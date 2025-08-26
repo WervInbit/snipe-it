@@ -9,9 +9,8 @@ return new class extends Migration
     {
         Schema::create('test_audits', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('auditable_type');
-            $table->unsignedInteger('auditable_id');
-            $table->unsignedInteger('user_id')->nullable();
+            $table->morphs('auditable');
+            $table->unsignedInteger('actor_id')->nullable();
             $table->string('field');
             $table->text('before')->nullable();
             $table->text('after')->nullable();
@@ -20,7 +19,7 @@ return new class extends Migration
             $table->charset = 'utf8mb4';
             $table->collation = 'utf8mb4_unicode_ci';
 
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('actor_id')->references('id')->on('users')->onDelete('set null');
         });
     }
 
