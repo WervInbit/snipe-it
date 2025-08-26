@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Asset;
 use App\Models\TestRun;
+use App\Models\TestType;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -11,7 +12,7 @@ class TestRunController extends Controller
 {
     public function index(Asset $asset)
     {
-        $this->authorize('view', Asset::class);
+        $this->authorize('view', $asset);
         $runs = $asset->testRuns;
         return view('tests.index', compact('asset', 'runs'));
     }
@@ -25,13 +26,21 @@ class TestRunController extends Controller
         $run->user()->associate($request->user());
         $run->save();
 
+        foreach (TestType::pluck('id') as $typeId) {
+            $run->results()->create([
+                'test_type_id' => $typeId,
+                'status' => 'pending',
+                'note' => null,
+            ]);
+        }
+
         return redirect()->route('test-runs.index', ['asset' => $asset->id])
             ->with('success', trans('general.test_run_created'));
     }
 
     public function destroy(Asset $asset, TestRun $testRun)
     {
-        $this->authorize('update', Asset::class);
+        $this->authorize('view', $asset);
         $testRun->delete();
         return redirect()->route('test-runs.index', $asset->id)
             ->with('success', trans('general.deleted'));
