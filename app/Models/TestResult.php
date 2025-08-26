@@ -19,6 +19,19 @@ class TestResult extends SnipeModel
 {
     use HasFactory;
 
+    public const STATUS_PASS = 'pass';
+    public const STATUS_FAIL = 'fail';
+    public const STATUS_NVT  = 'nvt';
+
+    /**
+     * Allowed status values for a test result.
+     */
+    public const STATUSES = [
+        self::STATUS_PASS,
+        self::STATUS_FAIL,
+        self::STATUS_NVT,
+    ];
+
     protected $table = 'test_results';
 
     protected $fillable = [

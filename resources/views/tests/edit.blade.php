@@ -27,7 +27,7 @@
                         <select name="status[{{ $result->id }}]" class="form-control" data-toggle="tooltip" title="{{ trans('tests.set_status') }}">
                             <option value="pass" @selected($result->status=='pass')>{{ trans('tests.pass') }}</option>
                             <option value="fail" @selected($result->status=='fail')>{{ trans('tests.fail') }}</option>
-                            <option value="pending" @selected($result->status=='pending')>{{ trans('tests.pending') }}</option>
+                            <option value="nvt" @selected($result->status=='nvt')>{{ trans('tests.nvt') }}</option>
                         </select>
                     </td>
                     <td>

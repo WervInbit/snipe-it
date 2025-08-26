@@ -22,7 +22,10 @@ class TestResultController extends Controller
     {
         $this->authorize('update', $asset);
         foreach ($testRun->results as $result) {
-            $result->status = $request->input('status.' . $result->id);
+            $status = $request->input('status.' . $result->id);
+            if (in_array($status, TestResult::STATUSES, true)) {
+                $result->status = $status;
+            }
             $result->note = $request->input('note.' . $result->id);
             $result->save();
         }
