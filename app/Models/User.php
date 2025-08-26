@@ -582,6 +582,31 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
         return $this->hasMany(\App\Models\Asset::class, 'id')->withTrashed();
     }
 
+    /**
+     * Get the test runs for this user
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function testRuns()
+    {
+        return $this->hasMany(\App\Models\TestRun::class, 'user_id');
+    }
+
+    /**
+     * Get the test results for this user
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function testResults()
+    {
+        return $this->hasManyThrough(
+            \App\Models\TestResult::class,
+            \App\Models\TestRun::class,
+            'user_id',
+            'test_run_id'
+        );
+    }
+
 
 
     /**
