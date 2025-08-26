@@ -2,21 +2,35 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Models\Traits\TestAuditable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-class TestResult extends Model
+class TestResult extends SnipeModel
 {
-    use TestAuditable;
+    use HasFactory;
+
+    protected $table = 'test_results';
 
     protected $fillable = [
         'test_run_id',
+        'test_type_id',
         'status',
-        'details',
+        'note',
     ];
 
-    public function run()
+    public function run(): BelongsTo
     {
         return $this->belongsTo(TestRun::class, 'test_run_id');
+    }
+
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(TestType::class, 'test_type_id');
+    }
+
+    public function audits(): MorphMany
+    {
+        return $this->morphMany(TestAudit::class, 'auditable');
     }
 }

@@ -128,6 +128,15 @@
                             "helpBlock" => trans('general.image_filetypes_help', ['size' => Helper::file_upload_max_size_readable()]),
                         ])
 
+                        <!-- QR Code Logo -->
+                        @include('partials/forms/edit/uploadLogo', [
+                            "logoVariable" => "qr_logo_path",
+                            "logoId" => "uploadQrLogo",
+                            "logoLabel" => trans('admin/settings/general.logo_labels.qr_logo'),
+                            "logoClearVariable" => "clear_qr_logo_path",
+                            "helpBlock" => trans('general.image_filetypes_help', ['size' => Helper::file_upload_max_size_readable()]),
+                        ])
+
                         <!-- PDF Logo -->
                         @include('partials/forms/edit/uploadLogo', [
                             "logoVariable" => "acceptance_pdf_logo",

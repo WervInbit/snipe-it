@@ -2,26 +2,34 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
 
-class TestAudit extends Model
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+
+class TestAudit extends SnipeModel
 {
+    use HasFactory;
+
+    public $timestamps = false;
+
+    protected $table = 'test_audits';
+
     protected $fillable = [
-        'testable_type',
-        'testable_id',
-        'event',
+        'auditable_type',
+        'auditable_id',
+        'user_id',
+        'field',
         'before',
         'after',
-        'actor_id',
+        'created_at',
     ];
 
     protected $casts = [
-        'before' => 'array',
-        'after'  => 'array',
+        'created_at' => 'datetime',
     ];
 
-    public function testable()
+    public function auditable(): MorphTo
     {
         return $this->morphTo();
     }
@@ -29,5 +37,6 @@ class TestAudit extends Model
     public function actor()
     {
         return $this->belongsTo(User::class, 'actor_id');
+
     }
 }

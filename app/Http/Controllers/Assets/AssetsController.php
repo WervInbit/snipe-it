@@ -19,6 +19,7 @@ use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\User;
 use App\View\Label;
+use App\Services\QrLabelService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -27,10 +28,8 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use League\Csv\Reader;
-use Illuminate\Http\Response;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use TypeError;
 
 /**
@@ -42,7 +41,6 @@ use TypeError;
  */
 class AssetsController extends Controller
 {
-    protected $qrCodeDimensions = ['height' => 3.5, 'width' => 3.5];
     protected $barCodeDimensions = ['height' => 2, 'width' => 22];
 
     public function __construct()
@@ -117,6 +115,7 @@ class AssetsController extends Controller
         $failures = [];
         $serials = $request->input('serials');
         $asset = null;
+        $qr = app(QrLabelService::class);
 
         for ($a = 1; $a <= count($asset_tags); $a++) {
             $asset = new Asset();
@@ -196,6 +195,7 @@ class AssetsController extends Controller
 
             // Validate the asset before saving
             if ($asset->isValid() && $asset->save()) {
+                $qr->generate($asset);
                 $target = null;
                 $location = null;
 
@@ -255,8 +255,15 @@ class AssetsController extends Controller
                 if (count($successes) == 1) {
                     //the most common case, keeping it so we don't have to make every use of that translation string be trans_choice'ed
                     //and re-translated
+                    $print = $qr->url($asset, 'pdf');
+                    $download = $qr->url($asset);
                     return Helper::getRedirectOption($request, $asset->id, 'Assets')
-                        ->with('success-unescaped', trans('admin/hardware/message.create.success_linked', ['link' => route('hardware.show', $asset), 'id', 'tag' => e($asset->asset_tag)]));
+                        ->with('success-unescaped', trans('admin/hardware/message.create.success_linked', [
+                            'link' => route('hardware.show', $asset),
+                            'tag' => e($asset->asset_tag),
+                            'print' => $print,
+                            'download' => $download,
+                        ]));
                 } else {
                     //multi-success
                     return Helper::getRedirectOption($request, $asset->id, 'Assets')
@@ -317,12 +324,7 @@ class AssetsController extends Controller
                 }
             }
 
-            $qr_code = (object) [
-                'display' => $settings->qr_code == '1',
-                'url' => route('qr_code/hardware', $asset),
-            ];
-
-            return view('hardware/view', compact('asset', 'qr_code', 'settings'))
+            return view('hardware/view', compact('asset', 'settings'))
                 ->with('use_currency', $use_currency)->with('audit_log', $audit_log);
         }
 
@@ -550,49 +552,12 @@ class AssetsController extends Controller
 
 
     /**
-     * Return a QR code for the asset
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @param int $assetId
-     * @since [v1.0]
-     */
-    public function getQrCode(Asset $asset) : Response | BinaryFileResponse | string | bool
-    {
-        $settings = Setting::getSettings();
-
-        if ($settings->label2_2d_type !== 'none') {
-
-            if ($asset) {
-                $size = Helper::barcodeDimensions($settings->label2_2d_type);
-                $qr_file = public_path().'/uploads/barcodes/qr-'.str_slug($asset->asset_tag).'-'.str_slug($asset->id).'.png';
-
-                if (isset($asset->id, $asset->asset_tag)) {
-                    if (file_exists($qr_file)) {
-                        $header = ['Content-type' => 'image/png'];
-
-                        return response()->file($qr_file, $header);
-                    } else {
-                        $barcode = new \Com\Tecnick\Barcode\Barcode();
-                        $barcode_obj = $barcode->getBarcodeObj($settings->label2_2d_type, route('hardware.show', $asset->id), $size['height'], $size['width'], 'black', [-2, -2, -2, -2]);
-                        file_put_contents($qr_file, $barcode_obj->getPngData());
-
-                        return response($barcode_obj->getPngData())->header('Content-type', 'image/png');
-                    }
-                }
-            }
-
-            return 'That asset is invalid';
-        }
-        return false;
-    }
-
-    /**
      * Return a 2D barcode for the asset
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @param int $assetId
      * @since [v1.0]
-     * @return Response
+     * @return mixed
      */
     public function getBarCode($assetId = null)
     {
