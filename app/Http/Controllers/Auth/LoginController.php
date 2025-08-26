@@ -8,7 +8,6 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Models\Ldap;
 use App\Services\Saml;
-use Com\Tecnick\Barcode\Barcode;
 use Google2FA;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Http\Request;
