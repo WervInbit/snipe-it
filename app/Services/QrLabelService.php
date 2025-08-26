@@ -4,9 +4,7 @@ namespace App\Services;
 
 use App\Models\Asset;
 use App\Models\Setting;
-use BaconQrCode\Renderer\ImageRenderer;
-use BaconQrCode\Renderer\Image\ImagickImageBackEnd;
-use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Renderer\GDLibRenderer;
 use BaconQrCode\Writer;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -26,10 +24,7 @@ class QrLabelService
         $disk->makeDirectory($this->directory);
 
         // build QR image
-        $renderer = new ImageRenderer(
-            new RendererStyle(300),
-            new ImagickImageBackEnd()
-        );
+        $renderer = new GDLibRenderer(300);
         $writer = new Writer($renderer);
         $qrData = $writer->writeString(route('hardware.show', $asset));
         $qrImg = imagecreatefromstring($qrData);

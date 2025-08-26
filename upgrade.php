@@ -289,7 +289,7 @@ $required_exts_array =
         'curl',
         'exif',
         'fileinfo',
-        'gd|imagick',
+        'gd',
         'json',
         'ldap',
         'mbstring',

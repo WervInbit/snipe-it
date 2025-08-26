@@ -4,6 +4,8 @@ namespace Tests\Unit;
 
 use App\Models\Asset;
 use App\Services\QrLabelService;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 use function Livewire\invade;
 
@@ -16,5 +18,18 @@ class QrLabelServiceTest extends TestCase
 
         $this->assertSame('labels/qr-my-asset-tag.png', invade($service)->path($asset, 'png'));
         $this->assertSame('labels/qr-my-asset-tag.pdf', invade($service)->path($asset, 'pdf'));
+    }
+
+    public function test_generate_creates_png_and_pdf_labels(): void
+    {
+        Storage::fake('public');
+        $asset = Asset::factory()->create();
+        $service = app(QrLabelService::class);
+
+        $service->generate($asset);
+
+        $slug = Str::slug($asset->asset_tag);
+        Storage::disk('public')->assertExists("labels/qr-{$slug}.png");
+        Storage::disk('public')->assertExists("labels/qr-{$slug}.pdf");
     }
 }

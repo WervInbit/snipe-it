@@ -55,7 +55,7 @@ class DemoAssetsSeeder extends Seeder
             try {
                 $labelService->generate($asset);
             } catch (\Throwable $e) {
-                // Ignore QR generation errors (e.g. missing imagick)
+                // Ignore QR generation errors (e.g. missing GD extension)
             }
         }
     }
