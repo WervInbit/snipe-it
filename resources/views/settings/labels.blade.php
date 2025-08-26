@@ -273,17 +273,6 @@
                                       </div>
                                   </div>
 
-                                  <!-- QR Logo -->
-                                  <div class="form-group{{ $errors->has('qr_logo') ? ' has-error' : '' }}">
-                                      <div class="col-md-3 text-right">
-                                          <label for="qr_logo" class="control-label">{{ trans('admin/settings/general.qr_logo') }}</label>
-                                      </div>
-                                      <div class="col-md-7">
-                                          <input type="file" name="qr_logo" id="qr_logo" class="form-control" />
-                                          {!! $errors->first('qr_logo', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                      </div>
-                                  </div>
-
                                   <!-- QR Formats -->
                                   <div class="form-group">
                                       <div class="col-md-3 text-right">

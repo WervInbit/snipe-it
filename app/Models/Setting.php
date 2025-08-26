@@ -69,7 +69,6 @@ class Setting extends Model
         'google_client_id',
         'google_client_secret',
         'manager_view_enabled',
-        'qr_logo_path',
         'qr_logo',
         'qr_text_redundancy',
         'qr_formats',
@@ -398,6 +397,14 @@ class Setting extends Model
     public static function get_client_side_key_path()
     {
         return self::get_fresh_file_path('ldap_client_tls_key', 'ldap_client_tls.key');
+    }
+
+    /**
+     * Retrieve the public URL for the QR logo.
+     */
+    public function getQrLogoUrlAttribute(): ?string
+    {
+        return $this->qr_logo ? Storage::url($this->qr_logo) : null;
     }
 
 }

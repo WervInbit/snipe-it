@@ -448,11 +448,24 @@ class SettingsController extends Controller
             }
 
             // QR logo upload
-            $setting = $request->handleImages($setting, 600, 'qr_logo_path', '', 'qr_logo_path');
+            if ($request->hasFile('qr_logo')) {
+                $file = $request->file('qr_logo');
+                $ext = $file->guessExtension();
+                $filename = 'qr_logo.' . $ext;
+                $file->storeAs('', $filename, 'public');
 
-            if ($request->input('clear_qr_logo_path') == '1') {
-                $setting = $request->deleteExistingImage($setting, '', 'qr_logo_path');
-                $setting->qr_logo_path = null;
+                if ($setting->qr_logo && $setting->qr_logo !== $filename && Storage::disk('public')->exists($setting->qr_logo)) {
+                    Storage::disk('public')->delete($setting->qr_logo);
+                }
+
+                $setting->qr_logo = $filename;
+            }
+
+            if ($request->input('clear_qr_logo') == '1') {
+                if ($setting->qr_logo && Storage::disk('public')->exists($setting->qr_logo)) {
+                    Storage::disk('public')->delete($setting->qr_logo);
+                }
+                $setting->qr_logo = null;
             }
 
             // Acceptance PDF upload

@@ -130,10 +130,10 @@
 
                         <!-- QR Code Logo -->
                         @include('partials/forms/edit/uploadLogo', [
-                            "logoVariable" => "qr_logo_path",
+                            "logoVariable" => "qr_logo",
                             "logoId" => "uploadQrLogo",
                             "logoLabel" => trans('admin/settings/general.logo_labels.qr_logo'),
-                            "logoClearVariable" => "clear_qr_logo_path",
+                            "logoClearVariable" => "clear_qr_logo",
                             "helpBlock" => trans('general.image_filetypes_help', ['size' => Helper::file_upload_max_size_readable()]),
                         ])
 

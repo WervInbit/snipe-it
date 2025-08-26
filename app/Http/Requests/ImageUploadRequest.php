@@ -39,6 +39,7 @@ class ImageUploadRequest extends Request
                 'image' => 'mimes:png,gif,jpg,jpeg,svg,bmp,svg+xml,webp,avif',
                 'avatar' => 'mimes:png,gif,jpg,jpeg,svg,bmp,svg+xml,webp,avif',
                 'favicon' => 'mimes:png,gif,jpg,jpeg,svg,bmp,svg+xml,webp,image/x-icon,image/vnd.microsoft.icon,ico',
+                'qr_logo' => 'mimes:png,gif,jpg,jpeg,svg,bmp,svg+xml,webp,avif',
             ];
     }
 
