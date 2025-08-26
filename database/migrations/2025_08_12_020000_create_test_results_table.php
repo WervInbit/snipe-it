@@ -11,7 +11,7 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('test_run_id')->constrained('test_runs')->onDelete('cascade');
             $table->string('status');
-            $table->text('details')->nullable();
+            $table->text('note')->nullable();
             $table->timestamps();
         });
     }

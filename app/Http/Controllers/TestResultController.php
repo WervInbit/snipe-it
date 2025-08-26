@@ -38,12 +38,12 @@ public function store(Request $request, Asset $asset): RedirectResponse
 
         $validated = $request->validate([
             'status' => ['required', Rule::in(['pass', 'fail', 'pending'])],
-            'notes' => 'nullable|string',
+            'note' => 'nullable|string',
         ]);
 
         $result = new TestResult();
         $result->status = $validated['status'];
-        $result->note = $validated['notes'] ?? null;
+        $result->note = $validated['note'] ?? null;
         $result->save();
 
         return redirect()->route('test-runs.index', ['asset' => $asset->id])
