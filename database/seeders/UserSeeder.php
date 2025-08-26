@@ -75,6 +75,43 @@ class UserSeeder extends Seeder
             ]))
             ->create();
 
+        // Demo users for showcasing different permission levels
+        User::factory()->superuser()
+            ->state(new Sequence(fn($sequence) => [
+                'company_id' => $companyIds->random(),
+                'department_id' => $departmentIds->random(),
+            ]))
+            ->create([
+                'username' => 'demo_super',
+                'email' => 'demo_super@example.com',
+                'first_name' => 'Demo',
+                'last_name' => 'Super',
+            ]);
+
+        User::factory()->admin()
+            ->state(new Sequence(fn($sequence) => [
+                'company_id' => $companyIds->random(),
+                'department_id' => $departmentIds->random(),
+            ]))
+            ->create([
+                'username' => 'demo_admin',
+                'email' => 'demo_admin@example.com',
+                'first_name' => 'Demo',
+                'last_name' => 'Admin',
+            ]);
+
+        User::factory()->viewAssets()
+            ->state(new Sequence(fn($sequence) => [
+                'company_id' => $companyIds->random(),
+                'department_id' => $departmentIds->random(),
+            ]))
+            ->create([
+                'username' => 'demo_user',
+                'email' => 'demo_user@example.com',
+                'first_name' => 'Demo',
+                'last_name' => 'User',
+            ]);
+
         $src = public_path('/img/demo/avatars/');
         $dst = 'avatars'.'/';
         $del_files = Storage::files($dst);
