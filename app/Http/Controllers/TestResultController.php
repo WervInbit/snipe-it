@@ -24,7 +24,7 @@ class TestResultController extends Controller
         $this->authorize('update', Asset::class);
         foreach ($testRun->results as $result) {
             $result->status = $request->input('status.' . $result->id);
-            $result->notes = $request->input('notes.' . $result->id);
+            $result->note = $request->input('note.' . $result->id);
             $result->save();
         }
 

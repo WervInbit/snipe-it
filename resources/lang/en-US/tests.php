@@ -10,5 +10,5 @@ return [
     'fail' => 'Fail',
     'pending' => 'Pending',
     'set_status' => 'Set status',
-    'add_notes' => 'Add notes',
+    'add_note' => 'Add note',
 ];

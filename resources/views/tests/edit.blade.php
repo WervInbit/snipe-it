@@ -21,7 +21,7 @@
                 <tr>
                     <td>
                         {{ $result->type->name }}
-                        <i class="fas fa-info-circle" data-toggle="tooltip" title="{{ $result->type->description }}"></i>
+                        <i class="fas fa-info-circle" data-toggle="tooltip" title="{{ $result->type->tooltip }}"></i>
                     </td>
                     <td>
                         <select name="status[{{ $result->id }}]" class="form-control" data-toggle="tooltip" title="{{ trans('tests.set_status') }}">
@@ -31,7 +31,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="text" name="notes[{{ $result->id }}]" value="{{ $result->notes }}" class="form-control" data-toggle="tooltip" title="{{ trans('tests.add_notes') }}">
+                        <input type="text" name="note[{{ $result->id }}]" value="{{ $result->note }}" class="form-control" data-toggle="tooltip" title="{{ trans('tests.add_note') }}">
                     </td>
                 </tr>
             @endforeach
