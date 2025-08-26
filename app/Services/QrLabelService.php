@@ -9,6 +9,7 @@ use BaconQrCode\Renderer\Image\ImagickImageBackEnd;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use TCPDF;
 
 class QrLabelService
@@ -96,7 +97,7 @@ class QrLabelService
 
     protected function path(Asset $asset, string $format): string
     {
-        return $this->directory.'/qr-'.str_slug($asset->asset_tag).'.'.$format;
+        return $this->directory.'/qr-'.Str::slug($asset->asset_tag).'.'.$format;
     }
 }
 
