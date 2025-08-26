@@ -32,9 +32,4 @@ class TestType extends SnipeModel
     {
         return $this->hasMany(TestResult::class, 'test_type_id');
     }
-
-    public function results()
-    {
-        return $this->hasMany(TestResult::class);
-    }
 }
