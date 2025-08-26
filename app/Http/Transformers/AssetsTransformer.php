@@ -7,6 +7,7 @@ use App\Models\Accessory;
 use App\Models\AccessoryCheckout;
 use App\Models\Asset;
 use App\Models\Setting;
+use App\Services\QrLabelService;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Database\Eloquent\Collection;
 use Carbon\Carbon;
@@ -77,7 +78,7 @@ class AssetsTransformer
                 'name'=> e($asset->defaultLoc->name),
             ] : null,
             'image' => ($asset->getImageUrl()) ? $asset->getImageUrl() : null,
-            'qr' => ($setting->qr_code=='1') ? config('app.url').'/uploads/barcodes/qr-'.str_slug($asset->asset_tag).'-'.str_slug($asset->id).'.png' : null,
+            'qr' => ($setting->qr_code=='1') ? app(QrLabelService::class)->url($asset) : null,
             'alt_barcode' => ($setting->alt_barcode_enabled=='1') ? config('app.url').'/uploads/barcodes/'.str_slug($setting->alt_barcode).'-'.str_slug($asset->asset_tag).'.png' : null,
             'assigned_to' => $this->transformAssignedTo($asset),
             'warranty_months' =>  ($asset->warranty_months > 0) ? e($asset->warranty_months.' '.trans('admin/hardware/form.months')) : null,
