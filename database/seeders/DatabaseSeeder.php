@@ -42,9 +42,11 @@ class DatabaseSeeder extends Seeder
         $this->call(LicenseSeeder::class);
         $this->call(ComponentSeeder::class);
         $this->call(ConsumableSeeder::class);
+        // Seed default test types
         $this->call(TestTypeSeeder::class);
         $this->call(ActionlogSeeder::class);
         $this->call(RolePermissionSeeder::class);
+        // Create demo assets
         $this->call(DemoAssetsSeeder::class);
 
 
