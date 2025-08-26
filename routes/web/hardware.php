@@ -5,6 +5,8 @@ use App\Http\Controllers\Assets\AssetsController;
 use App\Http\Controllers\Assets\BulkAssetsController;
 use App\Http\Controllers\Assets\AssetCheckoutController;
 use App\Http\Controllers\Assets\AssetCheckinController;
+use App\Http\Controllers\TestRunController;
+use App\Http\Controllers\TestResultController;
 use App\Models\Setting;
 use Tabuna\Breadcrumbs\Trail;
 use Illuminate\Support\Facades\Route;
@@ -159,6 +161,18 @@ Route::group(
             'bulksave',
             [BulkAssetsController::class, 'update']
         )->name('hardware/bulksave');
+
+        // Asset tests
+        Route::get('{asset}/tests', [TestRunController::class, 'index'])
+            ->name('test-runs.index');
+        Route::post('{asset}/tests', [TestRunController::class, 'store'])
+            ->name('test-runs.store');
+        Route::delete('{asset}/tests/{testRun}', [TestRunController::class, 'destroy'])
+            ->name('test-runs.destroy');
+        Route::get('{asset}/tests/{testRun}/results/edit', [TestResultController::class, 'edit'])
+            ->name('test-results.edit');
+        Route::put('{asset}/tests/{testRun}/results', [TestResultController::class, 'update'])
+            ->name('test-results.update');
 
         // Bulk checkout / checkin
         Route::get('bulkcheckout', [BulkAssetsController::class, 'showCheckout'])
