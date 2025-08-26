@@ -20,6 +20,7 @@ use App\Http\Controllers\NotesController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportTemplatesController;
 use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\ScanController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StatuslabelsController;
 use App\Http\Controllers\SuppliersController;
@@ -79,18 +80,23 @@ Route::group(['middleware' => 'auth'], function () {
 
     /*
     * Depreciations
-     */
+    */
     Route::resource('depreciations', DepreciationsController::class);
 
     /*
     * Status Labels
-     */
+    */
     Route::resource('statuslabels', StatuslabelsController::class);
 
     /*
     * Departments
     */
     Route::resource('departments', DepartmentsController::class);
+
+    /*
+    * Asset scanner
+    */
+    Route::get('scan', [ScanController::class, 'index'])->name('scan');
 });
 
 /*
