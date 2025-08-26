@@ -112,6 +112,59 @@ class UserSeeder extends Seeder
                 'last_name' => 'User',
             ]);
 
+        User::factory()
+            ->state(new Sequence(fn($sequence) => [
+                'company_id' => $companyIds->random(),
+                'department_id' => $departmentIds->random(),
+            ]))
+            ->create([
+                'username'    => 'demo_refurbisher',
+                'email'       => 'demo_refurbisher@example.com',
+                'first_name'  => 'Demo',
+                'last_name'   => 'Refurbisher',
+                'permissions' => json_encode([
+                    'refurbisher' => 1,
+                    'scanning'    => 1,
+                ]),
+            ]);
+
+        User::factory()
+            ->state(new Sequence(fn($sequence) => [
+                'company_id' => $companyIds->random(),
+                'department_id' => $departmentIds->random(),
+            ]))
+            ->create([
+                'username'    => 'demo_senior_refurbisher',
+                'email'       => 'demo_senior_refurbisher@example.com',
+                'first_name'  => 'Demo',
+                'last_name'   => 'Senior',
+                'permissions' => json_encode([
+                    'senior-refurbisher' => 1,
+                    'scanning'           => 1,
+                    'tests.execute'      => 1,
+                ]),
+            ]);
+
+        User::factory()
+            ->state(new Sequence(fn($sequence) => [
+                'company_id' => $companyIds->random(),
+                'department_id' => $departmentIds->random(),
+            ]))
+            ->create([
+                'username'    => 'demo_supervisor',
+                'email'       => 'demo_supervisor@example.com',
+                'first_name'  => 'Demo',
+                'last_name'   => 'Supervisor',
+                'permissions' => json_encode([
+                    'supervisor'    => 1,
+                    'scanning'      => 1,
+                    'tests.execute' => 1,
+                    'assets.create' => 1,
+                    'assets.delete' => 1,
+                    'tests.delete'  => 1,
+                ]),
+            ]);
+
         $src = public_path('/img/demo/avatars/');
         $dst = 'avatars'.'/';
         $del_files = Storage::files($dst);
