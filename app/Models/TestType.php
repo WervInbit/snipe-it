@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -21,6 +22,7 @@ class TestType extends SnipeModel
         'name',
         'slug',
         'tooltip',
+        'description',
     ];
 
     /**
@@ -29,5 +31,10 @@ class TestType extends SnipeModel
     public function results(): HasMany
     {
         return $this->hasMany(TestResult::class, 'test_type_id');
+    }
+
+    public function results()
+    {
+        return $this->hasMany(TestResult::class);
     }
 }

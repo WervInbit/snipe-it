@@ -39,6 +39,11 @@ class TestRun extends SnipeModel
         return $this->belongsTo(Asset::class);
     }
 
+    public function asset()
+    {
+        return $this->belongsTo(Asset::class);
+    }
+
     /**
      * User who performed the test run.
      */
@@ -53,6 +58,11 @@ class TestRun extends SnipeModel
     public function results(): HasMany
     {
         return $this->hasMany(TestResult::class, 'test_run_id');
+    }
+
+    public function results()
+    {
+        return $this->hasMany(TestResult::class);
     }
 
     /**

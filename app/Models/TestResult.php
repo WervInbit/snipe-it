@@ -30,7 +30,17 @@ class TestResult extends SnipeModel
         return $this->belongsTo(TestRun::class, 'test_run_id');
     }
 
+    public function run()
+    {
+        return $this->belongsTo(TestRun::class, 'test_run_id');
+    }
+
     public function testType(): BelongsTo
+    {
+        return $this->belongsTo(TestType::class, 'test_type_id');
+    }
+
+    public function type()
     {
         return $this->belongsTo(TestType::class, 'test_type_id');
     }
