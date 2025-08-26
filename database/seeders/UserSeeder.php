@@ -9,6 +9,7 @@ use App\Models\TestAudit;
 use App\Models\TestRun;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
@@ -21,9 +22,16 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
+
+        // Disable foreign key checks temporarily
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
         TestAudit::truncate();
         TestRun::truncate();
         User::truncate();
+
+        // Re-enable foreign key checks
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         if (! Company::count()) {
             $this->call(CompanySeeder::class);
