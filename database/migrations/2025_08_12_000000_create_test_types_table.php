@@ -2,16 +2,18 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up()
+    public function up(): void
     {
         Schema::create('test_types', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
             $table->string('slug')->unique();
             $table->string('tooltip')->nullable();
+            $table->text('description')->nullable();
             $table->timestamps();
             $table->engine = 'InnoDB';
             $table->charset = 'utf8mb4';
@@ -19,7 +21,7 @@ return new class extends Migration
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('test_types');
     }

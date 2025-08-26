@@ -151,6 +151,17 @@
 
                     @can('view', \App\Models\Asset::class)
                     <li>
+                        <a href="#tests" data-toggle="tab">
+                          <span class="hidden-lg hidden-md">
+                              <i class="fas fa-vial fa-2x"></i>
+                          </span>
+                            <span class="hidden-xs hidden-sm">{{ trans('tests.tests') }}
+                                {!! ($asset->testRuns()->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($asset->testRuns()->count()).'</span>' : '' !!}
+                          </span>
+                        </a>
+                    </li>
+
+                    <li>
                         <a href="#maintenances" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
                               <x-icon type="maintenances" class="fa-2x" />
@@ -1354,6 +1365,9 @@
                 </div><!-- /.tab-pane -->
                 @endcan
 
+                    <div class="tab-pane fade" id="tests">
+                        @include('tests.index', ['asset' => $asset, 'runs' => $asset->testRuns()->get()])
+                    </div>
 
                     @can('view', \App\Models\Asset::class)
                     <div class="tab-pane fade" id="maintenances">
