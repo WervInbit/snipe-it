@@ -24,7 +24,6 @@ use App\Http\Controllers\ScanController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StatuslabelsController;
 use App\Http\Controllers\SuppliersController;
-use App\Http\Controllers\ScanController;
 use App\Http\Controllers\StartController;
 use App\Http\Controllers\ViewAssetsController;
 use App\Livewire\Importer;

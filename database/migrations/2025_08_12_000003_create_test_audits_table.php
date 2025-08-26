@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('field');
             $table->text('before')->nullable();
             $table->text('after')->nullable();
-            $table->timestamp('created_at')->useCurrent();
+            $table->timestamps();
             $table->engine = 'InnoDB';
             $table->charset = 'utf8mb4';
             $table->collation = 'utf8mb4_unicode_ci';
