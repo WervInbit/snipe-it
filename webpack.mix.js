@@ -145,3 +145,5 @@ mix
         ],
         'public/js/dist/bootstrap-table.js'
  ).version();
+
+mix.js('./resources/assets/js/scan.js', 'public/js/dist/scan.js').version();
