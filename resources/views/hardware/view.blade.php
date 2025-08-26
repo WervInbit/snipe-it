@@ -59,6 +59,7 @@
                         </a>
                     </li>
 
+                    @can('view', \App\Models\License::class)
                     <li>
                         <a href="#software" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
@@ -69,7 +70,9 @@
                           </span>
                         </a>
                     </li>
+                    @endcan
 
+                    @can('view', \App\Models\Component::class)
                     <li>
                         <a href="#components" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
@@ -80,7 +83,9 @@
                           </span>
                         </a>
                     </li>
+                    @endcan
 
+                    @can('view', \App\Models\Asset::class)
                     <li>
                         <a href="#assets" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
@@ -93,8 +98,10 @@
                           </span>
                         </a>
                     </li>
+                    @endcan
 
                     @if ($asset->assignedAccessories->count() > 0)
+                        @can('view', \App\Models\Accessory::class)
                         <li>
                             <a href="#accessories_assigned" data-toggle="tab" data-tooltip="true">
 
@@ -108,10 +115,12 @@
                                 </span>
                             </a>
                         </li>
+                        @endcan
                     @endif
 
 
                     @if ($asset->audits->count() > 0)
+                    @can('audit', \App\Models\Asset::class)
                     <li>
                         <a href="#audits" data-toggle="tab" data-tooltip="true">
 
@@ -125,6 +134,7 @@
                             </span>
                         </a>
                     </li>
+                    @endcan
                     @endif
 
                     <li>
@@ -137,6 +147,7 @@
                         </a>
                     </li>
 
+                    @can('view', \App\Models\Asset::class)
                     <li>
                         <a href="#maintenances" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
@@ -147,7 +158,9 @@
                           </span>
                         </a>
                     </li>
+                    @endcan
 
+                    @can('files', $asset)
                     <li>
                         <a href="#files" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
@@ -158,6 +171,7 @@
                           </span>
                         </a>
                     </li>
+                    @endcan
 
                     @can('view', $asset->model)
                     <li>
@@ -1169,6 +1183,7 @@
                         </div> <!--/.row-->
                     </div><!-- /.tab-pane -->
 
+                    @can('view', \App\Models\License::class)
                     <div class="tab-pane fade" id="software">
                         <div class="row{{($asset->licenses->count() > 0 ) ? '' : ' hidden-print'}}">
                             <div class="col-md-12">
@@ -1208,7 +1223,9 @@
                             </div><!-- /col -->
                         </div> <!-- row -->
                     </div> <!-- /.tab-pane software -->
+                    @endcan
 
+                    @can('view', \App\Models\Component::class)
                     <div class="tab-pane fade" id="components">
                         <!-- checked out assets table -->
                         <div class="row{{($asset->components->count() > 0 ) ? '' : ' hidden-print'}}">
@@ -1261,8 +1278,9 @@
                             </div>
                         </div>
                     </div> <!-- /.tab-pane components -->
+                    @endcan
 
-
+                    @can('view', \App\Models\Asset::class)
                     <div class="tab-pane fade" id="assets">
                         <div class="row{{($asset->assignedAssets->count() > 0 ) ? '' : ' hidden-print'}}">
                             <div class="col-md-12">
@@ -1296,8 +1314,10 @@
                             </div><!-- /col -->
                         </div> <!-- row -->
                     </div> <!-- /.tab-pane software -->
+                    @endcan
 
 
+                @can('view', \App\Models\Accessory::class)
                 <div class="tab-pane" id="accessories_assigned">
 
 
@@ -1324,8 +1344,10 @@
 
                     </div><!-- /.table-responsive -->
                 </div><!-- /.tab-pane -->
+                @endcan
 
 
+                    @can('view', \App\Models\Asset::class)
                     <div class="tab-pane fade" id="maintenances">
                         <div class="row{{($asset->maintenances->count() > 0 ) ? '' : ' hidden-print'}}">
                             <div class="col-md-12">
@@ -1350,8 +1372,10 @@
                             </div> <!-- /.col-md-12 -->
                         </div> <!-- /.row -->
                     </div> <!-- /.tab-pane maintenances -->
+                    @endcan
 
 
+                @can('audit', \App\Models\Asset::class)
                 <div class="tab-pane fade" id="audits">
                     <!-- checked out assets table -->
                     <div class="row">
@@ -1388,6 +1412,7 @@
                         </div>
                     </div> <!-- /.row -->
                 </div> <!-- /.tab-pane history -->
+                @endcan
 
 
                 <div class="tab-pane fade" id="history">
@@ -1414,6 +1439,7 @@
                         </div> <!-- /.row -->
                     </div> <!-- /.tab-pane history -->
 
+                    @can('files', $asset)
                     <div class="tab-pane fade" id="files">
                         <div class="row{{ ($asset->uploads->count() > 0 ) ? '' : ' hidden-print' }}">
                             <div class="col-md-12">
@@ -1421,9 +1447,10 @@
                             </div> <!-- /.col-md-12 -->
                         </div> <!-- /.row -->
                     </div> <!-- /.tab-pane files -->
+                    @endcan
 
                     @if ($asset->model)
-                        @can('view', $asset->model)
+                        @can('files', $asset->model)
                             <div class="tab-pane fade" id="modelfiles">
                                 <div class="row{{ (($asset->model) && ($asset->model->uploads->count() > 0)) ? '' : ' hidden-print' }}">
                                     <div class="col-md-12">
