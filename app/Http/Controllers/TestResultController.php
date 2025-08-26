@@ -13,12 +13,12 @@ class TestResultController extends Controller
     {
         $validated = $request->validate([
             'status' => ['required', Rule::in(['pass', 'fail', 'pending'])],
-            'notes' => 'nullable|string',
+            'note' => 'nullable|string',
         ]);
 
         $result = new TestResult();
         $result->status = $validated['status'];
-        $result->note = $validated['notes'] ?? null;
+        $result->note = $validated['note'] ?? null;
         $result->save();
 
         return redirect()->back()->with('success', trans('general.test_result_saved'));

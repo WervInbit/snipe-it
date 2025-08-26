@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
  *
  * Each result belongs to a specific test run and test type and may have
  * multiple audit records.
+ *
+ * @property string|null $note Note captured during the test run.
  */
 class TestResult extends SnipeModel
 {
