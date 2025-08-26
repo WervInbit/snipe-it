@@ -97,13 +97,4 @@ use App\Services\QrLabelService;
 
     }
 
-    /**
-     * Download a generated QR label for an asset.
-     */
-    public function download(Asset $asset, string $format)
-    {
-        $this->authorize('view', $asset);
-        $service = app(QrLabelService::class);
-        return redirect($service->url($asset, $format));
-    }
 }

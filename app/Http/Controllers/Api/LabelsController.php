@@ -68,13 +68,4 @@ class LabelsController extends Controller
         return (new LabelsTransformer)->transformLabel($label);
     }
 
-    /**
-     * Return URL for a generated QR label for an asset.
-     */
-    public function download(Request $request, Asset $asset, string $format): JsonResponse
-    {
-        $this->authorize('view', $asset);
-        $service = app(QrLabelService::class);
-        return response()->json(['url' => $service->url($asset, $format)]);
-    }
 }
