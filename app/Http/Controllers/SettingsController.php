@@ -353,6 +353,8 @@ class SettingsController extends Controller
         $setting->profile_edit = $request->input('profile_edit', 0);
         $setting->require_checkinout_notes = $request->input('require_checkinout_notes', 0);
         $setting->manager_view_enabled = $request->input('manager_view_enabled', 0);
+        $tooltips = $request->input('test_tooltips');
+        $setting->test_tooltips = $tooltips ? json_decode($tooltips, true) : null;
 
 
         if ($request->input('per_page') != '') {
@@ -443,6 +445,14 @@ class SettingsController extends Controller
             if ($request->input('clear_label_logo') == '1') {
                 $setting = $request->deleteExistingImage($setting, '', 'label_logo');
                 $setting->label_logo = null;
+            }
+
+            // QR logo upload
+            $setting = $request->handleImages($setting, 600, 'qr_logo_path', '', 'qr_logo_path');
+
+            if ($request->input('clear_qr_logo_path') == '1') {
+                $setting = $request->deleteExistingImage($setting, '', 'qr_logo_path');
+                $setting->qr_logo_path = null;
             }
 
             // Acceptance PDF upload
@@ -775,6 +785,7 @@ class SettingsController extends Controller
         $setting->label2_2d_target = $request->input('label2_2d_target');
         $setting->label2_fields = $request->input('label2_fields');
         $setting->label2_empty_row_count = $request->input('label2_empty_row_count');
+        $setting->label_size = $request->input('label_size');
         $setting->labels_per_page = $request->input('labels_per_page');
         $setting->labels_width = $request->input('labels_width');
         $setting->labels_height = $request->input('labels_height');
