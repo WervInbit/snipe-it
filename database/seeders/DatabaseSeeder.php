@@ -35,7 +35,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ManufacturerSeeder::class);
         $this->call(SupplierSeeder::class);
         $this->call(AssetModelSeeder::class);
-        $this->call(DepreciationSeeder::class);
         $this->call(StatuslabelSeeder::class);
         $this->call(AccessorySeeder::class);
         $this->call(CustomFieldSeeder::class);
@@ -47,7 +46,6 @@ class DatabaseSeeder extends Seeder
         $this->call(RolePermissionSeeder::class);
         $this->call(TestTypeSeeder::class);
         $this->call(DemoAssetsSeeder::class);
-
 
 
         Artisan::call('snipeit:sync-asset-locations', ['--output' => 'all']);
