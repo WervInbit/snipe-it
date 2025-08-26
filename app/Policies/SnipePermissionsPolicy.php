@@ -48,7 +48,7 @@ abstract class SnipePermissionsPolicy
          * @see https://snipe-it.readme.io/docs/permissions
          */
 
-        if ($user->hasAccess('admin')) {
+        if ($user->hasAccess('admin') || $user->hasAccess('supervisor')) {
             return true;
         }
 

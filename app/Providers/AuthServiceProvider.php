@@ -137,7 +137,7 @@ class AuthServiceProvider extends ServiceProvider
                 }
 
                 // if they are an admin, deny them only if the user is a superadmin
-                if ($user->hasAccess('admin')) {
+                if ($user->hasAccess('admin') || $user->hasAccess('supervisor')) {
                     if ($item->isSuperUser()) {
                         return false;
                     }
@@ -163,7 +163,7 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         Gate::define('admin', function ($user) {
-            if ($user->hasAccess('admin')) {
+            if ($user->hasAccess('admin') || $user->hasAccess('supervisor')) {
                 return true;
             }
         });
@@ -219,7 +219,7 @@ class AuthServiceProvider extends ServiceProvider
         // Activity
         // -----------------------------------------
         Gate::define('activity.view', function ($user) {
-            if (($user->hasAccess('reports.view')) || ($user->hasAccess('admin'))) {
+            if ($user->hasAccess('reports.view') || $user->hasAccess('supervisor') || $user->hasAccess('admin')) {
                 return true;
             }
         });
@@ -228,7 +228,7 @@ class AuthServiceProvider extends ServiceProvider
         // Self
         // -----------------------------------------
         Gate::define('self.two_factor', function ($user) {
-            if (($user->hasAccess('self.two_factor')) || ($user->hasAccess('admin'))) {
+            if ($user->hasAccess('self.two_factor') || $user->hasAccess('supervisor') || $user->hasAccess('admin')) {
                 return true;
             }
         });
