@@ -35,8 +35,8 @@
 
             @if (($setting->$logoVariable!='') && (Storage::disk('public')->exists(($logoPath ?? ''). $snipeSettings->$logoVariable)))
                 <div class="pull-left" style="padding-right: 20px;">
-                    <a href="{{ Storage::disk('public')->url(e(($logoPath ?? '').$snipeSettings->$logoVariable)) }}"{!! ($logoVariable!='favicon') ? ' data-toggle="lightbox"' : '' !!} title="Existing logo">
-                        <img style="height: 80px; padding-bottom: 5px;" alt="Current logo" src="{{ Storage::disk('public')->url(e(($logoPath ?? ''). $snipeSettings->$logoVariable)) }}">
+                    <a href="{{ Storage::url(e(($logoPath ?? '').$snipeSettings->$logoVariable)) }}"{!! ($logoVariable!='favicon') ? ' data-toggle="lightbox"' : '' !!} title="Existing logo">
+                        <img style="height: 80px; padding-bottom: 5px;" alt="Current logo" src="{{ Storage::url(e(($logoPath ?? ''). $snipeSettings->$logoVariable)) }}">
                     </a>
                 </div>
             @endif

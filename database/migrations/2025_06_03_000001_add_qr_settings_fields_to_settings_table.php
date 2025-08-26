@@ -11,7 +11,6 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('settings', function (Blueprint $table) {
-            $table->string('qr_logo')->nullable();
             $table->boolean('qr_text_redundancy')->default(false);
             $table->string('qr_formats')->nullable();
         });
@@ -23,7 +22,7 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('settings', function (Blueprint $table) {
-            $table->dropColumn(['qr_logo', 'qr_text_redundancy', 'qr_formats']);
+            $table->dropColumn(['qr_text_redundancy', 'qr_formats']);
         });
     }
 };
