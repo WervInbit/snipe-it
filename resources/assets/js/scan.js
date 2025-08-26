@@ -1,4 +1,4 @@
-import jsQR from 'jsqr';
+import { BrowserQRCodeReader } from '@zxing/browser';
 
 const video = document.getElementById('scan-video');
 const assetInput = document.getElementById('asset-tag');
@@ -12,38 +12,25 @@ form.addEventListener('submit', (e) => {
     }
 });
 
-function startScan() {
+const codeReader = new BrowserQRCodeReader();
+
+async function startScan() {
     if (!navigator.mediaDevices) {
         return;
     }
 
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-        .then(stream => {
-            video.srcObject = stream;
-            video.setAttribute('playsinline', true);
-            video.play();
-            requestAnimationFrame(tick);
-        })
-        .catch(err => {
-            console.error('Unable to access camera', err);
+    try {
+        await codeReader.decodeFromVideoDevice(undefined, video, (result, err) => {
+            if (result) {
+                const tag = result.getText ? result.getText() : result.text;
+                if (tag) {
+                    window.location.href = `/assets/${encodeURIComponent(tag)}`;
+                }
+            }
         });
-}
-
-function tick() {
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-        const canvas = document.createElement('canvas');
-        canvas.height = video.videoHeight;
-        canvas.width = video.videoWidth;
-        const context = canvas.getContext('2d');
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-        const code = jsQR(imageData.data, canvas.width, canvas.height);
-        if (code) {
-            window.location.href = `/assets/${encodeURIComponent(code.data)}`;
-            return;
-        }
+    } catch (err) {
+        console.error('Unable to access camera', err);
     }
-    requestAnimationFrame(tick);
 }
 
 startScan();
