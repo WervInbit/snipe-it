@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\SnipeModel;
+use App\Models\Traits\TestAuditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 class TestResult extends SnipeModel
 {
     use HasFactory;
+    use TestAuditable;
 
     public const STATUS_PASS = 'pass';
     public const STATUS_FAIL = 'fail';

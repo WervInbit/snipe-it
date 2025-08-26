@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\SnipeModel;
+use App\Models\Traits\TestAuditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -17,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 class TestRun extends SnipeModel
 {
     use HasFactory;
+    use TestAuditable;
 
     protected $table = 'test_runs';
 
