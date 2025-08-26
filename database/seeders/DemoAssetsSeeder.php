@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+
 use App\Helpers\Helper;
 use App\Models\Asset;
 use App\Models\Setting;
@@ -56,4 +57,5 @@ class DemoAssetsSeeder extends Seeder
         }
     }
 }
+
 

@@ -879,6 +879,31 @@ class Asset extends Depreciable
     }
 
     /**
+     * Get the test runs for this asset
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function testRuns()
+    {
+        return $this->hasMany(\App\Models\TestRun::class, 'asset_id');
+    }
+
+    /**
+     * Get the test results for this asset
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\Relation
+     */
+    public function testResults()
+    {
+        return $this->hasManyThrough(
+            \App\Models\TestResult::class,
+            \App\Models\TestRun::class,
+            'asset_id',
+            'test_run_id'
+        );
+    }
+
+    /**
      * Establishes the asset -> location relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
