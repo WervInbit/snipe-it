@@ -7,10 +7,12 @@
 
 @section('content')
 <div class="mb-3 text-right">
-    <form method="POST" action="{{ route('test-runs.store', $asset->id) }}" style="display:inline">
-        @csrf
-        <button type="submit" class="btn btn-primary">{{ trans('tests.start_new_run') }}</button>
-    </form>
+    @can('tests.execute')
+        <form method="POST" action="{{ route('test-runs.store', $asset->id) }}" style="display:inline">
+            @csrf
+            <button type="submit" class="btn btn-primary">{{ trans('tests.start_new_run') }}</button>
+        </form>
+    @endcan
 </div>
 
 <table class="table table-striped">
@@ -41,20 +43,24 @@
                         @endforeach
                     </ul>
                 </td>
-                <td>
-                    <a href="{{ route('test-results.edit', [$asset->id, $run->id]) }}" class="btn btn-default btn-sm">{{ trans('button.edit') }}</a>
-                    <form method="POST" action="{{ route('test-runs.destroy', [$asset->id, $run->id]) }}" style="display:inline">
-                        @csrf
-                        @method('DELETE')
-                        <button class="btn btn-danger btn-sm" type="submit">{{ trans('button.delete') }}</button>
-                    </form>
-                </td>
+                    <td>
+                        @can('tests.execute')
+                            <a href="{{ route('test-results.edit', [$asset->id, $run->id]) }}" class="btn btn-default btn-sm">{{ trans('button.edit') }}</a>
+                        @endcan
+                        @can('tests.delete')
+                            <form method="POST" action="{{ route('test-runs.destroy', [$asset->id, $run->id]) }}" style="display:inline">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-danger btn-sm" type="submit">{{ trans('button.delete') }}</button>
+                            </form>
+                        @endcan
+                    </td>
             </tr>
         @endforeach
     </tbody>
 </table>
 
-@can('viewAudit')
+@can('audits.view')
     @foreach ($runs as $run)
         @include('tests.partials.audit-history', ['auditable' => $run])
         @foreach ($run->results as $result)

@@ -295,9 +295,13 @@ class AuthServiceProvider extends ServiceProvider
             return $user->hasAccess('scanning');
         });
 
-        Gate::define('tests.execute', function ($user) {
-            return $user->hasAccess('tests.execute');
-        });
+          Gate::define('tests.execute', function ($user) {
+              return $user->hasAccess('tests.execute');
+          });
+
+          Gate::define('tests.delete', function ($user) {
+              return $user->hasAccess('tests.delete');
+          });
 
         Gate::define('assets.create', function ($user) {
             return $user->hasAccess('assets.create');
@@ -307,9 +311,13 @@ class AuthServiceProvider extends ServiceProvider
             return $user->hasAccess('audits.view');
         });
 
-        Gate::define('config.manage', function ($user) {
-            return $user->hasAccess('config.manage');
-        });
+          Gate::define('config.manage', function ($user) {
+              return $user->hasAccess('config.manage');
+          });
+
+          Gate::define('config.qr_tooltips', function ($user) {
+              return $user->hasAccess('config.qr_tooltips');
+          });
 
         // This determines whether the user can edit their profile based on the setting in Admin > General
         Gate::define('self.profile', function ($user) {

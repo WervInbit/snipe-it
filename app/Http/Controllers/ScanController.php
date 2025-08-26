@@ -11,6 +11,7 @@ class ScanController extends Controller
      */
     public function index()
     {
+        \Illuminate\Support\Facades\Gate::authorize('scanning');
         return view('scan.index');
     }
 }

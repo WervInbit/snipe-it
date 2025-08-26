@@ -8,6 +8,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use App\Models\Group;
 
 class DatabaseSeeder extends Seeder
 {
@@ -46,6 +47,46 @@ class DatabaseSeeder extends Seeder
         $this->call(TestTypeSeeder::class);
         $this->call(ActionlogSeeder::class);
         $this->call(RolePermissionSeeder::class);
+
+        // Seed default roles with permissions
+        Group::updateOrCreate(
+            ['name' => 'Refurbisher'],
+            ['permissions' => json_encode([
+                'scanning' => 1,
+            ])]
+        );
+
+        Group::updateOrCreate(
+            ['name' => 'Senior Refurbisher'],
+            ['permissions' => json_encode([
+                'scanning'      => 1,
+                'tests.execute' => 1,
+            ])]
+        );
+
+        Group::updateOrCreate(
+            ['name' => 'Supervisor'],
+            ['permissions' => json_encode([
+                'scanning'      => 1,
+                'tests.execute' => 1,
+                'assets.create' => 1,
+                'assets.delete' => 1,
+                'tests.delete'  => 1,
+            ])]
+        );
+
+        Group::updateOrCreate(
+            ['name' => 'Admin'],
+            ['permissions' => json_encode([
+                'scanning'           => 1,
+                'tests.execute'      => 1,
+                'assets.create'      => 1,
+                'assets.delete'      => 1,
+                'tests.delete'       => 1,
+                'audits.view'        => 1,
+                'config.qr_tooltips' => 1,
+            ])]
+        );
         // Create demo assets
         $this->call(DemoAssetsSeeder::class);
 

@@ -155,7 +155,7 @@
 
                                 </div>
                             </div>
-                        @endif
+                @endif
                         @if($setting->label2_enable == 0)
                             @if ($is_gd_installed)
                             <!-- barcode -->
@@ -208,6 +208,7 @@
                                 </div>
                             </div>
                                 
+                @can('config.qr_tooltips')
                 @if($setting->label2_enable == 0)
 
                         <!-- qr code -->
@@ -316,6 +317,7 @@
                                     </div>
                                 </div>
 
+                @endcan
                                 <!-- Nuke barcode cache -->
                                 <div class="form-group">
                                     <div class="col-md-3 text-right">

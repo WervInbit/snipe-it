@@ -629,6 +629,12 @@ return [
             'note'       => 'Allows the user to run system tests.',
             'display'    => true,
         ],
+        [
+            'permission' => 'tests.delete',
+            'label'      => 'Delete Tests',
+            'note'       => 'Allows the user to remove test runs.',
+            'display'    => true,
+        ],
     ],
 
     'Audits' => [
@@ -645,6 +651,12 @@ return [
             'permission' => 'config.manage',
             'label'      => 'Manage Configuration',
             'note'       => 'Allows the user to modify system configuration.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'config.qr_tooltips',
+            'label'      => 'Configure QR & Tooltips',
+            'note'       => 'Allows the user to manage QR code and tooltip settings.',
             'display'    => true,
         ],
     ],

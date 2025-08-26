@@ -1,4 +1,4 @@
-@if(auth()->user() && auth()->user()->can('viewAudit') && $auditable->audits->isNotEmpty())
+@if(auth()->user() && auth()->user()->can('audits.view') && $auditable->audits->isNotEmpty())
 <div class="card mb-3">
     <div class="card-header">{{ __('Audit History') }}</div>
     <div class="card-body p-0">

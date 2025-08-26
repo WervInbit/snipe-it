@@ -239,20 +239,22 @@
                                 </div>
                             </div>
 
-                            <!-- Test Tooltips -->
-                            <div class="form-group {{ $errors->has('test_tooltips') ? 'error' : '' }}">
-                                <div class="col-md-3">
-                                    <label for="test_tooltips">{{ trans('admin/settings/general.test_tooltips') }}</label>
+                            @can('config.qr_tooltips')
+                                <!-- Test Tooltips -->
+                                <div class="form-group {{ $errors->has('test_tooltips') ? 'error' : '' }}">
+                                    <div class="col-md-3">
+                                        <label for="test_tooltips">{{ trans('admin/settings/general.test_tooltips') }}</label>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <x-input.textarea
+                                                name="test_tooltips"
+                                                :value="old('test_tooltips', json_encode($setting->test_tooltips, JSON_PRETTY_PRINT))"
+                                                placeholder='{"status":"Tooltip text"}'/>
+                                        <p class="help-block">{{ trans('admin/settings/general.test_tooltips_help') }}</p>
+                                        {!! $errors->first('test_tooltips', '<span class="alert-msg">:message</span>') !!}
+                                    </div>
                                 </div>
-                                <div class="col-md-8">
-                                    <x-input.textarea
-                                            name="test_tooltips"
-                                            :value="old('test_tooltips', json_encode($setting->test_tooltips, JSON_PRETTY_PRINT))"
-                                            placeholder='{"status":"Tooltip text"}'/>
-                                    <p class="help-block">{{ trans('admin/settings/general.test_tooltips_help') }}</p>
-                                    {!! $errors->first('test_tooltips', '<span class="alert-msg">:message</span>') !!}
-                                </div>
-                            </div>
+                            @endcan
 
                         </fieldset>
 
