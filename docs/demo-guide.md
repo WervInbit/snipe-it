@@ -16,6 +16,9 @@ The seeders create demo accounts to showcase permissions:
 
 - **demo_super** – superuser access
 - **demo_admin** – administrative access
+- **demo_supervisor** – supervisor access with scanning and asset/test management
+- **demo_senior_refurbisher** – senior refurbisher with scanning and test execution
+- **demo_refurbisher** – refurbisher with scanning access
 - **demo_user** – read-only asset access
 
 All demo accounts use the default password `password`.
