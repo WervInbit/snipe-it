@@ -9,6 +9,7 @@ use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Traits\Acceptable;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
+use App\Models\AssetTest;
 use App\Presenters\Presentable;
 use App\Presenters\AssetPresenter;
 use Carbon\Carbon;
@@ -786,6 +787,15 @@ class Asset extends Depreciable
     {
         return $this->hasMany(\App\Models\TestRun::class, 'asset_id')
             ->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Asset-specific tests.
+     */
+    public function tests()
+    {
+        return $this->hasMany(AssetTest::class)
+            ->orderBy('performed_at', 'desc');
     }
 
     /**

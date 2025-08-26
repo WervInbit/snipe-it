@@ -11,4 +11,7 @@ return [
     'nvt' => 'Not Verified',
     'set_status' => 'Set status',
     'add_note' => 'Add note',
+    'needs_cleaning' => 'Needs Cleaning',
+    'repeat' => 'Repeat',
+    'repeat_confirm' => 'Repeat this test using the previous values?',
 ];

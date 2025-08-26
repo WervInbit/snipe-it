@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api;
+use App\Http\Controllers\AssetTestController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -602,7 +603,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         /**
          * Asset maintenances API routes
          */
-        Route::resource('maintenances', 
+        Route::resource('maintenances',
         Api\MaintenancesController::class,
         ['names' => [
                 'index' => 'api.maintenances.index',
@@ -615,6 +616,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         'parameters' => ['maintenance' => 'maintenance_id'],
         ]
         ); // end assets API routes
+
+        // Asset tests API routes
+        Route::get('hardware/{asset}/asset-tests', [AssetTestController::class, 'index'])->name('api.asset-tests.index');
+        Route::post('hardware/{asset}/asset-tests', [AssetTestController::class, 'store'])->name('api.asset-tests.store');
+        Route::put('hardware/{asset}/asset-tests/{assetTest}', [AssetTestController::class, 'update'])->name('api.asset-tests.update');
+        Route::delete('hardware/{asset}/asset-tests/{assetTest}', [AssetTestController::class, 'destroy'])->name('api.asset-tests.destroy');
+        Route::post('hardware/{asset}/asset-tests/{assetTest}/repeat', [AssetTestController::class, 'repeat'])->name('api.asset-tests.repeat');
 
 
       /**

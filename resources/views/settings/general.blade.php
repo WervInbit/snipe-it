@@ -247,7 +247,8 @@
                                 <div class="col-md-8">
                                     <x-input.textarea
                                             name="test_tooltips"
-                                            :value="old('test_tooltips', json_encode($setting->test_tooltips, JSON_PRETTY_PRINT))"/>
+                                            :value="old('test_tooltips', json_encode($setting->test_tooltips, JSON_PRETTY_PRINT))"
+                                            placeholder='{"status":"Tooltip text"}'/>
                                     <p class="help-block">{{ trans('admin/settings/general.test_tooltips_help') }}</p>
                                     {!! $errors->first('test_tooltips', '<span class="alert-msg">:message</span>') !!}
                                 </div>

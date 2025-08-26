@@ -48,6 +48,12 @@
             </div>
         @endif
 
+        @if (optional($asset->tests()->first())->needs_cleaning)
+            <div class="col-md-12">
+                <span class="badge badge-warning">{{ trans('tests.needs_cleaning') }}</span>
+            </div>
+        @endif
+
         <div class="col-md-12">
             <div class="nav-tabs-custom">
                 <ul class="nav nav-tabs hidden-print">
