@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Asset;
 use App\Models\TestRun;
-use App\Models\TestType;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class TestRunController extends Controller
@@ -16,23 +16,17 @@ class TestRunController extends Controller
         return view('tests.index', compact('asset', 'runs'));
     }
 
-    public function store(Request $request, Asset $asset)
+    public function store(Request $request, Asset $asset): RedirectResponse
     {
-        $this->authorize('update', Asset::class);
-        $run = TestRun::create([
-            'asset_id' => $asset->id,
-            'user_id' => $request->user()->id,
-        ]);
+        $this->authorize('update', $asset);
 
-        foreach (TestType::all() as $type) {
-            $run->results()->create([
-                'test_type_id' => $type->id,
-                'status' => 'pending',
-            ]);
-        }
+        $run = new TestRun();
+        $run->asset()->associate($asset);
+        $run->user()->associate($request->user());
+        $run->save();
 
-        return redirect()->route('test-results.edit', [$asset->id, $run->id])
-            ->with('success', trans('general.created'));
+        return redirect()->route('test-runs.index', ['asset' => $asset->id])
+            ->with('success', trans('general.test_run_created'));
     }
 
     public function destroy(Asset $asset, TestRun $testRun)
