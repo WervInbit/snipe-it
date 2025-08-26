@@ -22,6 +22,7 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
+
         // Disable foreign key checks temporarily
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
