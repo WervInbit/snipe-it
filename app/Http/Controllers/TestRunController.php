@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Asset;
 use App\Models\TestRun;
 use App\Models\TestType;
+use App\Models\TestResult;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -29,7 +30,7 @@ class TestRunController extends Controller
         foreach (TestType::pluck('id') as $typeId) {
             $run->results()->create([
                 'test_type_id' => $typeId,
-                'status' => 'pending',
+                'status' => TestResult::STATUS_NVT,
                 'note' => null,
             ]);
         }

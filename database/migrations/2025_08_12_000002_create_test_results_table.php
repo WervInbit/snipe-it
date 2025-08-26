@@ -11,7 +11,7 @@ return new class extends Migration
             $table->increments('id');
             $table->unsignedInteger('test_run_id');
             $table->unsignedInteger('test_type_id');
-            $table->enum('status', ['pass', 'fail', 'skip']);
+            $table->enum('status', ['pass', 'fail', 'nvt']);
             $table->text('note')->nullable();
             $table->timestamps();
             $table->engine = 'InnoDB';

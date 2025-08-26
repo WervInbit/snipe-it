@@ -8,7 +8,7 @@ return [
     'start_new_run' => 'Start New Run',
     'pass' => 'Pass',
     'fail' => 'Fail',
-    'pending' => 'Pending',
+    'nvt' => 'Not Verified',
     'set_status' => 'Set status',
     'add_note' => 'Add note',
 ];
