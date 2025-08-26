@@ -5,12 +5,15 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\TestType;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class TestTypeSeeder extends Seeder
 {
     public function run(): void
     {
+        Schema::disableForeignKeyConstraints();
         DB::table('test_types')->truncate();
+        Schema::enableForeignKeyConstraints();
 
         $types = [
             ['name' => 'External Cleaning', 'description' => 'External surfaces cleaned', 'tooltip' => 'Placeholder tooltip for External Cleaning', 'slug' => 'external-cleaning'],
