@@ -8,11 +8,13 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Gate;
 
 class AssetTestController extends Controller
 {
     public function index(Request $request, Asset $asset)
     {
+        Gate::authorize('tests.execute');
         $this->authorize('view', $asset);
         $tests = $asset->tests()->get();
         if ($request->wantsJson()) {
@@ -23,12 +25,14 @@ class AssetTestController extends Controller
 
     public function create(Asset $asset): View
     {
+        Gate::authorize('tests.execute');
         $this->authorize('update', $asset);
         return view('tests.create', ['asset' => $asset, 'test' => new AssetTest]);
     }
 
     public function store(Request $request, Asset $asset): RedirectResponse|JsonResponse
     {
+        Gate::authorize('tests.execute');
         $this->authorize('update', $asset);
         $data = $request->validate([
             'performed_at' => ['required', 'date'],
@@ -48,12 +52,14 @@ class AssetTestController extends Controller
 
     public function edit(Asset $asset, AssetTest $test): View
     {
+        Gate::authorize('tests.execute');
         $this->authorize('update', $asset);
         return view('tests.create', compact('asset', 'test'));
     }
 
     public function update(Request $request, Asset $asset, AssetTest $test): RedirectResponse|JsonResponse
     {
+        Gate::authorize('tests.execute');
         $this->authorize('update', $asset);
         $data = $request->validate([
             'performed_at' => ['required', 'date'],
@@ -76,6 +82,7 @@ class AssetTestController extends Controller
 
     public function destroy(Request $request, Asset $asset, AssetTest $test): RedirectResponse|JsonResponse
     {
+        Gate::authorize('tests.delete');
         $this->authorize('update', $asset);
         $test->log()->create([
             'created_by' => $request->user()->id,
@@ -91,12 +98,14 @@ class AssetTestController extends Controller
 
     public function repeatForm(Asset $asset, AssetTest $test): View
     {
+        Gate::authorize('tests.execute');
         $this->authorize('update', $asset);
         return view('tests.repeat', compact('asset', 'test'));
     }
 
     public function repeat(Request $request, Asset $asset, AssetTest $test): RedirectResponse|JsonResponse
     {
+        Gate::authorize('tests.execute');
         $this->authorize('update', $asset);
         $new = $asset->tests()->create([
             'performed_at' => now(),

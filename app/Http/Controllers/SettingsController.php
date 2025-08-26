@@ -38,6 +38,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Illuminate\Support\Facades\Gate;
 
 /**
  * This controller handles all actions related to Settings for
@@ -353,6 +354,7 @@ class SettingsController extends Controller
         $setting->profile_edit = $request->input('profile_edit', 0);
         $setting->require_checkinout_notes = $request->input('require_checkinout_notes', 0);
         $setting->manager_view_enabled = $request->input('manager_view_enabled', 0);
+        Gate::authorize('config.qr_tooltips');
         $tooltips = $request->input('test_tooltips');
         $setting->test_tooltips = $tooltips ? json_decode($tooltips, true) : null;
 
@@ -770,6 +772,7 @@ class SettingsController extends Controller
      */
     public function getLabels() : View
     {
+        Gate::authorize('config.qr_tooltips');
         $is_gd_installed = extension_loaded('gd');
 
         return view('settings.labels')
@@ -786,6 +789,7 @@ class SettingsController extends Controller
      */
     public function postLabels(StoreLabelSettings $request) : RedirectResponse
     {
+        Gate::authorize('config.qr_tooltips');
         if (is_null($setting = Setting::getSettings())) {
             return redirect()->to('admin')->with('error', trans('admin/settings/message.update.error'));
         }
