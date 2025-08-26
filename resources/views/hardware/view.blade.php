@@ -142,7 +142,7 @@
                           <span class="hidden-lg hidden-md">
                               <i class="fas fa-vial fa-2x"></i>
                           </span>
-                            <span class="hidden-xs hidden-sm">Tests
+                            <span class="hidden-xs hidden-sm">{{ trans('tests.tests') }}
                                 {!! ($asset->testRuns()->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($asset->testRuns()->count()).'</span>' : '' !!}
                           </span>
                         </a>

@@ -1,7 +1,7 @@
 @extends('layouts/default')
 
 @section('title')
-    {{ __('Edit Test Results') }}
+    {{ trans('tests.edit_test_results') }}
 @endsection
 
 @section('content')
@@ -11,9 +11,9 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>{{ __('Test') }}</th>
-                <th>{{ __('Status') }}</th>
-                <th>{{ __('Notes') }}</th>
+                <th>{{ trans('tests.test') }}</th>
+                <th>{{ trans('general.status') }}</th>
+                <th>{{ trans('general.notes') }}</th>
             </tr>
         </thead>
         <tbody>
@@ -24,14 +24,14 @@
                         <i class="fas fa-info-circle" data-toggle="tooltip" title="{{ $result->type->description }}"></i>
                     </td>
                     <td>
-                        <select name="status[{{ $result->id }}]" class="form-control" data-toggle="tooltip" title="{{ __('Set status') }}">
-                            <option value="pass" @selected($result->status=='pass')>{{ __('Pass') }}</option>
-                            <option value="fail" @selected($result->status=='fail')>{{ __('Fail') }}</option>
-                            <option value="pending" @selected($result->status=='pending')>{{ __('Pending') }}</option>
+                        <select name="status[{{ $result->id }}]" class="form-control" data-toggle="tooltip" title="{{ trans('tests.set_status') }}">
+                            <option value="pass" @selected($result->status=='pass')>{{ trans('tests.pass') }}</option>
+                            <option value="fail" @selected($result->status=='fail')>{{ trans('tests.fail') }}</option>
+                            <option value="pending" @selected($result->status=='pending')>{{ trans('tests.pending') }}</option>
                         </select>
                     </td>
                     <td>
-                        <input type="text" name="notes[{{ $result->id }}]" value="{{ $result->notes }}" class="form-control" data-toggle="tooltip" title="{{ __('Add notes') }}">
+                        <input type="text" name="notes[{{ $result->id }}]" value="{{ $result->notes }}" class="form-control" data-toggle="tooltip" title="{{ trans('tests.add_notes') }}">
                     </td>
                 </tr>
             @endforeach

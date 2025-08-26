@@ -1,15 +1,15 @@
 <div class="mb-3 text-right">
     <form method="POST" action="{{ route('test-runs.store', $asset->id) }}">
         @csrf
-        <button type="submit" class="btn btn-primary">{{ __('Start New Run') }}</button>
+        <button type="submit" class="btn btn-primary">{{ trans('tests.start_new_run') }}</button>
     </form>
 </div>
 
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>{{ __('Date') }}</th>
-            <th>{{ __('Actions') }}</th>
+            <th>{{ trans('general.date') }}</th>
+            <th>{{ trans('table.actions') }}</th>
         </tr>
     </thead>
     <tbody>
