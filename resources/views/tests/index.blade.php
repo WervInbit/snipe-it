@@ -54,4 +54,13 @@
     </tbody>
 </table>
 
+@can('viewAudit')
+    @foreach ($runs as $run)
+        @include('tests.partials.audit-history', ['auditable' => $run])
+        @foreach ($run->results as $result)
+            @include('tests.partials.audit-history', ['auditable' => $result])
+        @endforeach
+    @endforeach
+@endcan
+
 @endsection

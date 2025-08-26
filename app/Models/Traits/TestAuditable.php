@@ -9,42 +9,53 @@ trait TestAuditable
 {
     public static function bootTestAuditable(): void
     {
-        static::created(function ($model) {
-            $model->writeTestAudit('created', null, $model->attributesToArray());
+        static::creating(function ($model) {
+            // Intentionally left blank to allow hooking into the creating event.
         });
 
-        static::updating(function ($model) {
-            $dirty = $model->getDirty();
-            if (!empty($dirty)) {
-                $before = [];
-                $after = [];
-                foreach ($dirty as $field => $new) {
-                    $before[$field] = $model->getOriginal($field);
-                    $after[$field] = $new;
-                }
-                $model->writeTestAudit('updated', $before, $after);
+        static::created(function ($model) {
+            foreach ($model->getAttributes() as $field => $value) {
+                $model->writeTestAudit($field, null, $value);
             }
         });
 
-        static::deleted(function ($model) {
-            $model->writeTestAudit('deleted', $model->getOriginal(), null);
+        static::updating(function ($model) {
+            foreach ($model->getDirty() as $field => $new) {
+                $before = $model->getOriginal($field);
+                if ($before != $new) {
+                    $model->writeTestAudit($field, $before, $new);
+                }
+            }
+        });
+
+        static::deleting(function ($model) {
+            foreach ($model->getOriginal() as $field => $value) {
+                $model->writeTestAudit($field, $value, null);
+            }
         });
     }
 
-    protected function writeTestAudit(string $event, ?array $before, ?array $after): void
+    protected function writeTestAudit(string $field, $before, $after): void
     {
         TestAudit::create([
-            'testable_type' => static::class,
-            'testable_id'   => $this->getKey(),
-            'event'         => $event,
-            'before'        => $before,
-            'after'         => $after,
-            'actor_id'      => Auth::id(),
+            'auditable_type' => static::class,
+            'auditable_id'   => $this->getKey(),
+            'actor_id'       => Auth::id(),
+            'field'          => $field,
+            'before'         => $this->serializeValue($before),
+            'after'          => $this->serializeValue($after),
+            'created_at'     => now(),
         ]);
     }
 
-    public function audits()
+    protected function serializeValue($value): ?string
     {
-        return $this->morphMany(TestAudit::class, 'testable')->latest();
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format('Y-m-d H:i:s');
+        }
+        if (is_array($value)) {
+            return json_encode($value);
+        }
+        return is_null($value) ? null : (string) $value;
     }
 }
