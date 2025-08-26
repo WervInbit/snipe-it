@@ -24,6 +24,7 @@ use App\Http\Controllers\ScanController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StatuslabelsController;
 use App\Http\Controllers\SuppliersController;
+use App\Http\Controllers\ScanController;
 use App\Http\Controllers\StartController;
 use App\Http\Controllers\ViewAssetsController;
 use App\Livewire\Importer;
@@ -85,19 +86,21 @@ Route::group(['middleware' => 'auth'], function () {
 
     /*
     * Status Labels
-    */
-    Route::resource('statuslabels', StatuslabelsController::class);
 
-    /*
-    * Departments
-    */
-    Route::resource('departments', DepartmentsController::class);
+     */
+      Route::resource('statuslabels', StatuslabelsController::class);
 
-    /*
-    * Asset scanner
-    */
-    Route::get('scan', [ScanController::class, 'index'])->name('scan');
-});
+      /*
+      * Departments
+      */
+      Route::resource('departments', DepartmentsController::class);
+
+      /*
+      * Asset scanner
+      */
+      Route::get('scan', [ScanController::class, 'index'])->name('scan');
+  });
+
 
 /*
 |
