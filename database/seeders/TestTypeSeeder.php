@@ -28,6 +28,8 @@ class TestTypeSeeder extends Seeder
             ['name' => 'Touchscreen', 'tooltip' => 'Placeholder tooltip for Touchscreen', 'slug' => 'touchscreen'],
             ['name' => 'Sensors', 'tooltip' => 'Placeholder tooltip for Sensors', 'slug' => 'sensors'],
             ['name' => 'Bluetooth', 'tooltip' => 'Placeholder tooltip for Bluetooth', 'slug' => 'bluetooth'],
+            ['name' => 'Wi-Fi', 'tooltip' => 'Placeholder tooltip for Wi-Fi', 'slug' => 'wi-fi'],
+            ['name' => 'Cellular', 'tooltip' => 'Placeholder tooltip for Cellular', 'slug' => 'cellular'],
         ];
 
         foreach ($types as $type) {
