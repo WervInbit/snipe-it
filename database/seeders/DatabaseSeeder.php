@@ -44,8 +44,10 @@ class DatabaseSeeder extends Seeder
         $this->call(ComponentSeeder::class);
         $this->call(ConsumableSeeder::class);
         $this->call(ActionlogSeeder::class);
+        $this->call(RolePermissionSeeder::class);
         $this->call(TestTypeSeeder::class);
         $this->call(DemoAssetsSeeder::class);
+
 
 
         Artisan::call('snipeit:sync-asset-locations', ['--output' => 'all']);

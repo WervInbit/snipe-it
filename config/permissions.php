@@ -71,13 +71,6 @@ return [
             'display'    => true,
         ],
         [
-            'permission' => 'assets.checkout',
-            'label'      => 'Checkout ',
-            'note'       => '',
-            'display'    => false,
-        ],
-
-        [
             'permission' => 'assets.checkin',
             'label'      => 'Checkin ',
             'note'       => '',
@@ -620,8 +613,41 @@ return [
         ],
     ],
 
+    'Scanning' => [
+        [
+            'permission' => 'scanning',
+            'label'      => 'Use Scanner',
+            'note'       => 'Allows the user to scan assets.',
+            'display'    => true,
+        ],
+    ],
 
+    'Testing' => [
+        [
+            'permission' => 'tests.execute',
+            'label'      => 'Execute Tests',
+            'note'       => 'Allows the user to run system tests.',
+            'display'    => true,
+        ],
+    ],
 
+    'Audits' => [
+        [
+            'permission' => 'audits.view',
+            'label'      => 'View Audits',
+            'note'       => 'Allows the user to view audit logs.',
+            'display'    => true,
+        ],
+    ],
+
+    'Configuration' => [
+        [
+            'permission' => 'config.manage',
+            'label'      => 'Manage Configuration',
+            'note'       => 'Allows the user to modify system configuration.',
+            'display'    => true,
+        ],
+    ],
 
     'Self' => [
         [
