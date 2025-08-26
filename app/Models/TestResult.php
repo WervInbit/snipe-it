@@ -25,18 +25,12 @@ class TestResult extends SnipeModel
         'note',
     ];
 
-    /**
-     * Test run this result is associated with.
-     */
-    public function run(): BelongsTo
+    public function testRun(): BelongsTo
     {
         return $this->belongsTo(TestRun::class, 'test_run_id');
     }
 
-    /**
-     * Type of test this result represents.
-     */
-    public function type(): BelongsTo
+    public function testType(): BelongsTo
     {
         return $this->belongsTo(TestType::class, 'test_type_id');
     }
