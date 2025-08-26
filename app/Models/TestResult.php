@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\SnipeModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -30,7 +31,17 @@ class TestResult extends SnipeModel
         return $this->belongsTo(TestRun::class, 'test_run_id');
     }
 
+    public function run()
+    {
+        return $this->belongsTo(TestRun::class, 'test_run_id');
+    }
+
     public function testType(): BelongsTo
+    {
+        return $this->belongsTo(TestType::class, 'test_type_id');
+    }
+
+    public function type()
     {
         return $this->belongsTo(TestType::class, 'test_type_id');
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asset;
+use App\Models\TestRun;
 use App\Models\TestResult;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -10,8 +11,29 @@ use Illuminate\Http\RedirectResponse;
 
 class TestResultController extends Controller
 {
-    public function store(Request $request, Asset $asset): RedirectResponse
+    
+    public function edit(Asset $asset, TestRun $testRun)
     {
+        $this->authorize('update', Asset::class);
+        $testRun->load('results.type');
+        return view('tests.edit', compact('asset', 'testRun'));
+    }
+
+    public function update(Request $request, Asset $asset, TestRun $testRun)
+    {
+        $this->authorize('update', Asset::class);
+        foreach ($testRun->results as $result) {
+            $result->status = $request->input('status.' . $result->id);
+            $result->notes = $request->input('notes.' . $result->id);
+            $result->save();
+        }
+
+        return redirect()->route('test-runs.index', $asset->id)
+            ->with('success', trans('general.updated'));
+    }
+
+public function store(Request $request, Asset $asset): RedirectResponse
+{
         $this->authorize('update', $asset);
 
         $validated = $request->validate([
