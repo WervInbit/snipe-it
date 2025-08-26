@@ -1,45 +1,57 @@
 @extends('layouts/default')
 
+
 @section('title')
     {{ trans('tests.tests') }}
 @endsection
 
 @section('content')
 <div class="mb-3 text-right">
-    <a href="{{ route('asset-tests.create', $asset->id) }}" class="btn btn-primary">{{ trans('button.add') }}</a>
+    <form method="POST" action="{{ route('test-runs.store', $asset->id) }}" style="display:inline">
+        @csrf
+        <button type="submit" class="btn btn-primary">{{ trans('tests.start_new_run') }}</button>
+    </form>
 </div>
+
 <table class="table table-striped">
     <thead>
         <tr>
             <th>{{ trans('general.date') }}</th>
-            <th>{{ trans('general.status') }}</th>
-            <th>{{ trans('tests.needs_cleaning') }}</th>
-            <th>{{ trans('general.notes') }}</th>
+            <th>{{ trans('general.user') }}</th>
+            <th>{{ trans('tests.test') }}</th>
             <th>{{ trans('table.actions') }}</th>
         </tr>
     </thead>
     <tbody>
-        @foreach ($tests as $test)
+        @foreach ($runs as $run)
             <tr>
-                <td>{{ $test->performed_at }}</td>
-                <td>{{ $test->status }}</td>
+                <td>{{ optional($run->created_at)->format('Y-m-d H:i') }}</td>
+                <td>{{ optional($run->user)->name }}</td>
                 <td>
-                    @if ($test->needs_cleaning)
-                        <span class="badge badge-warning">{{ trans('tests.needs_cleaning') }}</span>
-                    @endif
+                    <ul class="list-unstyled mb-0">
+                        @foreach ($run->results as $result)
+                            <li>
+                                {{ $result->type->name }}
+                                <i class="fas fa-info-circle" data-toggle="tooltip" title="{{ $result->type->tooltip }}"></i>:
+                                {{ trans('tests.' . $result->status) }}
+                                @if ($result->note)
+                                    <span class="text-muted">{{ $result->note }}</span>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
                 </td>
-                <td>{{ $test->notes }}</td>
                 <td>
-                    <a href="{{ route('asset-tests.edit', [$asset->id, $test->id]) }}" class="btn btn-default btn-sm">{{ trans('button.edit') }}</a>
-                    <form method="POST" action="{{ route('asset-tests.destroy', [$asset->id, $test->id]) }}" style="display:inline">
+                    <a href="{{ route('test-results.edit', [$asset->id, $run->id]) }}" class="btn btn-default btn-sm">{{ trans('button.edit') }}</a>
+                    <form method="POST" action="{{ route('test-runs.destroy', [$asset->id, $run->id]) }}" style="display:inline">
                         @csrf
                         @method('DELETE')
                         <button class="btn btn-danger btn-sm" type="submit">{{ trans('button.delete') }}</button>
                     </form>
-                    <a href="{{ route('asset-tests.repeat.form', [$asset->id, $test->id]) }}" class="btn btn-warning btn-sm">{{ trans('tests.repeat') }}</a>
                 </td>
             </tr>
         @endforeach
     </tbody>
 </table>
+
 @endsection

@@ -157,7 +157,7 @@
 
                     @can('view', \App\Models\Asset::class)
                     <li>
-                        <a href="#tests" data-toggle="tab">
+                          <a href="{{ route('test-runs.index', $asset->id) }}">
                           <span class="hidden-lg hidden-md">
                               <i class="fas fa-vial fa-2x"></i>
                           </span>
@@ -1378,9 +1378,6 @@
                 </div><!-- /.tab-pane -->
                 @endcan
 
-                    <div class="tab-pane fade" id="tests">
-                        @include('tests.index', ['asset' => $asset, 'runs' => $asset->testRuns()->get()])
-                    </div>
 
                     @can('view', \App\Models\Asset::class)
                     <div class="tab-pane fade" id="maintenances">
