@@ -439,13 +439,20 @@
                                     </div>
                                 @endif
                                 @if ($snipeSettings->qr_code=='1')
-                                    @php($qrPng = $qrLabels->url($asset))
-                                    @php($qrPdf = $qrLabels->url($asset, 'pdf'))
+                                    @php($formats = explode(',', $snipeSettings->qr_formats ?? 'png,pdf'))
+                                    @php($qrPng = in_array('png', $formats) ? $qrLabels->url($asset, 'png') : null)
+                                    @php($qrPdf = in_array('pdf', $formats) ? $qrLabels->url($asset, 'pdf') : null)
                                     <div class="col-md-12 text-center" style="padding-top: 15px;">
-                                        <img src="{{ $qrPng }}" class="img-thumbnail" style="height: 150px; width: 150px; margin-right: 10px;" alt="QR code for {{ $asset->getDisplayNameAttribute() }}">
+                                        @if($qrPng)
+                                            <img src="{{ $qrPng }}" class="img-thumbnail" style="height: 150px; width: 150px; margin-right: 10px;" alt="QR code for {{ $asset->getDisplayNameAttribute() }}">
+                                        @endif
                                         <div class="mt-2">
-                                            <a href="{{ $qrPdf }}" target="_blank" class="btn btn-default"><x-icon type="print" /> Print</a>
-                                            <a href="{{ $qrPng }}" download class="btn btn-default"><x-icon type="download" /> {{ trans('general.download') }}</a>
+                                            @if($qrPdf)
+                                                <a href="{{ $qrPdf }}" target="_blank" class="btn btn-default"><x-icon type="print" /> Print</a>
+                                            @endif
+                                            @if($qrPng)
+                                                <a href="{{ $qrPng }}" download class="btn btn-default"><x-icon type="download" /> {{ trans('general.download') }}</a>
+                                            @endif
                                         </div>
                                     </div>
                                 @endif

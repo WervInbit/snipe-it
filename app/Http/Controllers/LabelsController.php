@@ -14,9 +14,10 @@ use App\Models\Setting;
 use App\Models\Supplier;
 use App\Models\User;
 use App\View\Label as LabelView;
+use App\Services\QrLabelService;
 
-class LabelsController extends Controller
-{
+    class LabelsController extends Controller
+    {
     /**
      * Returns the Label view with test data
      *
@@ -94,5 +95,15 @@ class LabelsController extends Controller
             ->with('bulkedit', false)
             ->with('count', 0);
 
+    }
+
+    /**
+     * Download a generated QR label for an asset.
+     */
+    public function download(Asset $asset, string $format)
+    {
+        $this->authorize('view', $asset);
+        $service = app(QrLabelService::class);
+        return redirect($service->url($asset, $format));
     }
 }
