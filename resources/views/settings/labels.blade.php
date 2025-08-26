@@ -20,7 +20,7 @@
         }
     </style>
 
-    <form method="POST" action="{{ route('settings.labels.save') }}" accept-charset="UTF-8" id="settingsForm" autocomplete="off" class="form-horizontal" role="form">
+    <form method="POST" action="{{ route('settings.labels.save') }}" accept-charset="UTF-8" id="settingsForm" autocomplete="off" class="form-horizontal" role="form" enctype="multipart/form-data">
     <!-- CSRF Token -->
     {{csrf_field()}}
 
@@ -258,10 +258,45 @@
 
                     @if($setting->label2_enable == 0)
                                 <!-- QR Text -->
-                                <div class="form-group{{ $errors->has('qr_text') ? ' has-error' : '' }}">
+                                  <div class="form-group{{ $errors->has('qr_text') ? ' has-error' : '' }}">
                                     <div class="col-md-3 text-right">
                                         <label for="qr_text" class="control-label">{{ trans('admin/settings/general.qr_text') }}</label>
-                                    </div>
+                                  </div>
+
+                                  <!-- QR Text Redundancy -->
+                                  <div class="form-group">
+                                      <div class="col-md-9 col-md-offset-3">
+                                          <label class="form-control">
+                                              <input type="checkbox" name="qr_text_redundancy" value="1" @checked(old('qr_text_redundancy', $setting->qr_text_redundancy)) aria-label="qr_text_redundancy" />
+                                              {{ trans('admin/settings/general.qr_text_redundancy') }}
+                                          </label>
+                                      </div>
+                                  </div>
+
+                                  <!-- QR Logo -->
+                                  <div class="form-group{{ $errors->has('qr_logo') ? ' has-error' : '' }}">
+                                      <div class="col-md-3 text-right">
+                                          <label for="qr_logo" class="control-label">{{ trans('admin/settings/general.qr_logo') }}</label>
+                                      </div>
+                                      <div class="col-md-7">
+                                          <input type="file" name="qr_logo" id="qr_logo" class="form-control" />
+                                          {!! $errors->first('qr_logo', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                      </div>
+                                  </div>
+
+                                  <!-- QR Formats -->
+                                  <div class="form-group">
+                                      <div class="col-md-3 text-right">
+                                          <label for="qr_formats" class="control-label">{{ trans('admin/settings/general.qr_formats') }}</label>
+                                      </div>
+                                      <div class="col-md-7">
+                                          @php($selectedFormats = explode(',', old('qr_formats', $setting->qr_formats ?? 'png,pdf')))
+                                          <select name="qr_formats[]" id="qr_formats" multiple class="form-control">
+                                              <option value="png" @selected(in_array('png', $selectedFormats))>PNG</option>
+                                              <option value="pdf" @selected(in_array('pdf', $selectedFormats))>PDF</option>
+                                          </select>
+                                      </div>
+                                  </div>
                                     <div class="col-md-7">
                                         @if ($setting->qr_code == 1)
                                             <input

@@ -6,6 +6,8 @@ use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\LabelsTransformer;
 use App\Models\Labels\Label;
+use App\Models\Asset;
+use App\Services\QrLabelService;
 use Illuminate\Http\Request;
 use Illuminate\Support\ItemNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -66,4 +68,13 @@ class LabelsController extends Controller
         return (new LabelsTransformer)->transformLabel($label);
     }
 
+    /**
+     * Return URL for a generated QR label for an asset.
+     */
+    public function download(Request $request, Asset $asset, string $format): JsonResponse
+    {
+        $this->authorize('view', $asset);
+        $service = app(QrLabelService::class);
+        return response()->json(['url' => $service->url($asset, $format)]);
+    }
 }

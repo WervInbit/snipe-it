@@ -70,6 +70,9 @@ class Setting extends Model
         'google_client_secret',
         'manager_view_enabled',
         'qr_logo_path',
+        'qr_logo',
+        'qr_text_redundancy',
+        'qr_formats',
         'label_size',
         'test_tooltips',
     ];
@@ -78,6 +81,7 @@ class Setting extends Model
         'label2_asset_logo' => 'boolean',
         'require_checkinout_notes' => 'boolean',
         'manager_view_enabled' => 'boolean',
+        'qr_text_redundancy' => 'boolean',
         'test_tooltips' => 'array',
     ];
 
