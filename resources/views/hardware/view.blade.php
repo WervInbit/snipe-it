@@ -9,6 +9,8 @@
 {{-- Page content --}}
 @section('content')
 
+@inject('qrLabels', 'App\\Services\\QrLabelService')
+
 
     <div class="row">
 
@@ -405,9 +407,15 @@
                                         </ul>
                                     </div>
                                 @endif
-                                @if (($snipeSettings->qr_code=='1') || $snipeSettings->label2_2d_type!='none')
+                                @if ($snipeSettings->qr_code=='1')
+                                    @php($qrPng = $qrLabels->url($asset))
+                                    @php($qrPdf = $qrLabels->url($asset, 'pdf'))
                                     <div class="col-md-12 text-center" style="padding-top: 15px;">
-                                        <img src="{{ config('app.url') }}/hardware/{{ $asset->id }}/qr_code" class="img-thumbnail" style="height: 150px; width: 150px; margin-right: 10px;" alt="QR code for {{ $asset->getDisplayNameAttribute() }}">
+                                        <img src="{{ $qrPng }}" class="img-thumbnail" style="height: 150px; width: 150px; margin-right: 10px;" alt="QR code for {{ $asset->getDisplayNameAttribute() }}">
+                                        <div class="mt-2">
+                                            <a href="{{ $qrPdf }}" target="_blank" class="btn btn-default"><x-icon type="print" /> Print</a>
+                                            <a href="{{ $qrPng }}" download class="btn btn-default"><x-icon type="download" /> {{ trans('general.download') }}</a>
+                                        </div>
                                     </div>
                                 @endif
                                 <br><br>
