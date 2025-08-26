@@ -7,6 +7,7 @@ use App\Http\Controllers\Assets\AssetCheckoutController;
 use App\Http\Controllers\Assets\AssetCheckinController;
 use App\Http\Controllers\TestRunController;
 use App\Http\Controllers\TestResultController;
+use App\Http\Controllers\AssetTestController;
 use App\Models\Setting;
 use Tabuna\Breadcrumbs\Trail;
 use Illuminate\Support\Facades\Route;
@@ -169,6 +170,24 @@ Route::group(
             ->name('test-results.edit');
         Route::put('{asset}/tests/{testRun}/results', [TestResultController::class, 'update'])
             ->name('test-results.update');
+
+        // Asset individual tests
+        Route::get('{asset}/asset-tests', [AssetTestController::class, 'index'])
+            ->name('asset-tests.index');
+        Route::get('{asset}/asset-tests/create', [AssetTestController::class, 'create'])
+            ->name('asset-tests.create');
+        Route::post('{asset}/asset-tests', [AssetTestController::class, 'store'])
+            ->name('asset-tests.store');
+        Route::get('{asset}/asset-tests/{assetTest}/edit', [AssetTestController::class, 'edit'])
+            ->name('asset-tests.edit');
+        Route::put('{asset}/asset-tests/{assetTest}', [AssetTestController::class, 'update'])
+            ->name('asset-tests.update');
+        Route::delete('{asset}/asset-tests/{assetTest}', [AssetTestController::class, 'destroy'])
+            ->name('asset-tests.destroy');
+        Route::get('{asset}/asset-tests/{assetTest}/repeat', [AssetTestController::class, 'repeatForm'])
+            ->name('asset-tests.repeat.form');
+        Route::post('{asset}/asset-tests/{assetTest}/repeat', [AssetTestController::class, 'repeat'])
+            ->name('asset-tests.repeat');
 
         // Bulk checkout / checkin
         Route::get('bulkcheckout', [BulkAssetsController::class, 'showCheckout'])
