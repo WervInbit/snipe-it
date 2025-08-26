@@ -71,13 +71,6 @@ return [
             'display'    => true,
         ],
         [
-            'permission' => 'assets.checkout',
-            'label'      => 'Checkout ',
-            'note'       => '',
-            'display'    => false,
-        ],
-
-        [
             'permission' => 'assets.checkin',
             'label'      => 'Checkin ',
             'note'       => '',
