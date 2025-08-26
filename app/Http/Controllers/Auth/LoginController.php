@@ -37,7 +37,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/';
+    protected $redirectTo = '/start';
 
     /**
      * @var Saml
@@ -64,7 +64,7 @@ class LoginController extends Controller
         $this->loginViaRemoteUser($request);
         $this->loginViaSaml($request);
         if (Auth::check()) {
-            return redirect()->intended('/');
+            return redirect()->intended('/start');
         }
 
         if (!$request->session()->has('loggedout')) {
@@ -335,7 +335,7 @@ class LoginController extends Controller
             $user->saveQuietly();
         }
         // Redirect to the users page
-        return redirect()->intended()->with('success', trans('auth/message.signin.success'));
+        return redirect()->intended('/start')->with('success', trans('auth/message.signin.success'));
     }
 
 

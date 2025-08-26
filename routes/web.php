@@ -755,6 +755,7 @@ Route::middleware(['auth'])->get(
     $trail->push('Home', route('home'))
     );
 
+// Start page for role-based shortcuts
 Route::middleware(['auth'])->get(
     '/start',
     [StartController::class, 'index']
