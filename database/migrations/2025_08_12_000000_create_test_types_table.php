@@ -9,10 +9,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('test_types', function (Blueprint $table) {
-            $table->id();
-            $table->string('name')->unique();
+            $table->increments('id');
+            $table->string('name');
+            $table->string('slug')->unique();
+            $table->string('tooltip')->nullable();
             $table->text('description')->nullable();
             $table->timestamps();
+            $table->engine = 'InnoDB';
+            $table->charset = 'utf8mb4';
+            $table->collation = 'utf8mb4_unicode_ci';
         });
     }
 

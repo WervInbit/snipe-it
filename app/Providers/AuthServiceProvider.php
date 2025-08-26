@@ -291,6 +291,26 @@ class AuthServiceProvider extends ServiceProvider
         });
 
 
+        Gate::define('scanning', function ($user) {
+            return $user->hasAccess('scanning');
+        });
+
+        Gate::define('tests.execute', function ($user) {
+            return $user->hasAccess('tests.execute');
+        });
+
+        Gate::define('assets.create', function ($user) {
+            return $user->hasAccess('assets.create');
+        });
+
+        Gate::define('audits.view', function ($user) {
+            return $user->hasAccess('audits.view');
+        });
+
+        Gate::define('config.manage', function ($user) {
+            return $user->hasAccess('config.manage');
+        });
+
         // This determines whether the user can edit their profile based on the setting in Admin > General
         Gate::define('self.profile', function ($user) {
             return $user->canEditProfile();

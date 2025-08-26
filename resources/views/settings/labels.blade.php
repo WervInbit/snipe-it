@@ -60,6 +60,24 @@
                         </div>
 
 
+                        <!-- Label Size -->
+                        <div class="form-group{{ $errors->has('label_size') ? ' has-error' : '' }}">
+                            <div class="col-md-3 text-right">
+                                <label for="label_size" class="control-label">{{ trans('admin/settings/general.label_size') }}</label>
+                            </div>
+                            <div class="col-md-7">
+                                <x-input.select
+                                    name="label_size"
+                                    id="label_size"
+                                    :options="trans('admin/settings/general.label_size_options')"
+                                    :selected="old('label_size', $setting->label_size)"
+                                    class="form-control"
+                                />
+                                <p class="help-block">{{ trans('admin/settings/general.label_size_help') }}</p>
+                                {!! $errors->first('label_size', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
+                            </div>
+                        </div>
+
                         @if ($setting->label2_enable)
                             <!-- New Settings -->
 
