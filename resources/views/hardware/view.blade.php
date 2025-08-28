@@ -439,9 +439,11 @@
                                     </div>
                                 @endif
                                 @if ($snipeSettings->qr_code=='1')
-                                    @php($formats = explode(',', $snipeSettings->qr_formats ?? 'png,pdf'))
-                                    @php($qrPng = in_array('png', $formats) ? $qrLabels->url($asset, 'png') : null)
-                                    @php($qrPdf = in_array('pdf', $formats) ? $qrLabels->url($asset, 'pdf') : null)
+                                    @php
+                                        $formats = explode(',', $snipeSettings->qr_formats ?? 'png,pdf');
+                                        $qrPng = in_array('png', $formats) ? $qrLabels->url($asset, 'png') : null;
+                                        $qrPdf = in_array('pdf', $formats) ? $qrLabels->url($asset, 'pdf') : null;
+                                    @endphp
                                     <div class="col-md-12 text-center" style="padding-top: 15px;">
                                         @if($qrPng)
                                             <img src="{{ $qrPng }}" class="img-thumbnail" style="height: 150px; width: 150px; margin-right: 10px;" alt="QR code for {{ $asset->getDisplayNameAttribute() }}">
