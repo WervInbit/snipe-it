@@ -62,26 +62,26 @@ class AssetSeeder extends Seeder
         $this->supplierIds = Supplier::all()->pluck('id');
 
         // Seed various asset types
-        Asset::factory()->count(2000)->laptopMbp()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(50)->laptopMbpPending()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(50)->laptopMbpArchived()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(50)->laptopAir()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(50)->laptopSurface()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(5)->laptopXps()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(5)->laptopSpectre()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(50)->laptopZenbook()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(30)->laptopYoga()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(30)->desktopMacpro()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(30)->desktopLenovoI5()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(30)->desktopOptiplex()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(50)->confPolycom()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(20)->confPolycomcx()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(30)->tabletIpad()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(10)->tabletTab3()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(27)->phoneIphone11()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(40)->phoneIphone12()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(20)->ultrafine()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(20)->ultrasharp()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(10)->laptopMbp()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(3)->laptopMbpPending()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(3)->laptopMbpArchived()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(3)->laptopAir()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(3)->laptopSurface()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(2)->laptopXps()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(2)->laptopSpectre()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(5)->laptopZenbook()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(5)->laptopYoga()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(5)->desktopMacpro()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(5)->desktopLenovoI5()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(5)->desktopOptiplex()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(3)->confPolycom()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(3)->confPolycomcx()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(3)->tabletIpad()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(1)->tabletTab3()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(5)->phoneIphone11()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(5)->phoneIphone12()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(2)->ultrafine()->state(new Sequence($this->getState()))->create();
+        Asset::factory()->count(2)->ultrasharp()->state(new Sequence($this->getState()))->create();
 
         /*
          * Remove any stray files left in storage after seeding.
