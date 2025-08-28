@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('asset_tests', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('asset_id')->constrained('assets')->onDelete('cascade');
+            $table->unsignedInteger('asset_id');
+            $table->foreign('asset_id')->references('id')->on('assets')->onDelete('cascade');
             $table->dateTime('performed_at');
             $table->string('status');
             $table->boolean('needs_cleaning')->default(false);
