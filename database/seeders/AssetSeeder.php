@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Asset;
 use App\Models\Location;
-use App.Models\Supplier;
+use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Seeder;
