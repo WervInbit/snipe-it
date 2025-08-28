@@ -36,6 +36,9 @@ class SettingsSeeder extends Seeder
         $settings->version_footer = 'on';
         $settings->support_footer = 'on';
         $settings->pwd_secure_min = '8';
+        $settings->qr_code = 1;
+        $settings->qr_text_redundancy = 0;
+        $settings->qr_formats = 'png,pdf';
         $settings->default_avatar = 'default.png';
         $settings->save();
 
