@@ -8,6 +8,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use App\Models\Group;
 
 class DatabaseSeeder extends Seeder
@@ -19,7 +20,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
+        // Unguard models so they can be mass‑assigned during seeding
         Model::unguard();
+
+        // Disable foreign key checks globally while seeding
+        Schema::disableForeignKeyConstraints();
 
         // Only create default settings if they do not exist in the db.
         if (! Setting::first()) {
@@ -27,6 +32,7 @@ class DatabaseSeeder extends Seeder
             $this->call(SettingsSeeder::class);
         }
 
+        // Run all core seeders
         $this->call(CompanySeeder::class);
         $this->call(CategorySeeder::class);
         $this->call(LocationSeeder::class);
@@ -51,9 +57,7 @@ class DatabaseSeeder extends Seeder
         // Seed default roles with permissions
         Group::updateOrCreate(
             ['name' => 'Refurbisher'],
-            ['permissions' => json_encode([
-                'scanning' => 1,
-            ])]
+            ['permissions' => json_encode(['scanning' => 1])]
         );
 
         Group::updateOrCreate(
@@ -87,18 +91,32 @@ class DatabaseSeeder extends Seeder
                 'config.qr_tooltips' => 1,
             ])]
         );
+
         // Create demo assets
         $this->call(DemoAssetsSeeder::class);
 
-
+        // Synchronise asset locations
         Artisan::call('snipeit:sync-asset-locations', ['--output' => 'all']);
         $output = Artisan::output();
         Log::info($output);
 
+        // Re‑enable foreign key checks once seeding is complete
+        Schema::enableForeignKeyConstraints();
+
+        // Reguard models to restore mass‑assignment protection
         Model::reguard();
 
-        DB::table('imports')->truncate();
-        DB::table('maintenances')->truncate();
-        DB::table('requested_assets')->truncate();
+        /*
+         * Clean up some tables without using TRUNCATE.
+         * TRUNCATE fails when other tables reference them via foreign keys.
+         */
+        DB::table('imports')->delete();
+        DB::table('maintenances')->delete();
+        DB::table('requested_assets')->delete();
+
+        // Reset auto‑increment counters on those tables
+        DB::statement('ALTER TABLE imports AUTO_INCREMENT = 1');
+        DB::statement('ALTER TABLE maintenances AUTO_INCREMENT = 1');
+        DB::statement('ALTER TABLE requested_assets AUTO_INCREMENT = 1');
     }
 }
