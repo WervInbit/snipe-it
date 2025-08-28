@@ -5,25 +5,42 @@ namespace Database\Seeders;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Location;
+use App\Models\License;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
+/**
+ * Seeder for the action_logs table.
+ * Clears existing logs safely, ensures prerequisites, and then seeds new logs.
+ */
 class ActionlogSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        Actionlog::truncate();
+        // Safely clear existing logs; truncate would fail if other tables reference action_logs
+        Schema::disableForeignKeyConstraints();
+        Actionlog::query()->delete();
+        DB::statement('ALTER TABLE action_logs AUTO_INCREMENT = 1');
+        Schema::enableForeignKeyConstraints();
 
-        if (! Asset::count()) {
+        // Ensure we have assets, locations, and licenses to work with
+        if (!Asset::count()) {
             $this->call(AssetSeeder::class);
         }
-
-        if (! Location::count()) {
+        if (!Location::count()) {
             $this->call(LocationSeeder::class);
         }
+        if (!License::count()) {
+            $this->call(LicenseSeeder::class);
+        }
 
-        $admin = User::where('permissions->superuser', '1')->first() ?? User::factory()->firstAdmin()->create();
+        // Identify the admin (creates one if necessary)
+        $admin = User::where('permissions->superuser', '1')->first()
+            ?? User::factory()->firstAdmin()->create();
 
+        // Create checkout logs
         Actionlog::factory()
             ->count(300)
             ->assetCheckoutToUser()
