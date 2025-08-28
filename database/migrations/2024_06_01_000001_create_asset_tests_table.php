@@ -16,8 +16,11 @@ return new class extends Migration
             $table->string('status');
             $table->boolean('needs_cleaning')->default(false);
             $table->text('notes')->nullable();
-            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
-            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+$table->unsignedInteger('created_by')->nullable();
+$table->foreign('created_by')->references('id')->on('users')->nullOnDelete();
+
+$table->unsignedInteger('updated_by')->nullable();
+$table->foreign('updated_by')->references('id')->on('users')->nullOnDelete();
             $table->timestamps();
         });
     }
