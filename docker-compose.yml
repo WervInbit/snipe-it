@@ -1,37 +1,64 @@
-# Compose file for production.
-
-volumes:
-  db_data:
-  storage:
-
 services:
   app:
-    image: snipe/snipe-it:${APP_VERSION:-latest}
-    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    container_name: snipeit_app
+    working_dir: /var/www/html
     volumes:
-      - storage:/var/lib/snipeit
-    ports:
-      - "${APP_PORT:-8000}:80"
+      - ./:/var/www/html:cached
+      - app_vendor:/var/www/html/vendor
+      - app_storage:/var/www/html/storage
+      - app_cache:/var/www/html/bootstrap/cache
+      - app_node_modules:/var/www/html/node_modules
+    environment:
+      - APP_ENV=local
+      - APP_URL=https://raspberrypi.fritz.box
     depends_on:
       db:
         condition: service_healthy
-        restart: true
-    env_file:
-      - .env
+
+  web:
+    image: nginx:1.25-alpine
+    container_name: snipeit_web
+    ports:
+      - "8000:80"
+      - "8443:443"
+      - "443:443"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/certs:/etc/nginx/certs:ro
+    depends_on:
+      - app
 
   db:
     image: mariadb:11.4.7
-    restart: unless-stopped
+    container_name: snipeit_db
+    environment:
+      MYSQL_DATABASE: snipeit
+      MYSQL_USER: snipeituser
+      MYSQL_PASSWORD: snipeitpw
+      MYSQL_ROOT_PASSWORD: snipeitrootpw
     volumes:
       - db_data:/var/lib/mysql
-    environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     healthcheck:
-      # https://mariadb.com/kb/en/using-healthcheck-sh/#compose-file-example
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      interval: 5s
-      timeout: 1s
-      retries: 5
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  node:
+    image: node:20-bullseye
+    container_name: snipeit_node
+    working_dir: /app
+    volumes:
+      - ./:/app:cached
+      - app_node_modules:/app/node_modules
+
+volumes:
+  db_data:
+  app_vendor:
+  app_storage:
+  app_cache:
+  app_node_modules:
