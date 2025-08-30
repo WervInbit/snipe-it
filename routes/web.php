@@ -98,6 +98,7 @@ Route::group(['middleware' => 'auth'], function () {
       * Asset scanner
       */
       Route::get('scan', [ScanController::class, 'index'])->name('scan');
+      Route::get('scan/resolve/{code}', [ScanController::class, 'resolve'])->name('scan.resolve');
   });
 
 

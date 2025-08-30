@@ -33,7 +33,8 @@ class DatabaseSeeder extends Seeder
         }
 
         // Run all core seeders
-        $this->call(CompanySeeder::class);
+        // Companies are not required for demo testing; skip company seeding
+        // $this->call(CompanySeeder::class);
         $this->call(CategorySeeder::class);
         $this->call(LocationSeeder::class);
         $this->call(DepartmentSeeder::class);

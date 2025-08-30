@@ -22,8 +22,7 @@ form.addEventListener('submit', (e) => {
     e.preventDefault();
     const tag = assetInput.value.trim();
     if (tag) {
-        // Redirect to Snipe-IT route that resolves an asset by tag
-        window.location.href = `/hardware/bytag/${encodeURIComponent(tag)}`;
+        window.location.href = `/scan/resolve/${encodeURIComponent(tag)}`;
     }
 });
 
@@ -99,8 +98,7 @@ async function startScan() {
             if (result) {
                 const tag = result.getText ? result.getText() : result.text;
                 if (tag) {
-                    // Redirect to Snipe-IT route that resolves an asset by tag
-                    window.location.href = `/hardware/bytag/${encodeURIComponent(tag)}`;
+                    window.location.href = `/scan/resolve/${encodeURIComponent(tag)}`;
                 }
             }
             if (err && err.name && err.name !== 'NotFoundException') {
@@ -117,7 +115,7 @@ async function startScan() {
                     if (result) {
                         const tag = result.getText ? result.getText() : result.text;
                         if (tag) {
-                            window.location.href = `/hardware/bytag/${encodeURIComponent(tag)}`;
+                            window.location.href = `/scan/resolve/${encodeURIComponent(tag)}`;
                         }
                     }
                     if (err && err.name && err.name !== 'NotFoundException') {

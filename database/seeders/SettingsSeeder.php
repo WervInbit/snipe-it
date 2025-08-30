@@ -25,6 +25,10 @@ class SettingsSeeder extends Seeder
         $settings->ldap_enabled = 0;
         $settings->full_multiple_companies_support = 0;
         $settings->label2_1d_type = 'C128';
+        // Enable QR code generation and display in UI
+        $settings->qr_code = 1;
+        $settings->qr_formats = 'png,pdf';
+        $settings->qr_text_redundancy = 1;
         $settings->skin = '';
         $settings->email_domain = 'example.org';
         $settings->email_format = 'filastname';

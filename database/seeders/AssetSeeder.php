@@ -61,27 +61,22 @@ class AssetSeeder extends Seeder
         $this->locationIds = Location::all()->pluck('id');
         $this->supplierIds = Supplier::all()->pluck('id');
 
-        // Seed various asset types
-        Asset::factory()->count(10)->laptopMbp()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(3)->laptopMbpPending()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(3)->laptopMbpArchived()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(3)->laptopAir()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(3)->laptopSurface()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(2)->laptopXps()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(2)->laptopSpectre()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(5)->laptopZenbook()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(5)->laptopYoga()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(5)->desktopMacpro()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(5)->desktopLenovoI5()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(5)->desktopOptiplex()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(3)->confPolycom()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(3)->confPolycomcx()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(3)->tabletIpad()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(1)->tabletTab3()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(5)->phoneIphone11()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(5)->phoneIphone12()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(2)->ultrafine()->state(new Sequence($this->getState()))->create();
-        Asset::factory()->count(2)->ultrasharp()->state(new Sequence($this->getState()))->create();
+        // Seed a fixed set of assets (no company scoping)
+        $created = Asset::factory()
+            ->count(40)
+            ->state(new Sequence(fn() => [
+                'rtd_location_id' => $this->locationIds->random(),
+                'supplier_id'     => $this->supplierIds->random(),
+                'created_by'      => $this->adminuser->id,
+            ]))
+            ->create();
+        // Generate QR labels for each created asset (best-effort)
+        try {
+            $qr = app(\App\Services\QrLabelService::class);
+            $created->each(function (Asset $asset) use ($qr) {
+                try { $qr->generate($asset); } catch (\Throwable $e) { /* ignore */ }
+            });
+        } catch (\Throwable $e) { /* ignore */ }
 
         /*
          * Remove any stray files left in storage after seeding.
@@ -112,6 +107,8 @@ class AssetSeeder extends Seeder
             $this->call(SupplierSeeder::class);
         }
     }
+
+    // No companies needed for demo
 
     private function getState(): callable
     {

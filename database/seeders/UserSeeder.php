@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Company;
 use App\Models\Department;
 use App\Models\User;
 use App\Models\TestAudit;
@@ -33,11 +32,7 @@ class UserSeeder extends Seeder
         // Re-enable foreign key checks
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        if (! Company::count()) {
-            $this->call(CompanySeeder::class);
-        }
-
-        $companyIds = Company::all()->pluck('id');
+        // Companies are not seeded; users will not be company-restricted by default
 
         if (! Department::count()) {
             $this->call(DepartmentSeeder::class);
@@ -47,42 +42,36 @@ class UserSeeder extends Seeder
 
         User::factory()->count(1)->firstAdmin()
             ->state(new Sequence(fn($sequence) => [
-                'company_id' => $companyIds->random(),
                 'department_id' => $departmentIds->random(),
             ]))
             ->create();
 
         User::factory()->count(1)->snipeAdmin()
             ->state(new Sequence(fn($sequence) => [
-                'company_id' => $companyIds->random(),
                 'department_id' => $departmentIds->random(),
             ]))
             ->create();
 
         User::factory()->count(1)->testAdmin()
             ->state(new Sequence(fn($sequence) => [
-                'company_id' => $companyIds->random(),
                 'department_id' => $departmentIds->random(),
             ]))
             ->create();
 
         User::factory()->count(3)->superuser()
             ->state(new Sequence(fn($sequence) => [
-                'company_id' => $companyIds->random(),
                 'department_id' => $departmentIds->random(),
             ]))
             ->create();
 
         User::factory()->count(3)->admin()
             ->state(new Sequence(fn($sequence) => [
-                'company_id' => $companyIds->random(),
                 'department_id' => $departmentIds->random(),
             ]))
             ->create();
 
         User::factory()->count(50)->viewAssets()
             ->state(new Sequence(fn($sequence) => [
-                'company_id' => $companyIds->random(),
                 'department_id' => $departmentIds->random(),
             ]))
             ->create();
@@ -90,7 +79,6 @@ class UserSeeder extends Seeder
         // Demo users for showcasing different permission levels
         User::factory()->superuser()
             ->state(new Sequence(fn($sequence) => [
-                'company_id' => $companyIds->random(),
                 'department_id' => $departmentIds->random(),
             ]))
             ->create([
@@ -102,7 +90,6 @@ class UserSeeder extends Seeder
 
         User::factory()->admin()
             ->state(new Sequence(fn($sequence) => [
-                'company_id' => $companyIds->random(),
                 'department_id' => $departmentIds->random(),
             ]))
             ->create([
@@ -114,7 +101,6 @@ class UserSeeder extends Seeder
 
         User::factory()->viewAssets()
             ->state(new Sequence(fn($sequence) => [
-                'company_id' => $companyIds->random(),
                 'department_id' => $departmentIds->random(),
             ]))
             ->create([
@@ -126,7 +112,6 @@ class UserSeeder extends Seeder
 
         User::factory()
             ->state(new Sequence(fn($sequence) => [
-                'company_id' => $companyIds->random(),
                 'department_id' => $departmentIds->random(),
             ]))
             ->create([
@@ -142,7 +127,6 @@ class UserSeeder extends Seeder
 
         User::factory()
             ->state(new Sequence(fn($sequence) => [
-                'company_id' => $companyIds->random(),
                 'department_id' => $departmentIds->random(),
             ]))
             ->create([
@@ -159,7 +143,6 @@ class UserSeeder extends Seeder
 
         User::factory()
             ->state(new Sequence(fn($sequence) => [
-                'company_id' => $companyIds->random(),
                 'department_id' => $departmentIds->random(),
             ]))
             ->create([
