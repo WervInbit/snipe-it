@@ -1,4 +1,6 @@
-const mix = require("laravel-mix");
+﻿const mix = require("laravel-mix");
+
+mix.setPublicPath('public');
 const fs = require("node:fs");
 
 // This generates a file called app.css, which we use
@@ -147,3 +149,4 @@ mix
  ).version();
 
 mix.js('./resources/assets/js/scan.js', 'public/js/dist/scan.js').version();
+
