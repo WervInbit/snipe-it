@@ -16,6 +16,8 @@ use TCPDF;
 class QrLabelService
 {
     protected string $directory = 'labels';
+    // Increment to invalidate previously generated image filenames
+    protected string $version = 'v2';
 
     /**
      * Generate PNG and PDF labels for an asset.
@@ -26,7 +28,8 @@ class QrLabelService
         $disk = Storage::disk('public');
         $disk->makeDirectory($this->directory);
 
-        // Build payload: only immutable identifier (no URL)
+        // Build payload for in-app scanning only (no external URL)
+        // Ensure the asset has a stable opaque identifier
         if (empty($asset->qr_uid)) {
             $asset->qr_uid = (string) Str::uuid();
             $asset->save();
@@ -111,7 +114,7 @@ class QrLabelService
 
     protected function path(Asset $asset, string $format): string
     {
-        return $this->directory.'/qr-'.Str::slug($asset->asset_tag).'.'.$format;
+        return $this->directory.'/qr-'.$this->version.'-'.Str::slug($asset->asset_tag).'.'.$format;
     }
 
     /**

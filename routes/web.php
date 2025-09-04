@@ -99,6 +99,10 @@ Route::group(['middleware' => 'auth'], function () {
       */
       Route::get('scan', [ScanController::class, 'index'])->name('scan');
       Route::get('scan/resolve/{code}', [ScanController::class, 'resolve'])->name('scan.resolve');
+
+      // Fallback route: some external scanners prepend "/assets/" to non-URL payloads
+      // Accept that pattern and resolve the scanned code the same way
+      Route::get('assets/{code}', [ScanController::class, 'resolve'])->name('scan.resolve.assets');
   });
 
 
