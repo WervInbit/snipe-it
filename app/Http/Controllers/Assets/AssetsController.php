@@ -380,6 +380,16 @@ class AssetsController extends Controller
 
         $status = Statuslabel::find($request->input('status_id'));
 
+        if ($status && strcasecmp($status->name, 'Ready for Sale') === 0) {
+            $failed = $asset->latestFailedTestNames();
+            if ($failed->isNotEmpty() && !$request->boolean('ack_failed_tests')) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('warning', trans('general.ready_for_sale_failed_tests', ['tests' => $failed->implode(', ')]))
+                    ->with('requires_ack_failed_tests', true);
+            }
+        }
+
         // This is an archived or undeployable - we should check the asset back in.
         // Pending is allowed here
         if (($status) && (($status->getStatuslabelType() != 'pending') && ($status->getStatuslabelType() != 'deployable')) && ($target = $asset->assignedTo)) {

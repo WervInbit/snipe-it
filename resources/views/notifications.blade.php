@@ -36,6 +36,18 @@
 @endif
 
 
+@if ($message = session()->get('warning'))
+<div class="col-md-12">
+    <div class="alert alert-warning fade in">
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+        <i class="fas fa-exclamation-triangle faa-pulse animated"></i>
+        <strong>{{ trans('general.notification_warning') }}: </strong>
+        {!! $message !!}
+    </div>
+</div>
+@endif
+
+
 @if ($message = session()->get('success-unescaped'))
     <div class="col-md-12" id="success-notification">
         <div class="alert alert-success fade in">

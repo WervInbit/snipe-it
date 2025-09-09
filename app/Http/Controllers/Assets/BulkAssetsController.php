@@ -267,7 +267,24 @@ class BulkAssetsController extends Controller
 
         $assets = Asset::whereIn('id', $request->input('ids'))->get();
 
-
+        if ($request->filled('status_id')) {
+            $status = Statuslabel::find($request->input('status_id'));
+            if ($status && strcasecmp($status->name, 'Ready for Sale') === 0) {
+                $warnings = [];
+                foreach ($assets as $asset) {
+                    $failed = $asset->latestFailedTestNames();
+                    if ($failed->isNotEmpty()) {
+                        $warnings[] = $asset->asset_tag . ': ' . $failed->implode(', ');
+                    }
+                }
+                if ($warnings && !$request->boolean('ack_failed_tests')) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->with('warning', trans('general.ready_for_sale_failed_tests', ['tests' => implode(' | ', $warnings)]))
+                        ->with('requires_ack_failed_tests', true);
+                }
+            }
+        }
 
         /**
          * If ANY of these are filled, prepare to update the values on the assets.

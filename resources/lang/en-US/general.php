@@ -437,6 +437,7 @@ return [
     'consumable_name'       => 'Consumable Name:',
     'accessory_information' => 'Accessory Information:',
     'accessory_name'       => 'Accessory Name:',
+    'ready_for_sale_failed_tests' => 'Warning: The following tests failed in the last run: :tests. Proceed anyway?',
     'clone_item'            => 'Clone Item',
     'checkout_tooltip' => 'Check this item out',
     'checkin_tooltip' => 'Check this item in so that it is available for re-issue, re-imaging, etc',

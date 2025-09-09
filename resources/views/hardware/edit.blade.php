@@ -18,7 +18,11 @@
 
 {{-- Page content --}}
 @section('inputFields')
-    
+
+    @if (session('requires_ack_failed_tests'))
+        <input type="hidden" name="ack_failed_tests" value="1">
+    @endif
+
     @include ('partials.forms.edit.company-select', ['translated_name' => trans('general.company'), 'fieldname' => 'company_id'])
 
 

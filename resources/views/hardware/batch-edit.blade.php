@@ -9,6 +9,9 @@
     <div class="col-md-8 col-md-offset-2">
         <form class="form-horizontal" method="post" action="{{ route('hardware/bulksave') }}" autocomplete="off" role="form">
             @csrf
+            @if (session('requires_ack_failed_tests'))
+                <input type="hidden" name="ack_failed_tests" value="1">
+            @endif
             @foreach($assets as $asset_id)
                 <input type="hidden" name="ids[]" value="{{ $asset_id }}">
             @endforeach

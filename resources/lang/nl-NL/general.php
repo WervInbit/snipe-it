@@ -425,6 +425,7 @@ return [
     'consumable_name'       => 'Verbruiksartikel naam:',
     'accessory_information' => 'Accessoire Informatie:',
     'accessory_name'       => 'Accessoire naam:',
+    'ready_for_sale_failed_tests' => 'Waarschuwing: De volgende tests zijn mislukt in de laatste run: :tests. Toch doorgaan?',
     'clone_item'            => 'Item dupliceren',
     'checkout_tooltip' => 'Check dit item uit',
     'checkin_tooltip' => 'Check dit item in zodat het beschikbaar is om opnieuw uit te checken, opnieuw te imagen, etc',

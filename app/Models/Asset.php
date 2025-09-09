@@ -11,6 +11,7 @@ use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
 use App\Models\AssetTest;
 use App\Models\Category;
+use App\Models\TestResult;
 use App\Presenters\Presentable;
 use App\Presenters\AssetPresenter;
 use Carbon\Carbon;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Watson\Validating\ValidatingTrait;
@@ -935,6 +937,26 @@ class Asset extends Depreciable
             'asset_id',
             'test_run_id'
         );
+    }
+
+    /**
+     * Names of tests that failed in the most recent run.
+     *
+     * @return Collection
+     */
+    public function latestFailedTestNames(): Collection
+    {
+        $latestRun = $this->testRuns()
+            ->with(['results' => function ($query) {
+                $query->where('status', TestResult::STATUS_FAIL)->with('type');
+            }])
+            ->first();
+
+        if (!$latestRun) {
+            return collect();
+        }
+
+        return $latestRun->results->pluck('type.name');
     }
 
     /**
