@@ -31,6 +31,7 @@ class TestRunController extends Controller
         $run = new TestRun();
         $run->asset()->associate($asset);
         $run->user()->associate($request->user());
+        $run->sku()->associate($asset->sku);
         $run->started_at = now();
         $run->save();
 
