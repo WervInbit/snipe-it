@@ -19,6 +19,7 @@ return [
     'zip'                       => 'Postal Code',
     'locations'                 => 'Locations',
     'parent'                    => 'Parent',
+    'parent_help'               => 'Leave blank to create a Warehouse. Selecting a Warehouse creates a Shelf. Selecting a Shelf creates a Bin.',
     'currency'                  => 'Location Currency',
     'ldap_ou'                   => 'LDAP Search OU',
     'user_name'                 => 'User Name',

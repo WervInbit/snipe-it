@@ -175,6 +175,9 @@ class LocationsController extends Controller
         $this->authorize('create', Location::class);
         $location = new Location;
         $location->fill($request->all());
+        if (Location::exceedsMaxDepth($location->parent_id)) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/locations/message.invalid_parent_depth')));
+        }
         $location = $request->handleImages($location);
 
         // Only scope location if the setting is enabled
@@ -246,6 +249,9 @@ class LocationsController extends Controller
         $location = Location::findOrFail($id);
 
         $location->fill($request->all());
+        if (Location::exceedsMaxDepth($location->parent_id)) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/locations/message.invalid_parent_depth')));
+        }
         $location = $request->handleImages($location);
 
         if ($request->filled('company_id')) {

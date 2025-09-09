@@ -238,6 +238,22 @@ class Location extends SnipeModel
     }
 
     /**
+     * Determines if assigning the given parent would exceed the max depth.
+     *
+     * @param  int|null $parentId
+     * @return bool
+     */
+    public static function exceedsMaxDepth($parentId): bool
+    {
+        if (! $parentId) {
+            return false;
+        }
+
+        $parent = self::with('parent.parent')->find($parentId);
+        return $parent && $parent->parent && $parent->parent->parent;
+    }
+
+    /**
      * Establishes the locations -> company relationship
      *
      * @author [T. Regnery] [<tobias.regnery@gmail.com>]
