@@ -39,6 +39,10 @@ class AssetsTransformer
                 'id' => (int) $asset->model->id,
                 'name'=> e($asset->model->name),
             ] : null,
+            'sku' => ($asset->sku) ? [
+                'id' => (int) $asset->sku->id,
+                'name' => e($asset->sku->name),
+            ] : null,
             'byod' => ($asset->byod ? true : false),
             'requestable' => ($asset->requestable ? true : false),
             'is_sellable' => ($asset->is_sellable ? true : false),
@@ -284,6 +288,7 @@ class AssetsTransformer
             'type' => 'asset',
             'name' => e($asset->present()->fullName()),
             'model' => ($asset->model) ? e($asset->model->name) : null,
+            'sku' => ($asset->sku) ? e($asset->sku->name) : null,
             'model_number' => (($asset->model) && ($asset->model->model_number)) ? e($asset->model->model_number) : null,
             'asset_tag' => e($asset->asset_tag),
             'serial' => e($asset->serial),

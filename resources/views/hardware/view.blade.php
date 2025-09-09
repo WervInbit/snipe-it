@@ -776,6 +776,10 @@
                                                         {{ $asset->model->name }}
                                                     @endcan
 
+                                                    @if ($asset->sku)
+                                                        ({{ trans('general.sku') }}: {{ $asset->sku->name }})
+                                                    @endif
+
                                                 @endif
                                             </div>
                                         </div>
@@ -787,21 +791,10 @@
                                                 {{ trans('admin/models/table.modelnumber') }}
                                             </strong>
                                         </div>
-                                        <div class="col-md-9">
+<div class="col-md-9">
                                             {{ ($asset->model) ? $asset->model->model_number : ''}}
                                         </div>
                                     </div>
-
-                                    @if ($asset->sku)
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <strong>SKU</strong>
-                                            </div>
-                                            <div class="col-md-9">
-                                                {{ $asset->sku->name }}
-                                            </div>
-                                        </div>
-                                    @endif
 
                                     <!-- byod -->
                                     <div class="row byod">

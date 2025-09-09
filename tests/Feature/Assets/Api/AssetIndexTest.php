@@ -5,6 +5,7 @@ namespace Tests\Feature\Assets\Api;
 use App\Models\Asset;
 use App\Models\Company;
 use App\Models\User;
+use App\Models\Sku;
 use Carbon\Carbon;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
@@ -29,6 +30,22 @@ class AssetIndexTest extends TestCase
                 'rows',
             ])
             ->assertJson(fn(AssertableJson $json) => $json->has('rows', 3)->etc());
+    }
+
+    public function testAssetApiIndexIncludesSku()
+    {
+        $sku = Sku::factory()->create();
+        Asset::factory()->for($sku->model, 'model')->for($sku, 'sku')->create();
+
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->getJson(route('api.assets.index'))
+            ->assertOk()
+            ->assertJson(fn(AssertableJson $json) =>
+                $json->has('rows.0.sku', fn($json) =>
+                    $json->where('id', $sku->id)
+                        ->where('name', $sku->name)
+                )->etc()
+            );
     }
 
     public function testAssetApiIndexReturnsDisplayUpcomingAuditsDue()
