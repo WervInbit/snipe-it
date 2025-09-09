@@ -15,7 +15,7 @@ class AssetImageController extends Controller
     {
         $request->validate([
             'image' => ['required', 'array'],
-            'image.*' => ['image'],
+            'image.*' => ['image', 'mimes:jpeg,jpg,png,gif', 'max:5120'],
             'caption' => ['required', 'array'],
             'caption.*' => ['required', 'string'],
         ]);

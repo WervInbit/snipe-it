@@ -56,4 +56,36 @@ class AssetImageUploadTest extends TestCase
         $response->assertSessionHasNoErrors();
         $this->assertEquals(2, $asset->images()->count());
     }
+
+    public function test_asset_image_upload_rejects_non_images(): void
+    {
+        Storage::fake('public');
+
+        $asset = Asset::factory()->create();
+        $user = User::factory()->superuser()->create();
+
+        $response = $this->actingAs($user)->post(route('asset-images.store', $asset), [
+            'image' => [UploadedFile::fake()->create('doc1.pdf', 10, 'application/pdf')],
+            'caption' => ['bad'],
+        ]);
+
+        $response->assertSessionHasErrors('image.0');
+        $this->assertEquals(0, $asset->images()->count());
+    }
+
+    public function test_asset_image_upload_rejects_large_images(): void
+    {
+        Storage::fake('public');
+
+        $asset = Asset::factory()->create();
+        $user = User::factory()->superuser()->create();
+
+        $response = $this->actingAs($user)->post(route('asset-images.store', $asset), [
+            'image' => [UploadedFile::fake()->image('big.jpg')->size(6000)],
+            'caption' => ['big'],
+        ]);
+
+        $response->assertSessionHasErrors('image.0');
+        $this->assertEquals(0, $asset->images()->count());
+    }
 }

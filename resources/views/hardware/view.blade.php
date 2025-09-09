@@ -1538,15 +1538,19 @@
                             @endforeach
                         </div>
                         @can('update', $asset)
+                        @if ($asset->images->count() < 30)
                         <form id="image-upload-form" method="POST" action="{{ route('asset-images.store', $asset) }}" enctype="multipart/form-data">
                             @csrf
                             <div id="image-dropzone" class="well text-center" style="cursor:pointer">
                                 {{ trans('general.drag_n_drop_help') }}
                             </div>
-                            <input type="file" id="image-input" name="image[]" class="d-none" multiple accept="image/*">
+                            <input type="file" id="image-input" name="image[]" class="d-none" multiple accept="image/jpeg,image/png,image/gif">
                             <div id="image-preview" class="row mt-3"></div>
                             <button type="submit" id="image-upload-btn" class="btn btn-primary mt-2" disabled>{{ trans('general.image_upload') }}</button>
                         </form>
+                        @else
+                            <div class="alert alert-info mt-3">{{ trans('general.too_many_asset_images') }}</div>
+                        @endif
                         @endcan
                     </div>
 
@@ -1681,6 +1685,8 @@
             var preview = document.getElementById('image-preview');
             var button = document.getElementById('image-upload-btn');
             var files = [];
+            var existingCount = {{ $asset->images->count() }};
+            var maxSize = 5 * 1024 * 1024; // 5MB
 
             function updateInput() {
                 var dt = new DataTransfer();
@@ -1691,6 +1697,18 @@
 
             function addFiles(selected) {
                 Array.from(selected).forEach(function(file){
+                    if (files.length + existingCount >= 30) {
+                        alert('{{ trans('general.too_many_asset_images') }}');
+                        return;
+                    }
+                    if (['image/jpeg','image/png','image/gif'].indexOf(file.type) === -1) {
+                        alert('{{ trans('general.invalid_image_type') }}');
+                        return;
+                    }
+                    if (file.size > maxSize) {
+                        alert('{{ trans('general.image_too_large', ['size' => '5MB']) }}');
+                        return;
+                    }
                     files.push(file);
                     var reader = new FileReader();
                     reader.onload = function(e){
