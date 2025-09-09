@@ -12,14 +12,16 @@ class AgentTestResultsTest extends TestCase
 {
     public function test_agent_can_submit_test_results(): void
     {
+        \App\Models\User::factory()->create();
         $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAG123']);
-        $type = TestType::factory()->create(['slug' => 'cpu']);
+        $cpu = TestType::factory()->create(['slug' => 'cpu']);
+        $ram = TestType::factory()->create(['slug' => 'ram']);
 
         $payload = [
             'asset_tag' => $asset->asset_tag,
             'results' => [
                 [
-                    'test_slug' => $type->slug,
+                    'test_slug' => $cpu->slug,
                     'status' => TestResult::STATUS_PASS,
                     'note' => 'All good',
                 ],
@@ -37,9 +39,16 @@ class AgentTestResultsTest extends TestCase
 
         $this->assertDatabaseHas('test_results', [
             'test_run_id' => $run->id,
-            'test_type_id' => $type->id,
+            'test_type_id' => $cpu->id,
             'status' => TestResult::STATUS_PASS,
             'note' => 'All good',
+        ]);
+
+        $this->assertDatabaseHas('test_results', [
+            'test_run_id' => $run->id,
+            'test_type_id' => $ram->id,
+            'status' => TestResult::STATUS_NVT,
+            'note' => 'Not tested by agent',
         ]);
 
         $asset->refresh();

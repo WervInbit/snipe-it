@@ -39,14 +39,34 @@ class AgentTestController extends Controller
         $run->finished_at = now();
         $run->save();
 
-        foreach ($validated['results'] as $result) {
-            $type = TestType::where('slug', $result['test_slug'])->first();
+        $types = TestType::forAsset($asset)->get()->keyBy('slug');
+        $provided = collect($validated['results'])->keyBy('test_slug');
+
+        foreach ($types as $slug => $type) {
+            $data = $provided[$slug] ?? null;
+
+            if ($data) {
+                $status = $data['status'];
+                $note = $data['note'] ?? null;
+            } else {
+                $status = TestResult::STATUS_NVT;
+                $note = 'Not tested by agent';
+            }
+
             $run->results()->create([
                 'test_type_id' => $type->id,
-                'status' => $result['status'],
-                'note' => $result['note'] ?? null,
+                'status' => $status,
+                'note' => $note,
             ]);
         }
+
+        $run->audits()->create([
+            'user_id' => null,
+            'field' => 'source',
+            'before' => null,
+            'after' => 'agent',
+            'created_at' => now(),
+        ]);
 
         $asset->refreshTestCompletionFlag();
 
