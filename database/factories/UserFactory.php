@@ -116,6 +116,11 @@ class UserFactory extends Factory
         return $this->appendPermission(['refurbisher' => '1']);
     }
 
+    public function seniorRefurbisher()
+    {
+        return $this->appendPermission(['senior-refurbisher' => '1']);
+    }
+
     public function supervisor()
     {
         return $this->appendPermission(['supervisor' => '1']);

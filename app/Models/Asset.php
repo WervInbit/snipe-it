@@ -12,6 +12,7 @@ use App\Models\Traits\Searchable;
 use App\Models\AssetTest;
 use App\Models\Category;
 use App\Models\TestResult;
+use App\Models\Sku;
 use App\Presenters\Presentable;
 use App\Presenters\AssetPresenter;
 use Carbon\Carbon;
@@ -91,6 +92,7 @@ class Asset extends Depreciable
         'last_audit_date' => 'datetime',
         'next_audit_date' => 'datetime:m-d-Y',
         'model_id'       => 'integer',
+        'sku_id'        => 'integer',
         'status_id'      => 'integer',
         'category_id'    => 'integer',
         'company_id'     => 'integer',
@@ -106,6 +108,7 @@ class Asset extends Depreciable
 
     protected $rules = [
         'model_id'          => ['nullable', 'integer', 'exists:models,id,deleted_at,NULL', 'not_array'],
+        'sku_id'            => ['nullable', 'integer', 'exists:skus,id'],
         'status_id'         => ['nullable', 'integer', 'exists:status_labels,id'],
         'category_id'       => ['nullable', 'integer', 'exists:categories,id'],
         'asset_tag'         => ['nullable', 'min:1', 'max:255', 'unique_undeleted:assets,asset_tag', 'not_array'],
@@ -152,6 +155,7 @@ class Asset extends Depreciable
         'image',
         'location_id',
         'model_id',
+        'sku_id',
         'category_id',
         'name',
         'notes',
@@ -216,6 +220,7 @@ class Asset extends Depreciable
         'model'              => ['name', 'model_number', 'eol'],
         'model.category'     => ['name'],
         'model.manufacturer' => ['name'],
+        'sku'                => ['name'],
     ];
 
     protected static function booted(): void
@@ -316,6 +321,11 @@ class Asset extends Depreciable
     public function company()
     {
         return $this->belongsTo(\App\Models\Company::class, 'company_id');
+    }
+
+    public function sku()
+    {
+        return $this->belongsTo(Sku::class, 'sku_id');
     }
 
     /**

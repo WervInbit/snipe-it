@@ -63,7 +63,26 @@
     <div class="input_fields_wrap">
     </div>
 
-    @include ('partials.forms.edit.model-select', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id'])
+    @php
+        $selected_category = old('category_id');
+        $selected_manufacturer = old('manufacturer_id');
+        if (!$selected_category && $item->model) {
+            $selected_category = $item->model->category_id;
+        }
+        if (!$selected_manufacturer && $item->model) {
+            $selected_manufacturer = $item->model->manufacturer_id;
+        }
+    @endphp
+
+    @include('partials.forms.edit.category-select', ['translated_name' => trans('general.category'), 'fieldname' => 'category_id', 'selected' => $selected_category])
+    @include('partials.forms.edit.manufacturer-select', ['translated_name' => trans('general.manufacturer'), 'fieldname' => 'manufacturer_id', 'selected' => $selected_manufacturer])
+    @include('partials.forms.edit.model-select', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id'])
+    @include('partials.forms.edit.sku-select', [
+        'translated_name' => 'SKU',
+        'fieldname' => 'sku_id',
+        'selected' => old('sku_id', $item->sku_id),
+        'selected_text' => optional($item->sku)->name,
+    ])
 
 
     @include ('partials.forms.edit.status', ['required' => false])
@@ -399,6 +418,46 @@
             }
         }
 
+    });
+
+    $(document).ready(function() {
+        var categorySelect = $('#category_select_id');
+        var manufacturerSelect = $('#manufacturer_select_id');
+        var modelSelect = $('#model_select_id');
+        var skuSelect = $('#sku_select_id');
+
+        manufacturerSelect.data('category-id', categorySelect.val());
+        modelSelect.data('category-id', categorySelect.val());
+        if (manufacturerSelect.val()) {
+            modelSelect.data('manufacturer-id', manufacturerSelect.val());
+        }
+        if (modelSelect.val()) {
+            skuSelect.data('model-id', modelSelect.val());
+        }
+
+        categorySelect.on('change', function () {
+            var categoryId = $(this).val();
+            manufacturerSelect.val(null).trigger('change');
+            manufacturerSelect.data('category-id', categoryId);
+            modelSelect.val(null).trigger('change');
+            modelSelect.data('category-id', categoryId);
+            skuSelect.val(null).trigger('change');
+            skuSelect.removeData('model-id');
+        });
+
+        manufacturerSelect.on('change', function () {
+            var manufacturerId = $(this).val();
+            modelSelect.val(null).trigger('change');
+            modelSelect.data('manufacturer-id', manufacturerId);
+            skuSelect.val(null).trigger('change');
+            skuSelect.removeData('model-id');
+        });
+
+        modelSelect.on('change', function () {
+            var modelId = $(this).val();
+            skuSelect.val(null).trigger('change');
+            skuSelect.data('model-id', modelId);
+        });
     });
 
 

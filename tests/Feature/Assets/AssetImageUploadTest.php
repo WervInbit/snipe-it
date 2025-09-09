@@ -141,6 +141,25 @@ class AssetImageUploadTest extends TestCase
         $this->assertDatabaseHas('asset_images', ['id' => $image->id]);
     }
 
+    public function test_senior_refurbisher_can_delete_image(): void
+    {
+        Storage::fake('public');
+
+        $asset = Asset::factory()->create();
+        $user = User::factory()->seniorRefurbisher()->editAssets()->create();
+
+        $this->actingAs($user)->post(route('asset-images.store', $asset), [
+            'image' => [UploadedFile::fake()->image('front.jpg')],
+            'caption' => ['Front'],
+        ])->assertStatus(201);
+
+        $image = $asset->images()->first();
+
+        $response = $this->actingAs($user)->delete(route('asset-images.destroy', [$asset, $image]));
+        $response->assertRedirect();
+        $this->assertDatabaseMissing('asset_images', ['id' => $image->id]);
+    }
+
     public function test_asset_image_caption_can_be_updated(): void
     {
         Storage::fake('public');

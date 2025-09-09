@@ -212,6 +212,15 @@ $(function () {
                         assetStatusType: link.data("asset-status-type"),
                         companyId: link.data("company-id"),
                     };
+                    if (link.data("category-id")) {
+                        data.category_id = link.data("category-id");
+                    }
+                    if (link.data("manufacturer-id")) {
+                        data.manufacturer_id = link.data("manufacturer-id");
+                    }
+                    if (link.data("model-id")) {
+                        data.model_id = link.data("model-id");
+                    }
                     return data;
                 },
                 /* processResults: function (data, params) {

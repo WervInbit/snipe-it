@@ -278,6 +278,14 @@ class AssetModelsController extends Controller
             'models.category_id',
         ])->with('manufacturer', 'category');
 
+        if ($request->filled('category_id')) {
+            $assetmodels = $assetmodels->where('models.category_id', $request->input('category_id'));
+        }
+
+        if ($request->filled('manufacturer_id')) {
+            $assetmodels = $assetmodels->where('models.manufacturer_id', $request->input('manufacturer_id'));
+        }
+
         $settings = \App\Models\Setting::getSettings();
 
         if ($request->filled('search')) {

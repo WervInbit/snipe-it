@@ -257,6 +257,14 @@ class ManufacturersController extends Controller
             $manufacturers = $manufacturers->where('name', 'LIKE', '%'.$request->get('search').'%');
         }
 
+        if ($request->filled('category_id')) {
+            $manufacturers = $manufacturers->whereIn('id', function ($query) use ($request) {
+                $query->select('manufacturer_id')
+                      ->from('models')
+                      ->where('category_id', $request->input('category_id'));
+            });
+        }
+
         $manufacturers = $manufacturers->orderBy('name', 'ASC')->paginate(50);
 
         // Loop through and set some custom properties for the transformer to use.
