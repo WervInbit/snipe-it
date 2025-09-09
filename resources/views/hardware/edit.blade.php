@@ -77,7 +77,12 @@
     @include('partials.forms.edit.category-select', ['translated_name' => trans('general.category'), 'fieldname' => 'category_id', 'selected' => $selected_category])
     @include('partials.forms.edit.manufacturer-select', ['translated_name' => trans('general.manufacturer'), 'fieldname' => 'manufacturer_id', 'selected' => $selected_manufacturer])
     @include('partials.forms.edit.model-select', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id'])
-    @include('partials.forms.edit.sku-select', ['translated_name' => 'SKU', 'fieldname' => 'sku_id'])
+    @include('partials.forms.edit.sku-select', [
+        'translated_name' => 'SKU',
+        'fieldname' => 'sku_id',
+        'selected' => old('sku_id', $item->sku_id),
+        'selected_text' => optional($item->sku)->name,
+    ])
 
 
     @include ('partials.forms.edit.status', ['required' => false])
@@ -420,6 +425,15 @@
         var manufacturerSelect = $('#manufacturer_select_id');
         var modelSelect = $('#model_select_id');
         var skuSelect = $('#sku_select_id');
+
+        manufacturerSelect.data('category-id', categorySelect.val());
+        modelSelect.data('category-id', categorySelect.val());
+        if (manufacturerSelect.val()) {
+            modelSelect.data('manufacturer-id', manufacturerSelect.val());
+        }
+        if (modelSelect.val()) {
+            skuSelect.data('model-id', modelSelect.val());
+        }
 
         categorySelect.on('change', function () {
             var categoryId = $(this).val();

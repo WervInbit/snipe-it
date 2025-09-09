@@ -792,6 +792,17 @@
                                         </div>
                                     </div>
 
+                                    @if ($asset->sku)
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <strong>SKU</strong>
+                                            </div>
+                                            <div class="col-md-9">
+                                                {{ $asset->sku->name }}
+                                            </div>
+                                        </div>
+                                    @endif
+
                                     <!-- byod -->
                                     <div class="row byod">
                                         <div class="col-md-3">

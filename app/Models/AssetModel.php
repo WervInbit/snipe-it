@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Storage;
 use Watson\Validating\ValidatingTrait;
 use \App\Presenters\AssetModelPresenter;
 use App\Http\Traits\TwoColumnUniqueUndeletedTrait;
+use App\Models\Sku;
 
 /**
  * Model for Asset Models. Asset Models contain higher level
@@ -119,6 +120,11 @@ class AssetModel extends SnipeModel
     public function assets()
     {
         return $this->hasMany(\App\Models\Asset::class, 'model_id');
+    }
+
+    public function skus()
+    {
+        return $this->hasMany(Sku::class, 'model_id');
     }
 
     /**
