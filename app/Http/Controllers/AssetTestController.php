@@ -16,7 +16,7 @@ class AssetTestController extends Controller
     {
         Gate::authorize('tests.execute');
         $this->authorize('view', $asset);
-        $tests = $asset->tests()->get();
+        $tests = $asset->assetTests()->get();
         if ($request->wantsJson()) {
             return response()->json($tests);
         }
@@ -41,7 +41,7 @@ class AssetTestController extends Controller
             'notes' => ['nullable', 'string'],
         ]);
         $data['created_by'] = $request->user()->id;
-        $test = $asset->tests()->create($data);
+        $test = $asset->assetTests()->create($data);
         $test->logCreate('asset test created');
         if ($request->wantsJson()) {
             return response()->json($test, 201);
@@ -107,7 +107,7 @@ class AssetTestController extends Controller
     {
         Gate::authorize('tests.execute');
         $this->authorize('update', $asset);
-        $new = $asset->tests()->create([
+        $new = $asset->assetTests()->create([
             'performed_at' => now(),
             'status' => $test->status,
             'needs_cleaning' => $test->needs_cleaning,

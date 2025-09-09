@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Models\SnipeModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Builder;
+use App\Models\Asset;
 
 /**
  * Defines a kind of diagnostic test that can be executed.
@@ -22,6 +24,7 @@ class TestType extends SnipeModel
         'name',
         'slug',
         'tooltip',
+        'category',
     ];
 
     /**
@@ -30,5 +33,17 @@ class TestType extends SnipeModel
     public function results(): HasMany
     {
         return $this->hasMany(TestResult::class, 'test_type_id');
+    }
+
+    /**
+     * Scope test types for the provided asset.
+     *
+     * This acts as an extension point for future SKU or model-based filtering.
+     * For now it simply returns all test types so every device gets the full set
+     * and technicians can mark not-applicable tests as needed.
+     */
+    public function scopeForAsset(Builder $query, Asset $asset): Builder
+    {
+        return $query;
     }
 }

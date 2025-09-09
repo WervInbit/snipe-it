@@ -29,6 +29,13 @@ class TestRun extends SnipeModel
         'finished_at',
     ];
 
+    protected array $auditFields = [
+        'asset_id',
+        'user_id',
+        'started_at',
+        'finished_at',
+    ];
+
     protected $casts = [
         'started_at' => 'datetime',
         'finished_at' => 'datetime',

@@ -111,6 +111,16 @@ class UserFactory extends Factory
         });
     }
 
+    public function refurbisher()
+    {
+        return $this->appendPermission(['refurbisher' => '1']);
+    }
+
+    public function supervisor()
+    {
+        return $this->appendPermission(['supervisor' => '1']);
+    }
+
     public function viewAssets()
     {
         return $this->appendPermission(['assets.view' => '1']);

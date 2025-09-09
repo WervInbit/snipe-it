@@ -18,6 +18,7 @@ class TestTypeFactory extends Factory
             'name' => ucfirst($name),
             'slug' => Str::slug($name) . '-' . Str::random(5),
             'tooltip' => $this->faker->sentence(),
+            'category' => 'computer',
         ];
     }
 }

@@ -347,6 +347,9 @@ return [
     'labels' => 'Labels',
     'labels_title' => 'Update Label Settings',
     'labels_help' => 'Barcodes &amp; label settings',
+    'test_settings' => 'Test Settings',
+    'test_settings_title' => 'Test Settings',
+    'test_settings_help' => 'Manage test templates and tooltips',
     'purge_help' => 'Purge Deleted Records',
     'ldap_extension_warning' => 'It does not look like the LDAP extension is installed or enabled on this server. You can still save your settings, but you will need to enable the LDAP extension for PHP before LDAP syncing or login will work.',
     'ldap_ad' => 'LDAP/AD',
@@ -500,6 +503,7 @@ return [
         'purge'             => 'permanently delete',
         'security'          => 'password, passwords, requirements, two factor, two-factor, common passwords, remote login, logout, authentication',
         'notifications'     => 'alerts, email, notifications, audit, threshold, email alerts, cc',
+        'test_settings'     => 'tests, test types, templates, tooltip',
     ],
 
 ];
