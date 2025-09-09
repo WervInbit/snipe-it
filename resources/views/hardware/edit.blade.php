@@ -435,28 +435,61 @@
             skuSelect.data('model-id', modelSelect.val());
         }
 
-        categorySelect.on('change', function () {
+        categorySelect.on('change', function (e, preserve) {
             var categoryId = $(this).val();
-            manufacturerSelect.val(null).trigger('change');
             manufacturerSelect.data('category-id', categoryId);
-            modelSelect.val(null).trigger('change');
             modelSelect.data('category-id', categoryId);
-            skuSelect.val(null).trigger('change');
-            skuSelect.removeData('model-id');
-        });
-
-        manufacturerSelect.on('change', function () {
-            var manufacturerId = $(this).val();
+            if (preserve) {
+                return;
+            }
+            manufacturerSelect.val(null).trigger('change');
             modelSelect.val(null).trigger('change');
-            modelSelect.data('manufacturer-id', manufacturerId);
             skuSelect.val(null).trigger('change');
             skuSelect.removeData('model-id');
         });
 
-        modelSelect.on('change', function () {
-            var modelId = $(this).val();
+        manufacturerSelect.on('change', function (e, preserve) {
+            var manufacturerId = $(this).val();
+            modelSelect.data('manufacturer-id', manufacturerId);
+            if (preserve) {
+                return;
+            }
+            modelSelect.val(null).trigger('change');
             skuSelect.val(null).trigger('change');
-            skuSelect.data('model-id', modelId);
+            skuSelect.removeData('model-id');
+        });
+
+        function syncFromModel(model) {
+            if (model.category && categorySelect.val() != model.category.id) {
+                categorySelect.val(model.category.id).trigger('change', [true]);
+            }
+            if (model.manufacturer && manufacturerSelect.val() != model.manufacturer.id) {
+                manufacturerSelect.val(model.manufacturer.id).trigger('change', [true]);
+            }
+        }
+
+        modelSelect.on('change', function (e, preserveSku) {
+            var modelId = $(this).val();
+            if (!preserveSku) {
+                skuSelect.val(null).trigger('change');
+            }
+            if (modelId) {
+                skuSelect.data('model-id', modelId);
+                $.getJSON("{{ config('app.url') }}/api/v1/models/" + modelId, syncFromModel);
+            } else {
+                skuSelect.removeData('model-id');
+            }
+        });
+
+        skuSelect.on('change', function () {
+            var skuId = $(this).val();
+            if (skuId) {
+                $.getJSON("{{ config('app.url') }}/api/v1/skus/" + skuId, function (sku) {
+                    if (sku.model) {
+                        modelSelect.val(sku.model.id).trigger('change', [true]);
+                    }
+                });
+            }
         });
     });
 
