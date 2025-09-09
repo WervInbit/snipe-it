@@ -18,4 +18,12 @@ class QrCodeServiceTest extends TestCase
         $this->assertNotEmpty($png);
         $this->assertNotEmpty($pdf);
     }
+
+    public function test_pdf_can_include_caption(): void
+    {
+        $service = app(QrCodeService::class);
+        $data = 'ASSET-123';
+        $pdf = $service->pdf($data, $data, null, 'dymo-89x36', 'My Asset');
+        $this->assertNotEmpty($pdf);
+    }
 }

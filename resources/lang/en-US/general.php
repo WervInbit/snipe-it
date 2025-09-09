@@ -127,6 +127,7 @@ return [
     'download_png'                  => 'Download PNG',
     'print_pdf'                     => 'Print PDF',
     'print_qr'                      => 'Print QR Code',
+    'qr_printed_on_date'            => 'QR printed – :date',
     'editprofile'  			=> 'Edit Your Profile',
     'eol'					=> 'EOL',
     'email_domain'			=> 'Email Domain',

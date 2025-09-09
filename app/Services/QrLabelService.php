@@ -33,13 +33,18 @@ class QrLabelService
         $formats = array_map('trim', explode(',', $settings->qr_formats ?? 'png,pdf'));
         $qr = app(QrCodeService::class);
 
+        $caption = $asset->name ?: optional($asset->model)->name;
+        if (! $caption) {
+            $caption = trans('general.qr_printed_on_date', ['date' => now()->toDateString()]);
+        }
+
         if (in_array('png', $formats)) {
             $png = $qr->png($data, $label, $logoPath, $template);
             $disk->put($this->path($asset, 'png', $template), $png);
         }
 
         if (in_array('pdf', $formats)) {
-            $pdf = $qr->pdf($data, $label, $logoPath, $template);
+            $pdf = $qr->pdf($data, $label, $logoPath, $template, $caption);
             $disk->put($this->path($asset, 'pdf', $template), $pdf);
         }
     }

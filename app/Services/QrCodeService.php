@@ -43,7 +43,7 @@ class QrCodeService
     /**
      * Render a QR code as PDF binary data.
      */
-    public function pdf(string $data, ?string $label = null, ?string $logoPath = null, ?string $template = null): string
+    public function pdf(string $data, ?string $label = null, ?string $logoPath = null, ?string $template = null, ?string $caption = null): string
     {
         $tpl = $this->template($template);
 
@@ -52,7 +52,8 @@ class QrCodeService
         $dompdf = new Dompdf();
         $width = $tpl['width_mm'] * 72 / 25.4;
         $height = $tpl['height_mm'] * 72 / 25.4;
-        $html = '<html><body style="margin:0;padding:0;"><div style="width:' . $tpl['width_mm'] . 'mm;height:' . $tpl['height_mm'] . 'mm;display:flex;justify-content:center;align-items:center;"><img src="data:image/png;base64,' . base64_encode($png) . '" style="height:100%;" /></div></body></html>';
+        $captionHtml = $caption ? '<div style="margin-top:2px;font-size:10px;text-align:center;">' . htmlspecialchars($caption, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</div>' : '';
+        $html = '<html><body style="margin:0;padding:0;"><div style="width:' . $tpl['width_mm'] . 'mm;height:' . $tpl['height_mm'] . 'mm;display:flex;flex-direction:column;justify-content:center;align-items:center;"><img src="data:image/png;base64,' . base64_encode($png) . '" style="max-height:80%;max-width:100%;" />' . $captionHtml . '</div></body></html>';
         $dompdf->loadHtml($html);
         $dompdf->setPaper([0, 0, $width, $height]);
         $dompdf->render();
