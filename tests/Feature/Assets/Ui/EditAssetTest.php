@@ -161,4 +161,16 @@ class EditAssetTest extends TestCase
         $this->assertEquals($currentLocation->id, $asset->location_id);
     }
 
+    public function testSellableFlagCanBeToggled()
+    {
+        $asset = Asset::factory()->create(['is_sellable' => true]);
+
+        $this->actingAs(User::factory()->viewAssets()->editAssets()->create())
+            ->patch(route('hardware.update', $asset), [
+                'is_sellable' => 0,
+            ])
+            ->assertRedirect();
+
+        $this->assertFalse($asset->fresh()->is_sellable);
+    }
 }

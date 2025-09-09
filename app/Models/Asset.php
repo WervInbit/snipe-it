@@ -98,6 +98,7 @@ class Asset extends Depreciable
         'created_at'     => 'datetime',
         'updated_at'   => 'datetime',
         'deleted_at'  => 'datetime',
+        'is_sellable'  => 'boolean',
     ];
 
     protected $rules = [
@@ -129,7 +130,8 @@ class Asset extends Depreciable
         'requestable'       => ['nullable', 'boolean'],
         'assigned_user'     => ['integer', 'nullable', 'exists:users,id,deleted_at,NULL'],
         'assigned_location' => ['integer', 'nullable', 'exists:locations,id,deleted_at,NULL', 'fmcs_location'],
-        'assigned_asset'    => ['integer', 'nullable', 'exists:assets,id,deleted_at,NULL']
+        'assigned_asset'    => ['integer', 'nullable', 'exists:assets,id,deleted_at,NULL'],
+        'is_sellable'       => ['nullable', 'boolean']
     ];
 
 
@@ -158,6 +160,7 @@ class Asset extends Depreciable
         'supplier_id',
         'warranty_months',
         'requestable',
+        'is_sellable',
         'last_checkout',
         'expected_checkin',
         'byod',

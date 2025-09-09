@@ -45,6 +45,7 @@ class AssetFactory extends Factory
             'order_number' => (string) $this->faker->numberBetween(1000000, 50000000),
             'supplier_id' => Supplier::factory(),
             'requestable' => $this->faker->boolean(),
+            'is_sellable' => true,
             'assigned_to' => null,
             'assigned_type' => null,
             'next_audit_date' => null,

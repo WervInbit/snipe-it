@@ -113,6 +113,7 @@ class AssetsController extends Controller
             'requests_counter',
             'byod',
             'asset_eol_date',
+            'is_sellable',
             'requestable',
             'jobtitle',
         ];

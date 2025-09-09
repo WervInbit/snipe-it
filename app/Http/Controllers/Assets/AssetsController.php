@@ -146,6 +146,7 @@ class AssetsController extends Controller
             $asset->assigned_to             = request('assigned_to', null);
             $asset->supplier_id             = request('supplier_id', null);
             $asset->requestable             = request('requestable', 0);
+            $asset->is_sellable             = request('is_sellable', 1);
             $asset->rtd_location_id         = request('rtd_location_id', null);
             $asset->byod                    = request('byod', 0);
 
@@ -373,6 +374,7 @@ class AssetsController extends Controller
         $asset->supplier_id = $request->input('supplier_id', null);
         $asset->expected_checkin = $request->input('expected_checkin', null);
         $asset->requestable = $request->input('requestable', 0);
+        $asset->is_sellable = $request->input('is_sellable', 1);
         $asset->rtd_location_id = $request->input('rtd_location_id', null);
         $asset->byod = $request->input('byod', 0);
 

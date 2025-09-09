@@ -51,6 +51,7 @@ class StoreAssetTest extends TestCase
                 'purchase_cost' => '123.45',
                 'purchase_date' => '2023-09-02',
                 'requestable' => true,
+                'is_sellable' => false,
                 'rtd_location_id' => $rtdLocation->id,
                 'serial' => '1234567890',
                 'status_id' => $status->id,
@@ -83,6 +84,7 @@ class StoreAssetTest extends TestCase
         $this->assertTrue($asset->assetstatus->is($status));
         $this->assertTrue($asset->supplier->is($supplier));
         $this->assertEquals(10, $asset->warranty_months);
+        $this->assertFalse($asset->is_sellable);
 
         $this->assertHasTheseActionLogs($asset, ['create', 'checkout']);
     }

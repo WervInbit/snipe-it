@@ -71,6 +71,7 @@ class UpdateAssetTest extends TestCase
                 'purchase_cost' => '123.45',
                 'purchase_date' => '2023-09-02',
                 'requestable' => true,
+                'is_sellable' => false,
                 'rtd_location_id' => $rtdLocation->id,
                 'serial' => '1234567890',
                 'status_id' => $status->id,
@@ -100,8 +101,36 @@ class UpdateAssetTest extends TestCase
         $this->assertTrue($updatedAsset->assetstatus->is($status));
         $this->assertTrue($updatedAsset->supplier->is($supplier));
         $this->assertEquals(10, $updatedAsset->warranty_months);
-        //$this->assertEquals('2023-09-03 00:00:00', $updatedAsset->last_audit_date->format('Y-m-d H:i:s'));
         $this->assertEquals('2023-09-03 00:00:00', $updatedAsset->last_audit_date);
+        $this->assertFalse($updatedAsset->is_sellable);
+    }
+
+    public function testNonAdminCannotChangeAssetTag(): void
+    {
+        $asset = Asset::factory()->create();
+        $originalTag = $asset->asset_tag;
+
+        $this->actingAsForApi(User::factory()->editAssets()->create())
+            ->patchJson(route('api.assets.update', $asset->id), [
+                'asset_tag' => 'NEW-TAG',
+            ])
+            ->assertStatus(403);
+
+        $asset->refresh();
+        $this->assertEquals($originalTag, $asset->asset_tag);
+    }
+
+    public function testAdminCanChangeAssetTag(): void
+    {
+        $asset = Asset::factory()->create();
+
+        $this->actingAsForApi(User::factory()->admin()->create())
+            ->patchJson(route('api.assets.update', $asset->id), [
+                'asset_tag' => 'NEW-TAG',
+            ])
+            ->assertOk();
+
+        $this->assertEquals('NEW-TAG', $asset->fresh()->asset_tag);
     }
 
     public function testNonAdminCannotChangeAssetTag(): void

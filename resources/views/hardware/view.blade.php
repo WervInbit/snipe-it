@@ -795,6 +795,24 @@
                                         </div>
                                     </div>
 
+                                    @can('update', $asset)
+                                        @if (!optional($asset->assetstatus)->name || strtolower($asset->assetstatus->name) !== 'sold')
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <strong>{{ trans('admin/hardware/general.block_from_sale') }}</strong>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <form method="POST" action="{{ route('hardware.update', $asset->id) }}">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <input type="hidden" name="is_sellable" value="{{ $asset->is_sellable ? 1 : 0 }}">
+                                                    <input type="checkbox" aria-label="{{ trans('admin/hardware/general.block_from_sale') }}" onchange="this.previousElementSibling.value = this.checked ? 0 : 1; this.form.submit();" {{ $asset->is_sellable ? '' : 'checked' }}>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        @endif
+                                    @endcan
+
                                     @if (($asset->model) && ($asset->model->fieldset))
                                         @foreach($asset->model->fieldset->fields as $field)
                                             <div class="row">

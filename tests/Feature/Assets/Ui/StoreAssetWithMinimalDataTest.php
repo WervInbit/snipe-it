@@ -24,5 +24,6 @@ class StoreAssetWithMinimalDataTest extends TestCase
         $this->assertEquals('ASSET-0001', $asset->asset_tag);
         $this->assertNull($asset->model_id);
         $this->assertNull($asset->status_id);
+        $this->assertTrue($asset->is_sellable);
     }
 }
