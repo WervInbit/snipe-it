@@ -20,7 +20,7 @@ trait CompanyableTrait
             static::addGlobalScope(new CompanyableScope);
         } else {
             $settings = Setting::getSettings();
-            if ($settings && $settings->scope_locations_fmcs == 1) {
+            if ($settings?->scope_locations_fmcs == 1) {
                 static::addGlobalScope(new CompanyableScope);
             }
         }

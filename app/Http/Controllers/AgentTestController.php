@@ -20,17 +20,17 @@ class AgentTestController extends Controller
         }
 
         $validated = $request->validate([
-            'asset_tag' => ['required_without:asset_id', 'string'],
-            'asset_id' => ['required_without:asset_tag', 'integer', 'exists:assets,id'],
+            'asset_tag' => ['required', 'string'],
             'results' => ['required', 'array'],
             'results.*.test_slug' => ['required', 'string', 'exists:test_types,slug'],
             'results.*.status' => ['required', 'string', 'in:' . implode(',', TestResult::STATUSES)],
             'results.*.note' => ['nullable', 'string'],
         ]);
 
-        $asset = isset($validated['asset_id'])
-            ? Asset::findOrFail($validated['asset_id'])
-            : Asset::where('asset_tag', $validated['asset_tag'])->firstOrFail();
+        $asset = Asset::where('asset_tag', $validated['asset_tag'])->first();
+        if (!$asset) {
+            return response()->json(['message' => 'Asset not found'], 404);
+        }
 
         $run = new TestRun();
         $run->asset()->associate($asset);
