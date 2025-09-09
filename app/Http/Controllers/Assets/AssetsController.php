@@ -102,32 +102,34 @@ class AssetsController extends Controller
 
         // There are a lot more rules to add here but prevents
         // errors around `asset_tags` not being present below.
-        $this->validate($request, ['asset_tags' => ['required', 'array']]);
+        $this->validate($request, ['asset_tags' => ['array']]);
 
         // Handle asset tags - there could be one, or potentially many.
         // This is only necessary on create, not update, since bulk editing is handled
         // differently
-        $asset_tags = $request->input('asset_tags');
+        $asset_tags = $request->input('asset_tags', []);
 
         $settings = Setting::getSettings();
 
         $successes = [];
         $failures = [];
-        $serials = $request->input('serials');
+        $serials = $request->input('serials', []);
         $asset = null;
         $qr = app(QrLabelService::class);
 
-        for ($a = 1; $a <= count($asset_tags); $a++) {
+        $count = max(count($asset_tags), count($serials), 1);
+
+        for ($a = 1; $a <= $count; $a++) {
             $asset = new Asset();
             $asset->model()->associate(AssetModel::find($request->input('model_id')));
             $asset->name = $request->input('name');
 
             // Check for a corresponding serial
-            if (($serials) && (array_key_exists($a, $serials))) {
+            if (array_key_exists($a, $serials) && $serials[$a] !== '') {
                 $asset->serial = $serials[$a];
             }
 
-            if (($asset_tags) && (array_key_exists($a, $asset_tags))) {
+            if (array_key_exists($a, $asset_tags) && $asset_tags[$a] !== '') {
                 $asset->asset_tag = $asset_tags[$a];
             }
 
