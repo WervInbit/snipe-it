@@ -834,7 +834,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
 
         }); 
     
-        Route::resource('models', 
+        Route::resource('models',
         Api\AssetModelsController::class,
         ['names' => [
                 'index' => 'api.models.index',
@@ -847,6 +847,18 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         'parameters' => ['model' => 'model_id'],
         ]
         ); // end asset models API routes
+
+        /**
+        * SKU API routes
+        */
+        Route::group(['prefix' => 'skus'], function () {
+            Route::get('selectlist',
+                [
+                    Api\SkusController::class,
+                    'selectlist'
+                ]
+            )->name('api.skus.selectlist');
+        });
 
 
 
