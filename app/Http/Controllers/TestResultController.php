@@ -44,9 +44,14 @@ class TestResultController extends Controller
             $result->save();
         }
 
+        if (!$testRun->finished_at) {
+            $testRun->finished_at = now();
+            $testRun->save();
+        }
+
         $asset->refreshTestCompletionFlag();
 
         return redirect()->route('test-runs.index', $asset->id)
-            ->with('success', trans('general.updated'));
+            ->with('success', trans('tests.run_saved'));
     }
 }

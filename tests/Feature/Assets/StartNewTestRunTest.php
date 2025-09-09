@@ -15,11 +15,7 @@ class StartNewTestRunTest extends TestCase
     {
         $asset = Asset::factory()->create();
         TestType::factory()->count(3)->create();
-        $user = User::factory()
-            ->viewAssets()
-            ->editAssets()
-            ->appendPermission(['tests.execute' => '1'])
-            ->create();
+        $user = User::factory()->superuser()->create();
 
         $response = $this->actingAs($user)->post(route('test-runs.store', $asset->id));
         $run = TestRun::where('asset_id', $asset->id)->latest()->first();

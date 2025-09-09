@@ -7,38 +7,39 @@ use App\Models\TestRun;
 use App\Models\TestResult;
 use App\Models\TestType;
 use App\Models\User;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\File;
 use Tests\TestCase;
 
-class AttachPhotoToTestResultTest extends TestCase
+class SaveTestRunResultsTest extends TestCase
 {
-    public function test_photo_can_be_attached_to_result(): void
+    public function test_run_can_be_saved_and_marked_complete(): void
     {
         $asset = Asset::factory()->create();
         $type = TestType::factory()->create();
         $user = User::factory()->superuser()->create();
         $run = TestRun::factory()->for($asset)->for($user)->create();
-        $result = TestResult::factory()->for($run)
-            ->for($type, 'type')
+        $result = TestResult::factory()->for($run)->for($type, 'type')
             ->create(['status' => TestResult::STATUS_NVT]);
-
-        $file = UploadedFile::fake()->image('damage.jpg');
 
         $response = $this->actingAs($user)->put(
             route('test-results.update', [$asset->id, $run->id]),
             [
-                'status' => [$result->id => TestResult::STATUS_FAIL],
-                'photo'  => [$result->id => $file],
+                'status' => [$result->id => TestResult::STATUS_PASS],
+                'note' => [$result->id => 'looks good'],
             ]
         );
 
         $response->assertRedirect(route('test-runs.index', $asset->id));
+        $response->assertSessionHas('success');
+
+        $run->refresh();
+        $this->assertNotNull($run->finished_at);
 
         $result->refresh();
-        $this->assertNotNull($result->photo_path);
-        $this->assertFileExists(public_path($result->photo_path));
+        $this->assertEquals(TestResult::STATUS_PASS, $result->status);
+        $this->assertEquals('looks good', $result->note);
 
-        File::delete(public_path($result->photo_path));
+        $asset->refresh();
+        $this->assertTrue($asset->tests_completed_ok);
     }
 }
+

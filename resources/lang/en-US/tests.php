@@ -15,4 +15,5 @@ return [
     'repeat' => 'Repeat',
     'repeat_confirm' => 'Repeat this test using the previous values?',
     'all_passed' => 'All Tests Passed',
+    'run_saved' => 'Test run saved successfully',
 ];
