@@ -343,6 +343,15 @@ class LocationPresenter extends Presenter
 
     public function fullName()
     {
-        return $this->name;
+        $this->model->loadMissing('parent.parent.parent');
+
+        $segments = [];
+        $location = $this->model;
+        while ($location) {
+            array_unshift($segments, $location->name);
+            $location = $location->parent;
+        }
+
+        return implode(' > ', $segments);
     }
 }
