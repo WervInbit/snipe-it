@@ -50,12 +50,12 @@ class TestRelationshipsTest extends TestCase
         $this->assertTrue($type->results->first()->is($result));
     }
 
-    public function test_asset_test_runs_relationship()
+    public function test_asset_tests_relationship()
     {
         $asset = Asset::factory()->create();
         $run = TestRun::factory()->create(['asset_id' => $asset->id]);
 
-        $this->assertTrue($asset->testRuns->first()->is($run));
+        $this->assertTrue($asset->tests->first()->is($run));
     }
 }
 

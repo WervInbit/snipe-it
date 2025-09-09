@@ -14,7 +14,7 @@ class TestRunController extends Controller
     public function index(Asset $asset)
     {
         $this->authorize('view', $asset);
-        $runs = $asset->testRuns()
+        $runs = $asset->tests()
             ->with(['results.type', 'user'])
             ->orderByDesc('created_at')
             ->get();

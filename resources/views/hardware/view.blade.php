@@ -55,7 +55,7 @@
             </div>
         @endif
 
-        @if (optional($asset->tests()->first())->needs_cleaning)
+        @if (optional($asset->assetTests()->first())->needs_cleaning)
             <div class="col-md-12">
                 <span class="badge badge-warning">{{ trans('tests.needs_cleaning') }}</span>
             </div>
@@ -175,7 +175,7 @@
                               <i class="fas fa-vial fa-2x"></i>
                           </span>
                             <span class="hidden-xs hidden-sm">{{ trans('tests.tests') }}
-                                {!! ($asset->testRuns()->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($asset->testRuns()->count()).'</span>' : '' !!}
+                                {!! ($asset->tests()->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($asset->tests()->count()).'</span>' : '' !!}
                           </span>
                         </a>
                     </li>
