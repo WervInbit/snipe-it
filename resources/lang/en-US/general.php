@@ -159,6 +159,7 @@ return [
     'image_delete'         	=> 'Delete Image',
     'include_deleted'       => 'Include Deleted Assets',
     'image_upload'              => 'Upload Image',
+    'image_upload_failed'   => 'Image upload failed.',
     'attach_photo'              => 'Attach Photo',
     'too_many_asset_images'    => 'Assets may not have more than 30 images.',
     'images'                => 'Images',

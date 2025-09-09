@@ -4,14 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Asset;
 use App\Models\AssetImage;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AssetImageController extends Controller
 {
-    public function store(Request $request, Asset $asset): RedirectResponse
+    public function store(Request $request, Asset $asset): JsonResponse
     {
         $request->validate([
             'image' => ['required', 'array'],
@@ -32,16 +35,41 @@ class AssetImageController extends Controller
             ]);
         }
 
-        foreach ($request->file('image') as $index => $file) {
-            $path = $file->store('assets/'.$asset->id, 'public');
+        $stored = [];
+        $paths = [];
 
-            $asset->images()->create([
-                'file_path' => $path,
-                'caption' => $request->input('caption')[$index],
-            ]);
+        DB::beginTransaction();
+
+        try {
+            foreach ($request->file('image') as $index => $file) {
+                $filename = $asset->id.'_'.Str::uuid().'.'.$file->getClientOriginalExtension();
+                $path = $file->storeAs('assets/'.$asset->id, $filename, 'public');
+
+                $image = $asset->images()->create([
+                    'file_path' => $path,
+                    'caption' => $request->input('caption')[$index],
+                ]);
+
+                $paths[] = $path;
+
+                $stored[] = [
+                    'id' => $image->id,
+                    'url' => Storage::disk('public')->url($path),
+                ];
+            }
+
+            DB::commit();
+
+            return response()->json(['images' => $stored], 201);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            foreach ($paths as $path) {
+                Storage::disk('public')->delete($path);
+            }
+
+            return response()->json(['message' => trans('general.image_upload_failed')], 500);
         }
-
-        return back()->with('success', trans('general.image_upload'));
     }
 
     public function destroy(Asset $asset, AssetImage $assetImage): RedirectResponse

@@ -22,7 +22,7 @@ class AssetImageUploadTest extends TestCase
                 'image' => [UploadedFile::fake()->image("photo{$i}.jpg")],
                 'caption' => ["caption {$i}"],
             ]);
-            $response->assertStatus(302);
+            $response->assertStatus(201);
         }
 
         $this->assertEquals(30, $asset->images()->count());
@@ -53,7 +53,7 @@ class AssetImageUploadTest extends TestCase
             ],
             'caption' => ['front', 'back'],
         ]);
-        $response->assertSessionHasNoErrors();
+        $response->assertStatus(201)->assertJsonCount(2, 'images');
         $this->assertEquals(2, $asset->images()->count());
     }
 
@@ -65,7 +65,7 @@ class AssetImageUploadTest extends TestCase
         $user = User::factory()->superuser()->create();
 
         $response = $this->actingAs($user)->post(route('asset-images.store', $asset), [
-            'image' => [UploadedFile::fake()->create('doc1.pdf', 10, 'application/pdf')],
+            'image' => [UploadedFile::fake()->image('doc1.bmp')],
             'caption' => ['bad'],
         ]);
 
