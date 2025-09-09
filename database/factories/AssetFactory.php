@@ -42,6 +42,7 @@ class AssetFactory extends Factory
             'created_by' => User::factory()->superuser(),
             'asset_tag' => $this->faker->unixTime('now'),
             'notes'   => 'Created by DB seeder',
+            'location_note' => null,
             'purchase_date' => $this->faker->dateTimeBetween('-1 years', 'now', date_default_timezone_get())->format('Y-m-d'),
             'purchase_cost' => $this->faker->randomFloat(2, '299.99', '2999.99'),
             'order_number' => (string) $this->faker->numberBetween(1000000, 50000000),

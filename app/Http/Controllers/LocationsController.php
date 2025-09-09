@@ -46,12 +46,17 @@ class LocationsController extends Controller
      * @see LocationsController::postCreate() method that validates and stores the data
      * @since [v1.0]
      */
-    public function create() : View
+    public function create(Request $request) : View
     {
         $this->authorize('create', Location::class);
 
+        $location = new Location;
+        if ($request->filled('parent_id')) {
+            $location->parent_id = $request->input('parent_id');
+        }
+
         return view('locations/edit')
-            ->with('item', new Location);
+            ->with('item', $location);
     }
 
     /**
@@ -69,6 +74,9 @@ class LocationsController extends Controller
         
         $location = new Location();
         $location->name = $request->input('name');
+        if (Location::exceedsMaxDepth($request->input('parent_id'))) {
+            return redirect()->back()->withInput()->withErrors(['parent_id' => trans('admin/locations/message.invalid_parent_depth')]);
+        }
         $location->parent_id = $request->input('parent_id', null);
         $location->currency = $request->input('currency', '$');
         $location->address = $request->input('address');
@@ -144,6 +152,9 @@ class LocationsController extends Controller
         $this->authorize('update', Location::class);
 
         $location->name = $request->input('name');
+        if (Location::exceedsMaxDepth($request->input('parent_id'))) {
+            return redirect()->back()->withInput()->withErrors(['parent_id' => trans('admin/locations/message.invalid_parent_depth')]);
+        }
         $location->parent_id = $request->input('parent_id', null);
         $location->currency = $request->input('currency', '$');
         $location->address = $request->input('address');

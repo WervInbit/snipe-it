@@ -17,9 +17,22 @@
 				@endif
 
 				<!-- Select company, only for users with multicompany access - replace default company -->
-				<div class="dynamic-form-row">
-					@include ('partials.forms.edit.company-select', ['translated_name' => trans('general.company'), 'fieldname' => 'company_id'])
-				</div>
+                                <div class="dynamic-form-row">
+                                        @include ('partials.forms.edit.company-select', ['translated_name' => trans('general.company'), 'fieldname' => 'company_id'])
+                                </div>
+
+                <div class="dynamic-form-row">
+                    <div class="col-md-4 col-xs-12"><label for="modal-parent_id">{{ trans('admin/locations/table.parent') }}:</label></div>
+                    <div class="col-md-8 col-xs-12">
+                        <select class="form-control js-data-ajax" data-endpoint="locations" data-placeholder="{{ trans('general.select_location') }}" name="parent_id" id="modal-parent_id" style="width: 100%"></select>
+                        <p class="help-block">{{ trans('admin/locations/table.parent_help') }}</p>
+                    </div>
+                </div>
+
+                <div class="dynamic-form-row">
+                    <div class="col-md-4 col-xs-12"><label>{{ trans('admin/locations/table.type') }}:</label></div>
+                    <div class="col-md-8 col-xs-12"><input type="text" id="modal-location-type" class="form-control" value="{{ trans('admin/locations/table.warehouse') }}" readonly></div>
+                </div>
 
                 <div class="dynamic-form-row">
                     <div class="col-md-4 col-xs-12"><label for="modal-city">{{ trans('general.city') }}:</label></div>
@@ -35,3 +48,19 @@
         @include('modals.partials.footer')
     </div><!-- /.modal-content -->
 </div><!-- /.modal-dialog -->
+<script>
+    function updateModalLocationType(parentId) {
+        if (!parentId) {
+            $('#modal-location-type').val('{{ trans('admin/locations/table.warehouse') }}');
+            return;
+        }
+        $.getJSON('/api/locations/' + parentId, function(resp) {
+            var type = resp.data?.location_type || 'warehouse';
+            var nextType = type === 'warehouse' ? '{{ trans('admin/locations/table.shelf') }}' : '{{ trans('admin/locations/table.bin') }}';
+            $('#modal-location-type').val(nextType);
+        });
+    }
+    $('#modal-parent_id').on('change', function() {
+        updateModalLocationType($(this).val());
+    });
+</script>

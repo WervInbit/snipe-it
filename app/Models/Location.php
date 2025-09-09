@@ -40,12 +40,14 @@ class Location extends SnipeModel
         'manager_id'    => 'exists:users,id|nullable',
         'parent_id'     => 'nullable|exists:locations,id|non_circular:locations,id',
         'company_id'    => 'integer|nullable|exists:companies,id',
+        'location_type' => 'in:warehouse,shelf,bin',
     ];
 
     protected $casts = [
         'parent_id'     => 'integer',
         'manager_id'    => 'integer',
         'company_id'    => 'integer',
+        'location_type' => 'string',
     ];
 
     /**
@@ -81,6 +83,7 @@ class Location extends SnipeModel
         'image',
         'company_id',
         'notes',
+        'location_type',
     ];
     protected $hidden = ['user_id'];
 
@@ -102,6 +105,13 @@ class Location extends SnipeModel
       'parent'  => ['name'],
       'company' => ['name']
     ];
+
+    protected static function booted()
+    {
+        static::saving(function (Location $location) {
+            $location->location_type = self::determineType($location->parent_id);
+        });
+    }
 
 
     /**
@@ -238,6 +248,50 @@ class Location extends SnipeModel
     }
 
     /**
+     * Determines if assigning the given parent would exceed the max depth.
+     *
+     * @param  int|null $parentId
+     * @return bool
+     */
+    public static function exceedsMaxDepth($parentId): bool
+    {
+        if (! $parentId) {
+            return false;
+        }
+
+        $parent = self::with('parent.parent')->find($parentId);
+        return $parent && $parent->parent && $parent->parent->parent;
+    }
+
+    public static function determineType($parentId): string
+    {
+        if (! $parentId) {
+            return 'warehouse';
+        }
+
+        $parent = self::select('location_type', 'parent_id')->find($parentId);
+        if (! $parent) {
+            return 'warehouse';
+        }
+
+        return $parent->location_type === 'warehouse' ? 'shelf' : 'bin';
+    }
+
+    public static function customLocation(): self
+    {
+        $location = self::withTrashed()->firstOrCreate(
+            ['name' => 'Misc/Custom', 'parent_id' => null],
+            ['location_type' => self::determineType(null)]
+        );
+
+        if ($location->trashed()) {
+            $location->restore();
+        }
+
+        return $location;
+    }
+
+    /**
      * Establishes the locations -> company relationship
      *
      * @author [T. Regnery] [<tobias.regnery@gmail.com>]
@@ -273,6 +327,27 @@ class Location extends SnipeModel
     {
         return $this->hasMany(self::class, 'parent_id')
             ->with('children');
+    }
+
+    /**
+     * Get an array of IDs for the provided location and all descendants.
+     *
+     * @param  int|self $location
+     * @return array<int>
+     */
+    public static function getLocationHierarchy($location)
+    {
+        $locationId = $location instanceof self ? $location->id : (int) $location;
+
+        $ids = [$locationId];
+
+        $children = self::where('parent_id', $locationId)->pluck('id');
+
+        foreach ($children as $childId) {
+            $ids = array_merge($ids, self::getLocationHierarchy($childId));
+        }
+
+        return $ids;
     }
 
     /**

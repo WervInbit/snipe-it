@@ -453,7 +453,11 @@
                                             @if (isset($asset->location))
                                                 <li>
                                                     <x-icon type="locations" class="fa-fw" />
-                                                     {{ $asset->location->name }}</li>
+                                                     {{ $asset->location->present()->fullName() }}
+                                                     @if ($asset->location_note)
+                                                         ({{ trans('general.see_note') }})
+                                                     @endif
+                                                </li>
                                                 <li>{{ $asset->location->address }}
                                                     @if ($asset->location->address2!='')
                                                         {{ $asset->location->address2 }}
@@ -466,6 +470,9 @@
                                                     @endif
                                                     {{ $asset->location->state }} {{ $asset->location->zip }}
                                                 </li>
+                                            @endif
+                                            @if ($asset->location_note)
+                                                <li><strong>{{ trans('admin/hardware/form.location_note') }}:</strong> <em>{{ $asset->location_note }}</em></li>
                                             @endif
                                             <li>
                                                 <x-icon type="calendar" class="fa-fw" />
@@ -1160,11 +1167,27 @@
                                             <div class="col-md-9">
                                                 @can('superuser')
                                                     <a href="{{ route('locations.show', ['location' => $asset->location->id]) }}">
-                                                        {{ $asset->location->name }}
+                                                        {{ $asset->location->present()->fullName() }}
                                                     </a>
                                                 @else
-                                                    {{ $asset->location->name }}
+                                                    {{ $asset->location->present()->fullName() }}
                                                 @endcan
+                                                @if ($asset->location_note)
+                                                    ({{ trans('general.see_note') }})
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if ($asset->location_note)
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <strong>
+                                                    {{ trans('admin/hardware/form.location_note') }}
+                                                </strong>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <em>{{ $asset->location_note }}</em>
                                             </div>
                                         </div>
                                     @endif
@@ -1179,10 +1202,10 @@
                                             <div class="col-md-9">
                                                 @can('superuser')
                                                     <a href="{{ route('locations.show', ['location' => $asset->defaultLoc->id]) }}">
-                                                        {{ $asset->defaultLoc->name }}
+                                                        {{ $asset->defaultLoc->present()->fullName() }}
                                                     </a>
                                                 @else
-                                                    {{ $asset->defaultLoc->name }}
+                                                    {{ $asset->defaultLoc->present()->fullName() }}
                                                 @endcan
                                             </div>
                                         </div>

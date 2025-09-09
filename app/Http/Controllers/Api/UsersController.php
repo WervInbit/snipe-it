@@ -16,6 +16,7 @@ use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Accessory;
 use App\Models\Company;
+use App\Models\Location;
 use App\Models\Consumable;
 use App\Models\License;
 use App\Models\User;
@@ -131,7 +132,8 @@ class UsersController extends Controller
         }
 
         if ($request->filled('location_id')) {
-            $users = $users->where('users.location_id', '=', $request->input('location_id'));
+            $ids = Location::getLocationHierarchy($request->input('location_id'));
+            $users = $users->whereIn('users.location_id', $ids);
         }
 
         if ($request->filled('created_by')) {

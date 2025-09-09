@@ -12,7 +12,14 @@
 @include ('partials.forms.edit.name', ['translated_name' => trans('admin/locations/table.name')])
 
 <!-- parent -->
-@include ('partials.forms.edit.location-select', ['translated_name' => trans('admin/locations/table.parent'), 'fieldname' => 'parent_id'])
+@include ('partials.forms.edit.location-select', ['translated_name' => trans('admin/locations/table.parent'), 'fieldname' => 'parent_id', 'help_text' => trans('admin/locations/table.parent_help')])
+
+<div class="form-group">
+    <label class="col-md-3 control-label">{{ trans('admin/locations/table.type') }}</label>
+    <div class="col-md-7">
+        <input type="text" class="form-control" id="location_type_display" value="{{ trans('admin/locations/table.' . ($item->location_type ?? 'warehouse')) }}" readonly>
+    </div>
+</div>
 
 <!-- Manager-->
 @include ('partials.forms.edit.user-select', ['translated_name' => trans('admin/users/table.manager'), 'fieldname' => 'manager_id'])
@@ -79,4 +86,23 @@
 </div>
 
 @stop
+
+@push('scripts')
+<script>
+    function updateLocationTypeDisplay(parentId) {
+        if (!parentId) {
+            $('#location_type_display').val('{{ trans('admin/locations/table.warehouse') }}');
+            return;
+        }
+        $.getJSON('/api/locations/' + parentId, function(resp) {
+            var type = resp.data?.location_type || 'warehouse';
+            var nextType = type === 'warehouse' ? '{{ trans('admin/locations/table.shelf') }}' : '{{ trans('admin/locations/table.bin') }}';
+            $('#location_type_display').val(nextType);
+        });
+    }
+    $('#parent_id').on('change', function(){
+        updateLocationTypeDisplay($(this).val());
+    });
+</script>
+@endpush
 

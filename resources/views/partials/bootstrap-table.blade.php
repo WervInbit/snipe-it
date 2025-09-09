@@ -420,6 +420,10 @@
                 actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '/clone" class="actions btn btn-sm btn-info" data-tooltip="true" title="{{ trans('general.clone_item') }}"><x-icon type="clone" /><span class="sr-only">{{ trans('general.clone_item') }}</span></a>&nbsp;';
             }
 
+            if ((row.available_actions) && (row.available_actions.create_child === true) && (owner_name == 'locations')) {
+                actions += '<a href="{{ config('app.url') }}/' + dest + '/create?parent_id=' + row.id + '" class="actions btn btn-sm btn-success" data-tooltip="true" title="{{ trans('admin/locations/table.add_child') }}"><x-icon type="plus" /><span class="sr-only">{{ trans('admin/locations/table.add_child') }}</span></a>&nbsp;';
+            }
+
             if ((row.available_actions) && (row.available_actions.audit === true)) {
                 actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '/audit" class="actions btn btn-sm btn-primary" data-tooltip="true" title="{{ trans('general.audit') }}"><x-icon type="audit" /><span class="sr-only">{{ trans('general.audit') }}</span></a>&nbsp;';
             }

@@ -46,6 +46,13 @@ class LocationPresenter extends Presenter
                 'visible' => true,
                 'formatter' => 'locationsLinkFormatter',
             ], [
+                'field' => 'location_type',
+                'searchable' => true,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => trans('admin/locations/table.type'),
+                'visible' => true,
+            ], [
                 'field' => 'image',
                 'searchable' => false,
                 'sortable' => true,
@@ -336,6 +343,15 @@ class LocationPresenter extends Presenter
 
     public function fullName()
     {
-        return $this->name;
+        $this->model->loadMissing('parent.parent.parent');
+
+        $segments = [];
+        $location = $this->model;
+        while ($location) {
+            array_unshift($segments, $location->name);
+            $location = $location->parent;
+        }
+
+        return implode(' > ', $segments);
     }
 }

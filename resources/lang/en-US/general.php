@@ -671,6 +671,7 @@ return [
     'deleted_users' => 'Deleted Users',
     'cost_each' => ':amount each',
     'remove_current_image' => 'Remove current :type image',
+    'see_note' => 'see note',
 
     'seeding' => [
         'manufacturers' => [

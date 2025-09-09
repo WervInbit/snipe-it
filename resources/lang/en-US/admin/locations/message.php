@@ -10,6 +10,7 @@ return array(
     'current_location' => 'Current Location',
     'open_map' => 'Open in :map_provider_icon Maps',
 
+    'invalid_parent_depth' => 'Locations can only be nested two levels deep (Warehouse → Shelf → Bin).',
 
     'create' => array(
         'error'   => 'Location was not created, please try again.',

@@ -72,6 +72,7 @@ class LocationsController extends Controller
             'locations.country',
             'locations.parent_id',
             'locations.manager_id',
+            'locations.location_type',
             'locations.created_at',
             'locations.updated_at',
             'locations.image',
@@ -135,24 +136,26 @@ class LocationsController extends Controller
         $offset = ($request->input('offset') > $locations->count()) ? $locations->count() : app('api_offset_value');
         $limit = app('api_limit_value');
 
-        $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
-        $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
+        $order = $request->input('order') === 'desc' ? 'desc' : 'asc';
+        $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : null;
 
-
-
-        switch ($request->input('sort')) {
-            case 'parent':
-                $locations->OrderParent($order);
-                break;
-            case 'manager':
-                $locations->OrderManager($order);
-                break;
-            case 'company':
-                $locations->OrderCompany($order);
-                break;
-            default:
-                $locations->orderBy($sort, $order);
-                break;
+        if ($sort) {
+            switch ($sort) {
+                case 'parent':
+                    $locations->OrderParent($order);
+                    break;
+                case 'manager':
+                    $locations->OrderManager($order);
+                    break;
+                case 'company':
+                    $locations->OrderCompany($order);
+                    break;
+                default:
+                    $locations->orderBy($sort, $order);
+                    break;
+            }
+        } else {
+            $locations->orderBy('parent_id')->orderBy('name');
         }
 
 
@@ -175,6 +178,9 @@ class LocationsController extends Controller
         $this->authorize('create', Location::class);
         $location = new Location;
         $location->fill($request->all());
+        if (Location::exceedsMaxDepth($location->parent_id)) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/locations/message.invalid_parent_depth')));
+        }
         $location = $request->handleImages($location);
 
         // Only scope location if the setting is enabled
@@ -215,6 +221,7 @@ class LocationsController extends Controller
                 'locations.country',
                 'locations.parent_id',
                 'locations.manager_id',
+                'locations.location_type',
                 'locations.created_at',
                 'locations.updated_at',
                 'locations.image',
@@ -246,6 +253,9 @@ class LocationsController extends Controller
         $location = Location::findOrFail($id);
 
         $location->fill($request->all());
+        if (Location::exceedsMaxDepth($location->parent_id)) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/locations/message.invalid_parent_depth')));
+        }
         $location = $request->handleImages($location);
 
         if ($request->filled('company_id')) {
@@ -281,7 +291,8 @@ class LocationsController extends Controller
     {
         $this->authorize('view', Asset::class);
         $this->authorize('view', $location);
-        $assets = Asset::where('location_id', '=', $location->id)->with('model', 'model.category', 'assetstatus', 'location', 'company', 'defaultLoc');
+        $ids = Location::getLocationHierarchy($location->id);
+        $assets = Asset::whereIn('location_id', $ids)->with('model', 'model.category', 'assetstatus', 'location', 'company', 'defaultLoc');
         $assets = $assets->get();
         return (new AssetsTransformer)->transformAssets($assets, $assets->count(), $request);
     }
@@ -290,7 +301,8 @@ class LocationsController extends Controller
     {
         $this->authorize('view', Asset::class);
         $this->authorize('view', $location);
-        $assets = Asset::where('assigned_to', '=', $location->id)->where('assigned_type', '=', Location::class)->with('model', 'model.category', 'assetstatus', 'location', 'company', 'defaultLoc');
+        $ids = Location::getLocationHierarchy($location->id);
+        $assets = Asset::whereIn('assigned_to', $ids)->where('assigned_type', '=', Location::class)->with('model', 'model.category', 'assetstatus', 'location', 'company', 'defaultLoc');
         $assets = $assets->get();
         return (new AssetsTransformer)->transformAssets($assets, $assets->count(), $request);
     }
@@ -391,11 +403,25 @@ class LocationsController extends Controller
             $page = $request->input('page');
         }
 
+        if ($request->filled('parent_id')) {
+            $parent = $request->input('parent_id');
+            if ($parent === '0' || $parent === 0) {
+                $locations = $locations->whereNull('locations.parent_id');
+            } else {
+                $locations = $locations->where('locations.parent_id', '=', $parent);
+            }
+        }
+
         if ($request->filled('search')) {
             $locations = $locations->where('locations.name', 'LIKE', '%'.$request->input('search').'%');
         }
 
         $locations = $locations->orderBy('name', 'ASC')->get();
+
+        if ($request->filled('parent_id') || $request->filled('search')) {
+            $paginated_results = new LengthAwarePaginator($locations->forPage($page, 500), $locations->count(), 500, $page, []);
+            return (new SelectlistTransformer)->transformSelectlist($paginated_results);
+        }
 
         $locations_with_children = [];
 
@@ -406,12 +432,8 @@ class LocationsController extends Controller
             $locations_with_children[$location->parent_id][] = $location;
         }
 
-        if ($request->filled('search')) {
-            $locations_formatted = $locations;
-        } else {
-            $location_options = Location::indenter($locations_with_children);
-            $locations_formatted = new Collection($location_options);
-        }
+        $location_options = Location::indenter($locations_with_children);
+        $locations_formatted = new Collection($location_options);
 
         $paginated_results = new LengthAwarePaginator($locations_formatted->forPage($page, 500), $locations_formatted->count(), 500, $page, []);
 
