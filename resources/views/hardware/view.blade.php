@@ -1444,32 +1444,51 @@
                             @foreach ($asset->tests as $run)
                                 <div class="col-md-6 col-sm-12">
                                     <div class="panel panel-default">
+                                        @php
+                                            $timestamp = $run->finished_at ?: $run->created_at;
+                                            $passes = $run->results->where('status', 'pass')->count();
+                                            $fails = $run->results->where('status', 'fail')->count();
+                                            $nvts = $run->results->where('status', 'nvt')->count();
+                                        @endphp
                                         <div class="panel-heading">
-                                            {{ optional($run->created_at)->format('Y-m-d H:i') }} - {{ optional($run->user)->name }}
+                                            <a data-toggle="collapse" href="#test-run-{{ $run->id }}" aria-expanded="false" aria-controls="test-run-{{ $run->id }}">
+                                                {{ optional($timestamp)->format('Y-m-d H:i') }} - {{ optional($run->user)->name }}
+                                            </a>
+                                            <span class="pull-right">
+                                                {{ $passes }} {{ trans('tests.pass') }},
+                                                {{ $fails }} {{ trans('tests.fail') }}
+                                                @if ($nvts)
+                                                    , {{ $nvts }} {{ trans('tests.nvt') }}
+                                                @endif
+                                            </span>
                                         </div>
-                                        <div class="panel-body">
-                                            <ul class="list-unstyled">
-                                                @foreach ($run->results as $result)
-                                                    <li>
-                                                        {{ $result->type->name }}:
-                                                        {{ trans('tests.' . $result->status) }}
-                                                        @if ($result->note)
-                                                            <span class="text-muted">{{ $result->note }}</span>
+                                        <div id="test-run-{{ $run->id }}" class="panel-collapse collapse">
+                                            <div class="panel-body">
+                                                <ul class="list-unstyled">
+                                                    @foreach ($run->results as $result)
+                                                        <li>
+                                                            {{ $result->type->name }}:
+                                                            {{ trans('tests.' . $result->status) }}
+                                                            @if ($result->note)
+                                                                <span class="text-muted">{{ $result->note }}</span>
+                                                            @endif
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                                <div class="mt-2">
+                                                    @can('tests.execute')
+                                                        @if (is_null($run->finished_at))
+                                                            <a href="{{ route('test-results.edit', [$asset->id, $run->id]) }}" class="btn btn-default btn-sm">{{ trans('button.edit') }}</a>
                                                         @endif
-                                                    </li>
-                                                @endforeach
-                                            </ul>
-                                            <div class="mt-2">
-                                                @can('tests.execute')
-                                                    <a href="{{ route('test-results.edit', [$asset->id, $run->id]) }}" class="btn btn-default btn-sm">{{ trans('button.edit') }}</a>
-                                                @endcan
-                                                @can('tests.delete')
-                                                    <form method="POST" action="{{ route('test-runs.destroy', [$asset->id, $run->id]) }}" style="display:inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button class="btn btn-danger btn-sm" type="submit">{{ trans('button.delete') }}</button>
-                                                    </form>
-                                                @endcan
+                                                    @endcan
+                                                    @can('tests.delete')
+                                                        <form method="POST" action="{{ route('test-runs.destroy', [$asset->id, $run->id]) }}" style="display:inline">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button class="btn btn-danger btn-sm" type="submit">{{ trans('button.delete') }}</button>
+                                                        </form>
+                                                    @endcan
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

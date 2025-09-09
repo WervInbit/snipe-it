@@ -797,7 +797,7 @@ class Asset extends Depreciable
     public function tests()
     {
         return $this->hasMany(\App\Models\TestRun::class, 'asset_id')
-            ->orderBy('created_at', 'desc');
+            ->orderByRaw('COALESCE(finished_at, created_at) DESC');
     }
 
     /**
