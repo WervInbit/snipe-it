@@ -26,6 +26,7 @@ use App\Http\Controllers\SuppliersController;
 use App\Http\Controllers\StartController;
 use App\Http\Controllers\ScanController;
 use App\Http\Controllers\ViewAssetsController;
+use App\Http\Controllers\Admin\TestTypeController as AdminTestTypeController;
 use App\Livewire\Importer;
 use App\Models\ReportTemplate;
 use Illuminate\Support\Facades\Route;
@@ -222,6 +223,15 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
     Route::post('labels', [SettingsController::class, 'postLabels'])
         ->name('settings.labels.save');
+
+    Route::get('testtypes', [AdminTestTypeController::class, 'index'])
+        ->name('settings.testtypes.index')
+        ->breadcrumbs(fn (Trail $trail) =>
+        $trail->parent('settings.index')
+            ->push(trans('admin/settings/general.test_settings_title'), route('settings.testtypes.index')));
+
+    Route::put('testtypes/{testtype}', [AdminTestTypeController::class, 'update'])
+        ->name('settings.testtypes.update');
 
     Route::get('ldap', [SettingsController::class, 'getLdapSettings'])
         ->name('settings.ldap.index')

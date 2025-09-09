@@ -790,23 +790,31 @@ class Asset extends Depreciable
     }
 
     /**
-     * Get test runs for this asset
+     * Test runs executed against this asset.
      *
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
-    public function testRuns()
+    public function tests()
     {
         return $this->hasMany(\App\Models\TestRun::class, 'asset_id')
-            ->orderBy('created_at', 'desc');
+            ->orderByRaw('COALESCE(finished_at, created_at) DESC');
     }
 
     /**
-     * Asset-specific tests.
+     * Legacy asset-specific tests.
      */
-    public function tests()
+    public function assetTests()
     {
         return $this->hasMany(AssetTest::class)
             ->orderBy('performed_at', 'desc');
+    }
+
+    /**
+     * Additional images associated with this asset.
+     */
+    public function images()
+    {
+        return $this->hasMany(AssetImage::class);
     }
 
     /**
@@ -948,7 +956,7 @@ class Asset extends Depreciable
      */
     public function latestFailedTestNames(): Collection
     {
-        $latestRun = $this->testRuns()
+        $latestRun = $this->tests()
             ->with(['results' => function ($query) {
                 $query->where('status', TestResult::STATUS_FAIL)->with('type');
             }])
@@ -966,7 +974,7 @@ class Asset extends Depreciable
      */
     public function refreshTestCompletionFlag(): void
     {
-        $latestRun = $this->testRuns()->with('results')->first();
+        $latestRun = $this->tests()->with('results')->first();
 
         $this->tests_completed_ok = $latestRun
             ? $latestRun->results->where('status', TestResult::STATUS_FAIL)->isEmpty()

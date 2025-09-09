@@ -55,7 +55,7 @@
             </div>
         @endif
 
-        @if (optional($asset->tests()->first())->needs_cleaning)
+        @if (optional($asset->assetTests()->first())->needs_cleaning)
             <div class="col-md-12">
                 <span class="badge badge-warning">{{ trans('tests.needs_cleaning') }}</span>
             </div>
@@ -170,12 +170,23 @@
 
                     @can('view', \App\Models\Asset::class)
                     <li>
-                          <a href="{{ route('test-runs.index', $asset->id) }}">
+                        <a href="#tests" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
                               <i class="fas fa-vial fa-2x"></i>
                           </span>
                             <span class="hidden-xs hidden-sm">{{ trans('tests.tests') }}
-                                {!! ($asset->testRuns()->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($asset->testRuns()->count()).'</span>' : '' !!}
+                                {!! ($asset->tests()->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($asset->tests()->count()).'</span>' : '' !!}
+                          </span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="#images" data-toggle="tab">
+                          <span class="hidden-lg hidden-md">
+                              <i class="fas fa-camera fa-2x"></i>
+                          </span>
+                            <span class="hidden-xs hidden-sm">{{ trans('general.images') }}
+                                {!! ($asset->images->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($asset->images->count()).'</span>' : '' !!}
                           </span>
                         </a>
                     </li>
@@ -1431,6 +1442,130 @@
                 </div><!-- /.tab-pane -->
                 @endcan
 
+                    <div class="tab-pane fade" id="tests">
+                        <div class="mb-3 text-right">
+                            @can('tests.execute')
+                                <form method="POST" action="{{ route('test-runs.store', $asset->id) }}" style="display:inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary">{{ trans('tests.start_new_run') }}</button>
+                                </form>
+                            @endcan
+                        </div>
+                        <div class="row">
+                            @foreach ($asset->tests as $run)
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="panel panel-default">
+                                        @php
+                                            $timestamp = $run->finished_at ?: $run->created_at;
+                                            $passes = $run->results->where('status', 'pass')->count();
+                                            $fails = $run->results->where('status', 'fail')->count();
+                                            $nvts = $run->results->where('status', 'nvt')->count();
+                                        @endphp
+                                        <div class="panel-heading">
+                                            <a data-toggle="collapse" href="#test-run-{{ $run->id }}" aria-expanded="false" aria-controls="test-run-{{ $run->id }}">
+                                                {{ optional($timestamp)->format('Y-m-d H:i') }} - {{ optional($run->user)->name }}
+                                            </a>
+                                            <span class="pull-right">
+                                                {{ $passes }} {{ trans('tests.pass') }},
+                                                {{ $fails }} {{ trans('tests.fail') }}
+                                                @if ($nvts)
+                                                    , {{ $nvts }} {{ trans('tests.nvt') }}
+                                                @endif
+                                            </span>
+                                        </div>
+                                        <div id="test-run-{{ $run->id }}" class="panel-collapse collapse">
+                                            <div class="panel-body">
+                                                <ul class="list-unstyled">
+                                                    @foreach ($run->results as $result)
+                                                        <li>
+                                                            {{ $result->type->name }}:
+                                                            {{ trans('tests.' . $result->status) }}
+                                                            @if ($result->note)
+                                                                <span class="text-muted">{{ $result->note }}</span>
+                                                            @endif
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                                <div class="mt-2">
+                                                    @can('update', $run)
+                                                        <a href="{{ route('test-results.edit', [$asset->id, $run->id]) }}" class="btn btn-default btn-sm">{{ trans('button.edit') }}</a>
+                                                    @endcan
+                                                    @can('delete', $run)
+                                                        <form method="POST" action="{{ route('test-runs.destroy', [$asset->id, $run->id]) }}" style="display:inline">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button class="btn btn-danger btn-sm" type="submit">{{ trans('button.delete') }}</button>
+                                                        </form>
+                                                    @endcan
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        @can('audits.view')
+                            @php
+                                $audits = $asset->tests->flatMap->audits
+                                    ->merge($asset->tests->flatMap->results->flatMap->audits)
+                                    ->sortByDesc('created_at');
+                            @endphp
+                            @if($audits->isNotEmpty())
+                                <button class="btn btn-default mb-2" type="button" data-toggle="collapse" data-target="#test-audit-trail">
+                                    {{ trans('tests.view_audit_trail') }}
+                                </button>
+                                <div id="test-audit-trail" class="collapse">
+                                    @include('tests.partials.audit-history', ['audits' => $audits])
+                                </div>
+                            @endif
+                        @endcan
+                    </div> <!-- /.tab-pane tests -->
+
+                    <div class="tab-pane fade" id="images">
+                        <div class="row">
+                            @forelse ($asset->images as $image)
+                                <div class="col-6 col-md-3 mb-3 text-center">
+                                    <a href="{{ asset('storage/'.$image->file_path) }}" target="_blank">
+                                        <img src="{{ asset('storage/'.$image->file_path) }}" class="img-fluid img-thumbnail" alt="{{ $image->caption }}">
+                                    </a>
+                                    <div class="mt-1">
+                                        @can('update', $asset)
+                                            <form method="POST" action="{{ route('asset-images.update', [$asset, $image]) }}" class="form-inline justify-content-center">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="text" name="caption" value="{{ $image->caption }}" class="form-control form-control-sm">
+                                                <button type="submit" class="btn btn-xs btn-primary ml-1">{{ trans('general.save') }}</button>
+                                            </form>
+                                            <form method="POST" action="{{ route('asset-images.destroy', [$asset, $image]) }}" class="mt-1" onsubmit="return confirm('{{ trans('general.delete_confirm', ['item' => trans('general.image')]) }}');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-xs btn-danger">{{ trans('button.delete') }}</button>
+                                            </form>
+                                        @else
+                                            {{ $image->caption }}
+                                        @endcan
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="col-12 text-center text-muted">{{ trans('general.no_asset_images') }}</div>
+                            @endforelse
+                        </div>
+                        @can('update', $asset)
+                        @if ($asset->images->count() < 30)
+                        <form id="image-upload-form" method="POST" action="{{ route('asset-images.store', $asset) }}" enctype="multipart/form-data">
+                            @csrf
+                            <div id="image-dropzone" class="well text-center" style="cursor:pointer">
+                                {{ trans('general.drag_n_drop_help') }}
+                            </div>
+                            <input type="file" id="image-input" name="image[]" class="d-none" multiple accept="image/jpeg,image/png,image/gif">
+                            <div id="image-preview" class="row mt-3"></div>
+                            <button type="submit" id="image-upload-btn" class="btn btn-primary mt-2" disabled>{{ trans('general.image_upload') }}</button>
+                        </form>
+                        @else
+                            <div class="alert alert-info mt-3">{{ trans('general.too_many_asset_images') }}</div>
+                        @endif
+                        @endcan
+                    </div>
 
                     @can('view', \App\Models\Asset::class)
                     <div class="tab-pane fade" id="maintenances">
@@ -1553,7 +1688,70 @@
         @include ('modals.upload-file', ['item_type' => 'asset', 'item_id' => $asset->id])
     @endcan
 @stop
-            @section('moar_scripts')
+@section('moar_scripts')
     @include ('partials.bootstrap-table')
+    <script>
+        (function () {
+            var dropzone = document.getElementById('image-dropzone');
+            if (!dropzone) return;
+            var input = document.getElementById('image-input');
+            var preview = document.getElementById('image-preview');
+            var button = document.getElementById('image-upload-btn');
+            var files = [];
+            var existingCount = {{ $asset->images->count() }};
+            var maxSize = 5 * 1024 * 1024; // 5MB
+
+            function updateInput() {
+                var dt = new DataTransfer();
+                files.forEach(function(f){ dt.items.add(f); });
+                input.files = dt.files;
+                button.disabled = files.length === 0;
+            }
+
+            function addFiles(selected) {
+                Array.from(selected).forEach(function(file){
+                    if (files.length + existingCount >= 30) {
+                        alert('{{ trans('general.too_many_asset_images') }}');
+                        return;
+                    }
+                    if (['image/jpeg','image/png','image/gif'].indexOf(file.type) === -1) {
+                        alert('{{ trans('general.invalid_image_type') }}');
+                        return;
+                    }
+                    if (file.size > maxSize) {
+                        alert('{{ trans('general.image_too_large', ['size' => '5MB']) }}');
+                        return;
+                    }
+                    files.push(file);
+                    var reader = new FileReader();
+                    reader.onload = function(e){
+                        var col = document.createElement('div');
+                        col.className = 'col-sm-3 mb-3 text-center';
+                        col.innerHTML = `<img src="${e.target.result}" class="img-thumbnail"><input type="text" name="caption[]" class="form-control mt-1" placeholder="{{ trans('general.caption') }}" required>`;
+                        preview.appendChild(col);
+                    };
+                    reader.readAsDataURL(file);
+                });
+                updateInput();
+            }
+
+            dropzone.addEventListener('click', function(){ input.click(); });
+            dropzone.addEventListener('dragover', function(e){ e.preventDefault(); dropzone.classList.add('dropzone-over'); });
+            dropzone.addEventListener('dragleave', function(){ dropzone.classList.remove('dropzone-over'); });
+            dropzone.addEventListener('drop', function(e){ e.preventDefault(); dropzone.classList.remove('dropzone-over'); addFiles(e.dataTransfer.files); });
+            input.addEventListener('change', function(e){ addFiles(e.target.files); });
+
+            document.getElementById('image-upload-form').addEventListener('submit', function(e){
+                var captions = preview.querySelectorAll('input[name="caption[]"]');
+                for (var i = 0; i < captions.length; i++) {
+                    if (!captions[i].value.trim()) {
+                        e.preventDefault();
+                        alert('{{ trans('general.caption_required') }}');
+                        return;
+                    }
+                }
+            });
+        })();
+    </script>
 
 @stop
