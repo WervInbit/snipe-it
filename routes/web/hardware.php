@@ -8,6 +8,7 @@ use App\Http\Controllers\Assets\AssetCheckinController;
 use App\Http\Controllers\TestRunController;
 use App\Http\Controllers\TestResultController;
 use App\Http\Controllers\AssetTestController;
+use App\Http\Controllers\AssetImageController;
 use App\Models\Setting;
 use Tabuna\Breadcrumbs\Trail;
 use Illuminate\Support\Facades\Route;
@@ -170,6 +171,12 @@ Route::group(
             ->name('test-results.edit');
         Route::put('{asset}/tests/{testRun}/results', [TestResultController::class, 'update'])
             ->name('test-results.update');
+
+        // Asset images
+        Route::post('{asset}/images', [AssetImageController::class, 'store'])
+            ->name('asset-images.store');
+        Route::delete('{asset}/images/{assetImage}', [AssetImageController::class, 'destroy'])
+            ->name('asset-images.destroy');
 
         // Asset individual tests
         Route::get('{asset}/asset-tests', [AssetTestController::class, 'index'])

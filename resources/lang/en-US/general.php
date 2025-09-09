@@ -160,6 +160,7 @@ return [
     'include_deleted'       => 'Include Deleted Assets',
     'image_upload'              => 'Upload Image',
     'attach_photo'              => 'Attach Photo',
+    'too_many_asset_images'    => 'Assets may not have more than 30 images.',
     'filetypes_accepted_help'    => 'Accepted filetype is :types. The maximum size allowed is :size.|Accepted filetypes are :types. The maximum upload size allowed is :size.',
     'filetypes_size_help'   => 'The maximum upload size allowed is :size.',
     'image_filetypes_help'  => 'Accepted Filetypes are jpg, webp, png, gif, svg, and avif. The maximum upload size allowed is :size.',

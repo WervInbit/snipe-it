@@ -810,6 +810,14 @@ class Asset extends Depreciable
     }
 
     /**
+     * Additional images associated with this asset.
+     */
+    public function images()
+    {
+        return $this->hasMany(AssetImage::class);
+    }
+
+    /**
      * Get user who created the item
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
