@@ -72,6 +72,7 @@ class Setting extends Model
         'qr_logo',
         'qr_text_redundancy',
         'qr_formats',
+        'qr_label_template',
         'label_size',
         'test_tooltips',
     ];

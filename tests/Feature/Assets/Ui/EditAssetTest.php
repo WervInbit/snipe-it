@@ -34,6 +34,7 @@ class EditAssetTest extends TestCase
     public function testAssetEditPostIsRedirectedIfRedirectSelectionIsIndex()
     {
         $asset = Asset::factory()->assignedToUser()->create();
+        $originalTag = $asset->asset_tag;
 
         $this->actingAs(User::factory()->viewAssets()->editAssets()->create())
             ->from(route('hardware.edit', $asset))
@@ -41,31 +42,66 @@ class EditAssetTest extends TestCase
                 [
                     'redirect_option' => 'index',
                     'name' => 'New name',
-                    'asset_tags' => 'New Asset Tag',
+                    'asset_tags' => $asset->asset_tag,
                     'status_id' => StatusLabel::factory()->create()->id,
                     'model_id' => AssetModel::factory()->create()->id,
                 ])
             ->assertStatus(302)
             ->assertRedirect(route('hardware.index'));
-        $this->assertDatabaseHas('assets', ['asset_tag' => 'New Asset Tag']);
+        $asset->refresh();
+        $this->assertEquals($originalTag, $asset->asset_tag);
     }
     public function testAssetEditPostIsRedirectedIfRedirectSelectionIsItem()
     {
         $asset = Asset::factory()->create();
+        $originalTag = $asset->asset_tag;
 
         $this->actingAs(User::factory()->viewAssets()->editAssets()->create())
             ->from(route('hardware.edit', $asset))
             ->put(route('hardware.update', $asset), [
                 'redirect_option' => 'item',
                 'name' => 'New name',
-                'asset_tags' => 'New Asset Tag',
+                'asset_tags' => $asset->asset_tag,
                 'status_id' => StatusLabel::factory()->create()->id,
                 'model_id' => AssetModel::factory()->create()->id,
             ])
             ->assertStatus(302)
             ->assertRedirect(route('hardware.show', $asset));
 
-        $this->assertDatabaseHas('assets', ['asset_tag' => 'New Asset Tag']);
+        $asset->refresh();
+        $this->assertEquals($originalTag, $asset->asset_tag);
+    }
+
+    public function testNonAdminCannotChangeAssetTag(): void
+    {
+        $asset = Asset::factory()->create();
+        $originalTag = $asset->asset_tag;
+
+        $this->actingAs(User::factory()->viewAssets()->editAssets()->create())
+            ->from(route('hardware.edit', $asset))
+            ->put(route('hardware.update', $asset), [
+                'asset_tags' => 'New Asset Tag',
+            ])
+            ->assertRedirect()
+            ->assertSessionHasErrors('asset_tag');
+
+        $asset->refresh();
+        $this->assertEquals($originalTag, $asset->asset_tag);
+    }
+
+    public function testAdminCanChangeAssetTag(): void
+    {
+        $asset = Asset::factory()->create();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->from(route('hardware.edit', $asset))
+            ->put(route('hardware.update', $asset), [
+                'asset_tags' => 'New Asset Tag',
+            ])
+            ->assertRedirect();
+
+        $asset->refresh();
+        $this->assertEquals('New Asset Tag', $asset->asset_tag);
     }
 
     public function testNewCheckinIsLoggedIfStatusChangedToUndeployable()
@@ -115,7 +151,7 @@ class EditAssetTest extends TestCase
             ->put(route('hardware.update', $asset), [
                 'redirect_option' => 'item',
                 'name' => 'New name',
-                'asset_tags' => 'New Asset Tag',
+                'asset_tags' => $asset->asset_tag,
                 'status_id' => $asset->status_id,
                 'model_id' => $asset->model_id,
             ]);

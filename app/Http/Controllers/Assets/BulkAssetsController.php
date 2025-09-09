@@ -10,6 +10,7 @@ use App\Models\AssetModel;
 use App\Models\Statuslabel;
 use App\Models\Setting;
 use App\View\Label;
+use App\Services\QrLabelService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -170,6 +171,14 @@ class BulkAssetsController extends Controller
 
 
             switch ($request->input('bulk_actions')) {
+                case 'qr':
+                    $this->authorize('view', Asset::class);
+                    $pdf = app(QrLabelService::class)->batchPdf($assets);
+                    return response($pdf, 200, [
+                        'Content-Type' => 'application/pdf',
+                        'Content-Disposition' => 'inline; filename="qr-labels.pdf"',
+                    ]);
+
                 case 'labels':
                     $this->authorize('view', Asset::class);
 
@@ -194,6 +203,12 @@ class BulkAssetsController extends Controller
                         $this->authorize('delete', $asset);
                     });
                     return view('hardware/bulk-restore')->with('assets', $assets);
+
+                case 'batch-edit':
+                    $this->authorize('update', Asset::class);
+                    return view('hardware/batch-edit')
+                        ->with('assets', $asset_ids)
+                        ->with('statuslabel_list', Helper::statusLabelList());
 
                 case 'edit':
                     $this->authorize('update', Asset::class);
@@ -274,6 +289,7 @@ class BulkAssetsController extends Controller
             || ($request->filled('company_id'))
             || ($request->filled('status_id'))
             || ($request->filled('model_id'))
+            || ($request->filled('category_id'))
             || ($request->filled('next_audit_date'))
             || ($request->filled('asset_eol_date'))
             || ($request->filled('null_name'))
@@ -287,6 +303,8 @@ class BulkAssetsController extends Controller
 
         ) {
             // Let's loop through those assets and build an update array
+            DB::beginTransaction();
+            try {
             foreach ($assets as $asset) {
 
                 $this->update_array = [];
@@ -307,7 +325,8 @@ class BulkAssetsController extends Controller
                     ->conditionallyAddItem('warranty_months')
                     ->conditionallyAddItem('next_audit_date')
                     ->conditionallyAddItem('asset_eol_date')
-                    ->conditionallyAddItem('notes');
+                    ->conditionallyAddItem('notes')
+                    ->conditionallyAddItem('category_id');
                     foreach ($custom_field_columns as $key => $custom_field_column) {
                         $this->conditionallyAddItem($custom_field_column); 
                    }
@@ -540,6 +559,12 @@ class BulkAssetsController extends Controller
             } // end asset foreach
 
             if ($has_errors > 0) {
+                throw new \Exception('Bulk update failed');
+            }
+
+            DB::commit();
+            } catch (\Throwable $e) {
+                DB::rollBack();
                 session()->put('bulkedit_ids', $request->input('ids'));
                 session()->put('bulk_asset_errors',$error_array);
 

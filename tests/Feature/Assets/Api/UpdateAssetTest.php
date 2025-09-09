@@ -46,6 +46,7 @@ class UpdateAssetTest extends TestCase
     public function testAllAssetAttributesAreStored()
     {
         $asset = Asset::factory()->create();
+        $originalTag = $asset->asset_tag;
         $user = User::factory()->editAssets()->create();
         $userAssigned = User::factory()->create();
         $company = Company::factory()->create();
@@ -58,7 +59,7 @@ class UpdateAssetTest extends TestCase
         $response = $this->actingAsForApi($user)
             ->patchJson(route('api.assets.update', $asset->id), [
                 'asset_eol_date' => '2024-06-02',
-                'asset_tag' => 'random_string',
+                'asset_tag' => $originalTag,
                 'assigned_user' => $userAssigned->id,
                 'company_id' => $company->id,
                 'last_audit_date' => '2023-09-03 12:23:45',
@@ -83,7 +84,7 @@ class UpdateAssetTest extends TestCase
         $updatedAsset = Asset::find($response['payload']['id']);
 
         $this->assertEquals('2024-06-02', $updatedAsset->asset_eol_date);
-        $this->assertEquals('random_string', $updatedAsset->asset_tag);
+        $this->assertEquals($originalTag, $updatedAsset->asset_tag);
         $this->assertEquals($userAssigned->id, $updatedAsset->assigned_to);
         $this->assertTrue($updatedAsset->company->is($company));
         $this->assertTrue($updatedAsset->location->is($location));
@@ -103,6 +104,34 @@ class UpdateAssetTest extends TestCase
         $this->assertEquals('2023-09-03 00:00:00', $updatedAsset->last_audit_date);
     }
 
+    public function testNonAdminCannotChangeAssetTag(): void
+    {
+        $asset = Asset::factory()->create();
+        $originalTag = $asset->asset_tag;
+
+        $this->actingAsForApi(User::factory()->editAssets()->create())
+            ->patchJson(route('api.assets.update', $asset->id), [
+                'asset_tag' => 'NEW-TAG',
+            ])
+            ->assertStatus(403);
+
+        $asset->refresh();
+        $this->assertEquals($originalTag, $asset->asset_tag);
+    }
+
+    public function testAdminCanChangeAssetTag(): void
+    {
+        $asset = Asset::factory()->create();
+
+        $this->actingAsForApi(User::factory()->admin()->create())
+            ->patchJson(route('api.assets.update', $asset->id), [
+                'asset_tag' => 'NEW-TAG',
+            ])
+            ->assertOk();
+
+        $this->assertEquals('NEW-TAG', $asset->fresh()->asset_tag);
+    }
+
     public function testUpdatesPeriodAsCommaSeparatorForPurchaseCost()
     {
         $this->settings->set([
@@ -114,7 +143,7 @@ class UpdateAssetTest extends TestCase
 
         $response = $this->actingAsForApi(User::factory()->superuser()->create())
             ->patchJson(route('api.assets.update', $original_asset->id), [
-                'asset_tag' => 'random-string',
+                'asset_tag' => $original_asset->asset_tag,
                 'model_id' => AssetModel::factory()->create()->id,
                 'status_id' => Statuslabel::factory()->create()->id,
                 // API also accepts string for comma separated values
@@ -138,7 +167,7 @@ class UpdateAssetTest extends TestCase
 
         $response = $this->actingAsForApi(User::factory()->superuser()->create())
             ->patchJson(route('api.assets.update', $original_asset->id), [
-                'asset_tag' => 'random-string',
+                'asset_tag' => $original_asset->asset_tag,
                 'model_id' => AssetModel::factory()->create()->id,
                 'status_id' => Statuslabel::factory()->create()->id,
                 // API also accepts string for comma separated values
@@ -162,7 +191,7 @@ class UpdateAssetTest extends TestCase
 
         $response = $this->actingAsForApi(User::factory()->superuser()->create())
             ->patchJson(route('api.assets.update', $original_asset->id), [
-                'asset_tag' => 'random-string',
+                'asset_tag' => $original_asset->asset_tag,
                 'model_id' => AssetModel::factory()->create()->id,
                 'status_id' => Statuslabel::factory()->create()->id,
                 // API also accepts string for comma separated values
@@ -186,7 +215,7 @@ class UpdateAssetTest extends TestCase
 
         $response = $this->actingAsForApi(User::factory()->superuser()->create())
             ->patchJson(route('api.assets.update', $original_asset->id), [
-                'asset_tag' => 'random-string',
+                'asset_tag' => $original_asset->asset_tag,
                 'model_id' => AssetModel::factory()->create()->id,
                 'status_id' => Statuslabel::factory()->create()->id,
                 // API also accepts string for comma separated values

@@ -102,32 +102,34 @@ class AssetsController extends Controller
 
         // There are a lot more rules to add here but prevents
         // errors around `asset_tags` not being present below.
-        $this->validate($request, ['asset_tags' => ['required', 'array']]);
+        $this->validate($request, ['asset_tags' => ['array']]);
 
         // Handle asset tags - there could be one, or potentially many.
         // This is only necessary on create, not update, since bulk editing is handled
         // differently
-        $asset_tags = $request->input('asset_tags');
+        $asset_tags = $request->input('asset_tags', []);
 
         $settings = Setting::getSettings();
 
         $successes = [];
         $failures = [];
-        $serials = $request->input('serials');
+        $serials = $request->input('serials', []);
         $asset = null;
         $qr = app(QrLabelService::class);
 
-        for ($a = 1; $a <= count($asset_tags); $a++) {
+        $count = max(count($asset_tags), count($serials), 1);
+
+        for ($a = 1; $a <= $count; $a++) {
             $asset = new Asset();
             $asset->model()->associate(AssetModel::find($request->input('model_id')));
             $asset->name = $request->input('name');
 
             // Check for a corresponding serial
-            if (($serials) && (array_key_exists($a, $serials))) {
+            if (array_key_exists($a, $serials) && $serials[$a] !== '') {
                 $asset->serial = $serials[$a];
             }
 
-            if (($asset_tags) && (array_key_exists($a, $asset_tags))) {
+            if (array_key_exists($a, $asset_tags) && $asset_tags[$a] !== '') {
                 $asset->asset_tag = $asset_tags[$a];
             }
 
@@ -261,9 +263,9 @@ class AssetsController extends Controller
                         ->with('success-unescaped', trans('admin/hardware/message.create.success_linked', [
                             'link' => route('hardware.show', $asset),
                             'tag' => e($asset->asset_tag),
-                            'print' => $print,
-                            'download' => $download,
-                        ]));
+                        ]))
+                        ->with('qr_pdf', $print)
+                        ->with('qr_png', $download);
                 } else {
                     //multi-success
                     return Helper::getRedirectOption($request, $asset->id, 'Assets')
@@ -410,10 +412,14 @@ class AssetsController extends Controller
         $asset->order_number = $request->input('order_number');
 
         $asset_tags = $request->input('asset_tags');
-        $asset->asset_tag = $request->input('asset_tags');
+        $original_tag = $asset->asset_tag;
 
-        if (is_array($request->input('asset_tags'))) {
-            $asset->asset_tag = $asset_tags[1];
+        if ($request->filled('asset_tags')) {
+            $incoming_tag = is_array($asset_tags) ? $asset_tags[1] : $asset_tags;
+            if (!auth()->user()->isAdmin() && $incoming_tag !== $original_tag) {
+                return redirect()->back()->withErrors(['asset_tag' => trans('admin/hardware/message.tag_immutable')]);
+            }
+            $asset->asset_tag = $incoming_tag;
         }
 
         $asset->notes = $request->input('notes');
