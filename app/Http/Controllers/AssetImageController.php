@@ -18,6 +18,16 @@ class AssetImageController extends Controller
     {
         $this->authorize('update', $asset);
 
+        $user = $request->user();
+        abort_unless(
+            $user->hasAccess('superuser') ||
+            $user->hasAccess('admin') ||
+            $user->hasAccess('supervisor') ||
+            $user->hasAccess('senior-refurbisher') ||
+            $user->hasAccess('refurbisher'),
+            403
+        );
+
         $request->validate([
             'image' => ['required', 'array'],
             'image.*' => ['image', 'mimes:jpeg,jpg,png,gif', 'max:5120'],
@@ -52,6 +62,12 @@ class AssetImageController extends Controller
                     'caption' => $request->input('caption')[$index],
                 ]);
 
+                // If this is the first image for the asset, mark it as the cover image
+                if (! $asset->image) {
+                    $asset->image = Str::after($path, 'assets/');
+                    $asset->save();
+                }
+
                 $paths[] = $path;
 
                 $stored[] = [
@@ -82,6 +98,16 @@ class AssetImageController extends Controller
 
         $this->authorize('update', $asset);
 
+        $user = $request->user();
+        abort_unless(
+            $user->hasAccess('superuser') ||
+            $user->hasAccess('admin') ||
+            $user->hasAccess('supervisor') ||
+            $user->hasAccess('senior-refurbisher') ||
+            $user->hasAccess('refurbisher'),
+            403
+        );
+
         $request->validate([
             'caption' => ['required', 'string'],
         ]);
@@ -91,7 +117,8 @@ class AssetImageController extends Controller
         return back()->with('success', trans('general.image_caption_updated'));
     }
 
-    public function destroy(Asset $asset, AssetImage $assetImage): RedirectResponse
+
+    public function destroy(Request $request, Asset $asset, AssetImage $assetImage): RedirectResponse
     {
         if ($assetImage->asset_id !== $asset->id) {
             abort(404);
@@ -99,8 +126,26 @@ class AssetImageController extends Controller
 
         $this->authorize('update', $asset);
 
+
+        $user = $request->user();
+        abort_unless(
+            $user->hasAccess('superuser') ||
+            $user->hasAccess('admin') ||
+            $user->hasAccess('supervisor') ||
+            $user->hasAccess('senior-refurbisher'),
+            403
+        );
+
+        $relative = Str::after($assetImage->file_path, 'assets/');
+
         Storage::disk('public')->delete($assetImage->file_path);
         $assetImage->delete();
+
+        if ($asset->image === $relative) {
+            $next = $asset->images()->first();
+            $asset->image = $next ? Str::after($next->file_path, 'assets/') : null;
+            $asset->save();
+        }
 
         return back()->with('success', trans('general.image_deleted'));
     }

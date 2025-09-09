@@ -168,6 +168,7 @@ return [
     'caption'               => 'Caption',
     'caption_required'      => 'Please enter a caption for each image.',
     'drag_n_drop_help'      => 'Drag & drop images here or click to browse.',
+    'cover_image_notice'    => 'The first uploaded image will be used as the cover photo.',
     'invalid_image_type'    => 'Only JPG, PNG, or GIF images are allowed.',
     'image_too_large'       => 'Images may not be larger than :size.',
     'no_asset_images'       => 'No images uploaded for this asset.',
