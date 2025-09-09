@@ -263,9 +263,9 @@ class AssetsController extends Controller
                         ->with('success-unescaped', trans('admin/hardware/message.create.success_linked', [
                             'link' => route('hardware.show', $asset),
                             'tag' => e($asset->asset_tag),
-                            'print' => $print,
-                            'download' => $download,
-                        ]));
+                        ]))
+                        ->with('qr_pdf', $print)
+                        ->with('qr_png', $download);
                 } else {
                     //multi-success
                     return Helper::getRedirectOption($request, $asset->id, 'Assets')

@@ -10,6 +10,7 @@ use App\Models\Traits\Acceptable;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
 use App\Models\AssetTest;
+use App\Models\Category;
 use App\Presenters\Presentable;
 use App\Presenters\AssetPresenter;
 use Carbon\Carbon;
@@ -89,6 +90,7 @@ class Asset extends Depreciable
         'next_audit_date' => 'datetime:m-d-Y',
         'model_id'       => 'integer',
         'status_id'      => 'integer',
+        'category_id'    => 'integer',
         'company_id'     => 'integer',
         'location_id'    => 'integer',
         'rtd_company_id' => 'integer',
@@ -101,6 +103,7 @@ class Asset extends Depreciable
     protected $rules = [
         'model_id'          => ['nullable', 'integer', 'exists:models,id,deleted_at,NULL', 'not_array'],
         'status_id'         => ['nullable', 'integer', 'exists:status_labels,id'],
+        'category_id'       => ['nullable', 'integer', 'exists:categories,id'],
         'asset_tag'         => ['nullable', 'min:1', 'max:255', 'unique_undeleted:assets,asset_tag', 'not_array'],
         'name'              => ['nullable', 'max:255'],
         'company_id'        => ['nullable', 'integer', 'exists:companies,id'],
@@ -143,6 +146,7 @@ class Asset extends Depreciable
         'image',
         'location_id',
         'model_id',
+        'category_id',
         'name',
         'notes',
         'order_number',
@@ -834,6 +838,14 @@ class Asset extends Depreciable
     public function model()
     {
         return $this->belongsTo(\App\Models\AssetModel::class, 'model_id')->withTrashed();
+    }
+
+    /**
+     * Category relationship for assets without models.
+     */
+    public function category()
+    {
+        return $this->belongsTo(\App\Models\Category::class, 'category_id');
     }
 
     /**
