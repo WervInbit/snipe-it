@@ -441,14 +441,23 @@
                                 @if ($snipeSettings->qr_code=='1')
                                     @php
                                         $formats = explode(',', $snipeSettings->qr_formats ?? 'png,pdf');
-                                        $qrPng = in_array('png', $formats) ? $qrLabels->url($asset, 'png') : null;
-                                        $qrPdf = in_array('pdf', $formats) ? $qrLabels->url($asset, 'pdf') : null;
+                                        $selectedTemplate = request('template', $snipeSettings->qr_label_template ?? config('qr_templates.default'));
+                                        $qrPng = in_array('png', $formats) ? $qrLabels->url($asset, 'png', $selectedTemplate) : null;
+                                        $qrPdf = in_array('pdf', $formats) ? $qrLabels->url($asset, 'pdf', $selectedTemplate) : null;
+                                        $qrTemplates = config('qr_templates.templates');
                                     @endphp
                                     <div class="col-md-12 text-center" style="padding-top: 15px;">
                                         @if($qrPng)
                                             <img src="{{ $qrPng }}" class="img-thumbnail" style="height: 150px; width: 150px; margin-right: 10px;" alt="QR code for {{ $asset->getDisplayNameAttribute() }}">
                                         @endif
                                         <div class="mt-2">
+                                            <form method="get" class="d-inline-block">
+                                                <select name="template" onchange="this.form.submit()" class="form-control" style="display:inline-block;width:auto;">
+                                                    @foreach($qrTemplates as $key => $tpl)
+                                                        <option value="{{ $key }}" @selected($selectedTemplate === $key)>{{ $tpl['name'] }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </form>
                                             @if($qrPdf)
                                                 <a href="{{ $qrPdf }}" target="_blank" class="btn btn-default"><x-icon type="print" /> Print</a>
                                             @endif

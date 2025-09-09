@@ -14,14 +14,15 @@ class QrLabelService
 {
     protected string $directory = 'labels';
     // Increment to invalidate previously generated image filenames
-    protected string $version = 'v2';
+    protected string $version = 'v3';
 
     /**
      * Generate PNG and PDF labels for an asset.
      */
-    public function generate(Asset $asset): void
+    public function generate(Asset $asset, ?string $template = null): void
     {
         $settings = Setting::getSettings();
+        $template = $template ?? ($settings->qr_label_template ?? config('qr_templates.default'));
         $disk = Storage::disk('public');
         $disk->makeDirectory($this->directory);
 
@@ -33,32 +34,34 @@ class QrLabelService
         $qr = app(QrCodeService::class);
 
         if (in_array('png', $formats)) {
-            $png = $qr->png($data, $label, $logoPath);
-            $disk->put($this->path($asset, 'png'), $png);
+            $png = $qr->png($data, $label, $logoPath, $template);
+            $disk->put($this->path($asset, 'png', $template), $png);
         }
 
         if (in_array('pdf', $formats)) {
-            $pdf = $qr->pdf($data, $label, $logoPath);
-            $disk->put($this->path($asset, 'pdf'), $pdf);
+            $pdf = $qr->pdf($data, $label, $logoPath, $template);
+            $disk->put($this->path($asset, 'pdf', $template), $pdf);
         }
     }
 
     /**
      * Return URL for label in desired format.
      */
-    public function url(Asset $asset, string $format = 'png'): string
+    public function url(Asset $asset, string $format = 'png', ?string $template = null): string
     {
+        $settings = Setting::getSettings();
+        $template = $template ?? ($settings->qr_label_template ?? config('qr_templates.default'));
         $disk = Storage::disk('public');
-        $file = $this->path($asset, $format);
+        $file = $this->path($asset, $format, $template);
         if (! $disk->exists($file)) {
-            $this->generate($asset);
+            $this->generate($asset, $template);
         }
         return $disk->url($file);
     }
 
-    protected function path(Asset $asset, string $format): string
+    protected function path(Asset $asset, string $format, string $template): string
     {
-        return $this->directory.'/qr-'.$this->version.'-'.Str::slug($asset->asset_tag).'.'.$format;
+        return $this->directory.'/qr-'.$this->version.'-'.$template.'-'.Str::slug($asset->asset_tag).'.'.$format;
     }
 
     /**

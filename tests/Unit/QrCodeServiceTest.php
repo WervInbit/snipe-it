@@ -12,8 +12,8 @@ class QrCodeServiceTest extends TestCase
         $service = app(QrCodeService::class);
         $data = 'ASSET-123';
 
-        $png = $service->png($data, $data);
-        $pdf = $service->pdf($data, $data);
+        $png = $service->png($data, $data, null, 'dymo-89x36');
+        $pdf = $service->pdf($data, $data, null, 'dymo-89x36');
 
         $this->assertNotEmpty($png);
         $this->assertNotEmpty($pdf);

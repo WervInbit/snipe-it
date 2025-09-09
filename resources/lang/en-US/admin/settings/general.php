@@ -186,6 +186,7 @@ return [
     'pwd_secure_uncommon_help'  => 'This will disallow users from using common passwords from the top 10,000 passwords reported in breaches.',
     'qr_help'                   => 'Enable QR Codes first to set this',
     'qr_text'                   => 'QR Code Text',
+    'qr_label_template'         => 'QR Label Template',
     'saml'                      => 'SAML',
     'saml_title'                => 'Update SAML settings',
     'saml_help'                 => 'SAML settings',

@@ -16,8 +16,8 @@ class QrLabelServiceTest extends TestCase
         $asset = new Asset(['asset_tag' => 'My Asset Tag']);
         $service = new QrLabelService();
 
-        $this->assertSame('labels/qr-v2-my-asset-tag.png', invade($service)->path($asset, 'png'));
-        $this->assertSame('labels/qr-v2-my-asset-tag.pdf', invade($service)->path($asset, 'pdf'));
+        $this->assertSame('labels/qr-v3-dymo-89x36-my-asset-tag.png', invade($service)->path($asset, 'png', 'dymo-89x36'));
+        $this->assertSame('labels/qr-v3-dymo-89x36-my-asset-tag.pdf', invade($service)->path($asset, 'pdf', 'dymo-89x36'));
     }
 
     public function test_generate_creates_png_and_pdf_labels(): void
@@ -26,10 +26,10 @@ class QrLabelServiceTest extends TestCase
         $asset = Asset::factory()->create();
         $service = app(QrLabelService::class);
 
-        $service->generate($asset);
+        $service->generate($asset, 'dymo-89x36');
 
         $slug = Str::slug($asset->asset_tag);
-        Storage::disk('public')->assertExists("labels/qr-v2-{$slug}.png");
-        Storage::disk('public')->assertExists("labels/qr-v2-{$slug}.pdf");
+        Storage::disk('public')->assertExists("labels/qr-v3-dymo-89x36-{$slug}.png");
+        Storage::disk('public')->assertExists("labels/qr-v3-dymo-89x36-{$slug}.pdf");
     }
 }
