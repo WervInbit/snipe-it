@@ -399,11 +399,25 @@ class LocationsController extends Controller
             $page = $request->input('page');
         }
 
+        if ($request->filled('parent_id')) {
+            $parent = $request->input('parent_id');
+            if ($parent === '0' || $parent === 0) {
+                $locations = $locations->whereNull('locations.parent_id');
+            } else {
+                $locations = $locations->where('locations.parent_id', '=', $parent);
+            }
+        }
+
         if ($request->filled('search')) {
             $locations = $locations->where('locations.name', 'LIKE', '%'.$request->input('search').'%');
         }
 
         $locations = $locations->orderBy('name', 'ASC')->get();
+
+        if ($request->filled('parent_id') || $request->filled('search')) {
+            $paginated_results = new LengthAwarePaginator($locations->forPage($page, 500), $locations->count(), 500, $page, []);
+            return (new SelectlistTransformer)->transformSelectlist($paginated_results);
+        }
 
         $locations_with_children = [];
 
@@ -414,12 +428,8 @@ class LocationsController extends Controller
             $locations_with_children[$location->parent_id][] = $location;
         }
 
-        if ($request->filled('search')) {
-            $locations_formatted = $locations;
-        } else {
-            $location_options = Location::indenter($locations_with_children);
-            $locations_formatted = new Collection($location_options);
-        }
+        $location_options = Location::indenter($locations_with_children);
+        $locations_formatted = new Collection($location_options);
 
         $paginated_results = new LengthAwarePaginator($locations_formatted->forPage($page, 500), $locations_formatted->count(), 500, $page, []);
 
