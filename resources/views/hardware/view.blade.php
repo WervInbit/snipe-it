@@ -1523,9 +1523,11 @@
 
                     <div class="tab-pane fade" id="images">
                         <div class="row">
-                            @foreach ($asset->images as $image)
-                                <div class="col-sm-3 mb-3 text-center">
-                                    <img src="{{ asset('storage/'.$image->file_path) }}" class="img-thumbnail">
+                            @forelse ($asset->images as $image)
+                                <div class="col-6 col-md-3 mb-3 text-center">
+                                    <a href="{{ asset('storage/'.$image->file_path) }}" target="_blank">
+                                        <img src="{{ asset('storage/'.$image->file_path) }}" class="img-fluid img-thumbnail" alt="{{ $image->caption }}">
+                                    </a>
                                     <div class="mt-1">{{ $image->caption }}</div>
                                     @can('update', $asset)
                                         <form method="POST" action="{{ route('asset-images.destroy', [$asset, $image]) }}">
@@ -1535,7 +1537,9 @@
                                         </form>
                                     @endcan
                                 </div>
-                            @endforeach
+                            @empty
+                                <div class="col-12 text-center text-muted">{{ trans('general.no_asset_images') }}</div>
+                            @endforelse
                         </div>
                         @can('update', $asset)
                         @if ($asset->images->count() < 30)

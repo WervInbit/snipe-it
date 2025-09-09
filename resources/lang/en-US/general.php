@@ -168,6 +168,7 @@ return [
     'drag_n_drop_help'      => 'Drag & drop images here or click to browse.',
     'invalid_image_type'    => 'Only JPG, PNG, or GIF images are allowed.',
     'image_too_large'       => 'Images may not be larger than :size.',
+    'no_asset_images'       => 'No images uploaded for this asset.',
     'filetypes_accepted_help'    => 'Accepted filetype is :types. The maximum size allowed is :size.|Accepted filetypes are :types. The maximum upload size allowed is :size.',
     'filetypes_size_help'   => 'The maximum upload size allowed is :size.',
     'image_filetypes_help'  => 'Accepted Filetypes are jpg, webp, png, gif, svg, and avif. The maximum upload size allowed is :size.',
