@@ -61,6 +61,12 @@
             </div>
         @endif
 
+        @if ($asset->tests_completed_ok)
+            <div class="col-md-12">
+                <span class="badge badge-success"><x-icon type="check" /> {{ trans('tests.all_passed') }}</span>
+            </div>
+        @endif
+
         <div class="col-md-12">
             <div class="nav-tabs-custom">
                 <ul class="nav nav-tabs hidden-print">

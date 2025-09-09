@@ -39,6 +39,8 @@ class TestRunController extends Controller
             ]);
         }
 
+        $asset->refreshTestCompletionFlag();
+
         return redirect()->route('test-runs.index', ['asset' => $asset->id])
             ->with('success', trans('general.test_run_created'));
     }
@@ -47,6 +49,7 @@ class TestRunController extends Controller
     {
         $this->authorize('view', $asset);
         $testRun->delete();
+        $asset->refreshTestCompletionFlag();
         return redirect()->route('test-runs.index', $asset->id)
             ->with('success', trans('general.deleted'));
     }

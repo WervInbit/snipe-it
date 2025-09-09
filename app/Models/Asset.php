@@ -101,6 +101,7 @@ class Asset extends Depreciable
         'updated_at'   => 'datetime',
         'deleted_at'  => 'datetime',
         'is_sellable'  => 'boolean',
+        'tests_completed_ok' => 'boolean',
     ];
 
     protected $rules = [
@@ -133,7 +134,8 @@ class Asset extends Depreciable
         'assigned_user'     => ['integer', 'nullable', 'exists:users,id,deleted_at,NULL'],
         'assigned_location' => ['integer', 'nullable', 'exists:locations,id,deleted_at,NULL', 'fmcs_location'],
         'assigned_asset'    => ['integer', 'nullable', 'exists:assets,id,deleted_at,NULL'],
-        'is_sellable'       => ['nullable', 'boolean']
+        'is_sellable'       => ['nullable', 'boolean'],
+        'tests_completed_ok' => ['nullable', 'boolean']
     ];
 
 
@@ -957,6 +959,20 @@ class Asset extends Depreciable
         }
 
         return $latestRun->results->pluck('type.name');
+    }
+
+    /**
+     * Recalculate the "all tests passed" flag based on the latest run.
+     */
+    public function refreshTestCompletionFlag(): void
+    {
+        $latestRun = $this->testRuns()->with('results')->first();
+
+        $this->tests_completed_ok = $latestRun
+            ? $latestRun->results->where('status', TestResult::STATUS_FAIL)->isEmpty()
+            : false;
+
+        $this->save();
     }
 
     /**
