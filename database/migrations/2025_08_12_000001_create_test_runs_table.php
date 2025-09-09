@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::create('test_runs', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('asset_id');
-            $table->unsignedInteger('user_id');
+            $table->unsignedInteger('user_id')->nullable();
             $table->timestamp('started_at')->nullable();
             $table->timestamp('finished_at')->nullable();
             $table->timestamps();

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api;
+use App\Http\Controllers\AgentTestController;
 use App\Http\Controllers\AssetTestController;
 use Illuminate\Support\Facades\Route;
 
@@ -623,6 +624,11 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         Route::put('hardware/{asset}/asset-tests/{assetTest}', [AssetTestController::class, 'update'])->name('api.asset-tests.update');
         Route::delete('hardware/{asset}/asset-tests/{assetTest}', [AssetTestController::class, 'destroy'])->name('api.asset-tests.destroy');
         Route::post('hardware/{asset}/asset-tests/{assetTest}/repeat', [AssetTestController::class, 'repeat'])->name('api.asset-tests.repeat');
+
+        // Agent-provided test results
+        Route::post('agent/test-results', [AgentTestController::class, 'store'])
+            ->withoutMiddleware('auth:api')
+            ->name('api.agent.test-results.store');
 
 
       /**
