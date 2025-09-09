@@ -1476,12 +1476,10 @@
                                                     @endforeach
                                                 </ul>
                                                 <div class="mt-2">
-                                                    @can('tests.execute')
-                                                        @if (is_null($run->finished_at))
-                                                            <a href="{{ route('test-results.edit', [$asset->id, $run->id]) }}" class="btn btn-default btn-sm">{{ trans('button.edit') }}</a>
-                                                        @endif
+                                                    @can('update', $run)
+                                                        <a href="{{ route('test-results.edit', [$asset->id, $run->id]) }}" class="btn btn-default btn-sm">{{ trans('button.edit') }}</a>
                                                     @endcan
-                                                    @can('tests.delete')
+                                                    @can('delete', $run)
                                                         <form method="POST" action="{{ route('test-runs.destroy', [$asset->id, $run->id]) }}" style="display:inline">
                                                             @csrf
                                                             @method('DELETE')

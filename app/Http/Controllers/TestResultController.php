@@ -14,14 +14,16 @@ class TestResultController extends Controller
     
     public function edit(Asset $asset, TestRun $testRun)
     {
-        $this->authorize('update', $asset);
+        $this->authorize('update', $testRun);
+        abort_unless($testRun->asset_id === $asset->id, 404);
         $testRun->load('results.type');
         return view('tests.edit', compact('asset', 'testRun'));
     }
 
     public function update(Request $request, Asset $asset, TestRun $testRun)
     {
-        $this->authorize('update', $asset);
+        $this->authorize('update', $testRun);
+        abort_unless($testRun->asset_id === $asset->id, 404);
         foreach ($testRun->results as $result) {
             $status = $request->input('status.' . $result->id);
             if (in_array($status, TestResult::STATUSES, true)) {
@@ -44,10 +46,8 @@ class TestResultController extends Controller
             $result->save();
         }
 
-        if (!$testRun->finished_at) {
-            $testRun->finished_at = now();
-            $testRun->save();
-        }
+        $testRun->finished_at = now();
+        $testRun->save();
 
         $asset->refreshTestCompletionFlag();
 

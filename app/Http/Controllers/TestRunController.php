@@ -49,7 +49,8 @@ class TestRunController extends Controller
 
     public function destroy(Asset $asset, TestRun $testRun)
     {
-        $this->authorize('view', $asset);
+        $this->authorize('delete', $testRun);
+        abort_unless($testRun->asset_id === $asset->id, 404);
         $testRun->delete();
         $asset->refreshTestCompletionFlag();
         return redirect()->route('test-runs.index', $asset->id)

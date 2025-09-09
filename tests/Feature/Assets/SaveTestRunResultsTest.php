@@ -15,8 +15,11 @@ class SaveTestRunResultsTest extends TestCase
     {
         $asset = Asset::factory()->create();
         $type = TestType::factory()->create();
-        $user = User::factory()->superuser()->create();
-        $run = TestRun::factory()->for($asset)->for($user)->create();
+        $user = User::factory()->refurbisher()->create();
+        $run = TestRun::factory()->for($asset)->for($user)->create([
+            'finished_at' => now()->subDay(),
+        ]);
+        $oldFinished = $run->finished_at;
         $result = TestResult::factory()->for($run)->for($type, 'type')
             ->create(['status' => TestResult::STATUS_NVT]);
 
@@ -32,7 +35,7 @@ class SaveTestRunResultsTest extends TestCase
         $response->assertSessionHas('success');
 
         $run->refresh();
-        $this->assertNotNull($run->finished_at);
+        $this->assertTrue($run->finished_at->gt($oldFinished));
 
         $result->refresh();
         $this->assertEquals(TestResult::STATUS_PASS, $result->status);

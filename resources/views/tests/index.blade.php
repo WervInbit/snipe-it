@@ -44,10 +44,10 @@
                     </ul>
                 </td>
                     <td>
-                        @can('tests.execute')
+                        @can('update', $run)
                             <a href="{{ route('test-results.edit', [$asset->id, $run->id]) }}" class="btn btn-default btn-sm">{{ trans('button.edit') }}</a>
                         @endcan
-                        @can('tests.delete')
+                        @can('delete', $run)
                             <form method="POST" action="{{ route('test-runs.destroy', [$asset->id, $run->id]) }}" style="display:inline">
                                 @csrf
                                 @method('DELETE')
