@@ -5,7 +5,8 @@ return [
     'undeployable' 		 => 'The following assets cannot be deployed and have been removed from checkout: :asset_tags',
     'does_not_exist' 	 => 'Asset does not exist.',
     'does_not_exist_var' => 'Asset with tag :asset_tag not found.',
-    'no_tag' 	         => 'No asset tag provided.',
+    'no_tag'             => 'No asset tag provided.',
+    'tag_immutable'      => 'Asset tag cannot be changed once set.',
     'does_not_exist_or_not_requestable' => 'That asset does not exist or is not requestable.',
     'assoc_users'	 	 => 'This asset is currently checked out to a user and cannot be deleted. Please check the asset in first, and then try deleting again. ',
     'warning_audit_date_mismatch' 	=> 'This asset\'s next audit date (:next_audit_date) is before the last audit date (:last_audit_date). Please update the next audit date.',
@@ -16,7 +17,7 @@ return [
     'create' => [
         'error'   		=> 'Asset was not created, please try again. :(',
         'success' 		=> 'Asset created successfully. :)',
-        'success_linked' => 'Asset with tag :tag was created successfully. <strong><a href=":link" style="color: white;">Click here to view</a></strong>. <a href=":print" style="color: white;" target="_blank">Print</a> | <a href=":download" style="color: white;" download>Download</a>.',
+        'success_linked' => 'Asset with tag :tag was created successfully. <strong><a href=":link" style="color: white;">Click here to view</a></strong>.',
         'multi_success_linked' => 'Asset with tag :links was created successfully.|:count assets were created succesfully. :links.',
         'partial_failure' => 'An asset was unable to be created. Reason: :failures|:count assets were unable to be created. Reasons: :failures',
         'target_not_found' => [

@@ -37,7 +37,7 @@ class StoreAssetRequest extends ImageUploadRequest
         $this->parseLastAuditDate();
 
         $this->merge([
-            'asset_tag' => $this->asset_tag ?? Asset::autoincrement_asset(),
+            'asset_tag' => $this->asset_tag,
             'company_id' => $idForCurrentUser,
         ]);
     }

@@ -21,6 +21,7 @@ return [
     'requestable'               => 'Requestable',
     'requested'				    => 'Requested',
     'not_requestable'           => 'Not Requestable',
+    'block_from_sale'           => 'Block from Webshop/Sale',
     'requestable_status_warning' => 'Do not change requestable status',
     'restore'  					=> 'Restore Asset',
     'pending'  					=> 'Pending',

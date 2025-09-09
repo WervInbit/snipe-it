@@ -778,7 +778,8 @@ class SettingsController extends Controller
         return view('settings.labels')
             ->with('setting', Setting::getSettings())
             ->with('is_gd_installed', $is_gd_installed)
-            ->with('customFields', CustomField::where('field_encrypted', '=', 0)->get());
+            ->with('customFields', CustomField::where('field_encrypted', '=', 0)->get())
+            ->with('qrTemplates', config('qr_templates.templates'));
     }
 
     /**
@@ -823,6 +824,7 @@ class SettingsController extends Controller
         $setting->alt_barcode_enabled = $request->input('alt_barcode_enabled', '0');
         //QR-Code
         $setting->qr_text = $request->input('qr_text');
+        $setting->qr_label_template = $request->input('qr_label_template', config('qr_templates.default'));
 
         if ($request->filled('labels_display_name')) {
             $setting->labels_display_name = 1;
