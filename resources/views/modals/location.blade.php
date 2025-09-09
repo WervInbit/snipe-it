@@ -30,6 +30,11 @@
                 </div>
 
                 <div class="dynamic-form-row">
+                    <div class="col-md-4 col-xs-12"><label>{{ trans('admin/locations/table.type') }}:</label></div>
+                    <div class="col-md-8 col-xs-12"><input type="text" id="modal-location-type" class="form-control" value="{{ trans('admin/locations/table.warehouse') }}" readonly></div>
+                </div>
+
+                <div class="dynamic-form-row">
                     <div class="col-md-4 col-xs-12"><label for="modal-city">{{ trans('general.city') }}:</label></div>
                     <div class="col-md-8 col-xs-12"><input type='text' name="city" id='modal-city' class="form-control"></div>
                 </div>
@@ -43,3 +48,19 @@
         @include('modals.partials.footer')
     </div><!-- /.modal-content -->
 </div><!-- /.modal-dialog -->
+<script>
+    function updateModalLocationType(parentId) {
+        if (!parentId) {
+            $('#modal-location-type').val('{{ trans('admin/locations/table.warehouse') }}');
+            return;
+        }
+        $.getJSON('/api/locations/' + parentId, function(resp) {
+            var type = resp.data?.location_type || 'warehouse';
+            var nextType = type === 'warehouse' ? '{{ trans('admin/locations/table.shelf') }}' : '{{ trans('admin/locations/table.bin') }}';
+            $('#modal-location-type').val(nextType);
+        });
+    }
+    $('#modal-parent_id').on('change', function() {
+        updateModalLocationType($(this).val());
+    });
+</script>

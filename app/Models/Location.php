@@ -40,12 +40,14 @@ class Location extends SnipeModel
         'manager_id'    => 'exists:users,id|nullable',
         'parent_id'     => 'nullable|exists:locations,id|non_circular:locations,id',
         'company_id'    => 'integer|nullable|exists:companies,id',
+        'location_type' => 'in:warehouse,shelf,bin',
     ];
 
     protected $casts = [
         'parent_id'     => 'integer',
         'manager_id'    => 'integer',
         'company_id'    => 'integer',
+        'location_type' => 'string',
     ];
 
     /**
@@ -81,6 +83,7 @@ class Location extends SnipeModel
         'image',
         'company_id',
         'notes',
+        'location_type',
     ];
     protected $hidden = ['user_id'];
 
@@ -102,6 +105,13 @@ class Location extends SnipeModel
       'parent'  => ['name'],
       'company' => ['name']
     ];
+
+    protected static function booted()
+    {
+        static::saving(function (Location $location) {
+            $location->location_type = self::determineType($location->parent_id);
+        });
+    }
 
 
     /**
@@ -251,6 +261,20 @@ class Location extends SnipeModel
 
         $parent = self::with('parent.parent')->find($parentId);
         return $parent && $parent->parent && $parent->parent->parent;
+    }
+
+    public static function determineType($parentId): string
+    {
+        if (! $parentId) {
+            return 'warehouse';
+        }
+
+        $parent = self::select('location_type', 'parent_id')->find($parentId);
+        if (! $parent) {
+            return 'warehouse';
+        }
+
+        return $parent->location_type === 'warehouse' ? 'shelf' : 'bin';
     }
 
     /**

@@ -47,6 +47,7 @@ class LocationsTransformer
                 'zip' => ($location->zip) ? e($location->zip) : null,
                 'phone' => ($location->phone!='') ? e($location->phone): null,
                 'fax' => ($location->fax!='') ? e($location->fax): null,
+                'location_type' => trans('admin/locations/table.' . $location->location_type),
                 'accessories_count' => (int) $location->accessories_count,
                 'assigned_accessories_count' => (int) $location->assigned_accessories_count,
                 'assigned_assets_count' => (int) $location->assigned_assets_count,
