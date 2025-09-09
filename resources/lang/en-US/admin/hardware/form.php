@@ -24,6 +24,8 @@ return [
     'depreciates_on'	=> 'Depreciates On',
     'default_location'	=> 'Default Location',
     'default_location_phone' => 'Default Location Phone',
+    'use_custom_location' => 'Use custom location',
+    'location_note' => 'Alternate Location Description',
     'eol_date'			=> 'EOL Date',
     'eol_rate'			=> 'EOL Rate',
     'expected_checkin'  => 'Expected Checkin Date',

@@ -95,6 +95,42 @@
 
     @include ('partials.forms.edit.notes')
     @include ('partials.forms.edit.location-cascade-select', ['translated_name' => trans('admin/hardware/form.default_location'), 'fieldname' => 'rtd_location_id', 'help_text' => trans('general.rtd_location_help')])
+    <div class="form-group">
+        <div class="col-md-7 col-md-offset-3">
+            <label class="form-control">
+                <input type="checkbox" value="1" name="use_custom_location" id="use_custom_location" {{ old('use_custom_location', $item->location_note ? 1 : 0) ? 'checked="checked"' : '' }} aria-label="use_custom_location">
+                {{ trans('admin/hardware/form.use_custom_location') }}
+            </label>
+        </div>
+    </div>
+    <div id="location_note_group" class="form-group{{ $errors->has('location_note') ? ' has-error' : '' }}">
+        <label for="location_note" class="col-md-3 control-label">{{ trans('admin/hardware/form.location_note') }}</label>
+        <div class="col-md-7 col-sm-12">
+            <textarea class="form-control" name="location_note" id="location_note" {{ old('use_custom_location', $item->location_note ? 1 : 0) ? '' : 'disabled="disabled"' }}>{{ old('location_note', $item->location_note) }}</textarea>
+            {!! $errors->first('location_note', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+        </div>
+    </div>
+    <script nonce="{{ csrf_token() }}">
+        document.addEventListener('DOMContentLoaded', function () {
+            const customCheck = document.getElementById('use_custom_location');
+            const cascadeDiv = document.getElementById('rtd_location_id');
+            const hiddenLoc = document.getElementById('rtd_location_id_id');
+            const noteField = document.getElementById('location_note');
+            function toggleCustom() {
+                if (customCheck.checked) {
+                    cascadeDiv.style.display = 'none';
+                    hiddenLoc.disabled = true;
+                    noteField.removeAttribute('disabled');
+                } else {
+                    cascadeDiv.style.display = '';
+                    hiddenLoc.disabled = false;
+                    noteField.setAttribute('disabled', 'disabled');
+                }
+            }
+            customCheck.addEventListener('change', toggleCustom);
+            toggleCustom();
+        });
+    </script>
     @include ('partials.forms.edit.requestable', ['requestable_text' => trans('admin/hardware/general.requestable')])
 
 
