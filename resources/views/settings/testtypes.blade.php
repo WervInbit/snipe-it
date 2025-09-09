@@ -15,6 +15,7 @@
                         <tr>
                             <th>{{ trans('general.name') }}</th>
                             <th>Slug</th>
+                            <th>{{ trans('general.category') }}</th>
                             <th>{{ trans('admin/testtypes/general.tooltip') }}</th>
                             <th>{{ trans('button.actions') }}</th>
                         </tr>
@@ -24,6 +25,7 @@
                             <tr>
                                 <td>{{ $type->name }}</td>
                                 <td>{{ $type->slug }}</td>
+                                <td>{{ $type->category }}</td>
                                 <td>
                                     <form method="POST" action="{{ route('settings.testtypes.update', $type) }}" class="form-inline">
                                         @csrf

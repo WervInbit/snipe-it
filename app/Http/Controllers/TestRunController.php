@@ -34,7 +34,7 @@ class TestRunController extends Controller
         $run->started_at = now();
         $run->save();
 
-        foreach (TestType::pluck('id') as $typeId) {
+        foreach (TestType::forAsset($asset)->pluck('id') as $typeId) {
             $run->results()->create([
                 'test_type_id' => $typeId,
                 'status' => TestResult::STATUS_NVT,
