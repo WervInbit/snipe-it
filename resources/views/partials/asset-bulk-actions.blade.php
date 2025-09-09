@@ -25,6 +25,7 @@
 
             @can('update', \App\Models\Asset::class)
                 <option value="edit">{{ trans('button.edit') }}</option>
+                <option value="batch-edit">{{ trans('general.batch_edit') }}</option>
                 <option value="maintenance">{{ trans('button.add_maintenance') }}</option>
             @endcan
 
@@ -39,6 +40,7 @@
             @endcan
 
             <option value="labels" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=l" : ''}}>{{ trans_choice('button.generate_labels', 2) }}</option>
+            <option value="qr">{{ trans('general.generate_qrs') }}</option>
         @endif
     </select>
 

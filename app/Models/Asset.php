@@ -10,6 +10,7 @@ use App\Models\Traits\Acceptable;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
 use App\Models\AssetTest;
+use App\Models\Category;
 use App\Presenters\Presentable;
 use App\Presenters\AssetPresenter;
 use Carbon\Carbon;
@@ -89,6 +90,7 @@ class Asset extends Depreciable
         'next_audit_date' => 'datetime:m-d-Y',
         'model_id'       => 'integer',
         'status_id'      => 'integer',
+        'category_id'    => 'integer',
         'company_id'     => 'integer',
         'location_id'    => 'integer',
         'rtd_company_id' => 'integer',
@@ -96,12 +98,14 @@ class Asset extends Depreciable
         'created_at'     => 'datetime',
         'updated_at'   => 'datetime',
         'deleted_at'  => 'datetime',
+        'is_sellable'  => 'boolean',
     ];
 
     protected $rules = [
-        'model_id'          => ['required', 'integer', 'exists:models,id,deleted_at,NULL', 'not_array'],
-        'status_id'         => ['required', 'integer', 'exists:status_labels,id'],
-        'asset_tag'         => ['required', 'min:1', 'max:255', 'unique_undeleted:assets,asset_tag', 'not_array'],
+        'model_id'          => ['nullable', 'integer', 'exists:models,id,deleted_at,NULL', 'not_array'],
+        'status_id'         => ['nullable', 'integer', 'exists:status_labels,id'],
+        'category_id'       => ['nullable', 'integer', 'exists:categories,id'],
+        'asset_tag'         => ['nullable', 'min:1', 'max:255', 'unique_undeleted:assets,asset_tag', 'not_array'],
         'name'              => ['nullable', 'max:255'],
         'company_id'        => ['nullable', 'integer', 'exists:companies,id'],
         'warranty_months'   => ['nullable', 'numeric', 'digits_between:0,240'],
@@ -126,7 +130,8 @@ class Asset extends Depreciable
         'requestable'       => ['nullable', 'boolean'],
         'assigned_user'     => ['integer', 'nullable', 'exists:users,id,deleted_at,NULL'],
         'assigned_location' => ['integer', 'nullable', 'exists:locations,id,deleted_at,NULL', 'fmcs_location'],
-        'assigned_asset'    => ['integer', 'nullable', 'exists:assets,id,deleted_at,NULL']
+        'assigned_asset'    => ['integer', 'nullable', 'exists:assets,id,deleted_at,NULL'],
+        'is_sellable'       => ['nullable', 'boolean']
     ];
 
 
@@ -143,6 +148,7 @@ class Asset extends Depreciable
         'image',
         'location_id',
         'model_id',
+        'category_id',
         'name',
         'notes',
         'order_number',
@@ -154,6 +160,7 @@ class Asset extends Depreciable
         'supplier_id',
         'warranty_months',
         'requestable',
+        'is_sellable',
         'last_checkout',
         'expected_checkin',
         'byod',
@@ -837,6 +844,14 @@ class Asset extends Depreciable
     }
 
     /**
+     * Category relationship for assets without models.
+     */
+    public function category()
+    {
+        return $this->belongsTo(\App\Models\Category::class, 'category_id');
+    }
+
+    /**
      * Return the assets with a warranty expiring within x days
      *
      * @param  $days
@@ -948,6 +963,25 @@ class Asset extends Depreciable
         } else {
             return false;
         }
+    }
+
+    /**
+     * Generate a unique asset tag when one is not supplied.
+     *
+     * Uses the traditional auto-increment settings when enabled, otherwise
+     * falls back to a sequential `ASSET-0001` style tag.
+     *
+     * @since [v5.1]
+     */
+    public static function generateTag(): string
+    {
+        if ($tag = self::autoincrement_asset()) {
+            return $tag;
+        }
+
+        $settings = \App\Models\Setting::getSettings();
+
+        return 'ASSET-' . self::zerofill($settings->next_auto_tag_base, 4);
     }
 
 

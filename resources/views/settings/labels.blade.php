@@ -287,6 +287,21 @@
                                           </select>
                                       </div>
                                   </div>
+
+                                  <!-- QR Label Template -->
+                                  <div class="form-group">
+                                      <div class="col-md-3 text-right">
+                                          <label for="qr_label_template" class="control-label">{{ trans('admin/settings/general.qr_label_template') }}</label>
+                                      </div>
+                                      <div class="col-md-7">
+                                          @php($selectedTemplate = old('qr_label_template', $setting->qr_label_template ?? config('qr_templates.default')))
+                                          <select name="qr_label_template" id="qr_label_template" class="form-control">
+                                              @foreach($qrTemplates as $key => $tpl)
+                                                  <option value="{{ $key }}" @selected($selectedTemplate == $key)>{{ $tpl['name'] }}</option>
+                                              @endforeach
+                                          </select>
+                                      </div>
+                                  </div>
                                     <div class="col-md-7">
                                         @if ($setting->qr_code == 1)
                                             <input
