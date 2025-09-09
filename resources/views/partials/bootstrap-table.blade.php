@@ -635,6 +635,7 @@
         'maintenances',
         'manufacturers',
         'models',
+        'skus',
         'statuslabels',
         'suppliers',
         'users',

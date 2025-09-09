@@ -740,6 +740,14 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                         </li>
                                     @endcan
 
+                                    @can('view', \App\Models\Sku::class)
+                                        <li {!! (request()->is('skus*') ? ' class="active"' : '') !!}>
+                                            <a href="{{ route('skus.index') }}">
+                                                {{ trans('general.skus') }}
+                                            </a>
+                                        </li>
+                                    @endcan
+
                                     @can('view', \App\Models\Category::class)
                                         <li {{!! (request()->is('categories') ? ' class="active"' : '') !!}}>
                                             <a href="{{ route('categories.index') }}">
