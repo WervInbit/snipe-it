@@ -1524,19 +1524,10 @@
                     <div class="tab-pane fade" id="images">
                         @php
                             $user = auth()->user();
-                            $canManageImages = $user && $user->can('update', $asset) && (
-                                $user->hasAccess('superuser') ||
-                                $user->hasAccess('admin') ||
-                                $user->hasAccess('supervisor') ||
-                                $user->hasAccess('senior-refurbisher') ||
-                                $user->hasAccess('refurbisher')
-                            );
-                            $canDeleteImages = $user && $user->can('update', $asset) && (
-                                $user->hasAccess('superuser') ||
-                                $user->hasAccess('admin') ||
-                                $user->hasAccess('supervisor') ||
-                                $user->hasAccess('senior-refurbisher')
-                            );
+                            $uploadRoles = ['superuser', 'admin', 'supervisor', 'senior-refurbisher', 'refurbisher'];
+                            $deleteRoles = ['superuser', 'admin', 'supervisor', 'senior-refurbisher'];
+                            $canManageImages = $user && $user->can('update', $asset) && collect($uploadRoles)->contains(fn($role) => $user->hasAccess($role));
+                            $canDeleteImages = $user && $user->can('update', $asset) && collect($deleteRoles)->contains(fn($role) => $user->hasAccess($role));
                         @endphp
                         <div class="row">
                             <div class="col-12 text-muted small mb-2">{{ trans('general.cover_image_notice') }}</div>

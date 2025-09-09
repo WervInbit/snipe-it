@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Asset;
 use App\Models\AssetImage;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,19 +15,35 @@ use Illuminate\Validation\ValidationException;
 
 class AssetImageController extends Controller
 {
+    /**
+     * Determine if the given user is allowed to upload images.
+     */
+    private function canUpload(User $user): bool
+    {
+        return $user->hasAccess('superuser') ||
+            $user->hasAccess('admin') ||
+            $user->hasAccess('supervisor') ||
+            $user->hasAccess('senior-refurbisher') ||
+            $user->hasAccess('refurbisher');
+    }
+
+    /**
+     * Determine if the given user is allowed to delete images.
+     */
+    private function canDelete(User $user): bool
+    {
+        return $user->hasAccess('superuser') ||
+            $user->hasAccess('admin') ||
+            $user->hasAccess('supervisor') ||
+            $user->hasAccess('senior-refurbisher');
+    }
+
     public function store(Request $request, Asset $asset): JsonResponse
     {
         $this->authorize('update', $asset);
 
         $user = $request->user();
-        abort_unless(
-            $user->hasAccess('superuser') ||
-            $user->hasAccess('admin') ||
-            $user->hasAccess('supervisor') ||
-            $user->hasAccess('senior-refurbisher') ||
-            $user->hasAccess('refurbisher'),
-            403
-        );
+        abort_unless($this->canUpload($user), 403);
 
         $request->validate([
             'image' => ['required', 'array'],
@@ -99,14 +116,7 @@ class AssetImageController extends Controller
         $this->authorize('update', $asset);
 
         $user = $request->user();
-        abort_unless(
-            $user->hasAccess('superuser') ||
-            $user->hasAccess('admin') ||
-            $user->hasAccess('supervisor') ||
-            $user->hasAccess('senior-refurbisher') ||
-            $user->hasAccess('refurbisher'),
-            403
-        );
+        abort_unless($this->canUpload($user), 403);
 
         $request->validate([
             'caption' => ['required', 'string'],
@@ -128,13 +138,7 @@ class AssetImageController extends Controller
 
 
         $user = $request->user();
-        abort_unless(
-            $user->hasAccess('superuser') ||
-            $user->hasAccess('admin') ||
-            $user->hasAccess('supervisor') ||
-            $user->hasAccess('senior-refurbisher'),
-            403
-        );
+        abort_unless($this->canDelete($user), 403);
 
         $relative = Str::after($assetImage->file_path, 'assets/');
 
