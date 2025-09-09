@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Asset;
+use Illuminate\Support\Str;
 
 /**
  * Defines a kind of diagnostic test that can be executed.
@@ -36,14 +37,23 @@ class TestType extends SnipeModel
     }
 
     /**
-     * Scope test types for the provided asset.
+     * Scope test types for the provided asset, deriving category via SKU.
      *
-     * This acts as an extension point for future SKU or model-based filtering.
-     * For now it simply returns all test types so every device gets the full set
-     * and technicians can mark not-applicable tests as needed.
+     * Future enhancements may map tests directly to a SKU. For now, the
+     * asset's SKU (or model) determines its category and filters available
+     * tests accordingly.
      */
     public function scopeForAsset(Builder $query, Asset $asset): Builder
     {
-        return $query;
+        $categoryName = $asset->sku?->model?->category?->name
+            ?? $asset->model?->category?->name;
+
+        $slug = Str::singular(Str::slug((string) $categoryName));
+
+        if (in_array($slug, ['laptop', 'desktop'])) {
+            return $query->where('category', 'computer');
+        }
+
+        return $query->whereRaw('0 = 1');
     }
 }

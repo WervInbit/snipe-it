@@ -9,6 +9,7 @@ use App\Models\CustomField;
 use App\Models\Location;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
+use App\Models\Sku;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -75,6 +76,9 @@ class AssetFactory extends Factory
                     return AssetModel::where('name', 'Macbook Pro 13"')->first() ?? AssetModel::factory()->mbp13Model();
                 },
             ];
+        })->afterMaking(function (Asset $asset) {
+            $modelId = $asset->model_id instanceof AssetModel ? $asset->model_id->id : $asset->model_id;
+            $asset->sku_id = Sku::factory()->create(['model_id' => $modelId])->id;
         });
     }
 

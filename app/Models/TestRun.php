@@ -24,6 +24,7 @@ class TestRun extends SnipeModel
 
     protected $fillable = [
         'asset_id',
+        'sku_id',
         'user_id',
         'started_at',
         'finished_at',
@@ -31,6 +32,7 @@ class TestRun extends SnipeModel
 
     protected array $auditFields = [
         'asset_id',
+        'sku_id',
         'user_id',
         'started_at',
         'finished_at',
@@ -55,6 +57,14 @@ class TestRun extends SnipeModel
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * SKU associated with the asset at the time of the run.
+     */
+    public function sku(): BelongsTo
+    {
+        return $this->belongsTo(Sku::class);
     }
 
     /**

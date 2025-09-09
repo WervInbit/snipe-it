@@ -4,7 +4,10 @@ namespace App\Http\Requests;
 
 use App\Http\Requests\Traits\MayContainCustomFields;
 use App\Models\Asset;
+use App\Models\AssetModel;
+use App\Models\Category;
 use App\Models\Setting;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
@@ -41,6 +44,27 @@ class UpdateAssetRequest extends ImageUploadRequest
                 ],
             ],
         );
+
+        $categoryId = $this->input('category_id');
+
+        if (!$categoryId) {
+            if ($this->input('model_id')) {
+                $model = AssetModel::find((int) $this->input('model_id'));
+                $categoryId = $model->category_id ?? null;
+            } elseif ($this->asset && $this->asset->model) {
+                $categoryId = $this->asset->model->category_id;
+            }
+        }
+
+        if ($categoryId) {
+            $category = Category::find($categoryId);
+            if ($category && in_array(Str::singular(Str::slug($category->name)), ['laptop', 'desktop'])) {
+                $rules['sku_id'] = ['integer', 'exists:skus,id'];
+                if (!$this->asset || !$this->asset->sku_id || $this->has('sku_id')) {
+                    $rules['sku_id'][] = 'required';
+                }
+            }
+        }
 
         // if the purchase cost is passed in as a string **and** the digit_separator is ',' (as is common in the EU)
         // then we tweak the purchase_cost rule to make it a string

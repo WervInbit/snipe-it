@@ -4,8 +4,11 @@ namespace App\Http\Requests;
 
 use App\Http\Requests\Traits\MayContainCustomFields;
 use App\Models\Asset;
+use App\Models\AssetModel;
+use App\Models\Category;
 use App\Models\Company;
 use App\Models\Setting;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Support\Facades\Gate;
@@ -50,6 +53,20 @@ class StoreAssetRequest extends ImageUploadRequest
     public function rules(): array
     {
         $modelRules = (new Asset)->getRules();
+
+        $categoryId = $this->input('category_id');
+
+        if (!$categoryId && $this->input('model_id')) {
+            $model = AssetModel::find((int) $this->input('model_id'));
+            $categoryId = $model->category_id ?? null;
+        }
+
+        if ($categoryId) {
+            $category = Category::find($categoryId);
+            if ($category && in_array(Str::singular(Str::slug($category->name)), ['laptop', 'desktop'])) {
+                $modelRules['sku_id'] = ['required', 'integer', 'exists:skus,id'];
+            }
+        }
 
         if (Setting::getSettings()->digit_separator === '1.234,56' && is_string($this->input('purchase_cost'))) {
             // If purchase_cost was submitted as a string with a comma separator
