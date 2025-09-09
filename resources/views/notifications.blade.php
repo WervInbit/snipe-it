@@ -48,6 +48,28 @@
     @include ('partials.confetti-js')
 @endif
 
+@php($qrPdf = session()->get('qr_pdf'))
+@php($qrPng = session()->get('qr_png'))
+@if ($qrPdf || $qrPng)
+    <div class="col-md-12" id="qr-notification">
+        <div class="alert alert-info fade in">
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                    {{ trans('general.print_qr') }} <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    @if ($qrPdf)
+                        <li><a href="{{ $qrPdf }}" target="_blank">{{ trans('general.print_pdf') }}</a></li>
+                    @endif
+                    @if ($qrPng)
+                        <li><a href="{{ $qrPng }}" download>{{ trans('general.download_png') }}</a></li>
+                    @endif
+                </ul>
+            </div>
+        </div>
+    </div>
+@endif
+
 
 @if ($assets = session()->get('assets'))
     @foreach ($assets as $asset)

@@ -11,6 +11,13 @@
 
 @inject('qrLabels', 'App\\Services\\QrLabelService')
 
+@php
+    $qrFormats = explode(',', $snipeSettings->qr_formats ?? 'png,pdf');
+    $selectedTemplate = request('template', $snipeSettings->qr_label_template ?? config('qr_templates.default'));
+    $qrTemplates = config('qr_templates.templates');
+    $qrPng = in_array('png', $qrFormats) ? $qrLabels->url($asset, 'png', $selectedTemplate) : null;
+    $qrPdf = in_array('pdf', $qrFormats) ? $qrLabels->url($asset, 'pdf', $selectedTemplate) : null;
+@endphp
 
     <div class="row">
 
@@ -247,17 +254,35 @@
                                 @if ($asset->deleted_at=='')
                                     @can('update', $asset)
                                         <div class="col-md-12 hidden-print" style="padding-top: 5px;">
-                                            <a href="{{ route('hardware.edit', $asset) }}" class="btn btn-sm btn-warning btn-social btn-block hidden-print">
-                                                <x-icon type="edit" />
-                                                {{ trans('admin/hardware/general.edit') }}
-                                            </a>
-                                        </div>
-                                    @endcan
+                                    <a href="{{ route('hardware.edit', $asset) }}" class="btn btn-sm btn-warning btn-social btn-block hidden-print">
+                                        <x-icon type="edit" />
+                                        {{ trans('admin/hardware/general.edit') }}
+                                    </a>
+                                </div>
+                            @endcan
+
+                            @if ($snipeSettings->qr_code=='1' && ($qrPdf || $qrPng))
+                                <div class="col-md-12 hidden-print" style="padding-top: 5px;">
+                                    <div class="btn-group btn-block">
+                                        <button type="button" class="btn btn-sm btn-default btn-block dropdown-toggle" data-toggle="dropdown">
+                                            <x-icon type="print" /> {{ trans('general.print_qr') }} <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu" role="menu">
+                                            @if ($qrPdf)
+                                                <li><a href="{{ $qrPdf }}" target="_blank">{{ trans('general.print_pdf') }}</a></li>
+                                            @endif
+                                            @if ($qrPng)
+                                                <li><a href="{{ $qrPng }}" download>{{ trans('general.download_png') }}</a></li>
+                                            @endif
+                                        </ul>
+                                    </div>
+                                </div>
+                            @endif
 
 
-                                @if (($asset->assetstatus) && ($asset->assetstatus->deployable=='1'))
-                                    @if (($asset->assigned_to != '') && ($asset->deleted_at==''))
-                                        @can('checkin', $asset)
+                            @if (($asset->assetstatus) && ($asset->assetstatus->deployable=='1'))
+                                @if (($asset->assigned_to != '') && ($asset->deleted_at==''))
+                                    @can('checkin', $asset)
                                             <div class="col-md-12 hidden-print" style="padding-top: 5px;">
                                                     <span class="tooltip-wrapper"{!! (!$asset->model ? ' data-tooltip="true" title="'.trans('admin/hardware/general.model_invalid_fix').'"' : '') !!}>
                                                         <a role="button" href="{{ route('hardware.checkin.create', $asset->id) }}" class="btn btn-sm btn-primary bg-purple btn-social btn-block hidden-print{{ (!$asset->model ? ' disabled' : '') }}">
@@ -439,13 +464,6 @@
                                     </div>
                                 @endif
                                 @if ($snipeSettings->qr_code=='1')
-                                    @php
-                                        $formats = explode(',', $snipeSettings->qr_formats ?? 'png,pdf');
-                                        $selectedTemplate = request('template', $snipeSettings->qr_label_template ?? config('qr_templates.default'));
-                                        $qrPng = in_array('png', $formats) ? $qrLabels->url($asset, 'png', $selectedTemplate) : null;
-                                        $qrPdf = in_array('pdf', $formats) ? $qrLabels->url($asset, 'pdf', $selectedTemplate) : null;
-                                        $qrTemplates = config('qr_templates.templates');
-                                    @endphp
                                     <div class="col-md-12 text-center" style="padding-top: 15px;">
                                         @if($qrPng)
                                             <img src="{{ $qrPng }}" class="img-thumbnail" style="height: 150px; width: 150px; margin-right: 10px;" alt="QR code for {{ $asset->getDisplayNameAttribute() }}">
