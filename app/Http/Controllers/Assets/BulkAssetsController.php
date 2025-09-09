@@ -10,6 +10,7 @@ use App\Models\AssetModel;
 use App\Models\Statuslabel;
 use App\Models\Setting;
 use App\View\Label;
+use App\Services\QrLabelService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -170,6 +171,14 @@ class BulkAssetsController extends Controller
 
 
             switch ($request->input('bulk_actions')) {
+                case 'qr':
+                    $this->authorize('view', Asset::class);
+                    $pdf = app(QrLabelService::class)->batchPdf($assets);
+                    return response($pdf, 200, [
+                        'Content-Type' => 'application/pdf',
+                        'Content-Disposition' => 'inline; filename="qr-labels.pdf"',
+                    ]);
+
                 case 'labels':
                     $this->authorize('view', Asset::class);
 

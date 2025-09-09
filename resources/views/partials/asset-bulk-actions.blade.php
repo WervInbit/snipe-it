@@ -39,6 +39,7 @@
             @endcan
 
             <option value="labels" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=l" : ''}}>{{ trans_choice('button.generate_labels', 2) }}</option>
+            <option value="qr">{{ trans('general.generate_qrs') }}</option>
         @endif
     </select>
 

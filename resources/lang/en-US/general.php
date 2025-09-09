@@ -146,6 +146,7 @@ return [
     'file_upload'           => 'File Upload',
     'generate'				=> 'Generate',
     'generate_labels'       => 'Generate Labels',
+    'generate_qrs'          => 'Generate QR Codes',
     'github_markdown'      => 'This field accepts <a href="https://help.github.com/articles/github-flavored-markdown/">Github flavored markdown</a>.',
     'groups'				=> 'Groups',
     'gravatar_email'        => 'Gravatar Email Address',
