@@ -175,6 +175,8 @@ Route::group(
         // Asset images
         Route::post('{asset}/images', [AssetImageController::class, 'store'])
             ->name('asset-images.store');
+        Route::put('{asset}/images/{assetImage}', [AssetImageController::class, 'update'])
+            ->name('asset-images.update');
         Route::delete('{asset}/images/{assetImage}', [AssetImageController::class, 'destroy'])
             ->name('asset-images.destroy');
 

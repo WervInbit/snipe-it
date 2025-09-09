@@ -160,6 +160,8 @@ return [
     'include_deleted'       => 'Include Deleted Assets',
     'image_upload'              => 'Upload Image',
     'image_upload_failed'   => 'Image upload failed.',
+    'image_deleted'         => 'Image deleted.',
+    'image_caption_updated' => 'Image caption updated.',
     'attach_photo'              => 'Attach Photo',
     'too_many_asset_images'    => 'Assets may not have more than 30 images.',
     'images'                => 'Images',

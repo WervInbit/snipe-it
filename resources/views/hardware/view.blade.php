@@ -1528,14 +1528,23 @@
                                     <a href="{{ asset('storage/'.$image->file_path) }}" target="_blank">
                                         <img src="{{ asset('storage/'.$image->file_path) }}" class="img-fluid img-thumbnail" alt="{{ $image->caption }}">
                                     </a>
-                                    <div class="mt-1">{{ $image->caption }}</div>
-                                    @can('update', $asset)
-                                        <form method="POST" action="{{ route('asset-images.destroy', [$asset, $image]) }}">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-xs btn-danger">{{ trans('button.delete') }}</button>
-                                        </form>
-                                    @endcan
+                                    <div class="mt-1">
+                                        @can('update', $asset)
+                                            <form method="POST" action="{{ route('asset-images.update', [$asset, $image]) }}" class="form-inline justify-content-center">
+                                                @csrf
+                                                @method('PUT')
+                                                <input type="text" name="caption" value="{{ $image->caption }}" class="form-control form-control-sm">
+                                                <button type="submit" class="btn btn-xs btn-primary ml-1">{{ trans('general.save') }}</button>
+                                            </form>
+                                            <form method="POST" action="{{ route('asset-images.destroy', [$asset, $image]) }}" class="mt-1" onsubmit="return confirm('{{ trans('general.delete_confirm', ['item' => trans('general.image')]) }}');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-xs btn-danger">{{ trans('button.delete') }}</button>
+                                            </form>
+                                        @else
+                                            {{ $image->caption }}
+                                        @endcan
+                                    </div>
                                 </div>
                             @empty
                                 <div class="col-12 text-center text-muted">{{ trans('general.no_asset_images') }}</div>

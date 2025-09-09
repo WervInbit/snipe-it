@@ -16,6 +16,8 @@ class AssetImageController extends Controller
 {
     public function store(Request $request, Asset $asset): JsonResponse
     {
+        $this->authorize('update', $asset);
+
         $request->validate([
             'image' => ['required', 'array'],
             'image.*' => ['image', 'mimes:jpeg,jpg,png,gif', 'max:5120'],
@@ -72,15 +74,34 @@ class AssetImageController extends Controller
         }
     }
 
+    public function update(Request $request, Asset $asset, AssetImage $assetImage): RedirectResponse
+    {
+        if ($assetImage->asset_id !== $asset->id) {
+            abort(404);
+        }
+
+        $this->authorize('update', $asset);
+
+        $request->validate([
+            'caption' => ['required', 'string'],
+        ]);
+
+        $assetImage->update(['caption' => $request->input('caption')]);
+
+        return back()->with('success', trans('general.image_caption_updated'));
+    }
+
     public function destroy(Asset $asset, AssetImage $assetImage): RedirectResponse
     {
         if ($assetImage->asset_id !== $asset->id) {
             abort(404);
         }
 
+        $this->authorize('update', $asset);
+
         Storage::disk('public')->delete($assetImage->file_path);
         $assetImage->delete();
 
-        return back()->with('success', trans('general.image_delete')); // reuse existing string
+        return back()->with('success', trans('general.image_deleted'));
     }
 }
