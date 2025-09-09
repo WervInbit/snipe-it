@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Transformers\DepartmentsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Department;
+use App\Models\Location;
 use Illuminate\Http\Request;
 use App\Http\Requests\ImageUploadRequest;
 use Illuminate\Support\Facades\Storage;
@@ -56,7 +57,8 @@ class DepartmentsController extends Controller
         }
 
         if ($request->filled('location_id')) {
-            $departments->where('location_id', '=', $request->input('location_id'));
+            $ids = Location::getLocationHierarchy($request->input('location_id'));
+            $departments->whereIn('location_id', $ids);
         }
 
         // Make sure the offset and limit are actually integers and do not exceed system limits

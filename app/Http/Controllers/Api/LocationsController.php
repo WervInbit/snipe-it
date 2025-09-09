@@ -291,7 +291,8 @@ class LocationsController extends Controller
     {
         $this->authorize('view', Asset::class);
         $this->authorize('view', $location);
-        $assets = Asset::where('location_id', '=', $location->id)->with('model', 'model.category', 'assetstatus', 'location', 'company', 'defaultLoc');
+        $ids = Location::getLocationHierarchy($location->id);
+        $assets = Asset::whereIn('location_id', $ids)->with('model', 'model.category', 'assetstatus', 'location', 'company', 'defaultLoc');
         $assets = $assets->get();
         return (new AssetsTransformer)->transformAssets($assets, $assets->count(), $request);
     }
@@ -300,7 +301,8 @@ class LocationsController extends Controller
     {
         $this->authorize('view', Asset::class);
         $this->authorize('view', $location);
-        $assets = Asset::where('assigned_to', '=', $location->id)->where('assigned_type', '=', Location::class)->with('model', 'model.category', 'assetstatus', 'location', 'company', 'defaultLoc');
+        $ids = Location::getLocationHierarchy($location->id);
+        $assets = Asset::whereIn('assigned_to', $ids)->where('assigned_type', '=', Location::class)->with('model', 'model.category', 'assetstatus', 'location', 'company', 'defaultLoc');
         $assets = $assets->get();
         return (new AssetsTransformer)->transformAssets($assets, $assets->count(), $request);
     }

@@ -1383,35 +1383,25 @@ class Asset extends Depreciable
 
     public function scopeAssetsByLocation($query, $location)
     {
-        return $query->where(
-            function ($query) use ($location) {
-                $query->whereHas(
-                    'assignedTo', function ($query) use ($location) {
-                        $query->where(
-                            [
-                            ['users.location_id', '=', $location->id],
-                            ['assets.assigned_type', '=', User::class],
-                            ]
-                        )->orWhere(
-                            [
-                            ['locations.id', '=', $location->id],
-                            ['assets.assigned_type', '=', Location::class],
-                            ]
-                        )->orWhere(
-                            [
-                            ['assets.rtd_location_id', '=', $location->id],
-                            ['assets.assigned_type', '=', self::class],
-                            ]
-                        );
-                    }
-                )->orWhere(
-                    function ($query) use ($location) {
-                        $query->where('assets.rtd_location_id', '=', $location->id);
-                        $query->whereNull('assets.assigned_to');
-                    }
-                );
-            }
-        );
+        $ids = Location::getLocationHierarchy($location->id);
+
+        return $query->where(function ($query) use ($ids) {
+            $query->whereHas('assignedTo', function ($query) use ($ids) {
+                $query->where(function ($q) use ($ids) {
+                    $q->whereIn('users.location_id', $ids)
+                        ->where('assets.assigned_type', '=', User::class);
+                })->orWhere(function ($q) use ($ids) {
+                    $q->whereIn('locations.id', $ids)
+                        ->where('assets.assigned_type', '=', Location::class);
+                })->orWhere(function ($q) use ($ids) {
+                    $q->whereIn('assets.rtd_location_id', $ids)
+                        ->where('assets.assigned_type', '=', self::class);
+                });
+            })->orWhere(function ($query) use ($ids) {
+                $query->whereIn('assets.rtd_location_id', $ids);
+                $query->whereNull('assets.assigned_to');
+            });
+        });
     }
 
 
@@ -2275,16 +2265,13 @@ class Asset extends Depreciable
      */
     public function scopeByLocationId($query, $search)
     {
-        return $query->where(
-            function ($query) use ($search) {
-                $query->whereHas(
-                    'location', function ($query) use ($search) {
-                        $query->where('locations.id', '=', $search);
-                    }
-                );
-            }
-        );
+        $ids = Location::getLocationHierarchy($search);
 
+        return $query->where(function ($query) use ($ids) {
+            $query->whereHas('location', function ($query) use ($ids) {
+                $query->whereIn('locations.id', $ids);
+            });
+        });
     }
 
 

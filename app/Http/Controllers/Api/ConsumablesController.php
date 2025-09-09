@@ -11,6 +11,7 @@ use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Company;
 use App\Models\Consumable;
 use App\Models\User;
+use App\Models\Location;
 use Illuminate\Http\Request;
 use App\Http\Requests\ImageUploadRequest;
 use Illuminate\Support\Facades\Log;
@@ -60,7 +61,8 @@ class ConsumablesController extends Controller
         }
 
         if ($request->filled('location_id')) {
-            $consumables->where('location_id','=',$request->input('location_id'));
+            $ids = Location::getLocationHierarchy($request->input('location_id'));
+            $consumables->whereIn('location_id', $ids);
         }
 
         if ($request->filled('notes')) {

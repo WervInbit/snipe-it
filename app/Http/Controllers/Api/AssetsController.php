@@ -321,7 +321,8 @@ class AssetsController extends Controller
         }
 
         if ($request->filled('location_id')) {
-            $assets->where('assets.location_id', '=', $request->input('location_id'));
+            $ids = Location::getLocationHierarchy($request->input('location_id'));
+            $assets->whereIn('assets.location_id', $ids);
         }
 
         if ($request->filled('rtd_location_id')) {

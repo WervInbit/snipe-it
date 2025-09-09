@@ -6,6 +6,7 @@ use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\ComponentsTransformer;
 use App\Models\Component;
+use App\Models\Location;
 use Illuminate\Http\Request;
 use App\Http\Requests\ImageUploadRequest;
 use App\Events\CheckoutableCheckedIn;
@@ -80,7 +81,8 @@ class ComponentsController extends Controller
         }
 
         if ($request->filled('location_id')) {
-            $components->where('location_id', '=', $request->input('location_id'));
+            $ids = Location::getLocationHierarchy($request->input('location_id'));
+            $components->whereIn('location_id', $ids);
         }
 
         if ($request->filled('notes')) {

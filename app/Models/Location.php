@@ -330,6 +330,27 @@ class Location extends SnipeModel
     }
 
     /**
+     * Get an array of IDs for the provided location and all descendants.
+     *
+     * @param  int|self $location
+     * @return array<int>
+     */
+    public static function getLocationHierarchy($location)
+    {
+        $locationId = $location instanceof self ? $location->id : (int) $location;
+
+        $ids = [$locationId];
+
+        $children = self::where('parent_id', $locationId)->pluck('id');
+
+        foreach ($children as $childId) {
+            $ids = array_merge($ids, self::getLocationHierarchy($childId));
+        }
+
+        return $ids;
+    }
+
+    /**
      * Establishes the asset -> location assignment relationship
      *
      * @author A. Gianotto <snipe@snipe.net>

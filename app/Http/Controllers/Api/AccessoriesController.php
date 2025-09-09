@@ -12,6 +12,7 @@ use App\Http\Transformers\AccessoriesTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Accessory;
 use App\Models\Company;
+use App\Models\Location;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -82,7 +83,8 @@ class AccessoriesController extends Controller
         }
 
         if ($request->filled('location_id')) {
-            $accessories->where('location_id','=',$request->input('location_id'));
+            $ids = Location::getLocationHierarchy($request->input('location_id'));
+            $accessories->whereIn('location_id', $ids);
         }
 
         if ($request->filled('notes')) {
