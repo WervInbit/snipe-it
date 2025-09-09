@@ -181,6 +181,17 @@
                     </li>
 
                     <li>
+                        <a href="#images" data-toggle="tab">
+                          <span class="hidden-lg hidden-md">
+                              <i class="fas fa-camera fa-2x"></i>
+                          </span>
+                            <span class="hidden-xs hidden-sm">{{ trans('general.images') }}
+                                {!! ($asset->images->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($asset->images->count()).'</span>' : '' !!}
+                          </span>
+                        </a>
+                    </li>
+
+                    <li>
                         <a href="#maintenances" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
                               <x-icon type="maintenances" class="fa-2x" />
@@ -1510,6 +1521,35 @@
                         @endcan
                     </div> <!-- /.tab-pane tests -->
 
+                    <div class="tab-pane fade" id="images">
+                        <div class="row">
+                            @foreach ($asset->images as $image)
+                                <div class="col-sm-3 mb-3 text-center">
+                                    <img src="{{ asset('storage/'.$image->file_path) }}" class="img-thumbnail">
+                                    <div class="mt-1">{{ $image->caption }}</div>
+                                    @can('update', $asset)
+                                        <form method="POST" action="{{ route('asset-images.destroy', [$asset, $image]) }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-xs btn-danger">{{ trans('button.delete') }}</button>
+                                        </form>
+                                    @endcan
+                                </div>
+                            @endforeach
+                        </div>
+                        @can('update', $asset)
+                        <form id="image-upload-form" method="POST" action="{{ route('asset-images.store', $asset) }}" enctype="multipart/form-data">
+                            @csrf
+                            <div id="image-dropzone" class="well text-center" style="cursor:pointer">
+                                {{ trans('general.drag_n_drop_help') }}
+                            </div>
+                            <input type="file" id="image-input" name="image[]" class="d-none" multiple accept="image/*">
+                            <div id="image-preview" class="row mt-3"></div>
+                            <button type="submit" id="image-upload-btn" class="btn btn-primary mt-2" disabled>{{ trans('general.image_upload') }}</button>
+                        </form>
+                        @endcan
+                    </div>
+
                     @can('view', \App\Models\Asset::class)
                     <div class="tab-pane fade" id="maintenances">
                         <div class="row{{($asset->maintenances->count() > 0 ) ? '' : ' hidden-print'}}">
@@ -1631,7 +1671,56 @@
         @include ('modals.upload-file', ['item_type' => 'asset', 'item_id' => $asset->id])
     @endcan
 @stop
-            @section('moar_scripts')
+@section('moar_scripts')
     @include ('partials.bootstrap-table')
+    <script>
+        (function () {
+            var dropzone = document.getElementById('image-dropzone');
+            if (!dropzone) return;
+            var input = document.getElementById('image-input');
+            var preview = document.getElementById('image-preview');
+            var button = document.getElementById('image-upload-btn');
+            var files = [];
+
+            function updateInput() {
+                var dt = new DataTransfer();
+                files.forEach(function(f){ dt.items.add(f); });
+                input.files = dt.files;
+                button.disabled = files.length === 0;
+            }
+
+            function addFiles(selected) {
+                Array.from(selected).forEach(function(file){
+                    files.push(file);
+                    var reader = new FileReader();
+                    reader.onload = function(e){
+                        var col = document.createElement('div');
+                        col.className = 'col-sm-3 mb-3 text-center';
+                        col.innerHTML = `<img src="${e.target.result}" class="img-thumbnail"><input type="text" name="caption[]" class="form-control mt-1" placeholder="{{ trans('general.caption') }}" required>`;
+                        preview.appendChild(col);
+                    };
+                    reader.readAsDataURL(file);
+                });
+                updateInput();
+            }
+
+            dropzone.addEventListener('click', function(){ input.click(); });
+            dropzone.addEventListener('dragover', function(e){ e.preventDefault(); dropzone.classList.add('dropzone-over'); });
+            dropzone.addEventListener('dragleave', function(){ dropzone.classList.remove('dropzone-over'); });
+            dropzone.addEventListener('drop', function(e){ e.preventDefault(); dropzone.classList.remove('dropzone-over'); addFiles(e.dataTransfer.files); });
+            input.addEventListener('change', function(e){ addFiles(e.target.files); });
+
+            document.getElementById('image-upload-form').addEventListener('submit', function(e){
+                var captions = preview.querySelectorAll('input[name="caption[]"]');
+                for (var i = 0; i < captions.length; i++) {
+                    if (!captions[i].value.trim()) {
+                        e.preventDefault();
+                        alert('{{ trans('general.caption_required') }}');
+                        return;
+                    }
+                }
+            });
+        })();
+    </script>
 
 @stop

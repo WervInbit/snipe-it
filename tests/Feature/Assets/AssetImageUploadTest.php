@@ -19,7 +19,8 @@ class AssetImageUploadTest extends TestCase
 
         for ($i = 0; $i < 30; $i++) {
             $response = $this->actingAs($user)->post(route('asset-images.store', $asset), [
-                'image' => UploadedFile::fake()->image("photo{$i}.jpg"),
+                'image' => [UploadedFile::fake()->image("photo{$i}.jpg")],
+                'caption' => ["caption {$i}"],
             ]);
             $response->assertStatus(302);
         }
@@ -27,8 +28,32 @@ class AssetImageUploadTest extends TestCase
         $this->assertEquals(30, $asset->images()->count());
 
         $response = $this->actingAs($user)->post(route('asset-images.store', $asset), [
-            'image' => UploadedFile::fake()->image('too_many.jpg'),
+            'image' => [UploadedFile::fake()->image('too_many.jpg')],
+            'caption' => ['overflow'],
         ]);
         $response->assertSessionHasErrors('image');
+    }
+
+    public function test_asset_image_upload_requires_caption_and_allows_multiple(): void
+    {
+        Storage::fake('public');
+
+        $asset = Asset::factory()->create();
+        $user = User::factory()->superuser()->create();
+
+        $response = $this->actingAs($user)->post(route('asset-images.store', $asset), [
+            'image' => [UploadedFile::fake()->image('photo1.jpg')],
+        ]);
+        $response->assertSessionHasErrors('caption');
+
+        $response = $this->actingAs($user)->post(route('asset-images.store', $asset), [
+            'image' => [
+                UploadedFile::fake()->image('photo1.jpg'),
+                UploadedFile::fake()->image('photo2.jpg'),
+            ],
+            'caption' => ['front', 'back'],
+        ]);
+        $response->assertSessionHasNoErrors();
+        $this->assertEquals(2, $asset->images()->count());
     }
 }

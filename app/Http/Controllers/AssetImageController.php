@@ -14,22 +14,32 @@ class AssetImageController extends Controller
     public function store(Request $request, Asset $asset): RedirectResponse
     {
         $request->validate([
-            'image' => ['required', 'image'],
-            'caption' => ['nullable', 'string'],
+            'image' => ['required', 'array'],
+            'image.*' => ['image'],
+            'caption' => ['required', 'array'],
+            'caption.*' => ['required', 'string'],
         ]);
 
-        if ($asset->images()->count() >= 30) {
+        if (count($request->file('image')) !== count($request->input('caption'))) {
+            throw ValidationException::withMessages([
+                'caption' => trans('general.caption_required'),
+            ]);
+        }
+
+        if ($asset->images()->count() + count($request->file('image')) > 30) {
             throw ValidationException::withMessages([
                 'image' => trans('general.too_many_asset_images'),
             ]);
         }
 
-        $path = $request->file('image')->store('assets/'.$asset->id, 'public');
+        foreach ($request->file('image') as $index => $file) {
+            $path = $file->store('assets/'.$asset->id, 'public');
 
-        $asset->images()->create([
-            'file_path' => $path,
-            'caption' => $request->input('caption'),
-        ]);
+            $asset->images()->create([
+                'file_path' => $path,
+                'caption' => $request->input('caption')[$index],
+            ]);
+        }
 
         return back()->with('success', trans('general.image_upload'));
     }
