@@ -32,7 +32,7 @@
           <!-- we are editing an existing asset,  there will be only one asset tag -->
           <div class="col-md-7 col-sm-12">
 
-          <input class="form-control" type="text" name="asset_tags[1]" id="asset_tag" value="{{ old('asset_tag', $item->asset_tag) }}">
+          <input class="form-control" type="text" name="asset_tags[1]" id="asset_tag" value="{{ old('asset_tag', $item->asset_tag) }}" @unless(auth()->user()->isAdmin()) readonly @endunless>
               {!! $errors->first('asset_tags', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
               {!! $errors->first('asset_tag', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
           </div>

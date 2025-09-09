@@ -727,7 +727,17 @@ class AssetsController extends Controller
      */
     public function update(UpdateAssetRequest $request, Asset $asset): JsonResponse
     {
+        $original_tag = $asset->asset_tag;
+        $incoming_tag = $request->input('asset_tag', $original_tag);
+
         $asset->fill($request->validated());
+
+        if ($incoming_tag !== $original_tag && !auth()->user()->isAdmin()) {
+            return response()->json(
+                Helper::formatStandardApiResponse('error', null, trans('admin/hardware/message.tag_immutable')),
+                403
+            );
+        }
 
         if ($request->has('model_id')) {
             $asset->model()->associate(AssetModel::find($request->validated()['model_id']));

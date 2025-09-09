@@ -412,10 +412,14 @@ class AssetsController extends Controller
         $asset->order_number = $request->input('order_number');
 
         $asset_tags = $request->input('asset_tags');
-        $asset->asset_tag = $request->input('asset_tags');
+        $original_tag = $asset->asset_tag;
 
-        if (is_array($request->input('asset_tags'))) {
-            $asset->asset_tag = $asset_tags[1];
+        if ($request->filled('asset_tags')) {
+            $incoming_tag = is_array($asset_tags) ? $asset_tags[1] : $asset_tags;
+            if (!auth()->user()->isAdmin() && $incoming_tag !== $original_tag) {
+                return redirect()->back()->withErrors(['asset_tag' => trans('admin/hardware/message.tag_immutable')]);
+            }
+            $asset->asset_tag = $incoming_tag;
         }
 
         $asset->notes = $request->input('notes');
