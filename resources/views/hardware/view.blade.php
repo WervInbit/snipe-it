@@ -170,7 +170,7 @@
 
                     @can('view', \App\Models\Asset::class)
                     <li>
-                          <a href="{{ route('test-runs.index', $asset->id) }}">
+                        <a href="#tests" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
                               <i class="fas fa-vial fa-2x"></i>
                           </span>
@@ -1431,6 +1431,60 @@
                 </div><!-- /.tab-pane -->
                 @endcan
 
+                    <div class="tab-pane fade" id="tests">
+                        <div class="mb-3 text-right">
+                            @can('tests.execute')
+                                <form method="POST" action="{{ route('test-runs.store', $asset->id) }}" style="display:inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary">{{ trans('tests.start_new_run') }}</button>
+                                </form>
+                            @endcan
+                        </div>
+                        <div class="row">
+                            @foreach ($asset->tests as $run)
+                                <div class="col-md-6 col-sm-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            {{ optional($run->created_at)->format('Y-m-d H:i') }} - {{ optional($run->user)->name }}
+                                        </div>
+                                        <div class="panel-body">
+                                            <ul class="list-unstyled">
+                                                @foreach ($run->results as $result)
+                                                    <li>
+                                                        {{ $result->type->name }}:
+                                                        {{ trans('tests.' . $result->status) }}
+                                                        @if ($result->note)
+                                                            <span class="text-muted">{{ $result->note }}</span>
+                                                        @endif
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                            <div class="mt-2">
+                                                @can('tests.execute')
+                                                    <a href="{{ route('test-results.edit', [$asset->id, $run->id]) }}" class="btn btn-default btn-sm">{{ trans('button.edit') }}</a>
+                                                @endcan
+                                                @can('tests.delete')
+                                                    <form method="POST" action="{{ route('test-runs.destroy', [$asset->id, $run->id]) }}" style="display:inline">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button class="btn btn-danger btn-sm" type="submit">{{ trans('button.delete') }}</button>
+                                                    </form>
+                                                @endcan
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                        @can('audits.view')
+                            @foreach ($asset->tests as $run)
+                                @include('tests.partials.audit-history', ['auditable' => $run])
+                                @foreach ($run->results as $result)
+                                    @include('tests.partials.audit-history', ['auditable' => $result])
+                                @endforeach
+                            @endforeach
+                        @endcan
+                    </div> <!-- /.tab-pane tests -->
 
                     @can('view', \App\Models\Asset::class)
                     <div class="tab-pane fade" id="maintenances">
