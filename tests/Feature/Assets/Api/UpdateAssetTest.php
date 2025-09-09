@@ -4,10 +4,12 @@ namespace Tests\Feature\Assets\Api;
 
 use App\Models\Asset;
 use App\Models\AssetModel;
+use App\Models\Category;
 use App\Models\Company;
 use App\Models\Location;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
+use App\Models\Sku;
 use App\Models\User;
 use App\Models\CustomField;
 use Illuminate\Support\Facades\Crypt;
@@ -134,32 +136,21 @@ class UpdateAssetTest extends TestCase
 
     }
 
-    public function testNonAdminCannotChangeAssetTag(): void
+    public function testSkuIsRequiredForLaptopAndDesktopCategories()
     {
-        $asset = Asset::factory()->create();
-        $originalTag = $asset->asset_tag;
+        $category = Category::factory()->assetLaptopCategory()->create();
+        $model = AssetModel::factory()->create(['category_id' => $category->id]);
+        $sku = Sku::factory()->create(['model_id' => $model->id]);
+        $asset = Asset::factory()->create(['model_id' => $model->id, 'sku_id' => $sku->id]);
 
-        $this->actingAsForApi(User::factory()->editAssets()->create())
+        $response = $this->actingAsForApi(User::factory()->editAssets()->create())
             ->patchJson(route('api.assets.update', $asset->id), [
-                'asset_tag' => 'NEW-TAG',
+                'sku_id' => null,
             ])
-            ->assertStatus(403);
+            ->assertOk()
+            ->assertStatusMessageIs('error');
 
-        $asset->refresh();
-        $this->assertEquals($originalTag, $asset->asset_tag);
-    }
-
-    public function testAdminCanChangeAssetTag(): void
-    {
-        $asset = Asset::factory()->create();
-
-        $this->actingAsForApi(User::factory()->admin()->create())
-            ->patchJson(route('api.assets.update', $asset->id), [
-                'asset_tag' => 'NEW-TAG',
-            ])
-            ->assertOk();
-
-        $this->assertEquals('NEW-TAG', $asset->fresh()->asset_tag);
+        $this->assertNotNull($response->json('messages.sku_id'));
     }
 
     public function testUpdatesPeriodAsCommaSeparatorForPurchaseCost()

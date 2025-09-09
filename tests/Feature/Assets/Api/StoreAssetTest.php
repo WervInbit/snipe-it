@@ -4,6 +4,7 @@ namespace Tests\Feature\Assets\Api;
 
 use App\Models\Asset;
 use App\Models\AssetModel;
+use App\Models\Category;
 use App\Models\Company;
 use App\Models\CustomField;
 use App\Models\Location;
@@ -245,6 +246,24 @@ class StoreAssetTest extends TestCase
             ])
             ->assertOk()
             ->assertStatusMessageIs('success');
+    }
+
+    public function testSkuIsRequiredForLaptopAndDesktopCategories()
+    {
+        $category = Category::factory()->assetLaptopCategory()->create();
+        $model = AssetModel::factory()->create(['category_id' => $category->id]);
+        $status = Statuslabel::factory()->readyToDeploy()->create();
+
+        $response = $this->actingAsForApi(User::factory()->createAssets()->create())
+            ->postJson(route('api.assets.store'), [
+                'asset_tag' => '12345',
+                'model_id' => $model->id,
+                'status_id' => $status->id,
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('error');
+
+        $this->assertNotNull($response->json('messages.sku_id'));
     }
 
 
