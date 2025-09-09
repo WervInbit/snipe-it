@@ -108,6 +108,7 @@
         <div class="col-md-7 col-sm-12">
             <textarea class="form-control" name="location_note" id="location_note" {{ old('use_custom_location', $item->location_note ? 1 : 0) ? '' : 'disabled="disabled"' }}>{{ old('location_note', $item->location_note) }}</textarea>
             {!! $errors->first('location_note', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+            <p class="help-block">{{ trans('admin/hardware/form.location_note_help') }}</p>
         </div>
     </div>
     <script nonce="{{ csrf_token() }}">

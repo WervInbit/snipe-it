@@ -26,6 +26,7 @@ return [
     'default_location_phone' => 'Default Location Phone',
     'use_custom_location' => 'Use custom location',
     'location_note' => 'Alternate Location Description',
+    'location_note_help' => 'Assets using this field are assigned to the Misc/Custom location',
     'eol_date'			=> 'EOL Date',
     'eol_rate'			=> 'EOL Rate',
     'expected_checkin'  => 'Expected Checkin Date',

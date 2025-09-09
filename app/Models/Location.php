@@ -277,6 +277,20 @@ class Location extends SnipeModel
         return $parent->location_type === 'warehouse' ? 'shelf' : 'bin';
     }
 
+    public static function customLocation(): self
+    {
+        $location = self::withTrashed()->firstOrCreate(
+            ['name' => 'Misc/Custom', 'parent_id' => null],
+            ['location_type' => self::determineType(null)]
+        );
+
+        if ($location->trashed()) {
+            $location->restore();
+        }
+
+        return $location;
+    }
+
     /**
      * Establishes the locations -> company relationship
      *

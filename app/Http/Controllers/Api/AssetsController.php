@@ -640,6 +640,16 @@ class AssetsController extends Controller
         $asset->fill($request->validated());
         $asset->created_by    = auth()->id();
 
+        if ($asset->location_note) {
+            $custom = Location::customLocation();
+            $asset->rtd_location_id = $custom->id;
+            if (!$request->has('assigned_user') && !$request->has('assigned_asset') && !$request->has('assigned_location')) {
+                $asset->location_id = $custom->id;
+            }
+        } elseif (!$request->has('assigned_user') && !$request->has('assigned_asset') && !$request->has('assigned_location')) {
+            $asset->location_id = $asset->rtd_location_id;
+        }
+
         /**
          * this is here just legacy reasons. Api\AssetController
          * used image_source  once to allow encoded image uploads.
@@ -733,6 +743,16 @@ class AssetsController extends Controller
 
         $asset->fill($request->validated());
 
+        if ($asset->location_note) {
+            $custom = Location::customLocation();
+            $asset->rtd_location_id = $custom->id;
+            if (!$request->has('assigned_user') && !$request->has('assigned_asset') && !$request->has('assigned_location')) {
+                $asset->location_id = $custom->id;
+            }
+        } elseif ($request->has('rtd_location_id') && !$request->has('location_id') && !$request->has('assigned_user') && !$request->has('assigned_asset') && !$request->has('assigned_location')) {
+            $asset->location_id = $request->validated()['rtd_location_id'];
+        }
+
         if ($incoming_tag !== $original_tag && !auth()->user()->isAdmin()) {
             return response()->json(
                 Helper::formatStandardApiResponse('error', null, trans('admin/hardware/message.tag_immutable')),
@@ -745,9 +765,6 @@ class AssetsController extends Controller
         }
         if ($request->has('company_id')) {
             $asset->company_id = Company::getIdForCurrentUser($request->validated()['company_id']);
-        }
-        if ($request->has('rtd_location_id') && !$request->has('location_id')) {
-            $asset->location_id = $request->validated()['rtd_location_id'];
         }
         if ($request->input('last_audit_date')) {
             $asset->last_audit_date = Carbon::parse($request->input('last_audit_date'))->startOfDay()->format('Y-m-d H:i:s');

@@ -138,6 +138,7 @@ class AssetsController extends Controller
             $asset->sku_id                  = $request->input('sku_id');
             $asset->order_number            = $request->input('order_number');
             $asset->notes                   = $request->input('notes');
+            $asset->location_note           = $request->input('location_note');
             $asset->created_by              = auth()->id();
             $asset->status_id               = request('status_id');
             $asset->warranty_months         = request('warranty_months', null);
@@ -151,13 +152,18 @@ class AssetsController extends Controller
             $asset->rtd_location_id         = request('rtd_location_id', null);
             $asset->byod                    = request('byod', 0);
 
+            if ($asset->location_note) {
+                $custom = Location::customLocation();
+                $asset->rtd_location_id = $custom->id;
+            }
+
             if (! empty($settings->audit_interval)) {
                 $asset->next_audit_date = Carbon::now()->addMonths((int) $settings->audit_interval)->toDateString();
             }
 
             // Set location_id to rtd_location_id ONLY if the asset isn't being checked out
             if (!request('assigned_user') && !request('assigned_asset') && !request('assigned_location')) {
-                $asset->location_id = $request->input('rtd_location_id', null);
+                $asset->location_id = $asset->rtd_location_id;
             }
 
             if ($request->has('use_cloned_image')) {
@@ -385,6 +391,17 @@ class AssetsController extends Controller
         $asset->is_sellable = $request->input('is_sellable', 1);
         $asset->rtd_location_id = $request->input('rtd_location_id', null);
         $asset->byod = $request->input('byod', 0);
+        $asset->location_note = $request->input('location_note');
+
+        if ($asset->location_note) {
+            $custom = Location::customLocation();
+            $asset->rtd_location_id = $custom->id;
+            if (!$request->filled('assigned_user') && !$request->filled('assigned_asset') && !$request->filled('assigned_location')) {
+                $asset->location_id = $custom->id;
+            }
+        } elseif (!$request->filled('assigned_user') && !$request->filled('assigned_asset') && !$request->filled('assigned_location')) {
+            $asset->location_id = $asset->rtd_location_id;
+        }
 
         $status = Statuslabel::find($request->input('status_id'));
 
