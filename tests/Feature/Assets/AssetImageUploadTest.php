@@ -90,6 +90,57 @@ class AssetImageUploadTest extends TestCase
         $this->assertEquals(0, $asset->images()->count());
     }
 
+    public function test_refurbisher_can_upload_image(): void
+    {
+        Storage::fake('public');
+
+        $asset = Asset::factory()->create();
+        $user = User::factory()->refurbisher()->editAssets()->create();
+
+        $response = $this->actingAs($user)->post(route('asset-images.store', $asset), [
+            'image' => [UploadedFile::fake()->image('front.jpg')],
+            'caption' => ['Front'],
+        ]);
+
+        $response->assertStatus(201);
+        $this->assertEquals(1, $asset->images()->count());
+    }
+
+    public function test_user_without_refurbisher_cannot_upload_image(): void
+    {
+        Storage::fake('public');
+
+        $asset = Asset::factory()->create();
+        $user = User::factory()->editAssets()->create();
+
+        $response = $this->actingAs($user)->post(route('asset-images.store', $asset), [
+            'image' => [UploadedFile::fake()->image('front.jpg')],
+            'caption' => ['Front'],
+        ]);
+
+        $response->assertForbidden();
+        $this->assertEquals(0, $asset->images()->count());
+    }
+
+    public function test_refurbisher_cannot_delete_image(): void
+    {
+        Storage::fake('public');
+
+        $asset = Asset::factory()->create();
+        $user = User::factory()->refurbisher()->editAssets()->create();
+
+        $this->actingAs($user)->post(route('asset-images.store', $asset), [
+            'image' => [UploadedFile::fake()->image('front.jpg')],
+            'caption' => ['Front'],
+        ])->assertStatus(201);
+
+        $image = $asset->images()->first();
+
+        $response = $this->actingAs($user)->delete(route('asset-images.destroy', [$asset, $image]));
+        $response->assertForbidden();
+        $this->assertDatabaseHas('asset_images', ['id' => $image->id]);
+    }
+
     public function test_asset_image_caption_can_be_updated(): void
     {
         Storage::fake('public');
@@ -120,7 +171,7 @@ class AssetImageUploadTest extends TestCase
         Storage::fake('public');
 
         $asset = Asset::factory()->create();
-        $user = User::factory()->superuser()->create();
+        $user = User::factory()->supervisor()->editAssets()->create();
 
         $this->actingAs($user)->post(route('asset-images.store', $asset), [
             'image' => [UploadedFile::fake()->image('photo1.jpg')],

@@ -40,4 +40,25 @@ class DisplayAssetImagesTest extends TestCase
             ->get(route('hardware.show', $asset))
             ->assertSee(trans('general.no_asset_images'));
     }
+
+    public function test_refurbisher_cannot_see_delete_button(): void
+    {
+        Storage::fake('public');
+
+        $asset = Asset::factory()->create();
+        $supervisor = User::factory()->supervisor()->editAssets()->create();
+
+        $this->actingAs($supervisor)->post(route('asset-images.store', $asset), [
+            'image' => [UploadedFile::fake()->image('front.jpg')],
+            'caption' => ['Front'],
+        ])->assertStatus(201);
+
+        $image = $asset->images()->first();
+
+        $refurbisher = User::factory()->refurbisher()->editAssets()->create();
+        $this->actingAs($refurbisher)
+            ->get(route('hardware.show', $asset))
+            ->assertSee('name="caption"', false)
+            ->assertDontSee(route('asset-images.destroy', [$asset, $image]));
+    }
 }

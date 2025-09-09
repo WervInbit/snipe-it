@@ -1522,6 +1522,22 @@
                     </div> <!-- /.tab-pane tests -->
 
                     <div class="tab-pane fade" id="images">
+                        @php
+                            $user = auth()->user();
+                            $canManageImages = $user && $user->can('update', $asset) && (
+                                $user->hasAccess('superuser') ||
+                                $user->hasAccess('admin') ||
+                                $user->hasAccess('supervisor') ||
+                                $user->hasAccess('senior-refurbisher') ||
+                                $user->hasAccess('refurbisher')
+                            );
+                            $canDeleteImages = $user && $user->can('update', $asset) && (
+                                $user->hasAccess('superuser') ||
+                                $user->hasAccess('admin') ||
+                                $user->hasAccess('supervisor') ||
+                                $user->hasAccess('senior-refurbisher')
+                            );
+                        @endphp
                         <div class="row">
                             <div class="col-12 text-muted small mb-2">{{ trans('general.cover_image_notice') }}</div>
                             @forelse ($asset->images as $image)
@@ -1530,42 +1546,44 @@
                                         <img src="{{ asset('storage/'.$image->file_path) }}" class="img-fluid img-thumbnail" alt="{{ $image->caption }}">
                                     </a>
                                     <div class="mt-1">
-                                        @can('update', $asset)
+                                        @if ($canManageImages)
                                             <form method="POST" action="{{ route('asset-images.update', [$asset, $image]) }}" class="form-inline justify-content-center">
                                                 @csrf
                                                 @method('PUT')
                                                 <input type="text" name="caption" value="{{ $image->caption }}" class="form-control form-control-sm">
                                                 <button type="submit" class="btn btn-xs btn-primary ml-1">{{ trans('general.save') }}</button>
                                             </form>
+                                            @if ($canDeleteImages)
                                             <form method="POST" action="{{ route('asset-images.destroy', [$asset, $image]) }}" class="mt-1" onsubmit="return confirm('{{ trans('general.delete_confirm', ['item' => trans('general.image')]) }}');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-xs btn-danger">{{ trans('button.delete') }}</button>
                                             </form>
+                                            @endif
                                         @else
                                             {{ $image->caption }}
-                                        @endcan
+                                        @endif
                                     </div>
                                 </div>
                             @empty
                                 <div class="col-12 text-center text-muted">{{ trans('general.no_asset_images') }}</div>
                             @endforelse
                         </div>
-                        @can('update', $asset)
-                        @if ($asset->images->count() < 30)
-                        <form id="image-upload-form" method="POST" action="{{ route('asset-images.store', $asset) }}" enctype="multipart/form-data">
-                            @csrf
-                            <div id="image-dropzone" class="well text-center" style="cursor:pointer">
-                                {{ trans('general.drag_n_drop_help') }}
-                            </div>
-                            <input type="file" id="image-input" name="image[]" class="d-none" multiple accept="image/jpeg,image/png,image/gif">
-                            <div id="image-preview" class="row mt-3"></div>
-                            <button type="submit" id="image-upload-btn" class="btn btn-primary mt-2" disabled>{{ trans('general.image_upload') }}</button>
-                        </form>
-                        @else
-                            <div class="alert alert-info mt-3">{{ trans('general.too_many_asset_images') }}</div>
+                        @if ($canManageImages)
+                            @if ($asset->images->count() < 30)
+                                <form id="image-upload-form" method="POST" action="{{ route('asset-images.store', $asset) }}" enctype="multipart/form-data">
+                                    @csrf
+                                    <div id="image-dropzone" class="well text-center" style="cursor:pointer">
+                                        {{ trans('general.drag_n_drop_help') }}
+                                    </div>
+                                    <input type="file" id="image-input" name="image[]" class="d-none" multiple accept="image/jpeg,image/png,image/gif">
+                                    <div id="image-preview" class="row mt-3"></div>
+                                    <button type="submit" id="image-upload-btn" class="btn btn-primary mt-2" disabled>{{ trans('general.image_upload') }}</button>
+                                </form>
+                            @else
+                                <div class="alert alert-info mt-3">{{ trans('general.too_many_asset_images') }}</div>
+                            @endif
                         @endif
-                        @endcan
                     </div>
 
                     @can('view', \App\Models\Asset::class)

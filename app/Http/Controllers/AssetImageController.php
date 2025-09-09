@@ -18,6 +18,16 @@ class AssetImageController extends Controller
     {
         $this->authorize('update', $asset);
 
+        $user = $request->user();
+        abort_unless(
+            $user->hasAccess('superuser') ||
+            $user->hasAccess('admin') ||
+            $user->hasAccess('supervisor') ||
+            $user->hasAccess('senior-refurbisher') ||
+            $user->hasAccess('refurbisher'),
+            403
+        );
+
         $request->validate([
             'image' => ['required', 'array'],
             'image.*' => ['image', 'mimes:jpeg,jpg,png,gif', 'max:5120'],
@@ -88,6 +98,16 @@ class AssetImageController extends Controller
 
         $this->authorize('update', $asset);
 
+        $user = $request->user();
+        abort_unless(
+            $user->hasAccess('superuser') ||
+            $user->hasAccess('admin') ||
+            $user->hasAccess('supervisor') ||
+            $user->hasAccess('senior-refurbisher') ||
+            $user->hasAccess('refurbisher'),
+            403
+        );
+
         $request->validate([
             'caption' => ['required', 'string'],
         ]);
@@ -97,13 +117,22 @@ class AssetImageController extends Controller
         return back()->with('success', trans('general.image_caption_updated'));
     }
 
-    public function destroy(Asset $asset, AssetImage $assetImage): RedirectResponse
+    public function destroy(Request $request, Asset $asset, AssetImage $assetImage): RedirectResponse
     {
         if ($assetImage->asset_id !== $asset->id) {
             abort(404);
         }
 
         $this->authorize('update', $asset);
+
+        $user = $request->user();
+        abort_unless(
+            $user->hasAccess('superuser') ||
+            $user->hasAccess('admin') ||
+            $user->hasAccess('supervisor') ||
+            $user->hasAccess('senior-refurbisher'),
+            403
+        );
 
         $relative = Str::after($assetImage->file_path, 'assets/');
 
