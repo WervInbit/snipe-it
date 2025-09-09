@@ -327,7 +327,12 @@ class AssetsController extends Controller
                 }
             }
 
-            $asset->load(['tests.results.type', 'tests.user']);
+            $asset->load([
+                'tests.audits.user',
+                'tests.results.audits.user',
+                'tests.results.type',
+                'tests.user',
+            ]);
 
             return view('hardware/view', compact('asset', 'settings'))
                 ->with('use_currency', $use_currency)->with('audit_log', $audit_log);

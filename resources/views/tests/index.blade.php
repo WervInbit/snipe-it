@@ -61,12 +61,19 @@
 </table>
 
 @can('audits.view')
-    @foreach ($runs as $run)
-        @include('tests.partials.audit-history', ['auditable' => $run])
-        @foreach ($run->results as $result)
-            @include('tests.partials.audit-history', ['auditable' => $result])
-        @endforeach
-    @endforeach
+    @php
+        $audits = $runs->flatMap->audits
+            ->merge($runs->flatMap->results->flatMap->audits)
+            ->sortByDesc('created_at');
+    @endphp
+    @if($audits->isNotEmpty())
+        <button class="btn btn-default mb-2" type="button" data-toggle="collapse" data-target="#test-audit-trail">
+            {{ trans('tests.view_audit_trail') }}
+        </button>
+        <div id="test-audit-trail" class="collapse">
+            @include('tests.partials.audit-history', ['audits' => $audits])
+        </div>
+    @endif
 @endcan
 
 @endsection

@@ -16,4 +16,11 @@ return [
     'repeat_confirm' => 'Repeat this test using the previous values?',
     'all_passed' => 'All Tests Passed',
     'run_saved' => 'Test run saved successfully',
+    'view_audit_trail' => 'View Test Audit Trail',
+    'audit_trail' => 'Test Audit Trail',
+    'run_or_result' => 'Run/Result',
+    'field' => 'Field',
+    'timestamp' => 'Timestamp',
+    'before' => 'Before',
+    'after' => 'After',
 ];
