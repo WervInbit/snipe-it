@@ -14,6 +14,7 @@ return new class extends Migration
             $table->unsignedInteger('test_type_id');
             $table->enum('status', ['pass', 'fail', 'nvt']);
             $table->text('note')->nullable();
+            $table->string('photo_path')->nullable();
             $table->timestamps();
             $table->engine = 'InnoDB';
             $table->charset = 'utf8mb4';

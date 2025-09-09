@@ -27,9 +27,17 @@
                         <button type="button" class="btn btn-link comment-toggle" style="margin-top:10px;">
                             <i class="fas fa-comment"></i> {{ trans('general.add_note') }}
                         </button>
+                        <button type="button" class="btn btn-link photo-button" style="margin-top:10px;">
+                            <i class="fas fa-camera"></i> {{ trans('general.attach_photo') }}
+                        </button>
+                        <input type="file" name="photo[{{ $result->id }}]" class="photo-input" accept="image/*" capture="camera" style="display:none;">
                         <div class="comment-field" style="margin-top:10px; @if(!$result->note)display:none;@endif">
                             <textarea name="note[{{ $result->id }}]" class="form-control" rows="2">{{ $result->note }}</textarea>
-                            <input type="file" name="images[{{ $result->id }}][]" class="form-control" accept="image/*" multiple style="margin-top:5px;">
+                        </div>
+                        <div class="photo-preview" style="margin-top:10px;">
+                            @if($result->photo_path)
+                                <img src="/{{ $result->photo_path }}" alt="photo" style="max-width:100%;height:auto;">
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -62,6 +70,21 @@
 
         $('.comment-toggle').on('click', function(){
             $(this).siblings('.comment-field').toggle();
+        });
+
+        $('.photo-button').on('click', function(){
+            $(this).siblings('input.photo-input').trigger('click');
+        });
+
+        $('.photo-input').on('change', function(){
+            var input = this;
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e){
+                    $(input).siblings('.photo-preview').html('<img src="'+e.target.result+'" style="max-width:100%;height:auto;"/>');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
         });
     });
 </script>

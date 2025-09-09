@@ -41,6 +41,7 @@ class TestResult extends SnipeModel
         'test_type_id',
         'status',
         'note',
+        'photo_path',
     ];
 
     public function testRun(): BelongsTo

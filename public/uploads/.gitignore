@@ -1,3 +1,5 @@
 *
 !.gitignore
 !default.png
+!test_images/
+!test_images/.gitignore
