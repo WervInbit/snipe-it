@@ -131,6 +131,35 @@ class UpdateAssetTest extends TestCase
             ->assertOk();
 
         $this->assertEquals('NEW-TAG', $asset->fresh()->asset_tag);
+
+    }
+
+    public function testNonAdminCannotChangeAssetTag(): void
+    {
+        $asset = Asset::factory()->create();
+        $originalTag = $asset->asset_tag;
+
+        $this->actingAsForApi(User::factory()->editAssets()->create())
+            ->patchJson(route('api.assets.update', $asset->id), [
+                'asset_tag' => 'NEW-TAG',
+            ])
+            ->assertStatus(403);
+
+        $asset->refresh();
+        $this->assertEquals($originalTag, $asset->asset_tag);
+    }
+
+    public function testAdminCanChangeAssetTag(): void
+    {
+        $asset = Asset::factory()->create();
+
+        $this->actingAsForApi(User::factory()->admin()->create())
+            ->patchJson(route('api.assets.update', $asset->id), [
+                'asset_tag' => 'NEW-TAG',
+            ])
+            ->assertOk();
+
+        $this->assertEquals('NEW-TAG', $asset->fresh()->asset_tag);
     }
 
     public function testUpdatesPeriodAsCommaSeparatorForPurchaseCost()
