@@ -54,6 +54,7 @@ return [
     'bulkaudit_status'      => 'Audit Status',
     'bulk_checkout'  		=> 'Bulk Checkout',
     'bulk_edit'             => 'Bulk Edit',
+    'batch_edit'            => 'Batch Edit',
     'bulk_delete'           => 'Bulk Delete',
     'bulk_actions'          => 'Bulk Actions',
     'bulk_checkin_delete'   => 'Bulk Checkin / Delete Users',
