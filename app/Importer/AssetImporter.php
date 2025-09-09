@@ -77,7 +77,7 @@ class AssetImporter extends ItemImporter
         $asset_tag = $this->findCsvMatch($row, 'asset_tag');
 
         if (empty($asset_tag)){
-            $asset_tag = Asset::autoincrement_asset();
+            $asset_tag = Asset::generateTag();
         }
 
 

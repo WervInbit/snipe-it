@@ -11,6 +11,19 @@ use Carbon\Carbon;
 class AssetObserver
 {
     /**
+     * Ensure a tag is present before the asset is created.
+     *
+     * @param  Asset  $asset
+     * @return void
+     */
+    public function creating(Asset $asset)
+    {
+        if (empty($asset->asset_tag)) {
+            $asset->asset_tag = Asset::generateTag();
+        }
+    }
+
+    /**
      * Listen to the Asset updating event. This fires automatically every time an existing asset is saved.
      *
      * @param  Asset  $asset

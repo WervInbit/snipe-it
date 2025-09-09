@@ -950,6 +950,25 @@ class Asset extends Depreciable
         }
     }
 
+    /**
+     * Generate a unique asset tag when one is not supplied.
+     *
+     * Uses the traditional auto-increment settings when enabled, otherwise
+     * falls back to a sequential `ASSET-0001` style tag.
+     *
+     * @since [v5.1]
+     */
+    public static function generateTag(): string
+    {
+        if ($tag = self::autoincrement_asset()) {
+            return $tag;
+        }
+
+        $settings = \App\Models\Setting::getSettings();
+
+        return 'ASSET-' . self::zerofill($settings->next_auto_tag_base, 4);
+    }
+
 
     /**
      * Get the next base number for the auto-incrementer.

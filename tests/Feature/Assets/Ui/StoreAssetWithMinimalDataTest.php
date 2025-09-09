@@ -21,7 +21,7 @@ class StoreAssetWithMinimalDataTest extends TestCase
 
         $this->assertEquals(1, Asset::count());
         $asset = Asset::first();
-        $this->assertNull($asset->asset_tag);
+        $this->assertEquals('ASSET-0001', $asset->asset_tag);
         $this->assertNull($asset->model_id);
         $this->assertNull($asset->status_id);
     }
