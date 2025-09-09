@@ -136,24 +136,26 @@ class LocationsController extends Controller
         $offset = ($request->input('offset') > $locations->count()) ? $locations->count() : app('api_offset_value');
         $limit = app('api_limit_value');
 
-        $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
-        $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : 'created_at';
+        $order = $request->input('order') === 'desc' ? 'desc' : 'asc';
+        $sort = in_array($request->input('sort'), $allowed_columns) ? $request->input('sort') : null;
 
-
-
-        switch ($request->input('sort')) {
-            case 'parent':
-                $locations->OrderParent($order);
-                break;
-            case 'manager':
-                $locations->OrderManager($order);
-                break;
-            case 'company':
-                $locations->OrderCompany($order);
-                break;
-            default:
-                $locations->orderBy($sort, $order);
-                break;
+        if ($sort) {
+            switch ($sort) {
+                case 'parent':
+                    $locations->OrderParent($order);
+                    break;
+                case 'manager':
+                    $locations->OrderManager($order);
+                    break;
+                case 'company':
+                    $locations->OrderCompany($order);
+                    break;
+                default:
+                    $locations->orderBy($sort, $order);
+                    break;
+            }
+        } else {
+            $locations->orderBy('parent_id')->orderBy('name');
         }
 
 

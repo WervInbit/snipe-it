@@ -46,12 +46,17 @@ class LocationsController extends Controller
      * @see LocationsController::postCreate() method that validates and stores the data
      * @since [v1.0]
      */
-    public function create() : View
+    public function create(Request $request) : View
     {
         $this->authorize('create', Location::class);
 
+        $location = new Location;
+        if ($request->filled('parent_id')) {
+            $location->parent_id = $request->input('parent_id');
+        }
+
         return view('locations/edit')
-            ->with('item', new Location);
+            ->with('item', $location);
     }
 
     /**

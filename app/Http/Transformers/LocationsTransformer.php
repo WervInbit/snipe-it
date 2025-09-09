@@ -83,6 +83,7 @@ class LocationsTransformer
                     'delete' => $location->isDeletable()
                 ],
                 'clone' => (Gate::allows('create', Location::class) && ($location->deleted_at == '')),
+                'create_child' => (Gate::allows('create', Location::class) && ($location->location_type != 'bin')),
             ];
 
             $array += $permissions_array;
