@@ -173,6 +173,7 @@ class AssetImageUploadTest extends TestCase
         $asset = Asset::factory()->create();
         $user = User::factory()->supervisor()->editAssets()->create();
 
+
         $this->actingAs($user)->post(route('asset-images.store', $asset), [
             'image' => [UploadedFile::fake()->image('photo1.jpg')],
             'caption' => ['front'],
@@ -180,6 +181,7 @@ class AssetImageUploadTest extends TestCase
 
         $image = $asset->images()->first();
         Storage::disk('public')->assertExists($image->file_path);
+
 
         // Deleting the cover image should clear the asset image
         $this->assertSame(Str::after($image->file_path, 'assets/'), $asset->fresh()->image);
@@ -189,6 +191,7 @@ class AssetImageUploadTest extends TestCase
         Storage::disk('public')->assertMissing($image->file_path);
         $this->assertEquals(0, $asset->images()->count());
         $this->assertNull($asset->refresh()->image);
+
 
         $response = $this->actingAs($user)->post(route('asset-images.store', $asset), [
             'image' => [UploadedFile::fake()->image('photo2.jpg')],
@@ -231,5 +234,6 @@ class AssetImageUploadTest extends TestCase
         // Delete second image, cover should be null
         $this->actingAs($user)->delete(route('asset-images.destroy', [$asset, $second]));
         $this->assertNull($asset->refresh()->image);
+
     }
 }

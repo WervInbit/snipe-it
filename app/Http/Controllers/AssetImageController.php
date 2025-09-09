@@ -117,6 +117,7 @@ class AssetImageController extends Controller
         return back()->with('success', trans('general.image_caption_updated'));
     }
 
+
     public function destroy(Request $request, Asset $asset, AssetImage $assetImage): RedirectResponse
     {
         if ($assetImage->asset_id !== $asset->id) {
@@ -124,6 +125,7 @@ class AssetImageController extends Controller
         }
 
         $this->authorize('update', $asset);
+
 
         $user = $request->user();
         abort_unless(

@@ -1540,12 +1540,14 @@
                         @endphp
                         <div class="row">
                             <div class="col-12 text-muted small mb-2">{{ trans('general.cover_image_notice') }}</div>
+
                             @forelse ($asset->images as $image)
                                 <div class="col-6 col-md-3 mb-3 text-center">
                                     <a href="{{ asset('storage/'.$image->file_path) }}" target="_blank">
                                         <img src="{{ asset('storage/'.$image->file_path) }}" class="img-fluid img-thumbnail" alt="{{ $image->caption }}">
                                     </a>
                                     <div class="mt-1">
+
                                         @if ($canManageImages)
                                             <form method="POST" action="{{ route('asset-images.update', [$asset, $image]) }}" class="form-inline justify-content-center">
                                                 @csrf
@@ -1553,6 +1555,7 @@
                                                 <input type="text" name="caption" value="{{ $image->caption }}" class="form-control form-control-sm">
                                                 <button type="submit" class="btn btn-xs btn-primary ml-1">{{ trans('general.save') }}</button>
                                             </form>
+
                                             @if ($canDeleteImages)
                                             <form method="POST" action="{{ route('asset-images.destroy', [$asset, $image]) }}" class="mt-1" onsubmit="return confirm('{{ trans('general.delete_confirm', ['item' => trans('general.image')]) }}');">
                                                 @csrf
@@ -1563,12 +1566,14 @@
                                         @else
                                             {{ $image->caption }}
                                         @endif
+
                                     </div>
                                 </div>
                             @empty
                                 <div class="col-12 text-center text-muted">{{ trans('general.no_asset_images') }}</div>
                             @endforelse
                         </div>
+
                         @if ($canManageImages)
                             @if ($asset->images->count() < 30)
                                 <form id="image-upload-form" method="POST" action="{{ route('asset-images.store', $asset) }}" enctype="multipart/form-data">
@@ -1584,6 +1589,7 @@
                                 <div class="alert alert-info mt-3">{{ trans('general.too_many_asset_images') }}</div>
                             @endif
                         @endif
+
                     </div>
 
                     @can('view', \App\Models\Asset::class)
