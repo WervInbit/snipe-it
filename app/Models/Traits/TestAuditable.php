@@ -14,25 +14,31 @@ trait TestAuditable
         });
 
         static::created(function ($model) {
-            foreach ($model->getAttributes() as $field => $value) {
-                $model->writeTestAudit($field, null, $value);
+            foreach ($model->getAuditFields() as $field) {
+                $model->writeTestAudit($field, null, $model->getAttribute($field));
             }
         });
 
         static::updating(function ($model) {
-            foreach ($model->getDirty() as $field => $new) {
-                $before = $model->getOriginal($field);
-                if ($before != $new) {
-                    $model->writeTestAudit($field, $before, $new);
+            foreach ($model->getAuditFields() as $field) {
+                if ($model->isDirty($field)) {
+                    $model->writeTestAudit($field, $model->getOriginal($field), $model->getAttribute($field));
                 }
             }
         });
 
         static::deleting(function ($model) {
-            foreach ($model->getOriginal() as $field => $value) {
-                $model->writeTestAudit($field, $value, null);
+            foreach ($model->getAuditFields() as $field) {
+                $model->writeTestAudit($field, $model->getOriginal($field), null);
             }
         });
+    }
+
+    protected function getAuditFields(): array
+    {
+        return property_exists($this, 'auditFields')
+            ? $this->auditFields
+            : array_keys($this->getAttributes());
     }
 
     protected function writeTestAudit(string $field, $before, $after): void
