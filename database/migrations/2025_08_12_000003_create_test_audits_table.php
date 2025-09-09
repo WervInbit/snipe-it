@@ -9,17 +9,19 @@ return new class extends Migration
     {
         Schema::create('test_audits', function (Blueprint $table) {
             $table->increments('id');
-            $table->morphs('auditable');
-            $table->unsignedInteger('actor_id')->nullable();
+            $table->string('auditable_type');
+            $table->unsignedInteger('auditable_id');
+            $table->unsignedInteger('user_id')->nullable();
             $table->string('field');
             $table->text('before')->nullable();
             $table->text('after')->nullable();
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
             $table->engine = 'InnoDB';
             $table->charset = 'utf8mb4';
             $table->collation = 'utf8mb4_unicode_ci';
 
-            $table->foreign('actor_id')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+            $table->index(['auditable_type', 'auditable_id']);
         });
     }
 

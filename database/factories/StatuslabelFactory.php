@@ -112,4 +112,25 @@ class StatuslabelFactory extends Factory
             ];
         });
     }
+
+    public function beingRefurbished()
+    {
+        return $this->state(function () {
+            return [
+                'name' => 'Being Refurbished',
+                'default_label' => 0,
+            ];
+        });
+    }
+
+    public function brokenSpareParts()
+    {
+        return $this->state(function () {
+            return [
+                'name' => 'Broken/Spare Parts',
+                'archived' => 1,
+                'default_label' => 0,
+            ];
+        });
+    }
 }

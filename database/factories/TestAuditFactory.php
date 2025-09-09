@@ -16,7 +16,7 @@ class TestAuditFactory extends Factory
         return [
             'auditable_type' => TestResult::class,
             'auditable_id' => TestResult::factory(),
-            'actor_id' => User::factory(),
+            'user_id' => User::factory(),
             'field' => $this->faker->word(),
             'before' => $this->faker->sentence(),
             'after' => $this->faker->sentence(),

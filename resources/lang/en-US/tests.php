@@ -14,4 +14,5 @@ return [
     'needs_cleaning' => 'Needs Cleaning',
     'repeat' => 'Repeat',
     'repeat_confirm' => 'Repeat this test using the previous values?',
+    'all_passed' => 'All Tests Passed',
 ];

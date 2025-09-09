@@ -18,7 +18,7 @@ class TestAudit extends SnipeModel
     protected $fillable = [
         'auditable_type',
         'auditable_id',
-        'actor_id',
+        'user_id',
         'field',
         'before',
         'after',
@@ -34,8 +34,8 @@ class TestAudit extends SnipeModel
         return $this->morphTo();
     }
 
-    public function actor(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'actor_id');
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

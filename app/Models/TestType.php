@@ -22,7 +22,6 @@ class TestType extends SnipeModel
         'name',
         'slug',
         'tooltip',
-        'description',
     ];
 
     /**

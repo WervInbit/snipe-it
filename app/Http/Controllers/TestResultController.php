@@ -30,6 +30,8 @@ class TestResultController extends Controller
             $result->save();
         }
 
+        $asset->refreshTestCompletionFlag();
+
         return redirect()->route('test-runs.index', $asset->id)
             ->with('success', trans('general.updated'));
     }

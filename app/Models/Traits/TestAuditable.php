@@ -40,7 +40,7 @@ trait TestAuditable
         TestAudit::create([
             'auditable_type' => static::class,
             'auditable_id'   => $this->getKey(),
-            'actor_id'       => Auth::id(),
+            'user_id'        => Auth::id(),
             'field'          => $field,
             'before'         => $this->serializeValue($before),
             'after'          => $this->serializeValue($after),

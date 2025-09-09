@@ -13,7 +13,6 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug')->unique();
             $table->string('tooltip')->nullable();
-            $table->text('description')->nullable();
             $table->timestamps();
             $table->engine = 'InnoDB';
             $table->charset = 'utf8mb4';

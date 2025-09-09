@@ -131,6 +131,7 @@ class UpdateAssetTest extends TestCase
             ->assertOk();
 
         $this->assertEquals('NEW-TAG', $asset->fresh()->asset_tag);
+
     }
 
     public function testNonAdminCannotChangeAssetTag(): void

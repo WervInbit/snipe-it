@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\Actionlog;
 use App\Models\Asset;
+use App\Models\AssetStatusHistory;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -80,6 +81,22 @@ class AssetObserver
             $logAction->created_by = auth()->id();
             $logAction->log_meta = json_encode($changed);
             $logAction->logaction('update');
+        }
+    }
+
+    /**
+     * Log status changes after the asset is updated.
+     */
+    public function updated(Asset $asset): void
+    {
+        if ($asset->wasChanged('status_id')) {
+            AssetStatusHistory::create([
+                'asset_id' => $asset->id,
+                'old_status_id' => $asset->getOriginal('status_id'),
+                'new_status_id' => $asset->status_id,
+                'changed_by' => Auth::id(),
+                'changed_at' => now(),
+            ]);
         }
     }
 

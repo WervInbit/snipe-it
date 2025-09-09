@@ -11,6 +11,7 @@ use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
 use App\Models\AssetTest;
 use App\Models\Category;
+use App\Models\TestResult;
 use App\Presenters\Presentable;
 use App\Presenters\AssetPresenter;
 use Carbon\Carbon;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Watson\Validating\ValidatingTrait;
@@ -99,6 +101,7 @@ class Asset extends Depreciable
         'updated_at'   => 'datetime',
         'deleted_at'  => 'datetime',
         'is_sellable'  => 'boolean',
+        'tests_completed_ok' => 'boolean',
     ];
 
     protected $rules = [
@@ -131,7 +134,8 @@ class Asset extends Depreciable
         'assigned_user'     => ['integer', 'nullable', 'exists:users,id,deleted_at,NULL'],
         'assigned_location' => ['integer', 'nullable', 'exists:locations,id,deleted_at,NULL', 'fmcs_location'],
         'assigned_asset'    => ['integer', 'nullable', 'exists:assets,id,deleted_at,NULL'],
-        'is_sellable'       => ['nullable', 'boolean']
+        'is_sellable'       => ['nullable', 'boolean'],
+        'tests_completed_ok' => ['nullable', 'boolean']
     ];
 
 
@@ -832,6 +836,14 @@ class Asset extends Depreciable
     }
 
     /**
+     * Status change history for this asset.
+     */
+    public function statusHistory()
+    {
+        return $this->hasMany(AssetStatusHistory::class);
+    }
+
+    /**
      * Establishes the asset -> model relationship
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
@@ -927,6 +939,40 @@ class Asset extends Depreciable
             'asset_id',
             'test_run_id'
         );
+    }
+
+    /**
+     * Names of tests that failed in the most recent run.
+     *
+     * @return Collection
+     */
+    public function latestFailedTestNames(): Collection
+    {
+        $latestRun = $this->testRuns()
+            ->with(['results' => function ($query) {
+                $query->where('status', TestResult::STATUS_FAIL)->with('type');
+            }])
+            ->first();
+
+        if (!$latestRun) {
+            return collect();
+        }
+
+        return $latestRun->results->pluck('type.name');
+    }
+
+    /**
+     * Recalculate the "all tests passed" flag based on the latest run.
+     */
+    public function refreshTestCompletionFlag(): void
+    {
+        $latestRun = $this->testRuns()->with('results')->first();
+
+        $this->tests_completed_ok = $latestRun
+            ? $latestRun->results->where('status', TestResult::STATUS_FAIL)->isEmpty()
+            : false;
+
+        $this->save();
     }
 
     /**

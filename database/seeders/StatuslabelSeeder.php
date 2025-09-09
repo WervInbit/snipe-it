@@ -33,5 +33,7 @@ class StatuslabelSeeder extends Seeder
         Statuslabel::factory()->outForRepair()->create(['created_by' => $admin->id]);
         Statuslabel::factory()->broken()->create(['created_by' => $admin->id]);
         Statuslabel::factory()->lost()->create(['created_by' => $admin->id]);
+        Statuslabel::factory()->beingRefurbished()->create(['created_by' => $admin->id]);
+        Statuslabel::factory()->brokenSpareParts()->create(['created_by' => $admin->id]);
     }
 }

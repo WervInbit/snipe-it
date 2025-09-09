@@ -25,7 +25,7 @@ class TestAuditLogsTest extends TestCase
         $this->assertDatabaseHas('test_audits', [
             'auditable_type' => TestRun::class,
             'auditable_id' => $run->id,
-            'actor_id' => $user->id,
+            'user_id' => $user->id,
             'field' => 'asset_id',
             'before' => null,
             'after' => (string) $asset->id,
@@ -38,7 +38,7 @@ class TestAuditLogsTest extends TestCase
         $this->assertDatabaseHas('test_audits', [
             'auditable_type' => TestRun::class,
             'auditable_id' => $run->id,
-            'actor_id' => $user->id,
+            'user_id' => $user->id,
             'field' => 'finished_at',
             'before' => $original ? $original->format('Y-m-d H:i:s') : null,
             'after' => $newFinish->format('Y-m-d H:i:s'),
@@ -79,7 +79,7 @@ class TestAuditLogsTest extends TestCase
         $this->assertDatabaseHas('test_audits', [
             'auditable_type' => TestResult::class,
             'auditable_id' => $result->id,
-            'actor_id' => $user->id,
+            'user_id' => $user->id,
             'field' => 'note',
             'before' => null,
             'after' => 'Checked',
