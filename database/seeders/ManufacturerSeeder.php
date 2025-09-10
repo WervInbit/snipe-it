@@ -7,12 +7,15 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
 
 class ManufacturerSeeder extends Seeder
 {
     public function run()
     {
+        Schema::disableForeignKeyConstraints();
         Manufacturer::truncate();
+        Schema::enableForeignKeyConstraints();
 
         $admin = User::where('permissions->superuser', '1')->first() ?? User::factory()->firstAdmin()->create();
 

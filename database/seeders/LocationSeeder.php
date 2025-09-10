@@ -6,12 +6,15 @@ use App\Models\Location;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
 
 class LocationSeeder extends Seeder
 {
     public function run()
     {
+        Schema::disableForeignKeyConstraints();
         Location::truncate();
+        Schema::enableForeignKeyConstraints();
         Location::factory()->count(10)->create();
 
         $src = public_path('/img/demo/locations/');

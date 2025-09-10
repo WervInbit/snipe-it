@@ -9,13 +9,16 @@ use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class LicenseSeeder extends Seeder
 {
     public function run()
     {
+        Schema::disableForeignKeyConstraints();
         License::truncate();
         LicenseSeat::truncate();
+        Schema::enableForeignKeyConstraints();
 
         if (! Category::count()) {
             $this->call(CategorySeeder::class);

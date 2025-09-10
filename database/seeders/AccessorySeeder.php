@@ -10,13 +10,16 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
 
 class AccessorySeeder extends Seeder
 {
     public function run()
     {
+        Schema::disableForeignKeyConstraints();
         Accessory::truncate();
         DB::table('accessories_checkout')->truncate();
+        Schema::enableForeignKeyConstraints();
 
         if (! Location::count()) {
             $this->call(LocationSeeder::class);

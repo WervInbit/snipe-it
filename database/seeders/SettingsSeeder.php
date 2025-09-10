@@ -6,12 +6,15 @@ use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
 
 class SettingsSeeder extends Seeder
 {
     public function run()
     {
+        Schema::disableForeignKeyConstraints();
         Setting::truncate();
+        Schema::enableForeignKeyConstraints();
         $settings = new Setting;
         $settings->per_page = 20;
         $settings->site_name = 'Snipe-IT Demo';
