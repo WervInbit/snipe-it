@@ -32,7 +32,8 @@ class AgentTestResultsTest extends TestCase
 
         $this->postJson('/api/v1/agent/test-results', $payload, [
             'Authorization' => 'Bearer secrettoken',
-        ])->assertStatus(201);
+        ])->assertStatus(200)
+            ->assertJsonStructure(['message', 'test_run_id']);
 
         $run = TestRun::where('asset_id', $asset->id)->first();
         $this->assertNotNull($run);
@@ -74,6 +75,31 @@ class AgentTestResultsTest extends TestCase
 
         $this->postJson('/api/v1/agent/test-results', $payload, [
             'Authorization' => 'Bearer secrettoken',
-        ])->assertStatus(404);
+        ])->assertStatus(404)
+            ->assertJson(['message' => 'Asset not found']);
+    }
+
+    public function test_agent_gets_400_for_validation_errors(): void
+    {
+        \App\Models\User::factory()->create();
+        $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAG999']);
+        TestType::factory()->create(['slug' => 'cpu']);
+
+        $payload = [
+            'asset_tag' => $asset->asset_tag,
+            'results' => [
+                [
+                    'test_slug' => 'cpu',
+                    'status' => 'bad-status',
+                ],
+            ],
+        ];
+
+        config(['agent.api_token' => 'secrettoken']);
+
+        $this->postJson('/api/v1/agent/test-results', $payload, [
+            'Authorization' => 'Bearer secrettoken',
+        ])->assertStatus(400)
+            ->assertJsonStructure(['message', 'errors']);
     }
 }

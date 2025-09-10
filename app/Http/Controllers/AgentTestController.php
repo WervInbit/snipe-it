@@ -19,13 +19,22 @@ class AgentTestController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $validated = $request->validate([
+        $validator = validator($request->all(), [
             'asset_tag' => ['required', 'string'],
             'results' => ['required', 'array'],
             'results.*.test_slug' => ['required', 'string', 'exists:test_types,slug'],
             'results.*.status' => ['required', 'string', 'in:' . implode(',', TestResult::STATUSES)],
             'results.*.note' => ['nullable', 'string'],
         ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors(),
+            ], 400);
+        }
+
+        $validated = $validator->validated();
 
         $asset = Asset::where('asset_tag', $validated['asset_tag'])->first();
         if (!$asset) {
@@ -70,6 +79,9 @@ class AgentTestController extends Controller
 
         $asset->refreshTestCompletionFlag();
 
-        return response()->json(['test_run_id' => $run->id], 201);
+        return response()->json([
+            'message' => 'Test results recorded',
+            'test_run_id' => $run->id,
+        ]);
     }
 }
