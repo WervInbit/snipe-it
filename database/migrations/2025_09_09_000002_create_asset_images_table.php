@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         Schema::create('asset_images', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('asset_id');
+            $table->unsignedInteger('asset_id');
             $table->string('file_path');
             $table->string('caption')->nullable();
             $table->timestamps();

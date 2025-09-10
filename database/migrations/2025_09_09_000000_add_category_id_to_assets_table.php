@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('assets', function (Blueprint $table) {
-            $table->integer('category_id')->nullable()->after('model_id');
+            $table->unsignedInteger('category_id')->nullable()->after('model_id');
         });
     }
 

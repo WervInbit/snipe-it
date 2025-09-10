@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('test_runs', function (Blueprint $table) {
-            $table->unsignedInteger('sku_id')->nullable()->after('asset_id');
+            $table->unsignedBigInteger('sku_id')->nullable()->after('asset_id');
             $table->foreign('sku_id')->references('id')->on('skus')->nullOnDelete();
         });
     }
