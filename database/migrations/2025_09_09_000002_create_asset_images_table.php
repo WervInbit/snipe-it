@@ -9,7 +9,10 @@ return new class extends Migration {
     {
         Schema::create('asset_images', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('asset_id');
+            // The assets table uses an unsigned integer primary key, so
+            // we need to ensure the foreign key column matches its type
+            // to avoid MySQL foreign key constraint errors.
+            $table->unsignedInteger('asset_id');
             $table->string('file_path');
             $table->string('caption')->nullable();
             $table->timestamps();
