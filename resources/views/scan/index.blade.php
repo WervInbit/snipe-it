@@ -17,8 +17,9 @@
     <div id="scan-error" class="alert alert-danger d-none mt-3"></div>
 
     <button id="scan-start" class="btn btn-primary btn-lg w-100 mt-3">{{ __('Start scanning') }}</button>
+    <button id="manual-toggle" class="btn btn-secondary btn-lg w-100 mt-2">{{ __('Enter tag manually') }}</button>
 
-    <form id="manual-form" class="mt-4 d-none">
+    <form id="manual-form" class="mt-3 d-none">
         <input id="manual-tag" type="text" class="form-control form-control-lg" placeholder="{{ __('Enter asset tag') }}">
         <button type="submit" class="btn btn-primary btn-lg mt-2 w-100">{{ __('Go') }}</button>
     </form>

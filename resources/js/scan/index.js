@@ -10,6 +10,7 @@ const startBtn = document.getElementById('scan-start');
 const errorEl = document.getElementById('scan-error');
 const manualForm = document.getElementById('manual-form');
 const manualInput = document.getElementById('manual-tag');
+const manualToggle = document.getElementById('manual-toggle');
 
 const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
@@ -25,6 +26,8 @@ function showError(msg) {
 
 function showManual() {
   if (manualForm) manualForm.classList.remove('d-none');
+  if (startBtn) startBtn.classList.add('d-none');
+  if (manualToggle) manualToggle.classList.add('d-none');
 }
 
 function beep() {
@@ -106,6 +109,7 @@ function sample() {
 if (startBtn) {
   startBtn.addEventListener('click', () => {
     startBtn.classList.add('d-none');
+    if (manualToggle) manualToggle.classList.add('d-none');
     start();
   });
 }
@@ -115,6 +119,12 @@ if (manualForm) {
     e.preventDefault();
     const tag = manualInput.value.trim();
     if (tag) redirect(tag);
+  });
+}
+
+if (manualToggle) {
+  manualToggle.addEventListener('click', () => {
+    showManual();
   });
 }
 
