@@ -99,17 +99,20 @@ dir="{{ Helper::determineLanguageDirection() }}">
         <div class="wrapper">
 
             <header class="main-header">
-
-                <!-- Logo -->
-
+                @php
+                    $user = auth()->user();
+                    $isRefurbisher = $user && $user->groups->contains('name', 'Refurbisher');
+                @endphp
 
                 <!-- Header Navbar: style can be found in header.less -->
                 <nav class="navbar navbar-static-top" role="navigation">
+                    @unless($isRefurbisher)
                     <!-- Sidebar toggle button above the compact sidenav -->
                     <a href="#" style="color: white" class="sidebar-toggle btn btn-white" data-toggle="push-menu"
                        role="button">
                         <span class="sr-only">{{ trans('general.toggle_navigation') }}</span>
                     </a>
+                    @endunless
                     <div class="nav navbar-nav navbar-left">
                         <div class="left-navblock">
                             @if ($snipeSettings->brand == '3')
@@ -139,8 +142,21 @@ dir="{{ Helper::determineLanguageDirection() }}">
                     </div>
 
                     <!-- Navbar Right Menu -->
-                    <div class="navbar-custom-menu">
-                        <ul class="nav navbar-nav">
+                      <div class="navbar-custom-menu">
+                          @if($isRefurbisher)
+                          <ul class="nav navbar-nav">
+                              <li>
+                                  <a href="{{ route('logout.get') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                      <x-icon type="logout" class="fa-fw" />
+                                      <span class="sr-only">{{ trans('general.logout') }}</span>
+                                  </a>
+                                  <form id="logout-form" action="{{ route('logout.post') }}" method="POST" style="display: none;">
+                                      {{ csrf_field() }}
+                                  </form>
+                              </li>
+                          </ul>
+                          @else
+                          <ul class="nav navbar-nav">
                             @can('index', \App\Models\Asset::class)
                                 <li aria-hidden="true"{!! (request()->is('hardware*') ? ' class="active"' : '') !!}>
                                     <a href="{{ url('hardware') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=1" : ''}} tabindex="-1" data-tooltip="true" data-placement="bottom" data-title="{{ trans('general.assets') }}">
@@ -435,21 +451,25 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                     </a>
                                 </li>
                             @endcan
-                        </ul>
-                    </div>
+                          </ul>
+                          @endif
+                      </div>
                 </nav>
-                <a href="#" style="float:left" class="sidebar-toggle-mobile visible-xs btn" data-toggle="push-menu"
-                   role="button">
-                    <span class="sr-only">{{ trans('general.toggle_navigation') }}</span>
-                    <x-icon type="nav-toggle" />
-                </a>
-                <!-- Sidebar toggle button-->
+                  @unless($isRefurbisher)
+                  <a href="#" style="float:left" class="sidebar-toggle-mobile visible-xs btn" data-toggle="push-menu"
+                     role="button">
+                      <span class="sr-only">{{ trans('general.toggle_navigation') }}</span>
+                      <x-icon type="nav-toggle" />
+                  </a>
+                  @endunless
+                  <!-- Sidebar toggle button-->
             </header>
 
-            <!-- Left side column. contains the logo and sidebar -->
-            <aside class="main-sidebar">
-                <!-- sidebar: style can be found in sidebar.less -->
-                <section class="sidebar">
+              @unless($isRefurbisher)
+              <!-- Left side column. contains the logo and sidebar -->
+              <aside class="main-sidebar">
+                  <!-- sidebar: style can be found in sidebar.less -->
+                  <section class="sidebar">
                     <!-- sidebar menu: : style can be found in sidebar.less -->
                     <ul class="sidebar-menu" data-widget="tree" {{ \App\Helpers\Helper::determineLanguageDirection() == 'rtl' ? 'style="margin-right:12px' : '' }}>
                         @can('admin')
@@ -872,9 +892,10 @@ dir="{{ Helper::determineLanguageDirection() }}">
                     </ul>
                 </section>
                 <!-- /.sidebar -->
-            </aside>
+              </aside>
+              @endunless
 
-            <!-- Content Wrapper. Contains page content -->
+              <!-- Content Wrapper. Contains page content -->
 
             <div class="content-wrapper" role="main" id="setting-list">
 
