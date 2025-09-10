@@ -8,6 +8,7 @@ const stopBtn = document.getElementById('scan-stop');
 const cameraSelect = document.getElementById('camera-select');
 const assetInput = document.getElementById('asset-tag');
 const form = document.getElementById('scan-manual');
+const byTagUrl = '/hardware/bytag/';
 // Diagnostics elements
 const diagBtn = document.getElementById('scan-diagnostics');
 const diagReqBtn = document.getElementById('scan-request-perm');
@@ -18,11 +19,21 @@ const diagMedia = document.getElementById('diag-mediadev');
 const diagVideos = document.getElementById('diag-videos');
 const diagLog = document.getElementById('scan-diag-log');
 
+function redirectToAsset(data) {
+    const value = data.trim();
+    try {
+        const url = new URL(value);
+        window.location.href = url.href;
+    } catch (e) {
+        window.location.href = `${byTagUrl}${encodeURIComponent(value)}`;
+    }
+}
+
 form.addEventListener('submit', (e) => {
     e.preventDefault();
     const tag = assetInput.value.trim();
     if (tag) {
-        window.location.href = `/scan/resolve/${encodeURIComponent(tag)}`;
+        redirectToAsset(tag);
     }
 });
 
@@ -98,7 +109,7 @@ async function startScan() {
             if (result) {
                 const tag = result.getText ? result.getText() : result.text;
                 if (tag) {
-                    window.location.href = `/scan/resolve/${encodeURIComponent(tag)}`;
+                    redirectToAsset(tag);
                 }
             }
             if (err && err.name && err.name !== 'NotFoundException') {
@@ -115,7 +126,7 @@ async function startScan() {
                     if (result) {
                         const tag = result.getText ? result.getText() : result.text;
                         if (tag) {
-                            window.location.href = `/scan/resolve/${encodeURIComponent(tag)}`;
+                            redirectToAsset(tag);
                         }
                     }
                     if (err && err.name && err.name !== 'NotFoundException') {

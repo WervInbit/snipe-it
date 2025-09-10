@@ -27,7 +27,7 @@
         const canvas = canvasElement.getContext('2d');
         const result = document.getElementById('qr-result');
         const switchBtn = document.getElementById('switch-camera');
-        const resolveUrl = "{{ route('scan.resolve', ['code' => '__CODE__']) }}";
+        const byTagUrl = "{{ url('hardware/bytag') }}/";
         let currentStream;
         let devices = [];
         let currentDeviceId;
@@ -61,8 +61,15 @@
                 const code = jsQR(imageData.data, imageData.width, imageData.height);
                 if (code) {
                     currentStream.getTracks().forEach(t => t.stop());
-                    const url = resolveUrl.replace('__CODE__', encodeURIComponent(code.data));
-                    window.location.href = url;
+                    const data = code.data.trim();
+                    let target = data;
+                    try {
+                        const parsed = new URL(data);
+                        target = parsed.href;
+                    } catch (e) {
+                        target = byTagUrl + encodeURIComponent(data);
+                    }
+                    window.location.href = target;
                     return;
                 }
             }
