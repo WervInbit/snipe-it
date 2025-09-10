@@ -1,31 +1,31 @@
 @extends('layouts/default')
 
 @section('title')
-    Start
+    {{ __('Start') }}
     @parent
 @stop
 
 @section('content')
 <div class="text-center">
-    <h1>Welcome, {{ auth()->user()->present()->name() }}</h1>
+    <h1>{{ __('Welcome, :name', ['name' => auth()->user()->present()->name()]) }}</h1>
     @can('scanning')
-        <a href="{{ route('scan') }}"
-           class="btn btn-primary btn-lg btn-block"
-           style="max-width:300px;margin:15px auto;">
-            <i class="fas fa-camera"></i> Scan QR
-        </a>
+        @include('start.partials.action-button', [
+            'href' => route('scan'),
+            'icon' => 'camera',
+            'label' => __('Scan QR')
+        ])
     @endcan
     @can('assets.create')
-        <a href="{{ route('hardware.create') }}"
-           class="btn btn-primary btn-lg btn-block"
-           style="max-width:300px;margin:15px auto;">
-            <i class="fas fa-plus"></i> New Asset
-        </a>
+        @include('start.partials.action-button', [
+            'href' => route('hardware.create'),
+            'icon' => 'plus',
+            'label' => trans('general.new_asset')
+        ])
     @endcan
-    <a href="{{ route('home') }}"
-       class="btn btn-primary btn-lg btn-block"
-       style="max-width:300px;margin:15px auto;">
-        <i class="fas fa-cog"></i> Admin Panel
-    </a>
+    @include('start.partials.action-button', [
+        'href' => route('home'),
+        'icon' => 'cog',
+        'label' => __('Admin Panel')
+    ])
 </div>
 @stop
