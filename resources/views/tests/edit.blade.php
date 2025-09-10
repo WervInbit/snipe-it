@@ -5,7 +5,7 @@
 @endsection
 
 @section('content')
-<form method="POST" action="{{ route('test-results.update', [$asset->id, $testRun->id]) }}" enctype="multipart/form-data">
+<form class="container" method="POST" action="{{ route('test-results.update', [$asset->id, $testRun->id]) }}" enctype="multipart/form-data">
     @csrf
     @method('PUT')
     <div class="row">
@@ -44,7 +44,7 @@
             </div>
         @endforeach
     </div>
-    <button type="submit" class="btn btn-primary btn-block">{{ trans('button.save') }}</button>
+    <button type="submit" class="btn btn-primary btn-lg btn-block">{{ trans('button.save') }}</button>
 </form>
 @endsection
 
