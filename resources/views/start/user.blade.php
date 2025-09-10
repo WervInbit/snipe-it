@@ -6,8 +6,8 @@
 @stop
 
 @section('content')
-<div class="text-center">
-    <h1>{{ __('Welcome, :name', ['name' => auth()->user()->present()->name()]) }}</h1>
+<div class="container py-4 text-center">
+    <h1 class="h4 mb-4">{{ __('Welcome, :name', ['name' => auth()->user()->present()->name()]) }}</h1>
     @include('start.partials.action-button', [
         'href' => route('view-assets'),
         'icon' => 'box',
