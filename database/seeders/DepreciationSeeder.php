@@ -5,12 +5,14 @@ namespace Database\Seeders;
 use App\Models\Depreciation;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DepreciationSeeder extends Seeder
 {
     public function run()
     {
-        Depreciation::truncate();
+        Depreciation::query()->delete();
+        DB::statement('ALTER TABLE depreciations AUTO_INCREMENT = 1');
 
         $admin = User::where('permissions->superuser', '1')->first() ?? User::factory()->firstAdmin()->create();
 

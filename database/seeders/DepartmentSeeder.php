@@ -6,12 +6,14 @@ use App\Models\Department;
 use App\Models\Location;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DepartmentSeeder extends Seeder
 {
     public function run()
     {
-        Department::truncate();
+        Department::query()->delete();
+        DB::statement('ALTER TABLE departments AUTO_INCREMENT = 1');
 
         if (! Location::count()) {
             $this->call(LocationSeeder::class);

@@ -5,13 +5,15 @@ namespace Database\Seeders;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class SettingsSeeder extends Seeder
 {
     public function run()
     {
-        Setting::truncate();
+        Setting::query()->delete();
+        DB::statement('ALTER TABLE settings AUTO_INCREMENT = 1');
         $settings = new Setting;
         $settings->per_page = 20;
         $settings->site_name = 'Snipe-IT Demo';

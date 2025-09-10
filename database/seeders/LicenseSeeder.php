@@ -8,14 +8,17 @@ use App\Models\LicenseSeat;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class LicenseSeeder extends Seeder
 {
     public function run()
     {
-        License::truncate();
-        LicenseSeat::truncate();
+        LicenseSeat::query()->delete();
+        DB::statement('ALTER TABLE license_seats AUTO_INCREMENT = 1');
+        License::query()->delete();
+        DB::statement('ALTER TABLE licenses AUTO_INCREMENT = 1');
 
         if (! Category::count()) {
             $this->call(CategorySeeder::class);

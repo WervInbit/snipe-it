@@ -12,8 +12,10 @@ class ComponentSeeder extends Seeder
 {
     public function run()
     {
-        Component::truncate();
-        DB::table('components_assets')->truncate();
+        DB::table('components_assets')->delete();
+        DB::statement('ALTER TABLE components_assets AUTO_INCREMENT = 1');
+        Component::query()->delete();
+        DB::statement('ALTER TABLE components AUTO_INCREMENT = 1');
 
         if (! Company::count()) {
             $this->call(CompanySeeder::class);

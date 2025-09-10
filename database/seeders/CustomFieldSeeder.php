@@ -22,9 +22,12 @@ class CustomFieldSeeder extends Seeder
                 });
             }
         }
-        CustomField::truncate();
-        CustomFieldset::truncate();
-        DB::table('custom_field_custom_fieldset')->truncate();
+        DB::table('custom_field_custom_fieldset')->delete();
+        DB::statement('ALTER TABLE custom_field_custom_fieldset AUTO_INCREMENT = 1');
+        CustomField::query()->delete();
+        DB::statement('ALTER TABLE custom_fields AUTO_INCREMENT = 1');
+        CustomFieldset::query()->delete();
+        DB::statement('ALTER TABLE custom_fieldsets AUTO_INCREMENT = 1');
 
         CustomFieldset::factory()->count(1)->mobile()->create();
         CustomFieldset::factory()->count(1)->computer()->create();

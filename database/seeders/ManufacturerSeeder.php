@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Manufacturer;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -12,7 +13,8 @@ class ManufacturerSeeder extends Seeder
 {
     public function run()
     {
-        Manufacturer::truncate();
+        Manufacturer::query()->delete();
+        DB::statement('ALTER TABLE manufacturers AUTO_INCREMENT = 1');
 
         $admin = User::where('permissions->superuser', '1')->first() ?? User::factory()->firstAdmin()->create();
 

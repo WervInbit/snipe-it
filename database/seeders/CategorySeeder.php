@@ -5,12 +5,14 @@ namespace Database\Seeders;
 use App\Models\Category;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class CategorySeeder extends Seeder
 {
     public function run()
     {
-        Category::truncate();
+        Category::query()->delete();
+        DB::statement('ALTER TABLE categories AUTO_INCREMENT = 1');
 
         $admin = User::where('permissions->superuser', '1')->first() ?? User::factory()->firstAdmin()->create();
 

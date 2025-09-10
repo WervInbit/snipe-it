@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Location;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -11,7 +12,8 @@ class LocationSeeder extends Seeder
 {
     public function run()
     {
-        Location::truncate();
+        Location::query()->delete();
+        DB::statement('ALTER TABLE locations AUTO_INCREMENT = 1');
         Location::factory()->count(10)->create();
 
         $src = public_path('/img/demo/locations/');

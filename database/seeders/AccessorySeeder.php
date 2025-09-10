@@ -15,8 +15,10 @@ class AccessorySeeder extends Seeder
 {
     public function run()
     {
-        Accessory::truncate();
-        DB::table('accessories_checkout')->truncate();
+        DB::table('accessories_checkout')->delete();
+        DB::statement('ALTER TABLE accessories_checkout AUTO_INCREMENT = 1');
+        Accessory::query()->delete();
+        DB::statement('ALTER TABLE accessories AUTO_INCREMENT = 1');
 
         if (! Location::count()) {
             $this->call(LocationSeeder::class);

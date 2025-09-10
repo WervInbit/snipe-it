@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Company;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -17,7 +18,8 @@ class CompanySeeder extends Seeder
     public function run()
     {
         Log::debug('Seed companies');
-        Company::truncate();
+        Company::query()->delete();
+        DB::statement('ALTER TABLE companies AUTO_INCREMENT = 1');
         Company::factory()->count(4)->create();
 
         $src = public_path('/img/demo/companies/');

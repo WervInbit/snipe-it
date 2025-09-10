@@ -11,8 +11,10 @@ class ConsumableSeeder extends Seeder
 {
     public function run()
     {
-        Consumable::truncate();
-        DB::table('consumables_users')->truncate();
+        DB::table('consumables_users')->delete();
+        DB::statement('ALTER TABLE consumables_users AUTO_INCREMENT = 1');
+        Consumable::query()->delete();
+        DB::statement('ALTER TABLE consumables AUTO_INCREMENT = 1');
 
         $admin = User::where('permissions->superuser', '1')->first() ?? User::factory()->firstAdmin()->create();
 
