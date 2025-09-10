@@ -6,24 +6,26 @@
 @stop
 
 @section('content')
-<div class="row">
+<div class="text-center">
+    <h1>Welcome, {{ auth()->user()->present()->name() }}</h1>
     @can('scanning')
-        <div class="col-xs-12 col-sm-6 col-md-3" style="margin-bottom: 15px;">
-            <a href="{{ route('scan') }}" class="btn btn-primary btn-block">Scan QR</a>
-        </div>
+        <a href="{{ route('scan') }}"
+           class="btn btn-primary btn-lg btn-block"
+           style="max-width:300px;margin:15px auto;">
+            <i class="fas fa-camera"></i> Scan QR
+        </a>
     @endcan
     @can('assets.create')
-        <div class="col-xs-12 col-sm-6 col-md-3" style="margin-bottom: 15px;">
-            <a href="{{ route('hardware.create') }}" class="btn btn-primary btn-block">New Asset</a>
-        </div>
+        <a href="{{ route('hardware.create') }}"
+           class="btn btn-primary btn-lg btn-block"
+           style="max-width:300px;margin:15px auto;">
+            <i class="fas fa-plus"></i> New Asset
+        </a>
     @endcan
-    @can('assets.delete')
-        <div class="col-xs-12 col-sm-6 col-md-3" style="margin-bottom: 15px;">
-            <a href="{{ route('hardware.index') }}" class="btn btn-primary btn-block">Management</a>
-        </div>
-    @endcan
-    <div class="col-xs-12 col-sm-6 col-md-3" style="margin-bottom: 15px;">
-        <a href="{{ route('users.index') }}" class="btn btn-primary btn-block">Users</a>
-    </div>
+    <a href="{{ route('home') }}"
+       class="btn btn-primary btn-lg btn-block"
+       style="max-width:300px;margin:15px auto;">
+        <i class="fas fa-cog"></i> Admin Panel
+    </a>
 </div>
 @stop

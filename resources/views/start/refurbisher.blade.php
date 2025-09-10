@@ -6,11 +6,14 @@
 @stop
 
 @section('content')
-<div class="row">
+<div class="text-center">
+    <h1>Welcome, {{ auth()->user()->present()->name() }}</h1>
     @can('scanning')
-        <div class="col-xs-12 col-sm-6 col-md-4" style="margin-bottom: 15px;">
-            <a href="{{ route('scan') }}" class="btn btn-primary btn-block">Scan QR</a>
-        </div>
+        <a href="{{ route('scan') }}"
+           class="btn btn-primary btn-lg btn-block"
+           style="max-width:300px;margin:15px auto;">
+            <i class="fas fa-camera"></i> Scan QR
+        </a>
     @endcan
 </div>
 @stop
