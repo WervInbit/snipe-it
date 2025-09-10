@@ -10,13 +10,13 @@ use App\Models\Ldap;
 use App\Services\Saml;
 use Google2FA;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
-use Redirect;
 
 /**
  * This controller handles authentication for the user, including local
@@ -411,6 +411,14 @@ class LoginController extends Controller
         }
 
         return view('auth.two_factor');
+    }
+
+    /**
+     * Redirect users to the start screen after successful authentication.
+     */
+    protected function authenticated(Request $request, User $user): RedirectResponse
+    {
+        return redirect()->intended(route('start'));
     }
 
     /**
