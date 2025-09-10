@@ -233,7 +233,7 @@
 
                     @can('update', \App\Models\Asset::class)
                         <li class="pull-right">
-                            <a href="#" data-toggle="modal" data-target="#uploadFileModal">
+                            <a href="#" onclick="var f=document.getElementById('upload-form');f.style.display=f.style.display==='none'?'block':'none';return false;">
                                 <span class="hidden-lg hidden-xl hidden-md">
                                     <x-icon type="paperclip" class="fa-2x" />
                                 </span>
@@ -246,6 +246,15 @@
                     @endcan
 
                 </ul>
+
+                @can('update', \App\Models\Asset::class)
+                    <form id="upload-form" method="POST" action="{{ route('ui.files.store', ['object_type' => 'assets', 'id' => $asset->id]) }}" enctype="multipart/form-data" style="display:none; margin:15px 0;">
+                        @csrf
+                        <input type="file" name="file[]" multiple class="form-control" accept="{{ config('filesystems.allowed_upload_mimetypes') }}">
+                        <textarea class="form-control" name="notes" placeholder="{{ trans('general.notes') }}" rows="3" style="margin-top:10px;"></textarea>
+                        <button type="submit" class="btn btn-primary" style="margin-top:10px;">{{ trans('button.upload') }}</button>
+                    </form>
+                @endcan
 
                 <div class="tab-content">
                     <div class="tab-pane fade in active" id="details">
@@ -326,11 +335,17 @@
                                         <!-- Add notes -->
                                         @can('update', \App\Models\Asset::class)
                                             <div class="col-md-12 hidden-print" style="padding-top: 5px;">
-                                                <a href="#" style="width: 100%" data-toggle="modal" data-target="#createNoteModal" class="btn btn-sm btn-primary btn-block btn-social hidden-print">
+                                                <button type="button" style="width: 100%" class="btn btn-sm btn-primary btn-block btn-social hidden-print" onclick="var f=document.getElementById('note-form');f.style.display=f.style.display==='none'?'block':'none';">
                                                     <x-icon type="note" />
                                                     {{ trans('general.add_note') }}
-                                                </a>
-                                                @include ('modals.add-note', ['type' => 'asset', 'id' => $asset->id])
+                                                </button>
+                                                <form id="note-form" method="POST" action="{{ route('notes.store') }}" style="display:none; margin-top:10px;">
+                                                    @csrf
+                                                    <input type="hidden" name="type" value="asset">
+                                                    <input type="hidden" name="id" value="{{ $asset->id }}">
+                                                    <textarea class="form-control" name="note" required></textarea>
+                                                    <button type="submit" class="btn btn-primary" style="margin-top:10px;">{{ trans('general.save') }}</button>
+                                                </form>
                                             </div>
                                         @endcan
 
@@ -380,8 +395,7 @@
                                     <div class="col-md-12 hidden-print" style="padding-top: 30px; padding-bottom: 30px;">
 
                                         @if ($asset->deleted_at=='')
-                                            <button class="btn btn-sm btn-block btn-danger btn-social delete-asset" data-toggle="modal" data-title="{{ trans('general.delete') }}" data-content="{{ trans('general.sure_to_delete_var', ['item' => $asset->asset_tag]) }}" data-target="#dataConfirmModal">
-
+                                            <button class="btn btn-sm btn-block btn-danger btn-social delete-asset" onclick="return confirm('{{ trans('general.sure_to_delete_var', ['item' => $asset->asset_tag]) }}');">
                                                 <x-icon type="delete" />
                                                 @if ($asset->assignedTo)
                                                     {{ trans('general.checkin_and_delete') }}
@@ -1727,9 +1741,6 @@
         </div><!-- nav-tabs-custom -->
     </div>
 
-    @can('update', \App\Models\Asset::class)
-        @include ('modals.upload-file', ['item_type' => 'asset', 'item_id' => $asset->id])
-    @endcan
 @stop
 @section('moar_scripts')
     @include ('partials.bootstrap-table')

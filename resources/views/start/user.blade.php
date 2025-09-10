@@ -1,14 +1,17 @@
 @extends('layouts/default')
 
 @section('title')
-    Start
+    {{ __('Start') }}
     @parent
 @stop
 
 @section('content')
-<div class="row">
-    <div class="col-xs-12 col-sm-6 col-md-4" style="margin-bottom: 15px;">
-        <a href="{{ route('view-assets') }}" class="btn btn-primary btn-block">My Assets</a>
-    </div>
+<div class="text-center">
+    <h1>{{ __('Welcome, :name', ['name' => auth()->user()->present()->name()]) }}</h1>
+    @include('start.partials.action-button', [
+        'href' => route('view-assets'),
+        'icon' => 'box',
+        'label' => __('My Assets')
+    ])
 </div>
 @stop

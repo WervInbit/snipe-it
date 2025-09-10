@@ -8,6 +8,8 @@ const stopBtn = document.getElementById('scan-stop');
 const cameraSelect = document.getElementById('camera-select');
 const assetInput = document.getElementById('asset-tag');
 const form = document.getElementById('scan-manual');
+const byTagUrl = '/hardware/bytag/';
+const apiByTagUrl = '/api/v1/assets/bytag/';
 // Diagnostics elements
 const diagBtn = document.getElementById('scan-diagnostics');
 const diagReqBtn = document.getElementById('scan-request-perm');
@@ -18,11 +20,36 @@ const diagMedia = document.getElementById('diag-mediadev');
 const diagVideos = document.getElementById('diag-videos');
 const diagLog = document.getElementById('scan-diag-log');
 
+async function redirectToAsset(data) {
+    const value = data.trim();
+    try {
+        const url = new URL(value);
+        window.location.href = url.href;
+    } catch (e) {
+        try {
+            const resp = await fetch(`${apiByTagUrl}${encodeURIComponent(value)}`, { headers: { Accept: 'application/json' } });
+            if (resp.ok) {
+                const json = await resp.json();
+                const id = json && json.data && json.data.id;
+                if (id) {
+                    window.location.href = `/hardware/${id}`;
+                    return;
+                }
+            }
+            showError('Asset not found. Please try again or check the QR code.');
+            startScan();
+        } catch (err) {
+            showError('Asset lookup failed. Please try again.');
+            startScan();
+        }
+    }
+}
+
 form.addEventListener('submit', (e) => {
     e.preventDefault();
     const tag = assetInput.value.trim();
     if (tag) {
-        window.location.href = `/scan/resolve/${encodeURIComponent(tag)}`;
+        redirectToAsset(tag);
     }
 });
 
@@ -46,7 +73,7 @@ function showStatus(msg) {
 
 async function startScan() {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        const msg = 'Camera access unavailable. Use HTTPS and allow camera permissions.';
+        const msg = 'Camera access unavailable. Allow permissions or enter the asset tag manually.';
         showError(msg);
         return;
     }
@@ -98,7 +125,8 @@ async function startScan() {
             if (result) {
                 const tag = result.getText ? result.getText() : result.text;
                 if (tag) {
-                    window.location.href = `/scan/resolve/${encodeURIComponent(tag)}`;
+                    try { codeReader.reset(); } catch (e) { /* ignore */ }
+                    redirectToAsset(tag);
                 }
             }
             if (err && err.name && err.name !== 'NotFoundException') {
@@ -115,7 +143,8 @@ async function startScan() {
                     if (result) {
                         const tag = result.getText ? result.getText() : result.text;
                         if (tag) {
-                            window.location.href = `/scan/resolve/${encodeURIComponent(tag)}`;
+                            try { codeReader.reset(); } catch (e) { /* ignore */ }
+                            redirectToAsset(tag);
                         }
                     }
                     if (err && err.name && err.name !== 'NotFoundException') {

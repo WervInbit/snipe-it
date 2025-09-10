@@ -1,29 +1,31 @@
 @extends('layouts/default')
 
 @section('title')
-    Start
+    {{ __('Start') }}
     @parent
 @stop
 
 @section('content')
-<div class="row">
+<div class="text-center">
+    <h1>{{ __('Welcome, :name', ['name' => auth()->user()->present()->name()]) }}</h1>
     @can('scanning')
-        <div class="col-xs-12 col-sm-6 col-md-3" style="margin-bottom: 15px;">
-            <a href="{{ route('scan') }}" class="btn btn-primary btn-block">Scan QR</a>
-        </div>
+        @include('start.partials.action-button', [
+            'href' => route('scan'),
+            'icon' => 'camera',
+            'label' => __('Scan QR')
+        ])
     @endcan
     @can('assets.create')
-        <div class="col-xs-12 col-sm-6 col-md-3" style="margin-bottom: 15px;">
-            <a href="{{ route('hardware.create') }}" class="btn btn-primary btn-block">New Asset</a>
-        </div>
+        @include('start.partials.action-button', [
+            'href' => route('hardware.create'),
+            'icon' => 'plus',
+            'label' => trans('general.new_asset')
+        ])
     @endcan
-    @can('assets.delete')
-        <div class="col-xs-12 col-sm-6 col-md-3" style="margin-bottom: 15px;">
-            <a href="{{ route('hardware.index') }}" class="btn btn-primary btn-block">Management</a>
-        </div>
-    @endcan
-    <div class="col-xs-12 col-sm-6 col-md-3" style="margin-bottom: 15px;">
-        <a href="{{ route('users.index') }}" class="btn btn-primary btn-block">Users</a>
-    </div>
+    @include('start.partials.action-button', [
+        'href' => route('home'),
+        'icon' => 'cog',
+        'label' => __('Admin Panel')
+    ])
 </div>
 @stop
