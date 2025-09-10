@@ -11,11 +11,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
-class AgentTestController extends Controller
+class AgentReportController extends Controller
 {
+    /**
+     * Handle a report submission from the local agent.
+     */
     public function store(Request $request): JsonResponse
     {
-
         $token = $request->bearerToken();
         if (!$token || !hash_equals(config('agent.api_token'), $token)) {
             return response()->json(['message' => 'Unauthorized'], 401);
@@ -26,7 +28,22 @@ class AgentTestController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
+        $type = $request->input('type');
+        if ($type && $type !== 'test_results') {
+            return response()->json(['message' => 'Unsupported report type'], 400);
+        }
+
+        // Future report types (e.g. wipe certificates) can be dispatched here.
+        return $this->handleTestResults($request);
+    }
+
+    /**
+     * Store a test results report and its associated outcomes.
+     */
+    protected function handleTestResults(Request $request): JsonResponse
+    {
         $validator = validator($request->all(), [
+            'type' => ['required', 'string', 'in:test_results'],
             'asset_tag' => ['required', 'string'],
             'results' => ['required', 'array'],
             'results.*.test_slug' => ['required', 'string', 'exists:test_types,slug'],

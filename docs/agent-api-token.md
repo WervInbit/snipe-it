@@ -1,14 +1,19 @@
 # Agent API Token
 
-The local Windows agent must authenticate when submitting test results.
+The local Windows agent must authenticate when submitting reports such as test
+results.
 Generate a shared token and set it in the server's `.env` file:
 
 ```
 AGENT_API_TOKEN=your-secret
 ```
 
-Configure the agent to include this token in the `Authorization` header when
-calling `POST /api/v1/agent/test-results`:
+Every request must specify a `type` indicating the report being submitted. For
+now only `test_results` is supported, but additional report types (such as wipe
+certificates) may be added later.
+
+Configure the agent to include the token in the `Authorization` header when
+calling `POST /api/v1/agent/reports` with `type` set to `test_results`:
 
 ```
 Authorization: Bearer your-secret

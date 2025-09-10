@@ -20,6 +20,7 @@ class AgentTestResultsTest extends TestCase
         $ram = TestType::factory()->create(['slug' => 'ram']);
 
         $payload = [
+            'type' => 'test_results',
             'asset_tag' => $asset->asset_tag,
             'results' => [
                 [
@@ -37,7 +38,7 @@ class AgentTestResultsTest extends TestCase
 
         Log::spy();
 
-        $this->postJson('/api/v1/agent/test-results', $payload, [
+        $this->postJson('/api/v1/agent/reports', $payload, [
             'Authorization' => 'Bearer secrettoken',
         ])->assertStatus(200)
             ->assertJsonStructure(['message', 'test_run_id']);
@@ -89,6 +90,7 @@ class AgentTestResultsTest extends TestCase
         $type = TestType::factory()->create(['slug' => 'cpu']);
 
         $payload = [
+            'type' => 'test_results',
             'asset_tag' => 'MISSING_TAG',
             'results' => [
                 [
@@ -100,7 +102,7 @@ class AgentTestResultsTest extends TestCase
 
         config(['agent.api_token' => 'secrettoken']);
 
-        $this->postJson('/api/v1/agent/test-results', $payload, [
+        $this->postJson('/api/v1/agent/reports', $payload, [
             'Authorization' => 'Bearer secrettoken',
         ])->assertStatus(404)
             ->assertJson(['message' => 'Asset not found']);
@@ -113,6 +115,7 @@ class AgentTestResultsTest extends TestCase
         TestType::factory()->create(['slug' => 'cpu']);
 
         $payload = [
+            'type' => 'test_results',
             'asset_tag' => $asset->asset_tag,
             'results' => [
                 [
@@ -124,7 +127,7 @@ class AgentTestResultsTest extends TestCase
 
         config(['agent.api_token' => 'secrettoken']);
 
-        $this->postJson('/api/v1/agent/test-results', $payload, [
+        $this->postJson('/api/v1/agent/reports', $payload, [
             'Authorization' => 'Bearer secrettoken',
         ])->assertStatus(400)
             ->assertJsonStructure(['message', 'errors']);
@@ -137,6 +140,7 @@ class AgentTestResultsTest extends TestCase
         $cpu = TestType::factory()->create(['slug' => 'cpu']);
 
         $payload = [
+            'type' => 'test_results',
             'asset_tag' => $asset->asset_tag,
             'results' => [
                 [
@@ -149,7 +153,7 @@ class AgentTestResultsTest extends TestCase
         config(['agent.api_token' => 'secrettoken']);
         config(['agent.allowed_ips' => ['10.0.0.1']]);
 
-        $this->postJson('/api/v1/agent/test-results', $payload, [
+        $this->postJson('/api/v1/agent/reports', $payload, [
             'Authorization' => 'Bearer secrettoken',
         ])->assertStatus(401)
             ->assertJson(['message' => 'Unauthorized']);
