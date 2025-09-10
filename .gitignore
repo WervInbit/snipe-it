@@ -72,6 +72,9 @@ storage/ldap_client_tls.key
 
 /.phpunit.cache
 public/js/dist/
+public/build/
+public/mix-manifest.json
+public/**/*.map
 docker-compose.yml
 Dockerfile
 Dockerfile.scheduler

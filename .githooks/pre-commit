@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# Prevent committing built assets
+if git diff --cached --name-only | grep -E '^public/(js/dist|build|.*\.map|mix-manifest\.json)'; then
+  echo 'ERROR: Attempting to commit compiled assets under public/.' >&2
+  exit 1
+fi
+
+exit 0
