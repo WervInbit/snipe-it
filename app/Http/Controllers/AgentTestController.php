@@ -8,6 +8,7 @@ use App\Models\TestResult;
 use App\Models\TestType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class AgentTestController extends Controller
@@ -47,9 +48,17 @@ class AgentTestController extends Controller
             return response()->json(['message' => 'Asset not found'], 404);
         }
 
+        $agentUserId = config('agent.user_id');
+        if ($agentUserId) {
+            Auth::onceUsingId($agentUserId);
+        }
+
         $run = new TestRun();
         $run->asset()->associate($asset);
         $run->sku()->associate($asset->sku);
+        if ($agentUserId) {
+            $run->user_id = $agentUserId;
+        }
         $run->started_at = now();
         $run->finished_at = now();
         $run->save();
@@ -76,7 +85,7 @@ class AgentTestController extends Controller
         }
 
         $run->audits()->create([
-            'user_id' => null,
+            'user_id' => $agentUserId,
             'field' => 'source',
             'before' => null,
             'after' => 'agent',

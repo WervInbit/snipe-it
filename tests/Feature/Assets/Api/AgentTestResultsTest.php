@@ -14,6 +14,7 @@ class AgentTestResultsTest extends TestCase
     public function test_agent_can_submit_test_results(): void
     {
         \App\Models\User::factory()->create();
+        $agent = \App\Models\User::factory()->create();
         $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAG123']);
         $cpu = TestType::factory()->create(['slug' => 'cpu']);
         $ram = TestType::factory()->create(['slug' => 'ram']);
@@ -29,7 +30,10 @@ class AgentTestResultsTest extends TestCase
             ],
         ];
 
-        config(['agent.api_token' => 'secrettoken']);
+        config([
+            'agent.api_token' => 'secrettoken',
+            'agent.user_id' => $agent->id,
+        ]);
 
         Log::spy();
 
@@ -40,6 +44,7 @@ class AgentTestResultsTest extends TestCase
 
         $run = TestRun::where('asset_id', $asset->id)->first();
         $this->assertNotNull($run);
+        $this->assertEquals($agent->id, $run->user_id);
 
         $this->assertDatabaseHas('test_results', [
             'test_run_id' => $run->id,
@@ -57,6 +62,21 @@ class AgentTestResultsTest extends TestCase
 
         $asset->refresh();
         $this->assertTrue((bool) $asset->tests_completed_ok);
+
+        $this->assertDatabaseHas('test_audits', [
+            'auditable_type' => TestRun::class,
+            'auditable_id' => $run->id,
+            'user_id' => $agent->id,
+        ]);
+
+        $cpuResult = TestResult::where('test_run_id', $run->id)
+            ->where('test_type_id', $cpu->id)
+            ->first();
+        $this->assertDatabaseHas('test_audits', [
+            'auditable_type' => TestResult::class,
+            'auditable_id' => $cpuResult->id,
+            'user_id' => $agent->id,
+        ]);
 
         Log::shouldHaveReceived('info')->once()->withArgs(function ($message) use ($asset) {
             return str_contains($message, $asset->asset_tag) && str_contains($message, '127.0.0.1');
