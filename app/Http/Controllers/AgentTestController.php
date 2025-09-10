@@ -8,6 +8,7 @@ use App\Models\TestResult;
 use App\Models\TestType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AgentTestController extends Controller
 {
@@ -16,6 +17,11 @@ class AgentTestController extends Controller
 
         $token = $request->bearerToken();
         if (!$token || !hash_equals(config('agent.api_token'), $token)) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $allowedIps = config('agent.allowed_ips');
+        if (!empty($allowedIps) && !in_array($request->ip(), $allowedIps, true)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
@@ -78,6 +84,8 @@ class AgentTestController extends Controller
         ]);
 
         $asset->refreshTestCompletionFlag();
+
+        Log::info('Agent results received for Asset ' . $asset->asset_tag . ' by IP ' . $request->ip());
 
         return response()->json([
             'message' => 'Test results recorded',

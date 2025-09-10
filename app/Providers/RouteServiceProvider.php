@@ -99,6 +99,10 @@ class RouteServiceProvider extends ServiceProvider
                 });
         });
 
+        RateLimiter::for('agent', function (Request $request) {
+            return Limit::perMinute(60)->by($request->ip());
+        });
+
         // Rate limiter for forgotten password requests
         RateLimiter::for('forgotten_password', function (Request $request) {
             return Limit::perMinute(config('auth.password_reset.max_attempts_per_min'))->by(optional($request->user())->id ?: $request->ip());

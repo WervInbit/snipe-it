@@ -15,7 +15,11 @@ Authorization: Bearer your-secret
 ```
 
 Requests with a missing or incorrect token will receive a `401 Unauthorized`
-response. On success, the API returns a `200 OK` with the new `test_run_id`.
-If the asset tag is unknown, a `404` is returned, and invalid payloads
-receive a `400` with error details.
+response. You may further restrict access by whitelisting specific IPs via
+`AGENT_ALLOWED_IPS=ip1,ip2` in your environment. Every submission is logged
+with the asset tag and the originating IP for audit purposes.
+
+On success, the API returns a `200 OK` with the new `test_run_id`. If the
+asset tag is unknown, a `404` is returned, and invalid payloads receive a
+`400` with error details.
 

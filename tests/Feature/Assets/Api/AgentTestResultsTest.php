@@ -6,6 +6,7 @@ use App\Models\Asset;
 use App\Models\TestResult;
 use App\Models\TestRun;
 use App\Models\TestType;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class AgentTestResultsTest extends TestCase
@@ -29,6 +30,8 @@ class AgentTestResultsTest extends TestCase
         ];
 
         config(['agent.api_token' => 'secrettoken']);
+
+        Log::spy();
 
         $this->postJson('/api/v1/agent/test-results', $payload, [
             'Authorization' => 'Bearer secrettoken',
@@ -54,6 +57,10 @@ class AgentTestResultsTest extends TestCase
 
         $asset->refresh();
         $this->assertTrue((bool) $asset->tests_completed_ok);
+
+        Log::shouldHaveReceived('info')->once()->withArgs(function ($message) use ($asset) {
+            return str_contains($message, $asset->asset_tag) && str_contains($message, '127.0.0.1');
+        });
     }
 
     public function test_agent_gets_404_for_unknown_asset_tag(): void
@@ -101,5 +108,30 @@ class AgentTestResultsTest extends TestCase
             'Authorization' => 'Bearer secrettoken',
         ])->assertStatus(400)
             ->assertJsonStructure(['message', 'errors']);
+    }
+
+    public function test_agent_gets_401_if_ip_not_allowed(): void
+    {
+        \App\Models\User::factory()->create();
+        $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAGIP1']);
+        $cpu = TestType::factory()->create(['slug' => 'cpu']);
+
+        $payload = [
+            'asset_tag' => $asset->asset_tag,
+            'results' => [
+                [
+                    'test_slug' => $cpu->slug,
+                    'status' => TestResult::STATUS_PASS,
+                ],
+            ],
+        ];
+
+        config(['agent.api_token' => 'secrettoken']);
+        config(['agent.allowed_ips' => ['10.0.0.1']]);
+
+        $this->postJson('/api/v1/agent/test-results', $payload, [
+            'Authorization' => 'Bearer secrettoken',
+        ])->assertStatus(401)
+            ->assertJson(['message' => 'Unauthorized']);
     }
 }

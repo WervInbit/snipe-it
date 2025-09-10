@@ -627,6 +627,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
 
         // Agent-provided test results
         Route::post('agent/test-results', [AgentTestController::class, 'store'])
+            ->middleware('throttle:agent')
             ->withoutMiddleware('auth:api')
             ->name('api.agent.test-results.store');
 
