@@ -4,19 +4,15 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
+return new class extends Migration {
     public function up(): void
     {
         Schema::create('asset_status_history', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('asset_id');
-            $table->unsignedBigInteger('old_status_id')->nullable();
-            $table->unsignedBigInteger('new_status_id');
-            $table->unsignedBigInteger('changed_by')->nullable();
+            $table->id();
+            $table->unsignedInteger('asset_id');
+            $table->unsignedInteger('old_status_id')->nullable();
+            $table->unsignedInteger('new_status_id');
+            $table->unsignedInteger('changed_by')->nullable();
             $table->timestamp('changed_at');
 
             $table->foreign('asset_id')->references('id')->on('assets')->onDelete('cascade');
@@ -26,9 +22,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('asset_status_history');
