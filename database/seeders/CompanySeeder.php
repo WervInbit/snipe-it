@@ -6,6 +6,7 @@ use App\Models\Company;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
 
 class CompanySeeder extends Seeder
 {
@@ -17,7 +18,9 @@ class CompanySeeder extends Seeder
     public function run()
     {
         Log::debug('Seed companies');
+        Schema::disableForeignKeyConstraints();
         Company::truncate();
+        Schema::enableForeignKeyConstraints();
         Company::factory()->count(4)->create();
 
         $src = public_path('/img/demo/companies/');

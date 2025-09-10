@@ -22,9 +22,11 @@ class CustomFieldSeeder extends Seeder
                 });
             }
         }
+        Schema::disableForeignKeyConstraints();
         CustomField::truncate();
         CustomFieldset::truncate();
         DB::table('custom_field_custom_fieldset')->truncate();
+        Schema::enableForeignKeyConstraints();
 
         CustomFieldset::factory()->count(1)->mobile()->create();
         CustomFieldset::factory()->count(1)->computer()->create();

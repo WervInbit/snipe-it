@@ -7,13 +7,16 @@ use App\Models\Component;
 use App\Models\Location;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ComponentSeeder extends Seeder
 {
     public function run()
     {
+        Schema::disableForeignKeyConstraints();
         Component::truncate();
         DB::table('components_assets')->truncate();
+        Schema::enableForeignKeyConstraints();
 
         if (! Company::count()) {
             $this->call(CompanySeeder::class);

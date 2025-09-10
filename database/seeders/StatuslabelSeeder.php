@@ -5,12 +5,15 @@ namespace Database\Seeders;
 use App\Models\Statuslabel;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema;
 
 class StatuslabelSeeder extends Seeder
 {
     public function run()
     {
+        Schema::disableForeignKeyConstraints();
         Statuslabel::truncate();
+        Schema::enableForeignKeyConstraints();
 
         $admin = User::where('permissions->superuser', '1')->first() ?? User::factory()->firstAdmin()->create();
 
