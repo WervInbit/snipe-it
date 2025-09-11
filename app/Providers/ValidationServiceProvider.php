@@ -68,7 +68,8 @@ class ValidationServiceProvider extends ServiceProvider
             if (count($parameters)) {
 
                 // This is a bit of a shim, but serial doesn't have any other rules around it other than that it's nullable
-                if (($parameters[0]=='assets') && ($attribute == 'serial') && (Setting::getSettings()->unique_serial != '1')) {
+                $settings = Setting::getSettings();
+                if (($parameters[0]=='assets') && ($attribute == 'serial') && ($settings && $settings->unique_serial != '1')) {
                     return true;
                 }
 
@@ -358,6 +359,9 @@ class ValidationServiceProvider extends ServiceProvider
         // Validates that the company of the validated object matches the company of the location in case of scoped locations
         Validator::extend('fmcs_location', function ($attribute, $value, $parameters, $validator){
             $settings = Setting::getSettings();
+            if (! $settings) {
+                return true; // If settings not seeded yet, allow during early boot/seeding
+            }
             if ($settings->full_multiple_companies_support == '1' && $settings->scope_locations_fmcs == '1') {
                 $company_id = array_get($validator->getData(), 'company_id');
                 $location = Location::find($value);

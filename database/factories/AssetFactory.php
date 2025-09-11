@@ -60,12 +60,16 @@ class AssetFactory extends Factory
     
     public function configure()
     {
-        return $this->afterMaking(function (Asset $asset) {
-            // calculates the EOL date most of the time, but sometimes sets a random date so we have some explicits
-            // the explicit boolean gets set in the saving() method on the observer 
-            $asset->asset_eol_date = $this->faker->boolean(5) 
-                ? CarbonImmutable::parse($asset->purchase_date)->addMonths(rand(0, 20))->format('Y-m-d')
-                : CarbonImmutable::parse($asset->purchase_date)->addMonths($asset->model->eol)->format('Y-m-d');
+        return $this->afterCreating(function (Asset $asset) {
+            // Calculate EOL based on purchase_date and model->eol after the model exists
+            $purchase = $asset->purchase_date ?: now()->toDateString();
+            $model = $asset->model; // ensure relation is resolved
+            $months = $model && isset($model->eol) ? (int) $model->eol : rand(6, 36);
+
+            $asset->asset_eol_date = $this->faker->boolean(5)
+                ? CarbonImmutable::parse($purchase)->addMonths(rand(0, 20))->format('Y-m-d')
+                : CarbonImmutable::parse($purchase)->addMonths($months)->format('Y-m-d');
+            $asset->save();
         });
     }
 

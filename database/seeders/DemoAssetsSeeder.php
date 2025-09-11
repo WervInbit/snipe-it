@@ -18,12 +18,20 @@ class DemoAssetsSeeder extends Seeder
 {
     public function run(): void
     {
+        // Ensure the demo remains small and focused for testing
+        // Purge existing assets created by other seeders
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        foreach (['test_results','test_runs','test_audits','asset_tests','asset_logs','asset_images','asset_status_history','checkout_requests','assets'] as $table) {
+            \Illuminate\Support\Facades\DB::statement("TRUNCATE TABLE `{$table}`");
+        }
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1');
+
+        // Minimal HP-focused demo
         $assets = [
-            ['asset_tag' => 'ASSET-0001', 'name' => 'Macbook Pro 13"', 'category' => 'Laptops', 'manufacturer' => 'Apple'],
-            ['asset_tag' => 'ASSET-0002', 'name' => 'Macbook Air', 'category' => 'Laptops', 'manufacturer' => 'Apple'],
-            ['asset_tag' => 'ASSET-0003', 'name' => 'Surface', 'category' => 'Laptops', 'manufacturer' => 'Microsoft'],
-            ['asset_tag' => 'ASSET-0004', 'name' => 'iPad', 'category' => 'Tablets', 'manufacturer' => 'Apple'],
-            ['asset_tag' => 'ASSET-0005', 'name' => 'iPhone 12', 'category' => 'Mobile Phones', 'manufacturer' => 'Apple'],
+            ['asset_tag' => 'HP-0001', 'name' => 'HP Spectre 13', 'category' => 'Laptops', 'manufacturer' => 'HP'],
+            ['asset_tag' => 'HP-0002', 'name' => 'HP EliteBook 840', 'category' => 'Laptops', 'manufacturer' => 'HP'],
+            ['asset_tag' => 'HP-0003', 'name' => 'HP ProBook 450', 'category' => 'Laptops', 'manufacturer' => 'HP'],
+            ['asset_tag' => 'HP-0004', 'name' => 'HP Envy 15', 'category' => 'Laptops', 'manufacturer' => 'HP'],
         ];
 
         $user = User::first();

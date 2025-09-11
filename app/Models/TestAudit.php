@@ -19,6 +19,7 @@ class TestAudit extends SnipeModel
         'auditable_type',
         'auditable_id',
         'user_id',
+        'created_by',
         'field',
         'before',
         'after',

@@ -23,15 +23,15 @@ class QrLabelService
      */
     public function generate(Asset $asset, ?string $template = null): void
     {
-        $settings = Setting::getSettings();
+        $settings = Setting::getSettings() ?? (object) [];
         $template = $template ?? ($settings->qr_label_template ?? config('qr_templates.default'));
         $disk = Storage::disk('public');
         $disk->makeDirectory($this->directory);
 
-        $logo = $settings->qr_logo ?: $settings->label_logo;
+        $logo = ($settings->qr_logo ?? null) ?: ($settings->label_logo ?? null);
         $logoPath = ($logo && $disk->exists($logo)) ? $disk->path($logo) : null;
         $data = $asset->asset_tag;
-        $label = $settings->qr_text_redundancy ? $asset->asset_tag : null;
+        $label = ($settings->qr_text_redundancy ?? false) ? $asset->asset_tag : null;
         $formats = array_map('trim', explode(',', $settings->qr_formats ?? 'png,pdf'));
         $qr = app(QrCodeService::class);
 
@@ -56,7 +56,7 @@ class QrLabelService
      */
     public function url(Asset $asset, string $format = 'png', ?string $template = null): string
     {
-        $settings = Setting::getSettings();
+        $settings = Setting::getSettings() ?? (object) [];
         $template = $template ?? ($settings->qr_label_template ?? config('qr_templates.default'));
         $disk = Storage::disk('public');
         $file = $this->path($asset, $format, $template);
@@ -78,10 +78,10 @@ class QrLabelService
      */
     public function batchPdf(Collection $assets, ?string $template = null): string
     {
-        $settings = Setting::getSettings();
+        $settings = Setting::getSettings() ?? (object) [];
         $template = $template ?? ($settings->qr_label_template ?? config('qr_templates.default'));
         $disk = Storage::disk('public');
-        $logo = $settings->qr_logo ?: $settings->label_logo;
+        $logo = ($settings->qr_logo ?? null) ?: ($settings->label_logo ?? null);
         $logoPath = ($logo && $disk->exists($logo)) ? $disk->path($logo) : null;
         $tpls = config('qr_templates.templates');
         $tpl = $tpls[$template] ?? reset($tpls);
@@ -93,7 +93,7 @@ class QrLabelService
         $count = $assets->count();
         foreach ($assets as $i => $asset) {
             $data = $asset->asset_tag;
-            $label = $settings->qr_text_redundancy ? $asset->asset_tag : null;
+            $label = ($settings->qr_text_redundancy ?? false) ? $asset->asset_tag : null;
             $caption = $asset->name ?: optional($asset->model)->name;
             if (! $caption) {
                 $caption = trans('general.qr_printed_on_date', ['date' => now()->toDateString()]);

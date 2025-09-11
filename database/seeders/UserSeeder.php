@@ -58,23 +58,7 @@ class UserSeeder extends Seeder
             ]))
             ->create();
 
-        User::factory()->count(3)->superuser()
-            ->state(new Sequence(fn($sequence) => [
-                'department_id' => $departmentIds->random(),
-            ]))
-            ->create();
-
-        User::factory()->count(3)->admin()
-            ->state(new Sequence(fn($sequence) => [
-                'department_id' => $departmentIds->random(),
-            ]))
-            ->create();
-
-        User::factory()->count(50)->viewAssets()
-            ->state(new Sequence(fn($sequence) => [
-                'department_id' => $departmentIds->random(),
-            ]))
-            ->create();
+        // Minimal demo: skip mass user generation
 
         // Demo users for showcasing different permission levels
         User::factory()->superuser()
@@ -185,7 +169,7 @@ class UserSeeder extends Seeder
             }
         }
 
-        $users = User::orderBy('id', 'asc')->take(20)->get();
+        $users = User::orderBy('id', 'asc')->take(10)->get();
         $file_number = 1;
 
         foreach ($users as $user) {
