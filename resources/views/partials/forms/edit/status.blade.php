@@ -2,10 +2,29 @@
 <div class="form-group {{ $errors->has('status_id') ? ' has-error' : '' }}">
     <label for="status_id" class="col-md-3 control-label">{{ trans('admin/hardware/form.status') }}</label>
     <div class="col-md-7 col-sm-11">
+        @php
+            $__status_options = $statuslabel_list;
+            $user = auth()->user();
+            $isAdmin = $user && method_exists($user, 'isAdmin') ? $user->isAdmin() : false;
+            $isSuper = $user && method_exists($user, 'isSuperUser') ? $user->isSuperUser() : false;
+            if (!($isAdmin || $isSuper)) {
+                // Hide Ready for Sale for non-admin/supervisor users
+                $__status_options = collect($__status_options)
+                    ->reject(function($label){ return stripos($label, 'Ready for Sale') !== false; })
+                    ->all();
+            }
+        @endphp
+
+        @if (session('requires_ack_failed_tests'))
+            <div class="alert alert-warning" role="alert" style="margin-bottom:10px;">
+                {{ __('This asset has not passed all tests. Submit again to confirm Ready for Sale.') }}
+            </div>
+        @endif
+
         <x-input.select
             name="status_id"
             id="status_select_id"
-            :options="$statuslabel_list"
+            :options="$__status_options"
             :selected="old('status_id', $item->status_id)"
             :required="$required"
             class="status_id"

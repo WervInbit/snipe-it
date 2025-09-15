@@ -89,6 +89,22 @@ class Handler extends ExceptionHandler
             return redirect()->back()->withInput()->with('error', trans('validation.date', ['attribute' => 'date']));
         }
 
+        if ($e instanceof \DomainException && $e->getMessage() === 'requires_ack_failed_tests') {
+            return redirect()->back()
+                ->withInput()
+                ->with('requires_ack_failed_tests', true)
+                ->with('warning', 'This asset has not passed all tests. Submit again to confirm Ready for Sale.');
+        }
+
+        // Enforce supervisor/admin role for Ready for Sale (non-API)
+        if (!($request->ajax() || $request->wantsJson())) {
+            if ($e instanceof \DomainException && $e->getMessage() === 'requires_supervisor_role') {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Only supervisors or admins can mark an asset as Ready for Sale.');
+            }
+        }
+
         // Handle API requests that fail
         if ($request->ajax() || $request->wantsJson()) {
 

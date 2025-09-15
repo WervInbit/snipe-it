@@ -19,6 +19,23 @@
 {{-- Page content --}}
 @section('inputFields')
 
+    <!-- Quick Actions for Technicians (mobile-friendly) -->
+    <div class="row" style="margin-bottom: 10px;">
+        <div class="col-md-12">
+            <div class="btn-group" role="group" aria-label="Quick status actions">
+                <button type="button" class="btn btn-warning btn-sm" id="qa-begin-testing">
+                    <i class="fas fa-vial" aria-hidden="true"></i> Begin Testing
+                </button>
+                <button type="button" class="btn btn-success btn-sm" id="qa-tested-ok">
+                    <i class="fas fa-check" aria-hidden="true"></i> Pass (Tested – OK)
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" id="qa-needs-repair">
+                    <i class="fas fa-tools" aria-hidden="true"></i> Fail (Needs Repair)
+                </button>
+            </div>
+        </div>
+    </div>
+
     @if (session('requires_ack_failed_tests'))
         <input type="hidden" name="ack_failed_tests" value="1">
     @endif
@@ -242,6 +259,25 @@
 
     var transformed_oldvals={};
 
+    // Quick action helpers
+    function __setStatusAndSubmit__(targetText) {
+        var select = document.getElementById('status_select_id');
+        if (!select) return;
+        var desiredIndex = -1;
+        var t = (targetText || '').toLowerCase();
+        for (var i = 0; i < select.options.length; i++) {
+            var optText = (select.options[i].text || '').toLowerCase();
+            if (optText.indexOf(t) !== -1) { desiredIndex = i; break; }
+        }
+        if (desiredIndex >= 0) {
+            select.selectedIndex = desiredIndex;
+            var form = select.closest('form');
+            if (form) form.submit();
+        } else {
+            alert('Status option for \"' + targetText + '\" is not available.');
+        }
+    }
+
     function fetchCustomFields() {
         //save custom field choices
         var oldvals = $('#custom_fields_content').find('input,select,textarea').serializeArray();
@@ -458,6 +494,14 @@
     });
 
     $(document).ready(function() {
+        // Wire up quick action buttons
+        var beginBtn = document.getElementById('qa-begin-testing');
+        var okBtn = document.getElementById('qa-tested-ok');
+        var repairBtn = document.getElementById('qa-needs-repair');
+        if (beginBtn) beginBtn.addEventListener('click', function(){ __setStatusAndSubmit__('In Testing'); });
+        if (okBtn) okBtn.addEventListener('click', function(){ __setStatusAndSubmit__('Tested – OK'); });
+        if (repairBtn) repairBtn.addEventListener('click', function(){ __setStatusAndSubmit__('Needs Repair'); });
+
         var categorySelect = $('#category_select_id');
         var manufacturerSelect = $('#manufacturer_select_id');
         var modelSelect = $('#model_select_id');

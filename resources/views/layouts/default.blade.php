@@ -620,11 +620,14 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                         </li>
                                     @endcan
                                     @can('audit', \App\Models\Asset::class)
+                                        {{-- Deprecated: Audit hidden per refurb workflow --}}
+                                        {{--
                                         <li id="bulk-audit-sidenav-option" {!! (request()->is('hardware/bulkaudit') ? ' class="active"' : '') !!}>
                                             <a href="{{ route('assets.bulkaudit') }}">
                                                 {{ trans('general.bulkaudit') }}
                                             </a>
                                         </li>
+                                        --}}
                                     @endcan
                                 </ul>
                             </li>
@@ -1354,6 +1357,62 @@ dir="{{ Helper::determineLanguageDirection() }}">
             });
 
 
+        </script>
+
+        <!-- Sidebar tweaks for refurb workflow -->
+        <script nonce="{{ csrf_token() }}">
+            (function(){
+                if (!window.jQuery) return; var $=window.jQuery;
+                $(function(){
+                    // Hide deprecated items
+                    $("a:contains('Due for Checkin')").closest('li').hide();
+                    $("a:contains('Requestable')").closest('li').hide();
+
+                    // Rename Deployed -> Sold/Out (fallback if translations not applied)
+                    $("a[href*='hardware?status=Deployed']").each(function(){
+                        var $t=$(this); $t.text($t.text().replace(/Deployed/i,'Sold/Out'));
+                    });
+                    // Ensure Archived reads Sold/Archived
+                    $("a[href*='hardware?status=Archived']").each(function(){
+                        var $t=$(this); $t.text($t.text().replace(/Archived/i,'Sold/Archived'));
+                    });
+
+                    // Reorder a few statuses lower in the list
+                    var $hwTree=$("#hardware-sidenav-option .treeview-menu");
+                    if($hwTree.length){
+                        [
+                            "a[href*='hardware?status=Sold%20to%20Customer']",
+                            "a[href*='hardware?status=Archived']",
+                            "a[href*='hardware?status=Needs%20Repair']",
+                            "a[href*='hardware?status=Under%20Repair']"
+                        ].forEach(function(sel){
+                            var $li=$hwTree.find(sel).closest('li');
+                            if($li.length){ $li.appendTo($hwTree); }
+                        });
+                    }
+                });
+            })();
+        </script>
+
+        <!-- Sidebar presentation fixes: de-dup, icons, wrapping -->
+        <style nonce="{{ csrf_token() }}">
+            .sidebar-menu .treeview-menu > li > a { display:flex; align-items:center; gap:6px; white-space:nowrap; }
+            .sidebar-menu .treeview-menu > li > a i.fa, .sidebar-menu .treeview-menu > li > a i.fas, .sidebar-menu .treeview-menu > li > a i.fa-solid { width:16px; text-align:center; }
+        </style>
+        <script nonce="{{ csrf_token() }}">
+            (function(){ if(!window.jQuery) return; var $=window.jQuery; $(function(){
+                var $menu=$("#hardware-sidenav-option .treeview-menu"); if(!$menu.length) return;
+                var seen={}; $menu.find('a').each(function(){ var $a=$(this), k=$a.text().trim().toLowerCase(); if(!k) return; if(seen[k]){$a.closest('li').remove();} else {seen[k]=true;} });
+                var iconMap={
+                    'intake / new arrival':'fa-inbox text-primary','in testing':'fa-vial text-warning',
+                    'tested – ok':'fa-check text-success','tested - ok':'fa-check text-success',
+                    'needs repair':'fa-tools text-warning','under repair':'fa-wrench text-purple',
+                    'ready for sale':'fa-tag text-success','broken / for parts':'fa-ban text-danger',
+                    'returned – pending':'fa-rotate-left text-info','returned - pending':'fa-rotate-left text-info',
+                    'sold to customer':'fa-dollar-sign text-muted','sold/archived':'fa-box-archive text-muted',
+                    'for sale':'fa-tags text-success','processing':'fa-spinner text-info'
+                }; $menu.find('a').each(function(){ var $a=$(this), lbl=$a.text().trim().toLowerCase(), cls=iconMap[lbl]; if(!cls) return; if($a.find('i.fa, i.fas, i.fa-solid, svg, x-icon').length) return; $('<i class="fa '+cls+'" aria-hidden="true"></i>').prependTo($a); });
+            }); })();
         </script>
 
         @if ((Session::get('topsearch')=='true') || (request()->is('/')))

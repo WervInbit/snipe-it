@@ -14,6 +14,7 @@ use App\Models\Category;
 use App\Models\TestResult;
 use App\Models\Sku;
 use App\Presenters\Presentable;
+use App\Models\Statuslabel;
 use App\Presenters\AssetPresenter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,6 +24,7 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Watson\Validating\ValidatingTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
@@ -234,6 +236,83 @@ class Asset extends Depreciable
 
         static::softDeleted(function (Asset $asset) {
             $asset->requests()->delete();
+        });
+
+        // Default status on create and BYOD sellability guard
+        static::creating(function (Asset $asset) {
+            if (empty($asset->status_id)) {
+                if ($default = Statuslabel::where('default_label', 1)->first()) {
+                    $asset->status_id = $default->id;
+                }
+            }
+            if (!empty($asset->byod)) {
+                $asset->is_sellable = 0;
+            }
+        });
+
+        // Enforce key workflow rules on status transitions and sellability
+        static::saving(function (Asset $asset) {
+            // BYOD/Internal Use assets are not sellable
+            if (!empty($asset->byod)) {
+                $asset->is_sellable = 0;
+            }
+
+            if ($asset->isDirty('status_id')) {
+                $newStatus = $asset->status_id ? Statuslabel::find($asset->status_id) : null;
+                if (!$newStatus) {
+                    return;
+                }
+
+                $name = strtolower((string) $newStatus->name);
+                $oldId = $asset->getOriginal('status_id');
+                $old = $oldId ? Statuslabel::find($oldId) : null;
+                $oldName = strtolower((string) ($old?->name ?? ''));
+
+                // Ready for Sale requires tests OK (can be confirmed) and supervisor/admin role
+                if (str_contains($name, 'ready for sale')) {
+                    $user = auth()->user();
+                    $isAdmin = $user && method_exists($user, 'isAdmin') ? $user->isAdmin() : false;
+                    $isSuper = $user && method_exists($user, 'isSuperUser') ? $user->isSuperUser() : false;
+                    if (!($isAdmin || $isSuper)) {
+                        throw new \DomainException('requires_supervisor_role');
+                    }
+                    if (empty($asset->tests_completed_ok)) {
+                        if (!request()->boolean('ack_failed_tests')) {
+                            throw new \DomainException('requires_ack_failed_tests');
+                        }
+                    }
+                }
+
+                // Sold → archive asset record for active lists
+                if (str_contains($name, 'sold')) {
+                    $asset->archived = 1;
+                    Log::info('Asset marked sold; archiving', ['asset_id' => $asset->id]);
+                }
+
+                // Returned → restore from archived so it re-enters workflow
+                if (str_contains($name, 'returned')) {
+                    $asset->archived = 0;
+                    Log::info('Asset marked returned; unarchiving', ['asset_id' => $asset->id]);
+                }
+
+                // Broken/For Parts → unsellable and not requestable, add delist note
+                if (str_contains($name, 'broken') || str_contains($name, 'parts')) {
+                    $asset->is_sellable = 0;
+                    $asset->requestable = 0;
+                    Log::info('Asset set to Broken/For Parts; disabling sellable/requestable', ['asset_id' => $asset->id]);
+                    try {
+                        \App\Models\Actionlog::create([
+                            'item_type' => self::class,
+                            'item_id' => $asset->id,
+                            'action_type' => 'maintenance',
+                            'note' => 'Marked Broken/For Parts: item will be delisted from sales.',
+                            'created_by' => auth()->id(),
+                        ]);
+                    } catch (\Throwable $e) {}
+                }
+
+                // No maintenance record creation on Under Repair per requirements
+            }
         });
     }
 
@@ -2290,5 +2369,21 @@ class Asset extends Depreciable
 
     }
 
+
+    /**
+     * Treat assets marked for internal use (BYOD flag) as not sellable
+     * regardless of the stored is_sellable value.
+     */
+    protected function isSellable(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                if (!empty($this->attributes['byod']) && (bool)$this->attributes['byod'] === true) {
+                    return false;
+                }
+                return (bool) $value;
+            }
+        );
+    }
 
 }
