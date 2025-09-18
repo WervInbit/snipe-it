@@ -430,7 +430,12 @@ class AssetsController extends Controller
                         $assets->orderBy($sort_override, $order);
                     }
                 } else {
-                    $assets->orderBy($column_sort, $order);
+                    // Prefix with assets table to avoid ambiguous column errors when joins are present
+                    if (strpos($column_sort, '.') !== false) {
+                        $assets->orderBy($column_sort, $order);
+                    } else {
+                        $assets->orderBy('assets.' . $column_sort, $order);
+                    }
                 }
                 break;
         }

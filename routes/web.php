@@ -174,6 +174,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
     Route::post('security', [SettingsController::class, 'postSecurity'])
         ->name('settings.security.save');
 
+    Route::get('security/certificate', [SettingsController::class, 'downloadPublicCertificate'])
+        ->name('settings.security.certificate.download');
+
     Route::get('localization', [SettingsController::class, 'getLocalization'])
         ->name('settings.localization.index')
         ->breadcrumbs(fn (Trail $trail) =>

@@ -42,6 +42,18 @@
                                 {{ trans('admin/settings/general.legends.security') }}
                             </legend>
 
+                            <div class="form-group">
+                                <div class="col-md-3">
+                                    <label>{{ trans('admin/settings/general.download_public_certificate') }}</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <a class="btn btn-default" href="{{ route('settings.security.certificate.download') }}">
+                                        <i class="fas fa-download" aria-hidden="true"></i>
+                                        {{ trans('admin/settings/general.download_public_certificate_button') }}
+                                    </a>
+                                    <p class="help-block">{{ trans('admin/settings/general.download_public_certificate_help') }}</p>
+                                </div>
+                            </div>
                             <!-- Two Factor -->
                             <div class="form-group {{ $errors->has('brand') ? 'error' : '' }}">
                                 <div class="col-md-3">

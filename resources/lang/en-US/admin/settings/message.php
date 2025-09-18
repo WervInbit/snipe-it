@@ -6,6 +6,9 @@ return [
         'error'                 => 'An error has occurred while updating. ',
         'success'               => 'Settings updated successfully.',
     ],
+    'certificate' => [
+        'missing' => 'A public TLS certificate could not be found. Please verify PUBLIC_TLS_CERT_PATH or place the file in docker/certs.',
+    ],
     'backup' => [
         'delete_confirm'        => 'Are you sure you would like to delete this backup file? This action cannot be undone. ',
         'file_deleted'          => 'The backup file was successfully deleted. ',

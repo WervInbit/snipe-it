@@ -1103,6 +1103,83 @@ class SettingsController extends Controller
     }
 
     /**
+     * Download the public TLS certificate for distribution.
+     */
+    public function downloadPublicCertificate() : RedirectResponse | BinaryFileResponse
+    {
+        $certificatePath = $this->locatePublicCertificate();
+
+        if (! $certificatePath) {
+            return redirect()
+                ->route('settings.security.index')
+                ->with('error', trans('admin/settings/message.certificate.missing'));
+        }
+
+        Log::info('User '.auth()->user()->username.' downloaded public certificate from '.$certificatePath);
+
+        $headers = [
+            'Content-Type' => 'application/x-x509-ca-cert',
+            'Cache-Control' => 'no-store, must-revalidate',
+        ];
+
+        return response()->download($certificatePath, basename($certificatePath), $headers);
+    }
+
+    /**
+     * Locate a readable TLS certificate path.
+     */
+    private function locatePublicCertificate() : ?string
+    {
+        $candidates = [];
+
+        $configured = config('app.public_tls_certificate');
+        if (! empty($configured)) {
+            $candidates[] = $configured;
+        }
+
+        $candidates[] = 'docker/certs/snipe.inbit.crt';
+        $candidates[] = 'docker/certs/snipe.inbit.pem';
+
+        foreach ($candidates as $candidate) {
+            if (! $candidate) {
+                continue;
+            }
+
+            $resolved = $this->resolveCertificatePath($candidate);
+            if ($resolved) {
+                return $resolved;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Normalize certificate path candidates into real filesystem locations.
+     */
+    private function resolveCertificatePath(string $path) : ?string
+    {
+        if ($this->isAbsolutePath($path) && File::isFile($path)) {
+            return realpath($path) ?: $path;
+        }
+
+        $relative = base_path($path);
+
+        if (File::isFile($relative)) {
+            return realpath($relative) ?: $relative;
+        }
+
+        return null;
+    }
+
+    /**
+     * Determine if the provided path is absolute for the current platform.
+     */
+    private function isAbsolutePath(string $path) : bool
+    {
+        return Str::startsWith($path, ['/', '\\']) || (bool) preg_match('/^[A-Za-z]:\\\\/', $path);
+    }
+    /**
      * Download the backup file.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]

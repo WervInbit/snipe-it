@@ -143,6 +143,17 @@ return [
     */
 
     'private_uploads' => storage_path().'/private_uploads',
+    /*
+    |--------------------------------------------------------------------------
+    | Public TLS Certificate Path
+    |--------------------------------------------------------------------------
+    |
+    | Allows administrators to download the public certificate from the UI.
+    | Provide an absolute path or a path relative to the application base.
+    |
+    */
+
+    'public_tls_certificate' => env('PUBLIC_TLS_CERT_PATH', null),
 
     /*
    |--------------------------------------------------------------------------

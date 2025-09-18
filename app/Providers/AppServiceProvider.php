@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Artisan;
 
 /**
  * This service provider handles setting the observers on models
@@ -76,6 +77,18 @@ class AppServiceProvider extends ServiceProvider
         Consumable::observe(ConsumableObserver::class);
         License::observe(LicenseObserver::class);
         Setting::observe(SettingObserver::class);
+
+        // Ensure Laravel Passport keys exist in non-CLI contexts
+        try {
+            $privateKeyPath = storage_path('oauth-private.key');
+            $publicKeyPath = storage_path('oauth-public.key');
+            if (!file_exists($privateKeyPath) || !file_exists($publicKeyPath)) {
+                Artisan::call('passport:keys', ['--force' => true]);
+                Log::info('Passport keys generated automatically by AppServiceProvider.');
+            }
+        } catch (\Throwable $e) {
+            Log::error('Passport keys generation failed: ' . $e->getMessage());
+        }
     }
 
     /**
