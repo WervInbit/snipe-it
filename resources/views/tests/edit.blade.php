@@ -13,8 +13,18 @@
             <div class="col-xs-12 col-sm-6" style="margin-bottom:15px;">
                 <div class="panel panel-default" data-result-id="{{ $result->id }}">
                     <div class="panel-heading">
-                        {{ $result->type->name }}
-                        <i class="fas fa-info-circle" data-toggle="tooltip" title="{{ $result->type->tooltip }}"></i>
+                        @php
+                            $definition = $result->attributeDefinition;
+                            $label = $definition?->label ?? optional($result->type)->name;
+                            $tooltip = $definition ? ($definition->unit ? __('Unit: :unit', ['unit' => $definition->unit]) : null) : optional($result->type)->tooltip;
+                        @endphp
+                        {{ $label }}
+                        @if($tooltip)
+                            <i class="fas fa-info-circle" data-toggle="tooltip" title="{{ $tooltip }}"></i>
+                        @endif
+                        @if ($result->expected_value)
+                            <span class="pull-right text-muted">{{ __('Expected: :value', ['value' => $result->expected_value]) }}</span>
+                        @endif
                     </div>
                     <div class="panel-body">
                         <div class="btn-group btn-group-justified btn-group-lg status-buttons" role="group">

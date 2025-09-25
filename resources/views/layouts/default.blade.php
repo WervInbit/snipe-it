@@ -747,6 +747,14 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                         </li>
                                     @endif
 
+                                    @can('viewAny', \App\Models\AttributeDefinition::class)
+                                        <li {!! (request()->is('attributes*') ? ' class="active"' : '') !!}>
+                                            <a href="{{ route('attributes.index') }}">
+                                                {{ __('Attributes') }}
+                                            </a>
+                                        </li>
+                                    @endcan
+
                                     @can('view', \App\Models\Statuslabel::class)
                                         <li {!! (request()->is('statuslabels*') ? ' class="active"' : '') !!}>
                                             <a href="{{ route('statuslabels.index') }}">

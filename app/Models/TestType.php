@@ -28,6 +28,20 @@ class TestType extends SnipeModel
         'category',
     ];
 
+    public static function forAttribute(AttributeDefinition $definition): self
+    {
+        $slug = 'attribute-' . $definition->id;
+
+        return static::firstOrCreate(
+            ['slug' => $slug],
+            [
+                'name' => $definition->label,
+                'tooltip' => $definition->unit ? __('Expected unit: :unit', ['unit' => $definition->unit]) : null,
+                'category' => 'attribute',
+            ]
+        );
+    }
+
     /**
      * Results that have been recorded for this test type.
      */

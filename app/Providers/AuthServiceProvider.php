@@ -44,6 +44,8 @@ use App\Policies\UserPolicy;
 use App\Policies\TestRunPolicy;
 use App\Policies\TestTypePolicy;
 use App\Policies\SkuPolicy;
+use App\Models\AttributeDefinition;
+use App\Policies\AttributeDefinitionPolicy;
 use Carbon\Carbon;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -79,6 +81,7 @@ class AuthServiceProvider extends ServiceProvider
         Company::class => CompanyPolicy::class,
         TestRun::class => TestRunPolicy::class,
         TestType::class => TestTypePolicy::class,
+        AttributeDefinition::class => AttributeDefinitionPolicy::class,
         Sku::class => SkuPolicy::class,
     ];
 

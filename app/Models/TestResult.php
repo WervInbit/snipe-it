@@ -7,6 +7,7 @@ use App\Models\Traits\TestAuditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use App\Models\AttributeDefinition;
 
 /**
  * Stores the outcome of a single test within a run.
@@ -39,9 +40,12 @@ class TestResult extends SnipeModel
     protected $fillable = [
         'test_run_id',
         'test_type_id',
+        'attribute_definition_id',
         'status',
         'note',
         'photo_path',
+        'expected_value',
+        'expected_raw_value',
     ];
 
     protected array $auditFields = [
@@ -50,11 +54,19 @@ class TestResult extends SnipeModel
         'status',
         'note',
         'photo_path',
+        'attribute_definition_id',
+        'expected_value',
+        'expected_raw_value',
     ];
 
     public function testRun(): BelongsTo
     {
         return $this->belongsTo(TestRun::class, 'test_run_id');
+    }
+
+    public function attributeDefinition(): BelongsTo
+    {
+        return $this->belongsTo(AttributeDefinition::class, 'attribute_definition_id');
     }
 
     public function type(): BelongsTo

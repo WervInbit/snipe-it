@@ -16,6 +16,7 @@
             <ul class="dropdown-menu">
                 @if ($model->deleted_at=='')
                     <li><a href="{{ route('models.edit', $model->id) }}">{{ trans('admin/models/table.edit') }}</a></li>
+                    <li><a href="{{ route('models.spec.edit', $model) }}">{{ __('Edit Specification') }}</a></li>
                     <li><a href="{{ route('models.clone.create', $model->id) }}">{{ trans('admin/models/table.clone') }}</a></li>
                     <li><a href="{{ route('hardware.create', ['model_id' => $model->id]) }}">{{ trans('admin/hardware/form.create') }}</a></li>
                 @else

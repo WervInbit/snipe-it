@@ -36,10 +36,20 @@
                 </div>
                 <ul class="list-unstyled mt-2 mb-0">
                     @foreach ($run->results as $result)
+                        @php
+                            $definition = $result->attributeDefinition;
+                            $label = $definition?->label ?? optional($result->type)->name;
+                            $tooltip = $definition ? ($definition->unit ? __('Unit: :unit', ['unit' => $definition->unit]) : null) : optional($result->type)->tooltip;
+                        @endphp
                         <li>
-                            {{ $result->type->name }}
-                            <i class="fas fa-info-circle" data-toggle="tooltip" title="{{ $result->type->tooltip }}"></i>:
+                            {{ $label }}
+                            @if($tooltip)
+                                <i class="fas fa-info-circle" data-toggle="tooltip" title="{{ $tooltip }}"></i>
+                            @endif:
                             {{ trans('tests.' . $result->status) }}
+                            @if ($result->expected_value)
+                                <span class="text-muted">{{ __('Expected: :value', ['value' => $result->expected_value]) }}</span>
+                            @endif
                             @if ($result->note)
                                 <span class="text-muted">{{ $result->note }}</span>
                             @endif

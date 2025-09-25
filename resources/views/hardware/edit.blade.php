@@ -94,6 +94,11 @@
     @include('partials.forms.edit.category-select', ['translated_name' => trans('general.category'), 'fieldname' => 'category_id', 'selected' => $selected_category])
     @include('partials.forms.edit.manufacturer-select', ['translated_name' => trans('general.manufacturer'), 'fieldname' => 'manufacturer_id', 'selected' => $selected_manufacturer])
     @include('partials.forms.edit.model-select', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id'])
+
+    <div id="model_spec_content">
+        @include('hardware.partials.spec-overrides', ['attributes' => $specAttributes ?? collect()])
+    </div>
+
     @include('partials.forms.edit.sku-select', [
         'translated_name' => 'SKU',
         'fieldname' => 'sku_id',
@@ -253,11 +258,13 @@
     @if(Request::has('model_id'))
         //TODO: Refactor custom fields to use Livewire, populate from server on page load when requested with model_id
     $(document).ready(function() {
-        fetchCustomFields()
+        fetchCustomFields();
+        fetchSpecification($('#model_select_id').val());
     });
     @endif
 
     var transformed_oldvals={};
+    var transformed_spec_vals={};
 
     // Quick action helpers
     function __setStatusAndSubmit__(targetText) {
@@ -330,6 +337,45 @@
         }
     }
 
+    function fetchSpecification(modelId) {
+        var specContainer = $('#model_spec_content');
+        transformed_spec_vals = {};
+        specContainer.find('input,select,textarea').each(function () {
+            transformed_spec_vals[this.name] = $(this).val();
+        });
+
+        if (!modelId) {
+            specContainer.html('');
+            return;
+        }
+
+        var requestData = {};
+        var assetId = {{ $item->id ?? 'null' }};
+        if (assetId) {
+            requestData.asset_id = assetId;
+        }
+
+        $.ajax({
+            type: 'GET',
+            url: "{{ config('app.url') }}/models/" + modelId + "/spec-form",
+            headers: {
+                "X-Requested-With": 'XMLHttpRequest'
+            },
+            data: requestData,
+            dataType: 'html',
+            success: function (html) {
+                specContainer.html(html);
+                specContainer.find('input,select,textarea').each(function () {
+                    if (typeof transformed_spec_vals[this.name] !== 'undefined' && transformed_spec_vals[this.name] !== '') {
+                        $(this).val(transformed_spec_vals[this.name]);
+                    }
+                });
+            }
+        });
+    }
+
+    }
+
     function user_add(status_id) {
 
         if (status_id != '') {
@@ -366,8 +412,15 @@
 
 
     $(function () {
-        //grab custom fields for this model whenever model changes.
-        $('#model_select_id').on("change", fetchCustomFields);
+        //grab specification and custom fields whenever the model changes.
+        $('#model_select_id').on("change", function () {
+            var modelId = $(this).val();
+            fetchCustomFields();
+            fetchSpecification(modelId);
+        });
+
+        fetchCustomFields();
+        fetchSpecification($('#model_select_id').val());
 
         //initialize assigned user/loc/asset based on statuslabel's statustype
         user_add($(".status_id option:selected").val());

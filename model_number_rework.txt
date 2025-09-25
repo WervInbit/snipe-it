@@ -1,0 +1,268 @@
+Admin Workflow — Attributes, Model Number (final spec), Asset Overrides
+Definitions (single source of truth)
+
+Category: high-level class (Laptop, Desktop, etc.).
+
+Manufacturer: vendor (HP, Dell, etc.).
+
+Model: marketing name (e.g., “HP ProBook 120 G1”). A Model has exactly one model number.
+
+Model number: single string on the Model (e.g., 120-G1-i5/8/256) that represents the final spec. All attributes are attached to (and read from) this model number.
+
+AttributeDefinition: typed field you can reuse (e.g., ram_capacity_gb, storage_type), with settings: datatype, unit, required_for_category, needs_test, allow_custom_values, allow_asset_override, optional constraints (min|max|step|regex).
+
+AttributeOption: allowed value for enum attributes (e.g., DDR4, NVMe). Active/inactive supported.
+
+ModelNumberAttribute: the value of an AttributeDefinition for this model number (the default/final spec).
+
+AssetAttributeOverride: per-asset difference from the model number’s value. Absence = inherit.
+
+Rules:
+
+Exactly one model number per Model.
+
+The model number’s attributes are the canonical truth.
+
+Assets may override only attributes where allow_asset_override=true.
+
+Tests are generated only when a new test run starts, from attributes with needs_test=true (after applying asset overrides).
+
+1) Create an Attribute Definition
+
+Goal: define a reusable, typed field.
+
+Steps:
+
+Go to Admin → Attributes → New Attribute.
+
+Enter:
+
+Key (machine): e.g., ram_capacity_gb.
+
+Label (human): “RAM Capacity”.
+
+Datatype: enum | int | decimal | text | bool.
+
+Unit (optional): e.g., GB, MHz, in, Wh.
+
+Category Scope (optional): categories this attribute applies to (e.g., Laptops).
+
+Required for Category: on/off.
+
+Needs Test: on/off (drives auto-tests on test run start).
+
+Allow Custom Values: on/off (permits free values when an enum option is missing).
+
+Allow Asset Override: on/off (permits device-level differences on Asset).
+
+Constraints (optional): numeric min/max/step, text regex.
+
+Save.
+
+Success: attribute appears in list with the configured flags.
+Failure: duplicate Key, invalid constraints → block with explicit error.
+Repeat-safe: saving again with the same Key updates settings; no duplicates.
+
+2) Add Attribute Options (for enum datatypes)
+
+Goal: define the allowed set; optionally permit custom entries.
+
+Steps:
+
+Admin → Attributes → [Attribute] → Options.
+
+Add options:
+
+Value (machine): e.g., DDR4.
+
+Label (human): e.g., DDR4.
+
+Active: true.
+
+Repeat for all options (e.g., DDR3, DDR5; SSD, NVMe).
+
+Rules:
+
+If Allow Custom Values = off → users must pick an option.
+
+If Allow Custom Values = on → users may enter a free value when needed; admins can later promote it to an option.
+
+Repeat-safe: re-adding the same Value updates its label/active state.
+
+3) Create a Model (with a single model number)
+
+Goal: set up the model identity and its one model number string.
+
+Steps:
+
+Admin → Models → New Model.
+
+Enter:
+
+Name (full marketing name).
+
+Manufacturer.
+
+Category.
+
+Model number (single string; this is the one and only code for this Model).
+
+Save.
+
+Success: model exists with one model number attached.
+Failure: missing required fields or conflicting uniqueness → block.
+
+4) Assign Attribute Values to the Model Number (final spec)
+
+Goal: enter the canonical spec values for this model number.
+
+Steps:
+
+Admin → Models → [Model] → Edit Spec.
+
+For each applicable attribute (by category scope):
+
+Enum:
+
+If option exists → select it.
+
+If not and Allow Custom Values = on → enter a free value (stored typed; can be formalized later).
+
+Numeric:
+
+Enter the number; you may type units (e.g., “0.5 TB”). System normalizes to canonical (e.g., 512 GB).
+
+Text/Bool: type the string / toggle the switch.
+
+Ensure all Required for Category attributes are filled.
+
+Save.
+
+Success: the model number now holds the final attributes.
+Failure: missing required attribute or constraint violation → block.
+Repeat-safe: re-saving updates values; unchanged values persist.
+
+Examples (decomposed, typed—never “256gb ddr3” as one blob):
+
+ram_capacity_gb = 8
+
+ram_tech = DDR4
+
+storage_type = SSD
+
+storage_capacity_gb = 256
+
+display_panel = IPS
+
+5) Asset Creation (inherit from model number; optional overrides)
+
+Goal: assets inherit final values; only differences are stored.
+
+Steps:
+
+Assets → New Asset.
+
+Select Model (which already has its single model number and final attributes).
+
+Overrides (optional):
+
+For attributes with Allow Asset Override = true, you may set a different value for this device (e.g., upgrade storage from 256 → 512).
+
+Leave any attribute blank in Overrides to inherit the model number value.
+
+Save.
+
+Result:
+
+Effective attribute set for the asset = model number attributes ⊕ asset overrides (overrides win).
+
+Example: model number storage_capacity_gb=256; asset override sets 512 → device shows 512; no other attributes duplicated.
+
+Failure:
+
+Attempting to override an attribute where Allow Asset Override = false → block with explicit error.
+
+Model number missing a required value → block asset creation; admin must complete the model spec first.
+
+Repeat-safe: editing the asset updates only overrides; base model number values remain untouched.
+
+6) Test Generation (only when a test run starts)
+
+Goal: create test items based on “needs test” attributes.
+
+Steps:
+
+Refurb/Test → New Test Run for an asset.
+
+System computes effective attributes (model number ⊕ overrides).
+
+For every attribute with Needs Test = true, create a test item keyed to that attribute.
+
+Success:
+
+Test list matches the flagged attributes; values reflect device-level overrides if present.
+Failure:
+
+Missing required model number values → warn and block until model spec is complete.
+
+7) Governance and Permissions
+
+Only Admin:
+
+Create/edit AttributeDefinitions and AttributeOptions.
+
+Create/edit Models and their model number string.
+
+Set model number attribute values (final spec).
+
+Asset creators (Admin/Manager/Tech per RBAC):
+
+Create assets.
+
+Enter overrides only for attributes where Allow Asset Override = true.
+
+Cannot change the model number’s final attributes.
+
+8) Maintenance Patterns
+
+Promote custom to option: when a free enum value recurs, add it as a formal option; backfill historical free values to the option where equal.
+
+Tighten validation: if ad-hoc entries proliferate, switch Allow Custom Values off for that attribute; existing data remains valid.
+
+Unit normalization: always store canonical units (GB, MHz, inches, Wh). Echo normalized values back to admins after save to avoid ambiguity.
+
+Audit: keep the originally entered string alongside the normalized value for traceability (read-only).
+
+9) Success/Failure Signals
+
+Success:
+
+Model number always has a complete, typed final spec.
+
+Asset creation never asks for a model number; it inherits from the selected Model.
+
+Overrides UI appears only for attributes that permit device-level differences.
+
+Starting a test run yields test items for exactly the attributes marked “needs test”.
+
+Failure:
+
+Storing composite blobs like “256gb ddr3” in one field.
+
+Allowing asset overrides on attributes not flagged for override.
+
+Saving an asset while the model number spec is incomplete.
+
+Silent unit conversions without showing the normalized value.
+
+10) Duplicate-Run Safety
+
+Re-creating an AttributeDefinition with the same Key updates settings (no duplicates).
+
+Re-adding an enum Option with the same Value updates its label/active state.
+
+Editing a Model never creates a second model number.
+
+Re-saving the model number’s attributes updates in place.
+
+Re-starting a test run re-evaluates from current model number + overrides; previous runs remain as history.

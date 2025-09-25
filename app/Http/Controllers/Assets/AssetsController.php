@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Assets;
 use App\Events\CheckoutableCheckedIn;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ImageUploadRequest;
+use App\Http\Requests\StoreAssetRequest;
 use App\Http\Requests\UpdateAssetRequest;
 use App\Models\Actionlog;
 use App\Http\Requests\UploadFileRequest;
@@ -20,6 +20,8 @@ use App\Models\Statuslabel;
 use App\Models\User;
 use App\View\Label;
 use App\Services\QrLabelService;
+use App\Services\ModelAttributes\EffectiveAttributeResolver;
+use App\Services\ModelAttributes\ModelAttributeManager;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -27,6 +29,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use League\Csv\Reader;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -96,7 +99,7 @@ class AssetsController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v1.0]
      */
-    public function store(ImageUploadRequest $request) : RedirectResponse
+    public function store(StoreAssetRequest $request, ModelAttributeManager $attributeManager, EffectiveAttributeResolver $resolver) : RedirectResponse
     {
         $this->authorize(Asset::class);
 
@@ -110,6 +113,20 @@ class AssetsController extends Controller
         $asset_tags = $request->input('asset_tags', []);
 
         $settings = Setting::getSettings();
+
+        $modelForAttributes = $request->input('model_id') ? AssetModel::find($request->input('model_id')) : null;
+        if ($modelForAttributes) {
+            $missing = $resolver->resolveForModel($modelForAttributes)
+                ->filter(fn (\App\Services\ModelAttributes\ResolvedAttribute $attribute) => $attribute->definition->required_for_category && $attribute->value === null);
+
+            if ($missing->isNotEmpty()) {
+                return redirect()->back()->withInput()->withErrors([
+                    'model_id' => __('Complete the model specification before creating assets. Missing: :list', [
+                        'list' => $missing->pluck('definition.label')->implode(', '),
+                    ]),
+                ]);
+            }
+        }
 
         $successes = [];
         $failures = [];
@@ -205,6 +222,15 @@ class AssetsController extends Controller
 
             // Validate the asset before saving
             if ($asset->isValid() && $asset->save()) {
+                if ($asset->model_id) {
+                    try {
+                        $attributeManager->saveAssetOverrides($asset, $request->input('attribute_overrides', []));
+                    } catch (ValidationException $exception) {
+                        $asset->delete();
+                        throw $exception;
+                    }
+                }
+
                 $qr->generate($asset);
                 $target = null;
                 $location = null;
@@ -294,14 +320,17 @@ class AssetsController extends Controller
      * @since [v1.0]
      * @return \Illuminate\Contracts\View\View
      */
-    public function edit(Asset $asset) : View | RedirectResponse
+    public function edit(Asset $asset, EffectiveAttributeResolver $resolver) : View | RedirectResponse
     {
         $this->authorize($asset);
         session()->put('back_url', url()->previous());
+        $specAttributes = $asset->model ? $resolver->resolveForAsset($asset) : collect();
+
         return view('hardware/edit')
             ->with('item', $asset)
             ->with('statuslabel_list', Helper::statusLabelList())
-            ->with('statuslabel_types', Helper::statusTypeList());
+            ->with('statuslabel_types', Helper::statusTypeList())
+            ->with('specAttributes', $specAttributes);
     }
 
 
@@ -338,10 +367,14 @@ class AssetsController extends Controller
                 'tests.audits.user',
                 'tests.results.audits.user',
                 'tests.results.type',
+                'tests.results.attributeDefinition',
                 'tests.user',
             ]);
 
+            $resolvedAttributes = app(\App\Services\ModelAttributes\EffectiveAttributeResolver::class)->resolveForAsset($asset);
+
             return view('hardware/view', compact('asset', 'settings'))
+                ->with('resolvedAttributes', $resolvedAttributes)
                 ->with('use_currency', $use_currency)->with('audit_log', $audit_log);
         }
 
@@ -355,7 +388,7 @@ class AssetsController extends Controller
      * @since [v1.0]
      * @author [A. Gianotto] [<snipe@snipe.net>]
      */
-    public function update(ImageUploadRequest $request, Asset $asset) : RedirectResponse
+    public function update(UpdateAssetRequest $request, Asset $asset, ModelAttributeManager $attributeManager) : RedirectResponse
     {
 
         $this->authorize($asset);

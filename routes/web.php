@@ -27,6 +27,9 @@ use App\Http\Controllers\StartController;
 use App\Http\Controllers\ScanController;
 use App\Http\Controllers\ViewAssetsController;
 use App\Http\Controllers\Admin\TestTypeController as AdminTestTypeController;
+use App\Http\Controllers\Admin\AttributeDefinitionsController;
+use App\Http\Controllers\Admin\AttributeOptionsController;
+use App\Http\Controllers\Admin\ModelSpecificationController;
 use App\Livewire\Importer;
 use App\Models\ReportTemplate;
 use Illuminate\Support\Facades\Route;
@@ -71,6 +74,14 @@ Route::group(['middleware' => 'auth'], function () {
 
 
     });
+
+    Route::resource('attributes', AttributeDefinitionsController::class)->except(['show']);
+    Route::post('attributes/{attribute}/options', [AttributeOptionsController::class, 'store'])->name('attributes.options.store');
+    Route::put('attributes/{attribute}/options/{option}', [AttributeOptionsController::class, 'update'])->name('attributes.options.update');
+    Route::delete('attributes/{attribute}/options/{option}', [AttributeOptionsController::class, 'destroy'])->name('attributes.options.destroy');
+
+    Route::get('models/{model}/spec', [ModelSpecificationController::class, 'edit'])->name('models.spec.edit');
+    Route::put('models/{model}/spec', [ModelSpecificationController::class, 'update'])->name('models.spec.update');
 
     Route::resource('manufacturers', ManufacturersController::class);
 

@@ -53,6 +53,14 @@ Route::group(['prefix' => 'models', 'middleware' => ['auth']], function () {
         ]
     )->name('custom_fields/model');
 
+    Route::get(
+        '{model}/spec-form',
+        [
+            AssetModelsController::class, 
+            'getSpecificationForm'
+        ]
+    )->name('models.spec-form');
+
     Route::post(
         'bulkedit',
         [

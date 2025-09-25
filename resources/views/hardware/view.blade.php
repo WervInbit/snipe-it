@@ -636,6 +636,34 @@
                                         </div>
                                     @endif
 
+                                    @if(isset($resolvedAttributes) && $resolvedAttributes->isNotEmpty())
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <strong>{{ __('Specification') }}</strong>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <table class="table table-condensed">
+                                                    <tbody>
+                                                    @foreach($resolvedAttributes as $attribute)
+                                                        <tr>
+                                                            <td>{{ $attribute->definition->label }}</td>
+                                                            <td>
+                                                                {{ $attribute->value ?? __('Not specified') }}
+                                                                @if($attribute->isOverride)
+                                                                    <span class="label label-info">{{ __('Override') }}</span>
+                                                                @endif
+                                                                @if($attribute->modelValue && $attribute->isOverride)
+                                                                    <span class="text-muted">({{ __('Model: :value', ['value' => $attribute->modelValue]) }})</span>
+                                                                @endif
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    @endif
+
                                     @if ($asset->last_checkout!='')
                                         <div class="row">
                                             <div class="col-md-3">

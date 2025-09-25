@@ -257,11 +257,15 @@ class Category extends SnipeModel
 
         if ($this->eula_text) {
             return Helper::parseEscapedMarkedown($this->eula_text);
-        } elseif ((Setting::getSettings()->default_eula_text) && ($this->use_default_eula == '1')) {
-            return Helper::parseEscapedMarkedown(Setting::getSettings()->default_eula_text);
-        } else {
-            return null;
         }
+
+        $settings = Setting::getSettings();
+
+        if ($settings && $settings->default_eula_text && ($this->use_default_eula == '1')) {
+            return Helper::parseEscapedMarkedown($settings->default_eula_text);
+        }
+
+        return null;
     }
 
     /**
@@ -308,3 +312,4 @@ class Category extends SnipeModel
         return $query->leftJoin('users as admin_sort', 'categories.created_by', '=', 'admin_sort.id')->select('categories.*')->orderBy('admin_sort.first_name', $order)->orderBy('admin_sort.last_name', $order);
     }
 }
+

@@ -11,6 +11,7 @@ use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
 use App\Models\AssetTest;
 use App\Models\Category;
+use App\Models\AssetAttributeOverride;
 use App\Models\TestResult;
 use App\Models\Sku;
 use App\Presenters\Presentable;
@@ -27,6 +28,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Watson\Validating\ValidatingTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Model for Assets.
@@ -950,6 +952,11 @@ class Asset extends Depreciable
      * @since  [v1.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
+    public function attributeOverrides(): HasMany
+    {
+        return $this->hasMany(AssetAttributeOverride::class);
+    }
+
     public function model()
     {
         return $this->belongsTo(\App\Models\AssetModel::class, 'model_id')->withTrashed();
@@ -1699,17 +1706,17 @@ class Asset extends Depreciable
 
     public function scopeAssetsForShow($query)
     {
+        $settings = Setting::getSettings();
 
-        if (Setting::getSettings()->show_archived_in_list!=1) {
+        if (! $settings || $settings->show_archived_in_list != 1) {
             return $query->whereHas(
                 'assetstatus', function ($query) {
                     $query->where('archived', '=', 0);
                 }
             );
-        } else {
-            return $query;
         }
 
+        return $query;
     }
 
     /**
@@ -2387,3 +2394,4 @@ class Asset extends Depreciable
     }
 
 }
+

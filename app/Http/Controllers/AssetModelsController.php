@@ -6,6 +6,7 @@ use App\Helpers\Helper;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\StoreAssetModelRequest;
 use App\Models\Actionlog;
+use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\CustomField;
 use App\Models\SnipeModel;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use App\Services\ModelAttributes\EffectiveAttributeResolver;
 use \Illuminate\Contracts\View\View;
 use \Illuminate\Http\RedirectResponse;
 use Illuminate\Support\MessageBag;
@@ -75,7 +77,7 @@ class AssetModelsController extends Controller
         $model->eol = $request->input('eol');
         $model->depreciation_id = $request->input('depreciation_id');
         $model->name = $request->input('name');
-        $model->model_number = $request->input('model_number');
+        $model->model_number = trim((string) $request->input('model_number'));
         $model->min_amt = $request->input('min_amt');
         $model->manufacturer_id = $request->input('manufacturer_id');
         $model->category_id = $request->input('category_id');
@@ -109,7 +111,8 @@ class AssetModelsController extends Controller
                 }
             }
 
-            return redirect()->route('models.index')->with('success', trans('admin/models/message.create.success'));
+            return redirect()->route('models.spec.edit', $model)
+                ->with('success', trans('admin/models/message.create.success'));
         }
 
         return redirect()->back()->withInput()->withErrors($model->getErrors());
@@ -149,7 +152,7 @@ class AssetModelsController extends Controller
         $model->depreciation_id = $request->input('depreciation_id');
         $model->eol = $request->input('eol');
         $model->name = $request->input('name');
-        $model->model_number = $request->input('model_number');
+        $model->model_number = trim((string) $request->input('model_number'));
         $model->min_amt = $request->input('min_amt');
         $model->manufacturer_id = $request->input('manufacturer_id');
         $model->category_id = $request->input('category_id');
@@ -298,6 +301,32 @@ class AssetModelsController extends Controller
     public function getCustomFields($modelId) : View
     {
         return view('models.custom_fields_form')->with('model', AssetModel::find($modelId));
+    }
+
+    public function getSpecificationForm(Request $request, AssetModel $model, EffectiveAttributeResolver $resolver): View
+    {
+        $this->authorize('view', $model);
+
+        $asset = null;
+        if ($request->filled('asset_id')) {
+            $asset = Asset::find($request->input('asset_id'));
+
+            if ($asset) {
+                $this->authorize('view', $asset);
+
+                if ($asset->model_id !== $model->id) {
+                    $asset = null;
+                }
+            }
+        }
+
+        $attributes = $asset
+            ? $resolver->resolveForAsset($asset)
+            : $resolver->resolveForModel($model);
+
+        return view('hardware.partials.spec-overrides', [
+            'attributes' => $attributes,
+        ]);
     }
 
 

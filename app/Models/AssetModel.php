@@ -7,12 +7,15 @@ use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Watson\Validating\ValidatingTrait;
 use \App\Presenters\AssetModelPresenter;
 use App\Http\Traits\TwoColumnUniqueUndeletedTrait;
 use App\Models\Sku;
+use App\Models\AttributeDefinition;
+use App\Models\ModelNumberAttribute;
 
 /**
  * Model for Asset Models. Asset Models contain higher level
@@ -46,7 +49,7 @@ class AssetModel extends SnipeModel
 
     protected $rules = [
         'name'              => 'string|required|min:1|max:255|two_column_unique_undeleted:model_number',
-        'model_number'      => 'string|max:255|nullable|two_column_unique_undeleted:name',
+        'model_number'      => 'string|required|max:255|two_column_unique_undeleted:name',
         'min_amt'           => 'integer|min:0|nullable',
         'category_id'       => 'required|integer|exists:categories,id',
         'manufacturer_id'   => 'integer|exists:manufacturers,id|nullable',
@@ -201,6 +204,22 @@ class AssetModel extends SnipeModel
      * @since  [v2.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
+    /**
+     * Model-level attributes tied to the canonical model number.
+     */
+    public function specAttributes(): HasMany
+    {
+        return $this->hasMany(ModelNumberAttribute::class, 'model_id');
+    }
+
+    /**
+     * Query builder for attributes applicable to this model's category.
+     */
+    public function attributeDefinitionsForCategory()
+    {
+        return AttributeDefinition::query()->forCategory($this->category_id);
+    }
+
     public function getImageUrl()
     {
         if ($this->image) {
