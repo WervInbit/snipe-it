@@ -17,11 +17,15 @@ class CheckinCheckoutCounters extends TestCase
         $admin = User::factory()->admin()->create();
         $user = User::factory()->create();
 
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+
         // create an asset using the GUI
         $this->actingAs($admin)
             ->post(route('hardware.store'), [
                 'asset_tags' => ['1' => '1234'],
-                'model_id' => AssetModel::factory()->create()->id,
+                'model_id' => $model->id,
+                'model_number_id' => $modelNumber->id,
                 'status_id' => Statuslabel::factory()->readyToDeploy()->create()->id,
             ])->assertRedirect();
 

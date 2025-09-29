@@ -25,8 +25,9 @@
 @if (isset($item->model))
 | **{{ trans('general.asset_model') }}** | {{ $item->model->name }} |
 @endif
-@if ((isset($item->model->model_number)) && ($item->model->name!=$item->model->model_number))
-| **{{ trans('general.model_no') }}** | {{ $item->model->model_number }} |
+@php($mailModelNumber = method_exists($item, 'displayModelNumber') ? $item->displayModelNumber() : null)
+@if ($mailModelNumber)
+| **{{ trans('general.model_no') }}** | {{ $mailModelNumber }} |
 @endif
 @if (isset($item->serial))
 | **{{ trans('mail.serial') }}** | {{ $item->serial }} |

@@ -29,6 +29,8 @@ use App\Http\Controllers\ViewAssetsController;
 use App\Http\Controllers\Admin\TestTypeController as AdminTestTypeController;
 use App\Http\Controllers\Admin\AttributeDefinitionsController;
 use App\Http\Controllers\Admin\AttributeOptionsController;
+use App\Http\Controllers\Admin\ModelNumberController;
+use App\Http\Controllers\Admin\ModelNumberSettingsController;
 use App\Http\Controllers\Admin\ModelSpecificationController;
 use App\Livewire\Importer;
 use App\Models\ReportTemplate;
@@ -80,8 +82,36 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('attributes/{attribute}/options/{option}', [AttributeOptionsController::class, 'update'])->name('attributes.options.update');
     Route::delete('attributes/{attribute}/options/{option}', [AttributeOptionsController::class, 'destroy'])->name('attributes.options.destroy');
 
+    Route::group([
+        'prefix' => 'admin/settings',
+        'as' => 'settings.',
+        'middleware' => ['can:index,App\\Models\\AssetModel'],
+    ], function () {
+        Route::get('model-numbers', [ModelNumberSettingsController::class, 'index'])
+            ->name('model_numbers.index')
+            ->breadcrumbs(fn (Trail $trail) =>
+                $trail->parent('settings.index')
+                    ->push(__('Model Numbers'), route('settings.model_numbers.index')));
+
+        Route::post('model-numbers', [ModelNumberSettingsController::class, 'store'])
+            ->name('model_numbers.store');
+
+        Route::put('model-numbers/{modelNumber}', [ModelNumberSettingsController::class, 'update'])
+            ->name('model_numbers.update');
+
+        Route::delete('model-numbers/{modelNumber}', [ModelNumberSettingsController::class, 'destroy'])
+            ->name('model_numbers.destroy');
+
+        Route::patch('model-numbers/{modelNumber}/primary', [ModelNumberSettingsController::class, 'makePrimary'])
+            ->name('model_numbers.primary');
+    });
+
     Route::get('models/{model}/spec', [ModelSpecificationController::class, 'edit'])->name('models.spec.edit');
     Route::put('models/{model}/spec', [ModelSpecificationController::class, 'update'])->name('models.spec.update');
+    Route::post('models/{model}/model-numbers', [ModelNumberController::class, 'store'])->name('models.numbers.store');
+    Route::put('models/{model}/model-numbers/{modelNumber}', [ModelNumberController::class, 'update'])->name('models.numbers.update');
+    Route::delete('models/{model}/model-numbers/{modelNumber}', [ModelNumberController::class, 'destroy'])->name('models.numbers.destroy');
+    Route::patch('models/{model}/model-numbers/{modelNumber}/primary', [ModelNumberController::class, 'makePrimary'])->name('models.numbers.primary');
 
     Route::resource('manufacturers', ManufacturersController::class);
 

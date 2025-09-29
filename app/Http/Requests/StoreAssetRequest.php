@@ -5,7 +5,6 @@ namespace App\Http\Requests;
 use App\Http\Requests\Traits\MayContainCustomFields;
 use App\Models\Asset;
 use App\Models\AssetModel;
-use App\Models\Category;
 use App\Models\Company;
 use App\Models\Setting;
 use Illuminate\Support\Str;
@@ -13,6 +12,7 @@ use Carbon\Carbon;
 use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Support\Facades\Gate;
 use App\Rules\AssetCannotBeCheckedOutToNondeployableStatus;
+use Illuminate\Validation\Rule;
 
 class StoreAssetRequest extends ImageUploadRequest
 {
@@ -54,19 +54,7 @@ class StoreAssetRequest extends ImageUploadRequest
     {
         $modelRules = (new Asset)->getRules();
 
-        $categoryId = $this->input('category_id');
-
-        if (!$categoryId && $this->input('model_id')) {
-            $model = AssetModel::find((int) $this->input('model_id'));
-            $categoryId = $model->category_id ?? null;
-        }
-
-        if ($categoryId) {
-            $category = Category::find($categoryId);
-            if ($category && in_array(Str::singular(Str::slug($category->name)), ['laptop', 'desktop'])) {
-                $modelRules['sku_id'] = ['required', 'integer', 'exists:skus,id'];
-            }
-        }
+        $modelId = $this->input('model_id');
 
         if (Setting::getSettings()->digit_separator === '1.234,56' && is_string($this->input('purchase_cost'))) {
             // If purchase_cost was submitted as a string with a comma separator
@@ -77,9 +65,22 @@ class StoreAssetRequest extends ImageUploadRequest
             $modelRules = $this->removeNumericRulesFromPurchaseCost($modelRules);
         }
 
+        $modelNumberRules = $modelId
+            ? array_filter([
+                'required',
+                'integer',
+                Rule::exists('model_numbers', 'id')->where('model_id', (int) $modelId),
+            ])
+            : ['nullable'];
+
         return array_merge(
             $modelRules,
-            ['status_id' => [new AssetCannotBeCheckedOutToNondeployableStatus()]],
+            [
+                'model_number_id' => $modelNumberRules,
+                'status_id' => [new AssetCannotBeCheckedOutToNondeployableStatus()],
+                'attribute_overrides' => ['nullable', 'array'],
+                'attribute_overrides.*' => ['nullable'],
+            ],
             parent::rules(),
         );
     }

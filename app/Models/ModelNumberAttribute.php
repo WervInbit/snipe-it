@@ -12,7 +12,7 @@ class ModelNumberAttribute extends SnipeModel
     protected $table = 'model_number_attributes';
 
     protected $fillable = [
-        'model_id',
+        'model_number_id',
         'attribute_definition_id',
         'value',
         'raw_value',
@@ -20,14 +20,14 @@ class ModelNumberAttribute extends SnipeModel
     ];
 
     protected $casts = [
-        'model_id' => 'int',
+        'model_number_id' => 'int',
         'attribute_definition_id' => 'int',
         'attribute_option_id' => 'int',
     ];
 
-    public function model(): BelongsTo
+    public function modelNumber(): BelongsTo
     {
-        return $this->belongsTo(AssetModel::class, 'model_id');
+        return $this->belongsTo(ModelNumber::class, 'model_number_id');
     }
 
     public function definition(): BelongsTo

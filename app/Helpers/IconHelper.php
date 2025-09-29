@@ -171,6 +171,8 @@ class IconHelper
                 return 'fa-solid fa-hashtag';
             case 'asset-tags':
                 return 'fas fa-list-ol';
+            case 'model-numbers':
+                return 'fas fa-barcode';
             case 'labels':
                 return 'fas fa-tags';
             case 'ldap':

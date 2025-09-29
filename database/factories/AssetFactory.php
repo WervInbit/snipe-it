@@ -9,7 +9,6 @@ use App\Models\CustomField;
 use App\Models\Location;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
-use App\Models\Sku;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -33,7 +32,6 @@ class AssetFactory extends Factory
         return [
             'name' => null,
             'model_id' => AssetModel::factory(),
-            'sku_id' => null,
             'rtd_location_id' => Location::factory(),
             'serial' => $this->faker->uuid(),
             'status_id' => function () {
@@ -60,7 +58,13 @@ class AssetFactory extends Factory
     
     public function configure()
     {
-        return $this->afterCreating(function (Asset $asset) {
+        return $this->afterMaking(function (Asset $asset) {
+            $model = $asset->model ?? ($asset->model_id ? AssetModel::find($asset->model_id) : null);
+
+            if ($model) {
+                $asset->model_number_id = $model->ensurePrimaryModelNumber()->id;
+            }
+        })->afterCreating(function (Asset $asset) {
             // Calculate EOL based on purchase_date and model->eol after the model exists
             $purchase = $asset->purchase_date ?: now()->toDateString();
             $model = $asset->model; // ensure relation is resolved
@@ -81,9 +85,6 @@ class AssetFactory extends Factory
                     return AssetModel::where('name', 'Macbook Pro 13"')->first() ?? AssetModel::factory()->mbp13Model();
                 },
             ];
-        })->afterMaking(function (Asset $asset) {
-            $modelId = $asset->model_id instanceof AssetModel ? $asset->model_id->id : $asset->model_id;
-            $asset->sku_id = Sku::factory()->create(['model_id' => $modelId])->id;
         });
     }
 

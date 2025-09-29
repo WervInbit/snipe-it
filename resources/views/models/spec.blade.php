@@ -7,17 +7,41 @@
 ])
 
 @section('inputFields')
-    @if($attributes->isEmpty())
+    @if(($modelNumbers ?? collect())->isEmpty() || !$modelNumber)
         <div class="alert alert-info">
-            {{ __('No attribute definitions are scoped to this model's category yet.') }}
+            {{ __('Add a model number to this model to edit its specification.') }}
         </div>
-    @endif
+    @else
+        <input type="hidden" name="model_number_id" id="model_spec_model_number_id" value="{{ $modelNumber->id }}">
 
-    @foreach($attributes as $resolved)
-        @php($definition = $resolved->definition)
-        @php($name = "attributes.".$definition->id)
-        @php($inputName = "attributes[".$definition->id."]")
-        @php($current = old($name, $resolved->value))
+        <div class="form-group">
+            <label class="col-md-3 control-label" for="model_spec_model_number_selector">{{ __('Model Number') }}</label>
+            <div class="col-md-7">
+                <select id="model_spec_model_number_selector" class="form-control">
+                    @foreach($modelNumbers as $number)
+                        <option value="{{ $number->id }}" {{ $number->id === $modelNumber->id ? 'selected' : '' }}>
+                            {{ $number->label ?: $number->code }}
+                        </option>
+                    @endforeach
+                </select>
+                <p class="help-block">
+                    {{ __('Switch presets to review or edit their specification values.') }}
+                </p>
+            </div>
+        </div>
+
+        @if($attributes->isEmpty())
+            <div class="alert alert-info">
+                {{ __("No attribute definitions are scoped to this model's category yet.") }}
+            </div>
+        @endif
+
+        @foreach($attributes as $resolved)
+            @php($definition = $resolved->definition)
+            @php($name = "attributes.".$definition->id)
+            @php($inputName = "attributes[".$definition->id."]")
+            @php($current = old($name, $resolved->value))
+            @php($isRequired = $definition->required_for_category)
         <div class="form-group{{ $errors->has($name) ? ' has-error' : '' }}">
             <label class="col-md-3 control-label" for="attribute_{{ $definition->id }}">
                 {{ $definition->label }}
@@ -77,4 +101,29 @@
             </div>
         </div>
     @endforeach
+    @endif
+@endsection
+
+@section('moar_scripts')
+    @parent
+    <script nonce="{{ csrf_token() }}">
+        document.addEventListener('DOMContentLoaded', function () {
+            var selector = document.getElementById('model_spec_model_number_selector');
+            var hidden = document.getElementById('model_spec_model_number_id');
+
+            if (!selector) {
+                return;
+            }
+
+            selector.addEventListener('change', function () {
+                if (hidden) {
+                    hidden.value = this.value;
+                }
+
+                var url = new URL(window.location.href);
+                url.searchParams.set('model_number_id', this.value);
+                window.location.href = url.toString();
+            });
+        });
+    </script>
 @endsection

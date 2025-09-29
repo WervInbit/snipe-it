@@ -21,6 +21,13 @@ class StoreAssetModelRequest extends ImageUploadRequest
     {
         parent::prepareForValidation();
 
+        if ($this->has('model_number')) {
+            $modelNumber = trim((string) $this->input('model_number'));
+            $this->merge([
+                'model_number' => $modelNumber === '' ? null : $modelNumber,
+            ]);
+        }
+
         if ($this->category_id) {
             if ($category = Category::find($this->category_id)) {
                 $this->merge([

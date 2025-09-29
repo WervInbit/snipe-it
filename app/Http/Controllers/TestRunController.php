@@ -6,6 +6,7 @@ use App\Models\Asset;
 use App\Models\TestRun;
 use App\Models\TestType;
 use App\Models\TestResult;
+use App\Services\ModelAttributes\EffectiveAttributeResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -16,30 +17,54 @@ class TestRunController extends Controller
     {
         $this->authorize('view', $asset);
         $runs = $asset->tests()
-            ->with(['results.type', 'user'])
+            ->with(['results.type', 'results.attributeDefinition', 'user'])
             ->orderByDesc('created_at')
             ->get();
 
         return view('tests.index', compact('asset', 'runs'));
     }
 
-    public function store(Request $request, Asset $asset): RedirectResponse
+    public function store(Request $request, Asset $asset, EffectiveAttributeResolver $resolver): RedirectResponse
     {
         Gate::authorize('tests.execute');
         $this->authorize('update', $asset);
 
+        $resolved = $resolver->resolveForAsset($asset);
+
+        $missing = $resolved->filter(function ($attribute) {
+            return $attribute->definition->required_for_category && $attribute->value === null;
+        });
+
+        if ($missing->isNotEmpty()) {
+            return redirect()
+                ->route('test-runs.index', $asset->id)
+                ->withErrors([
+                    'attributes' => __('Complete the model specification before starting a test run. Missing: :list', [
+                        'list' => $missing->map(fn ($attribute) => $attribute->definition->label)->implode(', '),
+                    ]),
+                ]);
+        }
+
         $run = new TestRun();
         $run->asset()->associate($asset);
         $run->user()->associate($request->user());
-        $run->sku()->associate($asset->sku);
+        $run->model_number_id = $asset->model_number_id;
         $run->started_at = now();
         $run->save();
 
-        foreach (TestType::forAsset($asset)->pluck('id') as $typeId) {
+        $resolvedAttributes = $resolved->filter(fn ($attribute) => $attribute->requiresTest);
+
+        foreach ($resolvedAttributes as $attribute) {
+            $definition = $attribute->definition;
+            $type = TestType::forAttribute($definition);
+
             $run->results()->create([
-                'test_type_id' => $typeId,
+                'test_type_id' => $type->id,
+                'attribute_definition_id' => $definition->id,
                 'status' => TestResult::STATUS_NVT,
                 'note' => null,
+                'expected_value' => $attribute->value,
+                'expected_raw_value' => $attribute->rawValue,
             ]);
         }
 

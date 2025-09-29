@@ -6,6 +6,7 @@ use App\Models\Asset;
 use App\Models\TestRun;
 use App\Models\TestResult;
 use App\Models\TestType;
+use App\Services\ModelAttributes\EffectiveAttributeResolver;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -46,7 +47,7 @@ class AgentReportController extends Controller
             'type' => ['required', 'string', 'in:test_results'],
             'asset_tag' => ['required', 'string'],
             'results' => ['required', 'array'],
-            'results.*.test_slug' => ['required', 'string', 'exists:test_types,slug'],
+            'results.*.test_slug' => ['required', 'string'],
             'results.*.status' => ['required', 'string', 'in:' . implode(',', TestResult::STATUSES)],
             'results.*.note' => ['nullable', 'string'],
         ]);
@@ -72,7 +73,7 @@ class AgentReportController extends Controller
 
         $run = new TestRun();
         $run->asset()->associate($asset);
-        $run->sku()->associate($asset->sku);
+        $run->model_number_id = $asset->model_number_id;
         if ($agentUserId) {
             $run->user_id = $agentUserId;
         }
@@ -80,24 +81,49 @@ class AgentReportController extends Controller
         $run->finished_at = now();
         $run->save();
 
-        $types = TestType::forAsset($asset)->get()->keyBy('slug');
+        $resolver = app(EffectiveAttributeResolver::class);
+        $resolvedAttributes = $resolver->resolveForAsset($asset)
+            ->filter(fn ($attribute) => $attribute->requiresTest);
+
+        $types = $resolvedAttributes->mapWithKeys(function ($attribute) {
+            $definition = $attribute->definition;
+            $type = TestType::forAttribute($definition);
+
+            return [$type->slug => [
+                'type' => $type,
+                'attribute' => $attribute,
+            ]];
+        });
+
         $provided = collect($validated['results'])->keyBy('test_slug');
 
-        foreach ($types as $slug => $type) {
+        $unknown = $provided->keys()->diff($types->keys());
+        if ($unknown->isNotEmpty()) {
+            return response()->json([
+                'message' => 'Unknown test slugs',
+                'errors' => [
+                    'results' => ['Unexpected test slugs: ' . $unknown->implode(', ')],
+                ],
+            ], 422);
+        }
+
+        foreach ($types as $slug => $payload) {
+            /** @var \App\Services\ModelAttributes\ResolvedAttribute $attribute */
+            $attribute = $payload['attribute'];
+            /** @var TestType $type */
+            $type = $payload['type'];
             $data = $provided[$slug] ?? null;
 
-            if ($data) {
-                $status = $data['status'];
-                $note = $data['note'] ?? null;
-            } else {
-                $status = TestResult::STATUS_NVT;
-                $note = 'Not tested by agent';
-            }
+            $status = $data['status'] ?? TestResult::STATUS_NVT;
+            $note = $data['note'] ?? ($data ? null : 'Not tested by agent');
 
             $run->results()->create([
                 'test_type_id' => $type->id,
+                'attribute_definition_id' => $attribute->definition->id,
                 'status' => $status,
                 'note' => $note,
+                'expected_value' => $attribute->value,
+                'expected_raw_value' => $attribute->rawValue,
             ]);
         }
 

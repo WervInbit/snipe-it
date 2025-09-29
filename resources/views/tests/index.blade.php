@@ -40,6 +40,10 @@
                             $definition = $result->attributeDefinition;
                             $label = $definition?->label ?? optional($result->type)->name;
                             $tooltip = $definition ? ($definition->unit ? __('Unit: :unit', ['unit' => $definition->unit]) : null) : optional($result->type)->tooltip;
+                            $expectedDisplay = $result->expected_value;
+                            if ($definition && $definition->datatype === \App\Models\AttributeDefinition::DATATYPE_BOOL && $expectedDisplay !== null) {
+                                $expectedDisplay = $expectedDisplay === '1' ? __('Yes') : __('No');
+                            }
                         @endphp
                         <li>
                             {{ $label }}
@@ -47,8 +51,8 @@
                                 <i class="fas fa-info-circle" data-toggle="tooltip" title="{{ $tooltip }}"></i>
                             @endif:
                             {{ trans('tests.' . $result->status) }}
-                            @if ($result->expected_value)
-                                <span class="text-muted">{{ __('Expected: :value', ['value' => $result->expected_value]) }}</span>
+                            @if ($expectedDisplay !== null)
+                                <span class="text-muted">{{ __('Expected: :value', ['value' => $expectedDisplay]) }}</span>
                             @endif
                             @if ($result->note)
                                 <span class="text-muted">{{ $result->note }}</span>

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Asset;
-use Illuminate\Support\Str;
+use App\Services\ModelAttributes\EffectiveAttributeResolver;
 
 /**
  * Defines a kind of diagnostic test that can be executed.
@@ -59,15 +59,18 @@ class TestType extends SnipeModel
      */
     public function scopeForAsset(Builder $query, Asset $asset): Builder
     {
-        $categoryName = $asset->sku?->model?->category?->name
-            ?? $asset->model?->category?->name;
+        $resolver = app(EffectiveAttributeResolver::class);
+        $attributeTypeIds = $resolver->resolveForAsset($asset)
+            ->filter(fn ($attribute) => $attribute->requiresTest)
+            ->map(function ($attribute) {
+                return static::forAttribute($attribute->definition)->id;
+            })
+            ->all();
 
-        $slug = Str::singular(Str::slug((string) $categoryName));
-
-        if (in_array($slug, ['laptop', 'desktop'])) {
-            return $query->where('category', 'computer');
+        if (empty($attributeTypeIds)) {
+            return $query->whereRaw('0 = 1');
         }
 
-        return $query->whereRaw('0 = 1');
+        return $query->whereIn('id', $attributeTypeIds);
     }
 }

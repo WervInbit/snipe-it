@@ -16,7 +16,7 @@ class TestResultController extends Controller
     {
         $this->authorize('update', $testRun);
         abort_unless($testRun->asset_id === $asset->id, 404);
-        $testRun->load('results.type');
+        $testRun->load('results.type', 'results.attributeDefinition');
         return view('tests.edit', compact('asset', 'testRun'));
     }
 

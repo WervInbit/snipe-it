@@ -37,6 +37,13 @@ class AssetModelFactory extends Factory
         ];
     }
 
+    public function withoutModelNumber()
+    {
+        return $this->state(fn () => [
+            'model_number' => null,
+        ]);
+    }
+
     public function mbp13Model()
     {
         return $this->state(function () {

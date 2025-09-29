@@ -1,3 +1,58 @@
+# Session Progress (2025-09-28)
+
+## Addendum (2025-09-28 Codex)
+- Session restarted after prior context drop; reviewed AGENTS/PROGRESS/fork notes to re-establish scope on model number settings work.
+- Restored attribute creation form by passing the expected layout context so the form renders without `$item` errors.
+- Exposed the Model Numbers admin page in the settings side nav so superusers can reach the new CRUD screen.
+- Remapped Model Numbers settings auth to rely on the existing asset-model permissions so admins with model access can enter without 403s.
+- Escaped the spec editor alert copy so Blade compiles cleanly when model categories message includes an apostrophe.
+- Flagged a UX follow-up: enum options should support list-based entry instead of delimiter-separated input in quick-add flows.
+- Hardened the asset detail spec table rendering to avoid nested Blade expressions, preventing parse errors on environments sensitive to inline helpers.
+- Reframed webshop visibility as an allow-list toggle, added matched internal-use control on asset show/edit, and default new assets to stay off-sale until explicitly approved.
+
+## Notes for Follow-up Agents
+- Smoke-test the Admin → Settings → Model Numbers page once PHP/JS assets are recompiled to confirm new CRUD + search interactions behave as expected.
+- Continue wiring specification flows to respect the selected model number and fill in outstanding documentation updates once core pages stabilize.
+
+# Session Progress (2025-09-26)
+
+# Session Progress (2025-09-27)
+
+## Addendum (2025-09-27 Codex)
+- Session initiated on Raspberry Pi environment; reviewing WIP multi-model-number migrations and related services.
+- Goal: confirm migration drafts, scope remaining refactors (relationships, UI/API), and plan data backfill + documentation updates.
+- Implemented data-layer shift to `model_numbers` (service layer, resolver, factories) and began wiring asset create/update flows and spec UI around selectable model numbers.
+- Added admin CRUD + UI for model number presets, wired spec editor + asset forms to respect the selected preset, refreshed display helpers, and captured regression coverage/documentation updates.
+- Enabled creating models without an initial model number (schema change, validation, controller + API updates), reworked spec/asset views to guard when no presets exist, and updated docs/tests for the new workflow.
+
+## Summary
+- Confirmed workflow requirements now call for multiple model numbers per model with dropdown selection for refurbishers.
+- Scaffolded the new data layer: drafted migrations for `model_numbers`, backfill, and the accompanying Eloquent model.
+- Began refactoring attribute storage to reference `model_number_id` instead of `model_id`.
+
+## Notes for Follow-up Agents
+- Work paused due to environment usage limits before migrations were finalized—double-check the two new migration files for consistency and run them once access is restored.
+- Continue porting relationships and services (`ModelAttributeManager`, resolvers, controllers, UI) to the multi-number schema.
+- Update `model_number_rework.txt` and fork docs to reflect the new workflow once implementation resumes.
+- Planned next steps: finish data migration backfill, build admin CRUD for model numbers + specs, update asset create/edit (web & API) to require model + model number selection.
+
+## Summary
+- Finished staging attribute-driven test generation so new runs and agent uploads build from needs_test model specs.
+- Persisted asset specification overrides on updates and exposed formatted spec details on asset and model views.
+- Polished spec/override UIs (required flags, bool labels) and added targeted PHPUnit coverage for the flow.
+- Added guard rails for asset overrides and test runs (reject disallowed overrides and require complete model specs before launching tests).
+- Added unit-aware numeric normalization (e.g., TB, GHz) for model attributes while preserving the original input for audit context.
+- Introduced `attribute:promote-custom` artisan command to surface and promote recurring custom enum values.
+
+## Notes for Follow-up Agents
+- PHP CLI is unavailable in this environment, so rerun the new PHPUnit cases once a PHP binary is present.
+- Keep an eye on legacy files already modified in the worktree (public uploads, package-lock) when preparing commits.
+- Manually exercise asset update and test-run flows to verify the new validation rules; automated tests were not executed this pass.
+- To test: attempt an asset override on a non-overrideable attribute and confirm the request is rejected with a validation error.
+- To test: start a test run with a required model attribute missing and ensure the run is blocked with the missing attributes listed.
+- To test: enter values such as "0.5 TB" or "2.5 GHz" when editing model specs and confirm they are converted into the attribute's canonical unit while retaining the raw input for reference.
+- To test: run `php artisan attribute:promote-custom <attribute_key>` (with and without `--apply`) to verify the command reports custom values and optionally creates options.
+
 # Session Progress (2025-09-25)
 
 ## Summary
@@ -18,3 +73,104 @@
 - Keep `docs/fork-notes.md` focused on high-level feature deltas; log incremental fixes here in `PROGRESS.md`.
 - Keep README.md and CONTRIBUTING.md references in sync if the agent docs move or get renamed.
 - Session closed for 2025-09-25; resume outstanding work next shift.
+
+
+
+# Session Progress (2025-09-28)
+You dropped in the middle of removing sku's and we stopped the session:
+your last message:
+SKUs are still doing real work today; they’re more than a relic of the single-model-number era:
+
+Variant labelling & filters – AssetModel::skus() powers the Admin → SKUs screens, usage dashboards, and the “SKU and Model reports” in app/Http/Controllers/ReportsController. Shops tag outgoing stock (“T480 – 16GB/512GB”) and filter inventory by that label; dropping SKUs removes those grouping/report pivots.
+Test history joins – test_runs.sku_id links test results to the exact outgoing variant. Ops reports (and alerting) use it to pinpoint which SKU failed diagnostics, even when multiple trims share the same base model number.
+Legacy reporting & API contracts – Existing LiveSlides/BI exports (and API clients) call GET /api/v1/skus or pass sku_id= to the assets endpoint. Removing the entity is a breaking change for those consumers.
+The newer model-number system overlaps with SKU duties (spec presets; attribute overrides), so if you’re committed to consolidating on model numbers only, here’s what the SKU layer currently offers that you’d need to rehome:
+
+Variant-specific naming visible in asset lists, exports, and queue labels.
+Reporting filters and API params tied to sku_id.
+Historical analytics that assume test_runs and assets reference SKUs.
+If you’re ready to deprecate SKUs, we can map each of those behaviors onto the model-number + attribute pathway (e.g., expose model-number labels where we display SKU names, move the test_runs foreign key to model_number_id, add report filters for presets, etc.). That’s more involved than a straight delete but keeps workflows intact. Let me know if you want a concrete migration plan.
+my last message:
+there are multiple duplicate functions that still need to be removed, sku will be one of them. and sku doesnt fail diagnostics, a specific model does.
+
+you had made hcanges in the following files before crashing:
+18 files changed
++9
+-167
+
+Undo
+
+View all changes
+AgentReportController.php
++1
+-1
+
+AssetsController.php
++0
+-2
+
+TestRunController.php
++1
+-1
+
+StoreAssetRequest.php
++0
+-14
+
+UpdateAssetRequest.php
++0
+-12
+
+Asset.php
++0
+-9
+
+AssetModel.php
++0
+-6
+
+TestRun.php
++6
+-5
+
+AssetPresenter.php
++0
+-7
+
+AuthServiceProvider.php
++0
+-3
+
+RouteServiceProvider.php
++0
+-1
+
+permissions.php
++0
+-27
+
+AssetFactory.php
++0
+-5
+
+general.php
++0
+-2
+
+edit.blade.php
++1
+-35
+
+view.blade.php
++0
+-4
+
+default.blade.php
++0
+-8
+
+api.php
++0
+-25
+
+

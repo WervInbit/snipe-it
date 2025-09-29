@@ -22,7 +22,6 @@ use App\Models\Supplier;
 use App\Models\User;
 use App\Models\TestRun;
 use App\Models\TestType;
-use App\Models\Sku;
 use App\Policies\AccessoryPolicy;
 use App\Policies\AssetModelPolicy;
 use App\Policies\AssetPolicy;
@@ -43,7 +42,6 @@ use App\Policies\SupplierPolicy;
 use App\Policies\UserPolicy;
 use App\Policies\TestRunPolicy;
 use App\Policies\TestTypePolicy;
-use App\Policies\SkuPolicy;
 use App\Models\AttributeDefinition;
 use App\Policies\AttributeDefinitionPolicy;
 use Carbon\Carbon;
@@ -82,7 +80,6 @@ class AuthServiceProvider extends ServiceProvider
         TestRun::class => TestRunPolicy::class,
         TestType::class => TestTypePolicy::class,
         AttributeDefinition::class => AttributeDefinitionPolicy::class,
-        Sku::class => SkuPolicy::class,
     ];
 
     /**

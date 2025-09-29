@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use App\Models\ModelNumber;
 
 /**
  * Represents a collection of tests executed on an asset.
@@ -24,7 +25,7 @@ class TestRun extends SnipeModel
 
     protected $fillable = [
         'asset_id',
-        'sku_id',
+        'model_number_id',
         'user_id',
         'started_at',
         'finished_at',
@@ -32,7 +33,7 @@ class TestRun extends SnipeModel
 
     protected array $auditFields = [
         'asset_id',
-        'sku_id',
+        'model_number_id',
         'user_id',
         'started_at',
         'finished_at',
@@ -60,11 +61,11 @@ class TestRun extends SnipeModel
     }
 
     /**
-     * SKU associated with the asset at the time of the run.
+     * Model number associated with the asset at the time of the run.
      */
-    public function sku(): BelongsTo
+    public function modelNumber(): BelongsTo
     {
-        return $this->belongsTo(Sku::class);
+        return $this->belongsTo(ModelNumber::class, 'model_number_id');
     }
 
     /**

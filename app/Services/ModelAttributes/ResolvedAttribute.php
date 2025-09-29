@@ -20,6 +20,28 @@ class ResolvedAttribute
     ) {
     }
 
+    public function formattedValue(): ?string
+    {
+        return $this->formatValue($this->value);
+    }
+
+    public function formattedModelValue(): ?string
+    {
+        return $this->formatValue($this->modelValue);
+    }
+
+    private function formatValue(?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        return match ($this->definition->datatype) {
+            AttributeDefinition::DATATYPE_BOOL => $value === '1' ? __('Yes') : __('No'),
+            default => $value,
+        };
+    }
+
     public function toArray(): array
     {
         return [

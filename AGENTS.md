@@ -5,6 +5,7 @@ This guide keeps automation agents and human contributors aligned on the expecta
 ## Daily Workflow Checklist
 - Read `PROGRESS.md` and `docs/fork-notes.md` before starting to confirm current context and open follow-ups.
 - Scan outstanding docs for drift (README, CONTRIBUTING, `docs/*`); plan updates alongside code changes.
+- When a new work session begins, add a dated stub to `PROGRESS.md` so the log captures context as the day unfolds.
 - Prefer focused tests that exercise touched code; call out skipped coverage in `PROGRESS.md` when risk remains.
 - Close the loop by logging your work in `PROGRESS.md` (new dated addendum for a new day) and linking any supporting docs.
 

@@ -7,44 +7,53 @@ use App\Models\AssetAttributeOverride;
 use App\Models\AssetModel;
 use App\Models\AttributeDefinition;
 use App\Models\ModelNumberAttribute;
+use App\Models\ModelNumber;
 use Illuminate\Support\Collection;
 
 class EffectiveAttributeResolver
 {
     public function resolveForModel(AssetModel $model): Collection
     {
-        $definitions = $model->attributeDefinitionsForCategory()->with('options')->get();
-        $modelValues = $model->specAttributes()->with('option')->get()->keyBy('attribute_definition_id');
+        $model->loadMissing('primaryModelNumber');
 
-        return $definitions->map(function ($definition) use ($modelValues) {
-            /** @var ModelNumberAttribute|null $value */
-            $value = $modelValues->get($definition->id);
+        $modelNumber = $model->primaryModelNumber;
 
-            return $this->buildResolved($definition, $value, null);
-        });
+        if (!$modelNumber) {
+            return collect();
+        }
+
+        return $this->resolveForModelNumber($modelNumber);
     }
 
-    public function resolveForAsset(Asset $asset): Collection
+    public function resolveForModelNumber(ModelNumber $modelNumber): Collection
     {
-        $asset->loadMissing('model', 'attributeOverrides.option');
+        $modelNumber->loadMissing('model.category');
+        $model = $modelNumber->model;
+
+        if (!$model) {
+            return collect();
+        }
+
+        return $this->resolveWithContext($model, $modelNumber, collect());
+    }
+
+    public function resolveForAsset(Asset $asset, ?ModelNumber $overrideModelNumber = null): Collection
+    {
+        $asset->loadMissing('model', 'modelNumber', 'attributeOverrides.option');
+
         $model = $asset->model;
 
-        $definitions = $model->attributeDefinitionsForCategory()->with('options')->get();
-        $modelValues = $model->specAttributes()->with('option')->get()->keyBy('attribute_definition_id');
+        $modelNumber = $overrideModelNumber
+            ?? $asset->modelNumber
+            ?? $model?->primaryModelNumber;
+
+        if (!$model || !$modelNumber) {
+            return collect();
+        }
+
         $overrides = $asset->attributeOverrides->keyBy('attribute_definition_id');
 
-        return $definitions->map(function ($definition) use ($modelValues, $overrides) {
-            /** @var ModelNumberAttribute|null $modelValue */
-            $modelValue = $modelValues->get($definition->id);
-            /** @var AssetAttributeOverride|null $override */
-            $override = $overrides->get($definition->id);
-
-            if ($override && $definition->allow_asset_override) {
-                return $this->buildResolved($definition, $modelValue, $override, true);
-            }
-
-            return $this->buildResolved($definition, $modelValue, null);
-        });
+        return $this->resolveWithContext($model, $modelNumber, $overrides);
     }
 
     private function buildResolved(AttributeDefinition $definition, ?ModelNumberAttribute $modelValue, ?AssetAttributeOverride $override, bool $isOverride = false): ResolvedAttribute
@@ -95,5 +104,24 @@ class EffectiveAttributeResolver
             $modelValueString,
             $modelRaw
         );
+    }
+
+    private function resolveWithContext(AssetModel $model, ModelNumber $modelNumber, Collection $overrides): Collection
+    {
+        $definitions = $model->attributeDefinitionsForCategory()->with('options')->get();
+        $modelValues = $modelNumber->attributes()->with('option')->get()->keyBy('attribute_definition_id');
+
+        return $definitions->map(function ($definition) use ($modelValues, $overrides) {
+            /** @var ModelNumberAttribute|null $modelValue */
+            $modelValue = $modelValues->get($definition->id);
+            /** @var AssetAttributeOverride|null $override */
+            $override = $overrides->get($definition->id);
+
+            if ($override && $definition->allow_asset_override) {
+                return $this->buildResolved($definition, $modelValue, $override, true);
+            }
+
+            return $this->buildResolved($definition, $modelValue, null);
+        });
     }
 }

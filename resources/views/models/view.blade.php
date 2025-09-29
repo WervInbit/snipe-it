@@ -1,9 +1,11 @@
 @extends('layouts/default')
 
 {{-- Page title --}}
+@php($primaryModelNumber = $model->displayPrimaryModelNumber())
+
 @section('title')
     {{ $model->name }}
-    {{ ($model->model_number) ? '(#'.$model->model_number.')' : '' }}
+    {{ $primaryModelNumber ? '(' . $primaryModelNumber . ')' : '' }}
 @parent
 @stop
 
@@ -239,10 +241,10 @@
                             </li>
                         @endif
                     @endif
-                    @if ($model->model_number)
+                    @if ($primaryModelNumber)
                         <li>
                             <strong>{{ trans('general.model_no') }}</strong>:
-                            {{ $model->model_number }}
+                            {{ $primaryModelNumber }}
                         </li>
                     @endif
 
@@ -293,6 +295,151 @@
                 </div>
         </div>
         </div>
+
+        @can('update', $model)
+            <div class="col-md-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <div class="box-heading">
+                            <h2 class="box-title">{{ __('Model Numbers') }}</h2>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        @if($errors->any())
+                            <div class="alert alert-danger">
+                                <ul class="list-unstyled" style="margin-bottom: 0;">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        @if($model->modelNumbers->isEmpty())
+                            <p class="text-muted">{{ __('No model numbers have been configured yet.') }}</p>
+                        @else
+                            <div class="table-responsive">
+                                <table class="table table-condensed">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ __('Code') }}</th>
+                                            <th>{{ __('Label') }}</th>
+                                            <th>{{ __('Assets') }}</th>
+                                            <th class="text-right">{{ __('Actions') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($model->modelNumbers as $number)
+                                            <tr>
+                                                <td class="col-sm-3">
+                                                    <form id="update-model-number-{{ $number->id }}" method="POST" action="{{ route('models.numbers.update', [$model, $number]) }}">
+                                                        @csrf
+                                                        @method('PUT')
+                                                    </form>
+                                                    <input type="text" name="code" value="{{ old('code', $number->code) }}" class="form-control input-sm" form="update-model-number-{{ $number->id }}" required>
+                                                </td>
+                                                <td class="col-sm-3">
+                                                    <input type="text" name="label" value="{{ old('label', $number->label) }}" class="form-control input-sm" form="update-model-number-{{ $number->id }}">
+                                                </td>
+                                                <td class="col-sm-2">
+                                                    <span class="label label-default">{{ $number->assets_count }}</span>
+                                                </td>
+                                                <td class="col-sm-4 text-right">
+                                                    <div class="btn-group" role="group">
+                                                        <button type="submit" class="btn btn-primary btn-sm" form="update-model-number-{{ $number->id }}">{{ __('Update') }}</button>
+                                                        @if($model->primary_model_number_id !== $number->id)
+                                                            <button type="submit" name="make_primary" value="1" class="btn btn-default btn-sm" form="update-model-number-{{ $number->id }}">{{ __('Make Primary') }}</button>
+                                                        @else
+                                                            <span class="btn btn-success btn-sm" disabled>{{ __('Primary') }}</span>
+                                                        @endif
+                                                    </div>
+                                                    @if($model->primary_model_number_id !== $number->id && $number->assets_count === 0)
+                                                        <form method="POST" action="{{ route('models.numbers.destroy', [$model, $number]) }}" style="display:inline-block;">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('{{ __('Are you sure you want to delete this model number?') }}');">{{ __('Delete') }}</button>
+                                                        </form>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
+                    <div class="box-footer">
+                        <form method="POST" action="{{ route('models.numbers.store', $model) }}" class="form-inline">
+                            @csrf
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <label class="sr-only" for="new_model_number_code">{{ __('Code') }}</label>
+                                    <input id="new_model_number_code" type="text" name="code" class="form-control input-sm" placeholder="{{ __('Code') }}" required>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="sr-only" for="new_model_number_label">{{ __('Label') }}</label>
+                                    <input id="new_model_number_label" type="text" name="label" class="form-control input-sm" placeholder="{{ __('Label (optional)') }}">
+                                </div>
+                                <div class="col-sm-2">
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" name="make_primary" value="1"> {{ __('Make primary') }}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2 text-right">
+                                    <button type="submit" class="btn btn-primary btn-sm">{{ __('Add') }}</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @endcan
+
+        @if(isset($specAttributes))
+            <div class="col-md-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <div class="box-heading">
+                            <h2 class="box-title">{{ __('Specification') }}</h2>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        @if($specAttributes->isEmpty())
+                            <p class="text-muted">{{ __('No attribute definitions are scoped to this model.') }}</p>
+                        @else
+                            <table class="table table-condensed">
+                                <tbody>
+                                @foreach($specAttributes as $attribute)
+                                    @php($definition = $attribute->definition)
+                                    <tr>
+                                        <th>
+                                            {{ $definition->label }}
+                                            @if($definition->unit)
+                                                <span class="text-muted">({{ $definition->unit }})</span>
+                                            @endif
+                                            @if($definition->required_for_category)
+                                                <span class="label label-default">{{ __('Required') }}</span>
+                                            @endif
+                                            @if($definition->needs_test)
+                                                <span class="label label-info">{{ __('Tested') }}</span>
+                                            @endif
+                                        </th>
+                                        <td>{{ $attribute->formattedValue() ?? __('Not specified') }}</td>
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                            </table>
+                        @endif
+                    </div>
+                    @can('update', $model)
+                        <div class="box-footer">
+                            <a href="{{ route('models.spec.edit', $model) }}" class="btn btn-default btn-block">{{ __('Edit Specification') }}</a>
+                        </div>
+                    @endcan
+                </div>
+            </div>
+        @endif
             @can('update', \App\Models\AssetModel::class)
             <div class="col-md-12" style="padding-bottom: 5px;">
                 <a href="{{ ($model->deleted_at=='') ? route('models.edit', $model->id) : '#' }}" style="width: 100%;" class="btn btn-sm btn-warning btn-social hidden-print{{ ($model->deleted_at!='') ? ' disabled' : '' }}">

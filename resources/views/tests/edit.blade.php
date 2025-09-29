@@ -17,13 +17,17 @@
                             $definition = $result->attributeDefinition;
                             $label = $definition?->label ?? optional($result->type)->name;
                             $tooltip = $definition ? ($definition->unit ? __('Unit: :unit', ['unit' => $definition->unit]) : null) : optional($result->type)->tooltip;
+                            $expectedDisplay = $result->expected_value;
+                            if ($definition && $definition->datatype === \App\Models\AttributeDefinition::DATATYPE_BOOL && $expectedDisplay !== null) {
+                                $expectedDisplay = $expectedDisplay === '1' ? __('Yes') : __('No');
+                            }
                         @endphp
                         {{ $label }}
                         @if($tooltip)
                             <i class="fas fa-info-circle" data-toggle="tooltip" title="{{ $tooltip }}"></i>
                         @endif
-                        @if ($result->expected_value)
-                            <span class="pull-right text-muted">{{ __('Expected: :value', ['value' => $result->expected_value]) }}</span>
+                        @if ($expectedDisplay !== null)
+                            <span class="pull-right text-muted">{{ __('Expected: :value', ['value' => $expectedDisplay]) }}</span>
                         @endif
                     </div>
                     <div class="panel-body">

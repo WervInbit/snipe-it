@@ -14,6 +14,7 @@ use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\CheckoutRequest;
 use App\Models\Company;
+use App\Models\ModelNumber;
 use App\Models\Location;
 use App\Models\Setting;
 use App\Models\Statuslabel;
@@ -115,9 +116,24 @@ class AssetsController extends Controller
         $settings = Setting::getSettings();
 
         $modelForAttributes = $request->input('model_id') ? AssetModel::find($request->input('model_id')) : null;
+        $modelNumber = null;
+
         if ($modelForAttributes) {
-            $missing = $resolver->resolveForModel($modelForAttributes)
-                ->filter(fn (\App\Services\ModelAttributes\ResolvedAttribute $attribute) => $attribute->definition->required_for_category && $attribute->value === null);
+            $modelNumberId = (int) $request->input('model_number_id');
+            if ($modelNumberId) {
+                $modelNumber = $modelForAttributes->modelNumbers()->whereKey($modelNumberId)->first();
+            }
+
+            if (!$modelNumber) {
+                $modelNumber = $modelForAttributes->primaryModelNumber;
+            }
+
+            if ($modelNumber) {
+                $missing = $resolver->resolveForModelNumber($modelNumber)
+                    ->filter(fn (\App\Services\ModelAttributes\ResolvedAttribute $attribute) => $attribute->definition->required_for_category && $attribute->value === null);
+            } else {
+                $missing = collect();
+            }
 
             if ($missing->isNotEmpty()) {
                 return redirect()->back()->withInput()->withErrors([
@@ -126,6 +142,13 @@ class AssetsController extends Controller
                     ]),
                 ]);
             }
+
+            if (!$modelNumber) {
+                return redirect()->back()->withInput()->withErrors([
+                    'model_number_id' => __('Select a valid model number.'),
+                ]);
+            }
+
         }
 
         $successes = [];
@@ -139,6 +162,9 @@ class AssetsController extends Controller
         for ($a = 1; $a <= $count; $a++) {
             $asset = new Asset();
             $asset->model()->associate(AssetModel::find($request->input('model_id')));
+            if ($modelNumber) {
+                $asset->model_number_id = $modelNumber->id;
+            }
             $asset->name = $request->input('name');
 
             // Check for a corresponding serial
@@ -152,7 +178,6 @@ class AssetsController extends Controller
 
             $asset->company_id              = Company::getIdForCurrentUser($request->input('company_id'));
             $asset->model_id                = $request->input('model_id');
-            $asset->sku_id                  = $request->input('sku_id');
             $asset->order_number            = $request->input('order_number');
             $asset->notes                   = $request->input('notes');
             $asset->location_note           = $request->input('location_note');
@@ -165,9 +190,9 @@ class AssetsController extends Controller
             $asset->assigned_to             = request('assigned_to', null);
             $asset->supplier_id             = request('supplier_id', null);
             $asset->requestable             = request('requestable', 0);
-            $asset->is_sellable             = request('is_sellable', 1);
+            $asset->is_sellable             = (bool) request('is_sellable', 0);
             $asset->rtd_location_id         = request('rtd_location_id', null);
-            $asset->byod                    = request('byod', 0);
+            $asset->byod                    = (bool) request('byod', 0);
 
             if ($asset->location_note) {
                 $custom = Location::customLocation();
@@ -324,13 +349,18 @@ class AssetsController extends Controller
     {
         $this->authorize($asset);
         session()->put('back_url', url()->previous());
+        $asset->loadMissing('model.modelNumbers', 'modelNumber');
         $specAttributes = $asset->model ? $resolver->resolveForAsset($asset) : collect();
+        $modelNumbers = $asset->model ? $asset->model->modelNumbers : collect();
+        $selectedModelNumber = $asset->modelNumber ?? $asset->model?->primaryModelNumber;
 
         return view('hardware/edit')
             ->with('item', $asset)
             ->with('statuslabel_list', Helper::statusLabelList())
             ->with('statuslabel_types', Helper::statusTypeList())
-            ->with('specAttributes', $specAttributes);
+            ->with('specAttributes', $specAttributes)
+            ->with('modelNumbers', $modelNumbers)
+            ->with('selectedModelNumber', $selectedModelNumber);
     }
 
 
@@ -421,9 +451,9 @@ class AssetsController extends Controller
         $asset->supplier_id = $request->input('supplier_id', null);
         $asset->expected_checkin = $request->input('expected_checkin', null);
         $asset->requestable = $request->input('requestable', 0);
-        $asset->is_sellable = $request->input('is_sellable', 1);
+        $asset->is_sellable = $request->boolean('is_sellable');
         $asset->rtd_location_id = $request->input('rtd_location_id', null);
-        $asset->byod = $request->input('byod', 0);
+        $asset->byod = $request->boolean('byod');
         $asset->location_note = $request->input('location_note');
 
         if ($asset->location_note) {
@@ -479,7 +509,7 @@ class AssetsController extends Controller
         $asset->name = $request->input('name');
         $asset->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $asset->model_id = $request->input('model_id');
-        $asset->sku_id = $request->input('sku_id');
+        $asset->model_number_id = $request->input('model_number_id');
         $asset->order_number = $request->input('order_number');
 
         $asset_tags = $request->input('asset_tags');
@@ -532,7 +562,15 @@ class AssetsController extends Controller
         ]);
 
 
-        if ($asset->save()) {
+            if ($asset->save()) {
+                if ($asset->model_id) {
+                    try {
+                        $attributeManager->saveAssetOverrides($asset, $request->input('attribute_overrides', []));
+                    } catch (ValidationException $exception) {
+                        return redirect()->back()->withInput()->withErrors($exception->errors());
+                    }
+                }
+
             return Helper::getRedirectOption($request, $asset->id, 'Assets')
                 ->with('success', trans('admin/hardware/message.update.success'));
         }
@@ -1067,6 +1105,37 @@ class AssetsController extends Controller
         }
 
         return redirect()->back()->withInput()->withErrors($asset->getErrors());
+    }
+
+    public function toggleSaleAvailability(Request $request, Asset $asset): RedirectResponse
+    {
+        $this->authorize('update', $asset);
+
+        $desiredState = $request->boolean('is_sellable');
+
+        if ($desiredState && $asset->byod) {
+            return redirect()->back()->with('warning', trans('admin/hardware/message.internal_use_conflict'));
+        }
+
+        $asset->is_sellable = $desiredState;
+        $asset->save();
+
+        return redirect()->back()->with('success', trans('general.updated'));
+    }
+
+    public function toggleInternalUse(Request $request, Asset $asset): RedirectResponse
+    {
+        $this->authorize('update', $asset);
+
+        $asset->byod = $request->boolean('byod');
+
+        if ($asset->byod) {
+            $asset->is_sellable = false;
+        }
+
+        $asset->save();
+
+        return redirect()->back()->with('success', trans('general.updated'));
     }
 
     public function getRequestedIndex($user_id = null)

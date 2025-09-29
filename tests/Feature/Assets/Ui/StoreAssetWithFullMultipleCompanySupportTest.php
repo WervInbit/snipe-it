@@ -20,10 +20,14 @@ class StoreAssetWithFullMultipleCompanySupportTest extends TestCase
 
         $this->settings->enableMultipleFullCompanySupport();
 
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+
         $this->actingAs($actor)
             ->post(route('hardware.store'), [
                 'asset_tags' => ['1' => '1234'],
-                'model_id' => AssetModel::factory()->create()->id,
+                'model_id' => $model->id,
+                'model_number_id' => $modelNumber->id,
                 'status_id' => Statuslabel::factory()->create()->id,
                 'company_id' => $company->id,
             ]);

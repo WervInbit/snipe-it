@@ -61,7 +61,8 @@
               </td>
               <td>
                 @foreach($fieldset->models as $model)
-                  <a href="{{ route('models.show', $model->id) }}" class="label label-default">{{ $model->name }}{{ ($model->model_number) ? ' ('.$model->model_number.')' : '' }}</a>
+                  @php($displayNumber = $model->displayPrimaryModelNumber())
+                  <a href="{{ route('models.show', $model->id) }}" class="label label-default">{{ $model->name }}@if($displayNumber) ({{ $displayNumber }}) @endif</a>
 
                 @endforeach
               </td>

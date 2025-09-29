@@ -7,14 +7,15 @@ use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Watson\Validating\ValidatingTrait;
 use \App\Presenters\AssetModelPresenter;
 use App\Http\Traits\TwoColumnUniqueUndeletedTrait;
-use App\Models\Sku;
 use App\Models\AttributeDefinition;
+use App\Models\ModelNumber;
 use App\Models\ModelNumberAttribute;
 
 /**
@@ -49,7 +50,7 @@ class AssetModel extends SnipeModel
 
     protected $rules = [
         'name'              => 'string|required|min:1|max:255|two_column_unique_undeleted:model_number',
-        'model_number'      => 'string|required|max:255|two_column_unique_undeleted:name',
+        'model_number'      => 'nullable|string|max:255|two_column_unique_undeleted:name',
         'min_amt'           => 'integer|min:0|nullable',
         'category_id'       => 'required|integer|exists:categories,id',
         'manufacturer_id'   => 'integer|exists:manufacturers,id|nullable',
@@ -75,6 +76,7 @@ class AssetModel extends SnipeModel
         'name',
         'notes',
         'requestable',
+        'primary_model_number_id',
     ];
 
     use Searchable;
@@ -113,6 +115,65 @@ class AssetModel extends SnipeModel
         });
     }
 
+    public function ensurePrimaryModelNumber(): ModelNumber
+    {
+        $this->loadMissing('primaryModelNumber');
+
+        if ($this->primaryModelNumber) {
+            return $this->primaryModelNumber;
+        }
+
+        $code = $this->model_number ?: 'MODEL-'.$this->id;
+
+        $modelNumber = $this->modelNumbers()->create([
+            'code' => $code,
+        ]);
+
+        $this->forceFill(['primary_model_number_id' => $modelNumber->id])->save();
+
+        $this->setRelation('primaryModelNumber', $modelNumber);
+
+        return $modelNumber;
+    }
+
+    public function syncPrimaryModelNumber(?string $code): void
+    {
+        $this->loadMissing('primaryModelNumber');
+
+        if ($code === null) {
+            if ($this->model_number !== null) {
+                $this->forceFill(['model_number' => null])->save();
+            }
+
+            return;
+        }
+
+        $primary = $this->primaryModelNumber;
+
+        if ($primary) {
+            if ($primary->code !== $code) {
+                $primary->fill(['code' => $code])->save();
+            }
+
+            if ($this->model_number !== $code) {
+                $this->forceFill(['model_number' => $code])->save();
+            }
+
+            return;
+        }
+
+        $newPrimary = $this->modelNumbers()->create([
+            'code' => $code,
+        ]);
+
+        $this->forceFill([
+            'primary_model_number_id' => $newPrimary->id,
+            'model_number' => $code,
+        ])->save();
+
+        $this->setRelation('primaryModelNumber', $newPrimary);
+    }
+
     /**
      * Establishes the model -> assets relationship
      *
@@ -125,9 +186,14 @@ class AssetModel extends SnipeModel
         return $this->hasMany(\App\Models\Asset::class, 'model_id');
     }
 
-    public function skus()
+    public function modelNumbers(): HasMany
     {
-        return $this->hasMany(Sku::class, 'model_id');
+        return $this->hasMany(ModelNumber::class, 'model_id');
+    }
+
+    public function primaryModelNumber(): BelongsTo
+    {
+        return $this->belongsTo(ModelNumber::class, 'primary_model_number_id');
     }
 
     /**
@@ -209,7 +275,22 @@ class AssetModel extends SnipeModel
      */
     public function specAttributes(): HasMany
     {
-        return $this->hasMany(ModelNumberAttribute::class, 'model_id');
+        return $this->hasMany(ModelNumberAttribute::class, 'model_number_id', 'primary_model_number_id');
+    }
+
+    public function displayPrimaryModelNumber(): ?string
+    {
+        $primary = $this->primaryModelNumber;
+
+        if ($primary) {
+            if ($primary->label) {
+                return $primary->code.' ('.$primary->label.')';
+            }
+
+            return $primary->code;
+        }
+
+        return $this->model_number;
     }
 
     /**

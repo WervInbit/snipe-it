@@ -22,6 +22,7 @@ class ModelSpecificationRequest extends Request
     public function rules(): array
     {
         return [
+            'model_number_id' => ['nullable', 'integer', 'exists:model_numbers,id'],
             'attributes' => ['required', 'array'],
             'attributes.*' => ['nullable'],
         ];

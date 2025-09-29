@@ -25,8 +25,6 @@ return [
     'archived'              => 'Sold/Archived',
     'asset_models'			=> 'Asset Models',
     'asset_model'                       => 'Model',
-    'skus'                              => 'SKUs',
-    'sku'                               => 'SKU',
     'asset'					=> 'Asset',
     'asset_previous'        => 'Asset (Previously Assigned)',
     'asset_report'          => 'Asset Report',

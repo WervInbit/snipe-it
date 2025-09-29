@@ -5,9 +5,9 @@ Category: high-level class (Laptop, Desktop, etc.).
 
 Manufacturer: vendor (HP, Dell, etc.).
 
-Model: marketing name (e.g., “HP ProBook 120 G1”). A Model has exactly one model number.
+Model: marketing name (e.g., “HP ProBook 120 G1”). A model can carry multiple model numbers; one is marked primary for default spec flows.
 
-Model number: single string on the Model (e.g., 120-G1-i5/8/256) that represents the final spec. All attributes are attached to (and read from) this model number.
+Model number: code + optional label on the model (e.g., code "120-G1-i5/8/256", label "i5 / 8GB / 256GB") that represents a final spec preset. All attributes are attached to (and read from) a specific model number.
 
 AttributeDefinition: typed field you can reuse (e.g., ram_capacity_gb, storage_type), with settings: datatype, unit, required_for_category, needs_test, allow_custom_values, allow_asset_override, optional constraints (min|max|step|regex).
 
@@ -19,9 +19,9 @@ AssetAttributeOverride: per-asset difference from the model number’s value. Ab
 
 Rules:
 
-Exactly one model number per Model.
+At least one model number per model; one must be primary and is used as the default selection in UI and APIs.
 
-The model number’s attributes are the canonical truth.
+Each model number’s attributes are the canonical truth for that preset.
 
 Assets may override only attributes where allow_asset_override=true.
 
@@ -89,9 +89,9 @@ If Allow Custom Values = on → users may enter a free value when needed; admins
 
 Repeat-safe: re-adding the same Value updates its label/active state.
 
-3) Create a Model (with a single model number)
+3) Create a Model (optional primary model number)
 
-Goal: set up the model identity and its one model number string.
+Goal: set up the model identity. Provide a primary model number if one is available; otherwise leave the field blank and attach presets later from the Model Numbers panel.
 
 Steps:
 
@@ -105,20 +105,22 @@ Manufacturer.
 
 Category.
 
-Model number (single string; this is the one and only code for this Model).
+Primary model number (optional initial code/label; can be added later).
 
 Save.
 
-Success: model exists with one model number attached.
+Success: model exists. Add or manage presets from the Model Numbers panel on the model detail page when they become available.
 Failure: missing required fields or conflicting uniqueness → block.
 
 4) Assign Attribute Values to the Model Number (final spec)
 
-Goal: enter the canonical spec values for this model number.
+Goal: enter the canonical spec values for a specific model number preset. If no presets exist yet, add one from the Model Numbers panel first.
 
 Steps:
 
 Admin → Models → [Model] → Edit Spec.
+
+Select the desired model number preset from the dropdown (or follow the link back to the Model Numbers panel to add one if none exist).
 
 For each applicable attribute (by category scope):
 
@@ -162,7 +164,7 @@ Steps:
 
 Assets → New Asset.
 
-Select Model (which already has its single model number and final attributes).
+Select Model and choose the appropriate model number preset (defaults to the model’s primary number; required before continuing).
 
 Overrides (optional):
 

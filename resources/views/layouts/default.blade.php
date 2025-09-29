@@ -771,10 +771,10 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                         </li>
                                     @endcan
 
-                                    @can('view', \App\Models\Sku::class)
-                                        <li {!! (request()->is('skus*') ? ' class="active"' : '') !!}>
-                                            <a href="{{ route('skus.index') }}">
-                                                {{ trans('general.skus') }}
+                                    @can('view', \App\Models\AssetModel::class)
+                                        <li {!! (request()->is('admin/settings/model-numbers*') ? ' class="active"' : '') !!}>
+                                            <a href="{{ route('settings.model_numbers.index') }}">
+                                                {{ __('Model Numbers') }}
                                             </a>
                                         </li>
                                     @endcan

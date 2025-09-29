@@ -124,7 +124,7 @@ class AttributeDefinition extends SnipeModel
             return [];
         }
 
-        $decoded = is_array($value) ? $value : json_decode($value, true) ?: [];
+        $decoded = is_array($value) ? $value : (json_decode($value, true) ?: []);
 
         return array_filter(
             Arr::only($decoded, ['min', 'max', 'step', 'regex']),

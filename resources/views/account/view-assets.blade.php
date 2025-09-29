@@ -511,10 +511,10 @@
                           {{ $asset->name }}
                         </td>
                         <td>
-                            {{ $asset->model->name }}
+                          {{ $asset->model->name }}
                         </td>
                         <td>
-                          {{ $asset->model->model_number }}
+                          {{ $asset->displayModelNumber() }}
                         </td>
                         <td>
                           {{ $asset->serial }}

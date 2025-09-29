@@ -5,9 +5,7 @@ namespace App\Http\Requests;
 use App\Http\Requests\Traits\MayContainCustomFields;
 use App\Models\Asset;
 use App\Models\AssetModel;
-use App\Models\Category;
 use App\Models\Setting;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
@@ -56,21 +54,24 @@ class UpdateAssetRequest extends ImageUploadRequest
             }
         }
 
-        if ($categoryId) {
-            $category = Category::find($categoryId);
-            if ($category && in_array(Str::singular(Str::slug($category->name)), ['laptop', 'desktop'])) {
-                $rules['sku_id'] = ['integer', 'exists:skus,id'];
-                if (!$this->asset || !$this->asset->sku_id || $this->has('sku_id')) {
-                    $rules['sku_id'][] = 'required';
-                }
-            }
-        }
-
         // if the purchase cost is passed in as a string **and** the digit_separator is ',' (as is common in the EU)
         // then we tweak the purchase_cost rule to make it a string
         if (Setting::getSettings()->digit_separator === '1.234,56' && is_string($this->input('purchase_cost'))) {
             $rules['purchase_cost'] = ['nullable', 'string'];
         }
+
+        $modelId = $this->input('model_id') ?: ($this->asset?->model_id);
+
+        $rules['model_number_id'] = $modelId
+            ? array_filter([
+                'required',
+                'integer',
+                Rule::exists('model_numbers', 'id')->where('model_id', (int) $modelId),
+            ])
+            : ['nullable'];
+
+        $rules['attribute_overrides'] = ['nullable', 'array'];
+        $rules['attribute_overrides.*'] = ['nullable'];
 
         return $rules;
     }

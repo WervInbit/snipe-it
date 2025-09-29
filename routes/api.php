@@ -856,31 +856,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         ); // end asset models API routes
 
         /**
-        * SKU API routes
-        */
-        Route::group(['prefix' => 'skus'], function () {
-            Route::get('selectlist',
-                [
-                    Api\SkusController::class,
-                    'selectlist'
-                ]
-            )->name('api.skus.selectlist');
-        });
-
-        Route::resource('skus', Api\SkusController::class, [
-            'only' => ['index', 'show', 'store', 'update', 'destroy'],
-            'names' => [
-                'index' => 'api.skus.index',
-                'show' => 'api.skus.show',
-                'store' => 'api.skus.store',
-                'update' => 'api.skus.update',
-                'destroy' => 'api.skus.destroy',
-            ],
-        ]);
-
-
-
-        /**
         * Settings API routes
         */
         Route::group(['middleware'=> ['auth', 'authorize:superuser'], 'prefix' => 'settings'], function () {

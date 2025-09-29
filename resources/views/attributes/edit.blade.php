@@ -3,10 +3,11 @@
 @extends('layouts/edit-form', [
     'createText' => __('Create Attribute'),
     'updateText' => __('Update Attribute'),
-    'helpText' => __('Attributes define the final model specification fields assets inherit.'),
+    'helpText' => __('Attributes become the reusable specification fields your models and assets rely on. Configure the datatype, constraints, and override rules here to drive presets, validation, and reporting.'),
     'helpPosition' => 'right',
     'formAction' => $isEdit ? route('attributes.update', $definition) : route('attributes.store'),
     'method' => $isEdit ? 'PUT' : 'POST',
+    'item' => $definition,
 ])
 
 @section('inputFields')
@@ -68,27 +69,27 @@
     <div class="form-group">
         <div class="col-md-7 col-md-offset-3">
             <div class="checkbox">
-                <label>
+                <label style="display:flex; align-items:center; gap:8px;">
                     <input type="checkbox" name="required_for_category" value="1" {{ old('required_for_category', $definition->required_for_category) ? 'checked' : '' }}>
-                    {{ __('Required for category') }}
+                    <span>{{ __('Required for category') }}</span>
                 </label>
             </div>
             <div class="checkbox">
-                <label>
+                <label style="display:flex; align-items:center; gap:8px;">
                     <input type="checkbox" name="needs_test" value="1" {{ old('needs_test', $definition->needs_test) ? 'checked' : '' }}>
-                    {{ __('Needs test item') }}
+                    <span>{{ __('Needs test item') }}</span>
                 </label>
             </div>
             <div class="checkbox">
-                <label>
+                <label style="display:flex; align-items:center; gap:8px;">
                     <input type="checkbox" name="allow_asset_override" value="1" {{ old('allow_asset_override', $definition->allow_asset_override) ? 'checked' : '' }}>
-                    {{ __('Allow asset overrides') }}
+                    <span>{{ __('Allow asset overrides') }}</span>
                 </label>
             </div>
             <div class="checkbox">
-                <label>
+                <label style="display:flex; align-items:center; gap:8px;">
                     <input type="checkbox" name="allow_custom_values" value="1" {{ old('allow_custom_values', $definition->allow_custom_values) ? 'checked' : '' }}>
-                    {{ __('Allow custom values (enum only)') }}
+                    <span>{{ __('Allow custom values (enum only)') }}</span>
                 </label>
             </div>
         </div>

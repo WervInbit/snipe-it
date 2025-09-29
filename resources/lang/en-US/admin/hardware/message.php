@@ -13,6 +13,7 @@ return [
     'labels_generated'   => 'Labels were successfully generated.',
     'error_generating_labels' => 'Error while generating labels.',
     'no_assets_selected' => 'No assets selected.',
+    'internal_use_conflict' => 'Internal-use assets cannot be marked available for sale.',
 
     'create' => [
         'error'   		=> 'Asset was not created, please try again. :(',

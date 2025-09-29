@@ -645,15 +645,25 @@
                                                 <table class="table table-condensed">
                                                     <tbody>
                                                     @foreach($resolvedAttributes as $attribute)
+                                                        @php
+                                                            $displayValue = $attribute->formattedValue();
+                                                            $modelDisplay = $attribute->formattedModelValue();
+                                                        @endphp
                                                         <tr>
                                                             <td>{{ $attribute->definition->label }}</td>
                                                             <td>
-                                                                {{ $attribute->value ?? __('Not specified') }}
+                                                                @if($displayValue !== null && $displayValue !== '')
+                                                                    {{ $displayValue }}
+                                                                @else
+                                                                    {{ __('Not specified') }}
+                                                                @endif
+
                                                                 @if($attribute->isOverride)
                                                                     <span class="label label-info">{{ __('Override') }}</span>
                                                                 @endif
-                                                                @if($attribute->modelValue && $attribute->isOverride)
-                                                                    <span class="text-muted">({{ __('Model: :value', ['value' => $attribute->modelValue]) }})</span>
+
+                                                                @if($attribute->isOverride && $modelDisplay)
+                                                                    <span class="text-muted">({{ __('Model: :value', ['value' => $modelDisplay]) }})</span>
                                                                 @endif
                                                             </td>
                                                         </tr>
@@ -825,10 +835,6 @@
                                                         {{ $asset->model->name }}
                                                     @endcan
 
-                                                    @if ($asset->sku)
-                                                        ({{ trans('general.sku') }}: {{ $asset->sku->name }})
-                                                    @endif
-
                                                 @endif
                                             </div>
                                         </div>
@@ -841,7 +847,7 @@
                                             </strong>
                                         </div>
 <div class="col-md-9">
-                                            {{ ($asset->model) ? $asset->model->model_number : ''}}
+                                            {{ $asset->displayModelNumber() ?? '' }}
                                         </div>
                                     </div>
 
@@ -869,18 +875,38 @@
                                         @if (!optional($asset->assetstatus)->name || strtolower($asset->assetstatus->name) !== 'sold')
                                         <div class="row">
                                             <div class="col-md-3">
-                                                <strong>{{ trans('admin/hardware/general.block_from_sale') }}</strong>
+                                                <strong>{{ trans('admin/hardware/general.available_for_sale') }}</strong>
                                             </div>
                                             <div class="col-md-9">
-                                                <form method="POST" action="{{ route('hardware.update', $asset->id) }}">
+                                                <form method="POST" action="{{ route('hardware.toggle-sale', $asset) }}" class="form-inline" style="display:flex; align-items:center; gap:8px;">
                                                     @csrf
                                                     @method('PATCH')
-                                                    <input type="hidden" name="is_sellable" value="{{ $asset->is_sellable ? 1 : 0 }}">
-                                                    <input type="checkbox" aria-label="{{ trans('admin/hardware/general.block_from_sale') }}" onchange="this.previousElementSibling.value = this.checked ? 0 : 1; this.form.submit();" {{ $asset->is_sellable ? '' : 'checked' }}>
+                                                    <input type="hidden" name="is_sellable" value="0">
+                                                    <label class="checkbox-inline" style="margin:0;">
+                                                        <input type="checkbox" name="is_sellable" value="1" aria-label="{{ trans('admin/hardware/general.available_for_sale') }}" onchange="this.form.submit();" {{ $asset->is_sellable ? 'checked' : '' }}>
+                                                    </label>
+                                                    <span class="help-block" style="margin:0;">{{ trans('admin/hardware/general.available_for_sale_help') }}</span>
                                                 </form>
                                             </div>
                                         </div>
                                         @endif
+
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <strong>{{ trans('admin/hardware/general.internal_use_only') }}</strong>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <form method="POST" action="{{ route('hardware.toggle-internal', $asset) }}" class="form-inline" style="display:flex; align-items:center; gap:8px;">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <input type="hidden" name="byod" value="0">
+                                                    <label class="checkbox-inline" style="margin:0;">
+                                                        <input type="checkbox" name="byod" value="1" aria-label="{{ trans('admin/hardware/general.internal_use_only') }}" onchange="this.form.submit();" {{ $asset->byod ? 'checked' : '' }}>
+                                                    </label>
+                                                    <span class="help-block" style="margin:0;">{{ trans('admin/hardware/general.internal_use_only_help') }}</span>
+                                                </form>
+                                            </div>
+                                        </div>
                                     @endcan
 
                                     @if (($asset->model) && ($asset->model->fieldset))

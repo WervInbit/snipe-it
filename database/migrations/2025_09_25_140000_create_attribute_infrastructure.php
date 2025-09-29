@@ -56,7 +56,7 @@ return new class extends Migration
             $table->unsignedBigInteger('attribute_option_id')->nullable();
             $table->timestamps();
 
-            $table->unique(['model_id', 'attribute_definition_id']);
+            $table->unique(['model_id', 'attribute_definition_id'], 'model_number_attr_model_definition_unique');
             $table->foreign('model_id')->references('id')->on('models')->cascadeOnDelete();
             $table->foreign('attribute_definition_id')->references('id')->on('attribute_definitions')->cascadeOnDelete();
             $table->foreign('attribute_option_id')->references('id')->on('attribute_options')->nullOnDelete();
@@ -71,7 +71,7 @@ return new class extends Migration
             $table->unsignedBigInteger('attribute_option_id')->nullable();
             $table->timestamps();
 
-            $table->unique(['asset_id', 'attribute_definition_id']);
+            $table->unique(['asset_id', 'attribute_definition_id'], 'asset_override_asset_definition_unique');
             $table->foreign('asset_id')->references('id')->on('assets')->cascadeOnDelete();
             $table->foreign('attribute_definition_id')->references('id')->on('attribute_definitions')->cascadeOnDelete();
             $table->foreign('attribute_option_id')->references('id')->on('attribute_options')->nullOnDelete();

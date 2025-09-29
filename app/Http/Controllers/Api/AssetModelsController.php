@@ -149,11 +149,16 @@ class AssetModelsController extends Controller
     public function store(StoreAssetModelRequest $request) : JsonResponse
     {
         $this->authorize('create', AssetModel::class);
+        $payload = $request->all();
+        $modelNumberInput = trim((string) ($payload['model_number'] ?? ''));
+        $payload['model_number'] = $modelNumberInput !== '' ? $modelNumberInput : null;
+
         $assetmodel = new AssetModel;
-        $assetmodel->fill($request->all());
+        $assetmodel->fill($payload);
         $assetmodel = $request->handleImages($assetmodel);
 
         if ($assetmodel->save()) {
+            $assetmodel->syncPrimaryModelNumber($payload['model_number'] ?? null);
             return response()->json(Helper::formatStandardApiResponse('success', (new AssetModelsTransformer)->transformAssetModel($assetmodel), trans('admin/models/message.create.success')));
         }
         return response()->json(Helper::formatStandardApiResponse('error', null, $assetmodel->getErrors()));
@@ -205,7 +210,11 @@ class AssetModelsController extends Controller
     {
         $this->authorize('update', AssetModel::class);
         $assetmodel = AssetModel::findOrFail($id);
-        $assetmodel->fill($request->all());
+        $payload = $request->all();
+        $modelNumberInput = trim((string) ($payload['model_number'] ?? ''));
+        $payload['model_number'] = $modelNumberInput !== '' ? $modelNumberInput : null;
+
+        $assetmodel->fill($payload);
         $assetmodel = $request->handleImages($assetmodel);
 
         /**
@@ -222,6 +231,7 @@ class AssetModelsController extends Controller
 
 
         if ($assetmodel->save()) {
+            $assetmodel->syncPrimaryModelNumber($payload['model_number'] ?? null);
             return response()->json(Helper::formatStandardApiResponse('success', (new AssetModelsTransformer)->transformAssetModel($assetmodel), trans('admin/models/message.update.success')));
         }
 

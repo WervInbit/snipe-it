@@ -77,7 +77,8 @@ class AssetModelsController extends Controller
         $model->eol = $request->input('eol');
         $model->depreciation_id = $request->input('depreciation_id');
         $model->name = $request->input('name');
-        $model->model_number = trim((string) $request->input('model_number'));
+        $modelNumberInput = trim((string) $request->input('model_number'));
+        $model->model_number = $modelNumberInput !== '' ? $modelNumberInput : null;
         $model->min_amt = $request->input('min_amt');
         $model->manufacturer_id = $request->input('manufacturer_id');
         $model->category_id = $request->input('category_id');
@@ -105,6 +106,8 @@ class AssetModelsController extends Controller
 
 
         if ($model->save()) {
+            $model->syncPrimaryModelNumber($modelNumberInput !== '' ? $modelNumberInput : null);
+
             if ($this->shouldAddDefaultValues($request->input())) {
                 if (!$this->assignCustomFieldsDefaultValues($model, $request->input('default_values'))){
                     return redirect()->back()->withInput()->with('error', trans('admin/custom_fields/message.fieldset_default_value.error'));
@@ -152,7 +155,8 @@ class AssetModelsController extends Controller
         $model->depreciation_id = $request->input('depreciation_id');
         $model->eol = $request->input('eol');
         $model->name = $request->input('name');
-        $model->model_number = trim((string) $request->input('model_number'));
+        $modelNumberInput = trim((string) $request->input('model_number'));
+        $model->model_number = $modelNumberInput !== '' ? $modelNumberInput : null;
         $model->min_amt = $request->input('min_amt');
         $model->manufacturer_id = $request->input('manufacturer_id');
         $model->category_id = $request->input('category_id');
@@ -161,7 +165,13 @@ class AssetModelsController extends Controller
 
         $model->fieldset_id = $request->input('fieldset_id');
 
-        if ($model->save()) {
+            if ($model->save()) {
+                $model->syncPrimaryModelNumber($modelNumberInput !== '' ? $modelNumberInput : null);
+            $modelNumber = $model->ensurePrimaryModelNumber();
+            $modelNumber->fill([
+                'code' => $model->model_number,
+            ])->save();
+
             $this->removeCustomFieldsDefaultValues($model);
 
             if ($this->shouldAddDefaultValues($request->input())) {
@@ -261,10 +271,17 @@ class AssetModelsController extends Controller
      * @since [v1.0]
      * @param int $modelId
      */
-    public function show(AssetModel $model) : View | RedirectResponse
+    public function show(AssetModel $model, EffectiveAttributeResolver $resolver) : View | RedirectResponse
     {
-        $this->authorize('view', AssetModel::class);
-        return view('models/view', compact('model'));
+        $this->authorize('view', $model);
+        $model->load([
+            'category',
+            'manufacturer',
+            'modelNumbers' => fn ($query) => $query->withCount('assets')->orderBy('code'),
+        ]);
+        $specAttributes = $resolver->resolveForModel($model);
+
+        return view('models/view', compact('model', 'specAttributes'));
     }
 
     /**
@@ -320,12 +337,37 @@ class AssetModelsController extends Controller
             }
         }
 
+        $model->loadMissing('modelNumbers');
+
+        $modelNumberId = (int) $request->input('model_number_id');
+
+        $selectedModelNumber = null;
+        if ($modelNumberId) {
+            $selectedModelNumber = $model->modelNumbers->firstWhere('id', $modelNumberId);
+        }
+
+        if (!$selectedModelNumber) {
+            $selectedModelNumber = $model->primaryModelNumber ?? $model->modelNumbers->first();
+        }
+
+        if (!$selectedModelNumber) {
+            return view('hardware.partials.spec-overrides', [
+                'attributes' => collect(),
+                'modelNumbers' => $model->modelNumbers,
+                'selectedModelNumber' => null,
+                'asset' => $asset,
+            ]);
+        }
+
         $attributes = $asset
-            ? $resolver->resolveForAsset($asset)
-            : $resolver->resolveForModel($model);
+            ? $resolver->resolveForAsset($asset, $selectedModelNumber)
+            : $resolver->resolveForModelNumber($selectedModelNumber);
 
         return view('hardware.partials.spec-overrides', [
             'attributes' => $attributes,
+            'modelNumbers' => $model->modelNumbers,
+            'selectedModelNumber' => $selectedModelNumber,
+            'asset' => $asset,
         ]);
     }
 
@@ -409,6 +451,42 @@ class AssetModelsController extends Controller
 
         return redirect()->route('models.index')
             ->with('warning', trans('admin/models/message.bulkedit.error'));
+    }
+
+    private function syncPrimaryModelNumber(AssetModel $model, ?string $code): void
+    {
+        $model->loadMissing('primaryModelNumber');
+
+        if ($code === null) {
+            if ($model->model_number !== null) {
+                $model->forceFill(['model_number' => null])->save();
+            }
+
+            return;
+        }
+
+        $primary = $model->primaryModelNumber;
+
+        if ($primary) {
+            if ($primary->code !== $code) {
+                $primary->fill(['code' => $code])->save();
+            }
+
+            if ($model->model_number !== $code) {
+                $model->forceFill(['model_number' => $code])->save();
+            }
+
+            return;
+        }
+
+        $newPrimary = $model->modelNumbers()->create([
+            'code' => $code,
+        ]);
+
+        $model->forceFill([
+            'primary_model_number_id' => $newPrimary->id,
+            'model_number' => $code,
+        ])->save();
     }
 
     /**

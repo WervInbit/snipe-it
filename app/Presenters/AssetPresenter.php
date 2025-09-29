@@ -82,13 +82,6 @@ class AssetPresenter extends Presenter
                 'title' => trans('admin/models/table.modelnumber'),
                 'visible' => false,
             ], [
-                'field' => 'sku',
-                'searchable' => true,
-                'sortable' => true,
-                'title' => trans('general.sku'),
-                'visible' => true,
-                'formatter' => 'skusLinkObjFormatter',
-            ], [
                 'field' => 'category',
                 'searchable' => true,
                 'sortable' => true,

@@ -34,6 +34,7 @@ class AttributeDefinitionsController extends Controller
         return view('attributes.edit', [
             'definition' => new AttributeDefinition(),
             'categories' => Category::orderBy('name')->get(),
+            'item' => new AttributeDefinition(),
         ]);
     }
 
@@ -61,6 +62,7 @@ class AttributeDefinitionsController extends Controller
         return view('attributes.edit', [
             'definition' => $attribute,
             'categories' => Category::orderBy('name')->get(),
+            'item' => $attribute,
         ]);
     }
 

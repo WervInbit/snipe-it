@@ -96,16 +96,12 @@
     @include('partials.forms.edit.model-select', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id'])
 
     <div id="model_spec_content">
-        @include('hardware.partials.spec-overrides', ['attributes' => $specAttributes ?? collect()])
+        @include('hardware.partials.spec-overrides', [
+            'attributes' => $specAttributes ?? collect(),
+            'modelNumbers' => $modelNumbers ?? collect(),
+            'selectedModelNumber' => $selectedModelNumber ?? null,
+        ])
     </div>
-
-    @include('partials.forms.edit.sku-select', [
-        'translated_name' => 'SKU',
-        'fieldname' => 'sku_id',
-        'selected' => old('sku_id', $item->sku_id),
-        'selected_text' => optional($item->sku)->name,
-    ])
-
 
     @include ('partials.forms.edit.status', ['required' => false])
     @if (!$item->id)
@@ -155,6 +151,17 @@
         });
     </script>
     @include ('partials.forms.edit.requestable', ['requestable_text' => trans('admin/hardware/general.requestable')])
+
+    <div class="form-group">
+        <div class="col-md-7 col-md-offset-3">
+            <label class="form-control">
+                <input type="hidden" name="is_sellable" value="0">
+                <input type="checkbox" name="is_sellable" value="1" {{ old('is_sellable', $item->is_sellable) ? 'checked="checked"' : '' }} aria-label="is_sellable">
+                {{ trans('admin/hardware/general.available_for_sale') }}
+            </label>
+            <p class="help-block">{{ trans('admin/hardware/general.available_for_sale_help') }}</p>
+        </div>
+    </div>
 
 
 
@@ -259,7 +266,7 @@
         //TODO: Refactor custom fields to use Livewire, populate from server on page load when requested with model_id
     $(document).ready(function() {
         fetchCustomFields();
-        fetchSpecification($('#model_select_id').val());
+        fetchSpecification($('#model_select_id').val(), $('#model_number_id').val());
     });
     @endif
 
@@ -337,7 +344,7 @@
         }
     }
 
-    function fetchSpecification(modelId) {
+    window.fetchSpecification = function(modelId, modelNumberId) {
         var specContainer = $('#model_spec_content');
         transformed_spec_vals = {};
         specContainer.find('input,select,textarea').each(function () {
@@ -353,6 +360,9 @@
         var assetId = {{ $item->id ?? 'null' }};
         if (assetId) {
             requestData.asset_id = assetId;
+        }
+        if (modelNumberId) {
+            requestData.model_number_id = modelNumberId;
         }
 
         $.ajax({
@@ -416,11 +426,11 @@
         $('#model_select_id').on("change", function () {
             var modelId = $(this).val();
             fetchCustomFields();
-            fetchSpecification(modelId);
+            fetchSpecification(modelId, null);
         });
 
         fetchCustomFields();
-        fetchSpecification($('#model_select_id').val());
+        fetchSpecification($('#model_select_id').val(), $('#model_number_id').val());
 
         //initialize assigned user/loc/asset based on statuslabel's statustype
         user_add($(".status_id option:selected").val());
@@ -558,17 +568,12 @@
         var categorySelect = $('#category_select_id');
         var manufacturerSelect = $('#manufacturer_select_id');
         var modelSelect = $('#model_select_id');
-        var skuSelect = $('#sku_select_id');
 
         manufacturerSelect.data('category-id', categorySelect.val());
         modelSelect.data('category-id', categorySelect.val());
         if (manufacturerSelect.val()) {
             modelSelect.data('manufacturer-id', manufacturerSelect.val());
         }
-        if (modelSelect.val()) {
-            skuSelect.data('model-id', modelSelect.val());
-        }
-
         categorySelect.on('change', function (e, preserve) {
             var categoryId = $(this).val();
             manufacturerSelect.data('category-id', categoryId);
@@ -578,8 +583,6 @@
             }
             manufacturerSelect.val(null).trigger('change');
             modelSelect.val(null).trigger('change');
-            skuSelect.val(null).trigger('change');
-            skuSelect.removeData('model-id');
         });
 
         manufacturerSelect.on('change', function (e, preserve) {
@@ -589,8 +592,6 @@
                 return;
             }
             modelSelect.val(null).trigger('change');
-            skuSelect.val(null).trigger('change');
-            skuSelect.removeData('model-id');
         });
 
         function syncFromModel(model) {
@@ -602,27 +603,10 @@
             }
         }
 
-        modelSelect.on('change', function (e, preserveSku) {
+        modelSelect.on('change', function () {
             var modelId = $(this).val();
-            if (!preserveSku) {
-                skuSelect.val(null).trigger('change');
-            }
             if (modelId) {
-                skuSelect.data('model-id', modelId);
                 $.getJSON("{{ config('app.url') }}/api/v1/models/" + modelId, syncFromModel);
-            } else {
-                skuSelect.removeData('model-id');
-            }
-        });
-
-        skuSelect.on('change', function () {
-            var skuId = $(this).val();
-            if (skuId) {
-                $.getJSON("{{ config('app.url') }}/api/v1/skus/" + skuId, function (sku) {
-                    if (sku.model) {
-                        modelSelect.val(sku.model.id).trigger('change', [true]);
-                    }
-                });
             }
         });
     });

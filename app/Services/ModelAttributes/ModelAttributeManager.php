@@ -5,6 +5,7 @@ namespace App\Services\ModelAttributes;
 use App\Models\Asset;
 use App\Models\AssetAttributeOverride;
 use App\Models\AssetModel;
+use App\Models\ModelNumber;
 use App\Models\AttributeDefinition;
 use App\Models\ModelNumberAttribute;
 use Illuminate\Support\Collection;
@@ -20,13 +21,22 @@ class ModelAttributeManager
     /**
      * @param array<int|string, mixed> $payload keyed by attribute definition id or key.
      */
-    public function saveModelAttributes(AssetModel $model, array $payload): void
+    public function saveModelAttributes(ModelNumber $modelNumber, array $payload): void
     {
+        $modelNumber->loadMissing('model');
+        $model = $modelNumber->model;
+
+        if (!$model) {
+            throw ValidationException::withMessages([
+                'model_number_id' => __('The selected model number is invalid.'),
+            ]);
+        }
+
         $definitions = $this->fetchDefinitionsForModel($model);
 
-        DB::transaction(function () use ($model, $payload, $definitions) {
+        DB::transaction(function () use ($modelNumber, $payload, $definitions) {
             $persisted = ModelNumberAttribute::query()
-                ->where('model_id', $model->id)
+                ->where('model_number_id', $modelNumber->id)
                 ->get()
                 ->keyBy('attribute_definition_id');
 
@@ -41,7 +51,7 @@ class ModelAttributeManager
                     }
 
                     ModelNumberAttribute::query()
-                        ->where('model_id', $model->id)
+                        ->where('model_number_id', $modelNumber->id)
                         ->where('attribute_definition_id', $definition->id)
                         ->delete();
 
@@ -53,7 +63,7 @@ class ModelAttributeManager
 
                 $record = ModelNumberAttribute::query()->updateOrCreate(
                     [
-                        'model_id' => $model->id,
+                        'model_number_id' => $modelNumber->id,
                         'attribute_definition_id' => $definition->id,
                     ],
                     [
@@ -66,7 +76,7 @@ class ModelAttributeManager
                 $persisted->put($definition->id, $record);
             }
 
-            $this->ensureRequiredComplete($model, $definitions, $persisted);
+            $this->ensureRequiredComplete($modelNumber, $definitions, $persisted);
         });
     }
 
@@ -86,6 +96,10 @@ class ModelAttributeManager
                 $value = $payload[$key] ?? null;
 
                 if (!$definition->allow_asset_override) {
+                    if ($hasKey && !$this->isEmpty($value)) {
+                        $this->fail($definition, __('Overrides are disabled for :label.', ['label' => $definition->label]));
+                    }
+
                     AssetAttributeOverride::query()
                         ->where('asset_id', $asset->id)
                         ->where('attribute_definition_id', $definition->id)
@@ -164,9 +178,9 @@ class ModelAttributeManager
         return $definition->id;
     }
 
-    private function ensureRequiredComplete(AssetModel $model, Collection $definitions, Collection $persisted): void
+    private function ensureRequiredComplete(ModelNumber $modelNumber, Collection $definitions, Collection $persisted): void
     {
-        $missing = $definitions->filter(function (AttributeDefinition $definition) use ($persisted, $model) {
+        $missing = $definitions->filter(function (AttributeDefinition $definition) use ($persisted, $modelNumber) {
             if (!$definition->required_for_category) {
                 return false;
             }
@@ -176,7 +190,7 @@ class ModelAttributeManager
             }
 
             return !ModelNumberAttribute::query()
-                ->where('model_id', $model->id)
+                ->where('model_number_id', $modelNumber->id)
                 ->where('attribute_definition_id', $definition->id)
                 ->exists();
         });

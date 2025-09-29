@@ -140,6 +140,12 @@ Route::group(
             [AssetsController::class, 'getRestore']
         )->name('restore/hardware')->withTrashed();
 
+        Route::patch('{asset}/sale-toggle', [AssetsController::class, 'toggleSaleAvailability'])
+            ->name('hardware.toggle-sale');
+
+        Route::patch('{asset}/internal-use-toggle', [AssetsController::class, 'toggleInternalUse'])
+            ->name('hardware.toggle-internal');
+
         Route::post(
             'bulkedit',
             [BulkAssetsController::class, 'edit']

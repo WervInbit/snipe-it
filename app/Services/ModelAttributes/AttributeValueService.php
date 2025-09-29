@@ -78,11 +78,13 @@ class AttributeValueService
             $this->fail($definition, __('A value is required.'));
         }
 
-        if (!$this->isWholeNumber($input)) {
+        $numeric = $this->normalizeNumericInput($definition, $input, false);
+        $value = (int) round($numeric);
+
+        if (abs($numeric - $value) > 0.00001) {
             $this->fail($definition, __('Enter a whole number.'));
         }
 
-        $value = (int) $input;
         $constraints = $definition->constraints;
         $this->enforceNumericConstraints($definition, $value, $constraints);
 
@@ -95,11 +97,7 @@ class AttributeValueService
             $this->fail($definition, __('A value is required.'));
         }
 
-        if (!is_numeric($input)) {
-            $this->fail($definition, __('Enter a numeric value.'));
-        }
-
-        $value = (float) $input;
+        $value = $this->normalizeNumericInput($definition, $input, true);
         $constraints = $definition->constraints;
         $this->enforceNumericConstraints($definition, $value, $constraints);
 
@@ -152,17 +150,107 @@ class AttributeValueService
         return new AttributeValueTuple($value, $this->normalizeRaw($raw), null);
     }
 
-    private function isWholeNumber($value): bool
+    private function normalizeNumericInput(AttributeDefinition $definition, $input, bool $allowFloat): float
     {
-        if (is_int($value)) {
-            return true;
+        if (is_int($input) || is_float($input)) {
+            return (float) $input;
         }
 
-        if (is_string($value) && preg_match('/^-?\d+$/', trim($value))) {
-            return true;
+        if (!is_string($input)) {
+            $this->fail($definition, __('Enter a numeric value.'));
         }
 
-        return false;
+        $clean = trim(str_replace(',', '', $input));
+
+        if ($clean === '') {
+            $this->fail($definition, __('Enter a numeric value.'));
+        }
+
+        if (is_numeric($clean)) {
+            return (float) $clean;
+        }
+
+        if (!preg_match('/^([-+]?[0-9]*\.?[0-9]+)\s*([a-zA-Z]+)$/', $clean, $matches)) {
+            $this->fail($definition, __('Enter a numeric value.'));
+        }
+
+        $value = (float) $matches[1];
+        $suffix = strtolower($matches[2]);
+        $baseUnit = $definition->unit ? strtolower($definition->unit) : null;
+
+        if (!$baseUnit) {
+            $this->fail($definition, __('Unexpected unit :unit.', ['unit' => $matches[2]]));
+        }
+
+        if ($suffix === $baseUnit) {
+            return $value;
+        }
+
+        $converted = $this->convertUnit($baseUnit, $suffix, $value);
+
+        if ($converted === null) {
+            $this->fail($definition, __('Unable to convert :from to :to.', ['from' => $matches[2], 'to' => $definition->unit]));
+        }
+
+        if (!$allowFloat && abs($converted - round($converted)) > 0.00001) {
+            $this->fail($definition, __('Enter a whole number.'));
+        }
+
+        return $converted;
+    }
+
+    private function convertUnit(string $baseUnit, string $inputUnit, float $value): ?float
+    {
+        $unitSets = [
+            $this->dataUnits(),
+            $this->frequencyUnits(),
+            $this->powerUnits(),
+        ];
+
+        foreach ($unitSets as $map) {
+            if (isset($map[$baseUnit]) && isset($map[$inputUnit])) {
+                $baseFactor = $map[$baseUnit];
+                $inputFactor = $map[$inputUnit];
+                return ($value * $inputFactor) / $baseFactor;
+            }
+        }
+
+        return null;
+    }
+
+    private function dataUnits(): array
+    {
+        $base = 1024.0;
+        return [
+            'b' => 1.0,
+            'kb' => $base,
+            'mb' => $base ** 2,
+            'gb' => $base ** 3,
+            'tb' => $base ** 4,
+            'kib' => $base,
+            'mib' => $base ** 2,
+            'gib' => $base ** 3,
+            'tib' => $base ** 4,
+        ];
+    }
+
+    private function frequencyUnits(): array
+    {
+        return [
+            'hz' => 1.0,
+            'khz' => 1_000.0,
+            'mhz' => 1_000_000.0,
+            'ghz' => 1_000_000_000.0,
+        ];
+    }
+
+    private function powerUnits(): array
+    {
+        return [
+            'wh' => 1.0,
+            'kwh' => 1_000.0,
+            'mwh' => 1_000_000.0,
+        ];
     }
 
     private function compileRegex(string $pattern): string
