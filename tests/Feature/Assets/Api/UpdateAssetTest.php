@@ -9,7 +9,6 @@ use App\Models\Company;
 use App\Models\Location;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
-use App\Models\Sku;
 use App\Models\User;
 use App\Models\CustomField;
 use Illuminate\Support\Facades\Crypt;
@@ -136,21 +135,22 @@ class UpdateAssetTest extends TestCase
 
     }
 
-    public function testSkuIsRequiredForLaptopAndDesktopCategories()
+    public function testModelNumberIsRequiredForLaptopAndDesktopCategories()
     {
         $category = Category::factory()->assetLaptopCategory()->create();
         $model = AssetModel::factory()->create(['category_id' => $category->id]);
-        $sku = Sku::factory()->create(['model_id' => $model->id]);
-        $asset = Asset::factory()->create(['model_id' => $model->id, 'sku_id' => $sku->id]);
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $asset = Asset::factory()->create(['model_id' => $model->id, 'model_number_id' => $modelNumber->id]);
 
         $response = $this->actingAsForApi(User::factory()->editAssets()->create())
             ->patchJson(route('api.assets.update', $asset->id), [
-                'sku_id' => null,
+                'model_id' => $model->id,
+                'model_number_id' => null,
             ])
             ->assertOk()
             ->assertStatusMessageIs('error');
 
-        $this->assertNotNull($response->json('messages.sku_id'));
+        $this->assertNotNull($response->json('messages.model_number_id'));
     }
 
     public function testUpdatesPeriodAsCommaSeparatorForPurchaseCost()

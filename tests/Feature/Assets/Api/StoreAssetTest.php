@@ -248,7 +248,7 @@ class StoreAssetTest extends TestCase
             ->assertStatusMessageIs('success');
     }
 
-    public function testSkuIsRequiredForLaptopAndDesktopCategories()
+    public function testModelNumberIsRequiredForLaptopAndDesktopCategories()
     {
         $category = Category::factory()->assetLaptopCategory()->create();
         $model = AssetModel::factory()->create(['category_id' => $category->id]);
@@ -263,7 +263,7 @@ class StoreAssetTest extends TestCase
             ->assertOk()
             ->assertStatusMessageIs('error');
 
-        $this->assertNotNull($response->json('messages.sku_id'));
+        $this->assertNotNull($response->json('messages.model_number_id'));
     }
 
 

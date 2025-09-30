@@ -67,7 +67,7 @@ class StoreAssetRequest extends ImageUploadRequest
 
         $modelNumberRules = $modelId
             ? array_filter([
-                'required',
+                'nullable',
                 'integer',
                 Rule::exists('model_numbers', 'id')->where('model_id', (int) $modelId),
             ])

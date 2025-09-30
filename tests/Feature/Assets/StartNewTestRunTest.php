@@ -25,7 +25,7 @@ class StartNewTestRunTest extends TestCase
         $response->assertRedirect(route('test-results.edit', [$asset->id, $run->id]));
         $this->assertNotNull($run->started_at);
         $this->assertCount(TestType::count(), $run->results);
-        $this->assertEquals($asset->sku_id, $run->sku_id);
+        $this->assertEquals($asset->model_number_id, $run->model_number_id);
         $run->results->each(function ($result) {
             $this->assertEquals(TestResult::STATUS_NVT, $result->status);
             $this->assertNull($result->note);
@@ -47,3 +47,4 @@ class StartNewTestRunTest extends TestCase
         $this->assertCount(0, $run->results);
     }
 }
+

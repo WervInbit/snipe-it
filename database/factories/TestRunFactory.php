@@ -14,7 +14,7 @@ class TestRunFactory extends Factory
     public function definition()
     {
         $start = $this->faker->dateTimeBetween('-1 week', 'now');
-        $end = (clone $start)->modify('+'.rand(1,2).' hours');
+        $end = (clone $start)->modify('+' . rand(1, 2) . ' hours');
 
         return [
             'asset_id' => Asset::factory(),
@@ -22,5 +22,14 @@ class TestRunFactory extends Factory
             'started_at' => $start,
             'finished_at' => $end,
         ];
+    }
+
+    public function configure()
+    {
+        return $this->afterMaking(function (TestRun $run) {
+            if ($run->asset) {
+                $run->model_number_id = $run->asset->model_number_id;
+            }
+        });
     }
 }

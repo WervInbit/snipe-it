@@ -1,3 +1,16 @@
+# Session Progress (2025-09-30)
+
+## Addendum (2025-09-30 Codex)
+- Investigated the recurring Passport key failure after docker volume resets and confirmed the storage mount starts without oauth key material.
+- Extended docker/app/entrypoint.sh to auto-run php artisan passport:keys --force, chown the generated files to www-data, and lock permissions so HTTP requests can decrypt tokens immediately after boot.
+- Shared a stopgap for the current stack: execute docker compose exec app php artisan passport:keys --force once to repopulate keys until the container restarts with the updated entrypoint.
+- Finished retiring the orphaned SKU scaffolding: removed UI/API references, added a schema cleanup migration, and exposed model-number metadata in asset/test APIs and transformers.
+
+## Notes for Follow-up Agents
+- Rebuild or restart the app service (docker compose up -d --build app) to pick up the entrypoint change and verify the hardware index loads without manual key generation.
+- After the next cold start, confirm storage/oauth-public.key and storage/oauth-private.key exist on the shared volume; if not, capture container logs for the entrypoint to debug further.
+- Run `php artisan migrate` inside the app container once this branch lands to drop the legacy SKU tables and add the test-run model-number column.
+- Composer dev packages are missing in the container (`Collision` dependency); install them before attempting `php artisan test` so the new assertions can be exercised.
 # Session Progress (2025-09-28)
 
 ## Addendum (2025-09-28 Codex)
@@ -172,5 +185,7 @@ default.blade.php
 api.php
 +0
 -25
+
+
 
 

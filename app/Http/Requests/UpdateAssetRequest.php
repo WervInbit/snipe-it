@@ -64,7 +64,7 @@ class UpdateAssetRequest extends ImageUploadRequest
 
         $rules['model_number_id'] = $modelId
             ? array_filter([
-                'required',
+                'nullable',
                 'integer',
                 Rule::exists('model_numbers', 'id')->where('model_id', (int) $modelId),
             ])

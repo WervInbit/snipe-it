@@ -18,6 +18,7 @@
                     </option>
                 @endforeach
             </select>
+            {!! $errors->first('model_number_id', '<span class="alert-msg">:message</span>') !!}
             @if($modelNumbers->count() <= 1)
                 <p class="help-block text-muted">{{ __('This model currently has a single specification preset.') }}</p>
             @else
@@ -124,3 +125,4 @@
         });
     })();
 </script>
+

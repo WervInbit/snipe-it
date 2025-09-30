@@ -5,7 +5,6 @@ namespace Tests\Feature\Assets\Api;
 use App\Models\Asset;
 use App\Models\Company;
 use App\Models\User;
-use App\Models\Sku;
 use Carbon\Carbon;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
@@ -32,18 +31,19 @@ class AssetIndexTest extends TestCase
             ->assertJson(fn(AssertableJson $json) => $json->has('rows', 3)->etc());
     }
 
-    public function testAssetApiIndexIncludesSku()
+    public function testAssetApiIndexIncludesModelNumber()
     {
-        $sku = Sku::factory()->create();
-        Asset::factory()->for($sku->model, 'model')->for($sku, 'sku')->create();
+        $asset = Asset::factory()->create();
+        $expectedModelNumber = $asset->displayModelNumber();
+        $expectedModelNumberId = $asset->model_number_id;
 
         $this->actingAsForApi(User::factory()->superuser()->create())
             ->getJson(route('api.assets.index'))
             ->assertOk()
             ->assertJson(fn(AssertableJson $json) =>
-                $json->has('rows.0.sku', fn($json) =>
-                    $json->where('id', $sku->id)
-                        ->where('name', $sku->name)
+                $json->has('rows.0', fn(AssertableJson $row) =>
+                    $row->where('model_number', $expectedModelNumber)
+                        ->where('model_number_id', $expectedModelNumberId)
                 )->etc()
             );
     }

@@ -228,9 +228,8 @@ class Asset extends Depreciable
         'model'              => ['name', 'model_number', 'eol'],
         'model.category'     => ['name'],
         'model.manufacturer' => ['name'],
-        'sku'                => ['name'],
+        'modelNumber'        => ['code', 'label'],
     ];
-
     protected static function booted(): void
     {
         static::forceDeleted(function (Asset $asset) {
@@ -2412,3 +2411,5 @@ class Asset extends Depreciable
     }
 
 }
+
+

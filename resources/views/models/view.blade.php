@@ -63,18 +63,6 @@
                 </li>
 
                 <li>
-                    <a href="#skus" data-toggle="tab">
-
-                        <span class="hidden-lg hidden-md">
-                          <i class="fas fa-barcode fa-2x"></i>
-                        </span>
-                        <span class="hidden-xs hidden-sm">
-                            {{ trans('general.skus') }}
-                            {!! ($model->skus()->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($model->skus()->count()).'</span>' : '' !!}
-                        </span>
-                    </a>
-                </li>
-                <li>
                     <a href="#files" data-toggle="tab">
 
                         <span class="hidden-lg hidden-md">
@@ -118,29 +106,6 @@
                 }'>
                     </table>
                 </div> <!-- /.tab-pane assets -->
-
-                <div class="tab-pane fade" id="skus">
-                    <div id="skuToolbar">
-                        @can('create', \App\Models\Sku::class)
-                            <a href="{{ route('skus.create', ['model_id' => $model->id]) }}" class="btn btn-primary">{{ trans('admin/skus/table.create') }}</a>
-                        @endcan
-                    </div>
-                    <table
-                            data-columns="{{ \App\Presenters\SkuPresenter::dataTableLayout() }}"
-                            data-cookie-id-table="modelSkusTable"
-                            data-id-table="modelSkusTable"
-                            data-side-pagination="server"
-                            data-toolbar="#skuToolbar"
-                            data-sort-order="asc"
-                            id="modelSkusTable"
-                            data-url="{{ route('api.skus.index',['model_id'=> $model->id]) }}"
-                            class="table table-striped snipe-table"
-                            data-export-options='{
-                "fileName": "export-model-{{ str_slug($model->name) }}-skus-{{ date('Y-m-d') }}",
-                "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                }'>
-                    </table>
-                </div>
 
                 <div class="tab-pane fade" id="files">
 

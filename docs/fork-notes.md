@@ -23,3 +23,9 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 - Added feature coverage for model-number management and refreshed documentation to outline the multi-preset workflow.
 - Models can now be created without an initial model number; presets are attached from the Model Numbers panel, and spec/asset flows prompt when a preset is required.
 - Migration skips altering the column when running on SQLite (tests already operate with the nullable default schema in memory).
+
+### 2025-09-30
+- Removed the unfinished SKU layer in favour of multi-model-number workflows; dropped SKU routes/UI, and added a migration to prune the table/foreign keys.
+- Updated asset API responses to expose model number strings and IDs, and aligned factories/tests with the model-number requirement.
+- Linked test runs to model numbers so diagnostics follow the selected preset.
+

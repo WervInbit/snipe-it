@@ -638,9 +638,7 @@
         'locations',
         'maintenances',
         'manufacturers',
-        'models',
-        'skus',
-        'statuslabels',
+        'models',        'statuslabels',
         'suppliers',
         'users',
     ];
@@ -1774,3 +1772,5 @@
 </script>
     
 @endpush
+
+
