@@ -1139,7 +1139,7 @@ class Asset extends Depreciable
      * Generate a unique asset tag when one is not supplied.
      *
      * Uses the traditional auto-increment settings when enabled, otherwise
-     * falls back to a sequential `ASSET-0001` style tag.
+     * falls back to a sequential `ASSET-XX0001` style tag.
      *
      * @since [v5.1]
      */
@@ -1150,8 +1150,24 @@ class Asset extends Depreciable
         }
 
         $settings = \App\Models\Setting::getSettings();
+        $number = self::zerofill($settings->next_auto_tag_base, 4);
 
-        return 'ASSET-' . self::zerofill($settings->next_auto_tag_base, 4);
+        do {
+            $tag = 'ASSET-' . self::randomLetters(2) . $number;
+        } while (static::withTrashed()->where('asset_tag', $tag)->exists());
+
+        return $tag;
+    }
+
+    protected static function randomLetters(int $length = 2): string
+    {
+        $letters = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $letters .= chr(random_int(65, 90));
+        }
+
+        return $letters;
     }
 
 
@@ -2411,5 +2427,6 @@ class Asset extends Depreciable
     }
 
 }
+
 
 

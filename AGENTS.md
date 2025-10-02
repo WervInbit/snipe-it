@@ -10,6 +10,7 @@ This guide keeps automation agents and human contributors aligned on the expecta
 - Close the loop by logging your work in `PROGRESS.md` (new dated addendum for a new day) and linking any supporting docs.
 
 ## Automation Environment Notes
+- When emitting multi-line files from PowerShell, use here-strings (`@"..."@`) or pass string arrays to `Set-Content`/`Out-File` so real CRLFs are written; avoid building text with literal sequences like `` `r`n `` because those characters persist in the file.
 - Work from the repo root; run shell commands via `bash -lc` when possible and lean on `rg` for file and text discovery.
 - Default to ASCII when editing files; only add clarifying comments when logic is non-obvious.
 - Never revert uncommitted changes you did not author; coordinate if you encounter unexpected diffs.

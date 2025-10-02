@@ -21,6 +21,8 @@
 
 @section('content')
 
+@php($showSubmit = isset($showSubmit) ? (bool) $showSubmit : true)
+
 <!-- row -->
 <div class="row">
     <!-- col-md-8 -->
@@ -43,7 +45,7 @@
                                 </h2>
                             @endif
                         </div>
-                        @if (isset($topSubmit) && ($topSubmit=='true'))
+                        @if ($showSubmit && isset($topSubmit) && ($topSubmit=='true'))
                         <div class="col-md-3 text-right" style="padding-right: 10px;">
                             <button type="submit" class="btn btn-primary pull-right" name="submit">
                                 <x-icon type="checkmark" />
@@ -66,11 +68,13 @@
                     <!-- CSRF Token -->
                     {{ csrf_field() }}
                     @yield('inputFields')
+                    @if($showSubmit)
                         <x-redirect_submit_options
                                 :index_route="$index_route ?? null"
                                 :button_label="trans('general.save')"
                                 :options="$options ?? []"
                         />
+                    @endif
                 </div>
 
             </div> <!-- ./box-body -->

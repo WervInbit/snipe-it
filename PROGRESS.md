@@ -1,6 +1,28 @@
+# Session Progress (2025-10-02)
+
+## Addendum (2025-10-02 Codex)
+- Session initiated: reviewed AGENTS.md guidance and recent PROGRESS entries to align with fork expectations.
+
+## Addendum (2025-10-02 Codex - Follow-up)
+- Re-reviewed AGENTS.md, PROGRESS.md, and docs/fork-notes.md to confirm carryover work before resuming.
+- Current focus: process feedback and update the project based on the latest review inputs.
+
+- Removed the model-number input from the model create flow and redirected post-create to the detail view with guidance to add presets.
+- Added a dedicated model-number create page under settings and wired the spec editor CTA to it when no presets exist.
+- Updated build/runtime handling for Passport keys (generate during image build, validate only at runtime) and preserved dev-cache clearing guidance.
+- Default asset tag generation now uses random two-letter prefixes plus the sequential counter (e.g., ASSET-XY0001) and auto-assigns when tags are omitted; minimal-create test updated accordingly.
+- Session paused: finish the outstanding feature list (deprecated preset filtering in index/API, QR module rebuild, attribute enum UX, test-run wiring, role-based start page, docs/tests) and run `php artisan migrate && php artisan test` once PHP is available.
+
+
+## Notes for Follow-up Agents
+- Track ongoing details in docs/agents/progress-addendum-2025-10-02-session-kickoff.md during this session (review alongside this log).
+- Pending detailed updates once work completes this session.
+- Carryover reminders: rebuild/restart the app service for the Passport key entrypoint fix, verify oauth key files persist after a cold start (capture logs if missing), run `php artisan migrate` post-merge to drop SKUs + add the test-run column, and install composer dev packages (Collision) before running `php artisan test`.
+
 # Session Progress (2025-09-30)
 
 ## Addendum (2025-09-30 Codex)
+- Detailed notes: docs/agents/progress-addendum-2025-09-30-passport-keys.md (review alongside this summary).
 - Investigated the recurring Passport key failure after docker volume resets and confirmed the storage mount starts without oauth key material.
 - Extended docker/app/entrypoint.sh to auto-run php artisan passport:keys --force, chown the generated files to www-data, and lock permissions so HTTP requests can decrypt tokens immediately after boot.
 - Shared a stopgap for the current stack: execute docker compose exec app php artisan passport:keys --force once to repopulate keys until the container restarts with the updated entrypoint.
@@ -69,6 +91,7 @@
 # Session Progress (2025-09-25)
 
 ## Summary
+- Detailed notes: docs/agents/progress-addendum-2025-09-25-model-number.md (review alongside this summary).
 - Created `AGENTS.md` to consolidate contributor guidance tailored to this fork.
 - Linked the agent documentation from README.md and CONTRIBUTING.md for quicker discovery.
 - Hardened EULA fallback and asset visibility logic so category listings work before settings seeding.
@@ -86,8 +109,6 @@
 - Keep `docs/fork-notes.md` focused on high-level feature deltas; log incremental fixes here in `PROGRESS.md`.
 - Keep README.md and CONTRIBUTING.md references in sync if the agent docs move or get renamed.
 - Session closed for 2025-09-25; resume outstanding work next shift.
-
-
 
 # Session Progress (2025-09-28)
 You dropped in the middle of removing sku's and we stopped the session:
@@ -185,6 +206,18 @@ default.blade.php
 api.php
 +0
 -25
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

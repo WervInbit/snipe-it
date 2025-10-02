@@ -77,8 +77,6 @@ class AssetModelsController extends Controller
         $model->eol = $request->input('eol');
         $model->depreciation_id = $request->input('depreciation_id');
         $model->name = $request->input('name');
-        $modelNumberInput = trim((string) $request->input('model_number'));
-        $model->model_number = $modelNumberInput !== '' ? $modelNumberInput : null;
         $model->min_amt = $request->input('min_amt');
         $model->manufacturer_id = $request->input('manufacturer_id');
         $model->category_id = $request->input('category_id');
@@ -106,16 +104,15 @@ class AssetModelsController extends Controller
 
 
         if ($model->save()) {
-            $model->syncPrimaryModelNumber($modelNumberInput !== '' ? $modelNumberInput : null);
-
             if ($this->shouldAddDefaultValues($request->input())) {
                 if (!$this->assignCustomFieldsDefaultValues($model, $request->input('default_values'))){
                     return redirect()->back()->withInput()->with('error', trans('admin/custom_fields/message.fieldset_default_value.error'));
                 }
             }
 
-            return redirect()->route('models.spec.edit', $model)
-                ->with('success', trans('admin/models/message.create.success'));
+            return redirect()->route('models.show', $model)
+                ->with('success', trans('admin/models/message.create.success'))
+                ->with('info', __('Add a model number to this model to edit its specification.'));
         }
 
         return redirect()->back()->withInput()->withErrors($model->getErrors());
@@ -155,8 +152,6 @@ class AssetModelsController extends Controller
         $model->depreciation_id = $request->input('depreciation_id');
         $model->eol = $request->input('eol');
         $model->name = $request->input('name');
-        $modelNumberInput = trim((string) $request->input('model_number'));
-        $model->model_number = $modelNumberInput !== '' ? $modelNumberInput : null;
         $model->min_amt = $request->input('min_amt');
         $model->manufacturer_id = $request->input('manufacturer_id');
         $model->category_id = $request->input('category_id');
@@ -337,7 +332,7 @@ class AssetModelsController extends Controller
             }
         }
 
-        $model->loadMissing('modelNumbers');
+        $model->loadMissing(['modelNumbers' => fn ($query) => $query->orderBy('code')]);
 
         $modelNumberId = (int) $request->input('model_number_id');
 

@@ -21,9 +21,11 @@ class StoreAssetWithMinimalDataTest extends TestCase
 
         $this->assertEquals(1, Asset::count());
         $asset = Asset::first();
-        $this->assertEquals('ASSET-0001', $asset->asset_tag);
+        $this->assertMatchesRegularExpression('/^ASSET-[A-Z]{2}\d{4}$/', $asset->asset_tag);
         $this->assertNull($asset->model_id);
         $this->assertNull($asset->status_id);
         $this->assertFalse($asset->is_sellable);
     }
 }
+
+

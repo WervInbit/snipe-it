@@ -176,6 +176,10 @@ class AssetsController extends Controller
                 $asset->asset_tag = $asset_tags[$a];
             }
 
+            if (!$asset->asset_tag) {
+                $asset->asset_tag = Asset::generateTag();
+            }
+
             $asset->company_id              = Company::getIdForCurrentUser($request->input('company_id'));
             $asset->model_id                = $request->input('model_id');
             $asset->order_number            = $request->input('order_number');

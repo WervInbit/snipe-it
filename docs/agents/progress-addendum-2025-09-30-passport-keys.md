@@ -1,4 +1,5 @@
 # Passport Key Init Addendum (2025-09-30)
+> Companion to PROGRESS.md (2025-09-30 entry); review this addendum alongside the main log.
 
 ## Completed
 - Diagnosed docker volume resets clearing Passport key material, triggering CryptKey errors on OAuth requests.
@@ -12,3 +13,4 @@
 - [ ] Run `php artisan schema:dump --prune` after version 1 is accepted to squash legacy migrations while keeping fresh installs working.
 - [ ] Apply the new SKU cleanup migration (`php artisan migrate`) across environments once version 1 is tagged.
 - [ ] Install composer dev dependencies in the app container so `php artisan test` can run (Collision dependency currently missing).
+

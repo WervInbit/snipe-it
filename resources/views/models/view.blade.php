@@ -262,104 +262,98 @@
         </div>
 
         @can('update', $model)
-            <div class="col-md-12">
-                <div class="box box-default">
-                    <div class="box-header with-border">
-                        <div class="box-heading">
-                            <h2 class="box-title">{{ __('Model Numbers') }}</h2>
-                        </div>
-                    </div>
-                    <div class="box-body">
-                        @if($errors->any())
-                            <div class="alert alert-danger">
-                                <ul class="list-unstyled" style="margin-bottom: 0;">
-                                    @foreach($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-                        @if($model->modelNumbers->isEmpty())
-                            <p class="text-muted">{{ __('No model numbers have been configured yet.') }}</p>
-                        @else
-                            <div class="table-responsive">
-                                <table class="table table-condensed">
-                                    <thead>
-                                        <tr>
-                                            <th>{{ __('Code') }}</th>
-                                            <th>{{ __('Label') }}</th>
-                                            <th>{{ __('Assets') }}</th>
-                                            <th class="text-right">{{ __('Actions') }}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($model->modelNumbers as $number)
-                                            <tr>
-                                                <td class="col-sm-3">
-                                                    <form id="update-model-number-{{ $number->id }}" method="POST" action="{{ route('models.numbers.update', [$model, $number]) }}">
-                                                        @csrf
-                                                        @method('PUT')
-                                                    </form>
-                                                    <input type="text" name="code" value="{{ old('code', $number->code) }}" class="form-control input-sm" form="update-model-number-{{ $number->id }}" required>
-                                                </td>
-                                                <td class="col-sm-3">
-                                                    <input type="text" name="label" value="{{ old('label', $number->label) }}" class="form-control input-sm" form="update-model-number-{{ $number->id }}">
-                                                </td>
-                                                <td class="col-sm-2">
-                                                    <span class="label label-default">{{ $number->assets_count }}</span>
-                                                </td>
-                                                <td class="col-sm-4 text-right">
-                                                    <div class="btn-group" role="group">
-                                                        <button type="submit" class="btn btn-primary btn-sm" form="update-model-number-{{ $number->id }}">{{ __('Update') }}</button>
-                                                        @if($model->primary_model_number_id !== $number->id)
-                                                            <button type="submit" name="make_primary" value="1" class="btn btn-default btn-sm" form="update-model-number-{{ $number->id }}">{{ __('Make Primary') }}</button>
-                                                        @else
-                                                            <span class="btn btn-success btn-sm" disabled>{{ __('Primary') }}</span>
-                                                        @endif
-                                                    </div>
-                                                    @if($model->primary_model_number_id !== $number->id && $number->assets_count === 0)
-                                                        <form method="POST" action="{{ route('models.numbers.destroy', [$model, $number]) }}" style="display:inline-block;">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('{{ __('Are you sure you want to delete this model number?') }}');">{{ __('Delete') }}</button>
-                                                        </form>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
-                        @endif
-                    </div>
-                    <div class="box-footer">
-                        <form method="POST" action="{{ route('models.numbers.store', $model) }}" class="form-inline">
-                            @csrf
-                            <div class="row">
-                                <div class="col-sm-4">
-                                    <label class="sr-only" for="new_model_number_code">{{ __('Code') }}</label>
-                                    <input id="new_model_number_code" type="text" name="code" class="form-control input-sm" placeholder="{{ __('Code') }}" required>
-                                </div>
-                                <div class="col-sm-4">
-                                    <label class="sr-only" for="new_model_number_label">{{ __('Label') }}</label>
-                                    <input id="new_model_number_label" type="text" name="label" class="form-control input-sm" placeholder="{{ __('Label (optional)') }}">
-                                </div>
-                                <div class="col-sm-2">
-                                    <div class="checkbox">
-                                        <label>
-                                            <input type="checkbox" name="make_primary" value="1"> {{ __('Make primary') }}
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-sm-2 text-right">
-                                    <button type="submit" class="btn btn-primary btn-sm">{{ __('Add') }}</button>
-                                </div>
-                            </div>
-                        </form>
+    <div class="col-md-12">
+        <div class="box box-default">
+            <div class="box-header with-border">
+                <div class="box-heading">
+                    <h2 class="box-title">{{ __('Model Numbers') }}</h2>
+                    <div class="box-tools pull-right">
+                        <a href="{{ route('models.numbers.create', $model) }}" class="btn btn-primary btn-sm">{{ __('Create Model Number') }}</a>
                     </div>
                 </div>
             </div>
-        @endcan
+            <div class="box-body">
+                @if(session('error'))
+                    <div class="alert alert-danger">{{ session('error') }}</div>
+                @endif
+                @if(session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                @endif
+
+                @if($model->modelNumbers->isEmpty())
+                    <p class="text-muted">{{ __('No model numbers have been configured yet.') }}</p>
+                @else
+                    <div class="table-responsive">
+                        <table class="table table-condensed">
+                            <thead>
+                                <tr>
+                                    <th>{{ __('Code') }}</th>
+                                    <th>{{ __('Label') }}</th>
+                                    <th>{{ __('Status') }}</th>
+                                    <th>{{ __('Assets') }}</th>
+                                    <th class="text-right">{{ __('Actions') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($model->modelNumbers as $number)
+                                    @php($isPrimary = $model->primary_model_number_id === $number->id)
+                                    <tr>
+                                        <td class="monospace">{{ $number->code }}</td>
+                                        <td>{{ $number->label ?: __('Not specified') }}</td>
+                                        <td>
+                                            @if($isPrimary)
+                                                <span class="label label-success">{{ __('Primary') }}</span>
+                                            @elseif($number->isDeprecated())
+                                                <span class="label label-default">{{ __('Deprecated') }}</span>
+                                            @else
+                                                <span class="label label-info">{{ __('Active') }}</span>
+                                            @endif
+                                        </td>
+                                        <td><span class="label label-default">{{ $number->assets_count }}</span></td>
+                                        <td class="text-right">
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a href="{{ route('models.numbers.edit', [$model, $number]) }}" class="btn btn-default">{{ __('Edit') }}</a>
+                                                <a href="{{ route('models.numbers.spec.edit', ['model' => $model, 'modelNumber' => $number]) }}" class="btn btn-default">{{ __('Edit Spec') }}</a>
+                                                @if(!$isPrimary && !$number->isDeprecated())
+                                                    <form action="{{ route('models.numbers.primary', [$model, $number]) }}" method="POST" style="display:inline;">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="btn btn-default">{{ __('Make Default') }}</button>
+                                                    </form>
+                                                @endif
+                                                @if($number->isDeprecated())
+                                                    <form action="{{ route('models.numbers.restore', [$model, $number]) }}" method="POST" style="display:inline;">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="btn btn-default">{{ __('Restore') }}</button>
+                                                    </form>
+                                                @elseif(!$isPrimary)
+                                                    <form action="{{ route('models.numbers.deprecate', [$model, $number]) }}" method="POST" style="display:inline;">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="btn btn-default">{{ __('Deprecate') }}</button>
+                                                    </form>
+                                                @endif
+                                                @if(!$isPrimary && $number->assets_count === 0)
+                                                    <form action="{{ route('models.numbers.destroy', [$model, $number]) }}" method="POST" style="display:inline;">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger" onclick="return confirm('{{ __('Are you sure you want to delete this model number?') }}');">{{ __('Delete') }}</button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+@endcan
+
 
         @if(isset($specAttributes))
             <div class="col-md-12">

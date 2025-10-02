@@ -80,5 +80,35 @@ class ModelSpecificationController extends Controller
         return redirect()
             ->route('models.spec.edit', ['model' => $model, 'model_number_id' => $modelNumber->id])
             ->with('success', __('Model specification updated.'));
+    
+
+public function editForNumber(Request $request, AssetModel $model, ModelNumber $modelNumber): View
+{
+    $this->ensureModelNumber($model, $modelNumber);
+
+    $request = $request->duplicate(array_merge($request->all(), [
+        'model_number_id' => $modelNumber->id,
+    ]));
+
+    return $this->edit($request, $model);
+}
+
+public function updateForNumber(ModelSpecificationRequest $request, AssetModel $model, ModelNumber $modelNumber): RedirectResponse
+{
+    $this->ensureModelNumber($model, $modelNumber);
+
+    $request = $request->duplicate(array_merge($request->all(), [
+        'model_number_id' => $modelNumber->id,
+    ]));
+
+    return $this->update($request, $model);
+}
+
+private function ensureModelNumber(AssetModel $model, ModelNumber $candidate): void
+{
+    if ($candidate->model_id !== $model->id) {
+        abort(404);
     }
+}
+
 }

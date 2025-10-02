@@ -4,6 +4,7 @@
     'helpPosition' => 'right',
     'formAction' => route('models.spec.update', $model),
     'method' => 'PUT',
+    'showSubmit' => (bool) $modelNumber,
 ])
 
 @section('inputFields')
@@ -11,6 +12,7 @@
         <div class="alert alert-info">
             {{ __('Add a model number to this model to edit its specification.') }}
         </div>
+        <a href="{{ route('models.numbers.create', $model) }}" class="btn btn-primary">{{ __('Create Model Number') }}</a>
     @else
         <input type="hidden" name="model_number_id" id="model_spec_model_number_id" value="{{ $modelNumber->id }}">
 
@@ -20,13 +22,16 @@
                 <select id="model_spec_model_number_selector" class="form-control">
                     @foreach($modelNumbers as $number)
                         <option value="{{ $number->id }}" {{ $number->id === $modelNumber->id ? 'selected' : '' }}>
-                            {{ $number->label ?: $number->code }}
+                            {{ $number->label ?: $number->code }}@if($number->isDeprecated()) ({{ __('deprecated') }})@endif
                         </option>
                     @endforeach
                 </select>
                 <p class="help-block">
                     {{ __('Switch presets to review or edit their specification values.') }}
                 </p>
+                @if($modelNumber && $modelNumber->isDeprecated())
+                    <p class="help-block text-warning">{{ __('This preset is deprecated and hidden from new assets.') }}</p>
+                @endif
             </div>
         </div>
 
@@ -127,3 +132,5 @@
         });
     </script>
 @endsection
+
+

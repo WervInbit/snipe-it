@@ -87,11 +87,17 @@ Route::group(['middleware' => 'auth'], function () {
         'as' => 'settings.',
         'middleware' => ['can:index,App\\Models\\AssetModel'],
     ], function () {
-        Route::get('model-numbers', [ModelNumberSettingsController::class, 'index'])
+                Route::get('model-numbers', [ModelNumberSettingsController::class, 'index'])
             ->name('model_numbers.index')
-            ->breadcrumbs(fn (Trail $trail) =>
-                $trail->parent('settings.index')
+            ->breadcrumbs(fn (Trail ) =>
+                ->parent('settings.index')
                     ->push(__('Model Numbers'), route('settings.model_numbers.index')));
+
+        Route::get('model-numbers/create', [ModelNumberSettingsController::class, 'create'])
+            ->name('model_numbers.create');
+
+        Route::get('model-numbers/{modelNumber}/edit', [ModelNumberSettingsController::class, 'edit'])
+            ->name('model_numbers.edit');
 
         Route::post('model-numbers', [ModelNumberSettingsController::class, 'store'])
             ->name('model_numbers.store');
@@ -99,15 +105,25 @@ Route::group(['middleware' => 'auth'], function () {
         Route::put('model-numbers/{modelNumber}', [ModelNumberSettingsController::class, 'update'])
             ->name('model_numbers.update');
 
+        Route::patch('model-numbers/{modelNumber}/deprecate', [ModelNumberSettingsController::class, 'deprecate'])
+            ->name('model_numbers.deprecate');
+
+        Route::patch('model-numbers/{modelNumber}/restore', [ModelNumberSettingsController::class, 'restore'])
+            ->name('model_numbers.restore');
+
         Route::delete('model-numbers/{modelNumber}', [ModelNumberSettingsController::class, 'destroy'])
             ->name('model_numbers.destroy');
 
         Route::patch('model-numbers/{modelNumber}/primary', [ModelNumberSettingsController::class, 'makePrimary'])
             ->name('model_numbers.primary');
-    });
-
     Route::get('models/{model}/spec', [ModelSpecificationController::class, 'edit'])->name('models.spec.edit');
     Route::put('models/{model}/spec', [ModelSpecificationController::class, 'update'])->name('models.spec.update');
+    Route::get('models/{model}/model-numbers/{modelNumber}/spec', [ModelSpecificationController::class, 'editForNumber'])->name('models.numbers.spec.edit');
+    Route::put('models/{model}/model-numbers/{modelNumber}/spec', [ModelSpecificationController::class, 'updateForNumber'])->name('models.numbers.spec.update');
+    Route::get('models/{model}/model-numbers/create', [ModelNumberController::class, 'create'])->name('models.numbers.create');
+    Route::get('models/{model}/model-numbers/{modelNumber}/edit', [ModelNumberController::class, 'edit'])->name('models.numbers.edit');
+    Route::patch('models/{model}/model-numbers/{modelNumber}/deprecate', [ModelNumberController::class, 'deprecate'])->name('models.numbers.deprecate');
+    Route::patch('models/{model}/model-numbers/{modelNumber}/restore', [ModelNumberController::class, 'restore'])->name('models.numbers.restore');
     Route::post('models/{model}/model-numbers', [ModelNumberController::class, 'store'])->name('models.numbers.store');
     Route::put('models/{model}/model-numbers/{modelNumber}', [ModelNumberController::class, 'update'])->name('models.numbers.update');
     Route::delete('models/{model}/model-numbers/{modelNumber}', [ModelNumberController::class, 'destroy'])->name('models.numbers.destroy');
@@ -814,3 +830,11 @@ Route::middleware(['auth'])->get(
     '/start',
     [StartController::class, 'index']
 )->name('start');
+
+
+
+
+
+
+
+

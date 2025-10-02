@@ -2,8 +2,11 @@
 @php($modelNumbers = $modelNumbers ?? collect())
 @php($selectedModelNumber = $selectedModelNumber ?? null)
 @php($selectedModelNumberId = old('model_number_id', $selectedModelNumber?->id))
+@php($displayModelNumbers = $modelNumbers->filter(function ($number) use ($selectedModelNumber) {
+    return !$number->isDeprecated() || ($selectedModelNumber && $selectedModelNumber->id === $number->id);
+}))
 
-@if($modelNumbers->isEmpty())
+@if($displayModelNumbers->isEmpty())
     <div class="alert alert-info">
         {{ __('Add a model number to this model before configuring specifications or overrides.') }}
     </div>
@@ -12,14 +15,14 @@
         <label class="col-md-3 control-label" for="model_number_id">{{ __('Model Number') }}</label>
         <div class="col-md-7">
             <select name="model_number_id" id="model_number_id" class="form-control">
-                @foreach($modelNumbers as $modelNumber)
+                @foreach($displayModelNumbers as $modelNumber)
                     <option value="{{ $modelNumber->id }}" {{ (string)$selectedModelNumberId === (string)$modelNumber->id ? 'selected' : '' }}>
                         {{ $modelNumber->label ?: $modelNumber->code }}
                     </option>
                 @endforeach
             </select>
             {!! $errors->first('model_number_id', '<span class="alert-msg">:message</span>') !!}
-            @if($modelNumbers->count() <= 1)
+            @if($displayModelNumbers->count() <= 1)
                 <p class="help-block text-muted">{{ __('This model currently has a single specification preset.') }}</p>
             @else
                 <p class="help-block text-muted">{{ __('Select a preset to load its specification and overrides.') }}</p>

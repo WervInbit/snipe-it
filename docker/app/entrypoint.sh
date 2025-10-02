@@ -50,6 +50,20 @@ if ! grep -q '^APP_KEY=' .env || grep -q '^APP_KEY=\s*$' .env; then
   php artisan key:generate --force || true
 fi
 
+# Validate Passport keys (no regeneration at runtime)
+if [ -f artisan ]; then
+  for key in storage/oauth-private.key storage/oauth-public.key; do
+    if [ ! -f "$key" ]; then
+      echo "ERROR: Missing $key. Generate during build or init: php artisan passport:keys --force"
+      exit 1
+    fi
+  done
+
+  chown www-data:www-data storage/oauth-*.key 2>/dev/null || true
+  chmod 640 storage/oauth-private.key 2>/dev/null || true
+  chmod 644 storage/oauth-public.key 2>/dev/null || true
+fi
+
 # Create storage symlink (idempotent)
 php artisan storage:link || true
 

@@ -113,6 +113,16 @@ USER docker
 RUN COMPOSER_CACHE_DIR=/dev/null composer install --no-dev --working-dir=/var/www/html && rm -rf /var/www/html/vendor/*/*/.git
 USER root
 
+# Prepare application storage and Passport keys during build
+RUN php artisan key:generate --force && \
+    php artisan storage:link || true
+
+# Generate Passport keys once at build time
+RUN php artisan passport:keys --force && \
+    chown www-data:www-data storage/oauth-*.key && \
+    chmod 640 storage/oauth-private.key && \
+    chmod 644 storage/oauth-public.key
+
 ############### APPLICATION INSTALL/INIT #################
 
 #RUN php artisan app:install
