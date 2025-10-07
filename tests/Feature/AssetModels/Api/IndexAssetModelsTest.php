@@ -39,7 +39,13 @@ class IndexAssetModelsTest extends TestCase
                 'total',
                 'rows',
             ])
-            ->assertJson(fn(AssertableJson $json) => $json->has('rows', 3)->etc());
+            ->assertJson(fn (AssertableJson $json) => $json
+                ->has('rows', 3)
+                ->has('rows.0', fn (AssertableJson $row) => $row
+                    ->where('model_numbers_count', 0)
+                    ->etc()
+                )
+                ->etc());
     }
 
     public function testAssetModelIndexSearchReturnsExpectedAssetModels()
@@ -61,7 +67,13 @@ class IndexAssetModelsTest extends TestCase
                 'total',
                 'rows',
             ])
-            ->assertJson(fn(AssertableJson $json) => $json->has('rows', 1)->etc());
+            ->assertJson(fn (AssertableJson $json) => $json
+                ->has('rows', 1)
+                ->has('rows.0', fn (AssertableJson $row) => $row
+                    ->where('model_numbers_count', 0)
+                    ->etc()
+                )
+                ->etc());
     }
 
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Traits\HasUploads;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
@@ -10,6 +11,7 @@ use Illuminate\Support\Carbon;
 class ModelNumber extends SnipeModel
 {
     use HasFactory;
+    use HasUploads;
 
     protected $table = 'model_numbers';
 
@@ -23,6 +25,11 @@ class ModelNumber extends SnipeModel
         'model_id' => 'int',
         'deprecated_at' => 'datetime',
     ];
+
+    public function getNameAttribute(): string
+    {
+        return $this->label ?: $this->code;
+    }
 
     public function model(): BelongsTo
     {

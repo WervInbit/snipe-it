@@ -16,9 +16,12 @@ class ModelNumberController extends Controller
     {
         $this->authorize('update', $model);
 
+        $model->loadMissing('modelNumbers');
+
         return view('models.model_numbers.create', [
             'model' => $model,
             'item' => new ModelNumber(),
+            'hasExistingNumbers' => $model->modelNumbers->isNotEmpty(),
         ]);
     }
 

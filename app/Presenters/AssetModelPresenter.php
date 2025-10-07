@@ -69,6 +69,15 @@ class AssetModelPresenter extends Presenter
                 'visible' => true,
             ],
             [
+                'field' => 'model_numbers_count',
+                'searchable' => false,
+                'sortable' => true,
+                'switchable' => true,
+                'title' => __('Model Numbers'),
+                'visible' => true,
+                'class' => 'text-right text-padding-number-cell',
+            ],
+            [
                 'field' => 'min_amt',
                 'searchable' => false,
                 'sortable' => true,

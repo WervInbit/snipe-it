@@ -57,6 +57,7 @@ class AssetModelsController extends Controller
             'models.image',
             'models.name',
             'models.model_number',
+            'models.primary_model_number_id',
             'models.min_amt',
             'models.eol',
             'models.created_by',
@@ -69,9 +70,9 @@ class AssetModelsController extends Controller
             'models.fieldset_id',
             'models.deleted_at',
             'models.updated_at',
-         ])
-            ->with('category', 'depreciation', 'manufacturer', 'fieldset.fields.defaultValues', 'adminuser')
-            ->withCount('assets as assets_count');
+        ])
+            ->with('category', 'depreciation', 'manufacturer', 'fieldset.fields.defaultValues', 'adminuser', 'primaryModelNumber')
+            ->withCount(['assets', 'modelNumbers']);
 
         if ($request->input('status')=='deleted') {
             $assetmodels->onlyTrashed();

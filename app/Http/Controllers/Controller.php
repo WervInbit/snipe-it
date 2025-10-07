@@ -28,6 +28,7 @@ use App\Models\AssetModel;
 use App\Models\Component;
 use App\Models\Consumable;
 use App\Models\License;
+use App\Models\ModelNumber;
 use App\Models\Location;
 use App\Models\Maintenance;
 use App\Models\User;
@@ -51,6 +52,7 @@ abstract class Controller extends BaseController
         'licenses' => License::class,
         'locations' => Location::class,
         'models' => AssetModel::class,
+        'model-numbers' => ModelNumber::class,
         'users' => User::class,
     ];
 
@@ -64,6 +66,7 @@ abstract class Controller extends BaseController
         'licenses' => 'private_uploads/licenses/',
         'locations' => 'private_uploads/locations/',
         'models' => 'private_uploads/models/',
+        'model-numbers' => 'private_uploads/model_numbers/',
         'users' => 'private_uploads/users/',
     ];
 
@@ -77,6 +80,7 @@ abstract class Controller extends BaseController
         'licenses' => 'license',
         'locations' => 'location',
         'models' => 'model',
+        'model-numbers' => 'model-number',
         'users' => 'user',
     ];
 

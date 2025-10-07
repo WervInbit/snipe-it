@@ -88,38 +88,6 @@
                                         <div class="btn-group btn-group-sm" role="group">
                         <a href="{{ route('settings.model_numbers.edit', $number) }}" class="btn btn-default">{{ __('Edit') }}</a>
                         <a href="{{ route('models.numbers.spec.edit', ['model' => $number->model_id, 'modelNumber' => $number->id]) }}" class="btn btn-default">{{ __('Edit Spec') }}</a>
-
-                        @if(!$isPrimary && !$number->isDeprecated())
-                            <form action="{{ route('settings.model_numbers.primary', $number) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" class="btn btn-default">{{ __('Make Default') }}</button>
-                            </form>
-                        @endif
-
-                        @if($number->isDeprecated())
-                            <form action="{{ route('settings.model_numbers.restore', $number) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" class="btn btn-default">{{ __('Restore') }}</button>
-                            </form>
-                        @else
-                            @if(!$isPrimary)
-                                <form action="{{ route('settings.model_numbers.deprecate', $number) }}" method="POST" style="display:inline;">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="submit" class="btn btn-default">{{ __('Deprecate') }}</button>
-                                </form>
-                            @endif
-                        @endif
-
-                        @if(!$isPrimary && $number->assets_count === 0)
-                            <form action="{{ route('settings.model_numbers.destroy', $number) }}" method="POST" style="display:inline;">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-danger" onclick="return confirm('{{ __('Are you sure?') }}');">{{ __('Delete') }}</button>
-                            </form>
-                        @endif
                                         </div>
                                     </td>
                                 </tr>
@@ -138,3 +106,4 @@
         </div>
     </div>
 @endsection
+

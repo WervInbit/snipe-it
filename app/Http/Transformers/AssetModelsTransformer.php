@@ -38,6 +38,12 @@ class AssetModelsTransformer
             }
         }
 
+        $modelNumberCode = $assetmodel->model_number ?: optional($assetmodel->primaryModelNumber)->code;
+        $modelNumbersCount = $assetmodel->model_numbers_count
+            ?? ($assetmodel->relationLoaded('modelNumbers')
+                ? $assetmodel->modelNumbers->count()
+                : $assetmodel->modelNumbers()->count());
+
         $array = [
             'id' => (int) $assetmodel->id,
             'name' => e($assetmodel->name),
@@ -46,7 +52,8 @@ class AssetModelsTransformer
                 'name'=> e($assetmodel->manufacturer->name),
             ] : null,
             'image' => ($assetmodel->image != '') ? Storage::disk('public')->url('models/'.e($assetmodel->image)) : null,
-            'model_number' => ($assetmodel->model_number ? e($assetmodel->model_number): null),
+            'model_number' => $modelNumberCode ? e($modelNumberCode) : null,
+            'model_numbers_count' => (int) $modelNumbersCount,
             'min_amt'   => ($assetmodel->min_amt) ? (int) $assetmodel->min_amt : null,
             'remaining' => (int) ($assetmodel->assets_count - $assetmodel->min_amt),
             'depreciation' => ($assetmodel->depreciation) ? [

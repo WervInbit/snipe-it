@@ -59,3 +59,28 @@
         </div>
     </div>
 @endsection
+@section('content')
+    @parent
+
+    <div class="row" id="files">
+        <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 col-sm-offset-0">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <div class="box-heading">
+                        <h2 class="box-title">{{ __('Files') }}</h2>
+                        <div class="box-tools pull-right">
+                            <a href="#" data-toggle="modal" data-target="#uploadFileModal" class="btn btn-default btn-sm">
+                                <x-icon type="paperclip" /> {{ trans('button.upload') }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <x-filestable object_type="model-numbers" :object="$modelNumber" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @include('modals.upload-file', ['item_type' => 'model-numbers', 'item_id' => $modelNumber->id])
+@endsection

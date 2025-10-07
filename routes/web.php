@@ -87,11 +87,11 @@ Route::group(['middleware' => 'auth'], function () {
         'as' => 'settings.',
         'middleware' => ['can:index,App\\Models\\AssetModel'],
     ], function () {
-                Route::get('model-numbers', [ModelNumberSettingsController::class, 'index'])
+        Route::get('model-numbers', [ModelNumberSettingsController::class, 'index'])
             ->name('model_numbers.index')
-            ->breadcrumbs(fn (Trail ) =>
+            ->breadcrumbs(fn (Trail $trail) => $trail
                 ->parent('settings.index')
-                    ->push(__('Model Numbers'), route('settings.model_numbers.index')));
+                ->push(__('Model Numbers'), route('settings.model_numbers.index')));
 
         Route::get('model-numbers/create', [ModelNumberSettingsController::class, 'create'])
             ->name('model_numbers.create');
@@ -116,6 +116,8 @@ Route::group(['middleware' => 'auth'], function () {
 
         Route::patch('model-numbers/{modelNumber}/primary', [ModelNumberSettingsController::class, 'makePrimary'])
             ->name('model_numbers.primary');
+    });
+
     Route::get('models/{model}/spec', [ModelSpecificationController::class, 'edit'])->name('models.spec.edit');
     Route::put('models/{model}/spec', [ModelSpecificationController::class, 'update'])->name('models.spec.update');
     Route::get('models/{model}/model-numbers/{modelNumber}/spec', [ModelSpecificationController::class, 'editForNumber'])->name('models.numbers.spec.edit');
@@ -786,7 +788,7 @@ Route::group(['middleware' => 'web'], function () {
             'show'
         ]
     )->name('ui.files.show')
-        ->where(['object_type' => 'assets|maintenances|hardware|models|users|locations|accessories|consumables|licenses|components']);
+        ->where(['object_type' => 'assets|maintenances|hardware|models|model-numbers|users|locations|accessories|consumables|licenses|components']);
 
     // Upload files(s)
     Route::post('{object_type}/{id}/files',
@@ -795,7 +797,7 @@ Route::group(['middleware' => 'web'], function () {
             'store'
         ]
     )->name('ui.files.store')
-        ->where(['object_type' => 'assets|maintenances|hardware|models|users|locations|accessories|consumables|licenses|components']);
+        ->where(['object_type' => 'assets|maintenances|hardware|models|model-numbers|users|locations|accessories|consumables|licenses|components']);
 
     // Delete files(s)
     Route::delete('{object_type}/{id}/files/{file_id}/delete',
@@ -804,7 +806,7 @@ Route::group(['middleware' => 'web'], function () {
             'destroy'
         ]
     )->name('ui.files.destroy')
-        ->where(['object_type' => 'assets|hardware|models|users|locations|accessories|consumables|licenses|components']);
+        ->where(['object_type' => 'assets|hardware|models|model-numbers|users|locations|accessories|consumables|licenses|components']);
 });
 
 

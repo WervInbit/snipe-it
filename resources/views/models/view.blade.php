@@ -46,82 +46,74 @@
 
     <div class="col-md-9">
 
-        <div class="nav-tabs-custom">
-
-            <ul class="nav nav-tabs">
-                <li class="active">
-                    <a href="#assets" data-toggle="tab">
-
-                        <span class="hidden-lg hidden-md">
-                          <i class="fas fa-barcode fa-2x"></i>
-                        </span>
-                        <span class="hidden-xs hidden-sm">
-                            {{ trans('general.assets') }}
-                            {!! ($model->assets()->AssetsForShow()->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($model->assets()->AssetsForShow()->count()).'</span>' : '' !!}
-                        </span>
-                    </a>
-                </li>
-
-                <li>
-                    <a href="#files" data-toggle="tab">
-
-                        <span class="hidden-lg hidden-md">
-                          <i class="fas fa-barcode fa-2x"></i>
-                        </span>
-                        <span class="hidden-xs hidden-sm">
-                            {{ trans('general.files') }}
-                            {!! ($model->uploads->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($model->uploads->count()).'</span>' : '' !!}
-                          </span>
-                    </a>
-                </li>
-                <li class="pull-right">
-                    <a href="#" data-toggle="modal" data-target="#uploadFileModal">
-                        <x-icon type="paperclip" />
-                        {{ trans('button.upload') }}
-                    </a>
-                </li>
-
-            </ul>
-
-            <div class="tab-content">
-                <div class="tab-pane fade in active" id="assets">
-
-                    @include('partials.asset-bulk-actions')
-
-                    <table
-                            data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-                            data-cookie-id-table="assetListingTable"
-                            data-id-table="assetListingTable"
-                            data-side-pagination="server"
-                            data-toolbar="#assetsBulkEditToolbar"
-                            data-bulk-button-id="#bulkAssetEditButton"
-                            data-bulk-form-id="#assetsBulkForm"
-                            data-sort-order="asc"
-                            id="assetListingTable"
-                            data-url="{{ route('api.assets.index',['model_id'=> $model->id]) }}"
-                            class="table table-striped snipe-table"
-                            data-export-options='{
-                "fileName": "export-models-{{ str_slug($model->name) }}-assets-{{ date('Y-m-d') }}",
-                "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                }'>
-                    </table>
-                </div> <!-- /.tab-pane assets -->
-
-                <div class="tab-pane fade" id="files">
-
-                    <div class="row">
-                        <div class="col-md-12">
-
-                            <x-filestable object_type="models" :object="$model" />
-
-                        </div> <!-- /.col-md-12 -->
-                    </div> <!-- /.row -->
-
+                <div class="box box-default">
+            <div class="box-header with-border">
+                <div class="box-heading">
+                    <h2 class="box-title">{{ __('Model Numbers') }}</h2>
+                    @can('update', $model)
+                        <div class="box-tools pull-right">
+                            <a href="{{ route('models.numbers.create', $model) }}" class="btn btn-primary btn-sm">{{ __('Create Model Number') }}</a>
+                        </div>
+                    @endcan
                 </div>
+            </div>
+            <div class="box-body">
+                @if(session('error'))
+                    <div class="alert alert-danger">{{ session('error') }}</div>
+                @endif
+                @if(session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                @endif
 
+                @if($model->modelNumbers->isEmpty())
+                    <p class="text-muted">{{ __('No model numbers have been configured yet.') }}</p>
+                @else
+                    <div class="table-responsive">
+                        <table class="table table-striped table-condensed">
+                            <thead>
+                            <tr>
+                                <th>{{ __('Code') }}</th>
+                                <th>{{ __('Label') }}</th>
+                                <th>{{ __('Status') }}</th>
+                                <th class="text-right">{{ __('Assets') }}</th>
+                                @can('update', $model)
+                                    <th class="text-right">{{ __('Actions') }}</th>
+                                @endcan
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach($model->modelNumbers as $number)
+                                @php($isPrimary = $model->primary_model_number_id === $number->id)
+                                <tr>
+                                    <td class="monospace">{{ $number->code }}</td>
+                                    <td>{{ $number->label ?: __('Not specified') }}</td>
+                                    <td>
+                                        @if($isPrimary)
+                                            <span class="label label-success">{{ __('Primary') }}</span>
+                                        @elseif($number->isDeprecated())
+                                            <span class="label label-default">{{ __('Deprecated') }}</span>
+                                        @else
+                                            <span class="label label-info">{{ __('Active') }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-right"><span class="label label-default">{{ $number->assets_count }}</span></td>
+                                    @can('update', $model)
+                                        <td class="text-right">
+                                            <div class="btn-group btn-group-xs" role="group">
+                                                <a href="{{ route('models.numbers.edit', [$model, $number]) }}" class="btn btn-default">{{ __('Edit') }}</a>
+                                                <a href="{{ route('models.numbers.spec.edit', ['model' => $model, 'modelNumber' => $number]) }}" class="btn btn-default">{{ __('Edit Spec') }}</a>
+                                            </div>
+                                        </td>
+                                    @endcan
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+        </div>
 
-            </div> <!-- /.tab-content -->
-        </div>  <!-- /.nav-tabs-custom -->
     </div><!-- /. col-md-12 -->
 
     <div class="col-md-3">
@@ -261,144 +253,9 @@
         </div>
         </div>
 
-        @can('update', $model)
-    <div class="col-md-12">
-        <div class="box box-default">
-            <div class="box-header with-border">
-                <div class="box-heading">
-                    <h2 class="box-title">{{ __('Model Numbers') }}</h2>
-                    <div class="box-tools pull-right">
-                        <a href="{{ route('models.numbers.create', $model) }}" class="btn btn-primary btn-sm">{{ __('Create Model Number') }}</a>
-                    </div>
-                </div>
-            </div>
-            <div class="box-body">
-                @if(session('error'))
-                    <div class="alert alert-danger">{{ session('error') }}</div>
-                @endif
-                @if(session('success'))
-                    <div class="alert alert-success">{{ session('success') }}</div>
-                @endif
-
-                @if($model->modelNumbers->isEmpty())
-                    <p class="text-muted">{{ __('No model numbers have been configured yet.') }}</p>
-                @else
-                    <div class="table-responsive">
-                        <table class="table table-condensed">
-                            <thead>
-                                <tr>
-                                    <th>{{ __('Code') }}</th>
-                                    <th>{{ __('Label') }}</th>
-                                    <th>{{ __('Status') }}</th>
-                                    <th>{{ __('Assets') }}</th>
-                                    <th class="text-right">{{ __('Actions') }}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($model->modelNumbers as $number)
-                                    @php($isPrimary = $model->primary_model_number_id === $number->id)
-                                    <tr>
-                                        <td class="monospace">{{ $number->code }}</td>
-                                        <td>{{ $number->label ?: __('Not specified') }}</td>
-                                        <td>
-                                            @if($isPrimary)
-                                                <span class="label label-success">{{ __('Primary') }}</span>
-                                            @elseif($number->isDeprecated())
-                                                <span class="label label-default">{{ __('Deprecated') }}</span>
-                                            @else
-                                                <span class="label label-info">{{ __('Active') }}</span>
-                                            @endif
-                                        </td>
-                                        <td><span class="label label-default">{{ $number->assets_count }}</span></td>
-                                        <td class="text-right">
-                                            <div class="btn-group btn-group-sm" role="group">
-                                                <a href="{{ route('models.numbers.edit', [$model, $number]) }}" class="btn btn-default">{{ __('Edit') }}</a>
-                                                <a href="{{ route('models.numbers.spec.edit', ['model' => $model, 'modelNumber' => $number]) }}" class="btn btn-default">{{ __('Edit Spec') }}</a>
-                                                @if(!$isPrimary && !$number->isDeprecated())
-                                                    <form action="{{ route('models.numbers.primary', [$model, $number]) }}" method="POST" style="display:inline;">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="submit" class="btn btn-default">{{ __('Make Default') }}</button>
-                                                    </form>
-                                                @endif
-                                                @if($number->isDeprecated())
-                                                    <form action="{{ route('models.numbers.restore', [$model, $number]) }}" method="POST" style="display:inline;">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="submit" class="btn btn-default">{{ __('Restore') }}</button>
-                                                    </form>
-                                                @elseif(!$isPrimary)
-                                                    <form action="{{ route('models.numbers.deprecate', [$model, $number]) }}" method="POST" style="display:inline;">
-                                                        @csrf
-                                                        @method('PATCH')
-                                                        <button type="submit" class="btn btn-default">{{ __('Deprecate') }}</button>
-                                                    </form>
-                                                @endif
-                                                @if(!$isPrimary && $number->assets_count === 0)
-                                                    <form action="{{ route('models.numbers.destroy', [$model, $number]) }}" method="POST" style="display:inline;">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-danger" onclick="return confirm('{{ __('Are you sure you want to delete this model number?') }}');">{{ __('Delete') }}</button>
-                                                    </form>
-                                                @endif
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @endif
-            </div>
-        </div>
-    </div>
-@endcan
+        
 
 
-        @if(isset($specAttributes))
-            <div class="col-md-12">
-                <div class="box box-default">
-                    <div class="box-header with-border">
-                        <div class="box-heading">
-                            <h2 class="box-title">{{ __('Specification') }}</h2>
-                        </div>
-                    </div>
-                    <div class="box-body">
-                        @if($specAttributes->isEmpty())
-                            <p class="text-muted">{{ __('No attribute definitions are scoped to this model.') }}</p>
-                        @else
-                            <table class="table table-condensed">
-                                <tbody>
-                                @foreach($specAttributes as $attribute)
-                                    @php($definition = $attribute->definition)
-                                    <tr>
-                                        <th>
-                                            {{ $definition->label }}
-                                            @if($definition->unit)
-                                                <span class="text-muted">({{ $definition->unit }})</span>
-                                            @endif
-                                            @if($definition->required_for_category)
-                                                <span class="label label-default">{{ __('Required') }}</span>
-                                            @endif
-                                            @if($definition->needs_test)
-                                                <span class="label label-info">{{ __('Tested') }}</span>
-                                            @endif
-                                        </th>
-                                        <td>{{ $attribute->formattedValue() ?? __('Not specified') }}</td>
-                                    </tr>
-                                @endforeach
-                                </tbody>
-                            </table>
-                        @endif
-                    </div>
-                    @can('update', $model)
-                        <div class="box-footer">
-                            <a href="{{ route('models.spec.edit', $model) }}" class="btn btn-default btn-block">{{ __('Edit Specification') }}</a>
-                        </div>
-                    @endcan
-                </div>
-            </div>
-        @endif
             @can('update', \App\Models\AssetModel::class)
             <div class="col-md-12" style="padding-bottom: 5px;">
                 <a href="{{ ($model->deleted_at=='') ? route('models.edit', $model->id) : '#' }}" style="width: 100%;" class="btn btn-sm btn-warning btn-social hidden-print{{ ($model->deleted_at!='') ? ' disabled' : '' }}">
@@ -445,13 +302,5 @@
         </div>
 </div> <!-- /.row -->
 
-@can('update', \App\Models\AssetModel::class)
-    @include ('modals.upload-file', ['item_type' => 'models', 'item_id' => $model->id])
-@endcan
 @stop
 
-@section('moar_scripts')
-
-    @include ('partials.bootstrap-table', ['exportFile' => 'manufacturer' . $model->name . '-export', 'search' => false])
-
-@stop

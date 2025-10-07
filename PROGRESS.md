@@ -1,3 +1,19 @@
+# Session Progress (2025-10-07)
+
+## Addendum (2025-10-07 Codex)
+- Session initiated: reviewed AGENTS.md guidance, PROGRESS.md history, and docs/fork-notes.md to re-establish fork context before starting new work.
+- Created docs/agents/progress-addendum-2025-10-07-session-init.md to capture detailed notes for this block.
+- Refined the model index API/transformer to surface model-number counts and fallback to the primary code so the admin listing shows every model even when presets are missing.
+- Simplified model-number listings so default/deprecate actions live on the edit form instead of inline tables.
+- Replaced the model detail asset list with a model-number dashboard and shifted file/spec management onto individual presets.
+- Investigated the model select list (Werckerman search) but work deferred to next session; no code changes committed.
+
+## Notes for Follow-up Agents
+- Working notes: docs/agents/progress-addendum-2025-10-07-session-init.md (update as tasks advance).
+- Pending outcomes: summarize deliverables in this section before closing the session.
+- Testing blocked: php binary not available on host; rerun `php artisan test tests/Feature/AssetModels/Api/IndexAssetModelsTest.php` once PHP is installed.
+- Verify model-number edit screen still handles primary assignment and status flips after removing inline controls.
+
 # Session Progress (2025-10-02)
 
 ## Addendum (2025-10-02 Codex)
@@ -206,13 +222,6 @@ default.blade.php
 api.php
 +0
 -25
-
-
-
-
-
-
-
 
 
 
