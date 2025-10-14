@@ -35,7 +35,6 @@ class GroupsController extends Controller
         }
 
 
-        $offset = ($request->input('offset') > $groups->count()) ? $groups->count() : app('api_offset_value');
         $limit = app('api_limit_value');
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
 
@@ -59,6 +58,7 @@ class GroupsController extends Controller
         }
 
         $total = $groups->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $groups = $groups->skip($offset)->take($limit)->get();
 
         return (new GroupsTransformer)->transformGroups($groups, $total);

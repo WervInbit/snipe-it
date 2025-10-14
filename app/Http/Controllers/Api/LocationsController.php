@@ -132,8 +132,6 @@ class LocationsController extends Controller
             $locations->where('locations.company_id', '=', $request->input('company_id'));
         }
 
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $locations->count()) ? $locations->count() : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'desc' ? 'desc' : 'asc';
@@ -160,6 +158,7 @@ class LocationsController extends Controller
 
 
         $total = $locations->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $locations = $locations->skip($offset)->take($limit)->get();
 
         return (new LocationsTransformer)->transformLocations($locations, $total);
@@ -313,10 +312,10 @@ class LocationsController extends Controller
         $this->authorize('view', $location);
         $accessory_checkouts = AccessoryCheckout::LocationAssigned()->where('assigned_to', $location->id)->with('adminuser')->with('accessories');
 
-        $offset = ($request->input('offset') > $accessory_checkouts->count()) ? $accessory_checkouts->count() : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $total = $accessory_checkouts->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $accessory_checkouts = $accessory_checkouts->skip($offset)->take($limit)->get();
         return (new LocationsTransformer)->transformCheckedoutAccessories($accessory_checkouts, $total);
     }

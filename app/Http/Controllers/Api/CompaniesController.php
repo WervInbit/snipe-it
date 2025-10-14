@@ -65,8 +65,6 @@ class CompaniesController extends Controller
         }
 
 
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $companies->count()) ? $companies->count() : app('api_offset_value');
         $limit = app('api_limit_value');
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort_override =  $request->input('sort');
@@ -82,7 +80,7 @@ class CompaniesController extends Controller
         }
 
         $total = $companies->count();
-
+        $offset = $this->resolveOffset($request, $total, $limit);
         $companies = $companies->skip($offset)->take($limit)->get();
         return (new CompaniesTransformer)->transformCompanies($companies, $total);
 

@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use App\Models\AssetModel;
 use Illuminate\Support\Facades\Gate;
 
-class ModelSpecificationRequest extends Request
+class AssignModelNumberAttributeRequest extends Request
 {
     public function authorize(): bool
     {
@@ -22,11 +22,7 @@ class ModelSpecificationRequest extends Request
     public function rules(): array
     {
         return [
-            'model_number_id' => ['nullable', 'integer', 'exists:model_numbers,id'],
-            'attributes' => ['sometimes', 'array'],
-            'attributes.*' => ['nullable'],
-            'attribute_order' => ['sometimes', 'array'],
-            'attribute_order.*' => ['integer', 'exists:attribute_definitions,id'],
+            'attribute_definition_id' => ['required', 'integer', 'exists:attribute_definitions,id'],
         ];
     }
 }

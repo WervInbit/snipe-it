@@ -17,12 +17,18 @@ class ModelNumberAttribute extends SnipeModel
         'value',
         'raw_value',
         'attribute_option_id',
+        'display_order',
     ];
 
     protected $casts = [
         'model_number_id' => 'int',
         'attribute_definition_id' => 'int',
         'attribute_option_id' => 'int',
+        'display_order' => 'int',
+    ];
+
+    protected $attributes = [
+        'display_order' => 0,
     ];
 
     public function modelNumber(): BelongsTo

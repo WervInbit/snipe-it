@@ -61,8 +61,6 @@ class DepartmentsController extends Controller
             $departments->whereIn('location_id', $ids);
         }
 
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $departments->count()) ? $departments->count() : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
@@ -84,6 +82,7 @@ class DepartmentsController extends Controller
         }
 
         $total = $departments->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $departments = $departments->skip($offset)->take($limit)->get();
         return (new DepartmentsTransformer)->transformDepartments($departments, $total);
 

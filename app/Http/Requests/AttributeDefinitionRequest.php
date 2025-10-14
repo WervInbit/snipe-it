@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\AttributeDefinition;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class AttributeDefinitionRequest extends Request
 {
@@ -18,6 +19,24 @@ class AttributeDefinitionRequest extends Request
         }
 
         return Gate::allows('create', AttributeDefinition::class);
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        /** @var AttributeDefinition|null $attribute */
+        $attribute = $this->route('attribute');
+
+        if ($attribute instanceof AttributeDefinition) {
+            $validator->after(function (Validator $inner) use ($attribute) {
+                if ($this->filled('datatype') && $this->input('datatype') !== $attribute->datatype) {
+                    $inner->errors()->add('datatype', __('Datatype is immutable. Create a new version instead.'));
+                }
+
+                if ($this->filled('key') && $this->input('key') !== $attribute->key) {
+                    $inner->errors()->add('key', __('Key is immutable once created.'));
+                }
+            });
+        }
     }
 
     public function rules(): array
@@ -35,7 +54,9 @@ class AttributeDefinitionRequest extends Request
                 'regex:/^[a-z0-9_]+$/',
                 Rule::unique('attribute_definitions', 'key')
                     ->ignore($attributeId)
-                    ->whereNull('deleted_at'),
+                    ->where(fn ($query) => $query
+                        ->whereNull('deleted_at')
+                        ->whereNull('deprecated_at')),
             ],
             'label' => ['required', 'string', 'max:255'],
             'datatype' => ['required', 'string', Rule::in(AttributeDefinition::DATATYPES)],

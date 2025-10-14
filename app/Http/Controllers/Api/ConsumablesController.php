@@ -70,8 +70,6 @@ class ConsumablesController extends Controller
         }
 
 
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $consumables->count()) ? $consumables->count() : app('api_offset_value');
         $limit = app('api_limit_value');
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
 
@@ -123,6 +121,7 @@ class ConsumablesController extends Controller
         }
 
         $total = $consumables->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $consumables = $consumables->skip($offset)->take($limit)->get();
 
         return (new ConsumablesTransformer)->transformConsumables($consumables, $total);

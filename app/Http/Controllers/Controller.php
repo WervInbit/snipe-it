@@ -33,6 +33,7 @@ use App\Models\Location;
 use App\Models\Maintenance;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
@@ -88,5 +89,23 @@ abstract class Controller extends BaseController
     {
         view()->share('signedIn', Auth::check());
         view()->share('user', auth()->user());
+    }
+
+    protected function resolveOffset(Request $request, int $total, int $limit): int
+    {
+        if ($total === 0) {
+            return 0;
+        }
+
+        $requestedOffset = max(0, (int) $request->input('offset', 0));
+
+        if ($requestedOffset < $total) {
+            return $requestedOffset;
+        }
+
+        $remainder = $total % $limit;
+        $lastPageOffset = $remainder === 0 ? max(0, $total - $limit) : $total - $remainder;
+
+        return $lastPageOffset;
     }
 }

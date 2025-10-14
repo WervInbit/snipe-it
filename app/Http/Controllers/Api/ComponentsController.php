@@ -89,8 +89,6 @@ class ComponentsController extends Controller
             $components->where('notes','=',$request->input('notes'));
         }
 
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $components->count()) ? $components->count() : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
@@ -122,6 +120,7 @@ class ComponentsController extends Controller
         }
 
         $total = $components->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $components = $components->skip($offset)->take($limit)->get();
 
         return (new ComponentsTransformer)->transformComponents($components, $total);

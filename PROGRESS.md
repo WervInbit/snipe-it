@@ -1,3 +1,19 @@
+# Session Progress (2025-10-14)
+
+## Addendum (2025-10-14 Codex)
+- Session kicked off: reviewed AGENTS.md, prior PROGRESS entries, and docs/fork-notes.md to align with current fork expectations before making changes.
+- Logged new documentation stubs in docs/agents/agents-addendum-2025-10-14-session-init.md and docs/agents/progress-addendum-2025-10-14-session-init.md for detailed notes as the day advances.
+- Fixed the asset model index API so persisted table offsets clamp to the last available page instead of returning an empty dataset, and added regression coverage for the scenario.
+- Promoted the offset clamp into the shared API controller base and rolled it out across list endpoints (assets, accessories, locations, etc.), with fresh assets index coverage to guard the shared helper.
+- Introduced attribute definition versioning, hide/unhide workflows, and supporting UI/actions/tests so teams can migrate specs safely.
+- Delivered a model-number specification builder: new assignment/reorder endpoints, a three-column search-enabled UI, updated attribute resolution logic, and accompanying feature/unit coverage for assign/remove flows.
+
+## Notes for Follow-up Agents
+- Detailed worklog: docs/agents/progress-addendum-2025-10-14-session-init.md (extend with concrete updates and test evidence).
+- Handbook updates: docs/agents/agents-addendum-2025-10-14-session-init.md (record any process clarifications introduced today).
+- Testing follow-up: run the API feature suite (`php artisan test --group=api`) when PHP is available to exercise the new pagination helper under real execution.
+- QA follow-up: walk through the new specification builder end-to-end (add/remove/reorder attributes, save specs, verify overrides) once a UI-capable environment is available.
+
 # Session Progress (2025-10-07)
 
 ## Addendum (2025-10-07 Codex)

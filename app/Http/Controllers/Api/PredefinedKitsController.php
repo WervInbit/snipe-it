@@ -30,8 +30,6 @@ class PredefinedKitsController extends Controller
             $kits = $kits->TextSearch($request->input('search'));
         }
 
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $kits->count()) ? $kits->count() : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'desc' ? 'desc' : 'asc';
@@ -56,6 +54,7 @@ class PredefinedKitsController extends Controller
         }
 
         $total = $kits->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $kits = $kits->skip($offset)->take($limit)->get();
 
         return (new PredefinedKitsTransformer)->transformPredefinedKits($kits, $total);

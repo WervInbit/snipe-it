@@ -3,12 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Watson\Validating\ValidatingTrait;
+use App\Models\AttributeOption;
+use App\Models\TestResult;
 
 class AttributeDefinition extends SnipeModel
 {
@@ -42,6 +45,8 @@ class AttributeDefinition extends SnipeModel
         'allow_custom_values',
         'allow_asset_override',
         'constraints',
+        'hidden_at',
+        'deprecated_at',
     ];
 
     protected $casts = [
@@ -49,6 +54,8 @@ class AttributeDefinition extends SnipeModel
         'needs_test' => 'bool',
         'allow_custom_values' => 'bool',
         'allow_asset_override' => 'bool',
+        'deprecated_at' => 'datetime',
+        'hidden_at' => 'datetime',
     ];
 
     protected $rules = [
@@ -60,6 +67,10 @@ class AttributeDefinition extends SnipeModel
         'needs_test' => 'boolean',
         'allow_custom_values' => 'boolean',
         'allow_asset_override' => 'boolean',
+    ];
+
+    protected $attributes = [
+        'version' => 1,
     ];
 
     public function categories(): BelongsToMany
@@ -83,6 +94,21 @@ class AttributeDefinition extends SnipeModel
         return $this->hasMany(AssetAttributeOverride::class);
     }
 
+    public function testResults(): HasMany
+    {
+        return $this->hasMany(TestResult::class, 'attribute_definition_id');
+    }
+
+    public function nextVersions(): HasMany
+    {
+        return $this->hasMany(self::class, 'supersedes_attribute_id');
+    }
+
+    public function previousVersion(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'supersedes_attribute_id');
+    }
+
     public function scopeForCategory($query, ?int $categoryId)
     {
         if (!$categoryId) {
@@ -93,6 +119,21 @@ class AttributeDefinition extends SnipeModel
             $q->whereDoesntHave('categories')
                 ->orWhereHas('categories', fn ($relation) => $relation->where('categories.id', $categoryId));
         });
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->whereNull('deprecated_at');
+    }
+
+    public function scopeVisible($query)
+    {
+        return $query->whereNull('hidden_at');
+    }
+
+    public function scopeCurrent($query)
+    {
+        return $query->active()->visible();
     }
 
     public function setKeyAttribute(string $value): void
@@ -160,4 +201,81 @@ class AttributeDefinition extends SnipeModel
     {
         return $this->allow_asset_override === true;
     }
+
+    public function isDeprecated(): bool
+    {
+        return $this->deprecated_at !== null;
+    }
+
+    public function isHidden(): bool
+    {
+        return $this->hidden_at !== null;
+    }
+
+    public function markDeprecated(): void
+    {
+        $this->forceFill([
+            'deprecated_at' => now(),
+        ])->save();
+    }
+
+    public function markHidden(): void
+    {
+        $this->forceFill([
+            'hidden_at' => now(),
+        ])->save();
+    }
+
+    public function markVisible(): void
+    {
+        $this->forceFill([
+            'hidden_at' => null,
+        ])->save();
+    }
+
+    public function createNewVersion(array $attributes): self
+    {
+        $nextVersion = static::query()
+            ->where('key', $this->key)
+            ->max('version') + 1;
+
+        $clone = $this->replicate([
+            'version',
+            'supersedes_attribute_id',
+            'deprecated_at',
+            'hidden_at',
+            'created_at',
+            'updated_at',
+        ]);
+
+        $clone->fill($attributes);
+        $clone->key = $this->key;
+        $clone->version = $nextVersion;
+        $clone->supersedes_attribute_id = $this->id;
+        $clone->deprecated_at = null;
+        $clone->hidden_at = null;
+        $clone->save();
+
+        $clone->categories()->sync($this->categories()->pluck('categories.id')->all());
+
+        $this->options()->get()->each(function (AttributeOption $option) use ($clone) {
+            $clone->options()->create($option->only([
+                'value',
+                'label',
+                'active',
+                'sort_order',
+            ]));
+        });
+
+        $this->forceFill([
+            'deprecated_at' => now(),
+            'hidden_at' => now(),
+        ])->save();
+
+        return $clone;
+    }
 }
+
+
+
+

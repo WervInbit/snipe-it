@@ -91,8 +91,6 @@ class AccessoriesController extends Controller
             $accessories->where('notes','=',$request->input('notes'));
         }
 
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $accessories->count()) ? $accessories->count() : abs($request->input('offset'));
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
@@ -123,7 +121,8 @@ class AccessoriesController extends Controller
                 break;
         }
  
-        $total = $accessories->count();
+        $total = (clone $accessories)->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $accessories = $accessories->skip($offset)->take($limit)->get();
 
         return (new AccessoriesTransformer)->transformAccessories($accessories, $total);

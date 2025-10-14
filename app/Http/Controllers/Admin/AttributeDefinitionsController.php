@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AttributeDefinitionRequest;
+use App\Http\Requests\AttributeDefinitionVersionRequest;
 use App\Models\AttributeDefinition;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class AttributeDefinitionsController extends Controller
@@ -16,7 +18,7 @@ class AttributeDefinitionsController extends Controller
         $this->authorize('viewAny', AttributeDefinition::class);
 
         $definitions = AttributeDefinition::query()
-            ->with(['categories'])
+            ->with(['categories', 'previousVersion'])
             ->withCount(['options'])
             ->orderBy('label')
             ->paginate(25);
@@ -35,6 +37,7 @@ class AttributeDefinitionsController extends Controller
             'definition' => new AttributeDefinition(),
             'categories' => Category::orderBy('name')->get(),
             'item' => new AttributeDefinition(),
+            'versionSource' => null,
         ]);
     }
 
@@ -43,6 +46,7 @@ class AttributeDefinitionsController extends Controller
         $this->authorize('create', AttributeDefinition::class);
 
         $definition = new AttributeDefinition($this->payload($request));
+        $definition->version = 1;
         $definition->save();
         $definition->categories()->sync($request->input('category_ids', []));
 
@@ -63,6 +67,7 @@ class AttributeDefinitionsController extends Controller
             'definition' => $attribute,
             'categories' => Category::orderBy('name')->get(),
             'item' => $attribute,
+            'versionSource' => null,
         ]);
     }
 
@@ -70,7 +75,7 @@ class AttributeDefinitionsController extends Controller
     {
         $this->authorize('update', $attribute);
 
-        $attribute->fill($this->payload($request));
+        $attribute->fill($this->payload($request, $attribute, includeIdentity: false));
         $attribute->save();
         $attribute->categories()->sync($request->input('category_ids', []));
 
@@ -83,6 +88,17 @@ class AttributeDefinitionsController extends Controller
     {
         $this->authorize('delete', $attribute);
 
+        if (
+            $attribute->modelValues()->exists()
+            || $attribute->assetOverrides()->exists()
+            || $attribute->testResults()->exists()
+            || $attribute->nextVersions()->exists()
+        ) {
+            return redirect()
+                ->route('attributes.edit', $attribute)
+                ->with('error', __('You cannot delete an attribute that is in use. Hide it instead.'));
+        }
+
         $attribute->delete();
 
         return redirect()
@@ -90,18 +106,106 @@ class AttributeDefinitionsController extends Controller
             ->with('success', __('Attribute archived.'));
     }
 
-    private function payload(AttributeDefinitionRequest $request): array
+    public function hide(AttributeDefinition $attribute): RedirectResponse
+    {
+        $this->authorize('update', $attribute);
+        $attribute->markHidden();
+
+        return back()->with('success', __('Attribute hidden from selectors.'));
+    }
+
+    public function unhide(AttributeDefinition $attribute): RedirectResponse
+    {
+        $this->authorize('update', $attribute);
+
+        if ($attribute->isDeprecated()) {
+            return back()->with('error', __('Deprecated attributes cannot be made visible. Create a new version instead.'));
+        }
+
+        $attribute->markVisible();
+
+        return back()->with('success', __('Attribute is visible again.'));
+    }
+
+    public function createVersion(AttributeDefinition $attribute): View
+    {
+        $this->authorize('update', $attribute);
+
+        $draft = $attribute->replicate([
+            'id',
+            'version',
+            'supersedes_attribute_id',
+            'deprecated_at',
+            'hidden_at',
+            'created_at',
+            'updated_at',
+        ]);
+        $draft->exists = false;
+        $draft->setRelation('categories', $attribute->categories);
+
+        return view('attributes.edit', [
+            'definition' => $draft,
+            'categories' => Category::orderBy('name')->get(),
+            'item' => $draft,
+            'versionSource' => $attribute,
+        ]);
+    }
+
+    public function storeVersion(AttributeDefinitionVersionRequest $request, AttributeDefinition $attribute): RedirectResponse
+    {
+        $this->authorize('update', $attribute);
+
+        $payload = $this->payloadForVersion($request);
+
+        $newVersion = DB::transaction(function () use ($attribute, $payload, $request) {
+            $clone = $attribute->createNewVersion($payload);
+            $clone->categories()->sync($request->input('category_ids', $attribute->categories->pluck('id')->all()));
+
+            return $clone;
+        });
+
+        return redirect()
+            ->route('attributes.edit', $newVersion)
+            ->with('success', __('New attribute version created. Update dependent models as needed.'));
+    }
+
+    private function payload(AttributeDefinitionRequest $request, ?AttributeDefinition $attribute = null, bool $includeIdentity = true): array
+    {
+        $data = $request->validated();
+
+        $currentDatatype = $includeIdentity
+            ? ($data['datatype'] ?? AttributeDefinition::DATATYPE_TEXT)
+            : ($attribute?->datatype ?? AttributeDefinition::DATATYPE_TEXT);
+
+        $payload = [
+            'label' => $data['label'],
+            'unit' => $data['unit'] ?? null,
+            'required_for_category' => $request->boolean('required_for_category'),
+            'needs_test' => $request->boolean('needs_test'),
+            'allow_custom_values' => $request->boolean('allow_custom_values') && $currentDatatype === AttributeDefinition::DATATYPE_ENUM,
+            'allow_asset_override' => $request->boolean('allow_asset_override'),
+            'constraints' => $this->filterConstraints($data['constraints'] ?? []),
+        ];
+
+        if ($includeIdentity) {
+            $payload['key'] = $data['key'];
+            $payload['datatype'] = $currentDatatype;
+        }
+
+        return $payload;
+    }
+
+    private function payloadForVersion(AttributeDefinitionVersionRequest $request): array
     {
         $data = $request->validated();
 
         return [
-            'key' => $data['key'],
             'label' => $data['label'],
             'datatype' => $data['datatype'],
             'unit' => $data['unit'] ?? null,
             'required_for_category' => $request->boolean('required_for_category'),
             'needs_test' => $request->boolean('needs_test'),
-            'allow_custom_values' => $request->boolean('allow_custom_values'),
+            'allow_custom_values' => $request->boolean('allow_custom_values') && $data['datatype'] === AttributeDefinition::DATATYPE_ENUM,
             'allow_asset_override' => $request->boolean('allow_asset_override'),
             'constraints' => $this->filterConstraints($data['constraints'] ?? []),
         ];
@@ -117,3 +221,5 @@ class AttributeDefinitionsController extends Controller
         ], fn ($value) => $value !== null && $value !== '');
     }
 }
+
+

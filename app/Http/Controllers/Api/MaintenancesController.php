@@ -57,8 +57,6 @@ class MaintenancesController extends Controller
         }
 
 
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $maintenances->count()) ? $maintenances->count() : abs($request->input('offset'));
         $limit = app('api_limit_value');
 
         $allowed_columns = [
@@ -111,6 +109,7 @@ class MaintenancesController extends Controller
         }
 
         $total = $maintenances->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $maintenances = $maintenances->skip($offset)->take($limit)->get();
         return (new MaintenancesTransformer())->transformMaintenances($maintenances, $total);
 

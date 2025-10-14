@@ -97,8 +97,6 @@ class ManufacturersController extends Controller
             $manufacturers->where('support_email', '=', $request->input('support_email'));
         }
 
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $manufacturers->count()) ? $manufacturers->count() : app('api_offset_value');
         $limit = app('api_limit_value');
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort_override =  $request->input('sort');
@@ -114,6 +112,7 @@ class ManufacturersController extends Controller
         }
 
         $total = $manufacturers->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $manufacturers = $manufacturers->skip($offset)->take($limit)->get();
 
         return (new ManufacturersTransformer)->transformManufacturers($manufacturers, $total);

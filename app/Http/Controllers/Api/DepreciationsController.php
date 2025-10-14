@@ -42,8 +42,6 @@ class DepreciationsController extends Controller
             $depreciations = $depreciations->TextSearch($request->input('search'));
         }
 
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $depreciations->count()) ? $depreciations->count() : app('api_offset_value');
         $limit = app('api_limit_value');
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort_override =  $request->input('sort');
@@ -59,6 +57,7 @@ class DepreciationsController extends Controller
         }
 
         $total = $depreciations->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $depreciations = $depreciations->skip($offset)->take($limit)->get();
 
         return (new DepreciationsTransformer)->transformDepreciations($depreciations, $total);

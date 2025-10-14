@@ -34,7 +34,7 @@ class EffectiveAttributeResolver
             return collect();
         }
 
-        return $this->resolveWithContext($model, $modelNumber, collect());
+        return $this->resolveWithContext($modelNumber, collect());
     }
 
     public function resolveForAsset(Asset $asset, ?ModelNumber $overrideModelNumber = null): Collection
@@ -53,10 +53,10 @@ class EffectiveAttributeResolver
 
         $overrides = $asset->attributeOverrides->keyBy('attribute_definition_id');
 
-        return $this->resolveWithContext($model, $modelNumber, $overrides);
+        return $this->resolveWithContext($modelNumber, $overrides);
     }
 
-    private function buildResolved(AttributeDefinition $definition, ?ModelNumberAttribute $modelValue, ?AssetAttributeOverride $override, bool $isOverride = false): ResolvedAttribute
+    public function createResolved(AttributeDefinition $definition, ?ModelNumberAttribute $modelValue = null, ?AssetAttributeOverride $override = null, bool $isOverride = false): ResolvedAttribute
     {
         $modelValueString = $modelValue?->value;
         $modelRaw = $modelValue?->raw_value;
@@ -106,22 +106,19 @@ class EffectiveAttributeResolver
         );
     }
 
-    private function resolveWithContext(AssetModel $model, ModelNumber $modelNumber, Collection $overrides): Collection
+    private function resolveWithContext(ModelNumber $modelNumber, Collection $overrides): Collection
     {
-        $definitions = $model->attributeDefinitionsForCategory()->with('options')->get();
-        $modelValues = $modelNumber->attributes()->with('option')->get()->keyBy('attribute_definition_id');
+        $assignments = $modelNumber->attributes()->with(['definition.options', 'option'])->get();
 
-        return $definitions->map(function ($definition) use ($modelValues, $overrides) {
-            /** @var ModelNumberAttribute|null $modelValue */
-            $modelValue = $modelValues->get($definition->id);
-            /** @var AssetAttributeOverride|null $override */
+        return $assignments->map(function (ModelNumberAttribute $assignment) use ($overrides) {
+            $definition = $assignment->definition;
             $override = $overrides->get($definition->id);
 
             if ($override && $definition->allow_asset_override) {
-                return $this->buildResolved($definition, $modelValue, $override, true);
+                return $this->createResolved($definition, $assignment, $override, true);
             }
 
-            return $this->buildResolved($definition, $modelValue, null);
+            return $this->createResolved($definition, $assignment, null);
         });
     }
 }

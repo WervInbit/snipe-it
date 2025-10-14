@@ -102,8 +102,6 @@ class SuppliersController extends Controller
             $suppliers->where('notes', '=', $request->input('notes'));
         }
 
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $suppliers->count()) ? $suppliers->count() : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
@@ -119,6 +117,7 @@ class SuppliersController extends Controller
         }
 
         $total = $suppliers->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $suppliers = $suppliers->skip($offset)->take($limit)->get();
 
         return (new SuppliersTransformer)->transformSuppliers($suppliers, $total);

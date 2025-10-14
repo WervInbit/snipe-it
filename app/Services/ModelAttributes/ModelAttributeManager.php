@@ -4,7 +4,6 @@ namespace App\Services\ModelAttributes;
 
 use App\Models\Asset;
 use App\Models\AssetAttributeOverride;
-use App\Models\AssetModel;
 use App\Models\ModelNumber;
 use App\Models\AttributeDefinition;
 use App\Models\ModelNumberAttribute;
@@ -16,6 +15,101 @@ class ModelAttributeManager
 {
     public function __construct(private readonly AttributeValueService $valueService)
     {
+    }
+
+    /**
+     * @param array<int|string> $orderedDefinitionIds
+     */
+    public function syncModelNumberAssignments(ModelNumber $modelNumber, array $orderedDefinitionIds): void
+    {
+        $modelNumber->loadMissing('model');
+        $model = $modelNumber->model;
+
+        if (!$model) {
+            return;
+        }
+
+        $definitionIds = collect($orderedDefinitionIds)
+            ->map(function ($value) {
+                if (is_int($value)) {
+                    return $value;
+                }
+
+                if (is_string($value) && ctype_digit($value)) {
+                    return (int) $value;
+                }
+
+                return null;
+            })
+            ->filter(fn ($value) => $value !== null)
+            ->unique()
+            ->values();
+
+        DB::transaction(function () use ($modelNumber, $definitionIds, $model) {
+            $existingAssignments = ModelNumberAttribute::query()
+                ->where('model_number_id', $modelNumber->id)
+                ->get()
+                ->keyBy('attribute_definition_id');
+
+            $retainedDefinitionIds = [];
+
+            foreach ($definitionIds as $position => $definitionId) {
+                /** @var ModelNumberAttribute|null $assignment */
+                $assignment = $existingAssignments->get($definitionId);
+
+                if (!$assignment) {
+                    $definition = AttributeDefinition::query()
+                        ->forCategory($model->category_id)
+                        ->whereKey($definitionId)
+                        ->first();
+
+                    if (!$definition) {
+                        continue;
+                    }
+
+                    $assignment = ModelNumberAttribute::create([
+                        'model_number_id' => $modelNumber->id,
+                        'attribute_definition_id' => $definitionId,
+                        'display_order' => $position,
+                        'value' => null,
+                        'raw_value' => null,
+                        'attribute_option_id' => null,
+                    ]);
+
+                    $existingAssignments->put($definitionId, $assignment);
+                } elseif ($assignment->display_order !== $position) {
+                    $assignment->display_order = $position;
+                    $assignment->save();
+                }
+
+                $retainedDefinitionIds[] = $definitionId;
+            }
+
+            $assignmentsToRemoveQuery = ModelNumberAttribute::query()
+                ->where('model_number_id', $modelNumber->id);
+
+            if (!empty($retainedDefinitionIds)) {
+                $assignmentsToRemoveQuery->whereNotIn('attribute_definition_id', $retainedDefinitionIds);
+            }
+
+            $assignmentsToRemove = $assignmentsToRemoveQuery->get();
+
+            if ($assignmentsToRemove->isEmpty()) {
+                return;
+            }
+
+            $definitionIdsToRemove = $assignmentsToRemove->pluck('attribute_definition_id')->all();
+
+            AssetAttributeOverride::query()
+                ->whereIn('attribute_definition_id', $definitionIdsToRemove)
+                ->whereHas('asset', fn ($query) => $query->where('model_number_id', $modelNumber->id))
+                ->delete();
+
+            ModelNumberAttribute::query()
+                ->where('model_number_id', $modelNumber->id)
+                ->whereIn('attribute_definition_id', $definitionIdsToRemove)
+                ->delete();
+        });
     }
 
     /**
@@ -32,51 +126,49 @@ class ModelAttributeManager
             ]);
         }
 
-        $definitions = $this->fetchDefinitionsForModel($model);
+        $assignments = $this->fetchAssignments($modelNumber);
 
-        DB::transaction(function () use ($modelNumber, $payload, $definitions) {
-            $persisted = ModelNumberAttribute::query()
-                ->where('model_number_id', $modelNumber->id)
-                ->get()
-                ->keyBy('attribute_definition_id');
+        DB::transaction(function () use ($modelNumber, $payload, $assignments) {
+            $persisted = collect();
 
-            foreach ($definitions as $definition) {
+            foreach ($assignments as $assignment) {
+                $definition = $assignment->definition;
                 $key = $this->resolvePayloadKey($payload, $definition);
                 $hasKey = array_key_exists($key, $payload);
                 $value = $payload[$key] ?? null;
 
-                if (!$hasKey || $this->isEmpty($value)) {
+                if (!$hasKey) {
+                    $persisted->put($definition->id, $assignment);
+                    continue;
+                }
+
+                if ($this->isEmpty($value)) {
                     if ($definition->required_for_category) {
                         $this->missingRequired($definition);
                     }
 
-                    ModelNumberAttribute::query()
-                        ->where('model_number_id', $modelNumber->id)
-                        ->where('attribute_definition_id', $definition->id)
-                        ->delete();
+                    $assignment->fill([
+                        'value' => null,
+                        'raw_value' => null,
+                        'attribute_option_id' => null,
+                    ])->save();
 
-                    $persisted->forget($definition->id);
+                    $persisted->put($definition->id, $assignment->fresh());
                     continue;
                 }
 
                 $normalized = $this->valueService->validateAndNormalize($definition, $value);
 
-                $record = ModelNumberAttribute::query()->updateOrCreate(
-                    [
-                        'model_number_id' => $modelNumber->id,
-                        'attribute_definition_id' => $definition->id,
-                    ],
-                    [
-                        'value' => $normalized->value,
-                        'raw_value' => $normalized->rawValue,
-                        'attribute_option_id' => $normalized->attributeOptionId,
-                    ]
-                );
+                $assignment->fill([
+                    'value' => $normalized->value,
+                    'raw_value' => $normalized->rawValue,
+                    'attribute_option_id' => $normalized->attributeOptionId,
+                ])->save();
 
-                $persisted->put($definition->id, $record);
+                $persisted->put($definition->id, $assignment->fresh());
             }
 
-            $this->ensureRequiredComplete($modelNumber, $definitions, $persisted);
+            $this->ensureRequiredComplete($modelNumber, $persisted);
         });
     }
 
@@ -85,12 +177,35 @@ class ModelAttributeManager
      */
     public function saveAssetOverrides(Asset $asset, array $payload): void
     {
-        $asset->loadMissing('model', 'attributeOverrides');
+        $asset->loadMissing('model', 'attributeOverrides', 'modelNumber');
         $keys = array_unique(array_merge(array_keys($payload), $asset->attributeOverrides->pluck('attribute_definition_id')->all()));
-        $definitions = $this->fetchDefinitionsForModel($asset->model, $keys);
 
-        DB::transaction(function () use ($asset, $payload, $definitions) {
-            foreach ($definitions as $definition) {
+        $modelNumber = $asset->modelNumber ?: $asset->model?->primaryModelNumber;
+
+        if (!$modelNumber) {
+            return;
+        }
+
+        $assignments = $this->fetchAssignments($modelNumber, $keys)->keyBy('attribute_definition_id');
+
+        if ($assignments->isEmpty()) {
+            AssetAttributeOverride::query()
+                ->where('asset_id', $asset->id)
+                ->delete();
+
+            return;
+        }
+
+        $validIds = $assignments->pluck('attribute_definition_id')->all();
+
+        AssetAttributeOverride::query()
+            ->where('asset_id', $asset->id)
+            ->whereNotIn('attribute_definition_id', $validIds)
+            ->delete();
+
+        DB::transaction(function () use ($asset, $payload, $assignments) {
+            foreach ($assignments as $assignment) {
+                $definition = $assignment->definition;
                 $key = $this->resolvePayloadKey($payload, $definition);
                 $hasKey = array_key_exists($key, $payload);
                 $value = $payload[$key] ?? null;
@@ -136,33 +251,36 @@ class ModelAttributeManager
         });
     }
 
-    private function fetchDefinitionsForModel(AssetModel $model, array $keys = []): Collection
+    private function fetchAssignments(ModelNumber $modelNumber, array $keys = []): Collection
     {
-        $query = $model->attributeDefinitionsForCategory();
+        $assignments = ModelNumberAttribute::query()
+            ->where('model_number_id', $modelNumber->id)
+            ->with(['definition' => fn ($query) => $query->with('options')])
+            ->orderBy('display_order')
+            ->orderBy('id')
+            ->get();
 
-        if (!empty($keys)) {
-            $numeric = array_values(array_filter($keys, static fn ($key) => is_numeric($key)));
-            $stringKeys = array_values(array_filter($keys, static fn ($key) => is_string($key)));
-
-            $query->where(function ($inner) use ($numeric, $stringKeys) {
-                $hasClause = false;
-
-                if (!empty($numeric)) {
-                    $inner->whereIn('id', $numeric);
-                    $hasClause = true;
-                }
-
-                if (!empty($stringKeys)) {
-                    if ($hasClause) {
-                        $inner->orWhereIn('key', $stringKeys);
-                    } else {
-                        $inner->whereIn('key', $stringKeys);
-                    }
-                }
-            });
+        if (empty($keys)) {
+            return $assignments;
         }
 
-        return $query->with('options')->get();
+        $normalizedKeys = collect($keys)
+            ->filter(fn ($key) => $key !== null && $key !== '')
+            ->values();
+
+        if ($normalizedKeys->isEmpty()) {
+            return $assignments;
+        }
+
+        $numeric = $normalizedKeys->filter(fn ($key) => is_numeric($key))->map(fn ($key) => (int) $key)->all();
+        $stringKeys = $normalizedKeys->filter(fn ($key) => is_string($key))->all();
+
+        return $assignments->filter(function (ModelNumberAttribute $assignment) use ($numeric, $stringKeys) {
+            $definition = $assignment->definition;
+
+            return (in_array($definition->id, $numeric, true))
+                || (in_array($definition->key, $stringKeys, true));
+        })->values();
     }
 
     private function resolvePayloadKey(array $payload, AttributeDefinition $definition): int|string
@@ -178,25 +296,20 @@ class ModelAttributeManager
         return $definition->id;
     }
 
-    private function ensureRequiredComplete(ModelNumber $modelNumber, Collection $definitions, Collection $persisted): void
+    private function ensureRequiredComplete(ModelNumber $modelNumber, Collection $assignments): void
     {
-        $missing = $definitions->filter(function (AttributeDefinition $definition) use ($persisted, $modelNumber) {
+        $missing = $assignments->filter(function (ModelNumberAttribute $assignment) {
+            $definition = $assignment->definition;
+
             if (!$definition->required_for_category) {
                 return false;
             }
 
-            if ($persisted->has($definition->id)) {
-                return false;
-            }
-
-            return !ModelNumberAttribute::query()
-                ->where('model_number_id', $modelNumber->id)
-                ->where('attribute_definition_id', $definition->id)
-                ->exists();
+            return $this->isEmpty($assignment->value);
         });
 
         if ($missing->isNotEmpty()) {
-            $labels = $missing->pluck('label')->implode(', ');
+            $labels = $missing->map(fn (ModelNumberAttribute $assignment) => $assignment->definition->label)->implode(', ');
 
             throw ValidationException::withMessages([
                 'attributes' => __('Complete required attributes: :list', ['list' => $labels]),
@@ -221,3 +334,4 @@ class ModelAttributeManager
         return $value === null || $value === '';
     }
 }
+

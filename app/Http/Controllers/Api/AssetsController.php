@@ -441,11 +441,10 @@ class AssetsController extends Controller
         }
 
 
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $assets->count()) ? $assets->count() : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $total = $assets->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $assets = $assets->skip($offset)->take($limit)->get();
 
 
@@ -526,10 +525,10 @@ class AssetsController extends Controller
             $assets = $assets->withTrashed();
         }
 
-        $offset = ($request->input('offset') > $assets->count()) ? $assets->count() : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $total = $assets->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $assets = $assets->skip($offset)->take($limit)->get();
 
         if (($assets) && ($assets->count()) > 0) {
@@ -1310,11 +1309,10 @@ class AssetsController extends Controller
 
         $assets->requestableAssets();
 
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $assets->count()) ? $assets->count() : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $total = $assets->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $assets = $assets->skip($offset)->take($limit)->get();
 
         return (new AssetsTransformer)->transformRequestedAssets($assets, $total);
@@ -1337,10 +1335,10 @@ class AssetsController extends Controller
             ->with('adminuser')
             ->with('accessories');
 
-        $offset = ($request->input('offset') > $accessory_checkouts->count()) ? $accessory_checkouts->count() : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $total = $accessory_checkouts->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $accessory_checkouts = $accessory_checkouts->skip($offset)->take($limit)->get();
         return (new AssetsTransformer)->transformCheckedoutAccessories($accessory_checkouts, $total);
     }

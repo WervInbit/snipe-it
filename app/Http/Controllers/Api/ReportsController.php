@@ -86,9 +86,8 @@ class ReportsController extends Controller
 
 
         $total = $actionlogs->count();
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $total) ? $total : app('api_offset_value');
         $limit = app('api_limit_value');
+        $offset = $this->resolveOffset($request, $total, $limit);
 
         $order = ($request->input('order') == 'asc') ? 'asc' : 'desc';
 

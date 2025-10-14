@@ -108,8 +108,6 @@ class AssetModelsController extends Controller
             $assetmodels->TextSearch($request->input('search'));
         }
 
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $assetmodels->count()) ? $assetmodels->count() : abs($request->input('offset'));
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
@@ -133,7 +131,8 @@ class AssetModelsController extends Controller
                 break;
         }
 
-        $total = $assetmodels->count();
+        $total = (clone $assetmodels)->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $assetmodels = $assetmodels->skip($offset)->take($limit)->get();
 
         return (new AssetModelsTransformer)->transformAssetModels($assetmodels, $total);
@@ -327,4 +326,5 @@ class AssetModelsController extends Controller
 
         return (new SelectlistTransformer)->transformSelectlist($assetmodels);
     }
+
 }

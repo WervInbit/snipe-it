@@ -38,7 +38,7 @@ class ModelNumber extends SnipeModel
 
     public function attributes(): HasMany
     {
-        return $this->hasMany(ModelNumberAttribute::class, 'model_number_id');
+        return $this->hasMany(ModelNumberAttribute::class, 'model_number_id')->orderBy('display_order')->orderBy('id');
     }
 
     public function assets(): HasMany

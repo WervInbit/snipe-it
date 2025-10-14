@@ -108,8 +108,6 @@ class CategoriesController extends Controller
             $categories->where('updated_at', '=', $request->input('updated_at'));
         }
 
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $categories->count()) ? $categories->count() : app('api_offset_value');
         $limit = app('api_limit_value');
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
         $sort_override =  $request->input('sort');
@@ -125,6 +123,7 @@ class CategoriesController extends Controller
         }
 
         $total = $categories->count();
+        $offset = $this->resolveOffset($request, $total, $limit);
         $categories = $categories->skip($offset)->take($limit)->get();
 
         return (new CategoriesTransformer)->transformCategories($categories, $total);

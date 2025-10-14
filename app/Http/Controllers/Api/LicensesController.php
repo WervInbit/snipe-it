@@ -94,8 +94,6 @@ class LicensesController extends Controller
             $licenses->onlyTrashed();
         }
 
-        // Make sure the offset and limit are actually integers and do not exceed system limits
-        $offset = ($request->input('offset') > $licenses->count()) ? $licenses->count() : app('api_offset_value');
         $limit = app('api_limit_value');
 
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
@@ -147,7 +145,7 @@ class LicensesController extends Controller
         }
 
         $total = $licenses->count();
-
+        $offset = $this->resolveOffset($request, $total, $limit);
         $licenses = $licenses->skip($offset)->take($limit)->get();
         return (new LicensesTransformer)->transformLicenses($licenses, $total);
 
