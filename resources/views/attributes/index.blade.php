@@ -25,13 +25,14 @@
                             <th>{{ __('Name') }}</th>
                             <th>{{ __('Key') }}</th>
                             <th>{{ __('Datatype') }}</th>
-                            <th>{{ __('Unit') }}</th>
+                            <th>{{ __('Version') }}</th>
+                            <th>{{ __('Status') }}</th>
                             <th>{{ __('Categories') }}</th>
                             <th>{{ __('Required') }}</th>
                             <th>{{ __('Needs Test') }}</th>
                             <th>{{ __('Asset Overrides') }}</th>
                             <th>{{ __('Options') }}</th>
-                            <th></th>
+                            <th class="text-right"></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -40,7 +41,17 @@
                                 <td>{{ $definition->label }}</td>
                                 <td><code>{{ $definition->key }}</code></td>
                                 <td>{{ ucfirst($definition->datatype) }}</td>
-                                <td>{{ $definition->unit ?? '--' }}</td>
+                                <td>{{ $definition->version }}</td>
+                                <td>
+                                    @if($definition->isDeprecated())
+                                        <span class="label label-warning">{{ __('Deprecated') }}</span>
+                                    @else
+                                        <span class="label label-success">{{ __('Active') }}</span>
+                                    @endif
+                                    @if($definition->isHidden())
+                                        <span class="label label-default">{{ __('Hidden') }}</span>
+                                    @endif
+                                </td>
                                 <td>
                                     @if($definition->categories->isEmpty())
                                         <span class="text-muted">{{ __('All') }}</span>
@@ -52,13 +63,27 @@
                                 <td>{!! $definition->needs_test ? '<i class="fas fa-vial text-info"></i>' : '<span class="text-muted">--</span>' !!}</td>
                                 <td>{!! $definition->allow_asset_override ? '<i class="fas fa-toggle-on text-primary"></i>' : '<span class="text-muted">--</span>' !!}</td>
                                 <td>{{ $definition->options_count }}</td>
-                                <td class="text-right">
+                                <td class="text-right" style="white-space: nowrap;">
                                     <a href="{{ route('attributes.edit', $definition) }}" class="btn btn-xs btn-default">{{ __('Edit') }}</a>
+                                    <a href="{{ route('attributes.versions.create', $definition) }}" class="btn btn-xs btn-info">{{ __('New Version') }}</a>
+                                    @if($definition->isHidden())
+                                        <form action="{{ route('attributes.unhide', $definition) }}" method="POST" style="display:inline-block;">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="btn btn-xs btn-success">{{ __('Unhide') }}</button>
+                                        </form>
+                                    @else
+                                        <form action="{{ route('attributes.hide', $definition) }}" method="POST" style="display:inline-block;">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="btn btn-xs btn-warning">{{ __('Hide') }}</button>
+                                        </form>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="text-center text-muted">{{ __('No attributes defined yet.') }}</td>
+                                <td colspan="11" class="text-center text-muted">{{ __('No attributes defined yet.') }}</td>
                             </tr>
                         @endforelse
                         </tbody>

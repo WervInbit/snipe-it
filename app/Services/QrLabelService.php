@@ -32,7 +32,9 @@ class QrLabelService
         $logoPath = ($logo && $disk->exists($logo)) ? $disk->path($logo) : null;
         $data = $asset->asset_tag;
         $label = ($settings->qr_text_redundancy ?? false) ? $asset->asset_tag : null;
-        $formats = array_map('trim', explode(',', $settings->qr_formats ?? 'png,pdf'));
+        $formats = array_map(function ($format) {
+            return strtolower(trim($format));
+        }, explode(',', $settings->qr_formats ?? 'png,pdf'));
         $qr = app(QrCodeService::class);
 
         $caption = $asset->name ?: optional($asset->model)->name;
@@ -135,7 +137,9 @@ class QrLabelService
         $label = $settings->qr_text_redundancy ? $text : null;
         $logo = $settings->qr_logo ?: $settings->label_logo;
         $logoPath = ($logo && $disk->exists($logo)) ? $disk->path($logo) : null;
-        $formats = array_map('trim', explode(',', $settings->qr_formats ?? 'png,pdf'));
+        $formats = array_map(function ($format) {
+            return strtolower(trim($format));
+        }, explode(',', $settings->qr_formats ?? 'png,pdf'));
         $base = $this->directory.'/qr-ACC-'.($item->name ? Str::slug($item->name) : $item->id);
         $qr = app(QrCodeService::class);
 
@@ -166,7 +170,9 @@ class QrLabelService
         $label = $settings->qr_text_redundancy ? $text : null;
         $logo = $settings->qr_logo ?: $settings->label_logo;
         $logoPath = ($logo && $disk->exists($logo)) ? $disk->path($logo) : null;
-        $formats = array_map('trim', explode(',', $settings->qr_formats ?? 'png,pdf'));
+        $formats = array_map(function ($format) {
+            return strtolower(trim($format));
+        }, explode(',', $settings->qr_formats ?? 'png,pdf'));
         $base = $this->directory.'/qr-CMP-'.($item->name ? Str::slug($item->name) : $item->id);
         $qr = app(QrCodeService::class);
 

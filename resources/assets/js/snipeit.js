@@ -243,7 +243,85 @@ $(function () {
             //templateSelection: formatDataSelection
         });
 
+        if (endpoint === 'models') {
+            initializeModelSelector(link);
+        }
+
     });
+
+    function initializeModelSelector(selectElement) {
+        var hiddenInputSelector = selectElement.data('hiddenInput') || selectElement.attr('data-hidden-input');
+        var modelNumberTargetSelector = selectElement.data('modelNumberTarget') || selectElement.attr('data-model-number-target');
+        var initialModelId = selectElement.data('initial-model-id');
+        var initialModelNumberId = selectElement.data('initial-model-number-id');
+        var initialLabel = selectElement.data('initial-label');
+
+        var updateHiddenInput = function (modelId) {
+            if (hiddenInputSelector) {
+                $(hiddenInputSelector).val(modelId || '');
+            }
+        };
+
+        var updateModelNumberTarget = function (modelNumberId) {
+            if (modelNumberTargetSelector) {
+                $(modelNumberTargetSelector).val(modelNumberId || '');
+            }
+        };
+
+        var storeSelectionMeta = function (data) {
+            if (data && typeof data === 'object') {
+                selectElement.data('selected-model-id', data.model_id || null);
+                selectElement.data('selected-model-number-id', data.model_number_id || null);
+            } else {
+                selectElement.removeData('selected-model-id');
+                selectElement.removeData('selected-model-number-id');
+            }
+        };
+
+        selectElement.on('select2:select', function (event) {
+            var selection = event.params.data || {};
+            updateHiddenInput(selection.model_id || null);
+             updateModelNumberTarget(selection.model_number_id || null);
+            storeSelectionMeta(selection);
+            selectElement.trigger('model-selection:changed', selection);
+        });
+
+        selectElement.on('select2:clear', function () {
+            updateHiddenInput(null);
+            updateModelNumberTarget(null);
+            storeSelectionMeta(null);
+            selectElement.trigger('model-selection:cleared');
+        });
+
+        if (initialModelId && initialModelNumberId && initialLabel) {
+            var compositeValue = initialModelId + ':' + initialModelNumberId;
+            var option = new Option(initialLabel, compositeValue, true, true);
+            selectElement.append(option).trigger('change');
+            var initialData = {
+                id: compositeValue,
+                text: initialLabel,
+                model_id: initialModelId,
+                model_number_id: initialModelNumberId
+            };
+            updateHiddenInput(initialModelId);
+            updateModelNumberTarget(initialModelNumberId);
+            storeSelectionMeta(initialData);
+            selectElement.trigger({
+                type: 'select2:select',
+                params: {
+                    data: initialData
+                }
+            });
+        } else if (initialModelId) {
+            updateHiddenInput(initialModelId);
+            updateModelNumberTarget(initialModelNumberId || null);
+            var initialMeta = {
+                model_id: initialModelId,
+                model_number_id: initialModelNumberId || null
+            };
+            storeSelectionMeta(initialMeta);
+        }
+    }
 
 	function getSelect2Value(element) {
 		

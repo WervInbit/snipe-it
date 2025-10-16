@@ -2,35 +2,41 @@
 @php($modelNumbers = $modelNumbers ?? collect())
 @php($selectedModelNumber = $selectedModelNumber ?? null)
 @php($selectedModelNumberId = old('model_number_id', $selectedModelNumber?->id))
-@php($displayModelNumbers = $modelNumbers->filter(function ($number) use ($selectedModelNumber) {
-    return !$number->isDeprecated() || ($selectedModelNumber && $selectedModelNumber->id === $number->id);
-}))
+@php($displayModelNumbers = $modelNumbers->values())
 
 @if($displayModelNumbers->isEmpty())
     <div class="alert alert-info">
         {{ __('Add a model number to this model before configuring specifications or overrides.') }}
     </div>
 @else
+    @php($currentModelNumber = $selectedModelNumber ?? ($displayModelNumbers->firstWhere('id', $selectedModelNumberId)))
+    @php($currentModelNumberId = $currentModelNumber?->id)
+    @php($currentModelNumberLabel = $currentModelNumber ? ($currentModelNumber->label ?: $currentModelNumber->code) : null)
+
+    <input type="hidden" name="model_number_id" id="model_number_id" value="{{ $currentModelNumberId }}">
+
     <div class="form-group">
-        <label class="col-md-3 control-label" for="model_number_id">{{ __('Model Number') }}</label>
+        <label class="col-md-3 control-label" for="model_number_id_display">{{ __('Model Number') }}</label>
         <div class="col-md-7">
-            <select name="model_number_id" id="model_number_id" class="form-control">
-                @foreach($displayModelNumbers as $modelNumber)
-                    <option value="{{ $modelNumber->id }}" {{ (string)$selectedModelNumberId === (string)$modelNumber->id ? 'selected' : '' }}>
-                        {{ $modelNumber->label ?: $modelNumber->code }}
-                    </option>
-                @endforeach
-            </select>
-            {!! $errors->first('model_number_id', '<span class="alert-msg">:message</span>') !!}
-            @if($displayModelNumbers->count() <= 1)
-                <p class="help-block text-muted">{{ __('This model currently has a single specification preset.') }}</p>
+            @if($currentModelNumberLabel)
+                <p class="form-control-static" id="model_number_id_display">
+                    {{ $currentModelNumberLabel }}@if($currentModelNumber?->isDeprecated()) <span class="label label-warning">{{ __('deprecated') }}</span>@endif
+                </p>
             @else
-                <p class="help-block text-muted">{{ __('Select a preset to load its specification and overrides.') }}</p>
+                <p class="form-control-static text-muted" id="model_number_id_display">{{ __('Select a model that includes a specification preset.') }}</p>
             @endif
+            {!! $errors->first('model_number_id', '<span class="alert-msg">:message</span>') !!}
         </div>
     </div>
 
-    @if($attributes->isEmpty())
+    @if(!$currentModelNumber)
+        <div class="form-group">
+            <label class="col-md-3 control-label">{{ __('Specification') }}</label>
+            <div class="col-md-7">
+                <p class="form-control-static text-muted">{{ __('Select a model number to load its specification.') }}</p>
+            </div>
+        </div>
+    @elseif($attributes->isEmpty())
         <div class="form-group">
             <label class="col-md-3 control-label">{{ __('Specification') }}</label>
             <div class="col-md-7">

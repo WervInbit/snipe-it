@@ -12,7 +12,11 @@
 @inject('qrLabels', 'App\\Services\\QrLabelService')
 
 @php
-    $qrFormats = explode(',', $snipeSettings->qr_formats ?? 'png,pdf');
+    $qrFormats = collect(explode(',', $snipeSettings->qr_formats ?? 'png,pdf'))
+        ->map(fn ($format) => strtolower(trim($format)))
+        ->filter()
+        ->values()
+        ->all();
     $selectedTemplate = request('template', $snipeSettings->qr_label_template ?? config('qr_templates.default'));
     $qrTemplates = config('qr_templates.templates');
     $qrPng = in_array('png', $qrFormats) ? $qrLabels->url($asset, 'png', $selectedTemplate) : null;
@@ -287,7 +291,7 @@
                                 </div>
                             @endcan
 
-                            @if ($snipeSettings->qr_code=='1' && ($qrPdf || $qrPng))
+                            @if (config('qr_templates.enable_ui', true) && ($qrPdf || $qrPng))
                                 <div class="col-md-12 hidden-print" style="padding-top: 5px;">
                                     <div class="btn-group btn-block">
                                         <button type="button" class="btn btn-sm btn-default btn-block dropdown-toggle" data-toggle="dropdown">
@@ -501,7 +505,7 @@
                                         </ul>
                                     </div>
                                 @endif
-                                @if ($snipeSettings->qr_code=='1')
+                                @if (config('qr_templates.enable_ui', true))
                                     <div class="col-md-12 text-center" style="padding-top: 15px;">
                                         @if($qrPng)
                                             <img src="{{ $qrPng }}" class="img-thumbnail" style="height: 150px; width: 150px; margin-right: 10px;" alt="QR code for {{ $asset->getDisplayNameAttribute() }}">

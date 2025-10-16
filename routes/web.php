@@ -31,6 +31,7 @@ use App\Http\Controllers\Admin\AttributeDefinitionsController;
 use App\Http\Controllers\Admin\AttributeOptionsController;
 use App\Http\Controllers\Admin\ModelNumberController;
 use App\Http\Controllers\Admin\ModelNumberSettingsController;
+use App\Http\Controllers\Admin\ModelNumberAttributeController;
 use App\Http\Controllers\Admin\ModelSpecificationController;
 use App\Livewire\Importer;
 use App\Models\ReportTemplate;
@@ -78,6 +79,10 @@ Route::group(['middleware' => 'auth'], function () {
     });
 
     Route::resource('attributes', AttributeDefinitionsController::class)->except(['show']);
+    Route::get('attributes/{attribute}/versions/create', [AttributeDefinitionsController::class, 'createVersion'])->name('attributes.versions.create');
+    Route::post('attributes/{attribute}/versions', [AttributeDefinitionsController::class, 'storeVersion'])->name('attributes.versions.store');
+    Route::patch('attributes/{attribute}/hide', [AttributeDefinitionsController::class, 'hide'])->name('attributes.hide');
+    Route::patch('attributes/{attribute}/unhide', [AttributeDefinitionsController::class, 'unhide'])->name('attributes.unhide');
     Route::post('attributes/{attribute}/options', [AttributeOptionsController::class, 'store'])->name('attributes.options.store');
     Route::put('attributes/{attribute}/options/{option}', [AttributeOptionsController::class, 'update'])->name('attributes.options.update');
     Route::delete('attributes/{attribute}/options/{option}', [AttributeOptionsController::class, 'destroy'])->name('attributes.options.destroy');
@@ -122,6 +127,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('models/{model}/spec', [ModelSpecificationController::class, 'update'])->name('models.spec.update');
     Route::get('models/{model}/model-numbers/{modelNumber}/spec', [ModelSpecificationController::class, 'editForNumber'])->name('models.numbers.spec.edit');
     Route::put('models/{model}/model-numbers/{modelNumber}/spec', [ModelSpecificationController::class, 'updateForNumber'])->name('models.numbers.spec.update');
+    Route::post('models/{model}/model-numbers/{modelNumber}/attributes', [ModelNumberAttributeController::class, 'store'])->name('models.numbers.attributes.store');
+    Route::delete('models/{model}/model-numbers/{modelNumber}/attributes/{attributeDefinition}', [ModelNumberAttributeController::class, 'destroy'])->name('models.numbers.attributes.destroy');
+    Route::patch('models/{model}/model-numbers/{modelNumber}/attributes/reorder', [ModelNumberAttributeController::class, 'reorder'])->name('models.numbers.attributes.reorder');
     Route::get('models/{model}/model-numbers/create', [ModelNumberController::class, 'create'])->name('models.numbers.create');
     Route::get('models/{model}/model-numbers/{modelNumber}/edit', [ModelNumberController::class, 'edit'])->name('models.numbers.edit');
     Route::patch('models/{model}/model-numbers/{modelNumber}/deprecate', [ModelNumberController::class, 'deprecate'])->name('models.numbers.deprecate');

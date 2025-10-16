@@ -22,12 +22,18 @@ class SelectlistTransformer
 
         // Loop through the paginated collection to set the array values
         foreach ($select_items as $select_item) {
-            $items_array[] = [
-                'id' => (int) $select_item->id,
+            $id = $select_item->selectlist_id ?? $select_item->id;
+            $item = [
+                'id' => $id,
                 'text' => ($select_item->use_text) ? $select_item->use_text : $select_item->name,
                 'image' => ($select_item->use_image) ? $select_item->use_image : null,
-
             ];
+
+            if (property_exists($select_item, 'selectlist_meta') && is_array($select_item->selectlist_meta)) {
+                $item = array_merge($item, $select_item->selectlist_meta);
+            }
+
+            $items_array[] = $item;
         }
 
         $results = [

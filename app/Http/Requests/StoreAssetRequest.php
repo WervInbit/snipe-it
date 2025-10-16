@@ -27,8 +27,9 @@ class StoreAssetRequest extends ImageUploadRequest
         return Gate::allows('create', new Asset);
     }
 
-    public function prepareForValidation(): void
+    protected function prepareForValidation(): void
     {
+        $this->normaliseCompositeModelSelection();
         // Guard against users passing in an array for company_id instead of an integer.
         // If the company_id is not an integer then we simply use what was
         // provided to be caught by model level validation later.
@@ -43,6 +44,7 @@ class StoreAssetRequest extends ImageUploadRequest
             'asset_tag' => $this->asset_tag,
             'company_id' => $idForCurrentUser,
         ]);
+        parent::prepareForValidation();
     }
 
     /**
@@ -55,6 +57,12 @@ class StoreAssetRequest extends ImageUploadRequest
         $modelRules = (new Asset)->getRules();
 
         $modelId = $this->input('model_id');
+        $model = $modelId
+            ? AssetModel::with(['modelNumbers' => function ($query) {
+                $query->orderBy('code');
+            }])->find((int) $modelId)
+            : null;
+        $availableModelNumbers = $model?->modelNumbers ?? collect();
 
         if (Setting::getSettings()->digit_separator === '1.234,56' && is_string($this->input('purchase_cost'))) {
             // If purchase_cost was submitted as a string with a comma separator
@@ -65,9 +73,11 @@ class StoreAssetRequest extends ImageUploadRequest
             $modelRules = $this->removeNumericRulesFromPurchaseCost($modelRules);
         }
 
+        $requireModelNumber = $availableModelNumbers->count() > 1;
+
         $modelNumberRules = $modelId
             ? array_filter([
-                'nullable',
+                $requireModelNumber ? 'required' : 'nullable',
                 'integer',
                 Rule::exists('model_numbers', 'id')->where('model_id', (int) $modelId),
             ])
@@ -116,5 +126,43 @@ class StoreAssetRequest extends ImageUploadRequest
         });
 
         return $rules;
+    }
+
+    private function normaliseCompositeModelSelection(): void
+    {
+        $composite = $this->input('model_id_selector');
+
+        if (!$composite) {
+            return;
+        }
+
+        $modelId = null;
+        $modelNumberId = null;
+
+        if (is_numeric($composite)) {
+            $modelId = (int) $composite;
+        } elseif (is_string($composite) && str_contains($composite, ':')) {
+            [$rawModel, $rawNumber] = array_pad(explode(':', $composite, 2), 2, null);
+            if ($rawModel !== null && $rawModel !== '') {
+                $modelId = (int) $rawModel;
+            }
+            if ($rawNumber !== null && $rawNumber !== '') {
+                $modelNumberId = (int) $rawNumber;
+            }
+        }
+
+        $payload = [];
+
+        if ($modelId !== null) {
+            $payload['model_id'] = $modelId;
+        }
+
+        if ($modelNumberId !== null) {
+            $payload['model_number_id'] = $modelNumberId;
+        }
+
+        if (!empty($payload)) {
+            $this->merge($payload);
+        }
     }
 }

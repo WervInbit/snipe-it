@@ -341,8 +341,8 @@ class AssetModelsController extends Controller
             $selectedModelNumber = $model->modelNumbers->firstWhere('id', $modelNumberId);
         }
 
-        if (!$selectedModelNumber) {
-            $selectedModelNumber = $model->primaryModelNumber ?? $model->modelNumbers->first();
+        if (!$selectedModelNumber && $model->modelNumbers->count() === 1) {
+            $selectedModelNumber = $model->modelNumbers->first();
         }
 
         if (!$selectedModelNumber) {

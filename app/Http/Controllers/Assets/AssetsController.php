@@ -115,17 +115,18 @@ class AssetsController extends Controller
 
         $settings = Setting::getSettings();
 
-        $modelForAttributes = $request->input('model_id') ? AssetModel::find($request->input('model_id')) : null;
+        [$selectedModelId, $selectedModelNumberId] = $this->resolveModelSelection($request);
+        $modelForAttributes = $selectedModelId ? AssetModel::find($selectedModelId) : null;
         $modelNumber = null;
 
         if ($modelForAttributes) {
-            $modelNumberId = (int) $request->input('model_number_id');
-            if ($modelNumberId) {
-                $modelNumber = $modelForAttributes->modelNumbers()->whereKey($modelNumberId)->first();
+            $availableModelNumbers = $modelForAttributes->modelNumbers()->orderBy('code')->get();
+            if ($selectedModelNumberId) {
+                $modelNumber = $availableModelNumbers->firstWhere('id', $selectedModelNumberId);
             }
 
-            if (!$modelNumber) {
-                $modelNumber = $modelForAttributes->primaryModelNumber;
+            if (!$modelNumber && $availableModelNumbers->count() === 1) {
+                $modelNumber = $availableModelNumbers->first();
             }
 
             if ($modelNumber) {
@@ -143,12 +144,17 @@ class AssetsController extends Controller
                 ]);
             }
 
-            if (!$modelNumber) {
+            if ($availableModelNumbers->isNotEmpty() && !$modelNumber) {
                 return redirect()->back()->withInput()->withErrors([
                     'model_number_id' => __('Select a valid model number.'),
                 ]);
             }
 
+        }
+        elseif ($request->input('model_id_selector') || $request->input('model_id')) {
+            return redirect()->back()->withInput()->withErrors([
+                'model_id' => __('Select a valid model.'),
+            ]);
         }
 
         $successes = [];
@@ -161,9 +167,11 @@ class AssetsController extends Controller
 
         for ($a = 1; $a <= $count; $a++) {
             $asset = new Asset();
-            $asset->model()->associate(AssetModel::find($request->input('model_id')));
+            $asset->model()->associate($modelForAttributes);
             if ($modelNumber) {
                 $asset->model_number_id = $modelNumber->id;
+            } else {
+                $asset->model_number_id = null;
             }
             $asset->name = $request->input('name');
 
@@ -181,7 +189,7 @@ class AssetsController extends Controller
             }
 
             $asset->company_id              = Company::getIdForCurrentUser($request->input('company_id'));
-            $asset->model_id                = $request->input('model_id');
+            $asset->model_id                = $modelForAttributes?->id;
             $asset->order_number            = $request->input('order_number');
             $asset->notes                   = $request->input('notes');
             $asset->location_note           = $request->input('location_note');
@@ -426,21 +434,58 @@ class AssetsController extends Controller
     {
 
         $this->authorize($asset);
+        [$selectedModelId, $selectedModelNumberId] = $this->resolveModelSelection($request);
+        $selectedModel = $selectedModelId ? AssetModel::find($selectedModelId) : $asset->model;
+
+        if ($selectedModelId && !$selectedModel) {
+            return redirect()->back()->withInput()->withErrors([
+                'model_id' => __('Select a valid model.'),
+            ]);
+        }
+
+        $availableModelNumbers = $selectedModel
+            ? $selectedModel->modelNumbers()->orderBy('code')->get()
+            : collect();
+
+        $selectedModelNumber = null;
+
+        if ($selectedModelNumberId) {
+            $selectedModelNumber = $availableModelNumbers->firstWhere('id', $selectedModelNumberId);
+        }
+
+        if (!$selectedModelNumber && $availableModelNumbers->count() === 1) {
+            $selectedModelNumber = $availableModelNumbers->first();
+            $selectedModelNumberId = $selectedModelNumber?->id;
+        }
+
+        if ($selectedModel && $availableModelNumbers->isNotEmpty() && !$selectedModelNumber) {
+            return redirect()->back()->withInput()->withErrors([
+                'model_number_id' => __('Select a valid model number.'),
+            ]);
+        }
+
+        if ($selectedModel) {
+            $asset->model()->associate($selectedModel);
+            $asset->setRelation('model', $selectedModel);
+        } else {
+            $asset->model()->dissociate();
+            $asset->unsetRelation('model');
+        }
 
         $asset->status_id = $request->input('status_id', null);
         $asset->warranty_months = $request->input('warranty_months', null);
         $asset->purchase_cost = $request->input('purchase_cost', null);
         $asset->purchase_date = $request->input('purchase_date', null);
         $asset->next_audit_date = $request->input('next_audit_date', null);
-        if ($request->filled('purchase_date') && !$request->filled('asset_eol_date') && ($asset->model->eol > 0)) {
+        if ($request->filled('purchase_date') && !$request->filled('asset_eol_date') && (($selectedModel?->eol ?? 0) > 0)) {
             $asset->purchase_date = $request->input('purchase_date', null); 
-            $asset->asset_eol_date = Carbon::parse($request->input('purchase_date'))->addMonths($asset->model->eol)->format('Y-m-d');
+            $asset->asset_eol_date = Carbon::parse($request->input('purchase_date'))->addMonths($selectedModel->eol)->format('Y-m-d');
             $asset->eol_explicit = false;
         } elseif ($request->filled('asset_eol_date')) {
            $asset->asset_eol_date = $request->input('asset_eol_date', null);
             $months = (int) Carbon::parse($asset->asset_eol_date)->diffInMonths($asset->purchase_date, true);
-           if($asset->model->eol) {
-               if($months != $asset->model->eol > 0) {
+           if(($selectedModel?->eol ?? 0) > 0) {
+               if($selectedModel->eol > 0 && $months != $selectedModel->eol) {
                    $asset->eol_explicit = true;
                } else {
                    $asset->eol_explicit = false;
@@ -448,7 +493,7 @@ class AssetsController extends Controller
            } else {
                $asset->eol_explicit = true;
            }
-        } elseif (!$request->filled('asset_eol_date') && (($asset->model->eol) == 0)) {
+        } elseif (!$request->filled('asset_eol_date') && (($selectedModel?->eol ?? 0) == 0)) {
            $asset->asset_eol_date = null;
 		   $asset->eol_explicit = false;
         }
@@ -512,8 +557,8 @@ class AssetsController extends Controller
 
         $asset->name = $request->input('name');
         $asset->company_id = Company::getIdForCurrentUser($request->input('company_id'));
-        $asset->model_id = $request->input('model_id');
-        $asset->model_number_id = $request->input('model_number_id');
+        $asset->model_id = $selectedModel?->id;
+        $asset->model_number_id = $selectedModelNumber?->id;
         $asset->order_number = $request->input('order_number');
 
         $asset_tags = $request->input('asset_tags');
@@ -534,7 +579,7 @@ class AssetsController extends Controller
         // Update custom fields in the database.
         // FIXME: No idea why this is returning a Builder error on db_column_name.
         // Need to investigate and fix. Using static method for now.
-        $model = AssetModel::find($request->get('model_id'));
+        $model = $selectedModel;
         if (($model) && ($model->fieldset)) {
             foreach ($model->fieldset->fields as $field) {
                 if ($field->element == 'checkbox' && !$request->has($field->db_column)) {
@@ -1140,6 +1185,41 @@ class AssetsController extends Controller
         $asset->save();
 
         return redirect()->back()->with('success', trans('general.updated'));
+    }
+
+    private function resolveModelSelection(Request $request): array
+    {
+        $modelId = $request->input('model_id');
+        $modelNumberId = $request->input('model_number_id');
+        $composite = $request->input('model_id_selector');
+
+        if ((!$modelId || $modelId === '') && $composite) {
+            if (is_numeric($composite)) {
+                $modelId = (int) $composite;
+            } elseif (is_string($composite) && str_contains($composite, ':')) {
+                [$rawModel, $rawNumber] = array_pad(explode(':', $composite, 2), 2, null);
+                if ($rawModel !== null && $rawModel !== '') {
+                    $modelId = (int) $rawModel;
+                }
+                if ($rawNumber !== null && $rawNumber !== '') {
+                    $modelNumberId = (int) $rawNumber;
+                }
+            }
+        }
+
+        if ($modelId !== null && $modelId !== '') {
+            $modelId = (int) $modelId;
+        } else {
+            $modelId = null;
+        }
+
+        if ($modelNumberId !== null && $modelNumberId !== '') {
+            $modelNumberId = (int) $modelNumberId;
+        } else {
+            $modelNumberId = null;
+        }
+
+        return [$modelId, $modelNumberId];
     }
 
     public function getRequestedIndex($user_id = null)

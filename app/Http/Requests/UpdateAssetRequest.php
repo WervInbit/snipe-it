@@ -61,10 +61,17 @@ class UpdateAssetRequest extends ImageUploadRequest
         }
 
         $modelId = $this->input('model_id') ?: ($this->asset?->model_id);
+        $model = $modelId
+            ? AssetModel::with(['modelNumbers' => function ($query) {
+                $query->orderBy('label')->orderBy('code');
+            }])->find((int) $modelId)
+            : null;
+        $availableModelNumbers = $model?->modelNumbers ?? collect();
+        $requireModelNumber = $availableModelNumbers->count() > 1;
 
         $rules['model_number_id'] = $modelId
             ? array_filter([
-                'nullable',
+                $requireModelNumber ? 'required' : 'nullable',
                 'integer',
                 Rule::exists('model_numbers', 'id')->where('model_id', (int) $modelId),
             ])
@@ -74,5 +81,49 @@ class UpdateAssetRequest extends ImageUploadRequest
         $rules['attribute_overrides.*'] = ['nullable'];
 
         return $rules;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->normaliseCompositeModelSelection();
+        parent::prepareForValidation();
+    }
+
+    private function normaliseCompositeModelSelection(): void
+    {
+        $composite = $this->input('model_id_selector');
+
+        if (!$composite) {
+            return;
+        }
+
+        $modelId = null;
+        $modelNumberId = null;
+
+        if (is_numeric($composite)) {
+            $modelId = (int) $composite;
+        } elseif (is_string($composite) && str_contains($composite, ':')) {
+            [$rawModel, $rawNumber] = array_pad(explode(':', $composite, 2), 2, null);
+            if ($rawModel !== null && $rawModel !== '') {
+                $modelId = (int) $rawModel;
+            }
+            if ($rawNumber !== null && $rawNumber !== '') {
+                $modelNumberId = (int) $rawNumber;
+            }
+        }
+
+        $payload = [];
+
+        if ($modelId !== null) {
+            $payload['model_id'] = $modelId;
+        }
+
+        if ($modelNumberId !== null) {
+            $payload['model_number_id'] = $modelNumberId;
+        }
+
+        if (!empty($payload)) {
+            $this->merge($payload);
+        }
     }
 }

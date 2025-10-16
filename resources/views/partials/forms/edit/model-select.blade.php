@@ -1,28 +1,74 @@
 <!-- Asset Model -->
+@php
+    $selectedModelId = old($fieldname, $item->{$fieldname} ?? request($fieldname));
+    $selectedModelNumberId = old('model_number_id', $item->model_number_id ?? ($selectedModelNumber->id ?? null) ?? request('model_number_id'));
+    $selectedModelLabel = null;
+
+    if ($selectedModelId) {
+        $modelForSelect = \App\Models\AssetModel::with('modelNumbers', 'primaryModelNumber')->find($selectedModelId);
+
+        if ($modelForSelect) {
+            $initialModelNumber = null;
+
+            if ($selectedModelNumberId) {
+                $initialModelNumber = $modelForSelect->modelNumbers->firstWhere('id', (int) $selectedModelNumberId);
+            }
+
+            if (!$initialModelNumber) {
+                $initialModelNumber = $modelForSelect->primaryModelNumber ?? $modelForSelect->modelNumbers->first();
+            }
+
+            if ($initialModelNumber) {
+                $selectedModelNumberId = $initialModelNumber->id;
+                $numberLabel = $initialModelNumber->label ?: $initialModelNumber->code;
+                $selectedModelLabel = $modelForSelect->name;
+
+                if ($numberLabel) {
+                    $selectedModelLabel .= ' — '.$numberLabel;
+                }
+
+                if ($initialModelNumber->isDeprecated()) {
+                    $selectedModelLabel .= ' ('.trans('general.deprecated').')';
+                }
+            } else {
+                $selectedModelLabel = $modelForSelect->name;
+                $selectedModelNumberId = null;
+            }
+        }
+    }
+
+    $initialCompositeValue = ($selectedModelId && $selectedModelNumberId)
+        ? $selectedModelId.':'.$selectedModelNumberId
+        : null;
+@endphp
+
 <div id="{{ $fieldname }}" class="form-group{{ $errors->has($fieldname) ? ' has-error' : '' }}">
 
-    <label for="{{ $fieldname }}" class="col-md-3 control-label">{{ $translated_name }}</label>
+    <label for="model_select_id" class="col-md-3 control-label">{{ $translated_name }}</label>
 
     <div class="col-md-7">
-        <select class="js-data-ajax" data-endpoint="models" data-placeholder="{{ trans('general.select_model') }}" name="{{ $fieldname }}" style="width: 100%" id="model_select_id" aria-label="{{ $fieldname }}"{{  ((isset($field_req)) || ((isset($required) && ($required =='true')))) ?  ' required' : '' }}{{ (isset($multiple) && ($multiple=='true')) ? " multiple='multiple'" : '' }}>
-            @isset ($selected)
-                @if (!is_iterable($selected))
-                    @php
-                        $selected = [$selected];
-                    @endphp
-                @endif
-                @foreach ($selected as $model_id)
-                    <option value="{{ $model_id }}" selected="selected" role="option" aria-selected="true">
-                        {{ \App\Models\AssetModel::find($model_id)->name }}
-                    </option>
-                @endforeach
-            @endisset
-            @if ($model_id = old($fieldname, ($item->{$fieldname} ?? request($fieldname) ?? '')))
-                <option value="{{ $model_id }}" selected="selected">
-                    {{ (\App\Models\AssetModel::find($model_id)) ? \App\Models\AssetModel::find($model_id)->name : '' }}
+        <input type="hidden" name="{{ $fieldname }}" id="{{ $fieldname }}_hidden" value="{{ $selectedModelId }}">
+        <select
+            class="js-data-ajax"
+            data-endpoint="models"
+            data-placeholder="{{ trans('general.select_model') }}"
+            data-hidden-input="#{{ $fieldname }}_hidden"
+            data-model-number-target="#model_number_id"
+            @if($selectedModelId) data-initial-model-id="{{ $selectedModelId }}" @endif
+            @if($selectedModelNumberId) data-initial-model-number-id="{{ $selectedModelNumberId }}" @endif
+            @if($selectedModelLabel) data-initial-label="{{ e($selectedModelLabel) }}" @endif
+            name="{{ $fieldname }}_selector"
+            style="width: 100%"
+            id="model_select_id"
+            aria-label="{{ $translated_name }}"
+            {{  ((isset($field_req)) || ((isset($required) && ($required =='true')))) ?  ' required' : '' }}
+            {{ (isset($multiple) && ($multiple=='true')) ? " multiple='multiple'" : '' }}
+        >
+            @if($initialCompositeValue && $selectedModelLabel)
+                <option value="{{ $initialCompositeValue }}" selected="selected">
+                    {{ $selectedModelLabel }}
                 </option>
             @endif
-
         </select>
     </div>
     <div class="col-md-1 col-sm-1 text-left">

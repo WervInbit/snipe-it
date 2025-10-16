@@ -76,4 +76,24 @@ class IndexAssetModelsTest extends TestCase
                 ->etc());
     }
 
+    public function testAssetModelIndexClampsOversizedOffsets()
+    {
+        $model = AssetModel::factory()->create();
+
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->getJson(
+                route('api.models.index', [
+                    'sort' => 'name',
+                    'order' => 'asc',
+                    'offset' => 50,
+                    'limit' => 20,
+                ]))
+            ->assertOk()
+            ->assertJson(fn (AssertableJson $json) => $json
+                ->where('total', 1)
+                ->has('rows', 1)
+                ->where('rows.0.id', $model->id)
+                ->etc());
+    }
+
 }

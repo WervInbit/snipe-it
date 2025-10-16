@@ -7,6 +7,7 @@ use App\Models\AssetAttributeOverride;
 use App\Models\AssetModel;
 use App\Models\AttributeDefinition;
 use App\Models\Category;
+use App\Models\ModelNumber;
 use App\Models\ModelNumberAttribute;
 use App\Services\ModelAttributes\ModelAttributeManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -35,12 +36,25 @@ class ModelAttributeManagerTest extends TestCase
         return $definition;
     }
 
+    private function assignAttribute(ModelNumber $modelNumber, AttributeDefinition $definition, array $overrides = []): ModelNumberAttribute
+    {
+        return ModelNumberAttribute::create(array_merge([
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $definition->id,
+            'display_order' => 0,
+            'value' => null,
+            'raw_value' => null,
+            'attribute_option_id' => null,
+        ], $overrides));
+    }
+
     public function test_save_model_attributes_persists_values(): void
     {
         $category = Category::factory()->create();
         $definition = $this->makeAttributeDefinition($category);
         $model = AssetModel::factory()->create(['category_id' => $category->id]);
         $modelNumber = $model->ensurePrimaryModelNumber();
+        $this->assignAttribute($modelNumber, $definition);
 
         /** @var ModelAttributeManager $manager */
         $manager = app(ModelAttributeManager::class);
@@ -66,6 +80,7 @@ class ModelAttributeManagerTest extends TestCase
         $definition = $this->makeAttributeDefinition($category);
         $model = AssetModel::factory()->create(['category_id' => $category->id]);
         $modelNumber = $model->ensurePrimaryModelNumber();
+        $this->assignAttribute($modelNumber, $definition);
 
         /** @var ModelAttributeManager $manager */
         $manager = app(ModelAttributeManager::class);
@@ -83,6 +98,7 @@ class ModelAttributeManagerTest extends TestCase
         ]);
         $model = AssetModel::factory()->create(['category_id' => $category->id]);
         $modelNumber = $model->ensurePrimaryModelNumber();
+        $this->assignAttribute($modelNumber, $definition);
         $asset = Asset::factory()->create([
             'model_id' => $model->id,
             'model_number_id' => $modelNumber->id,
@@ -112,6 +128,7 @@ class ModelAttributeManagerTest extends TestCase
         ]);
         $model = AssetModel::factory()->create(['category_id' => $category->id]);
         $modelNumber = $model->ensurePrimaryModelNumber();
+        $this->assignAttribute($modelNumber, $definition);
         $asset = Asset::factory()->create([
             'model_id' => $model->id,
             'model_number_id' => $modelNumber->id,
@@ -129,4 +146,80 @@ class ModelAttributeManagerTest extends TestCase
             'attribute_definition_id' => $definition->id,
         ]);
     }
+
+    public function test_sync_model_number_assignments_creates_and_reorders_attributes(): void
+    {
+        $category = Category::factory()->create();
+        $first = $this->makeAttributeDefinition($category, ['key' => 'first_attr', 'label' => 'First']);
+        $second = $this->makeAttributeDefinition($category, ['key' => 'second_attr', 'label' => 'Second']);
+        $third = $this->makeAttributeDefinition($category, ['key' => 'third_attr', 'label' => 'Third']);
+        $model = AssetModel::factory()->create(['category_id' => $category->id]);
+        $modelNumber = $model->ensurePrimaryModelNumber();
+
+        $this->assignAttribute($modelNumber, $first, ['display_order' => 0]);
+        $this->assignAttribute($modelNumber, $second, ['display_order' => 1]);
+
+        /** @var ModelAttributeManager $manager */
+        $manager = app(ModelAttributeManager::class);
+
+        $manager->syncModelNumberAssignments($modelNumber, [$second->id, $third->id, $first->id]);
+
+        $this->assertDatabaseHas('model_number_attributes', [
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $second->id,
+            'display_order' => 0,
+        ]);
+
+        $this->assertDatabaseHas('model_number_attributes', [
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $third->id,
+            'display_order' => 1,
+        ]);
+
+        $this->assertDatabaseHas('model_number_attributes', [
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $first->id,
+            'display_order' => 2,
+        ]);
+    }
+
+    public function test_sync_model_number_assignments_removes_missing_attributes_and_overrides(): void
+    {
+        $category = Category::factory()->create();
+        $first = $this->makeAttributeDefinition($category, ['key' => 'first_attr', 'label' => 'First']);
+        $second = $this->makeAttributeDefinition($category, ['key' => 'second_attr', 'label' => 'Second']);
+        $model = AssetModel::factory()->create(['category_id' => $category->id]);
+        $modelNumber = $model->ensurePrimaryModelNumber();
+
+        $this->assignAttribute($modelNumber, $first, ['display_order' => 0]);
+        $this->assignAttribute($modelNumber, $second, ['display_order' => 1]);
+
+        $asset = Asset::factory()->create([
+            'model_id' => $model->id,
+            'model_number_id' => $modelNumber->id,
+        ]);
+
+        AssetAttributeOverride::create([
+            'asset_id' => $asset->id,
+            'attribute_definition_id' => $second->id,
+            'value' => 'override',
+            'raw_value' => 'override',
+        ]);
+
+        /** @var ModelAttributeManager $manager */
+        $manager = app(ModelAttributeManager::class);
+
+        $manager->syncModelNumberAssignments($modelNumber, [$first->id]);
+
+        $this->assertDatabaseMissing('model_number_attributes', [
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $second->id,
+        ]);
+
+        $this->assertDatabaseMissing('asset_attribute_overrides', [
+            'asset_id' => $asset->id,
+            'attribute_definition_id' => $second->id,
+        ]);
+    }
 }
+

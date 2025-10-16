@@ -266,12 +266,27 @@
         //TODO: Refactor custom fields to use Livewire, populate from server on page load when requested with model_id
     $(document).ready(function() {
         fetchCustomFields();
-        fetchSpecification($('#model_select_id').val(), $('#model_number_id').val());
+        var initialContext = getModelSelectionContext();
+        fetchSpecification(initialContext.modelId, initialContext.modelNumberId || $('#model_number_id').val());
     });
     @endif
 
     var transformed_oldvals={};
     var transformed_spec_vals={};
+
+    function getModelSelectionContext() {
+        var rawValue = $('#model_select_id').val();
+        if (!rawValue) {
+            return { modelId: null, modelNumberId: null };
+        }
+
+        var parts = String(rawValue).split(':');
+        if (parts.length === 2) {
+            return { modelId: parts[0], modelNumberId: parts[1] };
+        }
+
+        return { modelId: rawValue, modelNumberId: null };
+    }
 
     // Quick action helpers
     function __setStatusAndSubmit__(targetText) {
@@ -299,8 +314,9 @@
             transformed_oldvals[oldvals[i].name]=oldvals[i].value;
         }
 
-        var modelid = $('#model_select_id').val();
-        if (modelid == '') {
+        var context = getModelSelectionContext();
+        var modelid = context.modelId;
+        if (!modelid) {
             $('#custom_fields_content').html("");
         } else {
 
@@ -384,8 +400,6 @@
         });
     }
 
-    }
-
     function user_add(status_id) {
 
         if (status_id != '') {
@@ -424,13 +438,18 @@
     $(function () {
         //grab specification and custom fields whenever the model changes.
         $('#model_select_id').on("change", function () {
-            var modelId = $(this).val();
+            var context = getModelSelectionContext();
+            var hiddenSelector = $(this).data('hidden-input');
+            if (hiddenSelector) {
+                $(hiddenSelector).val(context.modelId || '');
+            }
             fetchCustomFields();
-            fetchSpecification(modelId, null);
+            fetchSpecification(context.modelId, context.modelNumberId);
         });
 
         fetchCustomFields();
-        fetchSpecification($('#model_select_id').val(), $('#model_number_id').val());
+        var initialSelection = getModelSelectionContext();
+        fetchSpecification(initialSelection.modelId, initialSelection.modelNumberId || $('#model_number_id').val());
 
         //initialize assigned user/loc/asset based on statuslabel's statustype
         user_add($(".status_id option:selected").val());
@@ -604,9 +623,9 @@
         }
 
         modelSelect.on('change', function () {
-            var modelId = $(this).val();
-            if (modelId) {
-                $.getJSON("{{ config('app.url') }}/api/v1/models/" + modelId, syncFromModel);
+            var context = getModelSelectionContext();
+            if (context.modelId) {
+                $.getJSON("{{ config('app.url') }}/api/v1/models/" + context.modelId, syncFromModel);
             }
         });
     });

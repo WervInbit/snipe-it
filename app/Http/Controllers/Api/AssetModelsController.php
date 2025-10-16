@@ -10,6 +10,8 @@ use App\Http\Transformers\AssetsTransformer;
 use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Asset;
 use App\Models\AssetModel;
+use App\Models\ModelNumber;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -279,52 +281,102 @@ class AssetModelsController extends Controller
     {
 
         $this->authorize('view.selectlists');
-        $assetmodels = AssetModel::select([
-            'models.id',
-            'models.name',
-            'models.image',
-            'models.model_number',
-            'models.manufacturer_id',
-            'models.category_id',
-        ])->with('manufacturer', 'category');
+
+        $settings = Setting::getSettings();
+
+        $modelNumbers = ModelNumber::query()
+            ->with(['model' => function ($query) {
+                $query->with('manufacturer', 'category');
+            }])
+            ->whereHas('model', function ($query) {
+                $query->whereNull('models.deleted_at');
+            });
 
         if ($request->filled('category_id')) {
-            $assetmodels = $assetmodels->where('models.category_id', $request->input('category_id'));
+            $modelNumbers->whereHas('model', function ($query) use ($request) {
+                $query->where('models.category_id', $request->input('category_id'));
+            });
         }
 
         if ($request->filled('manufacturer_id')) {
-            $assetmodels = $assetmodels->where('models.manufacturer_id', $request->input('manufacturer_id'));
+            $modelNumbers->whereHas('model', function ($query) use ($request) {
+                $query->where('models.manufacturer_id', $request->input('manufacturer_id'));
+            });
         }
-
-        $settings = \App\Models\Setting::getSettings();
 
         if ($request->filled('search')) {
-            $assetmodels = $assetmodels->SearchByManufacturerOrCat($request->input('search'));
+            $term = $request->input('search');
+            $modelNumbers->where(function ($query) use ($term) {
+                $query->where('model_numbers.label', 'LIKE', '%'.$term.'%')
+                    ->orWhere('model_numbers.code', 'LIKE', '%'.$term.'%')
+                    ->orWhereHas('model', function ($modelQuery) use ($term) {
+                        $modelQuery->where('models.name', 'LIKE', '%'.$term.'%')
+                            ->orWhereHas('manufacturer', function ($manufacturerQuery) use ($term) {
+                                $manufacturerQuery->where('manufacturers.name', 'LIKE', '%'.$term.'%');
+                            })
+                            ->orWhereHas('category', function ($categoryQuery) use ($term) {
+                                $categoryQuery->where('categories.name', 'LIKE', '%'.$term.'%');
+                            });
+                    });
+            });
         }
 
-        $assetmodels = $assetmodels->OrderCategory('ASC')->OrderManufacturer('ASC')->orderby('models.name', 'asc')->orderby('models.model_number', 'asc')->paginate(50);
+        $modelNumbers->orderBy('model_numbers.label')->orderBy('model_numbers.code');
 
-        foreach ($assetmodels as $assetmodel) {
-            $assetmodel->use_text = '';
+        $paginated = $modelNumbers->paginate(50);
 
-            if ($settings->modellistCheckedValue('category')) {
-                $assetmodel->use_text .= (($assetmodel->category) ? $assetmodel->category->name.' - ' : '');
+        $transformedCollection = $paginated->getCollection()->map(function (ModelNumber $modelNumber) use ($settings) {
+            $model = $modelNumber->model;
+
+            if (!$model) {
+                return null;
             }
 
-            if ($settings->modellistCheckedValue('manufacturer')) {
-                $assetmodel->use_text .= (($assetmodel->manufacturer) ? $assetmodel->manufacturer->name.' ' : '');
+            $segments = [];
+
+            if ($settings->modellistCheckedValue('category') && $model->category) {
+                $segments[] = $model->category->name;
             }
 
-            $assetmodel->use_text .= $assetmodel->name;
-
-            if (($settings->modellistCheckedValue('model_number')) && ($assetmodel->model_number != '')) {
-                $assetmodel->use_text .= ' (#'.$assetmodel->model_number.')';
+            if ($settings->modellistCheckedValue('manufacturer') && $model->manufacturer) {
+                $segments[] = $model->manufacturer->name;
             }
 
-            $assetmodel->use_image = ($settings->modellistCheckedValue('image') && ($assetmodel->image)) ? Storage::disk('public')->url('models/'.e($assetmodel->image)) : null;
-        }
+            $label = $modelNumber->label ?: $modelNumber->code;
 
-        return (new SelectlistTransformer)->transformSelectlist($assetmodels);
+            $display = $model->name;
+            if ($label) {
+                $display .= ' — '.$label;
+            }
+
+            if ($modelNumber->isDeprecated()) {
+                $display .= ' ('.trans('general.deprecated').')';
+            }
+
+            if (!empty($segments)) {
+                $display = implode(' - ', $segments).' '.$display;
+            }
+
+            $modelNumber->use_text = $display;
+            $modelNumber->use_image = ($settings->modellistCheckedValue('image') && $model->image)
+                ? Storage::disk('public')->url('models/'.e($model->image))
+                : null;
+
+            $modelNumber->selectlist_id = $model->id.':'.$modelNumber->id;
+            $modelNumber->selectlist_meta = [
+                'model_id' => $model->id,
+                'model_number_id' => $modelNumber->id,
+                'model_name' => $model->name,
+                'model_number_label' => $label,
+                'is_deprecated' => $modelNumber->isDeprecated(),
+            ];
+
+            return $modelNumber;
+        })->filter();
+
+        $paginated->setCollection($transformedCollection->values());
+
+        return (new SelectlistTransformer)->transformSelectlist($paginated);
     }
 
 }

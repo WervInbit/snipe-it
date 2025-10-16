@@ -31,6 +31,26 @@ class AssetIndexTest extends TestCase
             ->assertJson(fn(AssertableJson $json) => $json->has('rows', 3)->etc());
     }
 
+    public function testAssetApiIndexClampsOversizedOffsets()
+    {
+        $asset = Asset::factory()->create();
+
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->getJson(
+                route('api.assets.index', [
+                    'sort' => 'name',
+                    'order' => 'asc',
+                    'offset' => 500,
+                    'limit' => 20,
+                ]))
+            ->assertOk()
+            ->assertJson(fn (AssertableJson $json) => $json
+                ->where('total', 1)
+                ->has('rows', 1)
+                ->where('rows.0.id', $asset->id)
+                ->etc());
+    }
+
     public function testAssetApiIndexIncludesModelNumber()
     {
         $asset = Asset::factory()->create();
