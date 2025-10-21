@@ -85,15 +85,22 @@ class AgentReportController extends Controller
         $resolvedAttributes = $resolver->resolveForAsset($asset)
             ->filter(fn ($attribute) => $attribute->requiresTest);
 
-        $types = $resolvedAttributes->mapWithKeys(function ($attribute) {
-            $definition = $attribute->definition;
-            $type = TestType::forAttribute($definition);
+        $types = collect();
 
-            return [$type->slug => [
-                'type' => $type,
-                'attribute' => $attribute,
-            ]];
-        });
+        foreach ($resolvedAttributes as $attribute) {
+            $definition = $attribute->definition->loadMissing('tests');
+
+            if ($definition->tests->isEmpty()) {
+                continue;
+            }
+
+            foreach ($definition->tests as $testType) {
+                $types->put($testType->slug, [
+                    'type' => $testType,
+                    'attribute' => $attribute,
+                ]);
+            }
+        }
 
         $provided = collect($validated['results'])->keyBy('test_slug');
 
@@ -145,3 +152,4 @@ class AgentReportController extends Controller
         ]);
     }
 }
+

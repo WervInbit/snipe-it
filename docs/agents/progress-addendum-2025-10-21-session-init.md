@@ -30,5 +30,7 @@
 - Reworked manufacturer API feature tests to exercise `api.manufacturers.*` endpoints with JSON assertions, matching current redirect-free behavior.
 - Marked all maintenance API specs as skipped via class-level `setUp()` hooks because the module is disabled in this fork.
 - Built `DeviceAttributeSeeder` to seed laptop/phone attribute definitions and introduced a separate `DevicePresetSeeder` for optional demo catalog presets; both are wired into `DatabaseSeeder`.
+- Added `AttributeTestSeeder` plus a schema tweak so refurbishment checks live on `test_types` (`attribute_definition_id`, `instructions`); controllers now iterate every test attached to a definition instead of assuming one per attribute.
+- Implemented an admin Test Types screen (create, update, delete, attribute linking, instructions) so refurb workflows can be managed without seeder edits.
 - Updated `AgentTestResultsTest` to consume the seeded attribute-driven slugs (seeding attributes + presets during setup) and verified the scenario passes with the new data model.
 - Latest full API suite (`php artisan test --testsuite=API`) now finishes with 13 failures (ImportAssets validation expectations), 5 incomplete, 11 skipped, 510 passed.

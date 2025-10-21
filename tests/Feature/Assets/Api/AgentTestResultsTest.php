@@ -6,29 +6,35 @@ use App\Models\Asset;
 use App\Models\AttributeDefinition;
 use App\Models\TestResult;
 use App\Models\TestRun;
-use App\Models\TestType;
 use Database\Seeders\DeviceAttributeSeeder;
 use Database\Seeders\DevicePresetSeeder;
+use Database\Seeders\AttributeTestSeeder;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class AgentTestResultsTest extends TestCase
 {
-    protected TestType $keyboardTestType;
-    protected TestType $wifiTestType;
+    protected string $keyboardSlug;
+    protected string $wifiSlug;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->seed(DeviceAttributeSeeder::class);
+        $this->seed(AttributeTestSeeder::class);
         $this->seed(DevicePresetSeeder::class);
 
-        $keyboardDefinition = AttributeDefinition::where('key', 'keyboard_functional')->firstOrFail();
-        $wifiDefinition = AttributeDefinition::where('key', 'wifi_functional')->firstOrFail();
+        $keyboardDefinition = AttributeDefinition::where('key', 'keyboard_test')->firstOrFail()->loadMissing('tests');
+        $wifiDefinition = AttributeDefinition::where('key', 'wifi_test')->firstOrFail()->loadMissing('tests');
 
-        $this->keyboardTestType = TestType::forAttribute($keyboardDefinition);
-        $this->wifiTestType = TestType::forAttribute($wifiDefinition);
+        $this->keyboardSlug = $keyboardDefinition->tests->firstWhere('slug', 'keyboard_test')?->slug
+            ?? $keyboardDefinition->tests->first()?->slug;
+        $this->wifiSlug = $wifiDefinition->tests->firstWhere('slug', 'wifi_test')?->slug
+            ?? $wifiDefinition->tests->first()?->slug;
+
+        $this->assertNotNull($this->keyboardSlug, 'Keyboard test slug missing');
+        $this->assertNotNull($this->wifiSlug, 'Wi-Fi test slug missing');
     }
 
     public function test_agent_can_submit_test_results(): void
@@ -42,7 +48,7 @@ class AgentTestResultsTest extends TestCase
             'asset_tag' => $asset->asset_tag,
             'results' => [
                 [
-                    'test_slug' => $this->keyboardTestType->slug,
+                    'test_slug' => $this->keyboardSlug,
                     'status' => TestResult::STATUS_PASS,
                     'note' => 'All good',
                 ],
@@ -67,16 +73,21 @@ class AgentTestResultsTest extends TestCase
 
         $this->assertDatabaseHas('test_results', [
             'test_run_id' => $run->id,
-            'test_type_id' => $this->keyboardTestType->id,
+            'test_type_id' => $run->results()->whereHas('type', fn ($query) => $query->where('slug', $this->keyboardSlug))->value('test_type_id'),
             'status' => TestResult::STATUS_PASS,
             'note' => 'All good',
         ]);
 
+        $wifiResult = $run->results()->whereHas('type', fn ($query) => $query->where('slug', $this->wifiSlug))->first();
+        $this->assertNotNull($wifiResult);
+
+        $this->assertEquals(TestResult::STATUS_NVT, $wifiResult->status);
+        $this->assertEquals('Not tested by agent', $wifiResult->note);
+
         $this->assertDatabaseHas('test_results', [
             'test_run_id' => $run->id,
-            'test_type_id' => $this->wifiTestType->id,
+            'test_type_id' => $wifiResult->test_type_id,
             'status' => TestResult::STATUS_NVT,
-            'note' => 'Not tested by agent',
         ]);
 
         $asset->refresh();
@@ -88,12 +99,12 @@ class AgentTestResultsTest extends TestCase
             'user_id' => $agent->id,
         ]);
 
-        $cpuResult = TestResult::where('test_run_id', $run->id)
-            ->where('test_type_id', $this->keyboardTestType->id)
+        $keyboardResult = TestResult::where('test_run_id', $run->id)
+            ->whereHas('type', fn ($query) => $query->where('slug', $this->keyboardSlug))
             ->first();
         $this->assertDatabaseHas('test_audits', [
             'auditable_type' => TestResult::class,
-            'auditable_id' => $cpuResult->id,
+            'auditable_id' => $keyboardResult->id,
             'user_id' => $agent->id,
         ]);
 
@@ -111,7 +122,7 @@ class AgentTestResultsTest extends TestCase
             'asset_tag' => 'MISSING_TAG',
             'results' => [
                 [
-                    'test_slug' => $this->keyboardTestType->slug,
+                    'test_slug' => $this->keyboardSlug,
                     'status' => TestResult::STATUS_PASS,
                 ],
             ],
@@ -135,7 +146,7 @@ class AgentTestResultsTest extends TestCase
             'asset_tag' => $asset->asset_tag,
             'results' => [
                 [
-                    'test_slug' => $this->keyboardTestType->slug,
+                    'test_slug' => $this->keyboardSlug,
                     'status' => 'bad-status',
                 ],
             ],
@@ -159,7 +170,7 @@ class AgentTestResultsTest extends TestCase
             'asset_tag' => $asset->asset_tag,
             'results' => [
                 [
-                    'test_slug' => $this->keyboardTestType->slug,
+                    'test_slug' => $this->keyboardSlug,
                     'status' => TestResult::STATUS_PASS,
                 ],
             ],

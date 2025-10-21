@@ -7,6 +7,8 @@
 - Simplified the hardware location selector to a single Select2 dropdown (`resources/views/partials/forms/edit/location-cascade-select.blade.php`) and realigned the location API feature tests with the new single-location expectation; reran `php artisan test --testsuite=API` (now 100 failures, 5 incomplete, 4 skipped) and refreshed the failure inventory at `codexlog/api-failures.csv`.
 - Provisioned `storage/private_uploads/imports`, hardened `tests/Support/Importing/FileBuilder.php` to create the directory automatically, migrated manufacturer API specs to JSON endpoints, and marked maintenance API flows as skipped while the module is disabled.
 - Split device catalog seeding: `DeviceAttributeSeeder` now seeds only attribute metadata, while the new `DevicePresetSeeder` populates optional demo presets; `AgentTestResultsTest` relies on the attributes/presets for seeded slugs.
+- Refactored refurbishment tests so dedicated entries live in `test_types` (`attribute_definition_id`, `instructions` columns added; new `AttributeTestSeeder` seeds the test catalog); controllers now resolve all tests attached to each attribute when creating runs or ingesting agent payloads.
+- Built an admin Test Types UI (CRUD + attribute linking + instructions) so refurb checks can be managed without modifying seed data.
 - Latest `php artisan test --testsuite=API` completes with 13 failures, 5 incomplete, 11 skipped, 510 passed—remaining failures sit in the ImportAssets validation expectations.
 
 ## Notes for Follow-up Agents
@@ -176,5 +178,6 @@ Historical analytics that assume test_runs and assets reference SKUs.
 If you’re ready to deprecate SKUs, we can map each of those behaviors onto the model-number + attribute pathway (e.g., expose model-number labels where we display SKU names, move the test_runs foreign key to model_number_id, add report filters for presets, etc.). That’s more involved than a straight delete but keeps workflows intact. Let me know if you want a concrete migration plan.
 my last message:
 there are multiple duplicate functions that still need to be removed, sku will be one of them. and sku doesnt fail diagnostics, a specific model does.
+
 
 

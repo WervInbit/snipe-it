@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\AttributeDefinition;
-use App\Models\TestType;
 use App\Models\User;
 use Database\Seeders\Concerns\ProvidesDeviceCatalogData;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -72,11 +71,6 @@ class DeviceAttributeSeeder extends Seeder
             }
 
             $this->syncOptions($definition, $config['options'] ?? []);
-
-            if (!empty($config['needs_test'])) {
-                TestType::forAttribute($definition);
-            }
-
             $definitions->put($key, $definition);
         }
 

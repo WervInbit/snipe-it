@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\AttributeDefinition;
 use App\Models\SnipeModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Asset;
 use App\Services\ModelAttributes\EffectiveAttributeResolver;
@@ -24,22 +26,39 @@ class TestType extends SnipeModel
     protected $fillable = [
         'name',
         'slug',
+        'attribute_definition_id',
         'tooltip',
+        'instructions',
         'category',
+    ];
+
+    protected $casts = [
+        'attribute_definition_id' => 'int',
     ];
 
     public static function forAttribute(AttributeDefinition $definition): self
     {
-        $slug = 'attribute-' . $definition->id;
+        $test = static::query()
+            ->where('attribute_definition_id', $definition->id)
+            ->first();
 
-        return static::firstOrCreate(
-            ['slug' => $slug],
-            [
-                'name' => $definition->label,
-                'tooltip' => $definition->unit ? __('Expected unit: :unit', ['unit' => $definition->unit]) : null,
-                'category' => 'attribute',
-            ]
-        );
+        if (!$test) {
+            throw new \RuntimeException(sprintf(
+                'No test type configured for attribute [%s] (%d).',
+                $definition->key,
+                $definition->id
+            ));
+        }
+
+        return $test;
+    }
+
+    /**
+     * Attribute the test belongs to (optional).
+     */
+    public function attributeDefinition(): BelongsTo
+    {
+        return $this->belongsTo(AttributeDefinition::class, 'attribute_definition_id');
     }
 
     /**
@@ -60,17 +79,21 @@ class TestType extends SnipeModel
     public function scopeForAsset(Builder $query, Asset $asset): Builder
     {
         $resolver = app(EffectiveAttributeResolver::class);
-        $attributeTypeIds = $resolver->resolveForAsset($asset)
+        $testIds = $resolver->resolveForAsset($asset)
             ->filter(fn ($attribute) => $attribute->requiresTest)
-            ->map(function ($attribute) {
-                return static::forAttribute($attribute->definition)->id;
+            ->flatMap(function ($attribute) {
+                $definition = $attribute->definition->loadMissing('tests');
+
+                return $definition->tests->pluck('id');
             })
+            ->filter()
+            ->unique()
             ->all();
 
-        if (empty($attributeTypeIds)) {
+        if (empty($testIds)) {
             return $query->whereRaw('0 = 1');
         }
 
-        return $query->whereIn('id', $attributeTypeIds);
+        return $query->whereIn('id', $testIds);
     }
 }

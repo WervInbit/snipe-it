@@ -84,6 +84,11 @@ class AttributeDefinition extends SnipeModel
         return $this->hasMany(AttributeOption::class);
     }
 
+    public function tests(): HasMany
+    {
+        return $this->hasMany(TestType::class, 'attribute_definition_id');
+    }
+
     public function modelValues(): HasMany
     {
         return $this->hasMany(ModelNumberAttribute::class);

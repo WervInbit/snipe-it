@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Asset;
 use App\Models\TestRun;
-use App\Models\TestType;
 use App\Models\TestResult;
 use App\Services\ModelAttributes\EffectiveAttributeResolver;
 use Illuminate\Http\RedirectResponse;
@@ -55,17 +54,18 @@ class TestRunController extends Controller
         $resolvedAttributes = $resolved->filter(fn ($attribute) => $attribute->requiresTest);
 
         foreach ($resolvedAttributes as $attribute) {
-            $definition = $attribute->definition;
-            $type = TestType::forAttribute($definition);
+            $definition = $attribute->definition->loadMissing('tests');
 
-            $run->results()->create([
-                'test_type_id' => $type->id,
-                'attribute_definition_id' => $definition->id,
-                'status' => TestResult::STATUS_NVT,
-                'note' => null,
-                'expected_value' => $attribute->value,
-                'expected_raw_value' => $attribute->rawValue,
-            ]);
+            foreach ($definition->tests as $testType) {
+                $run->results()->create([
+                    'test_type_id' => $testType->id,
+                    'attribute_definition_id' => $definition->id,
+                    'status' => TestResult::STATUS_NVT,
+                    'note' => null,
+                    'expected_value' => $attribute->value,
+                    'expected_raw_value' => $attribute->rawValue,
+                ]);
+            }
         }
 
         $asset->refreshTestCompletionFlag();

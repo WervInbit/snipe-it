@@ -295,8 +295,14 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
         $trail->parent('settings.index')
             ->push(trans('admin/settings/general.test_settings_title'), route('settings.testtypes.index')));
 
+    Route::post('testtypes', [AdminTestTypeController::class, 'store'])
+        ->name('settings.testtypes.store');
+
     Route::put('testtypes/{testtype}', [AdminTestTypeController::class, 'update'])
         ->name('settings.testtypes.update');
+
+    Route::delete('testtypes/{testtype}', [AdminTestTypeController::class, 'destroy'])
+        ->name('settings.testtypes.destroy');
 
     Route::get('ldap', [SettingsController::class, 'getLdapSettings'])
         ->name('settings.ldap.index')
