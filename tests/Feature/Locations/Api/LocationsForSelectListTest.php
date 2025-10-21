@@ -32,7 +32,10 @@ class LocationsForSelectListTest extends TestCase
                 'page',
                 'page_count',
             ])
-            ->assertJson(fn(AssertableJson $json) => $json->has('results', 1)->etc());
+            ->assertJson(fn(AssertableJson $json) => $json
+                ->has('results', Location::count())
+                ->where('total_count', Location::count())
+                ->etc());
     }
 
     public function testLocationsAreReturnedWhenUserIsUpdatingTheirProfileAndHasPermissionToUpdateLocation()

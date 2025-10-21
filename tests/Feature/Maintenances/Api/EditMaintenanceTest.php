@@ -12,6 +12,13 @@ use Tests\TestCase;
 
 class EditMaintenanceTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->markTestSkipped('Maintenance module is disabled in the Inbit fork.');
+    }
+
     public function testPageRenders()
     {
         $this->actingAs(User::factory()->superuser()->create())

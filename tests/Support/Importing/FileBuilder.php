@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Support\Importing;
 
-use Illuminate\Support\Str;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use League\Csv\Reader;
 use OutOfBoundsException;
+use RuntimeException;
 
 /**
  * @template Row of array
@@ -209,9 +210,20 @@ abstract class FileBuilder
     public function saveToImportsDirectory(?string $filename = null, ?string $locale = null): string
     {
         $filename ??= Str::random(40) . '.csv';
+        $directory = rtrim(config('app.private_uploads'), '/\\') . '/imports';
+
+        if (! is_dir($directory) && ! mkdir($directory, 0775, true) && ! is_dir($directory)) {
+            throw new RuntimeException(sprintf('Unable to create imports directory at [%s].', $directory));
+        }
+
+        $filepath = $directory . '/' . $filename;
 
         try {
-            $stream = fopen(config('app.private_uploads') . "/imports/{$filename}", 'w');
+            $stream = fopen($filepath, 'w');
+
+            if ($stream === false) {
+                throw new RuntimeException(sprintf('Unable to open import file for writing at [%s].', $filepath));
+            }
 
             foreach ($this->toCsv() as $row) {
                 if ($locale) {

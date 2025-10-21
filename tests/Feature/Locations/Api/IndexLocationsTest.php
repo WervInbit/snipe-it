@@ -39,7 +39,10 @@ class IndexLocationsTest extends TestCase
                 'total',
                 'rows',
             ])
-            ->assertJson(fn(AssertableJson $json) => $json->has('rows', 3)->etc());
+            ->assertJson(fn(AssertableJson $json) => $json
+                ->where('total', Location::count())
+                ->has('rows', Location::count())
+                ->etc());
     }
 
 }

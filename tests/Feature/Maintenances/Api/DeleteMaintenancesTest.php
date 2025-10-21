@@ -11,6 +11,13 @@ use Tests\TestCase;
 
 class DeleteMaintenancesTest extends TestCase implements TestsFullMultipleCompaniesSupport, TestsPermissionsRequirement
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->markTestSkipped('Maintenance module is disabled in the Inbit fork.');
+    }
+
     public function testRequiresPermission()
     {
         $maintenance = Maintenance::factory()->create();

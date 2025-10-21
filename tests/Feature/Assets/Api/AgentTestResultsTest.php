@@ -3,28 +3,46 @@
 namespace Tests\Feature\Assets\Api;
 
 use App\Models\Asset;
+use App\Models\AttributeDefinition;
 use App\Models\TestResult;
 use App\Models\TestRun;
 use App\Models\TestType;
+use Database\Seeders\DeviceAttributeSeeder;
+use Database\Seeders\DevicePresetSeeder;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class AgentTestResultsTest extends TestCase
 {
+    protected TestType $keyboardTestType;
+    protected TestType $wifiTestType;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->seed(DeviceAttributeSeeder::class);
+        $this->seed(DevicePresetSeeder::class);
+
+        $keyboardDefinition = AttributeDefinition::where('key', 'keyboard_functional')->firstOrFail();
+        $wifiDefinition = AttributeDefinition::where('key', 'wifi_functional')->firstOrFail();
+
+        $this->keyboardTestType = TestType::forAttribute($keyboardDefinition);
+        $this->wifiTestType = TestType::forAttribute($wifiDefinition);
+    }
+
     public function test_agent_can_submit_test_results(): void
     {
         \App\Models\User::factory()->create();
         $agent = \App\Models\User::factory()->create();
         $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAG123']);
-        $cpu = TestType::factory()->create(['slug' => 'cpu']);
-        $ram = TestType::factory()->create(['slug' => 'ram']);
 
         $payload = [
             'type' => 'test_results',
             'asset_tag' => $asset->asset_tag,
             'results' => [
                 [
-                    'test_slug' => $cpu->slug,
+                    'test_slug' => $this->keyboardTestType->slug,
                     'status' => TestResult::STATUS_PASS,
                     'note' => 'All good',
                 ],
@@ -49,14 +67,14 @@ class AgentTestResultsTest extends TestCase
 
         $this->assertDatabaseHas('test_results', [
             'test_run_id' => $run->id,
-            'test_type_id' => $cpu->id,
+            'test_type_id' => $this->keyboardTestType->id,
             'status' => TestResult::STATUS_PASS,
             'note' => 'All good',
         ]);
 
         $this->assertDatabaseHas('test_results', [
             'test_run_id' => $run->id,
-            'test_type_id' => $ram->id,
+            'test_type_id' => $this->wifiTestType->id,
             'status' => TestResult::STATUS_NVT,
             'note' => 'Not tested by agent',
         ]);
@@ -71,7 +89,7 @@ class AgentTestResultsTest extends TestCase
         ]);
 
         $cpuResult = TestResult::where('test_run_id', $run->id)
-            ->where('test_type_id', $cpu->id)
+            ->where('test_type_id', $this->keyboardTestType->id)
             ->first();
         $this->assertDatabaseHas('test_audits', [
             'auditable_type' => TestResult::class,
@@ -87,14 +105,13 @@ class AgentTestResultsTest extends TestCase
     public function test_agent_gets_404_for_unknown_asset_tag(): void
     {
         \App\Models\User::factory()->create();
-        $type = TestType::factory()->create(['slug' => 'cpu']);
 
         $payload = [
             'type' => 'test_results',
             'asset_tag' => 'MISSING_TAG',
             'results' => [
                 [
-                    'test_slug' => $type->slug,
+                    'test_slug' => $this->keyboardTestType->slug,
                     'status' => TestResult::STATUS_PASS,
                 ],
             ],
@@ -112,14 +129,13 @@ class AgentTestResultsTest extends TestCase
     {
         \App\Models\User::factory()->create();
         $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAG999']);
-        TestType::factory()->create(['slug' => 'cpu']);
 
         $payload = [
             'type' => 'test_results',
             'asset_tag' => $asset->asset_tag,
             'results' => [
                 [
-                    'test_slug' => 'cpu',
+                    'test_slug' => $this->keyboardTestType->slug,
                     'status' => 'bad-status',
                 ],
             ],
@@ -137,14 +153,13 @@ class AgentTestResultsTest extends TestCase
     {
         \App\Models\User::factory()->create();
         $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAGIP1']);
-        $cpu = TestType::factory()->create(['slug' => 'cpu']);
 
         $payload = [
             'type' => 'test_results',
             'asset_tag' => $asset->asset_tag,
             'results' => [
                 [
-                    'test_slug' => $cpu->slug,
+                    'test_slug' => $this->keyboardTestType->slug,
                     'status' => TestResult::STATUS_PASS,
                 ],
             ],

@@ -14,7 +14,12 @@ use Tests\TestCase;
 
 class CreateMaintenanceTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
 
+        $this->markTestSkipped('Maintenance module is disabled in the Inbit fork.');
+    }
 
     public function testRequiresPermissionToCreateMaintenance()
     {

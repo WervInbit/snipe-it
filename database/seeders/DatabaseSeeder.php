@@ -43,6 +43,8 @@ class DatabaseSeeder extends Seeder
         $this->call(ManufacturerSeeder::class);
         $this->call(SupplierSeeder::class);
         $this->call(AssetModelSeeder::class);
+        $this->call(DeviceAttributeSeeder::class);
+        $this->call(DevicePresetSeeder::class);
         $this->call(StatuslabelSeeder::class);
         $this->call(AccessorySeeder::class);
         $this->call(CustomFieldSeeder::class);

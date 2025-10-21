@@ -16,6 +16,32 @@
     <testsuite name="Feature">
       <directory suffix="Test.php">./tests/Feature</directory>
     </testsuite>
+    <testsuite name="API">
+      <file>./tests/Feature/ApiRateLimitTest.php</file>
+      <directory suffix="Test.php">./tests/Feature/Accessories/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/AssetModels/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/Assets/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/Categories/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/Checkins/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/Checkouts/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/Companies/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/Components/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/Consumables/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/CustomFields/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/CustomFieldsets/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/Departments/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/Depreciations/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/Groups/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/Importing/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/Licenses/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/Locations/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/Maintenances/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/Manufacturers/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/PredefinedKits/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/StatusLabels/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/Suppliers/Api</directory>
+      <directory suffix="Test.php">./tests/Feature/Users/Api</directory>
+    </testsuite>
   </testsuites>
   <php>
     <env name="APP_ENV" value="testing"/>
