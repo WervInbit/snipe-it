@@ -47,4 +47,15 @@
         <p id="selected_status_status" style="display:none;"></p>
     </div>
 
+    <div class="col-md-7 col-sm-11 col-md-offset-3" style="margin-top:10px;">
+        <textarea
+            class="form-control"
+            name="status_change_note"
+            id="status_change_note"
+            rows="2"
+            placeholder="{{ __('Add a note for this status change (optional)') }}"
+        >{{ old('status_change_note') }}</textarea>
+        {!! $errors->first('status_change_note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+    </div>
+
 </div>

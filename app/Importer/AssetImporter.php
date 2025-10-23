@@ -4,8 +4,6 @@ namespace App\Importer;
 
 use App\Models\Asset;
 use App\Models\Statuslabel;
-use App\Models\User;
-use App\Events\CheckoutableCheckedIn;
 use Illuminate\Support\Facades\Crypt;
 
 class AssetImporter extends ItemImporter
@@ -201,13 +199,7 @@ class AssetImporter extends ItemImporter
             //-- created_by is a property of the abstract class Importer, which this class inherits from and it's set by
             //-- the class that needs to use it (command importer or GUI importer inside the project).
             if (isset($target) && ($target !== false)) {
-                if (!is_null($asset->assigned_to)){
-                    if ($asset->assigned_to != $target->id) {
-                        event(new CheckoutableCheckedIn($asset, User::find($asset->assigned_to), auth()->user(), 'Checkin from CSV Importer', $checkin_date));
-                    }
-                }
-
-                $asset->fresh()->checkOut($target, $this->created_by, $checkout_date, null, 'Checkout from CSV Importer',  $asset->name);
+                $this->log('Checkout skipped for asset '.$asset->asset_tag.' — checkout functionality is disabled in this fork.');
             }
 
             return;

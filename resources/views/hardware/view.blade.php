@@ -143,25 +143,6 @@
                         @endcan
                     @endif
 
-
-                    @if ($asset->audits->count() > 0)
-                    @can('audit', \App\Models\Asset::class)
-                    <li>
-                        <a href="#audits" data-toggle="tab" data-tooltip="true">
-
-                            <span class="hidden-lg hidden-md">
-                                <i class="fas fa-clipboard-check fa-2x"></i>
-                            </span>
-                            <span class="hidden-xs hidden-sm">
-                                {{ trans('general.audits') }}
-                                {!! ($asset->audits()->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($asset->audits()->count()).'</span>' : '' !!}
-
-                            </span>
-                        </a>
-                    </li>
-                    @endcan
-                    @endif
-
                     <li>
                         <a href="#history" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
@@ -310,63 +291,21 @@
                             @endif
 
 
-                            @if (($asset->assetstatus) && ($asset->assetstatus->deployable=='1'))
-                                @if (($asset->assigned_to != '') && ($asset->deleted_at==''))
-                                    @can('checkin', $asset)
-                                            <div class="col-md-12 hidden-print" style="padding-top: 5px;">
-                                                    <span class="tooltip-wrapper"{!! (!$asset->model ? ' data-tooltip="true" title="'.trans('admin/hardware/general.model_invalid_fix').'"' : '') !!}>
-                                                        <a role="button" href="{{ route('hardware.checkin.create', $asset->id) }}" class="btn btn-sm btn-primary bg-purple btn-social btn-block hidden-print{{ (!$asset->model ? ' disabled' : '') }}">
-                                                            <x-icon type="checkin" />
-                                                            {{ trans('admin/hardware/general.checkin') }}
-                                                        </a>
-                                                    </span>
-                                            </div>
-                                        @endcan
-                                    @elseif (($asset->assigned_to == '') && ($asset->deleted_at==''))
-                                        @can('checkout', $asset)
-                                            <div class="col-md-12 hidden-print" style="padding-top: 5px;">
-                                                    <span class="tooltip-wrapper"{!! (!$asset->model ? ' data-tooltip="true" title="'.trans('admin/hardware/general.model_invalid_fix').'"' : '') !!}>
-                                                        <a href="{{ route('hardware.checkout.create', $asset->id)  }}" class="btn btn-sm bg-maroon btn-social btn-block hidden-print{{ (!$asset->model ? ' disabled' : '') }}">
-                                                             <x-icon type="checkout" />
-                                                            {{ trans('admin/hardware/general.checkout') }}
-                                                    </a>
-                                                    </span>
-                                            </div>
-                                        @endcan
-                                    @endif
-                                @endif
-
-                                        <!-- Add notes -->
-                                        @can('update', \App\Models\Asset::class)
-                                            <div class="col-md-12 hidden-print" style="padding-top: 5px;">
-                                                <button type="button" style="width: 100%" class="btn btn-sm btn-primary btn-block btn-social hidden-print" onclick="var f=document.getElementById('note-form');f.style.display=f.style.display==='none'?'block':'none';">
-                                                    <x-icon type="note" />
-                                                    {{ trans('general.add_note') }}
-                                                </button>
-                                                <form id="note-form" method="POST" action="{{ route('notes.store') }}" style="display:none; margin-top:10px;">
-                                                    @csrf
-                                                    <input type="hidden" name="type" value="asset">
-                                                    <input type="hidden" name="id" value="{{ $asset->id }}">
-                                                    <textarea class="form-control" name="note" required></textarea>
-                                                    <button type="submit" class="btn btn-primary" style="margin-top:10px;">{{ trans('general.save') }}</button>
-                                                </form>
-                                            </div>
-                                        @endcan
-
-
-
-
-                                    @can('audit', \App\Models\Asset::class)
-                                        <div class="col-md-12 hidden-print" style="padding-top: 5px;">
-                                        <span class="tooltip-wrapper"{!! (!$asset->model ? ' data-tooltip="true" title="'.trans('admin/hardware/general.model_invalid_fix').'"' : '') !!}>
-                                            <a href="{{ route('asset.audit.create', $asset->id)  }}" class="btn btn-sm btn-primary btn-block btn-social hidden-print{{ (!$asset->model ? ' disabled' : '') }}">
-                                                 <x-icon type="audit" />
-                                             {{ trans('general.audit') }}
-                                            </a>
-                                        </span>
-                                        </div>
-                                    @endcan
-                                @endif
+                            @can('update', \App\Models\Asset::class)
+                                <div class="col-md-12 hidden-print" style="padding-top: 5px;">
+                                    <button type="button" style="width: 100%" class="btn btn-sm btn-primary btn-block btn-social hidden-print" onclick="var f=document.getElementById('note-form');f.style.display=f.style.display==='none'?'block':'none';">
+                                        <x-icon type="note" />
+                                        {{ trans('general.add_note') }}
+                                    </button>
+                                    <form id="note-form" method="POST" action="{{ route('notes.store') }}" style="display:none; margin-top:10px;">
+                                        @csrf
+                                        <input type="hidden" name="type" value="asset">
+                                        <input type="hidden" name="id" value="{{ $asset->id }}">
+                                        <textarea class="form-control" name="note" required></textarea>
+                                        <button type="submit" class="btn btn-primary" style="margin-top:10px;">{{ trans('general.save') }}</button>
+                                    </form>
+                                </div>
+                            @endcan
 
                                 @can('create', $asset)
                                     <div class="col-md-12 hidden-print" style="padding-top: 5px;">
@@ -377,23 +316,7 @@
                                     </div>
                                 @endcan
 
-                                <div class="col-md-12 hidden-print" style="padding-top: 5px;">
-                                    <form
-                                        method="POST"
-                                        action="{{ route('hardware/bulkedit') }}"
-                                        accept-charset="UTF-8"
-                                        class="form-inline"
-                                        target="_blank"
-                                        id="bulkForm"
-                                    >
-                                    @csrf
-                                    <input type="hidden" name="bulk_actions" value="labels" />
-                                    <input type="hidden" name="ids[{{$asset->id}}]" value="{{ $asset->id }}" />
-                                    <button class="btn btn-block btn-social btn-sm btn-default" id="bulkEdit"{{ (!$asset->model ? ' disabled' : '') }}{!! (!$asset->model ? ' data-tooltip="true" title="'.trans('admin/hardware/general.model_invalid').'"' : '') !!}>
-                                        <x-icon type="assets" />
-                                        {{ trans_choice('button.generate_labels', 1) }}</button>
-                                    </form>
-                                </div>
+                                {{-- Legacy TCPDF label generator hidden while QR module is active --}}
 
                                 @can('delete', $asset)
                                     <div class="col-md-12 hidden-print" style="padding-top: 30px; padding-bottom: 30px;">
@@ -527,6 +450,7 @@
                                         </div>
                                     </div>
                                 @endif
+                            @endif
                                 <br><br>
                             </div>
 
@@ -1576,9 +1500,24 @@
                                             <div class="panel-body">
                                                 <ul class="list-unstyled">
                                                     @foreach ($run->results as $result)
+                                                        @php
+                                                            $definition = $result->attributeDefinition;
+                                                            $label = $definition?->label ?? optional($result->type)->name;
+                                                            $instructions = trim((string) (optional($result->type)->instructions ?: ($definition?->instructions ?? $definition?->help_text)));
+                                                            $expectedDisplay = $result->expected_value;
+                                                            if ($definition && $definition->datatype === \App\Models\AttributeDefinition::DATATYPE_BOOL && $expectedDisplay !== null) {
+                                                                $expectedDisplay = $expectedDisplay === '1' ? __('Yes') : __('No');
+                                                            }
+                                                        @endphp
                                                         <li>
-                                                            {{ $result->type->name }}:
+                                                            {{ $label }}
+                                                            @if ($instructions !== '')
+                                                                <x-icon type="info-circle" class="text-muted" data-tooltip="true" data-placement="top" title="{{ $instructions }}" />
+                                                            @endif:
                                                             {{ trans('tests.' . $result->status) }}
+                                                            @if ($expectedDisplay !== null)
+                                                                <span class="text-muted">{{ __('Expected: :value', ['value' => $expectedDisplay]) }}</span>
+                                                            @endif
                                                             @if ($result->note)
                                                                 <span class="text-muted">{{ $result->note }}</span>
                                                             @endif
@@ -1710,49 +1649,51 @@
                     @endcan
 
 
-                @can('audit', \App\Models\Asset::class)
-                <div class="tab-pane fade" id="audits">
-                    <!-- checked out assets table -->
-                    <div class="row">
-                        <div class="col-md-12">
-                            <table
-                                    class="table table-striped snipe-table"
-                                    id="assetAuditHistory"
-                                    data-id-table="assetAuditHistory"
-                                    data-side-pagination="server"
-                                    data-sort-order="desc"
-                                    data-sort-name="created_at"
-                                    data-export-options='{
-                                         "fileName": "export-asset-{{  $asset->id }}-audits",
-                                         "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                                       }'
-                                    data-url="{{ route('api.activity.index', ['item_id' => $asset->id, 'item_type' => 'asset', 'action_type' => 'audit']) }}"
-                                    data-cookie-id-table="assetHistory"
-                                    data-cookie="true">
-                                <thead>
-                                <tr>
-                                    <th data-visible="true" data-field="icon" style="width: 40px;" class="hidden-xs" data-formatter="iconFormatter">{{ trans('admin/hardware/table.icon') }}</th>
-                                    <th data-visible="true" data-field="created_at" data-sortable="true" data-formatter="dateDisplayFormatter">{{ trans('general.date') }}</th>
-                                    <th data-visible="true" data-field="admin" data-formatter="usersLinkObjFormatter">{{ trans('general.created_by') }}</th>
-                                    <th class="col-sm-2" data-field="file" data-sortable="true" data-visible="false" data-formatter="fileUploadNameFormatter">{{ trans('general.file_name') }}</th>
-                                    <th data-field="note">{{ trans('general.notes') }}</th>
-                                    <th data-visible="false" data-field="file" data-visible="false"  data-formatter="fileDownloadButtonsFormatter">{{ trans('general.download') }}</th>
-                                    <th data-field="log_meta" data-visible="true" data-formatter="changeLogFormatter">{{ trans('admin/hardware/table.changed')}}</th>
-                                    <th data-field="remote_ip" data-visible="false" data-sortable="true">{{ trans('admin/settings/general.login_ip') }}</th>
-                                    <th data-field="user_agent" data-visible="false" data-sortable="true">{{ trans('admin/settings/general.login_user_agent') }}</th>
-                                    <th data-field="action_source" data-visible="false" data-sortable="true">{{ trans('general.action_source') }}</th>
-                                </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    </div> <!-- /.row -->
-                </div> <!-- /.tab-pane history -->
-                @endcan
-
-
                 <div class="tab-pane fade" id="history">
-                        <!-- checked out assets table -->
                         <div class="row">
+                            <div class="col-md-12">
+                                @php
+                                    $statusEvents = $asset->statusEvents()->with(['fromStatus', 'toStatus', 'user'])->get();
+                                @endphp
+                                @if ($statusEvents->isNotEmpty())
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            {{ trans('general.status_history') }}
+                                        </div>
+                                        <div class="panel-body">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>{{ trans('general.date') }}</th>
+                                                        <th>{{ trans('general.from') }}</th>
+                                                        <th>{{ trans('general.to') }}</th>
+                                                        <th>{{ trans('general.performed_by') }}</th>
+                                                        <th>{{ trans('general.notes') }}</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($statusEvents as $event)
+                                                        <tr>
+                                                            <td>{{ Helper::getFormattedDateObject($event->created_at, 'datetime', false) }}</td>
+                                                            <td>{{ optional($event->fromStatus)->name ?? trans('general.none') }}</td>
+                                                            <td>{{ optional($event->toStatus)->name ?? trans('general.none') }}</td>
+                                                            <td>
+                                                                @if ($event->user)
+                                                                    {!! link_to_route('users.show', $event->user->present()->fullName(), [$event->user->id]) !!}
+                                                                @else
+                                                                    {{ trans('general.system') }}
+                                                                @endif
+                                                            </td>
+                                                            <td>{{ $event->note }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
                             <div class="col-md-12">
                                 <table
                                         data-columns="{{ \App\Presenters\HistoryPresenter::dataTableLayout() }}"

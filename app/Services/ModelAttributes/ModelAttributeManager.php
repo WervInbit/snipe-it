@@ -157,7 +157,7 @@ class ModelAttributeManager
                     continue;
                 }
 
-                $normalized = $this->valueService->validateAndNormalize($definition, $value);
+                $normalized = $this->valueService->validateAndNormalize($definition, $value, 'attributes');
 
                 $assignment->fill([
                     'value' => $normalized->value,
@@ -234,7 +234,7 @@ class ModelAttributeManager
                     continue;
                 }
 
-                $normalized = $this->valueService->validateAndNormalize($definition, $value);
+                $normalized = $this->valueService->validateAndNormalize($definition, $value, 'attribute_overrides');
 
                 AssetAttributeOverride::query()->updateOrCreate(
                     [
@@ -319,13 +319,13 @@ class ModelAttributeManager
 
     private function missingRequired(AttributeDefinition $definition): void
     {
-        $this->fail($definition, __('This field is required.'));
+        $this->fail($definition, __(':label is required.', ['label' => $definition->label ?? $definition->key]));
     }
 
     private function fail(AttributeDefinition $definition, string $message): void
     {
         throw ValidationException::withMessages([
-            $definition->key => [$message],
+            'attributes.' . $definition->id => [$message],
         ]);
     }
 

@@ -49,6 +49,15 @@
         .selected-attribute-item.active {
             background-color: #f5f5f5;
             border-left: 3px solid #337ab7;
+            color: #222;
+        }
+
+        .selected-attribute-item.active .selected-attribute-item__info strong {
+            color: #000;
+        }
+
+        .selected-attribute-item.active small {
+            color: #555;
         }
 
         .selected-attribute-item__body {
@@ -93,6 +102,20 @@
         </div>
         <a href="{{ route('models.numbers.create', $model) }}" class="btn btn-primary">{{ __('Create Model Number') }}</a>
     @else
+        @if($errors->any())
+            <div class="col-md-12">
+                <div class="alert alert-danger">
+                    <strong>{{ __('Unable to save the specification.') }}</strong>
+                    <p class="help-block">{{ __('Review the highlighted fields below. Allowed formats, ranges, and units are noted alongside each attribute when validation fails.') }}</p>
+                    <ul class="mb-0">
+                        @foreach($errors->all() as $message)
+                            <li>{{ $message }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
+
         <input type="hidden" name="model_number_id" id="model_spec_model_number_id" value="{{ $modelNumber->id }}">
 
         <div class="form-group">

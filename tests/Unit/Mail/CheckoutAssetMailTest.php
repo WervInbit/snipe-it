@@ -11,6 +11,13 @@ use Tests\TestCase;
 
 class CheckoutAssetMailTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        ->markTestSkipped('Asset checkout functionality removed in this fork.');
+    }
+
     public static function data()
     {
         yield 'Asset requiring acceptance' => [
@@ -73,3 +80,4 @@ class CheckoutAssetMailTest extends TestCase
             ->assertSeeInText($expectedOpening);
     }
 }
+

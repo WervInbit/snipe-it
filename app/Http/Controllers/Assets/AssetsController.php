@@ -199,6 +199,7 @@ class AssetsController extends Controller
             $asset->purchase_cost           = request('purchase_cost');
             $asset->purchase_date           = request('purchase_date', null);
             $asset->asset_eol_date          = request('asset_eol_date', null);
+            $asset->withStatusChangeNote($request->input('status_change_note'));
             $asset->assigned_to             = request('assigned_to', null);
             $asset->supplier_id             = request('supplier_id', null);
             $asset->requestable             = request('requestable', 0);
@@ -477,6 +478,7 @@ class AssetsController extends Controller
         $asset->purchase_cost = $request->input('purchase_cost', null);
         $asset->purchase_date = $request->input('purchase_date', null);
         $asset->next_audit_date = $request->input('next_audit_date', null);
+        $asset->withStatusChangeNote($request->input('status_change_note'));
         if ($request->filled('purchase_date') && !$request->filled('asset_eol_date') && (($selectedModel?->eol ?? 0) > 0)) {
             $asset->purchase_date = $request->input('purchase_date', null); 
             $asset->asset_eol_date = Carbon::parse($request->input('purchase_date'))->addMonths($selectedModel->eol)->format('Y-m-d');
@@ -1018,144 +1020,6 @@ class AssetsController extends Controller
         return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
     }
 
-    public function quickScan()
-    {
-        $this->authorize('audit', Asset::class);
-        $settings = Setting::getSettings();
-        $dt = Carbon::now()->addMonths($settings->audit_interval)->toDateString();
-        return view('hardware/quickscan')->with('next_audit_date', $dt);
-    }
-
-    public function quickScanCheckin()
-    {
-        $this->authorize('checkin', Asset::class);
-
-        return view('hardware/quickscan-checkin')->with('statusLabel_list', Helper::statusLabelList());
-    }
-
-
-    public function dueForAudit()
-    {
-        $this->authorize('audit', Asset::class);
-
-        return view('hardware/audit-due');
-    }
-
-    public function dueForCheckin()
-    {
-        $this->authorize('checkin', Asset::class);
-
-        return view('hardware/checkin-due');
-    }
-
-
-    public function audit(Asset $asset): View | RedirectResponse
-    {
-        $this->authorize('audit', Asset::class);
-        $settings = Setting::getSettings();
-
-
-        // Invoke the validation to see if the audit will complete successfully
-        $asset->setRules($asset->getRules() + $asset->customFieldValidationRules());
-
-        if ($asset->isInvalid()) {
-            return redirect()->route('hardware.edit', $asset)->withErrors($asset->getErrors());
-        }
-
-        $dt = Carbon::now()->addMonths( (int) $settings->audit_interval)->toDateString();
-        return view('hardware/audit')->with('asset', $asset)->with('item', $asset)->with('next_audit_date', $dt)->with('locations_list');
-    }
-
-    public function auditStore(UploadFileRequest $request, Asset $asset)
-    {
-
-        $this->authorize('audit', Asset::class);
-
-        session()->put('redirect_option', $request->get('redirect_option'));
-        session()->put('other_redirect', 'audit');
-
-
-        $originalValues = $asset->getRawOriginal();
-
-        $asset->next_audit_date = $request->input('next_audit_date');
-        $asset->last_audit_date = date('Y-m-d H:i:s');
-
-        // Check to see if they checked the box to update the physical location,
-        // not just note it in the audit notes
-        if ($request->input('update_location') == '1') {
-            $asset->location_id = $request->input('location_id');
-        }
-
-        // Update custom fields in the database
-        if (($asset->model) && ($asset->model->fieldset)) {
-            foreach ($asset->model->fieldset->fields as $field) {
-                if (($field->display_audit=='1') && ($request->has($field->db_column))) {
-                    if ($field->field_encrypted == '1') {
-                        if (Gate::allows('assets.view.encrypted_custom_fields')) {
-                            if (is_array($request->input($field->db_column))) {
-                                $asset->{$field->db_column} = Crypt::encrypt(implode(', ', $request->input($field->db_column)));
-                            } else {
-                                $asset->{$field->db_column} = Crypt::encrypt($request->input($field->db_column));
-                            }
-                        }
-                    } else {
-                        if (is_array($request->input($field->db_column))) {
-                            $asset->{$field->db_column} = implode(', ', $request->input($field->db_column));
-                        } else {
-                            $asset->{$field->db_column} = $request->input($field->db_column);
-                        }
-                    }
-                }
-            }
-        }
-
-        // Invoke the validation to see if the audit will complete successfully
-        $asset->setRules($asset->getRules() + $asset->customFieldValidationRules());
-
-        // Validate the rest of the data before we turn off the event dispatcher
-        if ($asset->isInvalid()) {
-            return redirect()->back()->withInput()->withErrors($asset->getErrors());
-        }
-
-        /**
-         * Even though we do a save() further down, we don't want to log this as a "normal" asset update,
-         * which would trigger the Asset Observer and would log an asset *update* log entry (because the
-         * de-normed fields like next_audit_date on the asset itself will change on save()) *in addition* to
-         * the audit log entry we're creating through this controller.
-         *
-         * To prevent this double-logging (one for update and one for audit), we skip the observer and bypass
-         * that de-normed update log entry by using unsetEventDispatcher(), BUT invoking unsetEventDispatcher()
-         * will bypass normal model-level validation that's usually handled at the observer )
-         *
-         * We handle validation on the save() by checking if the asset is valid via the ->isValid() method,
-         * which manually invokes Watson Validating to make sure the asset's model is valid.
-         *
-         * @see \App\Observers\AssetObserver::updating()
-         * @see \App\Models\Asset::save()
-         */
-
-        $asset->unsetEventDispatcher();
-
-
-        /**
-         * Invoke Watson Validating to check the asset itself and check to make sure it saved correctly.
-         * We have to invoke this manually because of the unsetEventDispatcher() above.)
-         */
-        if ($asset->isValid() && $asset->save()) {
-
-            $file_name = null;
-            // Create the image (if one was chosen.)
-            if ($request->hasFile('image')) {
-                $file_name = $request->handleFile('private_uploads/audits/', 'audit-'.$asset->id, $request->file('image'));
-            }
-
-            $asset->logAudit($request->input('note'), $request->input('location_id'), $file_name, $originalValues);
-            return Helper::getRedirectOption($request, $asset->id, 'Assets')->with('success', trans('admin/hardware/message.audit.success'));
-        }
-
-        return redirect()->back()->withInput()->withErrors($asset->getErrors());
-    }
-
     public function toggleSaleAvailability(Request $request, Asset $asset): RedirectResponse
     {
         $this->authorize('update', $asset);
@@ -1236,3 +1100,4 @@ class AssetsController extends Controller
         return view('hardware/requested', compact('requestedItems'));
     }
 }
+

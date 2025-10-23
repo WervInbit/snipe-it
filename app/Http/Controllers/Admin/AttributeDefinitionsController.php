@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AttributeDefinitionRequest;
 use App\Http\Requests\AttributeDefinitionVersionRequest;
 use App\Models\AttributeDefinition;
+use App\Models\AttributeOption;
 use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
@@ -49,6 +50,7 @@ class AttributeDefinitionsController extends Controller
         $definition->version = 1;
         $definition->save();
         $definition->categories()->sync($request->input('category_ids', []));
+        $this->applyPendingOptions($definition, $request->input('options', []));
 
         return redirect()
             ->route('attributes.edit', $definition)
@@ -78,6 +80,7 @@ class AttributeDefinitionsController extends Controller
         $attribute->fill($this->payload($request, $attribute, includeIdentity: false));
         $attribute->save();
         $attribute->categories()->sync($request->input('category_ids', []));
+        $this->applyPendingOptions($attribute, $request->input('options', []));
 
         return redirect()
             ->route('attributes.edit', $attribute)
@@ -160,6 +163,7 @@ class AttributeDefinitionsController extends Controller
         $newVersion = DB::transaction(function () use ($attribute, $payload, $request) {
             $clone = $attribute->createNewVersion($payload);
             $clone->categories()->sync($request->input('category_ids', $attribute->categories->pluck('id')->all()));
+            $this->applyPendingOptions($clone, $request->input('options', []));
 
             return $clone;
         });
@@ -219,6 +223,62 @@ class AttributeDefinitionsController extends Controller
             'step' => $constraints['step'] ?? null,
             'regex' => $constraints['regex'] ?? null,
         ], fn ($value) => $value !== null && $value !== '');
+    }
+
+    private function applyPendingOptions(AttributeDefinition $attribute, array $options): void
+    {
+        if (!$attribute->isEnum()) {
+            return;
+        }
+
+        $pending = $options['new'] ?? [];
+        if (empty($pending)) {
+            return;
+        }
+
+        $currentSort = $attribute->options()->max('sort_order') ?? -1;
+        $seenValues = [];
+
+        foreach ($pending as $option) {
+            $value = trim((string) ($option['value'] ?? ''));
+            $label = trim((string) ($option['label'] ?? ''));
+            if ($value === '' || $label === '' || isset($seenValues[$value])) {
+                continue;
+            }
+            $seenValues[$value] = true;
+
+            $sortOrder = $option['sort_order'] ?? null;
+            $sortOrder = ($sortOrder === '' || $sortOrder === null) ? null : (int) $sortOrder;
+
+            if ($sortOrder === null) {
+                $currentSort++;
+                $sortOrder = $currentSort;
+            } else {
+                $currentSort = max($currentSort, $sortOrder);
+            }
+
+            /** @var AttributeOption|null $existing */
+            $existing = AttributeOption::withTrashed()
+                ->where('attribute_definition_id', $attribute->id)
+                ->where('value', $value)
+                ->first();
+
+            $payload = [
+                'label' => $label,
+                'sort_order' => $sortOrder,
+                'active' => true,
+            ];
+
+            if ($existing) {
+                $existing->fill($payload);
+                $existing->restore();
+                $existing->save();
+            } else {
+                $attribute->options()->create(array_merge([
+                    'value' => $value,
+                ], $payload));
+            }
+        }
     }
 }
 

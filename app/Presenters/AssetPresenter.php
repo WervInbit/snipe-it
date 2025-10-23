@@ -341,17 +341,6 @@ class AssetPresenter extends Presenter
         }
 
         $layout[] = [
-            'field' => 'checkincheckout',
-            'searchable' => false,
-            'sortable' => false,
-            'switchable' => false,
-            'title' => trans('general.checkin').'/'.trans('general.checkout'),
-            'visible' => true,
-            'formatter' => 'hardwareInOutFormatter',
-            'printIgnore' => true,
-        ];
-
-        $layout[] = [
             'field' => 'actions',
             'searchable' => false,
             'sortable' => false,

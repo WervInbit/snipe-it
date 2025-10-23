@@ -12,6 +12,13 @@ use Tests\TestCase;
 
 class NotificationTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        ->markTestSkipped('Asset checkout functionality removed in this fork.');
+    }
+
     public function testAUserIsEmailedIfTheyCheckoutAnAssetWithEULA()
     {
         $admin = User::factory()->superuser()->create();
@@ -60,3 +67,4 @@ class NotificationTest extends TestCase
         });
     }
 }
+

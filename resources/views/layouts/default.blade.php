@@ -197,6 +197,14 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                     </a>
                                 </li>
                             @endcan
+                            @can('index', \App\Models\TestType::class)
+                                <li aria-hidden="true"{!! (request()->is('settings/testtypes*') ? ' class="active"' : '') !!}>
+                                    <a href="{{ route('settings.testtypes.index') }}" tabindex="-1" data-tooltip="true" data-placement="bottom" data-title="{{ trans('admin/settings/general.test_settings_title') }}">
+                                        <x-icon type="tests" class="fa-fw" />
+                                        <span class="sr-only">{{ trans('admin/settings/general.test_settings_title') }}</span>
+                                    </a>
+                                </li>
+                            @endcan
 
                             @can('index', \App\Models\Asset::class)
                                 <li>
@@ -559,41 +567,8 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                         </a>
                                     </li>
 
-                                    @can('audit', \App\Models\Asset::class)
-                                        <li id="audit-due-sidenav-option"{!! (request()->is('hardware/audit/due') ? ' class="active"' : '') !!}>
-                                            <a href="{{ route('assets.audit.due') }}">
-                                                <x-icon type="audit" class="text-yellow fa-fw"/>
-                                                {{ trans('general.audit_due') }}
-                                                <span class="badge">{{ (isset($total_due_and_overdue_for_audit)) ? $total_due_and_overdue_for_audit : '' }}</span>
-                                            </a>
-                                        </li>
-                                    @endcan
-
-                                    @can('checkin', \App\Models\Asset::class)
-                                    <li id="checkin-due-sidenav-option"{!! (request()->is('hardware/checkins/due') ? ' class="active"' : '') !!}>
-                                        <a href="{{ route('assets.checkins.due') }}">
-                                            <x-icon type="due" class="text-orange fa-fw"/>
-                                            {{ trans('general.checkin_due') }}
-                                            <span class="badge">{{ (isset($total_due_and_overdue_for_checkin)) ? $total_due_and_overdue_for_checkin : '' }}</span>
-                                        </a>
-                                    </li>
-                                    @endcan
-
                                     <li class="divider">&nbsp;</li>
-                                    @can('checkin', \App\Models\Asset::class)
-                                        <li{!! (request()->is('hardware/quickscancheckin') ? ' class="active"' : '') !!}>
-                                            <a href="{{ route('hardware/quickscancheckin') }}">
-                                                {{ trans('general.quickscan_checkin') }}
-                                            </a>
-                                        </li>
-                                    @endcan
-
                                     @can('checkout', \App\Models\Asset::class)
-                                        <li{!! (request()->is('hardware/bulkcheckout') ? ' class="active"' : '') !!}>
-                                            <a href="{{ route('hardware.bulkcheckout.show') }}">
-                                                {{ trans('general.bulk_checkout') }}
-                                            </a>
-                                        </li>
                                         <li{!! (request()->is('hardware/requested') ? ' class="active"' : '') !!}>
                                             <a href="{{ route('assets.requested') }}">
                                                 {{ trans('general.requested') }}</a>
@@ -751,6 +726,14 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                         <li {!! (request()->is('attributes*') ? ' class="active"' : '') !!}>
                                             <a href="{{ route('attributes.index') }}">
                                                 {{ __('Attributes') }}
+                                            </a>
+                                        </li>
+                                    @endcan
+
+                                    @can('index', \App\Models\TestType::class)
+                                        <li {!! (request()->is('settings/testtypes*') ? ' class="active"' : '') !!}>
+                                            <a href="{{ route('settings.testtypes.index') }}">
+                                                {{ trans('admin/settings/general.test_settings_title') }}
                                             </a>
                                         </li>
                                     @endcan

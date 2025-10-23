@@ -79,6 +79,7 @@ class UpdateAssetRequest extends ImageUploadRequest
 
         $rules['attribute_overrides'] = ['nullable', 'array'];
         $rules['attribute_overrides.*'] = ['nullable'];
+        $rules['status_change_note'] = ['nullable', 'string', 'max:65535'];
 
         return $rules;
     }

@@ -16,6 +16,13 @@ use Tests\TestCase;
  */
 class CheckinCheckoutCounters extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->markTestSkipped('Asset checkout functionality removed in this fork.');
+    }
+
     #[Test]
     function counters()
     {

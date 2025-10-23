@@ -9,26 +9,33 @@ use Illuminate\Validation\ValidationException;
 
 class AttributeValueService
 {
-    public function validateAndNormalize(AttributeDefinition $definition, $input): AttributeValueTuple
+    private string $contextKey = 'attributes';
+
+    public function validateAndNormalize(AttributeDefinition $definition, $input, string $context = 'attributes'): AttributeValueTuple
     {
+        $previousContext = $this->contextKey;
+        $this->contextKey = $context;
+
         $definition->loadMissing('options');
         $raw = $input;
 
-        switch ($definition->datatype) {
-            case AttributeDefinition::DATATYPE_ENUM:
-                return $this->handleEnum($definition, $input, $raw);
-            case AttributeDefinition::DATATYPE_INT:
-                return $this->handleInteger($definition, $input, $raw);
-            case AttributeDefinition::DATATYPE_DECIMAL:
-                return $this->handleDecimal($definition, $input, $raw);
-            case AttributeDefinition::DATATYPE_BOOL:
-                return $this->handleBoolean($definition, $input, $raw);
-            case AttributeDefinition::DATATYPE_TEXT:
-                return $this->handleText($definition, $input, $raw);
-            default:
-                throw ValidationException::withMessages([
-                    $definition->key => __('Unknown attribute datatype :type', ['type' => $definition->datatype]),
-                ]);
+        try {
+            switch ($definition->datatype) {
+                case AttributeDefinition::DATATYPE_ENUM:
+                    return $this->handleEnum($definition, $input, $raw);
+                case AttributeDefinition::DATATYPE_INT:
+                    return $this->handleInteger($definition, $input, $raw);
+                case AttributeDefinition::DATATYPE_DECIMAL:
+                    return $this->handleDecimal($definition, $input, $raw);
+                case AttributeDefinition::DATATYPE_BOOL:
+                    return $this->handleBoolean($definition, $input, $raw);
+                case AttributeDefinition::DATATYPE_TEXT:
+                    return $this->handleText($definition, $input, $raw);
+                default:
+                    $this->fail($definition, __('Unknown attribute datatype :type', ['type' => $definition->datatype]));
+            }
+        } finally {
+            $this->contextKey = $previousContext;
         }
     }
 
@@ -54,7 +61,7 @@ class AttributeValueService
         $value = is_string($input) ? trim($input) : $input;
 
         if ($value === '' || $value === null) {
-            $this->fail($definition, __('Select a value for :label', ['label' => $definition->label]));
+            $this->fail($definition, __('Select a value for :label.', ['label' => $this->label($definition)]));
         }
 
         $option = $options->first(function (AttributeOption $option) use ($value) {
@@ -66,7 +73,20 @@ class AttributeValueService
         }
 
         if (!$definition->allow_custom_values) {
-            $this->fail($definition, __('The value :value is not in the allowed options.', ['value' => $value]));
+            $allowed = $options->pluck('value')->filter()->unique()->values();
+            $display = $allowed->take(10)->implode(', ');
+            if ($allowed->count() > 10) {
+                $display .= __(' (and :count more)', ['count' => $allowed->count() - 10]);
+            }
+
+            $this->fail(
+                $definition,
+                __('The value ":value" is not allowed for :label. Allowed options: :options.', [
+                    'value' => $value,
+                    'label' => $this->label($definition),
+                    'options' => $display ?: __('none'),
+                ])
+            );
         }
 
         return new AttributeValueTuple((string) $value, $this->normalizeRaw($raw), null);
@@ -75,14 +95,14 @@ class AttributeValueService
     private function handleInteger(AttributeDefinition $definition, $input, $raw): AttributeValueTuple
     {
         if ($input === '' || $input === null) {
-            $this->fail($definition, __('A value is required.'));
+            $this->fail($definition, __('Enter a value for :label.', ['label' => $this->label($definition)]));
         }
 
         $numeric = $this->normalizeNumericInput($definition, $input, false);
         $value = (int) round($numeric);
 
         if (abs($numeric - $value) > 0.00001) {
-            $this->fail($definition, __('Enter a whole number.'));
+            $this->fail($definition, __('Enter a whole number for :label.', ['label' => $this->label($definition)]));
         }
 
         $constraints = $definition->constraints;
@@ -94,7 +114,7 @@ class AttributeValueService
     private function handleDecimal(AttributeDefinition $definition, $input, $raw): AttributeValueTuple
     {
         if ($input === '' || $input === null) {
-            $this->fail($definition, __('A value is required.'));
+            $this->fail($definition, __('Enter a value for :label.', ['label' => $this->label($definition)]));
         }
 
         $value = $this->normalizeNumericInput($definition, $input, true);
@@ -128,22 +148,32 @@ class AttributeValueService
             return new AttributeValueTuple(((int) $input) === 1 ? '1' : '0', $this->normalizeRaw($raw), null);
         }
 
-        $this->fail($definition, __('Enter yes/no or true/false.'));
+        $this->fail($definition, __('Select yes or no for :label (accepted: yes/no, true/false, 1/0).', [
+            'label' => $this->label($definition),
+        ]));
     }
 
     private function handleText(AttributeDefinition $definition, $input, $raw): AttributeValueTuple
     {
         $value = is_scalar($input) ? trim((string) $input) : '';
         if ($value === '') {
-            $this->fail($definition, __('A value is required.'));
+            $this->fail($definition, __('Enter a value for :label.', ['label' => $this->label($definition)]));
         }
 
         $constraints = $definition->constraints;
         if (!empty($constraints['regex'])) {
-            $pattern = $this->compileRegex($constraints['regex']);
+            $rawPattern = $constraints['regex'];
+            $pattern = $this->compileRegex($rawPattern);
 
             if (@preg_match($pattern, $value) !== 1) {
-                $this->fail($definition, __('Value does not match the expected format.'));
+                $this->fail(
+                    $definition,
+                    __(':label must match the pattern :pattern. Received ":value".', [
+                        'label' => $this->label($definition),
+                        'pattern' => $rawPattern,
+                        'value' => $value,
+                    ])
+                );
             }
         }
 
@@ -157,13 +187,17 @@ class AttributeValueService
         }
 
         if (!is_string($input)) {
-            $this->fail($definition, __('Enter a numeric value.'));
+            $this->fail($definition, __('Enter a numeric value for :label. Examples: 10, 10.5, 10 GB.', [
+                'label' => $this->label($definition),
+            ]));
         }
 
         $clean = trim(str_replace(',', '', $input));
 
         if ($clean === '') {
-            $this->fail($definition, __('Enter a numeric value.'));
+            $this->fail($definition, __('Enter a numeric value for :label. Examples: 10, 10.5, 10 GB.', [
+                'label' => $this->label($definition),
+            ]));
         }
 
         if (is_numeric($clean)) {
@@ -171,7 +205,9 @@ class AttributeValueService
         }
 
         if (!preg_match('/^([-+]?[0-9]*\.?[0-9]+)\s*([a-zA-Z]+)$/', $clean, $matches)) {
-            $this->fail($definition, __('Enter a numeric value.'));
+            $this->fail($definition, __('Enter a numeric value for :label. Examples: 10, 10.5, 10 GB.', [
+                'label' => $this->label($definition),
+            ]));
         }
 
         $value = (float) $matches[1];
@@ -179,7 +215,10 @@ class AttributeValueService
         $baseUnit = $definition->unit ? strtolower($definition->unit) : null;
 
         if (!$baseUnit) {
-            $this->fail($definition, __('Unexpected unit :unit.', ['unit' => $matches[2]]));
+            $this->fail($definition, __('Unexpected unit ":unit" for :label. Remove the unit or set a base unit for this attribute.', [
+                'unit' => $matches[2],
+                'label' => $this->label($definition),
+            ]));
         }
 
         if ($suffix === $baseUnit) {
@@ -189,11 +228,17 @@ class AttributeValueService
         $converted = $this->convertUnit($baseUnit, $suffix, $value);
 
         if ($converted === null) {
-            $this->fail($definition, __('Unable to convert :from to :to.', ['from' => $matches[2], 'to' => $definition->unit]));
+            $allowedUnits = $this->availableUnitsForBaseUnit($baseUnit);
+            $this->fail($definition, __('Cannot convert :input_unit to :base_unit for :label. Allowed units: :units.', [
+                'input_unit' => $matches[2],
+                'base_unit' => $definition->unit,
+                'label' => $this->label($definition),
+                'units' => implode(', ', $allowedUnits),
+            ]));
         }
 
         if (!$allowFloat && abs($converted - round($converted)) > 0.00001) {
-            $this->fail($definition, __('Enter a whole number.'));
+            $this->fail($definition, __('Enter a whole number for :label.', ['label' => $this->label($definition)]));
         }
 
         return $converted;
@@ -201,13 +246,7 @@ class AttributeValueService
 
     private function convertUnit(string $baseUnit, string $inputUnit, float $value): ?float
     {
-        $unitSets = [
-            $this->dataUnits(),
-            $this->frequencyUnits(),
-            $this->powerUnits(),
-        ];
-
-        foreach ($unitSets as $map) {
+        foreach ($this->unitSets() as $map) {
             if (isset($map[$baseUnit]) && isset($map[$inputUnit])) {
                 $baseFactor = $map[$baseUnit];
                 $inputFactor = $map[$inputUnit];
@@ -253,6 +292,28 @@ class AttributeValueService
         ];
     }
 
+    private function unitSets(): array
+    {
+        return [
+            $this->dataUnits(),
+            $this->frequencyUnits(),
+            $this->powerUnits(),
+        ];
+    }
+
+    private function availableUnitsForBaseUnit(string $unit): array
+    {
+        $unit = strtolower($unit);
+
+        foreach ($this->unitSets() as $map) {
+            if (isset($map[$unit])) {
+                return array_map(fn ($key) => strtoupper($key), array_keys($map));
+            }
+        }
+
+        return [];
+    }
+
     private function compileRegex(string $pattern): string
     {
         $pattern = trim($pattern);
@@ -275,11 +336,17 @@ class AttributeValueService
     private function enforceNumericConstraints(AttributeDefinition $definition, $value, array $constraints): void
     {
         if (array_key_exists('min', $constraints) && $constraints['min'] !== null && $value < $constraints['min']) {
-            $this->fail($definition, __('Value must be at least :min.', ['min' => $constraints['min']]));
+            $this->fail($definition, __(':label must be at least :min.', [
+                'label' => $this->label($definition),
+                'min' => $constraints['min'],
+            ]));
         }
 
         if (array_key_exists('max', $constraints) && $constraints['max'] !== null && $value > $constraints['max']) {
-            $this->fail($definition, __('Value must be at most :max.', ['max' => $constraints['max']]));
+            $this->fail($definition, __(':label must be at most :max.', [
+                'label' => $this->label($definition),
+                'max' => $constraints['max'],
+            ]));
         }
 
         if (array_key_exists('step', $constraints) && $constraints['step']) {
@@ -287,7 +354,10 @@ class AttributeValueService
             if ($step > 0) {
                 $mod = fmod((float) $value - (float) ($constraints['min'] ?? 0), $step);
                 if ($mod > 1e-8 && ($step - $mod) > 1e-8) {
-                    $this->fail($definition, __('Value must align to a step of :step.', ['step' => $step]));
+                    $this->fail($definition, __(':label must align to a step of :step.', [
+                        'label' => $this->label($definition),
+                        'step' => $step,
+                    ]));
                 }
             }
         }
@@ -312,7 +382,12 @@ class AttributeValueService
     private function fail(AttributeDefinition $definition, string $message)
     {
         throw ValidationException::withMessages([
-            $definition->key => [$message],
+            $this->contextKey . '.' . $definition->id => [$message],
         ]);
+    }
+
+    private function label(AttributeDefinition $definition): string
+    {
+        return $definition->label ?: $definition->key;
     }
 }

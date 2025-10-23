@@ -13,6 +13,13 @@ class SupplierSeeder extends Seeder
         Schema::disableForeignKeyConstraints();
         Supplier::truncate();
         Schema::enableForeignKeyConstraints();
-        Supplier::factory()->count(5)->create();
+
+        Supplier::factory()->create([
+            'name' => 'TechCycle Partners',
+        ]);
+
+        Supplier::factory()->create([
+            'name' => 'Renewed Supply Co.',
+        ]);
     }
 }

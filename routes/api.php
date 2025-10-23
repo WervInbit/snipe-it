@@ -478,13 +478,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         )->name('api.assets.show.bytag')
         ->where('any', '.*');
 
-        Route::post('bytag/{any}/checkout',
-            [
-                Api\AssetsController::class, 
-                'checkoutByTag'
-            ]
-        )->name('api.assets.checkout.bytag');
-
         Route::post('bytag/{any}/checkin',
             [
                 Api\AssetsController::class,
@@ -536,20 +529,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'audit'
         ]
         )->name('api.asset.audit');
-
-        Route::post('{id}/checkin',
-        [
-            Api\AssetsController::class, 
-            'checkin'
-        ]
-        )->name('api.asset.checkin');
-
-        Route::post('{id}/checkout',
-          [
-            Api\AssetsController::class, 
-            'checkout'
-          ]
-        )->name('api.asset.checkout');
 
         Route::post('{asset_id}/restore',
           [
@@ -1364,3 +1343,4 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         ->where(['object_type' => 'accessories|assets|components|consumables|hardware|licenses|locations|maintenances|models|model-numbers|users']);
 
 }); // end API routes
+

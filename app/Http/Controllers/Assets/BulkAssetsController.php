@@ -17,7 +17,6 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
-use App\Http\Requests\AssetCheckoutRequest;
 use App\Models\CustomField;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -640,110 +639,18 @@ class BulkAssetsController extends Controller
         }
 
         $assignedAssets = Asset::whereIn('id', $assetIds)->whereNotNull('assigned_to')->get();
-        if($assignedAssets->isNotEmpty()) {
-
-            //if assets are checked out, return a list of asset tags that would need to be checked in first.
+        if ($assignedAssets->isNotEmpty()) {
             $assetTags = $assignedAssets->pluck('asset_tag')->implode(', ');
-            return redirect($bulk_back_url)->with('error', trans_choice('admin/hardware/message.delete.assigned_to_error', $assignedAssets->count(), ['asset_tag' => $assetTags] ));
+            return redirect($bulk_back_url)->with('error', trans_choice('admin/hardware/message.delete.assigned_to_error', $assignedAssets->count(), ['asset_tag' => $assetTags]));
         }
 
-        foreach (Asset::wherein('id', $assetIds)->get() as $asset) {
-                $asset->delete();
-            }
+        foreach (Asset::whereIn('id', $assetIds)->get() as $asset) {
+            $asset->delete();
+        }
 
         return redirect($bulk_back_url)->with('success', trans('admin/hardware/message.delete.success'));
-            // no values given, nothing to update
-
     }
 
-    /**
-     * Show Bulk Checkout Page
-     */
-    public function showCheckout() : View
-    {
-        $this->authorize('checkout', Asset::class);
-
-        $do_not_change = ['' => trans('general.do_not_change')];
-        $status_label_list = $do_not_change + Helper::deployableStatusLabelList();
-        return view('hardware/bulk-checkout')->with('statusLabel_list', $status_label_list);
-    }
-
-    /**
-     * Process Multiple Checkout Request
-     */
-    public function storeCheckout(AssetCheckoutRequest $request) : RedirectResponse | ModelNotFoundException
-    {
-        $this->authorize('checkout', Asset::class);
-
-        try {
-            $admin = auth()->user();
-
-            $target = $this->determineCheckoutTarget();
-
-            if (! is_array($request->get('selected_assets'))) {
-                return redirect()->route('hardware.bulkcheckout.show')->withInput()->with('error', trans('admin/hardware/message.checkout.no_assets_selected'));
-            }
-
-            $asset_ids = array_filter($request->get('selected_assets'));
-
-            $assets = Asset::findOrFail($asset_ids);
-
-            if (request('checkout_to_type') == 'asset') {
-                foreach ($asset_ids as $asset_id) {
-                    if ($target->id == $asset_id) {
-                        return redirect()->back()->with('error', 'You cannot check an asset out to itself.');
-                    }
-                }
-            }
-            $checkout_at = date('Y-m-d H:i:s');
-            if (($request->filled('checkout_at')) && ($request->get('checkout_at') != date('Y-m-d'))) {
-                $checkout_at = $request->get('checkout_at');
-            }
-
-            $expected_checkin = '';
-
-            if ($request->filled('expected_checkin')) {
-                $expected_checkin = $request->get('expected_checkin');
-            }
-
-            $errors = [];
-            DB::transaction(function () use ($target, $admin, $checkout_at, $expected_checkin, &$errors, $assets, $request) { //NOTE: $errors is passsed by reference!
-                foreach ($assets as $asset) {
-                    $this->authorize('checkout', $asset);
-
-                    // See if there is a status label passed
-                    if ($request->filled('status_id')) {
-                        $asset->status_id = $request->get('status_id');
-                    }
-
-                    $checkout_success = $asset->checkOut($target, $admin, $checkout_at, $expected_checkin, e($request->get('note')), $asset->name, null);
-
-                    //TODO - I think this logic is duplicated in the checkOut method?
-                    if ($target->location_id != '') {
-                        $asset->location_id = $target->location_id;
-                        // TODO - I don't know why this is being saved without events
-                        $asset::withoutEvents(function () use ($asset) {
-                            $asset->save();
-                        });
-                    }
-
-                    if (!$checkout_success) {
-                        $errors = array_merge_recursive($errors, $asset->getErrors()->toArray());
-                    }
-                }
-            });
-
-            if (! $errors) {
-                // Redirect to the new asset page
-                return redirect()->to('hardware')->with('success', trans_choice('admin/hardware/message.multi-checkout.success', $asset_ids));
-            }
-            // Redirect to the asset management page with error
-            return redirect()->route('hardware.bulkcheckout.show')->withInput()->with('error', trans_choice('admin/hardware/message.multi-checkout.error', $asset_ids))->withErrors($errors);
-        } catch (ModelNotFoundException $e) {
-            return redirect()->route('hardware.bulkcheckout.show')->withInput()->with('error', trans_choice('admin/hardware/message.multi-checkout.error', $request->input('selected_assets')));
-        }
-        
-    }
     public function restore(Request $request) : RedirectResponse
     {
         $this->authorize('update', Asset::class);

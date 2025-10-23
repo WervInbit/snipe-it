@@ -29,3 +29,11 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 - Updated asset API responses to expose model number strings and IDs, and aligned factories/tests with the model-number requirement.
 - Linked test runs to model numbers so diagnostics follow the selected preset.
 
+### 2025-10-23
+- Consolidated per-session agent addenda into `docs/agents/agent-progress-2025.md` and trimmed the demo seed data to refurb-focused records and curated assets.
+- Hid the legacy hardware-page “Generate Label” button so only the new QR module controls remain visible while we plan the long-term QR/label unification.
+- Removed company selectors from the asset form for the current single-company refurb workflow (companies stay in the data model for future reinstatement).
+ - Removed checkout/checkin/audit flows; status transitions now drive lifecycle tracking with status event history and notes.
+
+
+

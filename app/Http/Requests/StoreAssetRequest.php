@@ -90,6 +90,7 @@ class StoreAssetRequest extends ImageUploadRequest
                 'status_id' => [new AssetCannotBeCheckedOutToNondeployableStatus()],
                 'attribute_overrides' => ['nullable', 'array'],
                 'attribute_overrides.*' => ['nullable'],
+                'status_change_note' => ['nullable', 'string', 'max:65535'],
             ],
             parent::rules(),
         );

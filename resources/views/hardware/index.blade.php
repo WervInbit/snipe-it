@@ -79,7 +79,7 @@
                     'status_id'=>e(Request::get('status_id')))) }}"
                 data-export-options='{
                 "fileName": "export{{ (Request::has('status')) ? '-'.str_slug(Request::get('status')) : '' }}-assets-{{ date('Y-m-d') }}",
-                "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                "ignoreColumn": ["actions","image","change","checkbox","icon"]
                 }'>
               </table>
 

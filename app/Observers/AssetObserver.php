@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Models\Actionlog;
 use App\Models\Asset;
-use App\Models\AssetStatusHistory;
+use App\Models\AssetStatusEvent;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -82,6 +82,13 @@ class AssetObserver
             $logAction->log_meta = json_encode($changed);
             $logAction->logaction('update');
         }
+
+        if ($asset->isDirty('status_id')) {
+            $asset->markPendingStatusTransition(
+                $asset->getOriginal('status_id'),
+                $asset->status_id
+            );
+        }
     }
 
     /**
@@ -90,12 +97,13 @@ class AssetObserver
     public function updated(Asset $asset): void
     {
         if ($asset->wasChanged('status_id')) {
-            AssetStatusHistory::create([
+            [$from, $to] = $asset->pullPendingStatusTransition();
+            AssetStatusEvent::create([
                 'asset_id' => $asset->id,
-                'old_status_id' => $asset->getOriginal('status_id'),
-                'new_status_id' => $asset->status_id,
-                'changed_by' => Auth::id(),
-                'changed_at' => now(),
+                'from_status_id' => $from,
+                'to_status_id' => $to ?? $asset->status_id,
+                'triggered_by' => Auth::id(),
+                'note' => $asset->pullStatusChangeNote() ?? (app()->bound('request') && !app()->runningInConsole() ? request()->input('status_change_note') : null),
             ]);
         }
     }
@@ -146,6 +154,16 @@ class AssetObserver
             $logAction->setActionSource('importer');
         }
         $logAction->logaction('create');
+
+        if ($asset->status_id) {
+            AssetStatusEvent::create([
+                'asset_id' => $asset->id,
+                'from_status_id' => null,
+                'to_status_id' => $asset->status_id,
+                'triggered_by' => Auth::id(),
+                'note' => $asset->pullStatusChangeNote(),
+            ]);
+        }
     }
 
     /**

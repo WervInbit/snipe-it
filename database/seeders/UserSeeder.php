@@ -32,117 +32,103 @@ class UserSeeder extends Seeder
         // Re-enable foreign key checks
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        // Companies are not seeded; users will not be company-restricted by default
-
+        // Companies are not seeded; users remain unscoped
         if (! Department::count()) {
             $this->call(DepartmentSeeder::class);
         }
 
-        $departmentIds = Department::all()->pluck('id');
+        $departments = Department::query()
+            ->pluck('id', 'name');
 
-        User::factory()->count(1)->firstAdmin()
-            ->state(new Sequence(fn($sequence) => [
-                'department_id' => $departmentIds->random(),
-            ]))
-            ->create();
+        $users = [];
 
-        User::factory()->count(1)->snipeAdmin()
-            ->state(new Sequence(fn($sequence) => [
-                'department_id' => $departmentIds->random(),
-            ]))
-            ->create();
-
-        User::factory()->count(1)->testAdmin()
-            ->state(new Sequence(fn($sequence) => [
-                'department_id' => $departmentIds->random(),
-            ]))
-            ->create();
-
-        // Minimal demo: skip mass user generation
-
-        // Demo users for showcasing different permission levels
-        User::factory()->superuser()
-            ->state(new Sequence(fn($sequence) => [
-                'department_id' => $departmentIds->random(),
-            ]))
+        $users[] = User::factory()
+            ->superuser()
             ->create([
-                'username' => 'demo_super',
-                'email' => 'demo_super@example.com',
-                'first_name' => 'Demo',
-                'last_name' => 'Super',
+                'username' => 'admin',
+                'email' => 'admin@example.com',
+                'first_name' => 'Avery',
+                'last_name' => 'Benton',
+                'department_id' => $departments->get('Refurb Operations'),
+                'company_id' => null,
+                'permissions' => json_encode(['superuser' => 1]),
             ]);
 
-        User::factory()->admin()
-            ->state(new Sequence(fn($sequence) => [
-                'department_id' => $departmentIds->random(),
-            ]))
-            ->create([
-                'username' => 'demo_admin',
-                'email' => 'demo_admin@example.com',
-                'first_name' => 'Demo',
-                'last_name' => 'Admin',
-            ]);
+        $createdBy = $users[0]->id;
 
-        User::factory()->viewAssets()
-            ->state(new Sequence(fn($sequence) => [
-                'department_id' => $departmentIds->random(),
-            ]))
-            ->create([
-                'username' => 'demo_user',
-                'email' => 'demo_user@example.com',
-                'first_name' => 'Demo',
-                'last_name' => 'User',
-            ]);
+        $crew = [
+            [
+                'attributes' => [
+                    'username' => 'qa_manager',
+                    'email' => 'qa.manager@example.com',
+                    'first_name' => 'Quinn',
+                    'last_name' => 'Adler',
+                    'department_id' => $departments->get('Quality Assurance'),
+                    'company_id' => null,
+                    'created_by' => $createdBy,
+                    'permissions' => json_encode([
+                        'tests.execute' => 1,
+                        'scanning' => 1,
+                        'audits.view' => 1,
+                    ]),
+                ],
+            ],
+            [
+                'attributes' => [
+                    'username' => 'bench_tech',
+                    'email' => 'bench.tech@example.com',
+                    'first_name' => 'Riley',
+                    'last_name' => 'Patel',
+                    'department_id' => $departments->get('Refurb Operations'),
+                    'company_id' => null,
+                    'created_by' => $createdBy,
+                    'permissions' => json_encode([
+                        'refurbisher' => 1,
+                        'scanning' => 1,
+                    ]),
+                ],
+            ],
+            [
+                'attributes' => [
+                    'username' => 'inventory_clerk',
+                    'email' => 'inventory.clerk@example.com',
+                    'first_name' => 'Morgan',
+                    'last_name' => 'Lee',
+                    'department_id' => $departments->get('Inventory Control'),
+                    'company_id' => null,
+                    'created_by' => $createdBy,
+                    'permissions' => json_encode([
+                        'assets.create' => 1,
+                        'assets.edit' => 1,
+                        'scanning' => 1,
+                    ]),
+                ],
+            ],
+            [
+                'attributes' => [
+                    'username' => 'support_viewer',
+                    'email' => 'support.viewer@example.com',
+                    'first_name' => 'Jordan',
+                    'last_name' => 'Casey',
+                    'department_id' => $departments->get('Quality Assurance'),
+                    'company_id' => null,
+                    'created_by' => $createdBy,
+                    'permissions' => json_encode([
+                        'assets.view' => 1,
+                    ]),
+                ],
+            ],
+        ];
 
-        User::factory()
-            ->state(new Sequence(fn($sequence) => [
-                'department_id' => $departmentIds->random(),
-            ]))
-            ->create([
-                'username'    => 'demo_refurbisher',
-                'email'       => 'demo_refurbisher@example.com',
-                'first_name'  => 'Demo',
-                'last_name'   => 'Refurbisher',
-                'permissions' => json_encode([
-                    'refurbisher' => 1,
-                    'scanning'    => 1,
-                ]),
-            ]);
+        foreach ($crew as $seed) {
+            $factory = User::factory();
 
-        User::factory()
-            ->state(new Sequence(fn($sequence) => [
-                'department_id' => $departmentIds->random(),
-            ]))
-            ->create([
-                'username'    => 'demo_senior_refurbisher',
-                'email'       => 'demo_senior_refurbisher@example.com',
-                'first_name'  => 'Demo',
-                'last_name'   => 'Senior',
-                'permissions' => json_encode([
-                    'senior-refurbisher' => 1,
-                    'scanning'           => 1,
-                    'tests.execute'      => 1,
-                ]),
-            ]);
+            if (isset($seed['state']) && is_callable($seed['state'])) {
+                $factory = $seed['state']($factory);
+            }
 
-        User::factory()
-            ->state(new Sequence(fn($sequence) => [
-                'department_id' => $departmentIds->random(),
-            ]))
-            ->create([
-                'username'    => 'demo_supervisor',
-                'email'       => 'demo_supervisor@example.com',
-                'first_name'  => 'Demo',
-                'last_name'   => 'Supervisor',
-                'permissions' => json_encode([
-                    'supervisor'    => 1,
-                    'scanning'      => 1,
-                    'tests.execute' => 1,
-                    'assets.create' => 1,
-                    'assets.delete' => 1,
-                    'tests.delete'  => 1,
-                ]),
-            ]);
+            $users[] = $factory->create($seed['attributes']);
+        }
 
         $src = public_path('/img/demo/avatars/');
         $dst = 'avatars'.'/';
@@ -169,14 +155,11 @@ class UserSeeder extends Seeder
             }
         }
 
-        $users = User::orderBy('id', 'asc')->take(10)->get();
-        $file_number = 1;
-
+        $fileNumber = 1;
         foreach ($users as $user) {
-
-            $user->avatar = $file_number.'.jpg';
+            $user->avatar = $fileNumber.'.jpg';
             $user->save();
-            $file_number++;
+            $fileNumber++;
         }
         
 

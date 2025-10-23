@@ -29,12 +29,6 @@
                 <option value="maintenance">{{ trans('button.add_maintenance') }}</option>
             @endcan
 
-            @if((!isset($status)) || (($status != 'Deployed') && ($status != 'Archived')))
-                @can('checkout', \App\Models\Asset::class)
-                    <option value="checkout">{{ trans('general.bulk_checkout') }}</option>
-                @endcan
-            @endif
-
             @can('delete', \App\Models\Asset::class)
                 <option value="delete">{{ trans('button.delete') }}</option>
             @endcan

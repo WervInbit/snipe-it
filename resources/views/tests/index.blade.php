@@ -39,7 +39,7 @@
                         @php
                             $definition = $result->attributeDefinition;
                             $label = $definition?->label ?? optional($result->type)->name;
-                            $tooltip = $definition ? ($definition->unit ? __('Unit: :unit', ['unit' => $definition->unit]) : null) : optional($result->type)->tooltip;
+                            $instructions = trim((string) (optional($result->type)->instructions ?: ($definition?->instructions ?? $definition?->help_text)));
                             $expectedDisplay = $result->expected_value;
                             if ($definition && $definition->datatype === \App\Models\AttributeDefinition::DATATYPE_BOOL && $expectedDisplay !== null) {
                                 $expectedDisplay = $expectedDisplay === '1' ? __('Yes') : __('No');
@@ -47,8 +47,8 @@
                         @endphp
                         <li>
                             {{ $label }}
-                            @if($tooltip)
-                                <i class="fas fa-info-circle" data-toggle="tooltip" title="{{ $tooltip }}"></i>
+                            @if($instructions !== '')
+                                <i class="fas fa-info-circle" data-tooltip="true" title="{{ $instructions }}"></i>
                             @endif:
                             {{ trans('tests.' . $result->status) }}
                             @if ($expectedDisplay !== null)

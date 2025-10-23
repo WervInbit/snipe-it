@@ -11,6 +11,13 @@ use Tests\TestCase;
 
 class BulkAssetCheckoutTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->markTestSkipped('Asset checkout functionality removed in this fork.');
+    }
+
     public function testRequiresPermission()
     {
         $this->actingAs(User::factory()->create())

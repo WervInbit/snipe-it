@@ -40,7 +40,8 @@
         <input type="hidden" name="ack_failed_tests" value="1">
     @endif
 
-    @include ('partials.forms.edit.company-select', ['translated_name' => trans('general.company'), 'fieldname' => 'company_id'])
+    {{-- Company selection hidden while the refurb fork runs single-company flows --}}
+    @includeWhen(false, 'partials.forms.edit.company-select', ['translated_name' => trans('general.company'), 'fieldname' => 'company_id'])
 
 
   <!-- Asset Tag -->
@@ -93,7 +94,11 @@
 
     @include('partials.forms.edit.category-select', ['translated_name' => trans('general.category'), 'fieldname' => 'category_id', 'selected' => $selected_category])
     @include('partials.forms.edit.manufacturer-select', ['translated_name' => trans('general.manufacturer'), 'fieldname' => 'manufacturer_id', 'selected' => $selected_manufacturer])
-    @include('partials.forms.edit.model-select', ['translated_name' => trans('admin/hardware/form.model'), 'fieldname' => 'model_id'])
+    @include('partials.forms.edit.model-select', [
+        'translated_name' => trans('admin/hardware/form.model'),
+        'fieldname' => 'model_id',
+        'hide_new' => !$item->id,
+    ])
 
     <div id="model_spec_content">
         @include('hardware.partials.spec-overrides', [

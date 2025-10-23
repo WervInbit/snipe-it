@@ -15,6 +15,13 @@ use Tests\TestCase;
 
 class AssetCheckinTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->markTestSkipped('Asset checkout functionality removed in this fork.');
+    }
+
     public function testCheckingInAssetRequiresCorrectPermission()
     {
         $this->actingAs(User::factory()->create())

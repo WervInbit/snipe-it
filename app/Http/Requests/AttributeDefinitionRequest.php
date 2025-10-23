@@ -72,6 +72,11 @@ class AttributeDefinitionRequest extends Request
             'constraints.max' => ['nullable', 'numeric'],
             'constraints.step' => ['nullable', 'numeric', 'min:0'],
             'constraints.regex' => ['nullable', 'string', 'max:255'],
+            'options' => ['nullable', 'array'],
+            'options.new' => ['nullable', 'array'],
+            'options.new.*.value' => ['required', 'string', 'max:255'],
+            'options.new.*.label' => ['required', 'string', 'max:255'],
+            'options.new.*.sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
         ];
     }
 

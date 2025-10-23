@@ -6,17 +6,18 @@ use App\Events\CheckoutableCheckedOut;
 use App\Exceptions\CheckoutNotAllowed;
 use App\Helpers\Helper;
 use App\Http\Traits\UniqueUndeletedTrait;
+use App\Models\AssetAttributeOverride;
+use App\Models\AssetStatusEvent;
+use App\Models\AssetTest;
+use App\Models\Category;
+use App\Models\ModelNumber;
+use App\Models\Statuslabel;
+use App\Models\TestResult;
 use App\Models\Traits\Acceptable;
 use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
-use App\Models\AssetTest;
-use App\Models\Category;
-use App\Models\AssetAttributeOverride;
-use App\Models\TestResult;
-use App\Models\ModelNumber;
-use App\Presenters\Presentable;
-use App\Models\Statuslabel;
 use App\Presenters\AssetPresenter;
+use App\Presenters\Presentable;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -213,6 +214,46 @@ class Asset extends Depreciable
       'last_checkout',
       'asset_eol_date',
     ];
+
+    protected ?string $pendingStatusNote = null;
+    protected ?int $pendingStatusFrom = null;
+    protected ?int $pendingStatusTo = null;
+
+    public function withStatusChangeNote(?string $note): self
+    {
+        $this->pendingStatusNote = $note;
+
+        return $this;
+    }
+
+    public function pullStatusChangeNote(): ?string
+    {
+        return tap($this->pendingStatusNote, function (): void {
+            $this->pendingStatusNote = null;
+        });
+    }
+
+    public function markPendingStatusTransition(?int $from, ?int $to): self
+    {
+        $this->pendingStatusFrom = $from;
+        $this->pendingStatusTo = $to;
+
+        return $this;
+    }
+
+    /**
+     * @return array{0: ?int, 1: ?int}
+     */
+    public function pullPendingStatusTransition(): array
+    {
+        $from = $this->pendingStatusFrom;
+        $to = $this->pendingStatusTo;
+
+        $this->pendingStatusFrom = null;
+        $this->pendingStatusTo = null;
+
+        return [$from, $to];
+    }
 
     /**
      * The relations and their attributes that should be included when searching the model.
@@ -436,73 +477,21 @@ class Asset extends Depreciable
 
 
     /**
-     * Checks the asset out to the target
-     *
-     * @todo The admin parameter is never used. Can probably be removed.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @param  User   $user
-     * @param  User   $admin
-     * @param  Carbon $checkout_at
-     * @param  Carbon $expected_checkin
-     * @param  string $note
-     * @param  null   $name
-     * @return bool
-     * @since  [v3.0]
-     * @return bool
+     * Checkout functionality has been removed in this fork.
      */
     public function checkOut($target, $admin = null, $checkout_at = null, $expected_checkin = null, $note = null, $name = null, $location = null)
     {
-        if (! $target) {
-            return false;
-        }
-        if ($this->is($target)) {
-            throw new CheckoutNotAllowed('You cannot check an asset out to itself.');
-        }
+        throw new \RuntimeException('checkout_disabled');
+    }
 
-        if ($expected_checkin) {
-            $this->expected_checkin = $expected_checkin;
-        }
-
-        $this->last_checkout = $checkout_at;
-        $this->name = $name;
-
-        $this->assignedTo()->associate($target);
-
-        if ($location != null) {
-            $this->location_id = $location;
-        } else {
-            if (isset($target->location)) {
-                $this->location_id = $target->location->id;
-            }
-            if ($target instanceof Location) {
-                $this->location_id = $target->id;
-            }
-        }
-
-        $originalValues = $this->getRawOriginal();
-
-        // attempt to detect change in value if different from today's date
-        if ($checkout_at && strpos($checkout_at, date('Y-m-d')) === false) {
-            $originalValues['action_date'] = date('Y-m-d H:i:s');
-        }
-
-        if ($this->save()) {
-            if (is_int($admin)) {
-                $checkedOutBy = User::findOrFail($admin);
-            } elseif ($admin && get_class($admin) === \App\Models\User::class) {
-                $checkedOutBy = $admin;
-            } else {
-                $checkedOutBy = auth()->user();
-            }
-            event(new CheckoutableCheckedOut($this, $target, $checkedOutBy, $note, $originalValues));
-
-            $this->increment('checkout_counter', 1);
-
-            return true;
-        }
-
-        return false;
+    /**
+     * Historic checkout records for this asset.
+     */
+    public function checkouts(): HasMany
+    {
+        return $this->assetlog()->where('action_type', '=', 'checkout')
+            ->orderBy('created_at', 'desc')
+            ->withTrashed();
     }
 
     /**
@@ -812,14 +801,6 @@ class Asset extends Depreciable
      * @since  [v2.0]
      * @return \Illuminate\Database\Eloquent\Relations\Relation
      */
-    public function checkouts()
-    {
-        return $this->assetlog()->where('action_type', '=', 'checkout')
-            ->orderBy('created_at', 'desc')
-            ->withTrashed();
-    }
-
-
     /**
      * Get the list of audits for this asset
      *
@@ -935,9 +916,14 @@ class Asset extends Depreciable
     /**
      * Status change history for this asset.
      */
-    public function statusHistory()
+    public function statusHistory(): HasMany
     {
-        return $this->hasMany(AssetStatusHistory::class);
+        return $this->statusEvents();
+    }
+
+    public function statusEvents(): HasMany
+    {
+        return $this->hasMany(AssetStatusEvent::class)->orderByDesc('created_at');
     }
 
     /**
@@ -2427,6 +2413,9 @@ class Asset extends Depreciable
     }
 
 }
+
+
+
 
 
 

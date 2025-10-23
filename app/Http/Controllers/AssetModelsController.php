@@ -160,8 +160,10 @@ class AssetModelsController extends Controller
 
         $model->fieldset_id = $request->input('fieldset_id');
 
-            if ($model->save()) {
-                $model->syncPrimaryModelNumber($modelNumberInput !== '' ? $modelNumberInput : null);
+        $modelNumberInput = trim((string) $request->input('model_number', ''));
+
+        if ($model->save()) {
+            $model->syncPrimaryModelNumber($modelNumberInput !== '' ? $modelNumberInput : null);
             $modelNumber = $model->ensurePrimaryModelNumber();
             $modelNumber->fill([
                 'code' => $model->model_number,
@@ -176,15 +178,16 @@ class AssetModelsController extends Controller
             }
 
             if ($model->wasChanged('eol')) {
-                    if ($model->eol > 0) {
-                        $newEol = $model->eol; 
-                        $model->assets()->whereNotNull('purchase_date')->where('eol_explicit', false)
-                            ->update(['asset_eol_date' => DB::raw('DATE_ADD(purchase_date, INTERVAL ' . $newEol . ' MONTH)')]);
-                        } elseif ($model->eol == 0) {
-    						$model->assets()->whereNotNull('purchase_date')->where('eol_explicit', false)
-    							->update(['asset_eol_date' => DB::raw('null')]);
-					}
+                if ($model->eol > 0) {
+                    $newEol = $model->eol;
+                    $model->assets()->whereNotNull('purchase_date')->where('eol_explicit', false)
+                        ->update(['asset_eol_date' => DB::raw('DATE_ADD(purchase_date, INTERVAL ' . $newEol . ' MONTH)')]);
+                } elseif ($model->eol == 0) {
+                    $model->assets()->whereNotNull('purchase_date')->where('eol_explicit', false)
+                        ->update(['asset_eol_date' => DB::raw('null')]);
                 }
+            }
+
             return redirect()->route('models.index')->with('success', trans('admin/models/message.update.success'));
         }
 

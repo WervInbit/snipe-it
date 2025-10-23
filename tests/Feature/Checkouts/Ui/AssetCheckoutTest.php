@@ -21,7 +21,7 @@ class AssetCheckoutTest extends TestCase
     {
         parent::setUp();
 
-        Event::fake([CheckoutableCheckedOut::class]);
+        $this->markTestSkipped('Asset checkout functionality removed in this fork.');
     }
 
     public function testCheckingOutAssetRequiresCorrectPermission()

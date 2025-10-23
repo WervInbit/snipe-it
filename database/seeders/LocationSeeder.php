@@ -15,7 +15,19 @@ class LocationSeeder extends Seeder
         Schema::disableForeignKeyConstraints();
         Location::truncate();
         Schema::enableForeignKeyConstraints();
-        Location::factory()->count(10)->create();
+
+        $locations = [
+            ['name' => 'Refurb Intake', 'location_type' => 'warehouse'],
+            ['name' => 'Repair Bench', 'location_type' => 'workbench'],
+            ['name' => 'QA Lab', 'location_type' => 'lab'],
+            ['name' => 'Ready to Ship', 'location_type' => 'staging'],
+        ];
+
+        foreach ($locations as $index => $attributes) {
+            Location::factory()->create(array_merge([
+                'image' => sprintf('%02d.jpg', $index + 1),
+            ], $attributes));
+        }
 
         $src = public_path('/img/demo/locations/');
         $dst = 'locations'.'/';

@@ -40,6 +40,7 @@ return [
     'accessory_none'                    => 'The accessory does not exist',
     'checkout_success'                  => 'Checkout was successful',
     'checkout_error'                    => 'Checkout error',
+    'checkout_disabled'               => 'Kit checkout is disabled in this fork.',
     'kit_none'                          => 'Kit does not exist',
     'kit_created'                       => 'Kit was successfully created',
     'kit_updated'                       => 'Kit was successfully updated',

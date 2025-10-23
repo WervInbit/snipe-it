@@ -26,6 +26,8 @@ class PredefinedKitCheckoutService
      */
     public function checkout(Request $request, PredefinedKit $kit, User $user)
     {
+        return ['errors' => [trans('admin/kits/general.checkout_disabled')]];
+
         try {
 
             // Check if the user exists

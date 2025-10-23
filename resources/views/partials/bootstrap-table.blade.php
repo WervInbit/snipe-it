@@ -424,7 +424,7 @@
                 actions += '<a href="{{ config('app.url') }}/' + dest + '/create?parent_id=' + row.id + '" class="actions btn btn-sm btn-success" data-tooltip="true" title="{{ trans('admin/locations/table.add_child') }}"><x-icon type="plus" /><span class="sr-only">{{ trans('admin/locations/table.add_child') }}</span></a>&nbsp;';
             }
 
-            if ((row.available_actions) && (row.available_actions.audit === true)) {
+            if ((row.available_actions) && (row.available_actions.audit === true) && owner_name !== 'hardware') {
                 actions += '<a href="{{ config('app.url') }}/' + dest + '/' + row.id + '/audit" class="actions btn btn-sm btn-primary" data-tooltip="true" title="{{ trans('general.audit') }}"><x-icon type="audit" /><span class="sr-only">{{ trans('general.audit') }}</span></a>&nbsp;';
             }
 

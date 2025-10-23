@@ -594,3 +594,4 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $this->assertNotEquals($encryptedMacAddress, $macAddress);
     }
 }
+

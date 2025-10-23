@@ -30,7 +30,7 @@
                     data-cookie-id-table="requestedAssets"
                     data-export-options='{
                     "fileName": "export-assetrequests-{{ date('Y-m-d') }}",
-                    "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                    "ignoreColumn": ["actions","image","change","checkbox","icon"]
                     }'>
                 <thead>
                     <tr role="row">
@@ -41,7 +41,6 @@
                         <th class="col-md-3" data-sortable="true">{{ trans('admin/hardware/table.requesting_user') }}</th>
                         <th class="col-md-2">{{ trans('admin/hardware/table.requested_date') }}</th>
                         <th class="col-md-1">{{ trans('button.actions') }}</th>
-                        <th class="col-md-1">{{ trans('general.checkout') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -108,18 +107,6 @@
                                     <button class="btn btn-warning btn-sm" data-tooltip="true" title="{{ trans('general.cancel_request') }}">{{ trans('button.cancel') }}</button>
                                 </form>
                             </td>
-                            <td>
-                                @if ($request->itemType() == "asset")
-                                    @if ($request->requestable->assigned_to=='')
-                                        <a href="{{ config('app.url') }}/hardware/{{ $request->requestable->id }}/checkout" class="btn btn-sm bg-maroon" data-tooltip="true" title="{{ trans('general.checkout_user_tooltip') }}">{{ trans('general.checkout') }}</a>
-                                        @else
-                                        <a href="{{ config('app.url') }}/hardware/{{ $request->requestable->id }}/checkin" class="btn btn-sm bg-purple" data-tooltip="true" title="{{ trans('general.checkin_toolip') }}">{{ trans('general.checkin') }}</a>
-                                    @endif
-
-                                @endif
-                            </td>
-
-
                     </tr>
                     @endif
                     @endforeach

@@ -196,6 +196,9 @@ class IconHelper
             case 'note':
             case 'notes':
                 return 'fas fa-sticky-note';
+            case 'tests':
+            case 'test-types':
+                return 'fa-solid fa-vial';
         }
     }
 }

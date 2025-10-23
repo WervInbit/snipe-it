@@ -1,119 +1,249 @@
-<div class="form-group">
+@php
+    use App\Models\AttributeDefinition;
+
+    $existingOptions = $definition->relationLoaded('options') ? $definition->options : $definition->options;
+    $pendingOptions = collect(old('options.new', []))
+        ->filter(fn ($option) => is_array($option) && ($option['value'] ?? '') !== '' && ($option['label'] ?? '') !== '');
+
+    $hasExisting = $existingOptions->count() > 0;
+    $hasPending = $pendingOptions->count() > 0;
+
+    $maxExistingSort = $existingOptions->max('sort_order') ?? -1;
+    $maxPendingSort = $pendingOptions->max(fn ($option) => isset($option['sort_order']) ? (int) $option['sort_order'] : null) ?? -1;
+    $nextSort = max($maxExistingSort, $maxPendingSort) + 1;
+
+    $nextIndex = $pendingOptions->keys()->map(fn ($key) => (int) $key)->max();
+    $nextIndex = is_null($nextIndex) ? 0 : $nextIndex + 1;
+
+    $initialDatatype = old('datatype', $definition->datatype ?? ($versionSource->datatype ?? AttributeDefinition::DATATYPE_TEXT));
+    $shouldShow = $initialDatatype === AttributeDefinition::DATATYPE_ENUM;
+@endphp
+
+<div
+    class="form-group"
+    data-attribute-options-wrapper
+    style="{{ $shouldShow ? '' : 'display:none;' }}"
+    data-next-index="{{ $nextIndex }}"
+    data-next-sort="{{ $nextSort }}"
+>
     <label class="col-md-3 control-label">{{ __('Options') }}</label>
-    <div class="col-md-9">
-        <p class="help-block">{{ __('Manage the allowed values for this enum attribute.') }}</p>
+    <div class="col-md-9" style="border-top: 1px solid #f4f4f4; padding-top: 15px; margin-top: 10px;">
+        @php
+            $optionErrors = collect($errors->get('options.new.*.value'))
+                ->merge($errors->get('options.new.*.label'));
+        @endphp
+
+        @if($optionErrors->isNotEmpty())
+            <div class="alert alert-danger">
+                @foreach($optionErrors as $message)
+                    <div>{{ $message }}</div>
+                @endforeach
+            </div>
+        @endif
+        <p class="help-block">{{ __('Define the selectable values. They are saved with the attribute when you click Save.') }}</p>
+
         <table class="table table-condensed">
             <thead>
             <tr>
                 <th>{{ __('Value') }}</th>
                 <th>{{ __('Label') }}</th>
                 <th>{{ __('Sort') }}</th>
-                <th>{{ __('Active') }}</th>
                 <th class="text-right">{{ __('Actions') }}</th>
             </tr>
             </thead>
-            <tbody>
-            @forelse($definition->options as $option)
-                <tr>
+            <tbody data-option-rows>
+            @foreach($existingOptions as $option)
+                <tr data-existing-option>
                     <td>{{ $option->value }}</td>
-                    <td>{{ $option->label }}</td>
+                    <td>
+                        {{ $option->label }}
+                        @unless($option->active)
+                            <span class="label label-default">{{ __('Inactive') }}</span>
+                        @endunless
+                    </td>
                     <td>{{ $option->sort_order }}</td>
-                    <td>{!! $option->active ? '<i class="fas fa-check text-success"></i>' : '<span class="text-muted">—</span>' !!}</td>
                     <td class="text-right">
-                        <form method="POST" action="{{ route('attributes.options.destroy', [$definition, $option]) }}" style="display:inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-xs btn-danger" onclick="return confirm('{{ __('Delete this option?') }}');">{{ __('Delete') }}</button>
-                        </form>
+                        @if($definition->exists)
+                            <form method="POST" action="{{ route('attributes.options.destroy', [$definition, $option]) }}" style="display:inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-xs btn-danger" onclick="return confirm('{{ __('Delete this option?') }}');">
+                                    {{ __('Delete') }}
+                                </button>
+                            </form>
+                        @endif
                     </td>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="5" class="text-muted">{{ __('No options yet.') }}</td>
+            @endforeach
+
+            @foreach($pendingOptions as $index => $option)
+                @php
+                    $value = $option['value'] ?? '';
+                    $label = $option['label'] ?? '';
+                    $sort = $option['sort_order'] ?? $nextSort;
+                @endphp
+                <tr data-pending-row>
+                    <td>
+                        {{ $value }}
+                        <input type="hidden" name="options[new][{{ $index }}][value]" value="{{ e($value) }}">
+                    </td>
+                    <td>
+                        {{ $label }}
+                        <input type="hidden" name="options[new][{{ $index }}][label]" value="{{ e($label) }}">
+                    </td>
+                    <td>
+                        {{ $sort }}
+                        <input type="hidden" name="options[new][{{ $index }}][sort_order]" value="{{ e($sort) }}">
+                    </td>
+                    <td class="text-right">
+                        <button type="button" class="btn btn-xs btn-link text-danger" data-option-remove>&times;</button>
+                    </td>
                 </tr>
-            @endforelse
+            @endforeach
+
+            @if(!$hasExisting && !$hasPending)
+                <tr data-empty-row>
+                    <td colspan="4" class="text-muted">{{ __('No options yet.') }}</td>
+                </tr>
+            @endif
             </tbody>
         </table>
 
-        <hr>
-
-        @php($optionFormDomId = 'attribute-option-form-' . $definition->id)
-        <div id="{{ $optionFormDomId }}" data-action="{{ route('attributes.options.store', $definition) }}">
-            <div class="form-group{{ $errors->has('value') ? ' has-error' : '' }}">
-                <label for="new_option_value" class="control-label">{{ __('Value') }}</label>
-                <input type="text" id="new_option_value" class="form-control" value="{{ old('value') }}" required>
-                {!! $errors->first('value', '<span class="alert-msg">:message</span>') !!}
+        <div class="panel panel-default" data-option-entry>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-sm-4 form-group">
+                        <label for="new_option_value" class="control-label">{{ __('Value') }}</label>
+                        <input type="text" id="new_option_value" class="form-control">
+                    </div>
+                    <div class="col-sm-4 form-group">
+                        <label for="new_option_label" class="control-label">{{ __('Label') }}</label>
+                        <input type="text" id="new_option_label" class="form-control">
+                    </div>
+                    <div class="col-sm-4 form-group">
+                        <label for="new_option_sort" class="control-label">{{ __('Sort order') }}</label>
+                        <input type="number" id="new_option_sort" class="form-control" min="0" value="{{ $nextSort }}">
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-primary" data-option-add>{{ __('Add to list') }}</button>
             </div>
-            <div class="form-group{{ $errors->has('label') ? ' has-error' : '' }}">
-                <label for="new_option_label" class="control-label">{{ __('Label') }}</label>
-                <input type="text" id="new_option_label" class="form-control" value="{{ old('label') }}" required>
-                {!! $errors->first('label', '<span class="alert-msg">:message</span>') !!}
-            </div>
-            <div class="form-group{{ $errors->has('sort_order') ? ' has-error' : '' }}">
-                <label for="new_option_sort" class="control-label">{{ __('Sort order') }}</label>
-                <input type="number" id="new_option_sort" class="form-control" value="{{ old('sort_order', 0) }}" min="0">
-                {!! $errors->first('sort_order', '<span class="alert-msg">:message</span>') !!}
-            </div>
-            <div class="checkbox">
-                <label>
-                    <input type="checkbox" id="new_option_active" value="1" {{ old('active', true) ? 'checked' : '' }}> {{ __('Active') }}
-                </label>
-            </div>
-            <button type="button" class="btn btn-sm btn-primary" data-option-submit>{{ __('Save Option') }}</button>
         </div>
     </div>
 </div>
 
-@push('moar_scripts')
-    <script nonce="{{ csrf_token() }}">
-        document.addEventListener('DOMContentLoaded', function () {
-            var container = document.getElementById('{{ $optionFormDomId }}');
-            if (!container) {
-                return;
-            }
+@once
+    @push('js')
+        <script nonce="{{ csrf_token() }}">
+            (function () {
+                function escapeHtml(str) {
+                    return str.replace(/[&<>'"]/g, function (char) {
+                        switch (char) {
+                            case '&': return '&amp;';
+                            case '<': return '&lt;';
+                            case '>': return '&gt;';
+                            case '\'': return '&#39;';
+                            case '"': return '&quot;';
+                            default: return char;
+                        }
+                    });
+                }
 
-            var submit = container.querySelector('[data-option-submit]');
-            var valueField = container.querySelector('#new_option_value');
-            var labelField = container.querySelector('#new_option_label');
-            var sortField = container.querySelector('#new_option_sort');
-            var activeField = container.querySelector('#new_option_active');
+                function toggleEnumOptions() {
+                    var select = document.getElementById('datatype');
+                    var wrapper = document.querySelector('[data-attribute-options-wrapper]');
 
-            submit.addEventListener('click', function () {
-                if (!valueField.value.trim()) {
+                    if (!select || !wrapper) {
+                        return;
+                    }
+
+                    wrapper.style.display = select.value === 'enum' ? '' : 'none';
+                }
+
+                document.addEventListener('change', function (event) {
+                    if (event.target && event.target.id === 'datatype') {
+                        toggleEnumOptions();
+                    }
+                });
+
+                document.addEventListener('click', function (event) {
+                    var removeButton = event.target.closest('[data-option-remove]');
+                    if (removeButton) {
+                        var row = removeButton.closest('[data-pending-row]');
+                        if (row) {
+                            var tbody = row.parentElement;
+                            row.remove();
+
+                            if (!tbody.querySelector('[data-existing-option]') && !tbody.querySelector('[data-pending-row]')) {
+                                var placeholder = document.createElement('tr');
+                                placeholder.setAttribute('data-empty-row', '');
+                                placeholder.innerHTML = '<td colspan="4" class="text-muted">{{ __('No options yet.') }}</td>';
+                                tbody.appendChild(placeholder);
+                            }
+                        }
+                        return;
+                    }
+
+                    var addButton = event.target.closest('[data-option-add]');
+                    if (!addButton) {
+                        return;
+                    }
+
+                    var wrapper = addButton.closest('[data-attribute-options-wrapper]');
+                    if (!wrapper) {
+                        return;
+                    }
+
+                    var valueField = wrapper.querySelector('#new_option_value');
+                    var labelField = wrapper.querySelector('#new_option_label');
+                    var sortField = wrapper.querySelector('#new_option_sort');
+                    var tbody = wrapper.querySelector('[data-option-rows]');
+
+                    if (!valueField.value.trim()) {
+                        valueField.focus();
+                        return;
+                    }
+
+                    if (!labelField.value.trim()) {
+                        labelField.focus();
+                        return;
+                    }
+
+                    var value = valueField.value.trim();
+                    var label = labelField.value.trim();
+                    var sort = sortField.value.trim();
+
+                    if (sort === '') {
+                        sort = wrapper.dataset.nextSort || '0';
+                    }
+
+                    wrapper.dataset.nextSort = (parseInt(sort, 10) + 1).toString();
+
+                    var index = parseInt(wrapper.dataset.nextIndex || '0', 10);
+                    wrapper.dataset.nextIndex = (index + 1).toString();
+
+                    var placeholderRow = tbody.querySelector('[data-empty-row]');
+                    if (placeholderRow) {
+                        placeholderRow.remove();
+                    }
+
+                    var row = document.createElement('tr');
+                    row.setAttribute('data-pending-row', '');
+                    row.innerHTML =
+                        '<td>' + escapeHtml(value) + '<input type="hidden" name="options[new][' + index + '][value]" value="' + escapeHtml(value) + '"></td>' +
+                        '<td>' + escapeHtml(label) + '<input type="hidden" name="options[new][' + index + '][label]" value="' + escapeHtml(label) + '"></td>' +
+                        '<td>' + escapeHtml(sort) + '<input type="hidden" name="options[new][' + index + '][sort_order]" value="' + escapeHtml(sort) + '"></td>' +
+                        '<td class="text-right"><button type="button" class="btn btn-xs btn-link text-danger" data-option-remove>&times;</button></td>';
+
+                    tbody.appendChild(row);
+
+                    valueField.value = '';
+                    labelField.value = '';
+                    sortField.value = wrapper.dataset.nextSort;
                     valueField.focus();
-                    return;
-                }
+                });
 
-                if (!labelField.value.trim()) {
-                    labelField.focus();
-                    return;
-                }
-
-                var action = container.dataset.action;
-                var form = document.createElement('form');
-                form.method = 'POST';
-                form.action = action;
-
-                var addField = function (name, value) {
-                    var input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = name;
-                    input.value = value;
-                    form.appendChild(input);
-                };
-
-                addField('_token', '{{ csrf_token() }}');
-                addField('value', valueField.value.trim());
-                addField('label', labelField.value.trim());
-                addField('sort_order', sortField.value);
-
-                if (activeField.checked) {
-                    addField('active', '1');
-                }
-
-                document.body.appendChild(form);
-                form.submit();
-            });
-        });
-    </script>
-@endpush
+                toggleEnumOptions();
+            })();
+        </script>
+    @endpush
+@endonce

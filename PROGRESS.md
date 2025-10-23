@@ -1,3 +1,19 @@
+# Session Progress (2025-10-23)
+
+## Addendum (2025-10-23 Codex)
+- Reworked the Test Types admin experience so it aligns with other settings views: the listing now has inline action buttons, creation happens through a modal, and quick links were added to the top navigation and settings sidebar.
+- Converted enum option editing into a staged workflow; value/label pairs are queued on the form, reviewed in a consolidated table, and saved alongside the attribute definition with improved validation feedback.
+- Hardened model specification validation by surfacing field-level errors that spell out regex requirements, numeric ranges, and acceptable units, and added a summary alert when a spec save fails so issues are easy to spot.
+- Updated attribute value normalization to emit clearer guidance for enums, booleans, numerics, and unit conversions, and routed the messages to the correct inputs for both presets and asset overrides.
+- Polished hardware/test UIs: instructions now power the info icon tooltip, the audit button and legacy quick actions were fully removed, and selected attributes in the spec builder have readable highlight styling.
+- Reset container permissions on `storage/` and `bootstrap/cache` after view compilation failures to unblock Blade caching.
+
+## Notes for Follow-up Agents
+- QA: exercise the Test Types screen (create, edit, delete) and the staged enum workflow to ensure queued options persist and restore correctly on reload.
+- QA: in the model spec editor, attempt values that violate regex/min/max/step/unit constraints and confirm the inline messaging points to the offending field with clear remediation text.
+- Documentation follow-up: capture the new Test Types workflow, staged enum guidance, and enhanced spec validation behaviour in `docs/fork-notes.md`/handbook material.
+- Monitor storage permissions in future sessions; the remediation command is `docker compose exec --user root app chown -R www-data:www-data storage bootstrap/cache && docker compose exec --user root app chmod -R ug+rwX storage bootstrap/cache`.
+
 # Session Progress (2025-10-21)
 
 ## Addendum (2025-10-21 Codex)

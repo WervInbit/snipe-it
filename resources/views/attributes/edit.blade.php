@@ -10,6 +10,7 @@
     'formAction' => $isVersion ? route('attributes.versions.store', $versionSource) : ($isEdit ? route('attributes.update', $definition) : route('attributes.store')),
     'method' => $isVersion ? 'POST' : ($isEdit ? 'PUT' : 'POST'),
     'item' => $definition,
+    'index_route' => 'attributes.index',
 ])
 
 @section('inputFields')
@@ -156,9 +157,6 @@
         </div>
     </div>
 
-    @if($isEdit && !$isVersion && $definition->isEnum())
-        <hr>
-        @include('attributes.partials.options', ['definition' => $definition])
-    @endif
+    @include('attributes.partials.options', ['definition' => $definition])
 @endsection
 

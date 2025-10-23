@@ -11,4 +11,5 @@ return [
     'instructions' => 'Instructions',
     'tooltip' => 'Tooltip',
     'delete_confirm' => 'Are you sure you want to delete this test? This action cannot be undone.',
+    'edit_title' => 'Edit :name',
 ];
