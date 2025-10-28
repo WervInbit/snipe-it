@@ -136,8 +136,10 @@ class ModelNumberAttributeController extends Controller
 
     private function resolveDefinitionForModel(AssetModel $model, int $definitionId): AttributeDefinition
     {
+        $model->loadMissing('category');
+
         $definition = AttributeDefinition::query()
-            ->forCategory($model->category_id)
+            ->forCategory($model->category_id, $model->category?->category_type)
             ->current()
             ->whereKey($definitionId)
             ->first();

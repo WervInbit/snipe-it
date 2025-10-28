@@ -14,6 +14,9 @@
 - Reran `docker compose exec app php artisan migrate --seed` to validate the refreshed catalog and status labels; confirmed the container seeds the nine refurbished states without errors.
 - Schoonde het hardware-zijmenu: de oude Snipe-IT statusfilters (Deployed/RTD/etc.) verwijderd, het menu herbouwd rond de negen refurb labels met icoontjes en kleuraccenten, en dubbele vermeldingen in de treeview weggegooid.
 - Voorlopig het “Alle tests geslaagd”-lint van de asset detailpagina gehaald (`resources/views/hardware/view.blade.php`) zodat er geen legacy statusbanner meer bovenaan staat tijdens de UI/UX herontwerp.
+- Modelnummer-overzicht kreeg een verwijderknop per regel (`resources/views/settings/model_numbers/index.blade.php`) met servermatching checks: uitgeschakeld voor primaire of gebruikte nummers en bevestigingsdialoog voor de rest.
+- Spec-builder laadt nu alle relevante attributen: `AttributeDefinition::scopeForCategory` accepteert categorie-type fallback en de controller/managers geven dat type door, zodat modellen hun bovenliggende (b.v. laptop) attributen weer zien, ook als de exacte subcategorie afwijkt (`app/Models/AttributeDefinition.php`, `app/Http/Controllers/Admin/ModelSpecificationController.php`, `app/Services/ModelAttributes/ModelAttributeManager.php`, `app/Http/Controllers/Admin/ModelNumberAttributeController.php`, `app/Models/AssetModel.php`).
+- Dashboard refurb-pill labels en tooltips omgezet naar Nederlands, met losse weergavenaam en statuskoppeling zodat de onderliggende label-lookup gelijk blijft (`app/Http/Controllers/DashboardController.php`).
 
 ## Follow-ups
 - Populate the worklog as tasks progress and mirror key outcomes in `PROGRESS.md` before closing the session.

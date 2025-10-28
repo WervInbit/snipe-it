@@ -6,6 +6,9 @@
 - Reran `docker compose exec app php artisan migrate --seed` inside the stack to validate the refreshed seeders; confirmed the nine refurbished states seed without errors.
 - Hernieuwde het assets-zijmenu zodat alleen de nieuwe refurb statuslabels zichtbaar zijn en rechtstreeks naar `hardware.index?status_id=` linken; oude Deployed/RTD/Archived-links zijn verwijderd.
 - Verwijderde het legacy “All tests passed”-lint op de assetdetailpagina in afwachting van de nieuwe testrun-UX.
+- Modelnummerbeheer toont nu een verwijderknop (met bevestiging en blokkerende toestand voor primaire of toegewezen nummers) zodat opschonen niet meer via losse routes hoeft.
+- Spec-builder wijst attributen voortaan op categorie-type i.p.v. alleen exacte categorie-ID, zodat alle laptop/phone-velddefinities weer verschijnen bij modellen met subcategorieën (`AttributeDefinition::scopeForCategory` + call-sites).
+- Dashboard-refurbfilters vertalen nu naar Nederlandse labels en beschrijvingen terwijl de statuskoppeling intact blijft (`DashboardController@buildRefurbFilters`).
 
 ## Notes for Follow-up Agents
 - Smoke-test the dashboard status chips in a browser to confirm the new labels filter hardware as expected.

@@ -22,7 +22,7 @@ class ModelAttributeManager
      */
     public function syncModelNumberAssignments(ModelNumber $modelNumber, array $orderedDefinitionIds): void
     {
-        $modelNumber->loadMissing('model');
+        $modelNumber->loadMissing('model.category');
         $model = $modelNumber->model;
 
         if (!$model) {
@@ -59,7 +59,7 @@ class ModelAttributeManager
 
                 if (!$assignment) {
                     $definition = AttributeDefinition::query()
-                        ->forCategory($model->category_id)
+                        ->forCategory($model->category_id, $model->category?->category_type)
                         ->whereKey($definitionId)
                         ->first();
 

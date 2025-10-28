@@ -32,7 +32,7 @@ class ModelSpecificationController extends Controller
 
         $modelNumbers = $model->modelNumbers;
         $availableDefinitions = AttributeDefinition::query()
-            ->forCategory($model->category_id)
+            ->forCategory($model->category_id, $model->category?->category_type)
             ->current()
             ->with('options')
             ->orderBy('label')

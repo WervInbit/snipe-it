@@ -300,7 +300,7 @@ class AssetModel extends SnipeModel
      */
     public function attributeDefinitionsForCategory()
     {
-        return AttributeDefinition::query()->forCategory($this->category_id);
+        return AttributeDefinition::query()->forCategory($this->category_id, $this->category?->category_type);
     }
 
     public function getImageUrl()

@@ -114,15 +114,22 @@ class AttributeDefinition extends SnipeModel
         return $this->belongsTo(self::class, 'supersedes_attribute_id');
     }
 
-    public function scopeForCategory($query, ?int $categoryId)
+    public function scopeForCategory($query, ?int $categoryId, ?string $categoryType = null)
     {
-        if (!$categoryId) {
+        if (!$categoryId && !$categoryType) {
             return $query;
         }
 
-        return $query->where(function ($q) use ($categoryId) {
-            $q->whereDoesntHave('categories')
-                ->orWhereHas('categories', fn ($relation) => $relation->where('categories.id', $categoryId));
+        return $query->where(function ($q) use ($categoryId, $categoryType) {
+            $q->whereDoesntHave('categories');
+
+            if ($categoryId) {
+                $q->orWhereHas('categories', fn ($relation) => $relation->where('categories.id', $categoryId));
+            }
+
+            if ($categoryType) {
+                $q->orWhereHas('categories', fn ($relation) => $relation->where('categories.category_type', $categoryType));
+            }
         });
     }
 

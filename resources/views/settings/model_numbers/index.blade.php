@@ -64,14 +64,22 @@
                         </thead>
                         <tbody>
                             @forelse($modelNumbers as $number)
-                                @php($model = $number->model)
-                                @php($isPrimary = optional($model)->primary_model_number_id === $number->id)
+                                @php
+                                    $model = $number->model;
+                                    $isPrimary = optional($model)->primary_model_number_id === $number->id;
+                                    $canDelete = ! $isPrimary && ((int) $number->assets_count === 0);
+                                    $deleteTooltip = $isPrimary
+                                        ? __('Cannot delete the primary model number.')
+                                        : ($number->assets_count > 0
+                                            ? __('Cannot delete a model number that is in use by assets.')
+                                            : null);
+                                @endphp
                                 <tr>
                                     <td>
                                         <a href="{{ route('models.show', $number->model_id) }}">{{ optional($model)->name ?? __('(deleted)') }}</a>
                                     </td>
                                     <td class="monospace">{{ $number->code }}</td>
-                                    <td>{{ $number->label ?: __('—') }}</td>
+                                    <td>{{ $number->label ?: __('-') }}</td>
                                     <td>
                                         @if($isPrimary)
                                             <span class="label label-success">{{ __('Primary') }}</span>
@@ -86,8 +94,30 @@
                                     </td>
                                     <td class="text-right">
                                         <div class="btn-group btn-group-sm" role="group">
-                        <a href="{{ route('settings.model_numbers.edit', $number) }}" class="btn btn-default">{{ __('Edit') }}</a>
-                        <a href="{{ route('models.numbers.spec.edit', ['model' => $number->model_id, 'modelNumber' => $number->id]) }}" class="btn btn-default">{{ __('Edit Spec') }}</a>
+                                            <a href="{{ route('settings.model_numbers.edit', $number) }}" class="btn btn-default">{{ __('Edit') }}</a>
+                                            <a href="{{ route('models.numbers.spec.edit', ['model' => $number->model_id, 'modelNumber' => $number->id]) }}" class="btn btn-default">{{ __('Edit Spec') }}</a>
+                                            @if ($canDelete)
+                                                <form method="POST"
+                                                      action="{{ route('settings.model_numbers.destroy', $number) }}"
+                                                      style="display:inline;"
+                                                      onsubmit="return confirm('{{ __('Are you sure you want to delete this model number?') }}');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger">
+                                                        {{ trans('button.delete') }}
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <button type="button"
+                                                        class="btn btn-danger"
+                                                        disabled
+                                                        @if ($deleteTooltip)
+                                                            data-toggle="tooltip"
+                                                            title="{{ $deleteTooltip }}"
+                                                        @endif>
+                                                    {{ trans('button.delete') }}
+                                                </button>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

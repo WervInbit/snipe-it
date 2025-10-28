@@ -68,62 +68,71 @@ class DashboardController extends Controller
     {
         $definitions = collect([
             [
-                'name' => 'Stand-by',
+                'status' => 'Stand-by',
+                'label' => 'Stand-by',
                 'icon' => 'pause',
-                'description' => 'Afwachting intake of gegevenswiping',
+                'description' => 'Wachtend op intake of gegevenswiping.',
             ],
             [
-                'name' => 'Being Processed',
+                'status' => 'Being Processed',
+                'label' => 'In verwerking',
                 'icon' => 'cogs',
-                'description' => 'Tests, imaging of reparatie in uitvoering',
+                'description' => 'Actief in test-, wipe- of herstelproces.',
             ],
             [
-                'name' => 'QA Hold',
+                'status' => 'QA Hold',
+                'label' => 'QA wacht',
                 'icon' => 'flag',
-                'description' => 'Wacht op accessoires, cosmetica of finale QA',
+                'description' => 'Blokkeert tot accessoires, cosmetica of QA-uitkomst gereed zijn.',
             ],
             [
-                'name' => 'Ready for Sale',
+                'status' => 'Ready for Sale',
+                'label' => 'Verkoopklaar',
                 'icon' => 'box-open',
-                'description' => 'Vrijgegeven voor verkoop of distributie',
+                'description' => 'Goedgekeurd en klaar voor verkoop of uitlevering.',
             ],
             [
-                'name' => 'Sold',
+                'status' => 'Sold',
+                'label' => 'Verkocht',
                 'icon' => 'check',
-                'description' => 'Verlaten de voorraad na afronding order',
+                'description' => 'Reeds verkocht of uit voorraad verwijderd.',
             ],
             [
-                'name' => 'Broken / Parts',
+                'status' => 'Broken / Parts',
+                'label' => 'Defect / Onderdelen',
                 'icon' => 'tools',
-                'description' => 'Wordt gestript voor onderdelen of diagnose',
+                'description' => 'Niet verkoopbaar; gebruikt voor onderdelen of diagnose.',
             ],
             [
-                'name' => 'Internal Use',
+                'status' => 'Internal Use',
+                'label' => 'Intern gebruik',
                 'icon' => 'building',
-                'description' => 'In gebruik bij interne teams of labs',
+                'description' => 'Toegekend aan interne teams of labopstellingen.',
             ],
             [
-                'name' => 'Archived',
+                'status' => 'Archived',
+                'label' => 'Gearchiveerd',
                 'icon' => 'archive',
-                'description' => 'Historisch voorbeeld, niet actief',
+                'description' => 'Historisch dossier; niet actief in omloop.',
             ],
             [
-                'name' => 'Returned / RMA',
+                'status' => 'Returned / RMA',
+                'label' => 'Retour / RMA',
                 'icon' => 'undo-alt',
-                'description' => 'Retour ingestroomd; wacht op beoordeling',
+                'description' => 'Retour ontvangen en wacht op opnieuw beoordelen.',
             ],
         ]);
 
         $statusLabels = Statuslabel::select(['id', 'name', 'color'])
-            ->whereIn('name', $definitions->pluck('name')->all())
+            ->whereIn('name', $definitions->pluck('status')->all())
             ->get()
             ->keyBy('name');
 
         return $definitions->map(function (array $definition) use ($statusLabels) {
-            $status = $statusLabels->get($definition['name']);
+            $status = $statusLabels->get($definition['status']);
 
             return [
-                'label' => $definition['name'],
+                'label' => $definition['label'] ?? $definition['status'],
                 'icon' => $definition['icon'],
                 'description' => $definition['description'],
                 'status_id' => $status?->id,
