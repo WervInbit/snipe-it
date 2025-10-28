@@ -207,7 +207,7 @@ class DemoAssetsSeeder extends Seeder
                 'tag' => 'RF-001',
                 'name' => 'MacBook Pro 13" - Battery Intake',
                 'model_key' => 'Macbook Pro 13"',
-                'status' => 'In Testing',
+                'status' => 'Being Processed',
                 'location' => 'Repair Bench',
                 'notes' => 'Battery diagnostics in progress after intake.',
                 'assigned_to' => $users->get('bench_tech'),
@@ -227,7 +227,7 @@ class DemoAssetsSeeder extends Seeder
                 'tag' => 'RF-003',
                 'name' => 'Pixel 8 Pro - Intake Diagnostics',
                 'model_key' => 'Pixel 8 Pro',
-                'status' => 'Intake / New Arrival',
+                'status' => 'Stand-by',
                 'location' => 'Refurb Intake',
                 'notes' => 'Awaiting initial QA checklist for handset.',
                 'assigned_to' => null,
@@ -290,6 +290,7 @@ class DemoAssetsSeeder extends Seeder
                 'battery_test' => ['status' => TestResult::STATUS_FAIL, 'note' => 'Cycle count over 900; replace pack.'],
                 'cpu_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'TG Pro stress test passed.'],
                 'keyboard_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'All keys responsive after cleaning.'],
+                'webcam_test' => ['status' => TestResult::STATUS_PASS, 'note' => '1080p feed stable after lens cleaning.'],
             ],
             'RF-002' => [
                 'display_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'Panel calibrated and free of defects.'],
@@ -299,7 +300,8 @@ class DemoAssetsSeeder extends Seeder
             'RF-003' => [
                 'display_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'OLED panel verified.'],
                 'battery_test' => ['status' => TestResult::STATUS_NVT, 'note' => 'Queued for overnight capacity run.'],
-                'camera_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'Both front and rear cameras focus.'],
+                'front_camera_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'Selfiecamera scherpstelling en portretmodus gecontroleerd.'],
+                'rear_camera_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'Hoofdcamera en ultra-wide lens gecalibreerd.'],
             ],
         ];
 

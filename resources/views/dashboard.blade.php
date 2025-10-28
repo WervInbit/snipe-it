@@ -147,6 +147,8 @@
 </div>
 </div>
 
+@include('dashboard.partials.refurb-filter-row', ['filters' => $refurbFilters ?? collect()])
+
 @if ($counts['grand_total'] == 0)
 
     <div class="row">
@@ -236,6 +238,15 @@
                     data-id-table="dashActivityReport"
                     data-sort-order="desc"
                     data-sort-name="created_at"
+                    data-search="false"
+                    data-advanced-search="false"
+                    data-show-columns="false"
+                    data-show-columns-toggle-all="false"
+                    data-show-export="false"
+                    data-show-refresh="false"
+                    data-show-fullscreen="false"
+                    data-show-print="false"
+                    data-show-search-clear-button="false"
                     id="dashActivityReport"
                     class="table table-striped snipe-table"
                     data-url="{{ route('api.activity.index', ['limit' => 25]) }}">
@@ -309,16 +320,25 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div class="table-responsive">
-							<table
-									data-cookie-id-table="dashCompanySummary"
-									data-height="400"
+                            <table
+                                    data-cookie-id-table="dashCompanySummary"
+                                    data-height="400"
                                     data-pagination="false"
-									data-side-pagination="server"
-									data-sort-order="desc"
-									data-sort-field="assets_count"
-									id="dashCompanySummary"
-									class="table table-striped snipe-table"
-									data-url="{{ route('api.companies.index', ['sort' => 'assets_count', 'order' => 'asc']) }}">
+                                    data-side-pagination="server"
+                                    data-sort-order="desc"
+                                    data-sort-field="assets_count"
+                                    data-search="false"
+                                    data-advanced-search="false"
+                                    data-show-columns="false"
+                                    data-show-columns-toggle-all="false"
+                                    data-show-export="false"
+                                    data-show-refresh="false"
+                                    data-show-fullscreen="false"
+                                    data-show-print="false"
+                                    data-show-search-clear-button="false"
+                                    id="dashCompanySummary"
+                                    class="table table-striped snipe-table"
+                                    data-url="{{ route('api.companies.index', ['sort' => 'assets_count', 'order' => 'asc']) }}">
 
 								<thead>
 								<tr>
@@ -377,16 +397,25 @@
 					<div class="row">
 						<div class="col-md-12">
 							<div class="table-responsive">
-							<table
-									data-cookie-id-table="dashLocationSummary"
-									data-height="400"
-									data-side-pagination="server"
+                            <table
+                                    data-cookie-id-table="dashLocationSummary"
+                                    data-height="400"
+                                    data-side-pagination="server"
                                     data-pagination="false"
-									data-sort-order="desc"
-									data-sort-field="assets_count"
-									id="dashLocationSummary"
-									class="table table-striped snipe-table"
-									data-url="{{ route('api.locations.index', ['sort' => 'assets_count', 'order' => 'asc']) }}">
+                                    data-sort-order="desc"
+                                    data-sort-field="assets_count"
+                                    data-search="false"
+                                    data-advanced-search="false"
+                                    data-show-columns="false"
+                                    data-show-columns-toggle-all="false"
+                                    data-show-export="false"
+                                    data-show-refresh="false"
+                                    data-show-fullscreen="false"
+                                    data-show-print="false"
+                                    data-show-search-clear-button="false"
+                                    id="dashLocationSummary"
+                                    class="table table-striped snipe-table"
+                                    data-url="{{ route('api.locations.index', ['sort' => 'assets_count', 'order' => 'asc']) }}">
 								<thead>
 								<tr>
 									<th class="col-sm-3" data-visible="true" data-field="name" data-formatter="locationsLinkFormatter" data-sortable="true">{{ trans('general.name') }}</th>
@@ -446,6 +475,15 @@
                                 data-side-pagination="server"
                                 data-sort-order="desc"
                                 data-sort-field="assets_count"
+                                data-search="false"
+                                data-advanced-search="false"
+                                data-show-columns="false"
+                                data-show-columns-toggle-all="false"
+                                data-show-export="false"
+                                data-show-refresh="false"
+                                data-show-fullscreen="false"
+                                data-show-print="false"
+                                data-show-search-clear-button="false"
                                 id="dashCategorySummary"
                                 class="table table-striped snipe-table"
                                 data-url="{{ route('api.categories.index', ['sort' => 'assets_count', 'order' => 'asc']) }}">

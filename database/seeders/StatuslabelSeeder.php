@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Schema;
 
 class StatuslabelSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
         Schema::disableForeignKeyConstraints();
         Statuslabel::truncate();
@@ -17,113 +17,103 @@ class StatuslabelSeeder extends Seeder
 
         $admin = User::where('permissions->superuser', '1')->first() ?? User::factory()->firstAdmin()->create();
 
-        // Inbit refurbishment workflow statuses
-        // Intake (default) — Pending
-        Statuslabel::create([
-            'name' => 'Intake / New Arrival',
-            'notes' => 'Awaiting initial processing after arrival',
-            'deployable' => 0,
-            'pending' => 1,
-            'archived' => 0,
-            'default_label' => 1,
-            'show_in_nav' => 1,
-            'created_by' => $admin->id,
-        ]);
+        $labels = [
+            [
+                'name' => 'Stand-by',
+                'notes' => 'Wacht op intake of triage.',
+                'deployable' => 0,
+                'pending' => 1,
+                'archived' => 0,
+                'default_label' => 1,
+                'show_in_nav' => 1,
+                'color' => '#1abc9c',
+            ],
+            [
+                'name' => 'Being Processed',
+                'notes' => 'Actief in test-, wipe- of herstelproces.',
+                'deployable' => 0,
+                'pending' => 1,
+                'archived' => 0,
+                'default_label' => 0,
+                'show_in_nav' => 1,
+                'color' => '#3498db',
+            ],
+            [
+                'name' => 'QA Hold',
+                'notes' => 'Geblokkeerd tot accessoires of cosmetica gereed zijn.',
+                'deployable' => 0,
+                'pending' => 1,
+                'archived' => 0,
+                'default_label' => 0,
+                'show_in_nav' => 1,
+                'color' => '#9b59b6',
+            ],
+            [
+                'name' => 'Ready for Sale',
+                'notes' => 'Volledig getest en klaar voor verkoop.',
+                'deployable' => 1,
+                'pending' => 0,
+                'archived' => 0,
+                'default_label' => 0,
+                'show_in_nav' => 1,
+                'color' => '#2ecc71',
+            ],
+            [
+                'name' => 'Sold',
+                'notes' => 'Order afgerond en uit voorraad.',
+                'deployable' => 0,
+                'pending' => 0,
+                'archived' => 1,
+                'default_label' => 0,
+                'show_in_nav' => 1,
+                'color' => '#e67e22',
+            ],
+            [
+                'name' => 'Broken / Parts',
+                'notes' => 'Niet verkoopbaar; gebruikt voor onderdelen of referentie.',
+                'deployable' => 0,
+                'pending' => 0,
+                'archived' => 0,
+                'default_label' => 0,
+                'show_in_nav' => 1,
+                'color' => '#e74c3c',
+            ],
+            [
+                'name' => 'Internal Use',
+                'notes' => 'Beschikbaar voor interne teams of labopstellingen.',
+                'deployable' => 0,
+                'pending' => 0,
+                'archived' => 0,
+                'default_label' => 0,
+                'show_in_nav' => 1,
+                'color' => '#34495e',
+            ],
+            [
+                'name' => 'Archived',
+                'notes' => 'Gearchiveerd voor naslag, niet actief in omloop.',
+                'deployable' => 0,
+                'pending' => 0,
+                'archived' => 1,
+                'default_label' => 0,
+                'show_in_nav' => 1,
+                'color' => '#7f8c8d',
+            ],
+            [
+                'name' => 'Returned / RMA',
+                'notes' => 'Retour ontvangen; wacht op herinspectie.',
+                'deployable' => 0,
+                'pending' => 1,
+                'archived' => 0,
+                'default_label' => 0,
+                'show_in_nav' => 1,
+                'color' => '#f1c40f',
+            ],
+        ];
 
-        // In Testing — Pending
-        Statuslabel::create([
-            'name' => 'In Testing',
-            'notes' => 'Undergoing diagnostics/QA testing',
-            'deployable' => 0,
-            'pending' => 1,
-            'archived' => 0,
-            'default_label' => 0,
-            'show_in_nav' => 1,
-            'created_by' => $admin->id,
-        ]);
-
-        // Tested – OK — Pending (awaiting sales approval)
-        Statuslabel::create([
-            'name' => 'Tested – OK',
-            'notes' => 'Testing passed; awaiting sales approval',
-            'deployable' => 0,
-            'pending' => 1,
-            'archived' => 0,
-            'default_label' => 0,
-            'show_in_nav' => 1,
-            'created_by' => $admin->id,
-        ]);
-
-        // Needs Repair — Pending
-        Statuslabel::create([
-            'name' => 'Needs Repair',
-            'notes' => 'Testing failed; requires repair',
-            'deployable' => 0,
-            'pending' => 1,
-            'archived' => 0,
-            'default_label' => 0,
-            'show_in_nav' => 1,
-            'created_by' => $admin->id,
-        ]);
-
-        // Under Repair — Pending
-        Statuslabel::create([
-            'name' => 'Under Repair',
-            'notes' => 'Actively being repaired/refurbished',
-            'deployable' => 0,
-            'pending' => 1,
-            'archived' => 0,
-            'default_label' => 0,
-            'show_in_nav' => 1,
-            'created_by' => $admin->id,
-        ]);
-
-        // Ready for Sale — Deployable
-        Statuslabel::create([
-            'name' => 'Ready for Sale',
-            'notes' => 'Approved and sellable',
-            'deployable' => 1,
-            'pending' => 0,
-            'archived' => 0,
-            'default_label' => 0,
-            'show_in_nav' => 1,
-            'created_by' => $admin->id,
-        ]);
-
-        // Sold to Customer — Archived
-        Statuslabel::create([
-            'name' => 'Sold to Customer',
-            'notes' => 'Sold and removed from active inventory',
-            'deployable' => 0,
-            'pending' => 0,
-            'archived' => 1,
-            'default_label' => 0,
-            'show_in_nav' => 1,
-            'created_by' => $admin->id,
-        ]);
-
-        // Returned – Pending — Pending
-        Statuslabel::create([
-            'name' => 'Returned – Pending',
-            'notes' => 'Returned by customer; awaiting re-test',
-            'deployable' => 0,
-            'pending' => 1,
-            'archived' => 0,
-            'default_label' => 0,
-            'show_in_nav' => 1,
-            'created_by' => $admin->id,
-        ]);
-
-        // Broken / For Parts — Undeployable (all flags 0)
-        Statuslabel::create([
-            'name' => 'Broken / For Parts',
-            'notes' => 'Unsellable; for parts/harvest only',
-            'deployable' => 0,
-            'pending' => 0,
-            'archived' => 0,
-            'default_label' => 0,
-            'show_in_nav' => 1,
-            'created_by' => $admin->id,
-        ]);
+        foreach ($labels as $data) {
+            Statuslabel::create(array_merge($data, [
+                'created_by' => $admin->id,
+            ]));
+        }
     }
 }

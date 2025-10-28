@@ -354,7 +354,7 @@ class Asset extends Depreciable
                     } catch (\Throwable $e) {}
                 }
 
-                // No maintenance record creation on Under Repair per requirements
+                // No maintenance record creation on diagnostics/QA statuses per requirements
             }
         });
     }

@@ -1,3 +1,16 @@
+# Session Progress (2025-10-28)
+
+## Addendum (2025-10-28 Codex)
+- Realigned the refurbishment status taxonomy with the Stand-by -> Returned / RMA flow, updating dashboard filters, `StatuslabelSeeder`, the upsert migration, and demo asset fixtures to share the new Dutch labels and colour cues.
+- Audited the device attribute presets after the catalog rewrite to ensure no legacy keys (brand/device class/carrier lock etc.) lingered in the MacBook/XPS/Pixel blueprints.
+- Reran `docker compose exec app php artisan migrate --seed` inside the stack to validate the refreshed seeders; confirmed the nine refurbished states seed without errors.
+- Hernieuwde het assets-zijmenu zodat alleen de nieuwe refurb statuslabels zichtbaar zijn en rechtstreeks naar `hardware.index?status_id=` linken; oude Deployed/RTD/Archived-links zijn verwijderd.
+- Verwijderde het legacy “All tests passed”-lint op de assetdetailpagina in afwachting van de nieuwe testrun-UX.
+
+## Notes for Follow-up Agents
+- Smoke-test the dashboard status chips in a browser to confirm the new labels filter hardware as expected.
+- Resume the PHPUnit cleanup for checkout/merge retirement once PHP CLI access is available locally.
+
 # Session Progress (2025-10-23)
 
 ## Addendum (2025-10-23 Codex)

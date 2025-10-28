@@ -36,6 +36,8 @@ class Statuslabel extends SnipeModel
         'pending',
         'default_label',
         'show_in_nav',
+        'color',
+        'created_by',
     ];
 
     use Searchable;

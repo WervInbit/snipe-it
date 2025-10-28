@@ -10,15 +10,15 @@ return new class extends Migration
         $now = now();
 
         $labels = [
-            ['name' => 'Intake / New Arrival','deployable' => 0,'pending' => 1,'archived' => 0,'show_in_nav' => 1,'default_label' => 1,'notes' => 'Awaiting initial processing after arrival'],
-            ['name' => 'In Testing','deployable' => 0,'pending' => 1,'archived' => 0,'show_in_nav' => 1,'default_label' => 0,'notes' => 'Undergoing diagnostics/QA testing'],
-            ['name' => 'Tested – OK','deployable' => 0,'pending' => 1,'archived' => 0,'show_in_nav' => 1,'default_label' => 0,'notes' => 'Testing passed; awaiting sales approval'],
-            ['name' => 'Needs Repair','deployable' => 0,'pending' => 1,'archived' => 0,'show_in_nav' => 1,'default_label' => 0,'notes' => 'Testing failed; requires repair'],
-            ['name' => 'Under Repair','deployable' => 0,'pending' => 1,'archived' => 0,'show_in_nav' => 1,'default_label' => 0,'notes' => 'Actively being repaired/refurbished'],
-            ['name' => 'Ready for Sale','deployable' => 1,'pending' => 0,'archived' => 0,'show_in_nav' => 1,'default_label' => 0,'notes' => 'Approved and sellable'],
-            ['name' => 'Sold to Customer','deployable' => 0,'pending' => 0,'archived' => 1,'show_in_nav' => 1,'default_label' => 0,'notes' => 'Sold and removed from active inventory'],
-            ['name' => 'Returned – Pending','deployable' => 0,'pending' => 1,'archived' => 0,'show_in_nav' => 1,'default_label' => 0,'notes' => 'Returned by customer; awaiting re-test'],
-            ['name' => 'Broken / For Parts','deployable' => 0,'pending' => 0,'archived' => 0,'show_in_nav' => 1,'default_label' => 0,'notes' => 'Unsellable; for parts/harvest only'],
+            ['name' => 'Stand-by','deployable' => 0,'pending' => 1,'archived' => 0,'show_in_nav' => 1,'default_label' => 1,'notes' => 'Wacht op intake of triage.','color' => '#1abc9c'],
+            ['name' => 'Being Processed','deployable' => 0,'pending' => 1,'archived' => 0,'show_in_nav' => 1,'default_label' => 0,'notes' => 'Actief in test-, wipe- of herstelproces.','color' => '#3498db'],
+            ['name' => 'QA Hold','deployable' => 0,'pending' => 1,'archived' => 0,'show_in_nav' => 1,'default_label' => 0,'notes' => 'Geblokkeerd tot accessoires of cosmetica gereed zijn.','color' => '#9b59b6'],
+            ['name' => 'Ready for Sale','deployable' => 1,'pending' => 0,'archived' => 0,'show_in_nav' => 1,'default_label' => 0,'notes' => 'Volledig getest en klaar voor verkoop.','color' => '#2ecc71'],
+            ['name' => 'Sold','deployable' => 0,'pending' => 0,'archived' => 1,'show_in_nav' => 1,'default_label' => 0,'notes' => 'Order afgerond en uit voorraad.','color' => '#e67e22'],
+            ['name' => 'Broken / Parts','deployable' => 0,'pending' => 0,'archived' => 0,'show_in_nav' => 1,'default_label' => 0,'notes' => 'Niet verkoopbaar; gebruikt voor onderdelen of referentie.','color' => '#e74c3c'],
+            ['name' => 'Internal Use','deployable' => 0,'pending' => 0,'archived' => 0,'show_in_nav' => 1,'default_label' => 0,'notes' => 'Beschikbaar voor interne teams of labopstellingen.','color' => '#34495e'],
+            ['name' => 'Archived','deployable' => 0,'pending' => 0,'archived' => 1,'show_in_nav' => 1,'default_label' => 0,'notes' => 'Gearchiveerd voor naslag, niet actief in omloop.','color' => '#7f8c8d'],
+            ['name' => 'Returned / RMA','deployable' => 0,'pending' => 1,'archived' => 0,'show_in_nav' => 1,'default_label' => 0,'notes' => 'Retour ontvangen; wacht op herinspectie.','color' => '#f1c40f'],
         ];
 
         if (DB::getSchemaBuilder()->hasColumn('status_labels', 'default_label')) {
@@ -35,15 +35,25 @@ return new class extends Migration
         }
 
         $ids = DB::table('status_labels')->whereIn('name', array_column($labels, 'name'))->pluck('id', 'name');
-
         $map = [
             'Ready to Deploy' => 'Ready for Sale',
-            'Pending' => 'Intake / New Arrival',
-            'Out for Diagnostics' => 'In Testing',
-            'Out for Repair' => 'Under Repair',
-            'Being Refurbished' => 'Under Repair',
-            'Broken - Not Fixable' => 'Broken / For Parts',
-            'Broken/Spare Parts' => 'Broken / For Parts',
+            'Pending' => 'Stand-by',
+            'Intake / New Arrival' => 'Stand-by',
+            'In Testing' => 'Being Processed',
+            'Needs Repair' => 'Broken / Parts',
+            'Under Repair' => 'Being Processed',
+            'Tested - OK' => 'Ready for Sale',
+            'Tested – OK' => 'Ready for Sale',
+            'Out for Diagnostics' => 'Being Processed',
+            'Out for Repair' => 'Being Processed',
+            'Being Refurbished' => 'Being Processed',
+            'Sold to Customer' => 'Sold',
+            'Sold / Shipped' => 'Sold',
+            'Returned - Pending' => 'Returned / RMA',
+            'Returned – Pending' => 'Returned / RMA',
+            'Broken - Not Fixable' => 'Broken / Parts',
+            'Broken/Spare Parts' => 'Broken / Parts',
+            'Broken / For Parts' => 'Broken / Parts',
         ];
 
         foreach ($map as $old => $new) {
@@ -58,9 +68,9 @@ return new class extends Migration
             }
         }
 
-        if (isset($ids['Intake / New Arrival'])) {
+        if (isset($ids['Stand-by'])) {
             DB::table('status_labels')->update(['default_label' => 0]);
-            DB::table('status_labels')->where('id', $ids['Intake / New Arrival'])->update(['default_label' => 1]);
+            DB::table('status_labels')->where('id', $ids['Stand-by'])->update(['default_label' => 1]);
         }
     }
 
@@ -69,4 +79,13 @@ return new class extends Migration
         // No-op
     }
 };
+
+
+
+
+
+
+
+
+
 

@@ -56,11 +56,14 @@ class AttributeTestSeeder extends Seeder
             'bluetooth_test' => [
                 'instructions' => 'Pair with a Bluetooth peripheral and confirm successful data transfer.',
             ],
-            'camera_test' => [
-                'instructions' => 'Capture photo or video to verify camera focus and image quality.',
-            ],
             'cpu_test' => [
                 'instructions' => 'Run a processor stress utility and monitor for throttling or errors.',
+            ],
+            'front_camera_test' => [
+                'instructions' => 'Maak een selfie en controleer autofocus, belichting en eventuele vlekken op de lens.',
+            ],
+            'rear_camera_test' => [
+                'instructions' => 'Maak meerdere foto\'s met de hoofdcamera en controleer scherpstelling en flitser.',
             ],
             'display_test' => [
                 'instructions' => 'Inspect the display for brightness consistency, colour accuracy, and stuck pixels.',

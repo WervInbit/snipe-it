@@ -111,7 +111,7 @@ class AssetsController extends Controller
         // Handle asset tags - there could be one, or potentially many.
         // This is only necessary on create, not update, since bulk editing is handled
         // differently
-        $asset_tags = $request->input('asset_tags', []);
+        $requestedTags = $request->input('asset_tags', []);
 
         $settings = Setting::getSettings();
 
@@ -163,7 +163,7 @@ class AssetsController extends Controller
         $asset = null;
         $qr = app(QrLabelService::class);
 
-        $count = max(count($asset_tags), count($serials), 1);
+        $count = max(count($requestedTags), count($serials), 1);
 
         for ($a = 1; $a <= $count; $a++) {
             $asset = new Asset();
@@ -180,10 +180,7 @@ class AssetsController extends Controller
                 $asset->serial = $serials[$a];
             }
 
-            if (array_key_exists($a, $asset_tags) && $asset_tags[$a] !== '') {
-                $asset->asset_tag = $asset_tags[$a];
-            }
-
+            $asset->asset_tag = Asset::generateTag();
             if (!$asset->asset_tag) {
                 $asset->asset_tag = Asset::generateTag();
             }

@@ -56,10 +56,24 @@ class EffectiveAttributeResolver
         return $this->resolveWithContext($modelNumber, $overrides);
     }
 
+    protected function requiresTest(AttributeDefinition $definition): bool
+    {
+        if ($definition->needs_test) {
+            return true;
+        }
+
+        if ($definition->relationLoaded('tests')) {
+            return $definition->tests->isNotEmpty();
+        }
+
+        return $definition->tests()->exists();
+    }
+
     public function createResolved(AttributeDefinition $definition, ?ModelNumberAttribute $modelValue = null, ?AssetAttributeOverride $override = null, bool $isOverride = false): ResolvedAttribute
     {
         $modelValueString = $modelValue?->value;
         $modelRaw = $modelValue?->raw_value;
+        $requiresTest = $this->requiresTest($definition);
 
         if ($override && $isOverride) {
             $override->loadMissing('option');
@@ -70,7 +84,7 @@ class EffectiveAttributeResolver
                 $override->raw_value,
                 $override->option,
                 'override',
-                $definition->needs_test,
+                $requiresTest,
                 true,
                 $modelValueString,
                 $modelRaw
@@ -86,7 +100,7 @@ class EffectiveAttributeResolver
                 $modelValue->raw_value,
                 $modelValue->option,
                 'model',
-                $definition->needs_test,
+                $requiresTest,
                 false,
                 $modelValueString,
                 $modelRaw
@@ -99,7 +113,7 @@ class EffectiveAttributeResolver
             null,
             null,
             'missing',
-            $definition->needs_test,
+            $requiresTest,
             false,
             $modelValueString,
             $modelRaw
@@ -108,7 +122,7 @@ class EffectiveAttributeResolver
 
     private function resolveWithContext(ModelNumber $modelNumber, Collection $overrides): Collection
     {
-        $assignments = $modelNumber->attributes()->with(['definition.options', 'option'])->get();
+        $assignments = $modelNumber->attributes()->with(['definition.options', 'definition.tests', 'option'])->get();
 
         return $assignments->map(function (ModelNumberAttribute $assignment) use ($overrides) {
             $definition = $assignment->definition;

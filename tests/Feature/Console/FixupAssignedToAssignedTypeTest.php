@@ -12,7 +12,7 @@ class FixupAssignedToAssignedTypeTest extends TestCase
     {
         parent::setUp();
 
-        ->markTestSkipped('Asset checkout functionality removed in this fork.');
+        $this->markTestSkipped('Asset checkout functionality removed in this fork.');
     }
 
     public function testEmptyAssignedType()

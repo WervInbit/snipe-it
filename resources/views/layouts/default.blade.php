@@ -506,68 +506,56 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                         </a>
                                     </li>
 
-                                    <?php $status_navs = \App\Models\Statuslabel::where('show_in_nav', '=', 1)->withCount('assets as asset_count')->get(); ?>
-                                    @if (count($status_navs) > 0)
+                                    @php
+                                        $refurbOrder = [
+                                            'Stand-by',
+                                            'Being Processed',
+                                            'QA Hold',
+                                            'Ready for Sale',
+                                            'Sold',
+                                            'Broken / Parts',
+                                            'Internal Use',
+                                            'Archived',
+                                            'Returned / RMA',
+                                        ];
+                                        $status_navs = \App\Models\Statuslabel::where('show_in_nav', '=', 1)
+                                            ->withCount('assets as asset_count')
+                                            ->get()
+                                            ->sortBy(function ($label) use ($refurbOrder) {
+                                                $index = array_search($label->name, $refurbOrder, true);
+                                                return $index !== false ? $index : count($refurbOrder) + $label->id;
+                                            })
+                                            ->values();
+                                        $activeStatusId = (int) request()->query('status_id');
+                                        $iconMap = [
+                                            'Stand-by' => 'pause-circle',
+                                            'Being Processed' => 'cogs',
+                                            'QA Hold' => 'flag',
+                                            'Ready for Sale' => 'tags',
+                                            'Sold' => 'check-circle',
+                                            'Broken / Parts' => 'tools',
+                                            'Internal Use' => 'building',
+                                            'Archived' => 'archive',
+                                            'Returned / RMA' => 'undo-alt',
+                                        ];
+                                    @endphp
+                                    @if ($status_navs->isNotEmpty())
                                         @foreach ($status_navs as $status_nav)
-                                            <li{!! (request()->is('statuslabels/'.$status_nav->id) ? ' class="active"' : '') !!}>
-                                                <a href="{{ route('statuslabels.show', ['statuslabel' => $status_nav->id]) }}">
-                                                    <i class="fas fa-circle text-grey fa-fw"
-                                                       aria-hidden="true"{!!  ($status_nav->color!='' ? ' style="color: '.e($status_nav->color).'"' : '') !!}></i>
+                                            @php
+                                                $icon = $iconMap[$status_nav->name] ?? 'circle';
+                                                $colorStyle = $status_nav->color ? ' style="color: '.e($status_nav->color).'"' : '';
+                                                $isActive = $activeStatusId === (int) $status_nav->id;
+                                            @endphp
+                                            <li{!! $isActive ? ' class="active"' : '' !!}>
+                                                <a href="{{ route('hardware.index', ['status_id' => $status_nav->id]) }}">
+                                                    <i class="fas fa-{{ $icon }} fa-fw" aria-hidden="true"{!! $colorStyle !!}></i>
                                                     {{ $status_nav->name }}
-                                                    <span class="badge badge-secondary">{{ $status_nav->asset_count }}</span></a></li>
+                                                    <span class="badge badge-secondary">{{ $status_nav->asset_count }}</span>
+                                                </a>
+                                            </li>
                                         @endforeach
+                                        <li class="divider">&nbsp;</li>
                                     @endif
-
-
-                                    <li id="deployed-sidenav-option" {!! (Request::query('status') == 'Deployed' ? ' class="active"' : '') !!}>
-                                        <a href="{{ url('hardware?status=Deployed') }}">
-                                            <x-icon type="circle" class="text-blue fa-fw" />
-                                            {{ trans('general.deployed') }}
-                                            <span class="badge">{{ (isset($total_deployed_sidebar)) ? $total_deployed_sidebar : '' }}</span>
-                                        </a>
-                                    </li>
-                                    <li id="rtd-sidenav-option"{!! (Request::query('status') == 'RTD' ? ' class="active"' : '') !!}>
-                                        <a href="{{ url('hardware?status=RTD') }}">
-                                            <x-icon type="circle" class="text-green fa-fw" />
-                                            {{ trans('general.ready_to_deploy') }}
-                                            <span class="badge">{{ (isset($total_rtd_sidebar)) ? $total_rtd_sidebar : '' }}</span>
-                                        </a>
-                                    </li>
-                                    <li id="pending-sidenav-option"{!! (Request::query('status') == 'Pending' ? ' class="active"' : '') !!}><a href="{{ url('hardware?status=Pending') }}">
-                                            <x-icon type="circle" class="text-orange fa-fw" />
-                                            {{ trans('general.pending') }}
-                                            <span class="badge">{{ (isset($total_pending_sidebar)) ? $total_pending_sidebar : '' }}</span>
-                                        </a>
-                                    </li>
-                                    <li id="undeployable-sidenav-option"{!! (Request::query('status') == 'Undeployable' ? ' class="active"' : '') !!} ><a
-                                                href="{{ url('hardware?status=Undeployable') }}">
-                                            <x-icon type="x" class="text-red fa-fw" />
-                                            {{ trans('general.undeployable') }}
-                                            <span class="badge">{{ (isset($total_undeployable_sidebar)) ? $total_undeployable_sidebar : '' }}</span>
-                                        </a>
-                                    </li>
-                                    <li id="byod-sidenav-option"{!! (Request::query('status') == 'byod' ? ' class="active"' : '') !!}><a
-                                                href="{{ url('hardware?status=byod') }}">
-                                            <x-icon type="x" class="text-red fa-fw" />
-                                            {{ trans('general.byod') }}
-                                            <span class="badge">{{ (isset($total_byod_sidebar)) ? $total_byod_sidebar : '' }}</span>
-                                        </a>
-                                    </li>
-                                    <li id="archived-sidenav-option"{!! (Request::query('status') == 'Archived' ? ' class="active"' : '') !!}><a
-                                                href="{{ url('hardware?status=Archived') }}">
-                                            <x-icon type="x" class="text-red fa-fw" />
-                                            {{ trans('admin/hardware/general.archived') }}
-                                            <span class="badge">{{ (isset($total_archived_sidebar)) ? $total_archived_sidebar : '' }}</span>
-                                        </a>
-                                    </li>
-                                    <li id="requestable-sidenav-option"{!! (Request::query('status') == 'Requestable' ? ' class="active"' : '') !!}><a
-                                                href="{{ url('hardware?status=Requestable') }}">
-                                            <x-icon type="checkmark" class="text-blue fa-fw" />
-                                            {{ trans('admin/hardware/general.requestable') }}
-                                        </a>
-                                    </li>
-
-                                    <li class="divider">&nbsp;</li>
                                     @can('checkout', \App\Models\Asset::class)
                                         <li{!! (request()->is('hardware/requested') ? ' class="active"' : '') !!}>
                                             <a href="{{ route('assets.requested') }}">
@@ -1312,41 +1300,6 @@ dir="{{ Helper::determineLanguageDirection() }}">
 
         </script>
 
-        <!-- Sidebar tweaks for refurb workflow -->
-        <script nonce="{{ csrf_token() }}">
-            (function(){
-                if (!window.jQuery) return; var $=window.jQuery;
-                $(function(){
-                    // Hide deprecated items
-                    $("a:contains('Due for Checkin')").closest('li').hide();
-                    $("a:contains('Requestable')").closest('li').hide();
-
-                    // Rename Deployed -> Sold/Out (fallback if translations not applied)
-                    $("a[href*='hardware?status=Deployed']").each(function(){
-                        var $t=$(this); $t.text($t.text().replace(/Deployed/i,'Sold/Out'));
-                    });
-                    // Ensure Archived reads Sold/Archived
-                    $("a[href*='hardware?status=Archived']").each(function(){
-                        var $t=$(this); $t.text($t.text().replace(/Archived/i,'Sold/Archived'));
-                    });
-
-                    // Reorder a few statuses lower in the list
-                    var $hwTree=$("#hardware-sidenav-option .treeview-menu");
-                    if($hwTree.length){
-                        [
-                            "a[href*='hardware?status=Sold%20to%20Customer']",
-                            "a[href*='hardware?status=Archived']",
-                            "a[href*='hardware?status=Needs%20Repair']",
-                            "a[href*='hardware?status=Under%20Repair']"
-                        ].forEach(function(sel){
-                            var $li=$hwTree.find(sel).closest('li');
-                            if($li.length){ $li.appendTo($hwTree); }
-                        });
-                    }
-                });
-            })();
-        </script>
-
         <!-- Sidebar presentation fixes: de-dup, icons, wrapping -->
         <style nonce="{{ csrf_token() }}">
             .sidebar-menu .treeview-menu > li > a { display:flex; align-items:center; gap:6px; white-space:nowrap; }
@@ -1355,16 +1308,16 @@ dir="{{ Helper::determineLanguageDirection() }}">
         <script nonce="{{ csrf_token() }}">
             (function(){ if(!window.jQuery) return; var $=window.jQuery; $(function(){
                 var $menu=$("#hardware-sidenav-option .treeview-menu"); if(!$menu.length) return;
-                var seen={}; $menu.find('a').each(function(){ var $a=$(this), k=$a.text().trim().toLowerCase(); if(!k) return; if(seen[k]){$a.closest('li').remove();} else {seen[k]=true;} });
-                var iconMap={
-                    'intake / new arrival':'fa-inbox text-primary','in testing':'fa-vial text-warning',
-                    'tested – ok':'fa-check text-success','tested - ok':'fa-check text-success',
-                    'needs repair':'fa-tools text-warning','under repair':'fa-wrench text-purple',
-                    'ready for sale':'fa-tag text-success','broken / for parts':'fa-ban text-danger',
-                    'returned – pending':'fa-rotate-left text-info','returned - pending':'fa-rotate-left text-info',
-                    'sold to customer':'fa-dollar-sign text-muted','sold/archived':'fa-box-archive text-muted',
-                    'for sale':'fa-tags text-success','processing':'fa-spinner text-info'
-                }; $menu.find('a').each(function(){ var $a=$(this), lbl=$a.text().trim().toLowerCase(), cls=iconMap[lbl]; if(!cls) return; if($a.find('i.fa, i.fas, i.fa-solid, svg, x-icon').length) return; $('<i class="fa '+cls+'" aria-hidden="true"></i>').prependTo($a); });
+                var seen={};
+                $menu.find('a').each(function(){
+                    var $a=$(this), label=$a.text().trim().toLowerCase();
+                    if(!label) return;
+                    if(seen[label]) {
+                        $a.closest('li').remove();
+                    } else {
+                        seen[label]=true;
+                    }
+                });
             }); })();
         </script>
 
@@ -1376,3 +1329,6 @@ dir="{{ Helper::determineLanguageDirection() }}">
 
         </body>
 </html>
+
+
+

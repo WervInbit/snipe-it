@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\RedirectResponse;
 use \Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Collection;
+use App\Models\Statuslabel;
 
 
 /**
@@ -43,12 +45,91 @@ class DashboardController extends Controller
                 Artisan::call('passport:install', ['--no-interaction' => true]);
             }
 
-            return view('dashboard')->with('asset_stats', $asset_stats)->with('counts', $counts);
+            $refurbFilters = $this->buildRefurbFilters();
+
+            return view('dashboard')
+                ->with('asset_stats', $asset_stats)
+                ->with('counts', $counts)
+                ->with('refurbFilters', $refurbFilters);
         } else {
             Session::reflash();
 
             // Redirect to the profile page
             return redirect()->intended('account/view-assets');
         }
+    }
+
+    /**
+     * Prepare the list of refurbishment status filters for the dashboard.
+     *
+     * @return \Illuminate\Support\Collection<int, array<string, mixed>>
+     */
+    protected function buildRefurbFilters(): Collection
+    {
+        $definitions = collect([
+            [
+                'name' => 'Stand-by',
+                'icon' => 'pause',
+                'description' => 'Afwachting intake of gegevenswiping',
+            ],
+            [
+                'name' => 'Being Processed',
+                'icon' => 'cogs',
+                'description' => 'Tests, imaging of reparatie in uitvoering',
+            ],
+            [
+                'name' => 'QA Hold',
+                'icon' => 'flag',
+                'description' => 'Wacht op accessoires, cosmetica of finale QA',
+            ],
+            [
+                'name' => 'Ready for Sale',
+                'icon' => 'box-open',
+                'description' => 'Vrijgegeven voor verkoop of distributie',
+            ],
+            [
+                'name' => 'Sold',
+                'icon' => 'check',
+                'description' => 'Verlaten de voorraad na afronding order',
+            ],
+            [
+                'name' => 'Broken / Parts',
+                'icon' => 'tools',
+                'description' => 'Wordt gestript voor onderdelen of diagnose',
+            ],
+            [
+                'name' => 'Internal Use',
+                'icon' => 'building',
+                'description' => 'In gebruik bij interne teams of labs',
+            ],
+            [
+                'name' => 'Archived',
+                'icon' => 'archive',
+                'description' => 'Historisch voorbeeld, niet actief',
+            ],
+            [
+                'name' => 'Returned / RMA',
+                'icon' => 'undo-alt',
+                'description' => 'Retour ingestroomd; wacht op beoordeling',
+            ],
+        ]);
+
+        $statusLabels = Statuslabel::select(['id', 'name', 'color'])
+            ->whereIn('name', $definitions->pluck('name')->all())
+            ->get()
+            ->keyBy('name');
+
+        return $definitions->map(function (array $definition) use ($statusLabels) {
+            $status = $statusLabels->get($definition['name']);
+
+            return [
+                'label' => $definition['name'],
+                'icon' => $definition['icon'],
+                'description' => $definition['description'],
+                'status_id' => $status?->id,
+                'color' => $status?->color,
+                'available' => (bool) $status,
+            ];
+        });
     }
 }
