@@ -11,7 +11,8 @@
     @include('start.partials.action-button', [
         'href' => route('home'),
         'icon' => 'chart-bar',
-        'label' => trans('general.dashboard')
+        'label' => trans('general.dashboard'),
+        'dusk' => 'start-dashboard'
     ])
     @include('start.partials.action-button', [
         'href' => route('hardware.index'),

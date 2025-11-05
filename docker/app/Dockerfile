@@ -30,6 +30,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git curl zip unzip ca-certificates \
     libjpeg-dev libpng-dev libfreetype6-dev libonig-dev \
+    chromium chromium-driver fonts-liberation libu2f-udev libvulkan1 \
  && rm -rf /var/lib/apt/lists/*
 
 # PHP extensions + Composer

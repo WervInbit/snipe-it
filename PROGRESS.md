@@ -1,3 +1,25 @@
+# Session Progress (2025-11-05)
+
+## Addendum (2025-11-05 Codex)
+- Brought the repo in line with the Dusk harness: reviewed AGENTS.md/doc logs, installed `laravel/dusk`, and scaffolded the browser testing assets inside the PHP container.
+- Updated `docker/app/Dockerfile` to install Chromium/Chromedriver so headless runs execute inside Docker; added `.env.dusk*` files plus sqlite backing and force-set Dusk bootstrap to the internal Nginx host.
+- Hardened `tests/DuskTestCase.php` to seed/migrate per test, launch Chrome with container-safe flags, and normalise APP_URL/asset URLs before requests.
+- Added `tests/Browser/ExampleTest.php` (login inputs) and `tests/Browser/DashboardRefurbFiltersTest.php` (dashboard refurb chips via real login), wiring the Start-page shortcut into the dashboard view and getting the full Dusk suite green.
+- Follow-up: extend Dusk coverage beyond the smoke checks (refurb flow interactions, QR/camera handling) and continue using `scripts/check-storage-permissions.sh` after environment resets so compiled views remain writable.
+
+# Session Progress (2025-10-30)
+
+## Addendum (2025-10-30 Codex)
+- Session kickoff: reviewed AGENTS.md, docs/agents addenda, and prepared a fresh session log for 2025-10-30 under docs/agents/.
+- Dashboard assets dropdown now pulls refurb filters through localized labels so Dutch users see `Stand-by`, `In verwerking`, `QA-wacht`, etc.; seeding defaults to locale `nl-NL` for fresh datasets.
+- Added `scripts/check-storage-permissions.sh` to sanity-check writable cache directories after code changes without baking fixes into container entrypoints.
+- Resolved Blade cache permission errors by running the remediation commands in the container and clearing compiled views.
+- Normalized refurb status translations via `App\Support\RefurbStatus`, ensuring slug-based keys in `resources/lang/*/refurb.php` map canonical status names to Dutch labels.
+- Switched user seeding defaults to `nl-NL` (`UserFactory`) and updated `.env.example` so freshly provisioned demos and logins inherit the Dutch locale; reseeded with `php artisan migrate:fresh --seed` to apply.
+- Refreshed demo hardware seeders: retired the MacBook/XPS examples, introduced HP ProBook 450 G8 and 430 G7 plus a Samsung Galaxy A5 handset, and expanded manufacturer seeding for HP/Samsung.
+- Enabled asset-level overrides for `condition_grade`, `charger_included`, `storage_capacity_gb`, and `ram_size_gb` in the attribute blueprints so per-device refurb variations are supported; reviewed all `*_test` indicators and confirmed each maps to a distinct hardware check, so none were removed.
+- Follow-up: spot-check the dashboard sidebar and a freshly seeded environment to confirm locale/label translations look correct, and mirror any substantive documentation updates into docs/fork-notes.md if needed.
+
 # Session Progress (2025-10-28)
 
 ## Addendum (2025-10-28 Codex)
@@ -213,3 +235,6 @@ there are multiple duplicate functions that still need to be removed, sku will b
 
 
 
+
+
+**Session closed** — 2025-10-28 13:38
