@@ -35,6 +35,7 @@ use League\Csv\Reader;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use TypeError;
+use Illuminate\Support\Collection;
 
 /**
  * This class controls all actions related to assets for
@@ -120,7 +121,7 @@ class AssetsController extends Controller
         $modelNumber = null;
 
         if ($modelForAttributes) {
-            $availableModelNumbers = $modelForAttributes->modelNumbers()->orderBy('code')->get();
+            $availableModelNumbers = $this->availableModelNumbersFor($modelForAttributes);
             if ($selectedModelNumberId) {
                 $modelNumber = $availableModelNumbers->firstWhere('id', $selectedModelNumberId);
             }
@@ -361,7 +362,7 @@ class AssetsController extends Controller
         session()->put('back_url', url()->previous());
         $asset->loadMissing('model.modelNumbers', 'modelNumber');
         $specAttributes = $asset->model ? $resolver->resolveForAsset($asset) : collect();
-        $modelNumbers = $asset->model ? $asset->model->modelNumbers : collect();
+        $modelNumbers = $asset->model ? $this->availableModelNumbersFor($asset->model, $asset->model_number_id) : collect();
         $selectedModelNumber = $asset->modelNumber ?? $asset->model?->primaryModelNumber;
 
         return view('hardware/edit')
@@ -442,7 +443,7 @@ class AssetsController extends Controller
         }
 
         $availableModelNumbers = $selectedModel
-            ? $selectedModel->modelNumbers()->orderBy('code')->get()
+            ? $this->availableModelNumbersFor($selectedModel, $asset->model_number_id)
             : collect();
 
         $selectedModelNumber = null;
@@ -709,6 +710,10 @@ class AssetsController extends Controller
         }
         $asset = $assets->first();
         $this->authorize('view', $asset);
+
+        if (Gate::allows('tests.execute') && Gate::allows('update', $asset)) {
+            return redirect()->route('test-results.active', $asset->id);
+        }
 
         return redirect()->route('hardware.show', $asset->id)->with('topsearch', $topsearch);
     }
@@ -1081,6 +1086,30 @@ class AssetsController extends Controller
         }
 
         return [$modelId, $modelNumberId];
+    }
+
+    /**
+     * Retrieve active model numbers for a model, optionally including a specific ID.
+     */
+    private function availableModelNumbersFor(?AssetModel $model, ?int $includeId = null): Collection
+    {
+        if (!$model) {
+            return collect();
+        }
+
+        $numbers = $model->modelNumbers()
+            ->active()
+            ->orderBy('code')
+            ->get();
+
+        if ($includeId) {
+            $existing = $model->modelNumbers()->whereKey($includeId)->first();
+            if ($existing && $numbers->doesntContain(fn ($number) => $number->id === $existing->id)) {
+                $numbers->push($existing);
+            }
+        }
+
+        return $numbers;
     }
 
     public function getRequestedIndex($user_id = null)

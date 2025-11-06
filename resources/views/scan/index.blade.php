@@ -6,23 +6,50 @@
 @stop
 
 @section('content')
-<div class="container py-4 text-center">
-    <h1 class="h3 mb-3">{{ __('Scan Asset Tag') }}</h1>
+<div class="container py-4">
+    <div class="mx-auto" style="max-width:420px;">
+        <h1 class="h4 text-center mb-4">{{ trans('general.scan_qr') }}</h1>
 
-    <div id="scan-area" class="position-relative mx-auto" style="max-width:480px;">
-        <video id="scan-video" class="w-100 rounded" autoplay muted playsinline></video>
-        <canvas id="scan-overlay" class="position-absolute top-0 start-0 w-100 h-100"></canvas>
+        <div id="scan-permission" class="alert alert-warning d-none" role="alert" data-testid="scan-permission-banner">
+            {{ trans('general.scan_camera_denied') }}
+        </div>
+
+        <div id="scan-area" class="position-relative rounded overflow-hidden shadow-sm">
+            <video id="scan-video"
+                   class="w-100 d-block"
+                   data-testid="scan-video"
+                   muted
+                   playsinline></video>
+            <canvas id="scan-overlay" class="position-absolute top-0 start-0 w-100 h-100" aria-hidden="true"></canvas>
+            <div id="scan-hint" class="position-absolute bottom-0 start-0 end-0 text-white bg-dark bg-opacity-50 py-2 px-3 small d-none">
+                {{ trans('general.scan_hint_move_closer') }}
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 mt-3">
+            <button id="scan-switch" type="button" class="btn btn-outline-secondary flex-fill d-none" data-testid="scan-switch">
+                <i class="fas fa-sync" aria-hidden="true"></i> {{ trans('general.scan_switch_camera') }}
+            </button>
+            <button id="manual-toggle" type="button" class="btn btn-outline-secondary flex-fill" data-testid="scan-manual-toggle">
+                <i class="fas fa-keyboard" aria-hidden="true"></i> {{ trans('general.scan_manual_entry') }}
+            </button>
+        </div>
+
+        <div id="scan-error" class="alert alert-danger d-none mt-3" role="alert" data-testid="scan-error"></div>
+
+        <form id="manual-form" class="mt-3 d-none" data-testid="scan-manual-form">
+            <label class="form-label visually-hidden" for="manual-tag">{{ trans('general.scan_manual_entry') }}</label>
+            <input id="manual-tag"
+                   type="text"
+                   class="form-control form-control-lg"
+                   placeholder="{{ trans('general.scan_manual_placeholder') }}"
+                   autocomplete="off"
+                   data-testid="scan-manual-input">
+            <button type="submit" class="btn btn-primary btn-lg mt-3 w-100" data-testid="scan-manual-submit">
+                {{ trans('general.search') }}
+            </button>
+        </form>
     </div>
-
-    <div id="scan-error" class="alert alert-danger d-none mt-3"></div>
-
-    <button id="scan-start" class="btn btn-primary btn-lg btn-block mt-3">{{ __('Start scanning') }}</button>
-    <button id="manual-toggle" class="btn btn-secondary btn-lg btn-block mt-2">{{ __('Enter tag manually') }}</button>
-
-    <form id="manual-form" class="mt-3 d-none">
-        <input id="manual-tag" type="text" class="form-control form-control-lg" placeholder="{{ __('Enter asset tag') }}">
-        <button type="submit" class="btn btn-primary btn-lg mt-2 btn-block">{{ __('Go') }}</button>
-    </form>
 </div>
 @stop
 

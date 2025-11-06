@@ -103,6 +103,8 @@ Route::group(
         // Asset tests
         Route::get('{asset}/tests', [TestRunController::class, 'index'])
             ->name('test-runs.index');
+        Route::get('{asset}/tests/active', [TestResultController::class, 'active'])
+            ->name('test-results.active');
         Route::post('{asset}/tests', [TestRunController::class, 'store'])
             ->name('test-runs.store');
         Route::delete('{asset}/tests/{testRun}', [TestRunController::class, 'destroy'])

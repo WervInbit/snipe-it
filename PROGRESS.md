@@ -1,3 +1,24 @@
+# Session Progress (2025-11-06)
+
+## Addendum (2025-11-06 Codex)
+- Revisited AGENTS.md and prior addenda, then blocked deprecated model numbers from end-user flows by filtering Select2 options, store/update validation, and controller helpers while still surfacing an asset's legacy preset when editing.
+- Tightened the API `models.selectlist` endpoint to return only active presets (with an opt-in for deprecated), and added feature coverage for the filtered select list plus asset store/update validation edge cases.
+- Logged today's work in docs/agents and noted outstanding feature-list items (QR workflow, enum UX, role-based start gating) for subsequent passes.
+- Rebuilt the `/start` experience for refurbisher, senior refurbisher, and supervisor/admin roles with single-column, touch-friendly actions (`Scan QR`, `Nieuw asset`, `Beheer`) and consistent data-testid hooks.
+- Refreshed `/scan` with auto-starting camera, device switching, manual fallback, accessibility hints, and jsQR-based decoding tuned for mobile devices.
+- Delivered a new `/hardware/{asset}/tests/active` page: sticky context header, grouped test cards (Failures/Open/Passed), tri-state segmented toggles, inline notes/photos, Bootstrap toasts, and a bottom bar with progress + contextual CTAs.
+- Implemented optimistic autosave with offline queuing (local queue + lightweight service worker cache), success/error toasts, and rebalancing logic that moves cards between groups plus recalculates completion counts.
+- Added feature tests for the active test view redirect and ensured the scan redirect targets the new active test route; introduced documentation for the new flow.
+- Captured the “Developer Execution Plan — Mobile Testing Page (A5-first)” under `docs/plans/` for the next iteration of the testing UI, and updated the default QR label template to a 50×30 mm Dymo LabelWriter 400 size.
+
+## Notes for Follow-up Agents
+- Run `php artisan test --testsuite=API` (and the new select list coverage) once PHP CLI access is restored to verify the added tests.
+- Manually smoke-test the asset create/edit UI to confirm the Select2 initial state shows a deprecated preset once and that new searches omit it.
+- Continue the outstanding feature list from 2025-10-02 (QR module rebuild, enum quick-add UX, role-based start page gating, documentation updates) now that preset filtering is in place.
+- Next session: follow the Developer Execution Plan (A5-first) document to rebuild the testing page (compact two-column mode, pass/fail toggles with deselect, drawers, autosave status indicators, photo gallery UX).
+- Compile front-end assets with `npm run dev` (or `npm run prod`) so `public/js/dist/tests-active.js` is available for the redesigned test UI; assets remain functional without the bundle, but the interactive experience depends on it.
+- Extend Dusk coverage for the new flows (start buttons, scan redirect, autosave interactions) and consider full offline photo queuing if future requirements demand it.
+
 # Session Progress (2025-11-05)
 
 ## Addendum (2025-11-05 Codex)
@@ -238,3 +259,4 @@ there are multiple duplicate functions that still need to be removed, sku will b
 
 
 **Session closed** — 2025-10-28 13:38
+

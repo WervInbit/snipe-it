@@ -70,7 +70,7 @@ class TestRunController extends Controller
 
         $asset->refreshTestCompletionFlag();
 
-        return redirect()->route('test-results.edit', [$asset->id, $run->id]);
+        return redirect()->route('test-results.active', $asset->id);
     }
 
     public function destroy(Asset $asset, TestRun $testRun)

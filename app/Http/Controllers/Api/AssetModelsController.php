@@ -292,6 +292,10 @@ class AssetModelsController extends Controller
                 $query->whereNull('models.deleted_at');
             });
 
+        if (!$request->boolean('include_deprecated')) {
+            $modelNumbers->active();
+        }
+
         if ($request->filled('category_id')) {
             $modelNumbers->whereHas('model', function ($query) use ($request) {
                 $query->where('models.category_id', $request->input('category_id'));

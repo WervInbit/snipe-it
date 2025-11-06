@@ -59,7 +59,7 @@ class StoreAssetRequest extends ImageUploadRequest
         $modelId = $this->input('model_id');
         $model = $modelId
             ? AssetModel::with(['modelNumbers' => function ($query) {
-                $query->orderBy('code');
+                $query->active()->orderBy('code');
             }])->find((int) $modelId)
             : null;
         $availableModelNumbers = $model?->modelNumbers ?? collect();
@@ -79,7 +79,10 @@ class StoreAssetRequest extends ImageUploadRequest
             ? array_filter([
                 $requireModelNumber ? 'required' : 'nullable',
                 'integer',
-                Rule::exists('model_numbers', 'id')->where('model_id', (int) $modelId),
+                Rule::exists('model_numbers', 'id')->where(function ($query) use ($modelId) {
+                    $query->where('model_id', (int) $modelId)
+                        ->whereNull('deprecated_at');
+                }),
             ])
             : ['nullable'];
 

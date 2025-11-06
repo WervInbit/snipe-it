@@ -29,7 +29,7 @@ class SelectlistTransformer
                 'image' => ($select_item->use_image) ? $select_item->use_image : null,
             ];
 
-            if (property_exists($select_item, 'selectlist_meta') && is_array($select_item->selectlist_meta)) {
+            if (isset($select_item->selectlist_meta) && is_array($select_item->selectlist_meta)) {
                 $item = array_merge($item, $select_item->selectlist_meta);
             }
 

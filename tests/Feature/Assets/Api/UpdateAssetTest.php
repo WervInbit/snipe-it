@@ -681,6 +681,32 @@ class UpdateAssetTest extends TestCase
             ->assertStatusMessageIs('success');
     }
 
+    public function testUpdateAllowsKeepingDeprecatedModelNumber(): void
+    {
+        $model = AssetModel::factory()->create();
+        $deprecated = $model->modelNumbers()->create([
+            'code' => 'LEGACY',
+            'label' => 'Legacy Preset',
+        ]);
+        $deprecated->deprecate();
+
+        $asset = Asset::factory()->create([
+            'model_id' => $model->id,
+            'model_number_id' => $deprecated->id,
+        ]);
+
+        $this->actingAsForApi(User::factory()->editAssets()->create())
+            ->patchJson(route('api.assets.update', $asset->id), [
+                'model_id' => $model->id,
+                'model_number_id' => $deprecated->id,
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('success');
+
+        $asset->refresh();
+        $this->assertEquals($deprecated->id, $asset->model_number_id);
+    }
+
     public function testCustomFieldCannotBeUpdatedIfNotOnCurrentAssetModel()
     {
         $this->markIncompleteIfMySQL('Custom Field Tests do not work in MySQL');

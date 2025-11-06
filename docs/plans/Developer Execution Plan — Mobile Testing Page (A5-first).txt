@@ -1,0 +1,427 @@
+Developer Execution Plan — Mobile Testing Page (A5-first)
+
+Scope: Blade + Bootstrap 5 + vanilla JS. No backend changes except optional photo DELETE route if missing. All behaviors are idempotent and safe to repeat.
+
+A. UI Shell
+
+Header (sticky)
+
+Left: product/model + asset tag (truncate).
+
+Right:
+
+Save indicator slot: spinner while pending, checkmark when clean.
+
+Hamburger with a Two-column (compact) toggle (default OFF).
+
+<header class="testing-header sticky-top d-flex justify-content-between align-items-center px-3 py-2 shadow-sm">
+  <div class="text-truncate">
+    <div class="fw-semibold">{{ $asset->model_label }}</div>
+    <small class="text-muted">{{ $asset->asset_tag }}</small>
+  </div>
+
+  <div class="d-flex align-items-center gap-2">
+    <span id="saveIndicator" aria-live="polite" title="Sync status">
+      <!-- states: saving|clean|error -->
+      <i class="fa fa-rotate fa-spin d-none" data-state="saving"></i>
+      <i class="fa fa-check text-success d-none" data-state="clean"></i>
+      <i class="fa fa-triangle-exclamation text-danger d-none" data-state="error"></i>
+    </span>
+
+    <div class="btn-group">
+      <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fa fa-bars"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end">
+        <li>
+          <button class="dropdown-item" id="toggleTwoCol">
+            <span class="me-2">Twee kolommen (compact)</span>
+            <input type="checkbox" class="form-check-input m-0" id="twoColChk" />
+          </button>
+        </li>
+        <li><a class="dropdown-item" href="{{ route('hardware.tests.history',$asset) }}">Historie</a></li>
+      </ul>
+    </div>
+  </div>
+</header>
+
+
+Grid container
+
+Default 1-column.
+
+Add class .compact-2col to enable 2-columns on ≥480 px viewports.
+
+<main class="container-fluid py-2">
+  <div id="testGrid" class="row g-2" data-mode="one">
+    @foreach($activeRun->results as $r)
+      @include('tests.partials.card', ['r'=>$r])
+    @endforeach
+  </div>
+</main>
+
+
+CSS (minimal):
+
+@media (min-width:480px){
+  #testGrid.compact-2col > .col { flex: 0 0 50%; max-width: 50%; }
+}
+
+B. Test Card (per result)
+
+Rules implemented: PASS/FAIL only, tap again to deselect, one drawer open at a time, autosave notes, photos drawer with confirmation modal for deletions, horizontal thumbnail scroll, kinetic scroll preserved.
+
+{{-- resources/views/tests/partials/card.blade.php --}}
+<div class="col">
+  <article class="card shadow-sm" id="test-{{ $r->id }}" data-result-id="{{ $r->id }}" data-testid="test-item-{{ $r->slug }}">
+    <div class="card-body pb-2">
+      <div class="d-flex justify-content-between align-items-start mb-1">
+        <div class="fw-semibold text-truncate">{{ $r->label }}</div>
+        <button class="btn btn-link p-0" data-action="toggle-help" aria-expanded="false" aria-controls="help-{{ $r->id }}">
+          <i class="fa fa-circle-info"></i>
+        </button>
+      </div>
+      <div id="help-{{ $r->id }}" class="collapse small text-muted mb-2">{{ $r->instructions }}</div>
+
+      {{-- PASS/FAIL segmented toggle with deselect-on-same --}}
+      <div class="btn-group w-100 mb-2" role="group" aria-label="Resultaat">
+        <button class="btn btn-outline-success" data-action="set-pass" aria-pressed="{{ $r->status==='pass'?'true':'false' }}">
+          Pass
+        </button>
+        <button class="btn btn-outline-danger" data-action="set-fail" aria-pressed="{{ $r->status==='fail'?'true':'false' }}">
+          Fail
+        </button>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <button class="btn btn-sm btn-outline-secondary" data-action="toggle-note" aria-controls="note-{{ $r->id }}">Notitie</button>
+        <button class="btn btn-sm btn-outline-secondary" data-action="toggle-photos" aria-controls="photos-{{ $r->id }}">Foto’s</button>
+      </div>
+    </div>
+
+    {{-- NOTE drawer (autosave) --}}
+    <section class="collapse" id="note-{{ $r->id }}" data-role="drawer-note">
+      <div class="border-top p-2">
+        <textarea class="form-control" rows="3" data-bind="note">{{ $r->note }}</textarea>
+        <small class="text-muted d-block mt-1" data-bind="saved-at"></small>
+      </div>
+    </section>
+
+    {{-- PHOTOS drawer --}}
+    <section class="collapse" id="photos-{{ $r->id }}" data-role="drawer-photos">
+      <div class="border-top p-2">
+        <div class="d-flex gap-2 overflow-auto pb-1" data-role="thumbs">
+          @foreach($r->photos as $p)
+            <div class="position-relative" data-photo-id="{{ $p->id }}">
+              <img src="{{ $p->thumb }}" width="72" height="72" class="rounded" data-action="open-photo" alt="">
+              <button class="btn btn-sm btn-danger position-absolute top-0 end-0" data-action="confirm-delete-photo" aria-label="Verwijder">×</button>
+            </div>
+          @endforeach
+          <label class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center" style="width:72px;height:72px">
+            +
+            <input type="file" accept="image/*" capture="environment" class="d-none" data-action="upload-photo">
+          </label>
+        </div>
+      </div>
+    </section>
+  </article>
+</div>
+
+
+Delete confirmation modal (global, reused):
+
+<div class="modal fade" id="photoDeleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Foto verwijderen?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+      </div>
+      <div class="modal-body">Deze actie kan niet ongedaan worden gemaakt.</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuleren</button>
+        <button type="button" class="btn btn-danger" id="confirmPhotoDeleteBtn">Verwijderen</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+Fullscreen photo modal (tap thumbnail → modal):
+
+<div class="modal fade" id="photoViewerModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content bg-black">
+      <button type="button" class="btn-close btn-close-white position-absolute end-0 m-3" data-bs-dismiss="modal" aria-label="Sluiten"></button>
+      <div class="modal-body d-flex justify-content-center align-items-center">
+        <img id="viewerImg" src="" class="img-fluid" alt="">
+      </div>
+    </div>
+  </div>
+</div>
+
+C. JS Behavior (single module; safe to init twice)
+<script>
+(() => {
+  if (window.TestUIInitialized) return; // idempotent guard
+  window.TestUIInitialized = true;
+
+  const grid = document.getElementById('testGrid');
+  const indicator = document.getElementById('saveIndicator');
+  const spin = indicator?.querySelector('[data-state="saving"]');
+  const ok   = indicator?.querySelector('[data-state="clean"]');
+  const err  = indicator?.querySelector('[data-state="error"]');
+  const photoDeleteModal = new bootstrap.Modal('#photoDeleteModal');
+  const photoViewerModal = new bootstrap.Modal('#photoViewerModal');
+  const viewerImg = document.getElementById('viewerImg');
+
+  let openDrawerId = null;
+  let pending = 0;
+  let deleteCtx = null; // {resultId, photoId, node}
+
+  const setIndicator = (state) => {
+    [spin, ok, err].forEach(el => el && el.classList.add('d-none'));
+    ({saving:spin, clean:ok, error:err}[state])?.classList.remove('d-none');
+  };
+  const begin = () => { pending++; setIndicator('saving'); };
+  const end   = (okState=true) => { pending=Math.max(0,pending-1); setIndicator(pending? 'saving' : (okState? 'clean':'error')); };
+
+  // two-col toggle with localStorage persistence
+  const twoColChk = document.getElementById('twoColChk');
+  const toggleTwoColBtn = document.getElementById('toggleTwoCol');
+  const applyLayout = (on) => {
+    if (on) { grid.classList.add('compact-2col'); grid.dataset.mode = 'two'; }
+    else    { grid.classList.remove('compact-2col'); grid.dataset.mode = 'one'; }
+  };
+  const savedLayout = localStorage.getItem('test.layout.twoCol') === '1';
+  twoColChk && (twoColChk.checked = savedLayout, applyLayout(savedLayout));
+  toggleTwoColBtn?.addEventListener('click', () => {
+    const on = !twoColChk.checked;
+    twoColChk.checked = on;
+    applyLayout(on);
+    localStorage.setItem('test.layout.twoCol', on ? '1':'0');
+  });
+
+  // delegate events
+  grid.addEventListener('click', (e) => {
+    const btn = e.target.closest('button, label');
+    if (!btn) return;
+
+    const card = e.target.closest('article.card');
+    if (!card) return;
+    const resultId = card.dataset.resultId;
+
+    // open help
+    if (btn.dataset.action === 'toggle-help') {
+      const helpId = btn.getAttribute('aria-controls');
+      const el = document.getElementById(helpId);
+      bootstrap.Collapse.getOrCreateInstance(el).toggle();
+      return;
+    }
+
+    // drawers one-at-a-time
+    if (btn.dataset.action === 'toggle-note' || btn.dataset.action === 'toggle-photos') {
+      const targetId = btn.getAttribute('aria-controls');
+      if (openDrawerId && openDrawerId !== targetId) {
+        bootstrap.Collapse.getOrCreateInstance(document.getElementById(openDrawerId)).hide();
+      }
+      const inst = bootstrap.Collapse.getOrCreateInstance(document.getElementById(targetId));
+      inst.toggle();
+      openDrawerId = targetId;
+      return;
+    }
+
+    // PASS / FAIL with deselect-on-same
+    if (btn.dataset.action === 'set-pass' || btn.dataset.action === 'set-fail') {
+      const passBtn = card.querySelector('[data-action="set-pass"]');
+      const failBtn = card.querySelector('[data-action="set-fail"]');
+      const wasPressed = btn.getAttribute('aria-pressed') === 'true';
+      let newStatus = null; // deselect
+
+      if (!wasPressed) newStatus = (btn.dataset.action === 'set-pass') ? 'pass' : 'fail';
+
+      // update UI immediately
+      passBtn.setAttribute('aria-pressed', newStatus==='pass' ? 'true':'false');
+      failBtn.setAttribute('aria-pressed', newStatus==='fail' ? 'true':'false');
+
+      // send PATCH
+      begin();
+      fetch(`{{ route('tests.partialUpdate') }}`, {
+        method: 'POST',
+        headers: {'X-CSRF-TOKEN':'{{ csrf_token() }}'},
+        body: (() => {
+          const fd = new FormData();
+          fd.set('result_id', resultId);
+          // use '', 'pass', or 'fail'; backend should treat '' as unset
+          fd.set('status', newStatus ?? '');
+          return fd;
+        })()
+      }).then(r => end(r.ok)).catch(() => end(false));
+      return;
+    }
+
+    // photo view
+    if (btn.dataset.action === 'open-photo') {
+      viewerImg.src = btn.getAttribute('src').replace('/thumb/','/full/'); // adjust if needed
+      photoViewerModal.show();
+      return;
+    }
+
+    // confirm delete
+    if (btn.dataset.action === 'confirm-delete-photo') {
+      const photoNode = btn.closest('[data-photo-id]');
+      deleteCtx = { resultId, photoId: photoNode.dataset.photoId, node: photoNode };
+      photoDeleteModal.show();
+      return;
+    }
+  });
+
+  // confirm deletion
+  document.getElementById('confirmPhotoDeleteBtn')?.addEventListener('click', () => {
+    if (!deleteCtx) return;
+    const { resultId, photoId, node } = deleteCtx;
+    begin();
+    fetch(`/tests/photos/${photoId}`, { // adjust route if different
+      method: 'DELETE',
+      headers: {'X-CSRF-TOKEN':'{{ csrf_token() }}'}
+    }).then(r => {
+      if (r.ok) node.remove();
+      end(r.ok);
+      photoDeleteModal.hide();
+      deleteCtx = null;
+    }).catch(() => { end(false); });
+  });
+
+  // photo upload
+  grid.addEventListener('change', (e) => {
+    const input = e.target.closest('input[type=file][data-action="upload-photo"]');
+    if (!input || !input.files?.length) return;
+    const card = input.closest('article.card');
+    const resultId = card.dataset.resultId;
+
+    const fd = new FormData();
+    fd.set('result_id', resultId);
+    fd.set('photo', input.files[0]);
+
+    begin();
+    fetch(`{{ route('tests.partialUpdate') }}`, {
+      method: 'POST',
+      headers: {'X-CSRF-TOKEN':'{{ csrf_token() }}'},
+      body: fd
+    }).then(async r => {
+      if (r.ok) {
+        // server should return new thumb URL; if not, force reload of drawer
+        location.reload(); // simple, safe; replace with DOM patch if you prefer
+      }
+      end(r.ok);
+    }).catch(() => end(false))
+    .finally(() => { input.value=''; });
+  });
+
+  // note autosave (debounced)
+  const debouncers = new WeakMap();
+  grid.addEventListener('input', (e) => {
+    const ta = e.target.closest('textarea[data-bind="note"]');
+    if (!ta) return;
+    const card = ta.closest('article.card');
+    const resultId = card.dataset.resultId;
+    if (debouncers.has(ta)) clearTimeout(debouncers.get(ta));
+    debouncers.set(ta, setTimeout(() => {
+      begin();
+      const fd = new FormData();
+      fd.set('result_id', resultId);
+      fd.set('note', ta.value);
+      fetch(`{{ route('tests.partialUpdate') }}`, {
+        method: 'POST',
+        headers: {'X-CSRF-TOKEN':'{{ csrf_token() }}'},
+        body: fd
+      }).then(r => {
+        if (r.ok) ta.nextElementSibling.textContent = new Date().toLocaleString();
+        end(r.ok);
+      }).catch(() => end(false));
+    }, 800));
+  });
+
+  // collapse others when scrolling far
+  let lastY = window.scrollY;
+  document.addEventListener('scroll', () => {
+    if (Math.abs(window.scrollY - lastY) > 600 && openDrawerId) {
+      bootstrap.Collapse.getOrCreateInstance(document.getElementById(openDrawerId)).hide();
+      openDrawerId = null;
+    }
+    lastY = window.scrollY;
+  });
+})();
+</script>
+
+
+Backend expectations for partial updates:
+
+POST tests.partialUpdate accepts any subset of: result_id, status ('pass'|'fail'|''), note (string), photo (file).
+
+Treat empty status as unset. If your controller currently rejects empty status, change it to nullable for idempotency of the “deselect” rule.
+
+Photo DELETE route (if missing):
+
+// routes/web/hardware.php
+Route::delete('/tests/photos/{photo}', [TestResultController::class,'destroyPhoto'])
+     ->name('tests.photos.destroy');
+
+D. Dusk Tests (add)
+
+PassFailDeselectTest
+
+Click PASS → active. Click PASS again → unset. Click FAIL → active fail.
+
+TwoColumnToggleTest
+
+Default one column; toggle to two, persists reload (localStorage).
+
+NoteAutosaveTest
+
+Type note, pause >800 ms → saved indicator flips to ✓; reload shows persisted text.
+
+PhotoUploadAndDeleteTest
+
+Upload an image → thumbnail visible. Delete → confirmation modal appears; confirm → thumb removed.
+
+SingleOpenDrawerTest
+
+Open Note; open Photos → Note collapses.
+
+E. Accessibility & Touch Targets
+
+Buttons ≥ 44×44 px touch area; use extra padding on compact 2-col mode.
+
+All interactive elements include aria-pressed/aria-controls and visible focus outlines.
+
+Photo modal: ESC closes; close button is visible and labeled.
+
+F. Performance & Safety
+
+JS init has a global guard to avoid double-binding when partials re-render.
+
+All network ops increment/decrement a shared counter that drives the header indicator; multiple saves show one spinner.
+
+fetch calls are idempotent; repeating the same status or note is accepted silently.
+
+G. Rollback / Undo
+
+To revert the deselect feature: change the client to never send status='' and update controller to treat missing status as “no change”.
+
+To disable two-column: remove .compact-2col CSS and ignore the stored flag; no DB impact.
+
+Photo deletes are hard deletes; if you need soft-delete, implement deleted_at on attachments and change destroyPhoto to mark deleted.
+
+H. Deliverables
+
+Blade partials above integrated under resources/views/tests/.
+
+Controller tweak: allow nullable status for deselect.
+
+Routes: ensure tests.partialUpdate exists; add tests.photos.destroy if missing.
+
+Dusk tests added; run in existing harness.
+
+Minimal CSS and the JS module embedded once on the page.
+
+This plan matches your directives: 1-column default with a toggle, deselect-on-same for pass/fail, autosave notes, confirmation modal for photo delete, horizontal scroller for many images, global nav save indicator, one open drawer at a time, and native kinetic scroll preserved.

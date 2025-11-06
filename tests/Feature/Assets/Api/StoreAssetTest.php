@@ -106,6 +106,32 @@ class StoreAssetTest extends TestCase
         $this->assertEquals('2023-09-03 00:00:00', $asset->last_audit_date);
     }
 
+    public function testCannotCreateAssetWithDeprecatedModelNumber(): void
+    {
+        $model = AssetModel::factory()->create();
+        $model->modelNumbers()->create([
+            'code' => 'ACTIVE',
+            'label' => 'Active Preset',
+        ]);
+        $deprecated = $model->modelNumbers()->create([
+            'code' => 'OLD',
+            'label' => 'Deprecated Preset',
+        ]);
+        $deprecated->deprecate();
+
+        $status = Statuslabel::factory()->readyToDeploy()->create();
+
+        $this->actingAsForApi(User::factory()->createAssets()->create())
+            ->postJson(route('api.assets.store'), [
+                'asset_tag' => 'TAG-1001',
+                'model_id' => $model->id,
+                'model_number_id' => $deprecated->id,
+                'status_id' => $status->id,
+            ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrorFor('model_number_id');
+    }
+
     public function testLastAuditDateCanBeNull()
     {
         $response = $this->actingAsForApi(User::factory()->superuser()->create())

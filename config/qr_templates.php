@@ -4,9 +4,9 @@ return [
     'enable_ui' => true,
     'templates' => [
         'dymo-89x36' => [
-            'name' => 'Dymo 89x36mm',
-            'width_mm' => 89,
-            'height_mm' => 36,
+            'name' => 'Dymo 50x30mm',
+            'width_mm' => 50,
+            'height_mm' => 30,
             'qr_size' => 200,
         ],
     ],

@@ -1,5 +1,26 @@
 # Agent & Progress Log (2025)
 
+## 2025-11-06 — Preset Filtering Addendum
+> Companion to PROGRESS.md (2025-11-06 entry); review alongside the main log.
+
+### Completed
+- Filtered asset creation/edit flows so Select2 options, validation rules, and controller logic ignore deprecated model numbers while still surfacing the legacy preset when editing an existing asset.
+- Tightened the API `models.selectlist` endpoint to return only active presets by default, added an escape hatch via `include_deprecated`, and introduced regression coverage for both paths.
+- Expanded API asset store/update tests to block deprecated presets on new assets and confirm legacy assets retain their historical model numbers without validation failures.
+- Rebuilt the `/start` page for refurbishers, senior refurbishers, and supervisors/admins with single-column, touch-friendly buttons (Scan QR, Nieuw asset, Beheer) and dusk/data-testid hooks for Dusk wiring.
+- Refreshed `/scan` with auto-starting QR capture, camera switching, manual fallback, localized messaging, and non-blocking hints; redirects now jump directly into the active tests view.
+- Delivered the new `/hardware/{asset}/tests/active` experience: grouped cards (Fouten/Open/Geslaagd), tri-state status toggles, inline notes/photos, sticky header/action bar, and toasts driven by autosave.
+- Added optimistic autosave with an offline queue + service worker cache, moving cards between groups immediately and recalculating progress/failure summaries on each change.
+- Added feature coverage (`Tests\ActiveTestViewTest`) for the active view/scan redirect and wired new JS bundles (`tests-active.js`, `tests-sw.js`) via Mix.
+- Logged the “Developer Execution Plan — Mobile Testing Page (A5-first)” under `docs/plans/` and resized the default QR label template to 50×30 mm for the Dymo LabelWriter 400.
+
+### Outstanding
+- Run the API and feature suites once PHP CLI access is available to exercise the new tests.
+- Smoke-test the asset create/edit UI in a browser to ensure the Select2 initial state shows a deprecated preset exactly once and that new searches omit hidden presets.
+- Build front-end assets (`npm run dev` or `npm run prod`) before deploying so `public/js/dist/tests-active.js` is published; the redesigned tests UI depends on it.
+- Plan Dusk coverage around the new mobile test flow (start buttons, scan redirect, autosave interactions) and consider full offline photo queuing if future requirements demand it.
+- Next iteration: execute the A5-first execution plan (compact two-column toggle, pass/fail deselect, drawers, autosave indicator, photo gallery UX) once design references are locked in.
+
 ## 2025-10-23 - Validation & Test Types Refresh
 > Companion to PROGRESS.md (2025-10-23 entry); review this addendum alongside the main log.
 

@@ -6,26 +6,35 @@
 @stop
 
 @section('content')
-<div class="container py-4 text-center">
-    <h1 class="h4 mb-4">{{ __('Welcome, :name', ['name' => auth()->user()->present()->name()]) }}</h1>
-    @can('scanning')
+<div class="container py-4">
+    <div class="mx-auto" style="max-width:420px;">
+        <h1 class="h4 text-center mb-4">{{ __('Start') }}</h1>
+        @can('scanning')
+            @include('start.partials.action-button', [
+                'href' => route('scan'),
+                'icon' => 'camera',
+                'label' => trans('general.scan_qr'),
+                'dusk' => 'start-scan',
+                'testid' => 'start-scan'
+            ])
+        @endcan
+        @can('assets.create')
+            @include('start.partials.action-button', [
+                'href' => route('hardware.create'),
+                'icon' => 'plus',
+                'label' => trans('general.new_asset'),
+                'dusk' => 'start-new-asset',
+                'testid' => 'start-new-asset'
+            ])
+        @endcan
         @include('start.partials.action-button', [
-            'href' => route('scan'),
-            'icon' => 'camera',
-            'label' => __('Scan QR')
+            'href' => route('home'),
+            'icon' => 'sliders-h',
+            'label' => trans('general.manage_portal'),
+            'variant' => 'outline-secondary',
+            'dusk' => 'start-manage',
+            'testid' => 'start-manage'
         ])
-    @endcan
-    @can('assets.create')
-        @include('start.partials.action-button', [
-            'href' => route('hardware.create'),
-            'icon' => 'plus',
-            'label' => trans('general.new_asset')
-        ])
-    @endcan
-    @include('start.partials.action-button', [
-        'href' => route('home'),
-        'icon' => 'cog',
-        'label' => __('Admin Panel')
-    ])
+    </div>
 </div>
 @stop

@@ -61,19 +61,33 @@ class UpdateAssetRequest extends ImageUploadRequest
         }
 
         $modelId = $this->input('model_id') ?: ($this->asset?->model_id);
-        $model = $modelId
-            ? AssetModel::with(['modelNumbers' => function ($query) {
-                $query->orderBy('label')->orderBy('code');
-            }])->find((int) $modelId)
-            : null;
-        $availableModelNumbers = $model?->modelNumbers ?? collect();
-        $requireModelNumber = $availableModelNumbers->count() > 1;
+        $model = $modelId ? AssetModel::find((int) $modelId) : null;
+        $activeModelNumbers = $model
+            ? $model->modelNumbers()->active()->orderBy('label')->orderBy('code')->get()
+            : collect();
+        $availableModelNumbers = $activeModelNumbers->values();
+        $currentModelNumberId = $this->asset?->model_number_id;
+        if ($currentModelNumberId && $model) {
+            $currentModelNumber = $model->modelNumbers()->whereKey($currentModelNumberId)->first();
+            if ($currentModelNumber && $availableModelNumbers->doesntContain(fn ($number) => $number->id === $currentModelNumber->id)) {
+                $availableModelNumbers->push($currentModelNumber);
+            }
+        }
+        $requireModelNumber = $activeModelNumbers->count() > 1;
 
         $rules['model_number_id'] = $modelId
             ? array_filter([
                 $requireModelNumber ? 'required' : 'nullable',
                 'integer',
-                Rule::exists('model_numbers', 'id')->where('model_id', (int) $modelId),
+                Rule::exists('model_numbers', 'id')->where(function ($query) use ($modelId, $currentModelNumberId) {
+                    $query->where('model_id', (int) $modelId)
+                        ->where(function ($nested) use ($currentModelNumberId) {
+                            $nested->whereNull('deprecated_at');
+                            if ($currentModelNumberId) {
+                                $nested->orWhere('id', $currentModelNumberId);
+                            }
+                        });
+                }),
             ])
             : ['nullable'];
 

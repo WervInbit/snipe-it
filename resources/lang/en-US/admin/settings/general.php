@@ -84,7 +84,7 @@ return [
     'label_size'                => 'Label Size',
     'label_size_help'           => 'Choose a label size for printed labels.',
     'label_size_options'        => [
-        'dymo_89x36mm' => 'Dymo 89×36mm',
+        'dymo_89x36mm' => 'Dymo 50×30mm',
     ],
     'laravel'                   => 'Laravel Version',
     'ldap'                      => 'LDAP',
