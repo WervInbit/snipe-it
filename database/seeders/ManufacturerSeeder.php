@@ -21,7 +21,9 @@ class ManufacturerSeeder extends Seeder
 
         Manufacturer::factory()->apple()->create(['created_by' => $admin->id]);
         Manufacturer::factory()->dell()->create(['created_by' => $admin->id]);
+        Manufacturer::factory()->hp()->create(['created_by' => $admin->id]);
         Manufacturer::factory()->lenovo()->create(['created_by' => $admin->id]);
+        Manufacturer::factory()->samsung()->create(['created_by' => $admin->id]);
         Manufacturer::factory()->google()->create(['created_by' => $admin->id]);
 
         $src = public_path('/img/demo/manufacturers/');

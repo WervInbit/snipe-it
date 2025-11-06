@@ -111,6 +111,8 @@ Route::group(
             ->name('test-results.edit');
         Route::put('{asset}/tests/{testRun}/results', [TestResultController::class, 'update'])
             ->name('test-results.update');
+        Route::post('{asset}/tests/{testRun}/results/{result}', [TestResultController::class, 'partialUpdate'])
+            ->name('test-results.partial-update');
 
         // Asset images
         Route::post('{asset}/images', [AssetImageController::class, 'store'])

@@ -52,17 +52,24 @@ class AppServiceProvider extends ServiceProvider
          * We'll force the https scheme if the APP_URL starts with https://, or if APP_FORCE_TLS is set to true.
          *
          */
-        if ((strpos(env('APP_URL'), 'https://') === 0) || (env('APP_FORCE_TLS'))) {
-            $url->forceScheme('https');
-        }
+        if ($this->app->runningUnitTests()) {
+            Log::info('AppServiceProvider boot: running unit tests', ['app_url' => config('app.url')]);
+            URL::forceRootUrl(config('app.url'));
+            URL::forceScheme(parse_url(config('app.url'), PHP_URL_SCHEME) ?: 'http');
+        } else {
+            Log::info('AppServiceProvider boot: normal mode', ['app_url' => config('app.url')]);
+            if ((strpos(env('APP_URL'), 'https://') === 0) || (env('APP_FORCE_TLS'))) {
+                $url->forceScheme('https');
+            }
 
-        // TODO - isn't it somehow 'gauche' to check the environment directly; shouldn't we be using config() somehow?
-        if ( ! env('APP_ALLOW_INSECURE_HOSTS')) {  // unless you set APP_ALLOW_INSECURE_HOSTS, you should PROHIBIT forging domain parts of URL via Host: headers
-            $url_parts = parse_url(config('app.url'));
-            if ($url_parts && array_key_exists('scheme', $url_parts) && array_key_exists('host', $url_parts)) { // check for the *required* parts of a bare-minimum URL
-                URL::forceRootUrl(config('app.url'));
-            } else {
-                Log::error("Your APP_URL in your .env is misconfigured - it is: ".config('app.url').". Many things will work strangely unless you fix it.");
+            // TODO - isn't it somehow 'gauche' to check the environment directly; shouldn't we be using config() somehow?
+            if (! env('APP_ALLOW_INSECURE_HOSTS')) {  // unless you set APP_ALLOW_INSECURE_HOSTS, you should PROHIBIT forging domain parts of URL via Host: headers
+                $url_parts = parse_url(config('app.url'));
+                if ($url_parts && array_key_exists('scheme', $url_parts) && array_key_exists('host', $url_parts)) { // check for the *required* parts of a bare-minimum URL
+                    URL::forceRootUrl(config('app.url'));
+                } else {
+                    Log::error("Your APP_URL in your .env is misconfigured - it is: ".config('app.url').". Many things will work strangely unless you fix it.");
+                }
             }
         }
 

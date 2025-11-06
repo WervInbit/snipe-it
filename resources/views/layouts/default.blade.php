@@ -545,11 +545,12 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                                 $icon = $iconMap[$status_nav->name] ?? 'circle';
                                                 $colorStyle = $status_nav->color ? ' style="color: '.e($status_nav->color).'"' : '';
                                                 $isActive = $activeStatusId === (int) $status_nav->id;
+                                                $displayName = \App\Support\RefurbStatus::displayName($status_nav->name);
                                             @endphp
                                             <li{!! $isActive ? ' class="active"' : '' !!}>
                                                 <a href="{{ route('hardware.index', ['status_id' => $status_nav->id]) }}">
                                                     <i class="fas fa-{{ $icon }} fa-fw" aria-hidden="true"{!! $colorStyle !!}></i>
-                                                    {{ $status_nav->name }}
+                                                    {{ $displayName }}
                                                     <span class="badge badge-secondary">{{ $status_nav->asset_count }}</span>
                                                 </a>
                                             </li>

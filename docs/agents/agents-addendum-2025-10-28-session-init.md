@@ -21,3 +21,6 @@
 ## Follow-ups
 - Populate the worklog as tasks progress and mirror key outcomes in `PROGRESS.md` before closing the session.
 - Zet op de todo: resterende PHPUnit-failures uit de checkout/merge-testen triëren of herwerken zodat de suite weer groen wordt.
+
+
+**Session closed** — 2025-10-28 13:38

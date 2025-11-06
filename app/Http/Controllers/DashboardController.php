@@ -8,6 +8,7 @@ use \Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Collection;
 use App\Models\Statuslabel;
+use App\Support\RefurbStatus;
 
 
 /**
@@ -69,55 +70,46 @@ class DashboardController extends Controller
         $definitions = collect([
             [
                 'status' => 'Stand-by',
-                'label' => 'Stand-by',
                 'icon' => 'pause',
                 'description' => 'Wachtend op intake of gegevenswiping.',
             ],
             [
                 'status' => 'Being Processed',
-                'label' => 'In verwerking',
                 'icon' => 'cogs',
                 'description' => 'Actief in test-, wipe- of herstelproces.',
             ],
             [
                 'status' => 'QA Hold',
-                'label' => 'QA wacht',
                 'icon' => 'flag',
                 'description' => 'Blokkeert tot accessoires, cosmetica of QA-uitkomst gereed zijn.',
             ],
             [
                 'status' => 'Ready for Sale',
-                'label' => 'Verkoopklaar',
                 'icon' => 'box-open',
                 'description' => 'Goedgekeurd en klaar voor verkoop of uitlevering.',
             ],
             [
                 'status' => 'Sold',
-                'label' => 'Verkocht',
                 'icon' => 'check',
                 'description' => 'Reeds verkocht of uit voorraad verwijderd.',
             ],
             [
                 'status' => 'Broken / Parts',
-                'label' => 'Defect / Onderdelen',
                 'icon' => 'tools',
                 'description' => 'Niet verkoopbaar; gebruikt voor onderdelen of diagnose.',
             ],
             [
                 'status' => 'Internal Use',
-                'label' => 'Intern gebruik',
                 'icon' => 'building',
                 'description' => 'Toegekend aan interne teams of labopstellingen.',
             ],
             [
                 'status' => 'Archived',
-                'label' => 'Gearchiveerd',
                 'icon' => 'archive',
                 'description' => 'Historisch dossier; niet actief in omloop.',
             ],
             [
                 'status' => 'Returned / RMA',
-                'label' => 'Retour / RMA',
                 'icon' => 'undo-alt',
                 'description' => 'Retour ontvangen en wacht op opnieuw beoordelen.',
             ],
@@ -130,9 +122,10 @@ class DashboardController extends Controller
 
         return $definitions->map(function (array $definition) use ($statusLabels) {
             $status = $statusLabels->get($definition['status']);
+            $label = RefurbStatus::displayName($definition['status']);
 
             return [
-                'label' => $definition['label'] ?? $definition['status'],
+                'label' => $label,
                 'icon' => $definition['icon'],
                 'description' => $definition['description'],
                 'status_id' => $status?->id,

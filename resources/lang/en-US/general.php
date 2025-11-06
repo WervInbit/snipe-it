@@ -163,6 +163,8 @@ return [
     'image_deleted'         => 'Image deleted.',
     'image_caption_updated' => 'Image caption updated.',
     'attach_photo'              => 'Attach Photo',
+    'replace_photo'             => 'Replace Photo',
+    'photo_added'               => 'Photo Added',
     'too_many_asset_images'    => 'Assets may not have more than 30 images.',
     'images'                => 'Images',
     'caption'               => 'Caption',
