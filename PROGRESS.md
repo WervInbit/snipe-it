@@ -23,6 +23,8 @@
 - Highest priority: re-test `/hardware/{asset}/tests/active` now that the Bootstrap compatibility helpers are in place; if the legacy Blade/JS bundle still appears, inspect caches and ensure `public/js/dist/tests-active.js` is synced inside the runtime container (nginx/php-fpm).
 - Once the new UI renders correctly, rerun `php artisan test tests/Feature/Tests/ActiveTestViewTest.php tests/Feature/Assets/PartialUpdateTestResultTest.php`, `php artisan test --testsuite=API`, and `php artisan dusk --filter=TestsActiveDrawersTest`, then log the outcomes (the targeted feature test command currently fails because PHP CLI is unavailable in this shell).
 - Continue the A5-first testing UI execution plan and expand Dusk coverage after the environment reliably serves the refreshed assets.
+- TODO: tighten typography/layout on `/hardware/{asset}/tests/active` for ≤430 px devices so body copy no longer overflows the card; increase base font size/line height and ensure each card reflows without clipping.
+- TODO: replace the placeholder `code` fields in `ProvidesDeviceCatalogData` (e.g., `HP-450G8-I5-16-512`) with factual MPN/SKU values pulled from vendor datasheets before running seeds in production; research is still pending.
 
 # Session Progress (2025-11-11)
 

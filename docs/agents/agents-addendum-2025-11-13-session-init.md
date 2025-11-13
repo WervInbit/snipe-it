@@ -22,6 +22,8 @@
 - Re-test `/hardware/{asset}/tests/active` in browsers and Dusk to confirm the Bootstrap compatibility helpers clear the runtime error, the refreshed styling matches the plan screenshot, and that pass/fail buttons respond now that `canUpdate` falls back to asset-edit permissions; if the legacy Blade/JS bundle still appears, dig into view caches and in-container Mix artifacts next. Feature coverage already passed via `docker compose exec app php artisan test tests/Feature/Tests/ActiveTestViewTest.php` and `docker compose exec app php artisan test tests/Feature/Assets/PartialUpdateTestResultTest.php`; API/Dusk suites remain pending.
 - Rerun the targeted suites (`php artisan test --testsuite=API`, `php artisan test tests/Feature/Tests/ActiveTestViewTest.php tests/Feature/Assets/PartialUpdateTestResultTest.php`, and `php artisan dusk --filter=TestsActiveDrawersTest`) once the UI is fixed, then log the results here and in `PROGRESS.md`; the feature test command currently fails immediately because PHP CLI isn't available in this shell.
 - Mirror any user-facing or process changes into `docs/fork-notes.md` plus this addendum as the session progresses.
+- TODO (responsive polish): On ≤430 px devices the testing card body copy is still sized for desktop and spills outside the block. Increase base font size/line height within `.tests-active-card` and verify the grid collapses without clipping note/photo drawers.
+- TODO (catalog accuracy): The seed `code` values for HP ProBook 450/430 variants, Surface Pro 4/5, Pixel 8 Pro, etc., are placeholders. Research the real MPN/SKU strings from vendor datasheets and update `ProvidesDeviceCatalogData` before the next production seed run.
 
 
 
