@@ -1,3 +1,46 @@
+# Session Progress (2025-11-13)
+
+## Addendum (2025-11-13 Codex)
+- Re-read `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, `docs/agents/agent-progress-2025.md`, and every existing `docs/agents/agents-addendum-*` log so today's work begins with the latest workflow rules and carry-over issues.
+- Logged this dated stub and created `docs/agents/agents-addendum-2025-11-13-session-init.md` to capture detailed context before touching code or tests.
+- Reconfirmed the lingering blockers from the 2025-11-06 and 2025-11-11 sessions (new `/hardware/{asset}/tests/active` view not rendering, targeted PHPUnit/Dusk suites pending) and queued them for follow-up today.
+- Kickoff/context refresh captured before code changes resumed; all subsequent bullets reflect today's work.
+- Fixed the `bootstrap.Modal` runtime error on `/hardware/{asset}/tests/active` by adding compatibility helpers in `resources/js/tests-active.js` that prefer Bootstrap 5 components but gracefully fall back to the existing jQuery plugins (modal/collapse) when the namespace lacks constructors; rebuilt assets via `npm run dev` so the updated bundle is ready for verification.
+- Rewired the tests UI permission gate: `TestResultController@active` now derives `canUpdate` from the `TestRun` policy (run owners with refurbisher/supervisor/admin access) instead of the asset policy, and the view config reflects that so front-end buttons stay active for refurbishers who own the run even without asset-edit rights; added two feature tests covering the positive/negative scenarios. `php artisan test tests/Feature/Tests/ActiveTestViewTest.php` could not run locally because `php` is unavailable in this shell.
+- Restored asset-edit access to the tests UI: `TestResultController@active` now allows `canUpdate` when the viewer can edit the asset _or_ the test run, preserving the previous behavior for asset managers while keeping the new refurbisher permissions; extended feature coverage so a user with only asset-edit rights still sees `canUpdate: true`. Running `php artisan test tests/Feature/Tests/ActiveTestViewTest.php` still fails immediately because PHP CLI is unavailable here—rerun inside Docker/WSL to verify.
+- Fixed the missing page-level styles by switching both `resources/views/tests/active.blade.php` and `resources/views/tests/edit.blade.php` to use the layout’s `@push('css')` stack instead of the non-existent `@push('styles')`, so the new cards/layout now match the spec reference (two-column blocks, note/photo buttons at the bottom).
+- Delivered the new A5-first visual system for `/hardware/{asset}/tests/active`: sticky two-tier header, responsive CSS grid that switches between masonry and compact modes, elevated cards with segmented controls, and a glassy floating action bar that mirrors the screenshot in `docs/plans/Schermafbeelding 2025-11-13 093717.png`. The `tests/partials/active-card.blade.php` template now exposes status pills, 50/50 note/photo actions, and drawers styled for the new aesthetic.
+- Polished the cards per design feedback: removed the stale “Expected” copy, enlarged titles, centered/larger Geslaagd/Mislukt buttons, dropped the redundant status pill text, and replaced the note/photo labels with icon+indicator pills so it’s easy to scan which cards contain attachments.
+- Reworked `resources/js/tests-active.js` to drive the new icon indicators (note/photo chips now toggle classes instead of “Ja/Nee” text) and kept the multi-location progress counters in sync; recompiled assets via `npm run dev`.
+- Re-verified the feature targets inside Docker after each set of visual tweaks: `docker compose exec app php artisan test tests/Feature/Tests/ActiveTestViewTest.php` (6 tests) and `docker compose exec app php artisan test tests/Feature/Assets/PartialUpdateTestResultTest.php` (5 tests) both pass; API suite and Dusk runs remain pending.
+- Additional polish round: hid the lingering “Toon instructies” label, centered the note/photo text with icons, moved the indicator chip to the far right, widened/tallened the Geslaagd/Mislukt controls, and introduced localized copy for the note/photo CTAs plus the note field label. Assets rebuilt via `npm run dev`, and the same two Docker PHPUnit suites were re-run successfully.
+- Follow-up: repositioned the note/photo indicator chips using CSS grid so they float on the far right (independent of the centered icon/text), confirmed no lingering `general.*` strings remain, and recompiled assets. Re-ran the two Docker feature suites again to ensure the markup/JS changes are safe.
+- Added full multi-photo support for test results: new `test_result_photos` table/migration (with backfill), `TestResultPhoto` model/relations, multi-photo upload/delete logic in `TestResultController@partialUpdate`, Blade galleries, and JS handling (stacked thumbnails w/ horizontal scroll + per-photo delete). The `tests/Feature/Assets/PartialUpdateTestResultTest.php` suite now covers upload/removal flows; ran it plus `tests/Feature/Tests/ActiveTestViewTest.php` inside Docker after `php artisan migrate`.
+
+## Notes for Follow-up Agents
+- Expand this section as concrete work lands today and mirror behaviour/process changes into `docs/fork-notes.md` plus supporting docs.
+- Highest priority: re-test `/hardware/{asset}/tests/active` now that the Bootstrap compatibility helpers are in place; if the legacy Blade/JS bundle still appears, inspect caches and ensure `public/js/dist/tests-active.js` is synced inside the runtime container (nginx/php-fpm).
+- Once the new UI renders correctly, rerun `php artisan test tests/Feature/Tests/ActiveTestViewTest.php tests/Feature/Assets/PartialUpdateTestResultTest.php`, `php artisan test --testsuite=API`, and `php artisan dusk --filter=TestsActiveDrawersTest`, then log the outcomes (the targeted feature test command currently fails because PHP CLI is unavailable in this shell).
+- Continue the A5-first testing UI execution plan and expand Dusk coverage after the environment reliably serves the refreshed assets.
+
+# Session Progress (2025-11-11)
+
+## Addendum (2025-11-11 Codex)
+- Reviewed `AGENTS.md`, `PROGRESS.md`, and every `docs/agents` addendum so today's work starts with the latest ground rules and outstanding follow-ups in mind.
+- Logged this dated entry plus a companion docs/agents addendum to capture context before code changes begin, keeping the documentation trail intact.
+- Reconfirmed the 2025-11-06 follow-ups (A5-first testing UI plan, select list/API test runs, expanded Dusk/browser coverage) so they remain front-of-mind for this session's prioritization.
+- Implemented the A5-first testing UI plan: rebuilt `tests.active` with the sticky save-indicator header, layout toggle, card drawers, modals, and fixed action bar; added the new `tests/partials/active-card.blade.php`, rewrote `resources/js/tests-active.js` for the new interactions (pass/fail deselect, autosave notes, photo modal/delete), and extended translations + feature tests. (`php artisan test tests/Feature/Tests/ActiveTestViewTest.php tests/Feature/Assets/PartialUpdateTestResultTest.php` was attempted but `php` is unavailable in this shell.)
+- Follow-up polish: darkened the card backgrounds and added vertical/column spacing so each block is visually separated, wired the collapse toggles (instructions/note/photo) to Bootstrap’s data attributes for a non-JS fallback, loosened the update gate to match the start-run permission, expanded Dusk coverage (`TestsActiveDrawersTest` now seeds its own run and walks pass/fail/note/photo flows), and rebuilt assets with `npm run dev`. `docker compose exec app php artisan test tests/Feature/Tests/ActiveTestViewTest.php tests/Feature/Assets/PartialUpdateTestResultTest.php` passes; `docker compose exec app php artisan dusk --filter=TestsActiveDrawersTest` still times out because the refreshed UI fails to load inside Dusk (page renders the legacy template/no cards), screenshot saved under `tests/Browser/screenshots/failure-Tests_Browser_TestsActiveDrawersTest_test_note_and_photo_drawers_toggle-0.png`.
+- Reconfigured Dusk to use the same MariaDB engine as dev (new `snipeit_dusk` schema via `docker compose exec db …`, updated `.env.dusk*` to point at it) so browser tests no longer rely on SQLite. Post-change, `php artisan dusk --filter=TestsActiveDrawersTest` fails later in the flow (waiting for `/start`) instead of choking on SQLite-specific SQL, which confirms it now targets the MySQL schema; further UI fixes can proceed on that baseline.
+
+## Notes for Follow-up Agents
+- Use this stub to record concrete work as it lands today; mirror any user-facing or process changes into docs/fork-notes.md and supporting docs.
+- Highest priority: /hardware/{asset}/tests/active still renders the old UI (no cards/drawers) in both browsers and Dusk even after clearing caches, reinstalling dependencies, and recreating Docker volumes. Track down why php-fpm/nginx is serving the legacy Blade/JS and fix it.
+- When you start coding, run the targeted test suites (php artisan test --testsuite=API, php artisan dusk) relevant to your changes and log the results here.
+- Continue the Developer Execution Plan (A5-first testing UI) once blockers clear, and call out any new risks or doc needs in this section.
+- Dusk coverage is still pending: docker compose exec app php artisan dusk --filter=TestsActiveDrawersTest times out because the test harness still sees the legacy page; once the UI issue above is resolved, rerun the suite.
+
+
 # Session Progress (2025-11-06)
 
 ## Addendum (2025-11-06 Codex)
@@ -259,4 +302,5 @@ there are multiple duplicate functions that still need to be removed, sku will b
 
 
 **Session closed** — 2025-10-28 13:38
+
 

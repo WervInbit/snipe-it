@@ -5,521 +5,591 @@ if (!window.bootstrap) {
     window.bootstrap = bootstrap;
 }
 
-const { TestsActiveConfig: config } = window;
+const config = window.TestsActiveConfig || {};
+const getBootstrapNamespace = () => window.bootstrap || bootstrap || null;
+const getJquery = () => window.jQuery || window.$ || null;
 
-const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-const toastContainer = document.getElementById('tests-toast-container');
-const offlineBanner = document.getElementById('offline-banner');
-const completeBtn = document.getElementById('tests-complete-btn');
-const repairBtn = document.getElementById('tests-repair-btn');
-const progressBar = document.querySelector('.tests-action-bar .progress-bar');
-const progressCompletedEl = document.querySelector('[data-progress-completed]');
-const progressRemainingEl = document.querySelector('[data-progress-remaining]');
-const failuresSummaryEl = document.querySelector('[data-progress-failures]');
-const chipButtons = document.querySelectorAll('.chip-button');
-
-const queue = [];
-let flushingQueue = false;
-const progressState = config?.progress ? { ...config.progress } : { total: 0, completed: 0, remaining: 0, failures: 0 };
-
-function showToast(message, variant = 'success') {
-    if (!toastContainer || !message) return;
-
-    const wrapper = document.createElement('div');
-    wrapper.className = `toast align-items-center text-bg-${variant}`;
-    wrapper.setAttribute('role', 'status');
-    wrapper.setAttribute('aria-live', 'polite');
-    wrapper.setAttribute('aria-atomic', 'true');
-    wrapper.innerHTML = `
-        <div class="d-flex">
-            <div class="toast-body">${message}</div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-    `;
-
-    toastContainer.appendChild(wrapper);
-    const toast = new bootstrap.Toast(wrapper, { delay: 3000 });
-    toast.show();
-    wrapper.addEventListener('hidden.bs.toast', () => wrapper.remove());
-}
-
-function setOfflineState(isOffline) {
-    if (!offlineBanner) return;
-    offlineBanner.classList.toggle('d-none', !isOffline);
-}
-
-function buildUpdateUrl(resultId) {
-    if (!config?.endpoints?.partialUpdate) {
-        return null;
-    }
-    return config.endpoints.partialUpdate.replace('RESULT_ID', resultId);
-}
-
-function buildHeaders(isFormData = false) {
-    const headers = {};
-    if (!isFormData) {
-        headers['Content-Type'] = 'application/json';
-    }
-    if (csrfToken) {
-        headers['X-CSRF-TOKEN'] = csrfToken;
-    }
-    return headers;
-}
-
-async function flushQueue() {
-    if (flushingQueue || queue.length === 0) return;
-    if (!navigator.onLine) return;
-
-    flushingQueue = true;
-    setOfflineState(false);
-
-    while (queue.length > 0) {
-        const item = queue[0];
-        const url = buildUpdateUrl(item.resultId);
+const createModalController = (element) => {
+    if (!element) return null;
+    const bootstrapNs = getBootstrapNamespace();
+    if (bootstrapNs?.Modal && typeof bootstrapNs.Modal === 'function') {
         try {
-            const response = await fetch(url, {
-                method: 'POST',
-                body: item.body,
-                headers: item.headers,
-                credentials: 'same-origin',
-            });
-            if (!response.ok) throw new Error('Request failed');
-            queue.shift();
-            const data = await response.json().catch(() => ({}));
-            if (data?.message) {
-                showToast(data.message, 'success');
-            } else {
-                showToast(config?.messages?.saved ?? 'Saved', 'success');
-            }
+            return new bootstrapNs.Modal(element);
         } catch (error) {
-            console.error('Failed to flush queued test update', error);
-            // Leave in the queue and break so we can retry later.
-            setOfflineState(true);
-            break;
+            console.warn('Failed to instantiate bootstrap.Modal, falling back to jQuery plugin', error);
         }
     }
 
-    flushingQueue = false;
-}
-
-function queueUpdate(resultId, payload) {
-    const url = buildUpdateUrl(resultId);
-    if (!url) return;
-
-    queue.push(payload);
-    setOfflineState(true);
-    showToast(config?.messages?.queued ?? 'Update queued', 'secondary');
-    if (navigator.onLine) {
-        flushQueue();
+    const $ = getJquery();
+    if ($?.fn?.modal) {
+        const $el = $(element);
+        return {
+            show: () => $el.modal('show'),
+            hide: () => $el.modal('hide'),
+        };
     }
-}
 
-async function sendUpdate(resultId, payload) {
-    const url = buildUpdateUrl(resultId);
-    if (!url) return { ok: false };
+    return null;
+};
 
-    const isFormData = payload instanceof FormData;
-    const body = isFormData ? payload : JSON.stringify(payload);
-    const headers = buildHeaders(isFormData);
-
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            body,
-            headers,
-            credentials: 'same-origin',
-        });
-
-        if (!response.ok) {
-            const data = await response.json().catch(() => ({}));
-            throw new Error(data?.message || response.statusText);
-        }
-
-        const data = await response.json().catch(() => ({}));
-        if (data?.message) {
-            showToast(data.message, 'success');
-        } else {
-            showToast(config?.messages?.saved ?? 'Saved', 'success');
-        }
-        return { ok: true, data };
-    } catch (error) {
-        if (!navigator.onLine || error.message === 'Failed to fetch') {
-            if (isFormData) {
-                showToast(config?.messages?.photoOffline ?? 'Photo upload not available offline.', 'danger');
-                return { ok: false, offline: true };
-            }
-            queueUpdate(resultId, { resultId, body, headers });
-            return { ok: false, queued: true };
-        }
-        showToast(error.message || 'Save failed', 'danger');
-        return { ok: false, error };
+const getCollapseController = (element) => {
+    if (!element) return null;
+    const bootstrapNs = getBootstrapNamespace();
+    if (bootstrapNs?.Collapse?.getOrCreateInstance) {
+        return bootstrapNs.Collapse.getOrCreateInstance(element, { toggle: false });
     }
-}
 
-function updateStatusVisual(card, status) {
-    const buttons = card.querySelectorAll('.status-option');
-    buttons.forEach((btn) => {
-        const btnStatus = btn.dataset.status;
-        btn.classList.toggle('active', btnStatus === status);
-        btn.setAttribute('aria-pressed', btnStatus === status ? 'true' : 'false');
-    });
-    const toggle = card.querySelector('.status-toggle');
-    if (toggle) {
-        toggle.dataset.status = status;
+    const $ = getJquery();
+    if ($?.fn?.collapse) {
+        const $el = $(element);
+        return {
+            toggle: () => $el.collapse('toggle'),
+            show: () => $el.collapse('show'),
+            hide: () => $el.collapse('hide'),
+        };
     }
-}
 
-function updateNoteVisual(card, hasNote) {
-    const button = card.querySelector('[data-comment-toggle]');
-    if (!button) return;
-    button.classList.toggle('active-chip', hasNote);
-}
+    return null;
+};
 
-function updatePhotoVisual(card, photoUrl) {
-    const button = card.querySelector('[data-photo-trigger]');
-    const container = card.querySelector('[data-photo-container="true"]');
-    if (!button || !container) return;
-    const img = container.querySelector('img');
-
-    if (photoUrl) {
-        button.classList.add('active-chip');
-        container.classList.remove('d-none');
-        if (img) {
-            img.src = photoUrl;
-        } else {
-            const image = document.createElement('img');
-            image.src = photoUrl;
-            image.alt = button.textContent.trim();
-            container.prepend(image);
-        }
-    } else {
-        button.classList.remove('active-chip');
-        if (img) img.remove();
-        container.classList.add('d-none');
-    }
-}
-
-function updateGroupCounts() {
-    ['fail', 'open', 'pass'].forEach((groupKey) => {
-        const body = document.querySelector(`[data-group-body="${groupKey}"]`);
-        const header = document.querySelector(`[data-group-toggle="${groupKey}"]`);
-        const count = body ? body.querySelectorAll('.test-card').length : 0;
-        if (!header) return;
-
-        const badge = header.querySelector('.badge');
-        if (badge) {
-            badge.textContent = count;
-        }
-
-        if (count === 0) {
-            header.classList.add('disabled', 'text-muted');
-            header.setAttribute('disabled', 'disabled');
-            if (body) {
-                body.classList.add('d-none');
-                if (!body.querySelector('[data-empty-state]')) {
-                    const emptyText = body.dataset.emptyTemplate || 'Nothing here yet.';
-                    const empty = document.createElement('div');
-                    empty.className = 'text-muted small px-1';
-                    empty.dataset.emptyState = 'true';
-                    empty.textContent = emptyText;
-                    body.appendChild(empty);
-                }
-            }
-        } else {
-            header.classList.remove('disabled', 'text-muted');
-            header.removeAttribute('disabled');
-            if (groupKey !== 'pass' && body) {
-                body.classList.remove('d-none');
-            }
-        }
-    });
-    updateFailureSummary();
-}
-
-function updateFailureSummary() {
-    if (!failuresSummaryEl) return;
-    const failCards = document.querySelectorAll('[data-group-body="fail"] .test-card');
-    if (failCards.length === 0) {
-        failuresSummaryEl.classList.add('d-none');
-        failuresSummaryEl.textContent = '';
+const bootTestsActiveUI = () => {
+    if (window.TestsActiveUIBootstrapped || !config.runId) {
         return;
     }
 
-    const labels = Array.from(failCards).map((card) => card.querySelector('.test-card__label')?.textContent.trim()).filter(Boolean);
-    const template = failuresSummaryEl.dataset.template || 'Failing: :list';
-    failuresSummaryEl.textContent = template.replace(':list', labels.join(', '));
-    failuresSummaryEl.classList.remove('d-none');
-}
-
-function moveCardToGroup(card, newStatus) {
-    let targetGroup = 'open';
-    if (newStatus === 'fail') targetGroup = 'fail';
-    if (newStatus === 'pass') targetGroup = 'pass';
-
-    const body = document.querySelector(`[data-group-body="${targetGroup}"]`);
-    if (!body) return;
-
-    const emptyState = body.querySelector('[data-empty-state]');
-    if (emptyState) {
-        emptyState.remove();
+    const grid = document.getElementById('testGrid');
+    if (!grid) {
+        return;
     }
 
-    body.appendChild(card);
-    if (targetGroup === 'pass') {
-        const header = document.querySelector('[data-group-toggle="pass"]');
-        if (header?.getAttribute('aria-expanded') === 'true') {
-            body.classList.remove('d-none');
-        } else {
-            body.classList.add('d-none');
+    window.TestsActiveUIBootstrapped = true;
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    const indicator = document.getElementById('saveIndicator');
+    const indicatorIcons = indicator
+        ? {
+              saving: indicator.querySelector('[data-state="saving"]'),
+              clean: indicator.querySelector('[data-state="clean"]'),
+              error: indicator.querySelector('[data-state="error"]'),
+          }
+        : {};
+    let pendingSaves = 0;
+    let openDrawerId = null;
+
+    const photoDeleteModalEl = document.getElementById('photoDeleteModal');
+    const photoDeleteModal = createModalController(photoDeleteModalEl);
+    const photoViewerModalEl = document.getElementById('photoViewerModal');
+    const photoViewerModal = createModalController(photoViewerModalEl);
+    const viewerImg = document.getElementById('viewerImg');
+    const deleteConfirmBtn = document.getElementById('confirmPhotoDeleteBtn');
+    let deleteContext = null;
+
+    const progressState = {
+        total: Number(config.progress?.total ?? 0),
+        completed: Number(config.progress?.completed ?? 0),
+        remaining: Number(config.progress?.remaining ?? 0),
+        failures: Number(config.progress?.failures ?? 0),
+    };
+
+    const progressBar = document.querySelector('[data-progress-bar]');
+    const progressCompletedEls = document.querySelectorAll('[data-progress-completed]');
+    const progressRemainingEls = document.querySelectorAll('[data-progress-remaining]');
+    const failuresSummaryEls = document.querySelectorAll('[data-progress-failures]');
+    const completeBtn = document.getElementById('tests-complete-btn');
+    const repairBtn = document.getElementById('tests-repair-btn');
+
+    const noteMessageTemplate = config.messages?.noteSaved ?? '';
+    const photoEmptyTemplate = config.messages?.photoDrawerEmpty ?? '';
+    const removePhotoLabel = config.messages?.removePhoto ?? '';
+
+    const noteDebouncers = new WeakMap();
+
+    const buildUpdateUrl = (resultId) => {
+        if (!config.endpoints?.partialUpdate) return null;
+        return config.endpoints.partialUpdate.replace('RESULT_ID', resultId);
+    };
+
+    const setIndicator = (state) => {
+        if (!indicator) return;
+        Object.values(indicatorIcons).forEach((icon) => {
+            if (icon) icon.classList.add('d-none');
+        });
+        if (!state) return;
+        const icon = indicatorIcons[state];
+        if (icon) {
+            icon.classList.remove('d-none');
         }
-    }
+    };
 
-    updateGroupCounts();
-}
+    const beginSave = () => {
+        pendingSaves += 1;
+        setIndicator('saving');
+    };
 
-function updateProgressCounts(oldStatus, newStatus) {
-    if (oldStatus === newStatus) return;
+    const endSave = (ok = true) => {
+        pendingSaves = Math.max(0, pendingSaves - 1);
+        if (pendingSaves > 0) {
+            setIndicator('saving');
+            return;
+        }
+        setIndicator(ok ? 'clean' : 'error');
+    };
 
-    const isCompleteStatus = (status) => status === 'pass' || status === 'fail';
+    const submitFormData = async (resultId, formData) => {
+        const url = buildUpdateUrl(resultId);
+        if (!url) return { ok: false };
 
-    if (oldStatus === 'nvt' && isCompleteStatus(newStatus)) {
-        progressState.completed += 1;
-        progressState.remaining = Math.max(0, progressState.remaining - 1);
-    } else if (isCompleteStatus(oldStatus) && newStatus === 'nvt') {
-        progressState.completed = Math.max(0, progressState.completed - 1);
-        progressState.remaining += 1;
-    }
-
-    if (oldStatus === 'fail') {
-        progressState.failures = Math.max(0, progressState.failures - 1);
-    }
-    if (newStatus === 'fail') {
-        progressState.failures += 1;
-    }
-}
-
-function refreshProgressUI() {
-    if (progressCompletedEl) {
-        const template = progressCompletedEl.dataset.template || ':completed / :total';
-        progressCompletedEl.textContent = template
-            .replace(':completed', progressState.completed)
-            .replace(':total', progressState.total);
-    }
-
-    if (progressRemainingEl) {
-        const template = progressRemainingEl.dataset.template || ':remaining remaining';
-        progressRemainingEl.textContent = template.replace(':remaining', progressState.remaining);
-    }
-
-    if (progressBar) {
-        const width = progressState.total
-            ? Math.round((progressState.completed / Math.max(1, progressState.total)) * 100)
-            : 0;
-        progressBar.style.width = `${width}%`;
-        progressBar.setAttribute('aria-valuenow', progressState.completed);
-        progressBar.setAttribute('aria-valuemax', progressState.total);
-    }
-
-    if (completeBtn) {
-        const disabled = !(progressState.remaining === 0 && progressState.failures === 0);
-        completeBtn.disabled = disabled;
-        completeBtn.classList.toggle('disabled', disabled);
-    }
-
-    if (repairBtn) {
-        const disabled = progressState.failures === 0;
-        repairBtn.disabled = disabled;
-        repairBtn.classList.toggle('disabled', disabled);
-    }
-}
-
-function initialiseGroupToggles() {
-    document.querySelectorAll('[data-group-toggle]').forEach((button) => {
-        button.addEventListener('click', () => {
-            const group = button.dataset.groupToggle;
-            const body = document.querySelector(`[data-group-body="${group}"]`);
-            if (!body || button.classList.contains('disabled')) return;
-            const expanded = button.getAttribute('aria-expanded') === 'true';
-            button.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-            body.classList.toggle('d-none', expanded);
-        });
-    });
-}
-
-function initialiseCard(card) {
-    const initialStatus = card.dataset.initialStatus || 'nvt';
-    card.dataset.currentStatus = initialStatus;
-    updateStatusVisual(card, initialStatus);
-
-    const noteValue = card.querySelector('[data-note-input]')?.value.trim();
-    if (noteValue) {
-        const noteContainer = card.querySelector('[data-note-container="true"]');
-        if (noteContainer) noteContainer.classList.remove('d-none');
-        updateNoteVisual(card, true);
-    }
-
-    const photoContainer = card.querySelector('[data-photo-container="true"]');
-    if (photoContainer && !photoContainer.classList.contains('d-none')) {
-        updatePhotoVisual(card, photoContainer.querySelector('img')?.src || null);
-    }
-
-    card.querySelectorAll('.status-option').forEach((button) => {
-        button.addEventListener('click', async () => {
-            if (!config?.canUpdate) return;
-            const newStatus = button.dataset.status;
-            const previousStatus = card.dataset.currentStatus;
-            if (!newStatus || !previousStatus) return;
-
-            card.dataset.currentStatus = newStatus;
-            updateStatusVisual(card, newStatus);
-            const oldStatus = previousStatus;
-            moveCardToGroup(card, newStatus);
-            updateGroupCounts();
-            updateProgressCounts(oldStatus, newStatus);
-            refreshProgressUI();
-
-            const response = await sendUpdate(card.dataset.resultId, { status: newStatus });
-            if (!response.ok && !response.queued) {
-                // Revert
-                card.dataset.currentStatus = oldStatus;
-                updateStatusVisual(card, oldStatus);
-                moveCardToGroup(card, oldStatus);
-                updateGroupCounts();
-                updateProgressCounts(newStatus, oldStatus);
-                refreshProgressUI();
-            }
-        });
-    });
-
-    const instructionsToggle = card.querySelector('[data-instructions-toggle]');
-    if (instructionsToggle) {
-        const instructions = card.querySelector('.test-card__instructions');
-        instructionsToggle.addEventListener('click', () => {
-            if (!instructions) return;
-            const hidden = instructions.classList.contains('d-none');
-            instructions.classList.toggle('d-none', !hidden);
-            instructionsToggle.setAttribute('aria-expanded', hidden ? 'true' : 'false');
-        });
-    }
-
-    const noteToggle = card.querySelector('[data-comment-toggle]');
-    const noteContainer = card.querySelector('[data-note-container="true"]');
-    const noteInput = card.querySelector('[data-note-input]');
-    if (noteToggle && noteContainer && noteInput) {
-        noteToggle.addEventListener('click', () => {
-            const hidden = noteContainer.classList.contains('d-none');
-            noteContainer.classList.toggle('d-none', !hidden);
-            if (hidden) {
-                noteInput.focus();
-            }
-        });
-
-        const debouncedSave = debounce(async (value) => {
-            updateNoteVisual(card, value.trim().length > 0);
-            await sendUpdate(card.dataset.resultId, { note: value });
-        }, 600);
-
-        noteInput.addEventListener('input', (event) => {
-            debouncedSave(event.target.value);
-        });
-    }
-
-    const photoTrigger = card.querySelector('[data-photo-trigger]');
-    const photoInput = card.querySelector('[data-photo-input]');
-    const photoRemove = card.querySelector('[data-photo-remove]');
-
-    if (photoTrigger && photoInput) {
-        photoTrigger.addEventListener('click', () => {
-            photoInput.click();
-        });
-
-        photoInput.addEventListener('change', async () => {
-            const file = photoInput.files?.[0];
-            if (!file) return;
-
-            const formData = new FormData();
-            formData.append('photo', file);
-
-            const response = await sendUpdate(card.dataset.resultId, formData);
-            if (response.ok && response.data?.photo_url) {
-                updatePhotoVisual(card, response.data.photo_url);
-                showToast(config?.messages?.photoReplaced ?? 'Photo replaced', 'success');
-                let removeBtn = card.querySelector('[data-photo-remove]');
-                if (!removeBtn) {
-                    removeBtn = document.createElement('button');
-                    removeBtn.type = 'button';
-                    removeBtn.className = 'btn btn-link text-danger p-0 small';
-                    removeBtn.dataset.photoRemove = 'true';
-                    removeBtn.textContent = config?.messages?.removePhoto ?? 'Remove photo';
-                    card.querySelector('[data-photo-container="true"]')?.appendChild(removeBtn);
-                    removeBtn.addEventListener('click', async () => {
-                        const resp = await sendUpdate(card.dataset.resultId, { remove_photo: true });
-                        if (resp.ok) {
-                            updatePhotoVisual(card, null);
-                            removeBtn.remove();
-                        }
-                    });
-                }
-            } else if (!response.ok) {
-                photoInput.value = '';
-            }
-        });
-    }
-
-    if (photoRemove) {
-        photoRemove.addEventListener('click', async () => {
-            const response = await sendUpdate(card.dataset.resultId, { remove_photo: true });
-            if (response.ok) {
-                updatePhotoVisual(card, null);
-                photoRemove.remove();
-            }
-        });
-    }
-}
-
-function initialiseCards() {
-    document.querySelectorAll('.test-card').forEach((card) => {
-        card.dataset.resultId = card.dataset.resultId || card.getAttribute('data-result-id');
-        initialiseCard(card);
-    });
-    updateGroupCounts();
-    refreshProgressUI();
-}
-
-function initialiseActions() {
-    if (completeBtn && config?.actions?.completeUrl) {
-        completeBtn.addEventListener('click', () => {
-            if (completeBtn.classList.contains('disabled')) return;
-            window.location.href = config.actions.completeUrl;
-        });
-    }
-
-    if (repairBtn && config?.actions?.repairUrl) {
-        repairBtn.addEventListener('click', () => {
-            if (repairBtn.classList.contains('disabled')) return;
-            window.location.href = config.actions.repairUrl;
-        });
-    }
-}
-
-if (config?.runId) {
-    window.addEventListener('online', () => {
-        setOfflineState(false);
-        flushQueue();
-    });
-
-    window.addEventListener('offline', () => {
-        setOfflineState(true);
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-        initialiseGroupToggles();
-        initialiseCards();
-        initialiseActions();
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/tests-sw.js').catch((error) => {
-                console.error('Failed to register test service worker', error);
+        beginSave();
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : undefined,
+                body: formData,
+                credentials: 'same-origin',
             });
+
+            if (!response.ok) throw new Error('Request failed');
+            const data = await response.json().catch(() => ({}));
+            endSave(true);
+            return { ok: true, data };
+        } catch (error) {
+            console.error('Failed to update test result', error);
+            endSave(false);
+            return { ok: false, error };
+        }
+    };
+
+    const applyLayout = (enabled) => {
+        if (!grid) return;
+        if (enabled) {
+            grid.classList.add('compact-2col');
+            grid.dataset.mode = 'two';
+        } else {
+            grid.classList.remove('compact-2col');
+            grid.dataset.mode = 'one';
+        }
+    };
+
+    const layoutKey = config.layoutKey || 'tests.layout.twoCol';
+    const readLayoutPref = () => {
+        try {
+            return window.localStorage.getItem(layoutKey) === '1';
+        } catch {
+            return false;
+        }
+    };
+    const writeLayoutPref = (enabled) => {
+        try {
+            window.localStorage.setItem(layoutKey, enabled ? '1' : '0');
+        } catch {
+            // ignore storage failures
+        }
+    };
+
+    const twoColChk = document.getElementById('twoColChk');
+    const toggleTwoColBtn = document.getElementById('toggleTwoCol');
+    const initialTwoCol = readLayoutPref();
+    if (twoColChk) {
+        twoColChk.checked = initialTwoCol;
+    }
+    applyLayout(initialTwoCol);
+
+    toggleTwoColBtn?.addEventListener('click', () => {
+        const enabled = !(twoColChk?.checked ?? false);
+        if (twoColChk) {
+            twoColChk.checked = enabled;
+        }
+        applyLayout(enabled);
+        writeLayoutPref(enabled);
+    });
+
+    const updateFailureSummary = () => {
+        if (!failuresSummaryEls.length) return;
+        const template = failuresSummaryEls[0].dataset.template || ':failures';
+        const text = template.replace(':failures', progressState.failures);
+        failuresSummaryEls.forEach((el) => {
+            el.textContent = text;
+            el.classList.toggle('text-danger', progressState.failures > 0);
+        });
+    };
+
+    const refreshProgressUI = () => {
+        progressCompletedEls.forEach((el) => {
+            const template = el.dataset.template || ':completed / :total';
+            el.textContent = template
+                .replace(':completed', progressState.completed)
+                .replace(':total', progressState.total);
+        });
+        progressRemainingEls.forEach((el) => {
+            const template = el.dataset.template || ':remaining';
+            el.textContent = template.replace(':remaining', progressState.remaining);
+        });
+        if (progressBar) {
+            const width = progressState.total
+                ? Math.round((progressState.completed / Math.max(1, progressState.total)) * 100)
+                : 0;
+            progressBar.style.width = `${width}%`;
+            progressBar.setAttribute('aria-valuenow', progressState.completed);
+            progressBar.setAttribute('aria-valuemax', progressState.total);
+        }
+        if (completeBtn) {
+            const canComplete = progressState.remaining === 0 && progressState.failures === 0;
+            completeBtn.disabled = !canComplete;
+            completeBtn.classList.toggle('disabled', !canComplete);
+        }
+        if (repairBtn) {
+            const canRepair = progressState.failures > 0;
+            repairBtn.disabled = !canRepair;
+            repairBtn.classList.toggle('disabled', !canRepair);
+        }
+        updateFailureSummary();
+    };
+
+    const updateProgressCounts = (oldStatus, newStatus) => {
+        if (oldStatus === newStatus) return;
+        const isComplete = (status) => status === 'pass' || status === 'fail';
+
+        if (!isComplete(oldStatus) && isComplete(newStatus)) {
+            progressState.completed += 1;
+            progressState.remaining = Math.max(0, progressState.remaining - 1);
+        } else if (isComplete(oldStatus) && !isComplete(newStatus)) {
+            progressState.completed = Math.max(0, progressState.completed - 1);
+            progressState.remaining += 1;
+        }
+
+        if (oldStatus === 'fail') {
+            progressState.failures = Math.max(0, progressState.failures - 1);
+        }
+        if (newStatus === 'fail') {
+            progressState.failures += 1;
+        }
+    };
+
+    const setStatusPressedState = (card, status) => {
+        const passBtn = card.querySelector('[data-action="set-pass"]');
+        const failBtn = card.querySelector('[data-action="set-fail"]');
+        passBtn?.setAttribute('aria-pressed', status === 'pass' ? 'true' : 'false');
+        failBtn?.setAttribute('aria-pressed', status === 'fail' ? 'true' : 'false');
+        const pill = card.querySelector('[data-status-pill]');
+        if (pill) {
+            pill.dataset.status = status;
+            const label = pill.querySelector('[data-status-label]');
+            if (label) {
+                if (status === 'pass') {
+                    label.textContent = card.dataset.statusPassLabel || 'Pass';
+                } else if (status === 'fail') {
+                    label.textContent = card.dataset.statusFailLabel || 'Fail';
+                } else {
+                    label.textContent = card.dataset.statusNvtLabel || 'N/A';
+                }
+            }
+        }
+    };
+
+    const applyNoteSavedTimestamp = (textarea) => {
+        if (!textarea) return;
+        const target = textarea.closest('.collapse')?.querySelector('[data-note-saved]');
+        if (!target) return;
+        if (!noteMessageTemplate) {
+            target.textContent = new Date().toLocaleString();
+            return;
+        }
+        target.textContent = noteMessageTemplate.replace(':time', new Date().toLocaleString());
+    };
+
+    const setNoteIndicator = (card, hasNote) => {
+        const indicator = card?.querySelector('[data-note-indicator]');
+        if (!indicator) return;
+        indicator.classList.toggle('is-active', !!hasNote);
+    };
+
+    const setPhotoIndicator = (card, hasPhoto) => {
+        const indicator = card?.querySelector('[data-photo-indicator]');
+        if (!indicator) return;
+        indicator.classList.toggle('is-active', !!hasPhoto);
+    };
+
+    const ensurePhotoEmptyState = (gallery) => {
+        if (!gallery) return false;
+        const hasThumb = gallery.querySelector('[data-photo-node="true"]');
+        let empty = gallery.querySelector('[data-photo-empty]');
+        if (hasThumb) {
+            empty?.remove();
+            return true;
+        }
+        if (!empty) {
+            empty = document.createElement('span');
+            empty.dataset.photoEmpty = 'true';
+            empty.className = 'text-muted small';
+            empty.textContent = photoEmptyTemplate || '';
+            gallery.prepend(empty);
+        }
+        return false;
+    };
+
+    const createPhotoThumb = (photo) => {
+        const normalized = typeof photo === 'string' ? { url: photo } : photo || {};
+        const wrapper = document.createElement('div');
+        wrapper.className = 'testing-photos-thumb';
+        wrapper.dataset.photoNode = 'true';
+        if (normalized.id) {
+            wrapper.dataset.photoId = normalized.id;
+        }
+
+        const img = document.createElement('img');
+        img.src = normalized.url || '';
+        img.alt = '';
+        img.dataset.action = 'open-photo';
+        if (normalized.id) {
+            img.dataset.photoId = normalized.id;
+        }
+        wrapper.appendChild(img);
+
+        if (config.canUpdate) {
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'btn btn-link text-danger p-0 small mt-1';
+            removeBtn.dataset.action = 'confirm-remove-photo';
+            if (normalized.id) {
+                removeBtn.dataset.photoId = normalized.id;
+            }
+            removeBtn.textContent = removePhotoLabel;
+            wrapper.appendChild(removeBtn);
+        }
+
+        return wrapper;
+    };
+
+    const cards = grid.querySelectorAll('[data-result-id]');
+    cards.forEach((card) => {
+        const initialStatus = card.dataset.initialStatus || 'nvt';
+        card.dataset.currentStatus = initialStatus;
+        setStatusPressedState(card, initialStatus);
+        const noteField = card.querySelector('textarea[data-bind="note"]');
+        setNoteIndicator(card, noteField?.value.trim().length > 0);
+        const hasPhoto = !!card.querySelector('[data-photo-node="true"]');
+        setPhotoIndicator(card, hasPhoto);
+    });
+
+    refreshProgressUI();
+    setIndicator('clean');
+
+    const buildStatusPayload = (status) => {
+        const formData = new FormData();
+        if (status === 'nvt') {
+            formData.set('status', '');
+        } else {
+            formData.set('status', status);
+        }
+        return formData;
+    };
+
+    const handleStatusChange = async (card, nextStatus) => {
+        const resultId = card.dataset.resultId;
+        if (!resultId) return;
+
+        const previousStatus = card.dataset.currentStatus || 'nvt';
+        card.dataset.currentStatus = nextStatus;
+        setStatusPressedState(card, nextStatus);
+        updateProgressCounts(previousStatus, nextStatus);
+        refreshProgressUI();
+
+        const response = await submitFormData(resultId, buildStatusPayload(nextStatus));
+        if (!response.ok) {
+            card.dataset.currentStatus = previousStatus;
+            setStatusPressedState(card, previousStatus);
+            updateProgressCounts(nextStatus, previousStatus);
+            refreshProgressUI();
+        }
+    };
+
+    const maybeCloseOtherDrawer = (targetId) => {
+        if (openDrawerId && openDrawerId !== targetId) {
+            const current = document.getElementById(openDrawerId);
+            if (current) {
+                const instance = getCollapseController(current);
+                instance?.hide();
+            }
+        }
+        openDrawerId = targetId;
+    };
+
+    grid.addEventListener('shown.bs.collapse', (event) => {
+        openDrawerId = event.target.id;
+    });
+
+    grid.addEventListener('hidden.bs.collapse', (event) => {
+        if (openDrawerId === event.target.id) {
+            openDrawerId = null;
         }
     });
+
+    grid.addEventListener('click', (event) => {
+        const trigger = event.target.closest('[data-action]');
+        if (!trigger) return;
+
+        const card = trigger.closest('[data-result-id]');
+        const action = trigger.dataset.action;
+
+        if (!card && !['open-photo'].includes(action)) {
+            return;
+        }
+
+        switch (action) {
+            case 'toggle-help': {
+                const targetId = trigger.getAttribute('aria-controls');
+                if (!targetId) return;
+                const element = document.getElementById(targetId);
+                if (!element) return;
+                const instance = getCollapseController(element);
+                instance?.toggle();
+                break;
+            }
+            case 'toggle-note':
+            case 'toggle-photos': {
+                const targetId = trigger.getAttribute('aria-controls');
+                if (!targetId) return;
+                const element = document.getElementById(targetId);
+                if (!element) return;
+                maybeCloseOtherDrawer(targetId);
+                const instance = getCollapseController(element);
+                instance?.toggle();
+                break;
+            }
+            case 'set-pass':
+            case 'set-fail': {
+                if (!config.canUpdate) return;
+                const desired = action === 'set-pass' ? 'pass' : 'fail';
+                const current = card.dataset.currentStatus || 'nvt';
+                const nextStatus = current === desired ? 'nvt' : desired;
+                handleStatusChange(card, nextStatus);
+                break;
+            }
+            case 'open-photo': {
+                if (!photoViewerModal || !viewerImg) return;
+                const src = trigger.getAttribute('src') || trigger.dataset.photoUrl;
+                if (!src) return;
+                viewerImg.src = src;
+                photoViewerModal.show();
+                break;
+            }
+            case 'confirm-remove-photo': {
+                if (!photoDeleteModal) return;
+                const photoId = trigger.dataset.photoId;
+                if (!photoId) return;
+                deleteContext = {
+                    resultId: card?.dataset.resultId,
+                    gallery: card?.querySelector('[data-photo-gallery]'),
+                    photoId,
+                };
+                photoDeleteModal.show();
+                break;
+            }
+            default:
+                break;
+        }
+    });
+
+    deleteConfirmBtn?.addEventListener('click', async () => {
+        if (!deleteContext || !deleteContext.resultId) return;
+
+        const formData = new FormData();
+        if (deleteContext.photoId) {
+            formData.set('remove_photo_id', deleteContext.photoId);
+        } else {
+            formData.set('remove_photo', '1');
+        }
+        const response = await submitFormData(deleteContext.resultId, formData);
+        if (response.ok) {
+            const gallery = deleteContext.gallery;
+            let thumb = null;
+            if (deleteContext.photoId) {
+                thumb = gallery?.querySelector(`[data-photo-node="true"][data-photo-id="${deleteContext.photoId}"]`);
+            } else {
+                thumb = gallery?.querySelector('[data-photo-node="true"]');
+            }
+            thumb?.remove();
+            const hasPhotos = ensurePhotoEmptyState(gallery);
+            const card = gallery?.closest('[data-result-id]');
+            setPhotoIndicator(card, hasPhotos);
+        }
+        photoDeleteModal?.hide();
+        deleteContext = null;
+    });
+
+    grid.addEventListener('change', async (event) => {
+        const input = event.target.closest('input[type="file"][data-action="upload-photo"]');
+        if (!input || !input.files?.length) return;
+        const card = input.closest('[data-result-id]');
+        if (!card) return;
+        const resultId = card.dataset.resultId;
+        const files = Array.from(input.files);
+
+        for (const file of files) {
+            const formData = new FormData();
+            formData.set('photo', file);
+            const response = await submitFormData(resultId, formData);
+            if (response.ok && response.data?.photo) {
+                const gallery = card.querySelector('[data-photo-gallery]');
+                const photoData = response.data.photo || {
+                    id: response.data.photo_id,
+                    url: response.data.photo_url,
+                };
+                const thumb = createPhotoThumb(photoData);
+                gallery?.appendChild(thumb);
+                const hasPhotos = ensurePhotoEmptyState(gallery);
+                setPhotoIndicator(card, hasPhotos);
+            }
+        }
+        input.value = '';
+    });
+
+    grid.addEventListener('input', (event) => {
+        const textarea = event.target.closest('textarea[data-bind="note"]');
+        if (!textarea || !config.canUpdate) return;
+        const card = textarea.closest('[data-result-id]');
+        if (!card) return;
+        const resultId = card.dataset.resultId;
+        setNoteIndicator(card, textarea.value.trim().length > 0);
+
+        let handler = noteDebouncers.get(textarea);
+        if (!handler) {
+            handler = debounce(async () => {
+                const formData = new FormData();
+                formData.set('note', textarea.value);
+                const response = await submitFormData(resultId, formData);
+                if (response.ok) {
+                    applyNoteSavedTimestamp(textarea);
+                }
+            }, 700);
+            noteDebouncers.set(textarea, handler);
+        }
+        handler();
+    });
+
+    completeBtn?.addEventListener('click', () => {
+        if (completeBtn.classList.contains('disabled')) return;
+        if (config.actions?.completeUrl) {
+            window.location.href = config.actions.completeUrl;
+        }
+    });
+
+    repairBtn?.addEventListener('click', () => {
+        if (repairBtn.classList.contains('disabled')) return;
+        if (config.actions?.repairUrl) {
+            window.location.href = config.actions.repairUrl;
+        }
+    });
+
+    photoViewerModalEl?.addEventListener('hidden.bs.modal', () => {
+        if (viewerImg) {
+            viewerImg.src = '';
+        }
+    });
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootTestsActiveUI);
+} else {
+    bootTestsActiveUI();
 }

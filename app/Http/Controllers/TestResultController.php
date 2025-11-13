@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 use App\Models\AttributeDefinition;
+use App\Models\TestResultPhoto;
 
 class TestResultController extends Controller
 {
@@ -21,21 +22,23 @@ class TestResultController extends Controller
         $run = $asset->tests()
             ->with([
                 'results' => function ($query) {
-                    $query->with(['type', 'attributeDefinition'])->orderBy('id');
+                    $query->with(['type', 'attributeDefinition', 'photos'])->orderBy('id');
                 },
                 'user',
             ])
             ->first();
 
+        $canUpdateResults = Gate::allows('update', $asset);
+
+        if ($run) {
+            $canUpdateResults = $canUpdateResults || Gate::allows('update', $run);
+        }
+
         if (!$run) {
             return view('tests.active', [
                 'asset' => $asset,
                 'run' => null,
-                'groups' => [
-                    'fail' => collect(),
-                    'open' => collect(),
-                    'pass' => collect(),
-                ],
+                'results' => collect(),
                 'progress' => [
                     'total' => 0,
                     'completed' => 0,
@@ -43,7 +46,7 @@ class TestResultController extends Controller
                     'failures' => 0,
                 ],
                 'failingLabels' => collect(),
-                'canUpdate' => Gate::allows('update', $asset),
+                'canUpdate' => $canUpdateResults,
                 'canStartRun' => Gate::allows('tests.execute') && Gate::allows('update', $asset),
                 'canViewAudit' => Gate::allows('audits.view'),
             ]);
@@ -62,6 +65,20 @@ class TestResultController extends Controller
                 $expected = $expected === '1' ? trans('general.yes') : trans('general.no');
             }
 
+            $photos = $result->photos->map(function (TestResultPhoto $photo) {
+                return [
+                    'id' => $photo->id,
+                    'url' => url($photo->path),
+                ];
+            });
+
+            if ($photos->isEmpty() && $result->photo_path) {
+                $photos = collect([[
+                    'id' => null,
+                    'url' => url($result->photo_path),
+                ]]);
+            }
+
             return [
                 'id' => $result->id,
                 'status' => $result->status,
@@ -69,21 +86,16 @@ class TestResultController extends Controller
                 'slug' => $slug,
                 'note' => $result->note,
                 'instructions' => $instructions,
-                'photo' => $result->photo_path ? url($result->photo_path) : null,
                 'expected' => $expected,
                 'attribute' => $definition?->label,
+                'note_saved_at' => $result->updated_at?->timezone(config('app.timezone'))?->format('Y-m-d H:i'),
+                'photos' => $photos,
             ];
-        });
-
-        $grouped = [
-            'fail' => $results->where('status', TestResult::STATUS_FAIL)->values(),
-            'open' => $results->where('status', TestResult::STATUS_NVT)->values(),
-            'pass' => $results->where('status', TestResult::STATUS_PASS)->values(),
-        ];
+        })->values();
 
         $total = $results->count();
-        $openCount = $grouped['open']->count();
-        $failCount = $grouped['fail']->count();
+        $failCount = $results->where('status', TestResult::STATUS_FAIL)->count();
+        $openCount = $results->where('status', TestResult::STATUS_NVT)->count();
 
         $progress = [
             'total' => $total,
@@ -92,15 +104,17 @@ class TestResultController extends Controller
             'failures' => $failCount,
         ];
 
-        $failingLabels = $grouped['fail']->pluck('label');
+        $failingLabels = $results
+            ->where('status', TestResult::STATUS_FAIL)
+            ->pluck('label');
 
         return view('tests.active', [
             'asset' => $asset,
             'run' => $run,
-            'groups' => $grouped,
+            'results' => $results,
             'progress' => $progress,
             'failingLabels' => $failingLabels,
-            'canUpdate' => Gate::allows('update', $run),
+            'canUpdate' => $canUpdateResults,
             'canStartRun' => Gate::allows('tests.execute') && Gate::allows('update', $asset),
             'canViewAudit' => Gate::allows('audits.view'),
         ]);
@@ -159,10 +173,15 @@ class TestResultController extends Controller
 
         $updated = false;
         $response = [];
+        $photosMutated = false;
 
-        if ($request->filled('status')) {
+        if ($request->has('status')) {
             $status = $request->input('status');
-            if (in_array($status, TestResult::STATUSES, true)) {
+            if ($status === null || $status === '') {
+                $result->status = TestResult::STATUS_NVT;
+                $response['status'] = TestResult::STATUS_NVT;
+                $updated = true;
+            } elseif (in_array($status, TestResult::STATUSES, true)) {
                 $result->status = $status;
                 $response['status'] = $status;
                 $updated = true;
@@ -176,37 +195,98 @@ class TestResultController extends Controller
             $updated = true;
         }
 
-        if ($request->boolean('remove_photo')) {
+        $result->loadMissing('photos');
+
+        if ($request->filled('remove_photo_id')) {
+            $photoId = (int) $request->input('remove_photo_id');
+            $photo = $result->photos->firstWhere('id', $photoId);
+            if ($photo) {
+                if ($photo->path && File::exists(public_path($photo->path))) {
+                    File::delete(public_path($photo->path));
+                }
+                $photo->delete();
+                $response['removed_photo_id'] = $photoId;
+                $updated = true;
+                $photosMutated = true;
+            }
+        } elseif ($request->boolean('remove_photo')) {
+            foreach ($result->photos as $photo) {
+                if ($photo->path && File::exists(public_path($photo->path))) {
+                    File::delete(public_path($photo->path));
+                }
+                $photo->delete();
+            }
             if ($result->photo_path && File::exists(public_path($result->photo_path))) {
                 File::delete(public_path($result->photo_path));
             }
             $result->photo_path = null;
-            $response['photo'] = false;
             $updated = true;
+            $photosMutated = true;
         }
 
         if ($request->hasFile('photo')) {
-            $file = $request->file('photo');
+            $files = $request->file('photo');
+            if (!is_array($files)) {
+                $files = [$files];
+            }
+
             $destination = public_path('uploads/test_images');
             File::ensureDirectoryExists($destination);
 
-            if ($result->photo_path && File::exists(public_path($result->photo_path))) {
-                File::delete(public_path($result->photo_path));
+            $newPhotos = [];
+            foreach ($files as $file) {
+                $filename = uniqid('test_', true) . '.' . $file->getClientOriginalExtension();
+                $file->move($destination, $filename);
+                $relativePath = 'uploads/test_images/' . $filename;
+
+                $photoModel = $result->photos()->create(['path' => $relativePath]);
+                $newPhotos[] = [
+                    'id' => $photoModel->id,
+                    'url' => url($relativePath),
+                ];
+                $result->photo_path = $relativePath;
             }
 
-            $filename = uniqid('test_', true) . '.' . $file->getClientOriginalExtension();
-            $file->move($destination, $filename);
-            $relativePath = 'uploads/test_images/' . $filename;
-
-            $result->photo_path = $relativePath;
-            $response['photo'] = true;
-            $response['photo_url'] = url($relativePath);
+            $response['photo'] = $newPhotos[0] ?? null;
+            $response['photos'] = $newPhotos;
             $updated = true;
-        } elseif ($result->photo_path) {
-            $response['photo'] = true;
-            $response['photo_url'] = url($result->photo_path);
-        } else {
-            $response['photo'] = false;
+            $photosMutated = true;
+        } elseif (!array_key_exists('photos', $response)) {
+            $response['photos'] = $result->photos->map(function (TestResultPhoto $photo) {
+                return [
+                    'id' => $photo->id,
+                    'url' => url($photo->path),
+                ];
+            });
+        }
+
+        if ($photosMutated) {
+            $result->unsetRelation('photos');
+            $result->load('photos');
+            $latestPhoto = $result->photos()->latest()->first();
+            $result->photo_path = $latestPhoto?->path;
+        }
+
+        $result->loadMissing('photos');
+
+        $response['photos'] = $result->photos->map(function (TestResultPhoto $photo) {
+            return [
+                'id' => $photo->id,
+                'url' => url($photo->path),
+            ];
+        });
+
+        if (!isset($response['photo'])) {
+            $latest = $result->photos->last();
+            $response['photo'] = $latest
+                ? ['id' => $latest->id, 'url' => url($latest->path)]
+                : false;
+        }
+
+        if (is_array($response['photo'] ?? null)) {
+            $response['photo_url'] = $response['photo']['url'];
+        } elseif (!isset($response['photo_url'])) {
+            $response['photo_url'] = null;
         }
 
         if ($updated) {

@@ -6,8 +6,10 @@ use App\Models\SnipeModel;
 use App\Models\Traits\TestAuditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use App\Models\AttributeDefinition;
+use App\Models\TestResultPhoto;
 
 /**
  * Stores the outcome of a single test within a run.
@@ -53,7 +55,6 @@ class TestResult extends SnipeModel
         'test_type_id',
         'status',
         'note',
-        'photo_path',
         'attribute_definition_id',
         'expected_value',
         'expected_raw_value',
@@ -80,5 +81,10 @@ class TestResult extends SnipeModel
     public function audits(): MorphMany
     {
         return $this->morphMany(TestAudit::class, 'auditable');
+    }
+
+    public function photos(): HasMany
+    {
+        return $this->hasMany(TestResultPhoto::class);
     }
 }

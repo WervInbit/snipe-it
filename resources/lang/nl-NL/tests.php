@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 return [
     'tests' => 'Tests',
@@ -47,4 +47,17 @@ return [
     'update_queued' => 'Offline — wijziging in wachtrij',
     'photo_replaced' => 'Vorige foto vervangen',
     'photo_offline_error' => 'Foto\'s kunnen offline niet worden geüpload.',
+    'two_column_toggle' => 'Twee kolommen (compact)',
+    'note_saved_at' => 'Opgeslagen om :time',
+    'photo_drawer_empty' => 'Nog geen foto\'s.',
+    'photo_delete_title' => 'Foto verwijderen?',
+    'photo_delete_body' => 'Deze actie kan niet ongedaan worden gemaakt.',
+    'photo_delete_confirm' => 'Foto verwijderen',
+    'note_field_label' => 'Testnotitie',
+    'photo_thumbnail_alt' => 'Geüploade testfoto',
+    'add_photo_cta' => 'Foto toevoegen',
+    'note_cta' => 'Notitie',
+    'photo_cta' => 'Foto',
 ];
+
+
