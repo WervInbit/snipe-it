@@ -79,12 +79,9 @@ class DemoAssetsSeeder extends Seeder
     private function seedModelBlueprints(): array
     {
         $valueService = app(AttributeValueService::class);
-        $blueprints = collect($this->modelBlueprints())->only([
-            'HP ProBook 450 G8',
-            'HP ProBook 430 G7',
-            'Samsung Galaxy A5',
-            'Pixel 8 Pro',
-        ]);
+        $blueprints = collect($this->modelBlueprints())->only(
+            array_merge($this->demoModelKeys(), $this->expansionModelKeys())
+        );
 
         $attributeKeys = $blueprints
             ->flatMap(fn ($config) => array_keys($config['attributes']))
