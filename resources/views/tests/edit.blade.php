@@ -4,7 +4,7 @@
     {{ trans('tests.edit_test_results') }}
 @endsection
 
-@push('styles')
+@push('css')
 <style>
 .test-editor {
     padding-bottom: 2rem;
