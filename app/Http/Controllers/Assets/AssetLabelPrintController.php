@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Arr;
 use Symfony\Component\Process\Process;
 
 class AssetLabelPrintController extends Controller
@@ -23,13 +24,19 @@ class AssetLabelPrintController extends Controller
         $this->authorize('view', $asset);
 
         $templates = config('qr_templates.templates');
+        $queues = array_values(array_filter(config('qr_templates.queues') ?? []));
 
         $validated = $request->validate([
             'template' => ['required', 'string', Rule::in(array_keys($templates))],
-            'queue' => ['nullable', 'string', 'max:100', 'regex:/^[A-Za-z0-9._:-]+$/'],
+            'queue' => [
+                'nullable',
+                'string',
+                'max:100',
+                $queues ? Rule::in($queues) : 'regex:/^[A-Za-z0-9._:-]+$/',
+            ],
         ]);
 
-        $queue = $validated['queue'] ?? config('qr_templates.print_queue');
+        $queue = $validated['queue'] ?? config('qr_templates.print_queue') ?? Arr::first($queues);
 
         if (! $queue) {
             return response()->json([

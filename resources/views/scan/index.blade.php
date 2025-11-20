@@ -6,11 +6,22 @@
 @stop
 
 @section('content')
+<style>
+    #scan-area {
+        max-width: 100%;
+    }
+    #scan-video,
+    #scan-overlay {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+</style>
 <div class="container py-4">
     <div class="mx-auto" style="max-width:420px;">
         <h1 class="h4 text-center mb-4">{{ trans('general.scan_qr') }}</h1>
 
-        <div id="scan-permission" class="alert alert-warning d-none" role="alert" data-testid="scan-permission-banner">
+        <div id="scan-permission" class="alert alert-warning d-none" role="alert" data-testid="scan-permission-banner" style="display:none;">
             {{ trans('general.scan_camera_denied') }}
         </div>
 
@@ -21,7 +32,7 @@
                    muted
                    playsinline></video>
             <canvas id="scan-overlay" class="position-absolute top-0 start-0 w-100 h-100" aria-hidden="true"></canvas>
-            <div id="scan-hint" class="position-absolute bottom-0 start-0 end-0 text-white bg-dark bg-opacity-50 py-2 px-3 small d-none">
+            <div id="scan-hint" class="position-absolute bottom-0 start-0 end-0 text-white bg-dark bg-opacity-50 py-2 px-3 small d-none" style="display:none;">
                 {{ trans('general.scan_hint_move_closer') }}
             </div>
         </div>
@@ -35,9 +46,9 @@
             </button>
         </div>
 
-        <div id="scan-error" class="alert alert-danger d-none mt-3" role="alert" data-testid="scan-error"></div>
+        <div id="scan-error" class="alert alert-danger d-none mt-3" role="alert" data-testid="scan-error" style="display:none;"></div>
 
-        <form id="manual-form" class="mt-3 d-none" data-testid="scan-manual-form">
+        <form id="manual-form" class="mt-3 d-none" data-testid="scan-manual-form" style="display:none;">
             <label class="form-label visually-hidden" for="manual-tag">{{ trans('general.scan_manual_entry') }}</label>
             <input id="manual-tag"
                    type="text"

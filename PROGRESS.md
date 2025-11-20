@@ -4,6 +4,7 @@
 - Reviewed QR printing architecture and added a server-side print path that renders the selected template to PDF and spools it to a CUPS queue (configurable via `LABEL_PRINTER_QUEUE` / `LABEL_PRINT_COMMAND`).
 - New asset-page control sends the current template to the server print endpoint and surfaces job feedback; preview/download remain unchanged.
 - Added a CUPS setup guide under `docs/agents/cups-setup-guide.md` and stubbed the new env vars in `.env.example`.
+- Added optional multi-queue support (`LABEL_PRINTER_QUEUES`) plus a printer dropdown on the asset QR widget for selecting storage/workarea queues.
 
 # Session Progress (2025-11-19)
 
@@ -25,7 +26,7 @@
 - Run the refreshed PDFs through real Dymo LabelWriter 400 Turbo hardware for each template (especially the larger 30256 shipping roll) and tweak `config/qr_templates.php` padding if any QR codes still get cropped.
 - Consider persisting a per-user "last template" preference so success notifications and other entry points can default to the roll most recently used without forcing a page reload.
 - Once hardware verification is done, grab screenshots of the new sidebar widget and bulk picker for inclusion in README/docs to help downstream contributors understand the workflow without diffing code.
-- TODO: add multiple queue selection (e.g., storage vs workarea) for server-side LabelWriter printing.
+- TODO: configure and validate multiple print queues (storage vs workarea) via `LABEL_PRINTER_QUEUES` and the asset-page dropdown.
 
 # Session Progress (2025-11-13)
 

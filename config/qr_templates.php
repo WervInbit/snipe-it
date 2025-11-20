@@ -5,6 +5,7 @@ return [
     'enable_ui' => true,
     'print_queue' => env('LABEL_PRINTER_QUEUE'),
     'print_command' => env('LABEL_PRINT_COMMAND', 'lp'),
+    'queues' => array_values(array_filter(array_map('trim', explode(',', env('LABEL_PRINTER_QUEUES', ''))))),
     'templates' => [
         'dymo-99010-89x36' => [
             'name' => 'Dymo 99010 (89 x 36 mm) – Standard Address',

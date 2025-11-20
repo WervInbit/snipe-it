@@ -27,24 +27,35 @@ function showError(msg) {
   if (!errorEl) return;
   errorEl.textContent = msg;
   errorEl.classList.remove('d-none');
+  errorEl.style.display = '';
 }
 
 function hideError() {
   if (!errorEl) return;
   errorEl.classList.add('d-none');
   errorEl.textContent = '';
+  errorEl.style.display = 'none';
 }
 
 function showManual() {
-  if (manualForm) manualForm.classList.remove('d-none');
+  if (manualForm) {
+    manualForm.classList.remove('d-none');
+    manualForm.style.display = '';
+  }
 }
 
 function showPermissionBanner() {
-  if (permissionBanner) permissionBanner.classList.remove('d-none');
+  if (permissionBanner) {
+    permissionBanner.classList.remove('d-none');
+    permissionBanner.style.display = '';
+  }
 }
 
 function hidePermissionBanner() {
-  if (permissionBanner) permissionBanner.classList.add('d-none');
+  if (permissionBanner) {
+    permissionBanner.classList.add('d-none');
+    permissionBanner.style.display = 'none';
+  }
 }
 
 function beep() {
@@ -73,11 +84,17 @@ function clearOverlay() {
 }
 
 function showHint() {
-  if (hintBanner) hintBanner.classList.remove('d-none');
+  if (hintBanner) {
+    hintBanner.classList.remove('d-none');
+    hintBanner.style.display = '';
+  }
 }
 
 function hideHint() {
-  if (hintBanner) hintBanner.classList.add('d-none');
+  if (hintBanner) {
+    hintBanner.classList.add('d-none');
+    hintBanner.style.display = 'none';
+  }
 }
 
 function redirect(tag) {
@@ -130,12 +147,7 @@ async function start(deviceId = null) {
     video.srcObject = stream;
     await video.play();
 
-    const vw = video.videoWidth || video.clientWidth || config.width;
-    const vh = video.videoHeight || video.clientHeight || config.height;
-    canvas.width = vw;
-    canvas.height = vh;
-    overlay.width = vw;
-    overlay.height = vh;
+    syncViewportSizes();
 
     timer = setInterval(sample, config.interval);
     hintTimer = setTimeout(showHint, 10_000);
@@ -190,6 +202,16 @@ async function init() {
   await start(initialDeviceId);
 }
 
+function syncViewportSizes() {
+  const rect = video.getBoundingClientRect();
+  const vw = Math.max(1, Math.round(rect.width || config.width));
+  const vh = Math.max(1, Math.round(rect.height || config.height));
+  canvas.width = vw;
+  canvas.height = vh;
+  overlay.width = vw;
+  overlay.height = vh;
+}
+
 if (manualForm) {
   manualForm.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -221,6 +243,12 @@ document.addEventListener('visibilitychange', () => {
 
 window.addEventListener('beforeunload', () => {
   stop();
+});
+
+window.addEventListener('resize', () => {
+  if (stream) {
+    syncViewportSizes();
+  }
 });
 
 init().catch((error) => {

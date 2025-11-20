@@ -7,10 +7,12 @@
 - Added a server-side LabelWriter print endpoint that renders the selected QR template to PDF and spools it to a CUPS queue (config via `LABEL_PRINTER_QUEUE` / `LABEL_PRINT_COMMAND`), logging queue/job/user details.
 - Wired the asset view QR widget with a “Print to LabelWriter” control that posts the active template to the new endpoint and surfaces success/failure feedback.
 - Documented CUPS setup for Dymo on Linux in `docs/agents/cups-setup-guide.md`; `.env.example` now includes the printing env stubs.
+- Added optional multi-queue selection support (env `LABEL_PRINTER_QUEUES`, UI dropdown).
+- Filed the 99010 Dymo label template under `docs/labels/Inbit Snipeit Asset V3.label` for reference.
 
 ### Outstanding
-- Configure CUPS on the target server per the guide and set `LABEL_PRINTER_QUEUE` (initially for 99010 stock); add more templates once new rolls arrive.
-- Consider per-printer selection if multiple LabelWriters are exposed.
+- Configure CUPS on the target server per the guide and set `LABEL_PRINTER_QUEUE` / `LABEL_PRINTER_QUEUES` (initially for 99010 stock); add more templates once new rolls arrive.
+- Populate `LABEL_PRINTER_QUEUES` for storage vs workarea queues and verify server-side printing against both.
 
 # Agent & Progress Log (2025)
 
