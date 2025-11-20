@@ -300,6 +300,7 @@
                                                   <option value="{{ $key }}" @selected($selectedTemplate == $key)>{{ $tpl['name'] }}</option>
                                               @endforeach
                                           </select>
+                                          <p class="help-block">{{ trans('admin/settings/general.qr_label_template_help') }}</p>
                                       </div>
                                   </div>
                                     <div class="col-md-7">

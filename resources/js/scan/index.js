@@ -117,7 +117,11 @@ async function start(deviceId = null) {
   const constraints = {
     video: deviceId
       ? { deviceId: { exact: deviceId } }
-      : { facingMode: 'environment', width: { ideal: config.width }, height: { ideal: config.height } },
+      : {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: config.width },
+          height: { ideal: config.height },
+        },
     audio: false,
   };
 
@@ -125,10 +129,14 @@ async function start(deviceId = null) {
     stream = await navigator.mediaDevices.getUserMedia(constraints);
     video.srcObject = stream;
     await video.play();
-    canvas.width = config.width;
-    canvas.height = config.height;
-    overlay.width = config.width;
-    overlay.height = config.height;
+
+    const vw = video.videoWidth || video.clientWidth || config.width;
+    const vh = video.videoHeight || video.clientHeight || config.height;
+    canvas.width = vw;
+    canvas.height = vh;
+    overlay.width = vw;
+    overlay.height = vh;
+
     timer = setInterval(sample, config.interval);
     hintTimer = setTimeout(showHint, 10_000);
   } catch (err) {
@@ -165,6 +173,12 @@ async function switchCamera() {
 
 async function init() {
   devices = await enumerateVideoInputs();
+  const backIndex = devices.findIndex((d) => /back|rear|environment/i.test((d.label || '').toLowerCase()));
+  if (backIndex >= 0) {
+    currentDeviceIndex = backIndex;
+  } else {
+    currentDeviceIndex = 0;
+  }
   if (devices.length > 1 && switchBtn) {
     switchBtn.classList.remove('d-none');
     switchBtn.disabled = false;
@@ -172,7 +186,8 @@ async function init() {
     switchBtn.disabled = true;
     switchBtn.classList.add('d-none');
   }
-  await start(devices[currentDeviceIndex]?.deviceId || null);
+  const initialDeviceId = backIndex >= 0 ? devices[backIndex].deviceId : null;
+  await start(initialDeviceId);
 }
 
 if (manualForm) {

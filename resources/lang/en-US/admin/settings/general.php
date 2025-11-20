@@ -187,6 +187,7 @@ return [
     'qr_help'                   => 'Enable QR Codes first to set this',
     'qr_text'                   => 'QR Code Text',
     'qr_label_template'         => 'QR Label Template',
+    'qr_label_template_help'    => 'Select the Dymo roll that is currently in your printer so the PDF matches its width/height.',
     'saml'                      => 'SAML',
     'saml_title'                => 'Update SAML settings',
     'saml_help'                 => 'SAML settings',

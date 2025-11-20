@@ -1,3 +1,32 @@
+# Session Progress (2025-11-20)
+
+## Addendum (2025-11-20 Codex)
+- Reviewed QR printing architecture and added a server-side print path that renders the selected template to PDF and spools it to a CUPS queue (configurable via `LABEL_PRINTER_QUEUE` / `LABEL_PRINT_COMMAND`).
+- New asset-page control sends the current template to the server print endpoint and surfaces job feedback; preview/download remain unchanged.
+- Added a CUPS setup guide under `docs/agents/cups-setup-guide.md` and stubbed the new env vars in `.env.example`.
+
+# Session Progress (2025-11-19)
+
+## Addendum (2025-11-19 Codex)
+- Re-read `AGENTS.md`, the latest PROGRESS entries, and all `docs/agents/*` addenda so today’s QR printing fix started with the current workflow/state of play; logged the new docs/agents stub before coding.
+- Audited the QR label stack (config, QrCodeService, hardware view, bulk actions, label settings) to trace why the Dymo LabelWriter 400 Turbo output spilled the QR and caption across multiple “pages” and why users couldn’t easily pick the roll currently in the printer.
+- Added first-class templates for the common Dymo rolls (30334 57x32 mm, 30336 54x25 mm, 99012 89x36 mm, 30256 101x59 mm, plus the legacy 50x30 mm option) and exposed the picker in settings, the hardware sidebar, and the bulk action toolbar so refurbishers can match the printer stock without editing config files.
+- Rebuilt the PDF/layout helper shared by single/batch QR prints so we explicitly size the QR canvas and caption area; Dompdf now keeps both elements on a single page and batch runs honor the chosen template.
+- Delivered a new sidebar widget on the asset view (preview + template dropdown + print/download buttons) and wired the bulk "Generate QR Codes" action to pass the selected template to `QrLabelService::batchPdf`, improving the end-to-end printing experience.
+- Updated the sticker content so each label prints exactly once with the model + preset, serial number, asset tag text, and the Inbit company line; RAM/disk/status/property-of strings were intentionally left off per the request, and the tests now lock in the new caption formatting.
+- Refined the PDF layout so the QR stays large on the left while the text stack sits on the right, eliminating the extra second page that previously appeared on Dymo printers.
+- Switched the default template to the Dymo 99010 (89×36 mm) roll, introduced per-template QR column widths, and reworked the label HTML/CSS so the QR consumes ~90% of the vertical space with the asset name/tag block locked to the lower-right corner.
+- Cleaned up the demo seed data so curated assets use the actual product names (no more “Intake Diagnostics”/“QA Ready” suffixes) and remain less confusing for testers verifying the refurb flows.
+- Trimmed the sticker copy to just asset name + asset tag, anchored the text column to the bottom-right with a 5% internal margin, and ensured the QR respects the same top/bottom padding so each PDF displays as a single page with the requested framing.
+- Latest tweak: lifted the QR column so its top edge aligns with the text block, tightened the DOMPDF CSS, and removed the remaining blank pages—the PDF now renders a single 99010 label with the QR left and text bottom-right.
+- Updated translations, validation (`StoreLabelSettings`), docs/fork-notes.md, and docs/agents/agent-progress-2025.md to capture the new workflow and guidance for future sessions.
+
+## Notes for Follow-up Agents
+- Run the refreshed PDFs through real Dymo LabelWriter 400 Turbo hardware for each template (especially the larger 30256 shipping roll) and tweak `config/qr_templates.php` padding if any QR codes still get cropped.
+- Consider persisting a per-user "last template" preference so success notifications and other entry points can default to the roll most recently used without forcing a page reload.
+- Once hardware verification is done, grab screenshots of the new sidebar widget and bulk picker for inclusion in README/docs to help downstream contributors understand the workflow without diffing code.
+- TODO: add multiple queue selection (e.g., storage vs workarea) for server-side LabelWriter printing.
+
 # Session Progress (2025-11-13)
 
 ## Addendum (2025-11-13 Codex)
@@ -307,3 +336,4 @@ there are multiple duplicate functions that still need to be removed, sku will b
 **Session closed** — 2025-10-28 13:38
 
 
+\n## Notes for Next Session (2025-11-19)\n- TODO: Clean up the QR label sizing/margins once more and validate on hardware (short-term).\n- TODO: Implement one-click direct printing from the asset view to connected/network LabelWriter printers (long-term).

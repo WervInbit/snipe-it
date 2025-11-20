@@ -203,7 +203,7 @@ class DemoAssetsSeeder extends Seeder
         $records = [
             [
                 'tag' => 'RF-001',
-                'name' => 'HP ProBook 450 G8 - QA Ready',
+                'name' => 'HP ProBook 450 G8',
                 'model_key' => 'HP ProBook 450 G8',
                 'status' => 'Ready for Sale',
                 'location' => 'Ready to Ship',
@@ -213,7 +213,7 @@ class DemoAssetsSeeder extends Seeder
             ],
             [
                 'tag' => 'RF-002',
-                'name' => 'HP ProBook 430 G7 - Intake Diagnostics',
+                'name' => 'HP ProBook 430 G7',
                 'model_key' => 'HP ProBook 430 G7',
                 'status' => 'Being Processed',
                 'location' => 'Repair Bench',
@@ -223,7 +223,7 @@ class DemoAssetsSeeder extends Seeder
             ],
             [
                 'tag' => 'RF-003',
-                'name' => 'Samsung Galaxy A5 - Battery Swap',
+                'name' => 'Samsung Galaxy A5',
                 'model_key' => 'Samsung Galaxy A5',
                 'status' => 'Stand-by',
                 'location' => 'Refurb Intake',
@@ -233,7 +233,7 @@ class DemoAssetsSeeder extends Seeder
             ],
             [
                 'tag' => 'RF-004',
-                'name' => 'Pixel 8 Pro - QA Ready',
+                'name' => 'Pixel 8 Pro',
                 'model_key' => 'Pixel 8 Pro',
                 'status' => 'Ready for Sale',
                 'location' => 'Ready to Ship',

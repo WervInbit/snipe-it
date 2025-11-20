@@ -268,19 +268,13 @@
 
                             @if (config('qr_templates.enable_ui', true) && ($qrPdf || $qrPng))
                                 <div class="col-md-12 hidden-print" style="padding-top: 5px;">
-                                    <div class="btn-group btn-block">
-                                        <button type="button" class="btn btn-sm btn-default btn-block dropdown-toggle" data-toggle="dropdown">
-                                            <x-icon type="print" /> {{ trans('general.print_qr') }} <span class="caret"></span>
-                                        </button>
-                                        <ul class="dropdown-menu" role="menu">
-                                            @if ($qrPdf)
-                                                <li><a href="{{ $qrPdf }}" target="_blank">{{ trans('general.print_pdf') }}</a></li>
-                                            @endif
-                                            @if ($qrPng)
-                                                <li><a href="{{ $qrPng }}" download>{{ trans('general.download_png') }}</a></li>
-                                            @endif
-                                        </ul>
-                                    </div>
+                                    @include('hardware.partials.qr-label-widget', [
+                                        'asset' => $asset,
+                                        'qrPdf' => $qrPdf,
+                                        'qrPng' => $qrPng,
+                                        'qrTemplates' => $qrTemplates,
+                                        'selectedTemplate' => $selectedTemplate,
+                                    ])
                                 </div>
                             @endif
 
@@ -420,28 +414,6 @@
                                                 </li>
                                             @endif
                                         </ul>
-                                    </div>
-                                @endif
-                                @if (config('qr_templates.enable_ui', true))
-                                    <div class="col-md-12 text-center" style="padding-top: 15px;">
-                                        @if($qrPng)
-                                            <img src="{{ $qrPng }}" class="img-thumbnail" style="height: 150px; width: 150px; margin-right: 10px;" alt="QR code for {{ $asset->getDisplayNameAttribute() }}">
-                                        @endif
-                                        <div class="mt-2">
-                                            <form method="get" class="d-inline-block">
-                                                <select name="template" onchange="this.form.submit()" class="form-control" style="display:inline-block;width:auto;">
-                                                    @foreach($qrTemplates as $key => $tpl)
-                                                        <option value="{{ $key }}" @selected($selectedTemplate === $key)>{{ $tpl['name'] }}</option>
-                                                    @endforeach
-                                                </select>
-                                            </form>
-                                            @if($qrPdf)
-                                                <a href="{{ $qrPdf }}" target="_blank" class="btn btn-default"><x-icon type="print" /> Print</a>
-                                            @endif
-                                            @if($qrPng)
-                                                <a href="{{ $qrPng }}" download class="btn btn-default"><x-icon type="download" /> {{ trans('general.download') }}</a>
-                                            @endif
-                                        </div>
                                     </div>
                                 @endif
                             @endif

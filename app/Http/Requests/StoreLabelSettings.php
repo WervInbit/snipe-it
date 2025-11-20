@@ -34,6 +34,7 @@ class StoreLabelSettings extends FormRequest
                 'label2_template' => 'DefaultLabel',
             ]);
         }
+        $qrTemplateKeys = array_keys(config('qr_templates.templates', []));
 
         return [
             'labels_per_page'                     => 'numeric',
@@ -53,6 +54,10 @@ class StoreLabelSettings extends FormRequest
             'label2_template'                     => [
                 'required',
                 Rule::in($names),
+            ],
+            'qr_label_template'                   => [
+                'nullable',
+                Rule::in($qrTemplateKeys),
             ],
         ];
     }

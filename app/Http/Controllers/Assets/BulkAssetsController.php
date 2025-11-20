@@ -172,7 +172,7 @@ class BulkAssetsController extends Controller
             switch ($request->input('bulk_actions')) {
                 case 'qr':
                     $this->authorize('view', Asset::class);
-                    $pdf = app(QrLabelService::class)->batchPdf($assets);
+                    $pdf = app(QrLabelService::class)->batchPdf($assets, $request->input('qr_template'));
                     return response($pdf, 200, [
                         'Content-Type' => 'application/pdf',
                         'Content-Disposition' => 'inline; filename="qr-labels.pdf"',

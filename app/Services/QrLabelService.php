@@ -16,7 +16,7 @@ class QrLabelService
 {
     protected string $directory = 'labels';
     // Increment to invalidate previously generated image filenames
-    protected string $version = 'v3';
+    protected string $version = 'v4';
 
     /**
      * Generate PNG and PDF labels for an asset.
@@ -37,10 +37,7 @@ class QrLabelService
         }, explode(',', $settings->qr_formats ?? 'png,pdf'));
         $qr = app(QrCodeService::class);
 
-        $caption = $asset->name ?: optional($asset->model)->name;
-        if (! $caption) {
-            $caption = trans('general.qr_printed_on_date', ['date' => now()->toDateString()]);
-        }
+        $caption = $this->assetLabelBlocks($asset, $settings);
 
         if (in_array('png', $formats)) {
             $png = $qr->png($data, $label, $logoPath, $template);
@@ -74,6 +71,28 @@ class QrLabelService
     }
 
     /**
+     * Render and return a PDF binary for a single asset (always generates PDF, regardless of qr_formats).
+     */
+    public function pdfBinary(Asset $asset, ?string $template = null): string
+    {
+        $settings = Setting::getSettings() ?? (object) [];
+        $template = $template ?? ($settings->qr_label_template ?? config('qr_templates.default'));
+        $disk = Storage::disk('public');
+        $logo = ($settings->qr_logo ?? null) ?: ($settings->label_logo ?? null);
+        $logoPath = ($logo && $disk->exists($logo)) ? $disk->path($logo) : null;
+        $qr = app(QrCodeService::class);
+        $caption = $this->assetLabelBlocks($asset, $settings);
+
+        return $qr->pdf(
+            $asset->asset_tag,
+            ($settings->qr_text_redundancy ?? false) ? $asset->asset_tag : null,
+            $logoPath,
+            $template,
+            $caption
+        );
+    }
+
+    /**
      * Generate a combined PDF for multiple assets.
      *
      * @param \Illuminate\Support\Collection<Asset> $assets
@@ -87,32 +106,24 @@ class QrLabelService
         $logoPath = ($logo && $disk->exists($logo)) ? $disk->path($logo) : null;
         $tpls = config('qr_templates.templates');
         $tpl = $tpls[$template] ?? reset($tpls);
-        $width = $tpl['width_mm'];
-        $height = $tpl['height_mm'];
         $qr = app(QrCodeService::class);
 
-        $html = '<html><body style="margin:0;padding:0;">';
+        $fragments = [];
         $count = $assets->count();
-        foreach ($assets as $i => $asset) {
+        foreach ($assets as $index => $asset) {
             $data = $asset->asset_tag;
             $label = ($settings->qr_text_redundancy ?? false) ? $asset->asset_tag : null;
-            $caption = $asset->name ?: optional($asset->model)->name;
-            if (! $caption) {
-                $caption = trans('general.qr_printed_on_date', ['date' => now()->toDateString()]);
-            }
+            $caption = $this->assetLabelBlocks($asset, $settings);
             $png = $qr->png($data, $label, $logoPath, $template);
-            $captionHtml = $caption ? '<div style="margin-top:2px;font-size:10px;text-align:center;">' . htmlspecialchars($caption, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</div>' : '';
-            $style = 'width:' . $width . 'mm;height:' . $height . 'mm;display:flex;flex-direction:column;justify-content:center;align-items:center;';
-            if ($i < $count - 1) {
-                $style .= 'page-break-after:always;';
-            }
-            $html .= '<div style="' . $style . '"><img src="data:image/png;base64,' . base64_encode($png) . '" style="max-height:80%;max-width:100%;" />' . $captionHtml . '</div>';
+            $pageBreak = $index < ($count - 1);
+            $fragments[] = $qr->renderLabelFragment($png, $tpl, $caption, $pageBreak);
         }
-        $html .= '</body></html>';
+
+        [$html, $paper] = $qr->renderLabelDocument($tpl, $fragments);
 
         $dompdf = new Dompdf();
         $dompdf->loadHtml($html);
-        $dompdf->setPaper([0, 0, $width * 72 / 25.4, $height * 72 / 25.4]);
+        $dompdf->setPaper($paper);
         $dompdf->render();
 
         return $dompdf->output();
@@ -213,5 +224,38 @@ class QrLabelService
         if (in_array('pdf', $formats)) {
             $disk->put($base.'.pdf', $qr->pdf($data, $label, $logoPath));
         }
+    }
+
+    /**
+     * Build the caption lines rendered under the QR code.
+     *
+     * @param object $settings
+     * @return array<int, string>
+     */
+    protected function assetLabelBlocks(Asset $asset, object $settings): array
+    {
+        $lines = [];
+        $assetName = trim((string) ($asset->name
+            ?: optional($asset->model)->name
+            ?: optional($asset->modelNumber)->label
+            ?: optional($asset->modelNumber)->code));
+
+        if ($assetName !== '') {
+            $lines[] = Str::limit($assetName, 48);
+        }
+
+        $assetTag = trim((string) $asset->asset_tag);
+        if ($assetTag !== '') {
+            $lines[] = trans('admin/hardware/form.tag').': '.Str::limit($assetTag, 48);
+        }
+
+        if (empty($lines)) {
+            $lines[] = trans('general.qr_printed_on_date', ['date' => now()->toDateString()]);
+        }
+
+        return [
+            'top' => [],
+            'bottom' => array_values($lines),
+        ];
     }
 }

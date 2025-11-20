@@ -3,6 +3,8 @@
 namespace Tests\Unit;
 
 use App\Models\Asset;
+use App\Models\Setting;
+use App\Services\QrCodeService;
 use App\Services\QrLabelService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -18,8 +20,8 @@ class QrLabelServiceTest extends TestCase
         $asset = new Asset(['asset_tag' => 'My Asset Tag']);
         $service = new QrLabelService();
 
-        $this->assertSame('labels/qr-v3-dymo-89x36-my-asset-tag.png', invade($service)->path($asset, 'png', 'dymo-89x36'));
-        $this->assertSame('labels/qr-v3-dymo-89x36-my-asset-tag.pdf', invade($service)->path($asset, 'pdf', 'dymo-89x36'));
+        $this->assertSame('labels/qr-v4-dymo-89x36-my-asset-tag.png', invade($service)->path($asset, 'png', 'dymo-89x36'));
+        $this->assertSame('labels/qr-v4-dymo-89x36-my-asset-tag.pdf', invade($service)->path($asset, 'pdf', 'dymo-89x36'));
     }
 
     public function test_generate_creates_png_and_pdf_labels(): void
@@ -31,8 +33,8 @@ class QrLabelServiceTest extends TestCase
         $service->generate($asset, 'dymo-89x36');
 
         $slug = Str::slug($asset->asset_tag);
-        Storage::disk('public')->assertExists("labels/qr-v3-dymo-89x36-{$slug}.png");
-        Storage::disk('public')->assertExists("labels/qr-v3-dymo-89x36-{$slug}.pdf");
+        Storage::disk('public')->assertExists("labels/qr-v4-dymo-89x36-{$slug}.png");
+        Storage::disk('public')->assertExists("labels/qr-v4-dymo-89x36-{$slug}.pdf");
     }
 
     public function test_pdf_falls_back_to_print_date_when_name_missing(): void
@@ -42,8 +44,18 @@ class QrLabelServiceTest extends TestCase
         $asset = new Asset(['asset_tag' => 'FallbackTest']);
         $mock = Mockery::mock(QrCodeService::class);
         $mock->shouldReceive('png')->andReturn('png');
+        if ($settings = Setting::getSettings()) {
+            Setting::unguarded(fn() => $settings->update(['site_name' => 'Inbit']));
+            Setting::$_cache = null;
+        }
+        $settings = Setting::getSettings() ?? (object) [];
+        $companyName = trim((string) ($settings->site_name ?? '')) ?: 'Inbit';
+        $expectedCaption = [
+            'top' => [],
+            'bottom' => [trans('admin/hardware/form.tag').': FallbackTest'],
+        ];
         $mock->shouldReceive('pdf')
-            ->with('FallbackTest', 'FallbackTest', Mockery::any(), 'dymo-89x36', 'QR printed – 2024-04-01')
+            ->with('FallbackTest', Mockery::any(), Mockery::any(), 'dymo-89x36', $expectedCaption)
             ->andReturn('pdf');
         app()->instance(QrCodeService::class, $mock);
 
@@ -51,7 +63,7 @@ class QrLabelServiceTest extends TestCase
         $service->generate($asset, 'dymo-89x36');
 
         $slug = Str::slug($asset->asset_tag);
-        Storage::disk('public')->assertExists("labels/qr-v3-dymo-89x36-{$slug}.pdf");
+        Storage::disk('public')->assertExists("labels/qr-v4-dymo-89x36-{$slug}.pdf");
         Carbon::setTestNow();
         Mockery::close();
     }

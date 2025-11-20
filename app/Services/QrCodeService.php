@@ -15,6 +15,7 @@ use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer as BaconWriter;
 use Com\Tecnick\Barcode\Barcode;
+use Illuminate\Support\Str;
 
 class QrCodeService
 {
@@ -32,7 +33,7 @@ class QrCodeService
                 ->encoding(new Encoding('UTF-8'))
                 ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
                 ->size($tpl['qr_size'])
-                ->margin(0);
+                ->margin((int) ($tpl['qr_margin'] ?? 0));
 
             if ($logoPath) {
                 $builder->logoPath($logoPath)->logoResizeToWidth(90);
@@ -187,23 +188,120 @@ class QrCodeService
 
     /**
      * Render a QR code as PDF binary data.
+     *
+     * @param array<string,array<int,string>>|string|null $caption
      */
-    public function pdf(string $data, ?string $label = null, ?string $logoPath = null, ?string $template = null, ?string $caption = null): string
+    public function pdf(string $data, ?string $label = null, ?string $logoPath = null, ?string $template = null, array|string|null $caption = null): string
     {
         $tpl = $this->template($template);
-
         $png = $this->png($data, $label, $logoPath, $template);
+        $fragment = $this->renderLabelFragment($png, $tpl, $caption, false);
+        [$html, $paper] = $this->renderLabelDocument($tpl, [$fragment]);
 
         $dompdf = new Dompdf();
-        $width = $tpl['width_mm'] * 72 / 25.4;
-        $height = $tpl['height_mm'] * 72 / 25.4;
-        $captionHtml = $caption ? '<div style="margin-top:2px;font-size:10px;text-align:center;">' . htmlspecialchars($caption, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '</div>' : '';
-        $html = '<html><body style="margin:0;padding:0;"><div style="width:' . $tpl['width_mm'] . 'mm;height:' . $tpl['height_mm'] . 'mm;display:flex;flex-direction:column;justify-content:center;align-items:center;"><img src="data:image/png;base64,' . base64_encode($png) . '" style="max-height:80%;max-width:100%;" />' . $captionHtml . '</div></body></html>';
         $dompdf->loadHtml($html);
-        $dompdf->setPaper([0, 0, $width, $height]);
+        $dompdf->setPaper($paper);
         $dompdf->render();
 
         return $dompdf->output();
+    }
+
+    /**
+     * Build the HTML fragment for a single label (used by both single/batch PDFs).
+     *
+     * @param array<string,array<int,string>>|string|null $caption
+     */
+    public function renderLabelFragment(string $pngData, array $tpl, array|string|null $caption = null, bool $pageBreak = false): string
+    {
+        $padding = (float) ($tpl['padding_mm'] ?? 1.2);
+        $fontSize = (float) ($tpl['caption_font_size'] ?? 8);
+        $lineHeight = (float) ($tpl['caption_line_height'] ?? 1.2);
+        $maxLines = (int) ($tpl['caption_lines'] ?? 2);
+        $wrapAt = (int) ($tpl['caption_wrap'] ?? 28);
+        $maxChars = (int) ($tpl['caption_max_chars'] ?? 64);
+
+        $bottomLines = [];
+        if (is_array($caption)) {
+            $bottomLines = array_values(array_filter($caption['bottom'] ?? [], fn ($line) => trim((string) $line) !== ''));
+        } elseif (is_string($caption) && trim($caption) !== '') {
+            $bottomLines = $this->captionLines($caption, $maxChars, $wrapAt, $maxLines);
+        }
+
+        $labelWidth = (float) $tpl['width_mm'];
+        $labelHeight = (float) $tpl['height_mm'];
+        $topMargin = max(0.0, $labelHeight * 0.05);
+        $bottomMargin = $topMargin;
+        $leftMargin = max(0.0, $labelWidth * 0.05);
+        $rightMargin = $leftMargin;
+        $gutter = max(1.0, $labelWidth * 0.02);
+        $qrWidth = max(10.0, min($labelWidth * 0.45, (float) ($tpl['qr_column_mm'] ?? $labelWidth * 0.4)));
+        $qrHeight = max(10.0, $labelHeight - $topMargin - $bottomMargin);
+        $textLeft = $leftMargin + $qrWidth + $gutter;
+        $textWidth = max(10.0, $labelWidth - $rightMargin - $textLeft);
+        $textHeight = $qrHeight;
+
+        $imgStyle = sprintf(
+            'width:%smm;height:%smm;display:block;object-fit:contain;',
+            number_format($qrWidth, 3, '.', ''),
+            number_format($qrHeight, 3, '.', '')
+        );
+        $encoded = base64_encode($pngData);
+        $textHtml = $this->renderTextLines($bottomLines);
+
+        $containerStyles = sprintf(
+            'position:relative;width:%smm;height:%smm;',
+            number_format($labelWidth, 3, '.', ''),
+            number_format($labelHeight, 3, '.', '')
+        );
+        $qrStyles = sprintf(
+            'position:absolute;top:%smm;left:%smm;',
+            number_format($topMargin, 3, '.', ''),
+            number_format($leftMargin, 3, '.', '')
+        );
+        $textStyles = sprintf(
+            'position:absolute;top:%smm;right:%smm;width:%smm;height:%smm;display:flex;flex-direction:column;justify-content:flex-end;',
+            number_format($topMargin, 3, '.', ''),
+            number_format($rightMargin, 3, '.', ''),
+            number_format($textWidth, 3, '.', ''),
+            number_format($textHeight, 3, '.', '')
+        );
+
+        return <<<HTML
+<div class="qr-label" style="{$containerStyles}">
+    <img src="data:image/png;base64,{$encoded}" alt="QR label" style="{$qrStyles}{$imgStyle}">
+    <div class="qr-text" style="{$textStyles}">{$textHtml}</div>
+</div>
+HTML;
+    }
+
+    /**
+     * Wrap the provided fragments in a Dompdf-ready document.
+     *
+     * @param array<int, string> $fragments
+     * @return array{0: string, 1: array<int, float>}
+     */
+    public function renderLabelDocument(array $tpl, array $fragments): array
+    {
+        $width = (float) $tpl['width_mm'];
+        $height = (float) $tpl['height_mm'];
+        $padding = (float) ($tpl['padding_mm'] ?? 1.2);
+        $fontSize = (float) ($tpl['caption_font_size'] ?? 8);
+        $lineHeight = (float) ($tpl['caption_line_height'] ?? 1.2);
+
+        $style = <<<CSS
+@page { margin: 0; size: {$width}mm {$height}mm; }
+html, body { margin: 0; padding: 0; width: {$width}mm; height: {$height}mm; }
+.qr-label { width: {$width}mm; height: {$height}mm; box-sizing: border-box; overflow: hidden; position: relative; }
+.qr-text { font-size: max(6, {$fontSize} - 1)pt; line-height: {$lineHeight}; text-align: left; }
+.qr-text-line { display: block; font-size: max(6, {$fontSize} - 1)pt; }
+CSS;
+
+        $html = '<html><head><meta charset="UTF-8"><style>' . $style . '</style></head><body>' .
+            implode('', $fragments) .
+            '</body></html>';
+        $paper = [0, 0, $width * 72 / 25.4, $height * 72 / 25.4];
+
+        return [$html, $paper];
     }
 
     protected function template(?string $name): array
@@ -211,5 +309,60 @@ class QrCodeService
         $templates = config('qr_templates.templates');
         $name = $name ?? config('qr_templates.default');
         return $templates[$name] ?? reset($templates);
+    }
+
+    /**
+     * Break the caption into lines that fit on the label.
+     *
+     * @return array<int, string>
+     */
+    protected function captionLines(?string $caption, int $maxChars, int $wrapAt, int $maxLines): array
+    {
+        $caption = (string) $caption;
+        if ($caption === '') {
+            return [];
+        }
+
+        $wrapAt = max(1, $wrapAt);
+        $maxLines = max(1, $maxLines);
+        $maxChars = max(1, $maxChars);
+        $rawLines = preg_split("/\r\n|\n|\r/", $caption) ?: [];
+        $lines = [];
+
+        foreach ($rawLines as $raw) {
+            $normalized = preg_replace('/\s+/u', ' ', trim($raw));
+            if ($normalized === '') {
+                continue;
+            }
+
+            $wrapped = wordwrap($normalized, $wrapAt, "\n", true);
+            foreach (explode("\n", $wrapped) as $chunk) {
+                $chunk = trim($chunk);
+                if ($chunk === '') {
+                    continue;
+                }
+                $lines[] = Str::limit($chunk, $maxChars, '');
+                if (count($lines) >= $maxLines) {
+                    return array_slice($lines, 0, $maxLines);
+                }
+            }
+        }
+
+        return array_slice($lines, 0, $maxLines);
+    }
+
+    /**
+     * @param array<int, string> $lines
+     */
+    protected function renderTextLines(array $lines): string
+    {
+        if (empty($lines)) {
+            return '<div class="qr-text-line">&nbsp;</div>';
+        }
+
+        $class = 'qr-text-line';
+        $escaped = array_map(fn ($line) => e(Str::limit($line, 64), false), $lines);
+
+        return implode('', array_map(fn ($line) => '<div class="'.$class.'">'.$line.'</div>', $escaped));
     }
 }

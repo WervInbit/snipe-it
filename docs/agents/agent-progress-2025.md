@@ -1,6 +1,37 @@
 # Agent & Progress Log (2025)
 
-## 2025-11-06 — Preset Filtering Addendum
+# 2025-11-20 - QR Server Print Path
+> Pair with PROGRESS.md (2025-11-20 entry) and docs/agents/cups-setup-guide.md.
+
+### Completed
+- Added a server-side LabelWriter print endpoint that renders the selected QR template to PDF and spools it to a CUPS queue (config via `LABEL_PRINTER_QUEUE` / `LABEL_PRINT_COMMAND`), logging queue/job/user details.
+- Wired the asset view QR widget with a “Print to LabelWriter” control that posts the active template to the new endpoint and surfaces success/failure feedback.
+- Documented CUPS setup for Dymo on Linux in `docs/agents/cups-setup-guide.md`; `.env.example` now includes the printing env stubs.
+
+### Outstanding
+- Configure CUPS on the target server per the guide and set `LABEL_PRINTER_QUEUE` (initially for 99010 stock); add more templates once new rolls arrive.
+- Consider per-printer selection if multiple LabelWriters are exposed.
+
+# Agent & Progress Log (2025)
+
+## 2025-11-19 – QR Printing Refresh
+> Companion to PROGRESS.md (2025-11-19 entry); review alongside the main log.
+
+### Completed
+- Added first-class support for the common Dymo LabelWriter 400 Turbo rolls (30334 – 57x32 mm, 30336 – 54x25 mm, 99012 – 89x36 mm, 30256 – 101x59 mm) plus the legacy 50x30 mm template; Settings/labels and the hardware view now expose the picker so refurbishers can match the roll currently in the printer.
+- Rebuilt the QR PDF/layout stack (shared by single and batch printing) to size the QR canvas/caption area explicitly, eliminating the multi-page overflow that previously split the code and text across separate “pages.”
+- Added inline preview/print/download controls on the asset sidebar, auto-refreshing whenever a new template is selected, and surfaced the same template selector in the asset bulk actions so large batch prints land on the correct stock.
+- Extended `StoreLabelSettings` validation and docs/fork-notes.md to cover the new options, refreshed translations/help text, and wired the QR Label Service batch action to honor the chosen template.
+- Finalized the sticker payload so each label prints exactly once with the model + preset, serial, asset tag text, and the Inbit name/mark—no RAM/disk/status/property-of strings—and adjusted the PDF layout (99010 default) so the QR stays on the left with the asset name/tag block bottom-aligned on the right, preventing duplicate sticker pages.
+- Normalized the demo seed assets to use their real product names (e.g., “HP ProBook 450 G8”), removing the “QA Ready”/“Intake Diagnostics” suffixes that were confusing testers.
+- Additional polish: trimmed the sticker text down to asset name + asset tag, added the 5% right margin, and tightened the QR padding so the PDF now opens as a single page with the QR filling the left column and the text anchored at the bottom-right.
+- Latest fix: shifted the QR image up to align with the text block’s top edge and cleaned up the Dompdf CSS so no extra pages render—single-page 99010 labels with the exact framing are now guaranteed.
+
+### Outstanding
+- Exercise the new templates on the physical Dymo LabelWriter 400 Turbo hardware to confirm each PDF respects the printer margins (especially the 30256 shipping roll) and report any off-by-one drift so we can tune padding/QR canvas sizes.
+- Consider persisting the last-used QR template per user/session so creation success notifications can default to the correct roll without reloading the asset view.
+
+## 2025-11-06 – Preset Filtering Addendum
 > Companion to PROGRESS.md (2025-11-06 entry); review alongside the main log.
 
 ### Completed

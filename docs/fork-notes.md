@@ -35,5 +35,13 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 - Removed company selectors from the asset form for the current single-company refurb workflow (companies stay in the data model for future reinstatement).
  - Removed checkout/checkin/audit flows; status transitions now drive lifecycle tracking with status event history and notes.
 
+### 2025-11-19
+- Refreshed the QR label system for the Dymo LabelWriter 400 Turbo: added dedicated templates for 30334 (57x32 mm), 30336 (54x25 mm), 99012 (89x36 mm), 30256 (101x59 mm), plus the legacy 50x30 mm option, and exposed the picker on the asset page and bulk actions so refurbishers can match whatever roll is loaded.
+- Rebuilt the PDF/layout renderer so QR codes and captions scale within a single label (no more text spilling onto extra pages) and added an inline preview/print/download widget that regenerates whenever a new template is selected.
+- QR stickers now include a single block of text beside the QR containing the model + preset, serial number, asset tag, and the Inbit company line (no mutable specs/status/property-of text). The default template is now the Dymo 99010 (89×36 mm) roll, the QR column consumes ~90% of the label height, and the asset name/tag block is bottom-aligned so only one sticker prints per asset.
+- Demo assets use the actual product names (e.g., “HP ProBook 450 G8”) instead of QA/Intake suffixes to keep the dataset intuitive for testers.
+- Latest QR layout polish: only the asset name + asset tag render on the text column, which sticks to the bottom-right with a 5% inner margin while the QR honors the same top/bottom padding—PDFs now open with exactly one page and match the requested framing.
+- Raised the QR column so it shares the same top alignment as the text block and hardened the PDF styles to eliminate the stray blank pages; 99010 labels now render as a single page with the QR on the left and asset name/tag on the lower-right.
+
 
 

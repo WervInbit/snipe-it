@@ -38,6 +38,35 @@
         @endif
     </select>
 
+    @php($qrTemplates = config('qr_templates.templates'))
+    @php($selectedQrTemplate = old('qr_template', $snipeSettings->qr_label_template ?? config('qr_templates.default')))
+    @if (!empty($qrTemplates))
+        @if (count($qrTemplates) === 1)
+            <input type="hidden" name="qr_template" value="{{ array_key_first($qrTemplates) }}">
+        @else
+            <label for="bulk_qr_template" class="sr-only">
+                {{ trans('admin/settings/general.qr_label_template') }}
+            </label>
+            <select
+                name="qr_template"
+                id="bulk_qr_template"
+                class="form-control select2"
+                aria-label="qr_template"
+                style="min-width: 220px !important; margin-left: 10px;"
+                data-placeholder="{{ trans('admin/settings/general.qr_label_template') }}"
+            >
+                @foreach($qrTemplates as $key => $tpl)
+                    <option value="{{ $key }}" @selected($selectedQrTemplate === $key)>
+                        {{ $tpl['name'] }}
+                    </option>
+                @endforeach
+            </select>
+            <small class="text-muted" style="margin-left: 10px;">
+                {{ trans('general.bulk_qr_template_hint') }}
+            </small>
+        @endif
+    @endif
+
     <button class="btn btn-primary" id="{{ (isset($id_button)) ? $id_button : 'bulkAssetEditButton' }}" disabled>{{ trans('button.go') }}</button>
     </form>
 </div>

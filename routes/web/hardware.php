@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\MaintenancesController;
 use App\Http\Controllers\Assets\AssetsController;
+use App\Http\Controllers\Assets\AssetLabelPrintController;
 use App\Http\Controllers\Assets\BulkAssetsController;
 use App\Http\Controllers\TestRunController;
 use App\Http\Controllers\TestResultController;
@@ -115,6 +116,9 @@ Route::group(
             ->name('test-results.update');
         Route::post('{asset}/tests/{testRun}/results/{result}', [TestResultController::class, 'partialUpdate'])
             ->name('test-results.partial-update');
+
+        Route::post('{asset}/print-label', [AssetLabelPrintController::class, 'store'])
+            ->name('hardware.print-label');
 
         // Asset images
         Route::post('{asset}/images', [AssetImageController::class, 'store'])
