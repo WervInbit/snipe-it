@@ -16,6 +16,12 @@
         height: auto;
         object-fit: cover;
     }
+    .scan-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+        gap: .5rem;
+        margin-top: .75rem;
+    }
 </style>
 <div class="container py-4">
     <div class="mx-auto" style="max-width:420px;">
@@ -37,9 +43,15 @@
             </div>
         </div>
 
-        <div class="d-flex gap-2 mt-3">
+        <div class="scan-actions">
             <button id="scan-switch" type="button" class="btn btn-outline-secondary flex-fill d-none" data-testid="scan-switch">
                 <i class="fas fa-sync" aria-hidden="true"></i> {{ trans('general.scan_switch_camera') }}
+            </button>
+            <button id="scan-refocus" type="button" class="btn btn-outline-secondary flex-fill" data-testid="scan-refocus">
+                <i class="fas fa-bullseye" aria-hidden="true"></i> {{ trans('general.scan_refocus') }}
+            </button>
+            <button id="scan-torch" type="button" class="btn btn-outline-secondary flex-fill d-none" data-testid="scan-torch" aria-pressed="false">
+                <i class="fas fa-lightbulb" aria-hidden="true"></i> {{ trans('general.scan_torch') }}
             </button>
             <button id="manual-toggle" type="button" class="btn btn-outline-secondary flex-fill" data-testid="scan-manual-toggle">
                 <i class="fas fa-keyboard" aria-hidden="true"></i> {{ trans('general.scan_manual_entry') }}

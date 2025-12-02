@@ -228,6 +228,8 @@ return [
     'scan_camera_denied'     => 'Camera-toegang geweigerd. Gebruik handmatige invoer.',
     'scan_hint_move_closer'  => 'Tip: beweeg dichterbij.',
     'scan_switch_camera'     => 'Schakel camera',
+    'scan_refocus'           => 'Stel scherp',
+    'scan_torch'             => 'Zaklamp',
     'scan_manual_entry'      => 'Handmatige invoer',
     'scan_manual_placeholder'=> 'Voer assettag in',
     'offline_banner'         => 'Offline — wijzigingen worden in de wachtrij gezet.',

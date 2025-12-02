@@ -9,6 +9,17 @@
 {{-- Page content --}}
 @section('content')
 
+@push('css')
+<style>
+.spec-override td {
+    background-color: #eef5ff;
+}
+.spec-override td:first-child {
+    border-left: 4px solid #337ab7;
+}
+</style>
+@endpush
+
 @inject('qrLabels', 'App\\Services\\QrLabelService')
 
 @php
@@ -542,8 +553,9 @@
                                                         @php
                                                             $displayValue = $attribute->formattedValue();
                                                             $modelDisplay = $attribute->formattedModelValue();
+                                                            $isOverride = $attribute->isOverride;
                                                         @endphp
-                                                        <tr>
+                                                        <tr class="{{ $isOverride ? 'spec-override' : '' }}">
                                                             <td>{{ $attribute->definition->label }}</td>
                                                             <td>
                                                                 @if($displayValue !== null && $displayValue !== '')
@@ -552,11 +564,11 @@
                                                                     {{ __('Not specified') }}
                                                                 @endif
 
-                                                                @if($attribute->isOverride)
+                                                                @if($isOverride)
                                                                     <span class="label label-info">{{ __('Override') }}</span>
                                                                 @endif
 
-                                                                @if($attribute->isOverride && $modelDisplay)
+                                                                @if($isOverride && $modelDisplay)
                                                                     <span class="text-muted">({{ __('Model: :value', ['value' => $modelDisplay]) }})</span>
                                                                 @endif
                                                             </td>

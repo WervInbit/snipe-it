@@ -15,6 +15,17 @@
                 <div class="box-header with-border">
                     <h2 class="box-title">{{ __('Attribute Definitions') }}</h2>
                     <div class="box-tools pull-right">
+                        <form method="GET" action="{{ route('attributes.index') }}" class="form-inline" id="attributes-search-form" style="margin-right:10px;">
+                            <div class="form-group">
+                                <input type="text"
+                                       name="search"
+                                       value="{{ $search ?? '' }}"
+                                       class="form-control input-sm"
+                                       placeholder="{{ __('Search attributes…') }}"
+                                       autocomplete="off"
+                                       aria-label="{{ __('Search attributes') }}">
+                            </div>
+                        </form>
                         <a href="{{ route('attributes.create') }}" class="btn btn-primary btn-sm">{{ __('New Attribute') }}</a>
                     </div>
                 </div>
@@ -96,3 +107,26 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script nonce="{{ csrf_token() }}">
+(function () {
+    var form = document.getElementById('attributes-search-form');
+    if (!form) return;
+    var input = form.querySelector('input[name="search"]');
+    if (!input) return;
+
+    var timer = null;
+    var submit = function () {
+        form.submit();
+    };
+
+    input.addEventListener('input', function () {
+        if (timer) {
+            clearTimeout(timer);
+        }
+        timer = setTimeout(submit, 300);
+    });
+})();
+</script>
+@endpush

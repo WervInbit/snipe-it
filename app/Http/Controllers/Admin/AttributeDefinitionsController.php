@@ -8,25 +8,37 @@ use App\Http\Requests\AttributeDefinitionVersionRequest;
 use App\Models\AttributeDefinition;
 use App\Models\AttributeOption;
 use App\Models\Category;
+use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class AttributeDefinitionsController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
         $this->authorize('viewAny', AttributeDefinition::class);
+
+        $search = trim((string) $request->input('search'));
 
         $definitions = AttributeDefinition::query()
             ->with(['categories', 'previousVersion'])
             ->withCount(['options'])
+            ->when($search, function ($query) use ($search) {
+                $like = '%' . $search . '%';
+                $query->where(function ($inner) use ($like) {
+                    $inner->where('label', 'like', $like)
+                        ->orWhere('key', 'like', $like);
+                });
+            })
             ->orderBy('label')
-            ->paginate(25);
+            ->paginate(25)
+            ->appends(['search' => $search]);
 
         return view('attributes.index', [
             'definitions' => $definitions,
             'datatypes' => AttributeDefinition::DATATYPES,
+            'search' => $search,
         ]);
     }
 

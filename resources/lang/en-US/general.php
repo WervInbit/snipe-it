@@ -173,6 +173,8 @@ return [
     'scan_camera_denied'    => 'Camera access denied. Use manual entry.',
     'scan_hint_move_closer' => 'Tip: move closer to the code.',
     'scan_switch_camera'    => 'Switch camera',
+    'scan_refocus'          => 'Refocus camera',
+    'scan_torch'            => 'Toggle torch',
     'scan_manual_entry'     => 'Manual entry',
     'scan_manual_placeholder'=> 'Enter asset tag',
     'offline_banner'        => 'Offline — changes will be queued.',

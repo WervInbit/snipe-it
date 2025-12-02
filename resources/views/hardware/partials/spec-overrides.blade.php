@@ -92,15 +92,27 @@
                             @break
 
                         @case(\App\Models\AttributeDefinition::DATATYPE_ENUM)
-                            <input type="text" name="{{ $fieldName }}" id="attribute_override_{{ $definition->id }}" class="form-control" value="{{ $inputValue }}" list="attribute_override_{{ $definition->id }}_options" placeholder="{{ $baseDisplay }}">
-                            <datalist id="attribute_override_{{ $definition->id }}_options">
-                                @foreach($definition->options as $option)
-                                    @if($option->active)
-                                        <option value="{{ $option->value }}">{{ $option->label }}</option>
-                                    @endif
-                                @endforeach
-                            </datalist>
-                            <p class="help-block text-muted">{{ $definition->allow_custom_values ? __('Enter a custom value if it differs from the listed options.') : __('Choose from the allowed options or leave blank to inherit.') }}</p>
+                            @if($definition->allow_custom_values)
+                                <input type="text" name="{{ $fieldName }}" id="attribute_override_{{ $definition->id }}" class="form-control" value="{{ $inputValue }}" list="attribute_override_{{ $definition->id }}_options" placeholder="{{ $baseDisplay }}">
+                                <datalist id="attribute_override_{{ $definition->id }}_options">
+                                    @foreach($definition->options as $option)
+                                        @if($option->active)
+                                            <option value="{{ $option->value }}">{{ $option->label }}</option>
+                                        @endif
+                                    @endforeach
+                                </datalist>
+                                <p class="help-block text-muted">{{ __('Enter a custom value if it differs from the listed options.') }}</p>
+                            @else
+                                <select name="{{ $fieldName }}" id="attribute_override_{{ $definition->id }}" class="form-control">
+                                    <option value="">{{ __('Inherit') }}</option>
+                                    @foreach($definition->options as $option)
+                                        @if($option->active)
+                                            <option value="{{ $option->value }}" {{ (string)$inputValue === (string)$option->value ? 'selected' : '' }}>{{ $option->label }}</option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                                <p class="help-block text-muted">{{ __('Choose from the allowed options or leave blank to inherit.') }}</p>
+                            @endif
                             @break
 
                         @default

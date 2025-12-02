@@ -1,0 +1,144 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DieCutLabel Version="8.0" Units="twips">
+	<PaperOrientation>Landscape</PaperOrientation>
+	<Id>Address</Id>
+	<IsOutlined>false</IsOutlined>
+	<PaperName>30252 Address</PaperName>
+	<DrawCommands>
+		<RoundRectangle X="0" Y="0" Width="1581" Height="5040" Rx="270" Ry="270" />
+	</DrawCommands>
+	<ObjectInfo>
+		<ImageObject>
+			<Name>ASSET_QR_CODE</Name>
+			<ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+			<BackColor Alpha="0" Red="255" Green="255" Blue="255" />
+			<LinkedObjectName />
+			<Rotation>Rotation0</Rotation>
+			<IsMirrored>False</IsMirrored>
+			<IsVariable>False</IsVariable>
+			<GroupID>-1</GroupID>
+			<IsOutlined>False</IsOutlined>
+			<Image>iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAIAAAAiOjnJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAOOSURBVHhe7drRahUxFEBRr///z/VN5A4enJA9Te1ab4pJzpRN0ODr4+PjB+z28/03YAdhkRAWCWGReL395f31ev35y69l7R8iwycPGw6rBts3PMT1u9xYJIRFQlgkhEVCWCSERUJYJIRF4sYD6fUR7FM8OeFw1pphwuGsYdWTbk3oxiIhLBLCIiEsEsIiISwSwiIhLBJ7HkiHVWvWzhpWDdY2HFYN1jZcW7Vm7azrKjcWCWGREBYJYZEQFglhkRAWCWGRENaij797/6PfkrBICIuEsEgIi4SwSAiLhLBICIvEd/kfpN9w1Zq1s66r3FgkhEVCWCSERUJYJIRFQlgkhEVizwPpk56ccDhrsDbGcNbahtvdmtCNRUJYJIRFQlgkhEVCWCSERUJYJG48kJ7v+kz32/Bd56863/W73FgkhEVCWCSERUJYJIRFQlgkhEXi/YH0fzU8Pw4/gSdX/WfcWCSERUJYJIRFQlgkhEVCWCSERWLPA+nwJDhYO3rtrDVrEw7Whh/GGDYcVj3AjUVCWCSERUJYJIRFQlgkhEVCWCT2PJAODnnBG8YYHDLh9jEeOMuNRUJYJIRFQlgkhEVCWCSERUJYJG48kG5/VRs2PMQh37V9jAc2dGOREBYJYZEQFglhkRAWCWGREBaJPQ+kg2H/YcNh1XbDGGu2D7824doYw1m3NnRjkRAWCWGREBYJYZEQFglhkRAWiT0PpMMmw6pDDMNvt/2n8eTwt7ixSAiLhLBICIuEsEgIi4SwSAiLxI0H0i/tkJfJYYy1DQfbz7q1oRuLhLBICIuEsEgIi4SwSAiLhLBIvD+QDo9g57s+0/22/bu2n7W24bDqc7mxSAiLhLBICIuEsEgIi4SwSAiLxI0H0kPe4rZPOGy4Zhhj+1mD7WMMG165sUgIi4SwSAiLhLBICIuEsEgIi8SeB9Jh1Zq1s4ZVg7UND1m1ZjhrMIxx3dCNRUJYJIRFQlgkhEVCWCSERUJYJL7LA+naqkMMwz/p1g/KjUVCWCSERUJYJIRFQlgkhEVCWCQ8kE6rtlsbY23V53JjkRAWCWGREBYJYZEQFglhkRAWiT0PpE86ZMJhjCetffL24a9juLFICIuEsEgIi4SwSAiLhLBICIvEjQfS812f6f7Fk588TDiMsX3VYNeGbiwSwiIhLBLCIiEsEsIiISwSwiLx/kAKW7ixSAiLhLBICIuEsEj8AqaxjS3agCstAAAAAElFTkSuQmCC</Image>
+			<ScaleMode>Uniform</ScaleMode>
+			<BorderWidth>0</BorderWidth>
+			<BorderColor Alpha="255" Red="0" Green="0" Blue="0" />
+			<HorizontalAlignment>Center</HorizontalAlignment>
+			<VerticalAlignment>Center</VerticalAlignment>
+		</ImageObject>
+		<Bounds X="331" Y="57.9999999999999" Width="1303.93702745718" Height="1303.93702745718" />
+	</ObjectInfo>
+	<ObjectInfo>
+		<AddressObject>
+			<Name>ASSET__IDENTIFIER </Name>
+			<ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+			<BackColor Alpha="0" Red="255" Green="255" Blue="255" />
+			<LinkedObjectName />
+			<Rotation>Rotation0</Rotation>
+			<IsMirrored>False</IsMirrored>
+			<IsVariable>True</IsVariable>
+			<GroupID>-1</GroupID>
+			<IsOutlined>False</IsOutlined>
+			<HorizontalAlignment>Left</HorizontalAlignment>
+			<VerticalAlignment>Middle</VerticalAlignment>
+			<TextFitMode>ShrinkToFit</TextFitMode>
+			<UseFullFontHeight>True</UseFullFontHeight>
+			<Verticalized>False</Verticalized>
+			<StyledText>
+				<Element>
+					<String xml:space="preserve">2E9F9EA#ABH</String>
+					<Attributes>
+						<Font Family="Arial" Size="12" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+						<ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
+					</Attributes>
+				</Element>
+			</StyledText>
+			<ShowBarcodeFor9DigitZipOnly>False</ShowBarcodeFor9DigitZipOnly>
+			<BarcodePosition>Suppress</BarcodePosition>
+			<LineFonts>
+				<Font Family="Arial" Size="12" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+			</LineFonts>
+		</AddressObject>
+		<Bounds X="976.800048828125" Y="1379.61417152546" Width="734.399902343748" Height="113.385828474538" />
+	</ObjectInfo>
+	<ObjectInfo>
+		<AddressObject>
+			<Name>ASSET_NAME</Name>
+			<ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+			<BackColor Alpha="0" Red="255" Green="255" Blue="255" />
+			<LinkedObjectName />
+			<Rotation>Rotation0</Rotation>
+			<IsMirrored>False</IsMirrored>
+			<IsVariable>True</IsVariable>
+			<GroupID>-1</GroupID>
+			<IsOutlined>False</IsOutlined>
+			<HorizontalAlignment>Left</HorizontalAlignment>
+			<VerticalAlignment>Middle</VerticalAlignment>
+			<TextFitMode>ShrinkToFit</TextFitMode>
+			<UseFullFontHeight>True</UseFullFontHeight>
+			<Verticalized>False</Verticalized>
+			<StyledText>
+				<Element>
+					<String xml:space="preserve">ASSET-4033</String>
+					<Attributes>
+						<Font Family="Arial" Size="12" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+						<ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
+					</Attributes>
+				</Element>
+			</StyledText>
+			<ShowBarcodeFor9DigitZipOnly>False</ShowBarcodeFor9DigitZipOnly>
+			<BarcodePosition>Suppress</BarcodePosition>
+			<LineFonts>
+				<Font Family="Arial" Size="12" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+			</LineFonts>
+		</AddressObject>
+		<Bounds X="331" Y="1379.61417152546" Width="614.399902343749" Height="113.385828474538" />
+	</ObjectInfo>
+	<ObjectInfo>
+		<ImageObject>
+			<Name>AFBEELDING</Name>
+			<ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+			<BackColor Alpha="0" Red="255" Green="255" Blue="255" />
+			<LinkedObjectName />
+			<Rotation>Rotation0</Rotation>
+			<IsMirrored>False</IsMirrored>
+			<IsVariable>False</IsVariable>
+			<GroupID>-1</GroupID>
+			<IsOutlined>False</IsOutlined>
+			<Image>iVBORw0KGgoAAAANSUhEUgAAAMgAAADICAIAAAAiOjnJAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAOOSURBVHhe7drRahUxFEBRr///z/VN5A4enJA9Te1ab4pJzpRN0ODr4+PjB+z28/03YAdhkRAWCWGReL395f31ev35y69l7R8iwycPGw6rBts3PMT1u9xYJIRFQlgkhEVCWCSERUJYJIRF4sYD6fUR7FM8OeFw1pphwuGsYdWTbk3oxiIhLBLCIiEsEsIiISwSwiIhLBJ7HkiHVWvWzhpWDdY2HFYN1jZcW7Vm7azrKjcWCWGREBYJYZEQFglhkRAWCWGRENaij797/6PfkrBICIuEsEgIi4SwSAiLhLBICIvEd/kfpN9w1Zq1s66r3FgkhEVCWCSERUJYJIRFQlgkhEVizwPpk56ccDhrsDbGcNbahtvdmtCNRUJYJIRFQlgkhEVCWCSERUJYJG48kJ7v+kz32/Bd56863/W73FgkhEVCWCSERUJYJIRFQlgkhEXi/YH0fzU8Pw4/gSdX/WfcWCSERUJYJIRFQlgkhEVCWCSERWLPA+nwJDhYO3rtrDVrEw7Whh/GGDYcVj3AjUVCWCSERUJYJIRFQlgkhEVCWCT2PJAODnnBG8YYHDLh9jEeOMuNRUJYJIRFQlgkhEVCWCSERUJYJG48kG5/VRs2PMQh37V9jAc2dGOREBYJYZEQFglhkRAWCWGREBaJPQ+kg2H/YcNh1XbDGGu2D7824doYw1m3NnRjkRAWCWGREBYJYZEQFglhkRAWiT0PpMMmw6pDDMNvt/2n8eTwt7ixSAiLhLBICIuEsEgIi4SwSAiLxI0H0i/tkJfJYYy1DQfbz7q1oRuLhLBICIuEsEgIi4SwSAiLhLBIvD+QDo9g57s+0/22/bu2n7W24bDqc7mxSAiLhLBICIuEsEgIi4SwSAiLxI0H0kPe4rZPOGy4Zhhj+1mD7WMMG165sUgIi4SwSAiLhLBICIuEsEgIi8SeB9Jh1Zq1s4ZVg7UND1m1ZjhrMIxx3dCNRUJYJIRFQlgkhEVCWCSERUJYJL7LA+naqkMMwz/p1g/KjUVCWCSERUJYJIRFQlgkhEVCWCQ8kE6rtlsbY23V53JjkRAWCWGREBYJYZEQFglhkRAWiT0PpE86ZMJhjCetffL24a9juLFICIuEsEgIi4SwSAiLhLBICIvEjQfS812f6f7Fk588TDiMsX3VYNeGbiwSwiIhLBLCIiEsEsIiISwSwiLx/kAKW7ixSAiLhLBICIuEsEj8AqaxjS3agCstAAAAAElFTkSuQmCC</Image>
+			<ScaleMode>Uniform</ScaleMode>
+			<BorderWidth>0</BorderWidth>
+			<BorderColor Alpha="255" Red="0" Green="0" Blue="0" />
+			<HorizontalAlignment>Center</HorizontalAlignment>
+			<VerticalAlignment>Center</VerticalAlignment>
+		</ImageObject>
+		<Bounds X="3004.72445457525" Y="57.9999999999999" Width="1133.85828474538" Height="1133.85828474538" />
+	</ObjectInfo>
+	<ObjectInfo>
+		<TextObject>
+			<Name>TEKST</Name>
+			<ForeColor Alpha="255" Red="0" Green="0" Blue="0" />
+			<BackColor Alpha="0" Red="255" Green="255" Blue="255" />
+			<LinkedObjectName />
+			<Rotation>Rotation0</Rotation>
+			<IsMirrored>False</IsMirrored>
+			<IsVariable>False</IsVariable>
+			<GroupID>-1</GroupID>
+			<IsOutlined>False</IsOutlined>
+			<HorizontalAlignment>Left</HorizontalAlignment>
+			<VerticalAlignment>Top</VerticalAlignment>
+			<TextFitMode>ShrinkToFit</TextFitMode>
+			<UseFullFontHeight>True</UseFullFontHeight>
+			<Verticalized>False</Verticalized>
+			<StyledText>
+				<Element>
+					<String xml:space="preserve">SN # 5CD048P8P4</String>
+					<Attributes>
+						<Font Family="Arial" Size="12" Bold="False" Italic="False" Underline="False" Strikeout="False" />
+						<ForeColor Alpha="255" Red="0" Green="0" Blue="0" HueScale="100" />
+					</Attributes>
+				</Element>
+			</StyledText>
+		</TextObject>
+		<Bounds X="3004.72445457525" Y="1247.24411321992" Width="1133.85828474538" Height="113.385828474538" />
+	</ObjectInfo>
+</DieCutLabel>

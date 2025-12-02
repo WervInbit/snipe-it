@@ -36,7 +36,8 @@ class AssetLabelPrintController extends Controller
             ],
         ]);
 
-        $queue = $validated['queue'] ?? config('qr_templates.print_queue') ?? Arr::first($queues);
+        // Default to configured queue when the client sends no queue or an empty string.
+        $queue = $validated['queue'] ?: config('qr_templates.print_queue') ?: Arr::first($queues);
 
         if (! $queue) {
             return response()->json([

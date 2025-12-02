@@ -233,8 +233,17 @@ class AssetModelPresenter extends Presenter
         }
         $name .= $this->name;
 
-        if ($this->model_number) {
-            $name .= ' (#'.$this->model_number.')';
+        $selectedModelNumber = $this->model->primaryModelNumber;
+        if (!$selectedModelNumber) {
+            $selectedModelNumber = $this->model->modelNumbers()->first();
+        }
+
+        $displayCode = $selectedModelNumber
+            ? ($selectedModelNumber->code ?: $selectedModelNumber->label)
+            : null;
+
+        if ($displayCode) {
+            $name .= ' (#'.$displayCode.')';
         }
 
         return $name;

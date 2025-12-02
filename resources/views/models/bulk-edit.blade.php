@@ -38,8 +38,10 @@
                                         <i class="fa {!!  (($model->assets_count > 0 ) ? 'fa-warning info' : 'fa-check success') !!}"></i>
                                         {{ $model->display_name }}
 
-                                            @if ($model->model_number)
-                                                ({{ $model->model_number }})
+                                            @if ($model->primaryModelNumber)
+                                                ({{ $model->primaryModelNumber->code ?: $model->primaryModelNumber->label }})
+                                            @elseif($model->modelNumbers && $model->modelNumbers->count() === 1)
+                                                ({{ optional($model->modelNumbers->first())->code ?: optional($model->modelNumbers->first())->label }})
                                             @endif
                                         </td>
                                         <td>{{ $model->assets_count }} assets

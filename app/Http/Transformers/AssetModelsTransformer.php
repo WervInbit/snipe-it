@@ -38,11 +38,24 @@ class AssetModelsTransformer
             }
         }
 
-        $modelNumberCode = $assetmodel->model_number ?: optional($assetmodel->primaryModelNumber)->code;
-        $modelNumbersCount = $assetmodel->model_numbers_count
-            ?? ($assetmodel->relationLoaded('modelNumbers')
-                ? $assetmodel->modelNumbers->count()
-                : $assetmodel->modelNumbers()->count());
+        $modelNumbers = $assetmodel->relationLoaded('modelNumbers')
+            ? $assetmodel->modelNumbers
+            : $assetmodel->modelNumbers()->get();
+
+        $modelNumbersCount = $assetmodel->model_numbers_count ?? $modelNumbers->count();
+
+        $selectedModelNumber = $assetmodel->primaryModelNumber;
+        if (!$selectedModelNumber) {
+            if ($modelNumbersCount === 1) {
+                $selectedModelNumber = $modelNumbers->first();
+            } else {
+                $selectedModelNumber = $modelNumbers->first();
+            }
+        }
+
+        $modelNumberCode = $selectedModelNumber
+            ? ($selectedModelNumber->code ?: $selectedModelNumber->label)
+            : null;
 
         $array = [
             'id' => (int) $assetmodel->id,

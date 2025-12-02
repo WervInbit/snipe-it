@@ -1,3 +1,15 @@
+# Session Progress (2025-12-02)
+
+## Addendum (2025-12-02 Codex)
+- Kickoff: re-read `AGENTS.md` and every `docs/agents/*` log so today's work starts with the latest workflow/context.
+- Logged `docs/agents/agents-addendum-2025-12-02-session-init.md` to track this session; no code or config changes yet.
+
+# Session Progress (2025-11-25)
+
+## Addendum (2025-11-25 Codex)
+- Kickoff: re-read `AGENTS.md`, `docs/fork-notes.md`, and all `docs/agents/*` logs to align with the latest guidance before making changes.
+- Logged this dated stub and created `docs/agents/agents-addendum-2025-11-25-session-init.md` to capture work for today; no code changes yet.
+
 # Session Progress (2025-11-20)
 
 ## Addendum (2025-11-20 Codex)
