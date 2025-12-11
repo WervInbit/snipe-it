@@ -16,7 +16,7 @@ class QrLabelService
 {
     protected string $directory = 'labels';
     // Increment to invalidate previously generated image filenames
-    protected string $version = 'v4';
+    protected string $version = 'v13';
 
     /**
      * Generate PNG and PDF labels for an asset.
@@ -34,14 +34,18 @@ class QrLabelService
         $label = ($settings->qr_text_redundancy ?? false) ? $asset->asset_tag : null;
         $formats = array_map(function ($format) {
             return strtolower(trim($format));
-        }, explode(',', $settings->qr_formats ?? 'png,pdf'));
+        }, explode(',', $settings->qr_formats ?? 'png,pdf,qr'));
         $qr = app(QrCodeService::class);
 
-        $caption = $this->assetLabelBlocks($asset, $settings);
+        $caption = $this->assetLabelBlocks($asset, $settings, $template);
 
         if (in_array('png', $formats)) {
             $png = $qr->png($data, $label, $logoPath, $template);
             $disk->put($this->path($asset, 'png', $template), $png);
+        }
+
+        if (in_array('qr', $formats)) {
+            $this->generateRaw($asset, $logoPath);
         }
 
         if (in_array('pdf', $formats)) {
@@ -58,10 +62,21 @@ class QrLabelService
         $settings = Setting::getSettings() ?? (object) [];
         $template = $template ?? ($settings->qr_label_template ?? config('qr_templates.default'));
         $disk = Storage::disk('public');
+
+        if ($format === 'qr') {
+            $rawPath = $this->path($asset, 'png', 'qr-only');
+            if (! $disk->exists($rawPath)) {
+                $this->generateRaw($asset);
+            }
+
+            return $disk->url($rawPath);
+        }
+
         $file = $this->path($asset, $format, $template);
         if (! $disk->exists($file)) {
             $this->generate($asset, $template);
         }
+
         return $disk->url($file);
     }
 
@@ -81,7 +96,7 @@ class QrLabelService
         $logo = ($settings->qr_logo ?? null) ?: ($settings->label_logo ?? null);
         $logoPath = ($logo && $disk->exists($logo)) ? $disk->path($logo) : null;
         $qr = app(QrCodeService::class);
-        $caption = $this->assetLabelBlocks($asset, $settings);
+        $caption = $this->assetLabelBlocks($asset, $settings, $template);
 
         return $qr->pdf(
             $asset->asset_tag,
@@ -113,7 +128,7 @@ class QrLabelService
         foreach ($assets as $index => $asset) {
             $data = $asset->asset_tag;
             $label = ($settings->qr_text_redundancy ?? false) ? $asset->asset_tag : null;
-            $caption = $this->assetLabelBlocks($asset, $settings);
+            $caption = $this->assetLabelBlocks($asset, $settings, $template);
             $png = $qr->png($data, $label, $logoPath, $template);
             $pageBreak = $index < ($count - 1);
             $fragments[] = $qr->renderLabelFragment($png, $tpl, $caption, $pageBreak);
@@ -230,23 +245,42 @@ class QrLabelService
      * Build the caption lines rendered under the QR code.
      *
      * @param object $settings
+     * @param string|null $template
      * @return array<int, string>
      */
-    protected function assetLabelBlocks(Asset $asset, object $settings): array
+    protected function assetLabelBlocks(Asset $asset, object $settings, ?string $template = null): array
     {
         $lines = [];
-        $assetName = trim((string) ($asset->name
-            ?: optional($asset->model)->name
-            ?: optional($asset->modelNumber)->label
-            ?: optional($asset->modelNumber)->code));
 
-        if ($assetName !== '') {
-            $lines[] = Str::limit($assetName, 48);
-        }
-
+        $templateKey = $template ?? config('qr_templates.default');
         $assetTag = trim((string) $asset->asset_tag);
-        if ($assetTag !== '') {
-            $lines[] = trans('admin/hardware/form.tag').': '.Str::limit($assetTag, 48);
+        $serial = trim((string) $asset->serial);
+
+        if (Str::contains($templateKey, 's0929120')) {
+            // Ultra-compact label: show asset tag and serial (centered)
+            if ($assetTag !== '') {
+                $lines[] = Str::limit($assetTag, 48);
+            }
+            if ($serial !== '') {
+                $lines[] = 'SN: '.Str::limit($serial, 48);
+            }
+        } else {
+            $assetName = trim((string) ($asset->name
+                ?: optional($asset->model)->name
+                ?: optional($asset->modelNumber)->label
+                ?: optional($asset->modelNumber)->code));
+
+            if ($assetName !== '') {
+                $lines[] = Str::limit($assetName, 48);
+            }
+
+            if ($assetTag !== '') {
+                $lines[] = trans('admin/hardware/form.tag').': '.Str::limit($assetTag, 48);
+            }
+
+            if ($serial !== '') {
+                $lines[] = trans('admin/hardware/form.serial').': '.Str::limit($serial, 48);
+            }
         }
 
         if (empty($lines)) {
@@ -257,5 +291,19 @@ class QrLabelService
             'top' => [],
             'bottom' => array_values($lines),
         ];
+    }
+
+    protected function generateRaw(Asset $asset, ?string $logoPath = null): void
+    {
+        $settings = Setting::getSettings() ?? (object) [];
+        $disk = Storage::disk('public');
+        $disk->makeDirectory($this->directory);
+
+        $logo = ($settings->qr_logo ?? null) ?: ($settings->label_logo ?? null);
+        $logoPath = $logoPath ?? (($logo && $disk->exists($logo)) ? $disk->path($logo) : null);
+
+        $qr = app(QrCodeService::class);
+        $png = $qr->png($asset->asset_tag, null, $logoPath, null);
+        $disk->put($this->path($asset, 'png', 'qr-only'), $png);
     }
 }

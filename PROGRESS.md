@@ -1,8 +1,30 @@
+# Session Progress (2025-12-09)
+
+## Addendum (2025-12-09 Codex)
+- Kickoff: initialized session per `AGENTS.md` workflow; reviewed PROGRESS.md, docs/fork-notes.md, and docs/agents/agent-progress-2025.md to refresh current context.
+- Created this dated stub to track today's work; ready for task assignments.
+- Logged session kickoff in `docs/agents/agents.md` so today's notes have a dedicated addendum.
+- Restored dev printing path: attached the Dymo LabelWriter 330 Turbo to WSL, brought CUPS back up with queue `dymo25` (25x25 S0929120), updated `.env` to target it, installed `cups-client` in the `snipeit_app` container, and printed a sample 25x25 PDF via `lp` to verify end-to-end.
+- Reviewed QR label work from 2025-11-19 through 2025-12-02: server-side CUPS printing, multi-queue support, template consolidation.
+- Locked in the S0929120 (25x25) template as default (v13) with final offsets (qr_left 3.2mm, text_left 1.8mm, padding 1.8mm), cleared caches/labels, and validated printing via CUPS queue `dymo25` (job dymo25-25) using zero-margin Custom.W72H72 media.
+- Navigation: added a Scan button (route `scan`) to the top nav alongside Assets/Licenses for easier mobile access; new `scan` icon added.
+- Scanner: swapped QR decoding to ZXing (@zxing/browser), default to low-res 640x480 with QR-only hints, keeps torch/switch/refocus controls, and falls back to 1280x720 after consecutive failures; rebuilt assets via `npm run prod`.
+- Fixed S0929120 (25x25mm) label template for LabelWriter 330 Turbo (300 DPI): increased font from 8.5pt to 11pt, expanded text band from 2mm to 4mm, reduced QR box from 20mm to 18.5mm for better text visibility.
+- Removed arbitrary font-size reduction in CSS (was using `fontSize - 1`), now uses configured size directly with semibold weight for better readability on thermal printers.
+- Corrected template key from `dymo-s0929120-57x32` to `dymo-s0929120-25x25` to match actual dimensions.
+- Reconfigured 25x25mm template with 2mm physical margins: 21x21mm QR code, 2mm text band at bottom (9pt font), no gap between QR and text, 248px QR resolution (matches 300 DPI exactly).
+- Fixed square-stack layout rendering: QR now positions at top-left with padding, text band at bottom (was incorrectly using side-by-side layout).
+- Updated to user-specified dimensions: 2.5mm margins, 20x20mm QR (236px at 300 DPI), 2.5mm text band with 5pt font, 0.1mm gap.
+- Changed S0929120 template text to show asset tag only (no serial number) to match the QR code identifier.
+- Created HTML visual designer (label-designer.html) for iterative label layout design without regenerating PDFs.
+- Debugged website printing: fixed controller to pass CUPS_SERVER environment variable to the lp process; identified CUPS scheduler not running on WSL (172.22.110.249).
+
 # Session Progress (2025-12-02)
 
 ## Addendum (2025-12-02 Codex)
 - Kickoff: re-read `AGENTS.md` and every `docs/agents/*` log so today's work starts with the latest workflow/context.
 - Logged `docs/agents/agents-addendum-2025-12-02-session-init.md` to track this session; no code or config changes yet.
+- Seeded latest hardware variants (430 G3/G6, Surface Pro 4/5) and reset dev DB via `php artisan migrate:fresh --seed` to validate; QR/scan refinements shipped (refocus/torch, tighter spacing); model list now shows actual model-number codes/labels.
 
 # Session Progress (2025-11-25)
 

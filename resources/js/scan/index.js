@@ -1,10 +1,15 @@
-import jsQR from 'jsqr';
+import { BrowserMultiFormatReader } from '@zxing/browser';
+import { BarcodeFormat, DecodeHintType } from '@zxing/library';
 
+// Low-res first for better SNR at short/mid range; bump once if the code is too small/far.
 const defaults = {
-  width: 1280, // request higher resolution to aid focus/decoding
-  height: 720,
-  interval: 150, // slightly slower sampling to allow focus/torch to stabilize
+  width: 640,
+  height: 480,
+  interval: 120,
   beep: true,
+  fallbackWidth: 1280,
+  fallbackHeight: 720,
+  failBeforeFallback: 8,
 };
 const config = Object.assign({}, defaults, window.scanConfig || {});
 
@@ -25,11 +30,13 @@ const ctx = canvas.getContext('2d');
 const octx = overlay.getContext('2d');
 
 let stream = null;
-let timer = null;
 let hintTimer = null;
 let devices = [];
 let currentDeviceIndex = 0;
 let torchOn = false;
+let reader = null;
+let failCount = 0;
+let bumped = false;
 
 function showError(msg) {
   if (!errorEl) return;
@@ -110,12 +117,18 @@ function redirect(tag) {
 }
 
 function stop() {
-  if (timer) clearInterval(timer);
   if (hintTimer) clearTimeout(hintTimer);
+  if (reader) {
+    try {
+      reader.reset();
+    } catch (e) {
+      // ignore
+    }
+  }
   if (stream) stream.getTracks().forEach((t) => t.stop());
   stream = null;
-  timer = null;
   hintTimer = null;
+  reader = null;
 }
 
 async function enumerateVideoInputs() {
@@ -131,6 +144,8 @@ async function start(deviceId = null) {
   hideError();
   hidePermissionBanner();
   hideHint();
+  failCount = 0;
+  bumped = false;
 
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     showError('Camera not available');
@@ -147,7 +162,6 @@ async function start(deviceId = null) {
         height: { ideal: config.height },
       };
 
-  // Prefer autofocus; some devices honour these hints.
   if (!videoConstraints.advanced) {
     videoConstraints.advanced = [];
   }
@@ -165,31 +179,52 @@ async function start(deviceId = null) {
 
     syncViewportSizes();
 
-    timer = setInterval(sample, config.interval);
+    const hints = new Map();
+    hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.QR_CODE]);
+    reader = new BrowserMultiFormatReader(hints);
+
+    await reader.decodeFromVideoDevice(deviceId || null, video, async (result, err) => {
+      clearOverlay();
+
+      if (result) {
+        failCount = 0;
+        const points = result.resultPoints || [];
+        if (points.length >= 4) {
+          for (let i = 0; i < points.length; i++) {
+            const p1 = points[i];
+            const p2 = points[(i + 1) % points.length];
+            drawLine({ x: p1.x, y: p1.y }, { x: p2.x, y: p2.y });
+          }
+        }
+        beep();
+        stop();
+        redirect(result.getText());
+        return;
+      }
+
+      if (err) {
+        failCount += 1;
+        if (!bumped && failCount >= config.failBeforeFallback && config.fallbackWidth && config.fallbackHeight) {
+          bumped = true;
+          const [track] = stream?.getVideoTracks() || [];
+          if (track?.applyConstraints) {
+            try {
+              await track.applyConstraints({ width: { ideal: config.fallbackWidth }, height: { ideal: config.fallbackHeight } });
+              syncViewportSizes();
+            } catch (e) {
+              // ignore and keep going
+            }
+          }
+        }
+      }
+    });
+
     hintTimer = setTimeout(showHint, 10_000);
   } catch (err) {
     console.error('Unable to access camera', err);
     showError('Unable to access camera');
     showPermissionBanner();
     showManual();
-  }
-}
-
-function sample() {
-  if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
-  clearOverlay();
-  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  const code = jsQR(imageData.data, imageData.width, imageData.height);
-  if (code) {
-    const loc = code.location;
-    drawLine(loc.topLeftCorner, loc.topRightCorner);
-    drawLine(loc.topRightCorner, loc.bottomRightCorner);
-    drawLine(loc.bottomRightCorner, loc.bottomLeftCorner);
-    drawLine(loc.bottomLeftCorner, loc.topLeftCorner);
-    beep();
-    stop();
-    redirect(code.data);
   }
 }
 

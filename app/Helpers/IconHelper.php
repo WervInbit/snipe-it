@@ -199,6 +199,8 @@ class IconHelper
             case 'tests':
             case 'test-types':
                 return 'fa-solid fa-vial';
+            case 'scan':
+                return 'fa-solid fa-qrcode';
         }
     }
 }

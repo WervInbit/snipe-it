@@ -145,6 +145,12 @@ dir="{{ Helper::determineLanguageDirection() }}">
                       <div class="navbar-custom-menu">
                           @if($isRefurbisher)
                           <ul class="nav navbar-nav">
+                              <li aria-hidden="true"{!! (request()->routeIs('scan') ? ' class="active"' : '') !!}>
+                                  <a href="{{ route('scan') }}" tabindex="-1" data-tooltip="true" data-placement="bottom" data-title="{{ trans('general.scan') }}">
+                                      <x-icon type="scan" class="fa-fw" />
+                                      <span class="sr-only">{{ trans('general.scan') }}</span>
+                                  </a>
+                              </li>
                               <li>
                                   <a href="{{ route('logout.get') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                       <x-icon type="logout" class="fa-fw" />
@@ -205,6 +211,14 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                     </a>
                                 </li>
                             @endcan
+                            @auth
+                                <li aria-hidden="true"{!! (request()->routeIs('scan') ? ' class="active"' : '') !!}>
+                                    <a href="{{ route('scan') }}" tabindex="-1" data-tooltip="true" data-placement="bottom" data-title="{{ trans('general.scan') }}">
+                                        <x-icon type="scan" class="fa-fw" />
+                                        <span class="sr-only">{{ trans('general.scan') }}</span>
+                                    </a>
+                                </li>
+                            @endauth
 
                             @can('index', \App\Models\Asset::class)
                                 <li>
@@ -1330,6 +1344,3 @@ dir="{{ Helper::determineLanguageDirection() }}">
 
         </body>
 </html>
-
-
-
