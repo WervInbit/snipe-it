@@ -229,46 +229,75 @@ class QrCodeService
 
         $labelWidth = (float) $tpl['width_mm'];
         $labelHeight = (float) $tpl['height_mm'];
-        $topMargin = max(0.0, $labelHeight * 0.05);
-        $bottomMargin = $topMargin;
-        $leftMargin = max(0.0, $labelWidth * 0.05);
-        $rightMargin = $leftMargin;
-        $gutter = max(1.0, $labelWidth * 0.02);
-        $qrWidth = max(10.0, min($labelWidth * 0.45, (float) ($tpl['qr_column_mm'] ?? $labelWidth * 0.4)));
-        $qrHeight = max(10.0, $labelHeight - $topMargin - $bottomMargin);
-        $textLeft = $leftMargin + $qrWidth + $gutter;
-        $textWidth = max(10.0, $labelWidth - $rightMargin - $textLeft);
-        $textHeight = $qrHeight;
-
-        $imgStyle = sprintf(
-            'width:%smm;height:%smm;display:block;object-fit:contain;',
-            number_format($qrWidth, 3, '.', ''),
-            number_format($qrHeight, 3, '.', '')
-        );
+        $layout = $tpl['layout'] ?? null;
         $encoded = base64_encode($pngData);
         $textHtml = $this->renderTextLines($bottomLines);
 
-        $containerStyles = sprintf(
-            'position:relative;width:%smm;height:%smm;',
-            number_format($labelWidth, 3, '.', ''),
-            number_format($labelHeight, 3, '.', '')
-        );
-        $qrStyles = sprintf(
-            'position:absolute;top:%smm;left:%smm;',
-            number_format($topMargin, 3, '.', ''),
-            number_format($leftMargin, 3, '.', '')
-        );
-        $textStyles = sprintf(
-            'position:absolute;top:%smm;right:%smm;width:%smm;height:%smm;display:flex;flex-direction:column;justify-content:flex-end;',
-            number_format($topMargin, 3, '.', ''),
-            number_format($rightMargin, 3, '.', ''),
-            number_format($textWidth, 3, '.', ''),
-            number_format($textHeight, 3, '.', '')
-        );
+        if ($layout === 'square-stack') {
+            $qrBox = (float) ($tpl['qr_box_mm'] ?? 20.0);
+            $textBand = (float) ($tpl['text_height_mm'] ?? 2.0);
+            $textGap = (float) ($tpl['text_gap_mm'] ?? 0.0);
+            $qrTop = $padding;
+            $qrLeft = (float) ($tpl['qr_left_mm'] ?? $padding);
+            $textLeft = (float) ($tpl['text_left_mm'] ?? $padding);
+            $textRight = (float) ($tpl['text_right_mm'] ?? $textLeft);
+            $textTop = $qrTop + $qrBox + $textGap;
+
+            $containerStyles = sprintf(
+                'position:relative;width:%smm;height:%smm;box-sizing:border-box;overflow:hidden;',
+                number_format($labelWidth, 3, '.', ''),
+                number_format($labelHeight, 3, '.', '')
+            );
+            $qrStyles = sprintf(
+                'position:absolute;top:%smm;left:%smm;width:%smm;height:%smm;object-fit:contain;display:block;',
+                number_format($qrTop, 3, '.', ''),
+                number_format($qrLeft, 3, '.', ''),
+                number_format($qrBox, 3, '.', ''),
+                number_format($qrBox, 3, '.', '')
+            );
+            $textStyles = sprintf(
+                'position:absolute;left:%smm;right:%smm;top:%smm;height:%smm;display:flex;flex-direction:row;align-items:center;justify-content:center;text-align:center;',
+                number_format($textLeft, 3, '.', ''),
+                number_format($textRight, 3, '.', ''),
+                number_format($textTop, 3, '.', ''),
+                number_format($textBand, 3, '.', '')
+            );
+        } else {
+            $topMargin = max(0.0, $labelHeight * 0.05);
+            $bottomMargin = $topMargin;
+            $leftMargin = max(0.0, $labelWidth * 0.05);
+            $rightMargin = $leftMargin;
+            $gutter = max(1.0, $labelWidth * 0.02);
+            $qrWidth = max(10.0, min($labelWidth * 0.45, (float) ($tpl['qr_column_mm'] ?? $labelWidth * 0.4)));
+            $qrHeight = max(10.0, $labelHeight - $topMargin - $bottomMargin);
+            $textLeft = $leftMargin + $qrWidth + $gutter;
+            $textWidth = max(10.0, $labelWidth - $rightMargin - $textLeft);
+            $textHeight = $qrHeight;
+
+            $containerStyles = sprintf(
+                'position:relative;width:%smm;height:%smm;',
+                number_format($labelWidth, 3, '.', ''),
+                number_format($labelHeight, 3, '.', '')
+            );
+            $qrStyles = sprintf(
+                'position:absolute;top:%smm;left:%smm;width:%smm;height:%smm;display:block;object-fit:contain;',
+                number_format($topMargin, 3, '.', ''),
+                number_format($leftMargin, 3, '.', ''),
+                number_format($qrWidth, 3, '.', ''),
+                number_format($qrHeight, 3, '.', '')
+            );
+            $textStyles = sprintf(
+                'position:absolute;top:%smm;right:%smm;width:%smm;height:%smm;display:flex;flex-direction:column;justify-content:flex-end;text-align:left;',
+                number_format($topMargin, 3, '.', ''),
+                number_format($rightMargin, 3, '.', ''),
+                number_format($textWidth, 3, '.', ''),
+                number_format($textHeight, 3, '.', '')
+            );
+        }
 
         return <<<HTML
 <div class="qr-label" style="{$containerStyles}">
-    <img src="data:image/png;base64,{$encoded}" alt="QR label" style="{$qrStyles}{$imgStyle}">
+    <img src="data:image/png;base64,{$encoded}" alt="QR label" style="{$qrStyles}">
     <div class="qr-text" style="{$textStyles}">{$textHtml}</div>
 </div>
 HTML;
@@ -292,8 +321,8 @@ HTML;
 @page { margin: 0; size: {$width}mm {$height}mm; }
 html, body { margin: 0; padding: 0; width: {$width}mm; height: {$height}mm; }
 .qr-label { width: {$width}mm; height: {$height}mm; box-sizing: border-box; overflow: hidden; position: relative; }
-.qr-text { font-size: max(6, {$fontSize} - 1)pt; line-height: {$lineHeight}; text-align: left; }
-.qr-text-line { display: block; font-size: max(6, {$fontSize} - 1)pt; }
+.qr-text { font-size: {$fontSize}pt; line-height: {$lineHeight}; text-align: left; }
+.qr-text-line { display: block; font-size: {$fontSize}pt; font-weight: 600; }
 CSS;
 
         $html = '<html><head><meta charset="UTF-8"><style>' . $style . '</style></head><body>' .

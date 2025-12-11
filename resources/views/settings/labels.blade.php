@@ -280,10 +280,11 @@
                                           <label for="qr_formats" class="control-label">{{ trans('admin/settings/general.qr_formats') }}</label>
                                       </div>
                                       <div class="col-md-7">
-                                          @php($selectedFormats = explode(',', old('qr_formats', $setting->qr_formats ?? 'png,pdf')))
+                                          @php($selectedFormats = explode(',', old('qr_formats', $setting->qr_formats ?? 'png,pdf,qr')))
                                           <select name="qr_formats[]" id="qr_formats" multiple class="form-control">
                                               <option value="png" @selected(in_array('png', $selectedFormats))>PNG</option>
                                               <option value="pdf" @selected(in_array('pdf', $selectedFormats))>PDF</option>
+                                              <option value="qr" @selected(in_array('qr', $selectedFormats))>QR code only (PNG)</option>
                                           </select>
                                       </div>
                                   </div>

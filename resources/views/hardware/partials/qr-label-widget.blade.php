@@ -1,6 +1,7 @@
 @php($templateName = $qrTemplates[$selectedTemplate]['name'] ?? $selectedTemplate)
 @php($printQueues = array_values(array_filter(config('qr_templates.queues') ?? [])))
 @php($defaultQueue = config('qr_templates.print_queue') ?? ($printQueues[0] ?? null))
+@php($qrRaw = $qrRaw ?? null)
 <div class="panel panel-default qr-label-panel">
     <div class="panel-heading">
         <strong>{{ trans('general.print_qr') }}</strong>
@@ -62,6 +63,11 @@
             @if ($qrPdf)
                 <a href="{{ $qrPdf }}" target="_blank" class="btn btn-primary">
                     <x-icon type="print" /> {{ trans('general.print_pdf') }}
+                </a>
+            @endif
+            @if ($qrRaw)
+                <a href="{{ $qrRaw }}" download class="btn btn-default">
+                    <x-icon type="download" /> {{ __('Download QR code') }}
                 </a>
             @endif
             @if ($qrPng)

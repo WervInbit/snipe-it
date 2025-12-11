@@ -54,8 +54,22 @@ class AssetLabelPrintController extends Controller
         file_put_contents($pdfPath, $pdf);
 
         $command = config('qr_templates.print_command', 'lp');
-        $process = new Process([$command, '-d', $queue, $pdfPath]);
+        $options = config('qr_templates.print_options', []);
+        $process = new Process(array_values(array_filter([
+            $command,
+            '-d',
+            $queue,
+            ...$options,
+            $pdfPath,
+        ])));
         $process->setTimeout(15);
+
+        // Pass CUPS_SERVER environment variable if configured
+        $cupsServer = env('CUPS_SERVER');
+        if ($cupsServer) {
+            $process->setEnv(['CUPS_SERVER' => $cupsServer]);
+        }
+
         $process->run();
         @unlink($pdfPath);
 

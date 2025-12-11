@@ -23,7 +23,7 @@
 @inject('qrLabels', 'App\\Services\\QrLabelService')
 
 @php
-    $qrFormats = collect(explode(',', $snipeSettings->qr_formats ?? 'png,pdf'))
+    $qrFormats = collect(explode(',', $snipeSettings->qr_formats ?? 'png,pdf,qr'))
         ->map(fn ($format) => strtolower(trim($format)))
         ->filter()
         ->values()
@@ -32,6 +32,7 @@
     $qrTemplates = config('qr_templates.templates');
     $qrPng = in_array('png', $qrFormats) ? $qrLabels->url($asset, 'png', $selectedTemplate) : null;
     $qrPdf = in_array('pdf', $qrFormats) ? $qrLabels->url($asset, 'pdf', $selectedTemplate) : null;
+    $qrRaw = $qrLabels->url($asset, 'qr', $selectedTemplate);
 @endphp
 
     <div class="row">
@@ -283,6 +284,7 @@
                                         'asset' => $asset,
                                         'qrPdf' => $qrPdf,
                                         'qrPng' => $qrPng,
+                                        'qrRaw' => $qrRaw,
                                         'qrTemplates' => $qrTemplates,
                                         'selectedTemplate' => $selectedTemplate,
                                     ])
