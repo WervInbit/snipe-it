@@ -23,7 +23,13 @@
 .spec-label-cell { font-weight: 600; }
 .spec-value-cell { overflow-wrap: anywhere; word-break: break-word; }
 .spec-table-responsive { width: 100%; overflow-x: hidden; }
-@media (max-width: 640px) {
+@media (max-width: 800px) {
+    .spec-table-responsive > .spec-table > tbody > tr > td,
+    .spec-table-responsive > .spec-table > tbody > tr > th {
+        white-space: normal !important;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
     .spec-table { display: block; width: 100%; max-width: 100%; border-collapse: collapse; margin-bottom: 0; }
     .spec-table tr { display: block; margin-bottom: 10px; width: 100%; }
     .spec-table td,
@@ -36,6 +42,7 @@
     }
     .spec-table td + td { padding-top: 2px; }
     .spec-override td { border-left: none; }
+    .spec-inline-break { display: block; height: 2px; }
 }
 </style>
 @endpush
@@ -588,10 +595,12 @@
                                                                     @endif
 
                                                                     @if($isOverride)
+                                                                        <span class="spec-inline-break"></span>
                                                                         <span class="label label-info">{{ __('Override') }}</span>
                                                                     @endif
 
                                                                     @if($isOverride && $modelDisplay)
+                                                                        <span class="spec-inline-break"></span>
                                                                         <span class="text-muted">({{ __('Model: :value', ['value' => $modelDisplay]) }})</span>
                                                                     @endif
                                                                 </td>
