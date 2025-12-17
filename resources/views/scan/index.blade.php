@@ -8,7 +8,7 @@
 @section('content')
 <style>
     .scan-screen {min-height: 100vh; padding: 0 1rem 1.5rem;}
-    #scan-area {position: relative; width: 100%; max-width: 720px; margin: 0 auto; aspect-ratio: 4 / 3; max-height: 70vh; background: #111; border-radius: 8px; overflow: hidden;}
+    #scan-area {position: relative; width: 100%; max-width: 720px; margin: 0 auto; max-height: 70vh; min-height: 240px; background: #111; border-radius: 8px; overflow: hidden;}
     #scan-video,
     #scan-overlay {width: 100%; height: 100%; object-fit: contain; display: block;}
     .scan-actions {display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin-top: 1rem;}

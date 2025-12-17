@@ -6,10 +6,12 @@
 ### Completed
 - Found Bootstrap's responsive table nowrap rule causing the spec table to overflow on very narrow screens (~327 px).
 - Added a mobile-only override in `resources/views/hardware/view.blade.php` so spec rows wrap inside their parent instead of forcing horizontal scroll.
+- Let the scan camera viewport adapt to the incoming stream aspect ratio while keeping it inside the frame (dynamic height with clamped max).
 - Logged the session kickoff in PROGRESS.md for traceability.
 
 ### Outstanding
 - Verify on an A5/phone viewport after cache clears/build; if long unbroken strings still push width, add truncation or hyphenation helpers.
+- Confirm scan viewport behaviour across cameras with unusual aspect ratios and tweak min/max height if needed.
 
 # 2025-11-20 - QR Server Print Path
 > Pair with PROGRESS.md (2025-11-20 entry) and docs/agents/cups-setup-guide.md.
