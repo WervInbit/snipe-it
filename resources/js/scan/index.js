@@ -53,13 +53,6 @@ function hideError() {
   errorEl.style.display = 'none';
 }
 
-function showManual() {
-  if (manualForm) {
-    manualForm.classList.remove('d-none');
-    manualForm.style.display = '';
-  }
-}
-
 function showPermissionBanner() {
   if (permissionBanner) {
     permissionBanner.classList.remove('d-none');
@@ -151,7 +144,6 @@ async function start(deviceId = null) {
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     showError('Camera not available');
     showPermissionBanner();
-    showManual();
     return;
   }
 
@@ -233,7 +225,6 @@ async function start(deviceId = null) {
     console.error('Unable to access camera', err);
     showError('Unable to access camera');
     showPermissionBanner();
-    showManual();
   }
 }
 
@@ -336,14 +327,6 @@ function resizeScanArea() {
   scanArea.style.height = `${height}px`;
 }
 
-if (manualForm) {
-  manualForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const tag = manualInput.value.trim();
-    if (tag) redirect(tag);
-  });
-}
-
 if (switchBtn) {
   switchBtn.addEventListener('click', switchCamera);
 }
@@ -383,7 +366,6 @@ init().catch((error) => {
   console.error('Failed to initialise scanner', error);
   showError('Unable to access camera');
   showPermissionBanner();
-  showManual();
 });
 
 export { start, stop, config };

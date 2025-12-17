@@ -7,6 +7,7 @@
 - Found Bootstrap's responsive table nowrap rule causing the spec table to overflow on very narrow screens (~327 px).
 - Added a mobile-only override in `resources/views/hardware/view.blade.php` so spec rows wrap inside their parent instead of forcing horizontal scroll.
 - Let the scan camera viewport adapt to the incoming stream aspect ratio while keeping it inside the frame (dynamic height with clamped max).
+- Removed lingering manual-entry hooks from the scan script to stop runtime errors now that the manual form is gone.
 - Logged the session kickoff in PROGRESS.md for traceability.
 
 ### Outstanding
