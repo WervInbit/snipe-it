@@ -11,7 +11,7 @@
 @else
     @php($currentModelNumber = $selectedModelNumber ?? ($displayModelNumbers->firstWhere('id', $selectedModelNumberId)))
     @php($currentModelNumberId = $currentModelNumber?->id)
-    @php($currentModelNumberLabel = $currentModelNumber ? ($currentModelNumber->label ?: $currentModelNumber->code) : null)
+    @php($currentModelNumberLabel = $currentModelNumber ? ($currentModelNumber->code ?: $currentModelNumber->label) : null)
 
     <input type="hidden" name="model_number_id" id="model_number_id" value="{{ $currentModelNumberId }}">
 

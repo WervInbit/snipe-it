@@ -32,7 +32,7 @@ class AssetsTransformer
 
         $array = [
             'id' => (int) $asset->id,
-            'name' => e($asset->name),
+            'name' => e($asset->model?->name ?? $asset->name),
             'asset_tag' => e($asset->asset_tag),
             'serial' => e($asset->serial),
             'model' => ($asset->model) ? [

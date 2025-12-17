@@ -953,11 +953,7 @@ class Asset extends Depreciable
         $number = $this->modelNumber;
 
         if ($number) {
-            if ($number->label) {
-                return $number->code.' ('.$number->label.')';
-            }
-
-            return $number->code;
+            return $number->code ?: $number->label;
         }
 
         return $this->model?->model_number;
@@ -1131,15 +1127,11 @@ class Asset extends Depreciable
      */
     public static function generateTag(): string
     {
-        if ($tag = self::autoincrement_asset()) {
-            return $tag;
-        }
-
         $settings = \App\Models\Setting::getSettings();
         $number = self::zerofill($settings->next_auto_tag_base, 4);
 
         do {
-            $tag = 'ASSET-' . self::randomLetters(2) . $number;
+            $tag = 'INBIT-' . self::randomLetters(2) . $number;
         } while (static::withTrashed()->where('asset_tag', $tag)->exists());
 
         return $tag;

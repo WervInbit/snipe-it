@@ -72,7 +72,7 @@
 
     <div class="form-group col-lg-6{{ $errors->has('auto_increment_prefix') ? ' error' : '' }}">
       <label for="auto_increment_prefix">{{ trans('admin/settings/general.auto_increment_prefix') }}</label>
-      <input class="form-control" name="auto_increment_prefix" type="text" id="auto_increment_prefix" value="{{ old('auto_increment_prefix') }}">
+      <input class="form-control" name="auto_increment_prefix" type="text" id="auto_increment_prefix" value="{{ old('auto_increment_prefix', 'INBIT-') }}">
 
       {!! $errors->first('auto_increment_prefix', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
     </div>

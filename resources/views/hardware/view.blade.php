@@ -17,6 +17,26 @@
 .spec-override td:first-child {
     border-left: 4px solid #337ab7;
 }
+.spec-table { table-layout: auto; width: 100%; }
+.spec-table td,
+.spec-table th { white-space: normal; word-break: break-word; }
+.spec-label-cell { font-weight: 600; }
+.spec-value-cell { overflow-wrap: anywhere; word-break: break-word; }
+.spec-table-responsive { width: 100%; overflow-x: hidden; }
+@media (max-width: 640px) {
+    .spec-table { display: block; width: 100%; max-width: 100%; border-collapse: collapse; margin-bottom: 0; }
+    .spec-table tr { display: block; margin-bottom: 10px; width: 100%; }
+    .spec-table td,
+    .spec-table th {
+        display: block;
+        width: 100%;
+        padding: 4px 6px;
+        border: none;
+        box-sizing: border-box;
+    }
+    .spec-table td + td { padding-top: 2px; }
+    .spec-override td { border-left: none; }
+}
 </style>
 @endpush
 
@@ -549,35 +569,37 @@
                                                 <strong>{{ __('Specification') }}</strong>
                                             </div>
                                             <div class="col-md-9">
-                                                <table class="table table-condensed">
-                                                    <tbody>
-                                                    @foreach($resolvedAttributes as $attribute)
-                                                        @php
-                                                            $displayValue = $attribute->formattedValue();
-                                                            $modelDisplay = $attribute->formattedModelValue();
-                                                            $isOverride = $attribute->isOverride;
-                                                        @endphp
-                                                        <tr class="{{ $isOverride ? 'spec-override' : '' }}">
-                                                            <td>{{ $attribute->definition->label }}</td>
-                                                            <td>
-                                                                @if($displayValue !== null && $displayValue !== '')
-                                                                    {{ $displayValue }}
-                                                                @else
-                                                                    {{ __('Not specified') }}
-                                                                @endif
+                                                <div class="table-responsive spec-table-responsive">
+                                                    <table class="table table-condensed spec-table">
+                                                        <tbody>
+                                                        @foreach($resolvedAttributes as $attribute)
+                                                            @php
+                                                                $displayValue = $attribute->formattedValue();
+                                                                $modelDisplay = $attribute->formattedModelValue();
+                                                                $isOverride = $attribute->isOverride;
+                                                            @endphp
+                                                            <tr class="{{ $isOverride ? 'spec-override' : '' }}">
+                                                                <td class="spec-label-cell">{{ $attribute->definition->label }}</td>
+                                                                <td class="spec-value-cell">
+                                                                    @if($displayValue !== null && $displayValue !== '')
+                                                                        {{ $displayValue }}
+                                                                    @else
+                                                                        {{ __('Not specified') }}
+                                                                    @endif
 
-                                                                @if($isOverride)
-                                                                    <span class="label label-info">{{ __('Override') }}</span>
-                                                                @endif
+                                                                    @if($isOverride)
+                                                                        <span class="label label-info">{{ __('Override') }}</span>
+                                                                    @endif
 
-                                                                @if($isOverride && $modelDisplay)
-                                                                    <span class="text-muted">({{ __('Model: :value', ['value' => $modelDisplay]) }})</span>
-                                                                @endif
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                    </tbody>
-                                                </table>
+                                                                    @if($isOverride && $modelDisplay)
+                                                                        <span class="text-muted">({{ __('Model: :value', ['value' => $modelDisplay]) }})</span>
+                                                                    @endif
+                                                                </td>
+                                                            </tr>
+                                                        @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
                                             </div>
                                         </div>
                                     @endif

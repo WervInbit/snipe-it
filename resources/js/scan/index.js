@@ -17,11 +17,8 @@ const video = document.getElementById('scan-video');
 const overlay = document.getElementById('scan-overlay');
 const errorEl = document.getElementById('scan-error');
 const permissionBanner = document.getElementById('scan-permission');
-const manualForm = document.getElementById('manual-form');
-const manualInput = document.getElementById('manual-tag');
-const manualToggle = document.getElementById('manual-toggle');
+const scanArea = document.getElementById('scan-area');
 const switchBtn = document.getElementById('scan-switch');
-const refocusBtn = document.getElementById('scan-refocus');
 const torchBtn = document.getElementById('scan-torch');
 const hintBanner = document.getElementById('scan-hint');
 
@@ -37,6 +34,9 @@ let torchOn = false;
 let reader = null;
 let failCount = 0;
 let bumped = false;
+let scrolledToCamera = false;
+let currentDeviceId = null;
+const scrollOffset = 12; // px to keep header/nav visible
 
 function showError(msg) {
   if (!errorEl) return;
@@ -220,6 +220,12 @@ async function start(deviceId = null) {
     });
 
     hintTimer = setTimeout(showHint, 10_000);
+    if (!scrolledToCamera && scanArea) {
+      scrolledToCamera = true;
+      const rect = scanArea.getBoundingClientRect();
+      const targetY = window.pageYOffset + rect.top - scrollOffset;
+      window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+    }
   } catch (err) {
     console.error('Unable to access camera', err);
     showError('Unable to access camera');
@@ -229,9 +235,13 @@ async function start(deviceId = null) {
 }
 
 async function switchCamera() {
-  if (devices.length <= 1) return;
+  if (devices.length <= 1) {
+    await start(currentDeviceId);
+    return;
+  }
   currentDeviceIndex = (currentDeviceIndex + 1) % devices.length;
-  await start(devices[currentDeviceIndex].deviceId);
+  currentDeviceId = devices[currentDeviceIndex].deviceId;
+  await start(currentDeviceId);
 }
 
 async function toggleTorch() {
@@ -248,15 +258,9 @@ async function toggleTorch() {
 }
 
 async function refocus() {
-  const enableBtn = () => {
-    if (refocusBtn) refocusBtn.disabled = false;
-  };
-
-  if (refocusBtn) refocusBtn.disabled = true;
-
   try {
     if (!stream) {
-      await start(devices[currentDeviceIndex]?.deviceId || null);
+      await start(currentDeviceId);
       return;
     }
 
@@ -281,12 +285,10 @@ async function refocus() {
       }
     }
 
-    await start(track?.getSettings?.().deviceId || devices[currentDeviceIndex]?.deviceId || null);
+    await start(track?.getSettings?.().deviceId || currentDeviceId);
   } catch (err) {
     console.warn('Refocus failed; restarting stream', err);
-    await start(devices[currentDeviceIndex]?.deviceId || null);
-  } finally {
-    enableBtn();
+    await start(currentDeviceId);
   }
 }
 
@@ -298,14 +300,11 @@ async function init() {
   } else {
     currentDeviceIndex = 0;
   }
-  if (devices.length > 1 && switchBtn) {
-    switchBtn.classList.remove('d-none');
+  if (switchBtn) {
     switchBtn.disabled = false;
-  } else if (switchBtn) {
-    switchBtn.disabled = true;
-    switchBtn.classList.add('d-none');
   }
-  const initialDeviceId = backIndex >= 0 ? devices[backIndex].deviceId : null;
+  const initialDeviceId = backIndex >= 0 ? devices[backIndex].deviceId : devices[0]?.deviceId || null;
+  currentDeviceId = initialDeviceId;
   await start(initialDeviceId);
 }
 
@@ -327,26 +326,8 @@ if (manualForm) {
   });
 }
 
-if (manualToggle) {
-  manualToggle.addEventListener('click', () => {
-    manualForm.classList.toggle('d-none');
-    if (!manualForm.classList.contains('d-none')) {
-      manualInput?.focus();
-    }
-  });
-}
-
 if (switchBtn) {
   switchBtn.addEventListener('click', switchCamera);
-}
-
-if (refocusBtn) {
-  refocusBtn.addEventListener('click', () => {
-    refocus().catch((error) => {
-      console.error('Refocus failed', error);
-      if (refocusBtn) refocusBtn.disabled = false;
-    });
-  });
 }
 
 if (torchBtn) {
