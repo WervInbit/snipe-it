@@ -711,10 +711,6 @@ class AssetsController extends Controller
         $asset = $assets->first();
         $this->authorize('view', $asset);
 
-        if (Gate::allows('tests.execute') && Gate::allows('update', $asset)) {
-            return redirect()->route('test-results.active', $asset->id);
-        }
-
         return redirect()->route('hardware.show', $asset->id)->with('topsearch', $topsearch);
     }
 

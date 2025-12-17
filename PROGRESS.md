@@ -14,6 +14,12 @@
 - Corrected template key from `dymo-s0929120-57x32` to `dymo-s0929120-25x25` to match actual dimensions.
 - Reconfigured 25x25mm template with 2mm physical margins: 21x21mm QR code, 2mm text band at bottom (9pt font), no gap between QR and text, 248px QR resolution (matches 300 DPI exactly).
 - Fixed square-stack layout rendering: QR now positions at top-left with padding, text band at bottom (was incorrectly using side-by-side layout).
+- Hardware create form now shows the model number code (not the display label) so the selected preset is unambiguous during asset creation.
+- Hardware list now shows the model name in the “Name” column (falls back to asset name only if no model is present) for clarity.
+- Asset tag generator now prefixes new tags with `INBIT-` (two letters + four digits) as the sole generator for new asset tags, independent of auto-increment settings; setup defaults to the same prefix.
+- Scanning a tag now routes to the asset detail page instead of the active tests view.
+- Updated the scan page layout to focus on the camera preview with two primary controls (camera refresh, flashlight) and auto-scroll into view.
+- Camera auto-scroll now offsets slightly so the navbar and scan header remain visible when focusing the preview.
 - Updated to user-specified dimensions: 2.5mm margins, 20x20mm QR (236px at 300 DPI), 2.5mm text band with 5pt font, 0.1mm gap.
 - Changed S0929120 template text to show asset tag only (no serial number) to match the QR code identifier.
 - Created HTML visual designer (label-designer.html) for iterative label layout design without regenerating PDFs.

@@ -7,31 +7,23 @@
 
 @section('content')
 <style>
-    #scan-area {
-        max-width: 100%;
-    }
+    .scan-screen {min-height: 100vh; padding: 0 1rem 1.5rem;}
+    #scan-area {position: relative; width: 100%; max-width: 720px; margin: 0 auto; aspect-ratio: 4 / 3; max-height: 70vh; background: #111; border-radius: 8px; overflow: hidden;}
     #scan-video,
-    #scan-overlay {
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-    }
-    .scan-actions {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-        gap: .5rem;
-        margin-top: .75rem;
-    }
+    #scan-overlay {width: 100%; height: 100%; object-fit: contain; display: block;}
+    .scan-actions {display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin-top: 1rem;}
+    .scan-actions .btn {padding: 1rem 1rem; font-size: 1.1rem;}
+    #manual-section {max-width: 520px; margin: 1rem auto 0;}
 </style>
-<div class="container py-4">
-    <div class="mx-auto" style="max-width:420px;">
+<div class="container py-4 scan-screen">
+    <div class="mx-auto" style="max-width:720px;">
         <h1 class="h4 text-center mb-4">{{ trans('general.scan_qr') }}</h1>
 
         <div id="scan-permission" class="alert alert-warning d-none" role="alert" data-testid="scan-permission-banner" style="display:none;">
             {{ trans('general.scan_camera_denied') }}
         </div>
 
-        <div id="scan-area" class="position-relative rounded overflow-hidden shadow-sm">
+        <div id="scan-area" class="shadow-sm">
             <video id="scan-video"
                    class="w-100 d-block"
                    data-testid="scan-video"
@@ -44,34 +36,16 @@
         </div>
 
         <div class="scan-actions">
-            <button id="scan-switch" type="button" class="btn btn-outline-secondary flex-fill d-none" data-testid="scan-switch">
-                <i class="fas fa-sync" aria-hidden="true"></i> {{ trans('general.scan_switch_camera') }}
+            <button id="scan-switch" type="button" class="btn btn-outline-secondary" data-testid="scan-switch">
+                <i class="fas fa-sync" aria-hidden="true"></i> {{ __('Refresh camera') }}
             </button>
-            <button id="scan-refocus" type="button" class="btn btn-outline-secondary flex-fill" data-testid="scan-refocus">
-                <i class="fas fa-bullseye" aria-hidden="true"></i> {{ trans('general.scan_refocus') }}
-            </button>
-            <button id="scan-torch" type="button" class="btn btn-outline-secondary flex-fill d-none" data-testid="scan-torch" aria-pressed="false">
+            <button id="scan-torch" type="button" class="btn btn-outline-secondary" data-testid="scan-torch" aria-pressed="false">
                 <i class="fas fa-lightbulb" aria-hidden="true"></i> {{ trans('general.scan_torch') }}
-            </button>
-            <button id="manual-toggle" type="button" class="btn btn-outline-secondary flex-fill" data-testid="scan-manual-toggle">
-                <i class="fas fa-keyboard" aria-hidden="true"></i> {{ trans('general.scan_manual_entry') }}
             </button>
         </div>
 
         <div id="scan-error" class="alert alert-danger d-none mt-3" role="alert" data-testid="scan-error" style="display:none;"></div>
 
-        <form id="manual-form" class="mt-3 d-none" data-testid="scan-manual-form" style="display:none;">
-            <label class="form-label visually-hidden" for="manual-tag">{{ trans('general.scan_manual_entry') }}</label>
-            <input id="manual-tag"
-                   type="text"
-                   class="form-control form-control-lg"
-                   placeholder="{{ trans('general.scan_manual_placeholder') }}"
-                   autocomplete="off"
-                   data-testid="scan-manual-input">
-            <button type="submit" class="btn btn-primary btn-lg mt-3 w-100" data-testid="scan-manual-submit">
-                {{ trans('general.search') }}
-            </button>
-        </form>
     </div>
 </div>
 @stop

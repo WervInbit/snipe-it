@@ -193,7 +193,7 @@ class SettingsController extends Controller
         $settings->email_format = $request->input('email_format');
         $settings->next_auto_tag_base = 1;
         $settings->auto_increment_assets = $request->input('auto_increment_assets', 0);
-        $settings->auto_increment_prefix = $request->input('auto_increment_prefix');
+        $settings->auto_increment_prefix = $request->input('auto_increment_prefix', 'INBIT-');
         $settings->zerofill_count = $request->input('zerofill_count') ?: 0;
 
         if ((! $user->isValid()) || (! $settings->isValid())) {
