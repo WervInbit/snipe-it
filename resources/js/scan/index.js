@@ -134,6 +134,29 @@ async function enumerateVideoInputs() {
   return allDevices.filter((device) => device.kind === 'videoinput');
 }
 
+function renderCameraOptions(selectedId = null) {
+  if (!cameraSelect) return;
+  const placeholder = cameraSelect.querySelector('option[value=""]');
+  const placeholderOption = placeholder ? placeholder.cloneNode(true) : null;
+  cameraSelect.innerHTML = '';
+  if (placeholderOption) {
+    cameraSelect.appendChild(placeholderOption);
+  } else {
+    const option = document.createElement('option');
+    option.value = '';
+    option.textContent = 'Select camera';
+    cameraSelect.appendChild(option);
+  }
+  devices.forEach((d, idx) => {
+    const option = document.createElement('option');
+    option.value = d.deviceId || '';
+    option.textContent = d.label || `Camera ${idx + 1}`;
+    option.selected = !!selectedId && selectedId === (d.deviceId || '');
+    cameraSelect.appendChild(option);
+  });
+  cameraSelect.disabled = devices.length === 0;
+}
+
 async function start(deviceId = null) {
   stop();
   hideError();
@@ -222,6 +245,20 @@ async function start(deviceId = null) {
       const targetY = window.pageYOffset + rect.top - scrollOffset;
       window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
     }
+
+    // After permission is granted, refresh device list so labels populate.
+    try {
+      devices = await enumerateVideoInputs();
+      const activeId = deviceId || stream?.getVideoTracks?.()[0]?.getSettings?.().deviceId || currentDeviceId;
+      const activeIdx = devices.findIndex((d) => d.deviceId === activeId);
+      if (activeIdx >= 0) {
+        currentDeviceIndex = activeIdx;
+        currentDeviceId = devices[activeIdx].deviceId;
+      }
+      renderCameraOptions(currentDeviceId);
+    } catch (listError) {
+      console.warn('Unable to refresh camera list after start', listError);
+    }
   } catch (err) {
     console.error('Unable to access camera', err);
     showError('Unable to access camera');
@@ -298,17 +335,7 @@ async function init() {
   } else {
     currentDeviceIndex = 0;
   }
-  if (cameraSelect) {
-    cameraSelect.innerHTML = '';
-    devices.forEach((d, idx) => {
-      const option = document.createElement('option');
-      option.value = d.deviceId || '';
-      option.textContent = d.label || `Camera ${idx + 1}`;
-      option.selected = idx === currentDeviceIndex;
-      cameraSelect.appendChild(option);
-    });
-    cameraSelect.disabled = devices.length === 0;
-  }
+  renderCameraOptions(devices[currentDeviceIndex]?.deviceId || null);
   if (switchBtn) {
     switchBtn.disabled = false;
   }
