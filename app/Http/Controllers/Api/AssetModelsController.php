@@ -354,10 +354,13 @@ class AssetModelsController extends Controller
                 $segments[] = $model->manufacturer->name;
             }
 
-            $label = $modelNumber->label ?: $modelNumber->code;
+            $code = $modelNumber->code;
+            $label = $code ?: $modelNumber->label;
 
             $display = $model->name;
-            if ($label) {
+            if ($code) {
+                $display .= ' — '.$code;
+            } elseif ($label) {
                 $display .= ' — '.$label;
             }
 
@@ -379,6 +382,7 @@ class AssetModelsController extends Controller
                 'model_id' => $model->id,
                 'model_number_id' => $modelNumber->id,
                 'model_name' => $model->name,
+                'model_number_code' => $code,
                 'model_number_label' => $label,
                 'is_deprecated' => $modelNumber->isDeprecated(),
             ];
