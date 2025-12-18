@@ -1,5 +1,18 @@
 # Agent & Progress Log (2025)
 
+## 2025-12-18 - Session Kickoff
+> See PROGRESS.md (2025-12-18) and docs/agents/agents-addendum-2025-12-18-session-init.md.
+
+### Completed
+- Session initialized: reviewed handbook/fork notes and opened the 2025-12-18 stubs in PROGRESS.md and docs/agents to capture ongoing work.
+- Model-number select list now shows the model-number code; creating a model number redirects to its detail page.
+- Scan page now has camera selector + permission request and repopulates devices after permission; JS updated accordingly.
+- Marked *_test attribute definitions as needs_test by default (DeviceAttributeSeeder tweak) to enable test runs; seeded locally.
+- Enforced serial uniqueness unconditionally (removed unique_serial bypass).
+
+### Outstanding
+- Prod follow-up: create/map test attributes for test types (no *_test defs exist), set needs_test=1, link test_types to definitions, and backfill model number attributes; clean any existing duplicate serials if present.
+
 ## 2025-12-17 - Mobile Spec Table
 > See PROGRESS.md (2025-12-17) and docs/agents/agents-addendum-2025-12-17-session-init.md.
 

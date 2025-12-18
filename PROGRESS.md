@@ -1,3 +1,15 @@
+# Session Progress (2025-12-18)
+
+## Addendum (2025-12-18 Codex)
+- Kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, and recent `docs/agents/*` logs to align with current guidance before making changes.
+- Logged today's session in `docs/agents/agents.md` and started the dated addendum in `docs/agents/agents-addendum-2025-12-18-session-init.md` for detailed notes.
+- Added the 2025-12-18 entry to `docs/agents/agent-progress-2025.md` to keep the consolidated log current.
+- Reset DB with core seeds (categories, manufacturers, attributes, presets, tests) and re-seeded demo assets when verifying; noted that prod will need a one-off to mark test attributes and link test types.
+- Updated model-number select list to show the model-number code; model-number creation now redirects to the new model number detail.
+- Scan page: added camera selector, permission request button, and refreshed the JS to populate devices after permission.
+- Enforced serial uniqueness unconditionally (removed the `unique_serial` setting bypass).
+- Marked `_test` attribute definitions as `needs_test` by default in `DeviceAttributeSeeder`; identified prod needs a mapping/creation of `_test` defs to populate runs.
+
 # Session Progress (2025-12-09)
 
 ## Addendum (2025-12-09 Codex)
