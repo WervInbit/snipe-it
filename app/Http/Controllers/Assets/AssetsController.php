@@ -306,10 +306,11 @@ class AssetsController extends Controller
                 $failures[] = join(",", $asset->getErrors()->all());
             }
         }
-        if($request->get('redirect_option') === 'back'){
+        $redirectOption = $request->get('redirect_option');
+        if ($redirectOption === 'back') {
             session()->put(['redirect_option' => 'index']);
         } else {
-            session()->put(['redirect_option' => $request->get('redirect_option')]);
+            session()->put(['redirect_option' => $redirectOption ?: 'item']);
         }
 
         session()->put(['checkout_to_type' => $request->get('checkout_to_type'),
