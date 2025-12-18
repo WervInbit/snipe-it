@@ -43,6 +43,9 @@
             <button id="scan-torch" type="button" class="btn btn-outline-secondary" data-testid="scan-torch" aria-pressed="false">
                 <i class="fas fa-lightbulb" aria-hidden="true"></i> {{ trans('general.scan_torch') }}
             </button>
+            <button id="scan-request" type="button" class="btn btn-outline-secondary" data-testid="scan-request">
+                <i class="fas fa-unlock" aria-hidden="true"></i> {{ __('Request camera access') }}
+            </button>
             <div class="form-group mb-0">
                 <label class="sr-only" for="scan-camera-select">{{ __('Select camera') }}</label>
                 <select id="scan-camera-select" class="form-control" data-testid="scan-camera-select" aria-label="{{ __('Select camera') }}">

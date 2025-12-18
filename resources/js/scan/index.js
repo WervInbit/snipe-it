@@ -21,6 +21,7 @@ const scanArea = document.getElementById('scan-area');
 const switchBtn = document.getElementById('scan-switch');
 const torchBtn = document.getElementById('scan-torch');
 const cameraSelect = document.getElementById('scan-camera-select');
+const requestBtn = document.getElementById('scan-request');
 const hintBanner = document.getElementById('scan-hint');
 
 const canvas = document.createElement('canvas');
@@ -155,6 +156,23 @@ function renderCameraOptions(selectedId = null) {
     cameraSelect.appendChild(option);
   });
   cameraSelect.disabled = devices.length === 0;
+}
+
+async function requestCameraAccess() {
+  try {
+    const temp = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    temp.getTracks().forEach((t) => t.stop());
+    devices = await enumerateVideoInputs();
+    const activeId = devices[currentDeviceIndex]?.deviceId || devices[0]?.deviceId || null;
+    if (activeId) {
+      currentDeviceId = activeId;
+    }
+    renderCameraOptions(currentDeviceId);
+  } catch (err) {
+    console.error('Camera permission request failed', err);
+    showError('Unable to access camera');
+    showPermissionBanner();
+  }
 }
 
 async function start(deviceId = null) {
@@ -386,6 +404,12 @@ if (cameraSelect) {
     currentDeviceIndex = idx >= 0 ? idx : 0;
     currentDeviceId = selectedId || devices[currentDeviceIndex]?.deviceId || null;
     await start(currentDeviceId);
+  });
+}
+
+if (requestBtn) {
+  requestBtn.addEventListener('click', () => {
+    requestCameraAccess().catch((error) => console.error('Camera permission request failed', error));
   });
 }
 
