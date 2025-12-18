@@ -20,6 +20,7 @@ const permissionBanner = document.getElementById('scan-permission');
 const scanArea = document.getElementById('scan-area');
 const switchBtn = document.getElementById('scan-switch');
 const torchBtn = document.getElementById('scan-torch');
+const cameraSelect = document.getElementById('scan-camera-select');
 const hintBanner = document.getElementById('scan-hint');
 
 const canvas = document.createElement('canvas');
@@ -235,6 +236,9 @@ async function switchCamera() {
   }
   currentDeviceIndex = (currentDeviceIndex + 1) % devices.length;
   currentDeviceId = devices[currentDeviceIndex].deviceId;
+  if (cameraSelect) {
+    cameraSelect.value = currentDeviceId || '';
+  }
   await start(currentDeviceId);
 }
 
@@ -294,6 +298,17 @@ async function init() {
   } else {
     currentDeviceIndex = 0;
   }
+  if (cameraSelect) {
+    cameraSelect.innerHTML = '';
+    devices.forEach((d, idx) => {
+      const option = document.createElement('option');
+      option.value = d.deviceId || '';
+      option.textContent = d.label || `Camera ${idx + 1}`;
+      option.selected = idx === currentDeviceIndex;
+      cameraSelect.appendChild(option);
+    });
+    cameraSelect.disabled = devices.length === 0;
+  }
   if (switchBtn) {
     switchBtn.disabled = false;
   }
@@ -334,6 +349,16 @@ if (switchBtn) {
 if (torchBtn) {
   torchBtn.addEventListener('click', () => {
     toggleTorch().catch((error) => console.error('Torch toggle failed', error));
+  });
+}
+
+if (cameraSelect) {
+  cameraSelect.addEventListener('change', async (event) => {
+    const selectedId = event.target.value || null;
+    const idx = devices.findIndex((d) => d.deviceId === selectedId);
+    currentDeviceIndex = idx >= 0 ? idx : 0;
+    currentDeviceId = selectedId || devices[currentDeviceIndex]?.deviceId || null;
+    await start(currentDeviceId);
   });
 }
 

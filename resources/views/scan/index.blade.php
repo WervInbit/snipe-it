@@ -11,8 +11,9 @@
     #scan-area {position: relative; width: 100%; max-width: 720px; margin: 0 auto; max-height: 70vh; min-height: 240px; background: #111; border-radius: 8px; overflow: hidden;}
     #scan-video,
     #scan-overlay {width: 100%; height: 100%; object-fit: contain; display: block;}
-    .scan-actions {display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin-top: 1rem;}
+    .scan-actions {display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: .75rem; margin-top: 1rem;}
     .scan-actions .btn {padding: 1rem 1rem; font-size: 1.1rem;}
+    .scan-actions select {padding: 1rem; font-size: 1.05rem;}
     #manual-section {max-width: 520px; margin: 1rem auto 0;}
 </style>
 <div class="container py-4 scan-screen">
@@ -42,6 +43,12 @@
             <button id="scan-torch" type="button" class="btn btn-outline-secondary" data-testid="scan-torch" aria-pressed="false">
                 <i class="fas fa-lightbulb" aria-hidden="true"></i> {{ trans('general.scan_torch') }}
             </button>
+            <div class="form-group mb-0">
+                <label class="sr-only" for="scan-camera-select">{{ __('Select camera') }}</label>
+                <select id="scan-camera-select" class="form-control" data-testid="scan-camera-select" aria-label="{{ __('Select camera') }}">
+                    <option value="">{{ __('Select camera') }}</option>
+                </select>
+            </div>
         </div>
 
         <div id="scan-error" class="alert alert-danger d-none mt-3" role="alert" data-testid="scan-error" style="display:none;"></div>
