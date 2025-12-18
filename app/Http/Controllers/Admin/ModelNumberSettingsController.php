@@ -106,7 +106,7 @@ class ModelNumberSettingsController extends Controller
         }
 
         return redirect()
-            ->route('settings.model_numbers.index')
+            ->route('settings.model_numbers.edit', $modelNumber)
             ->with('success', __('Model number added.'));
     }
 
