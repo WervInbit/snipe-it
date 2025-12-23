@@ -248,6 +248,14 @@
         border: 1px solid var(--testing-border);
     }
 
+    #photoViewerModal img {
+        max-width: 100%;
+        max-height: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+    }
+
     [data-photo-gallery] {
         display: flex;
         flex-wrap: nowrap;

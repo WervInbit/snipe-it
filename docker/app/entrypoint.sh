@@ -4,6 +4,14 @@ set -euo pipefail
 # Switch to app root
 cd /var/www/html
 
+# Apply PHP upload limits when configured.
+if [ -n "${PHP_UPLOAD_LIMIT:-}" ] && [ "$(id -u)" = "0" ]; then
+  cat > /usr/local/etc/php/conf.d/zz-upload-limits.ini <<EOF
+upload_max_filesize = ${PHP_UPLOAD_LIMIT}M
+post_max_size = ${PHP_UPLOAD_LIMIT}M
+EOF
+fi
+
 # Ensure required directories exist with correct perms (volumes start empty)
 ensure_dirs() {
   # Need root to set ownership the first time
