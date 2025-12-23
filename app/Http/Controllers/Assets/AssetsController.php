@@ -410,6 +410,7 @@ class AssetsController extends Controller
                 'tests.results.audits.user',
                 'tests.results.type',
                 'tests.results.attributeDefinition',
+                'tests.results.photos',
                 'tests.user',
             ]);
 

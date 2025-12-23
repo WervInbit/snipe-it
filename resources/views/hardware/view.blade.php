@@ -23,6 +23,28 @@
 .spec-label-cell { font-weight: 600; }
 .spec-value-cell { overflow-wrap: anywhere; word-break: break-word; }
 .spec-table-responsive { width: 100%; overflow-x: hidden; }
+.test-photo-strip {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-top: 0.25rem;
+}
+.test-photo-strip img {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+}
+#photoViewerModal img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
 @media (max-width: 800px) {
     .spec-table-responsive > .spec-table > tbody > tr > td,
     .spec-table-responsive > .spec-table > tbody > tr > th {
@@ -1515,10 +1537,6 @@
                                                             $definition = $result->attributeDefinition;
                                                             $label = $definition?->label ?? optional($result->type)->name;
                                                             $instructions = trim((string) (optional($result->type)->instructions ?: ($definition?->instructions ?? $definition?->help_text)));
-                                                            $expectedDisplay = $result->expected_value;
-                                                            if ($definition && $definition->datatype === \App\Models\AttributeDefinition::DATATYPE_BOOL && $expectedDisplay !== null) {
-                                                                $expectedDisplay = $expectedDisplay === '1' ? __('Yes') : __('No');
-                                                            }
                                                         @endphp
                                                         <li>
                                                             {{ $label }}
@@ -1526,15 +1544,35 @@
                                                                 <x-icon type="info-circle" class="text-muted" data-tooltip="true" data-placement="top" title="{{ $instructions }}" />
                                                             @endif:
                                                             {{ trans('tests.' . $result->status) }}
-                                                            @if ($expectedDisplay !== null)
-                                                                <span class="text-muted">{{ __('Expected: :value', ['value' => $expectedDisplay]) }}</span>
-                                                            @endif
                                                             @if ($result->note)
                                                                 <span class="text-muted">{{ $result->note }}</span>
                                                             @endif
                                                         </li>
                                                     @endforeach
                                                 </ul>
+                                                @php
+                                                    $photoItems = $run->results->flatMap(function ($result) {
+                                                        $items = $result->photos->map(function ($photo) {
+                                                            return ['url' => url($photo->path)];
+                                                        });
+
+                                                        if ($items->isEmpty() && $result->photo_path) {
+                                                            $items = collect([['url' => url($result->photo_path)]]);
+                                                        }
+
+                                                        return $items;
+                                                    });
+                                                @endphp
+                                                @if ($photoItems->isNotEmpty())
+                                                    <div class="test-photo-strip">
+                                                        @foreach ($photoItems as $photo)
+                                                            <img src="{{ $photo['url'] }}"
+                                                                 alt="{{ trans('tests.photo_thumbnail_alt') }}"
+                                                                 data-action="open-photo"
+                                                                 data-photo-url="{{ $photo['url'] }}">
+                                                        @endforeach
+                                                    </div>
+                                                @endif
                                                 <div class="mt-2">
                                                     @can('update', $run)
                                                         <a href="{{ route('test-results.edit', [$asset->id, $run->id]) }}" class="btn btn-default btn-sm">{{ trans('button.edit') }}</a>
@@ -1814,6 +1852,75 @@
                         return;
                     }
                 }
+            });
+        })();
+    </script>
+    <div class="modal fade" id="photoViewerModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <img id="viewerImg" src="" alt="{{ trans('tests.photo_thumbnail_alt') }}">
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function () {
+            var modalEl = document.getElementById('photoViewerModal');
+            var viewerImg = document.getElementById('viewerImg');
+            if (!modalEl || !viewerImg) {
+                return;
+            }
+
+            function getBootstrapNamespace() {
+                return window.bootstrap || null;
+            }
+
+            function getJquery() {
+                return window.jQuery || window.$ || null;
+            }
+
+            function createModalController(element) {
+                var bootstrapNs = getBootstrapNamespace();
+                if (bootstrapNs && bootstrapNs.Modal && typeof bootstrapNs.Modal === 'function') {
+                    try {
+                        return new bootstrapNs.Modal(element);
+                    } catch (error) {
+                        // fall back to jQuery
+                    }
+                }
+
+                var $ = getJquery();
+                if ($ && $.fn && $.fn.modal) {
+                    var $el = $(element);
+                    return {
+                        show: function () { $el.modal('show'); },
+                        hide: function () { $el.modal('hide'); },
+                    };
+                }
+
+                return null;
+            }
+
+            var modal = createModalController(modalEl);
+
+            document.addEventListener('click', function (event) {
+                var trigger = event.target.closest('[data-action="open-photo"]');
+                if (!trigger) {
+                    return;
+                }
+                var src = trigger.dataset.photoUrl || trigger.getAttribute('src');
+                if (!src) {
+                    return;
+                }
+                viewerImg.src = src;
+                if (modal) {
+                    modal.show();
+                }
+            });
+
+            modalEl.addEventListener('hidden.bs.modal', function () {
+                viewerImg.src = '';
             });
         })();
     </script>

@@ -16,7 +16,7 @@ class TestRunController extends Controller
     {
         $this->authorize('view', $asset);
         $runs = $asset->tests()
-            ->with(['results.type', 'results.attributeDefinition', 'user'])
+            ->with(['results.type', 'results.attributeDefinition', 'results.photos', 'user'])
             ->orderByDesc('created_at')
             ->get();
 
