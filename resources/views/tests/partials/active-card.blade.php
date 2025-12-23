@@ -133,7 +133,6 @@
                             <input type="file"
                                    class="d-none"
                                    accept="image/*"
-                                   capture="environment"
                                    data-action="upload-photo"
                                    multiple>
                         </label>
