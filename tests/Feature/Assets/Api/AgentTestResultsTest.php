@@ -25,12 +25,12 @@ class AgentTestResultsTest extends TestCase
         $this->seed(AttributeTestSeeder::class);
         $this->seed(DevicePresetSeeder::class);
 
-        $keyboardDefinition = AttributeDefinition::where('key', 'keyboard_test')->firstOrFail()->loadMissing('tests');
-        $wifiDefinition = AttributeDefinition::where('key', 'wifi_test')->firstOrFail()->loadMissing('tests');
+        $keyboardDefinition = AttributeDefinition::where('key', 'keyboard')->firstOrFail()->loadMissing('tests');
+        $wifiDefinition = AttributeDefinition::where('key', 'wifi')->firstOrFail()->loadMissing('tests');
 
-        $this->keyboardSlug = $keyboardDefinition->tests->firstWhere('slug', 'keyboard_test')?->slug
+        $this->keyboardSlug = $keyboardDefinition->tests->firstWhere('slug', 'keyboard')?->slug
             ?? $keyboardDefinition->tests->first()?->slug;
-        $this->wifiSlug = $wifiDefinition->tests->firstWhere('slug', 'wifi_test')?->slug
+        $this->wifiSlug = $wifiDefinition->tests->firstWhere('slug', 'wifi')?->slug
             ?? $wifiDefinition->tests->first()?->slug;
 
         $this->assertNotNull($this->keyboardSlug, 'Keyboard test slug missing');
@@ -185,3 +185,4 @@ class AgentTestResultsTest extends TestCase
             ->assertJson(['message' => 'Unauthorized']);
     }
 }
+

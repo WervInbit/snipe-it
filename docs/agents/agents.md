@@ -37,3 +37,19 @@
 
 ## Follow-ups
 - Expand this log with concrete updates, tests run, and any documentation touchpoints, mirroring user-facing changes into `PROGRESS.md` and `docs/fork-notes.md` when applicable.
+
+# Agents Addendum - 2025-12-23 Session Wrap
+
+## Context
+- Continued test-type scoping refactor; see PROGRESS.md (2025-12-23 addendum) for the detailed log.
+- Context compression occurred during this session; some conversational details were lost midstream.
+
+## Worklog
+- Shifted test creation to Test Types with category scoping and optional/required flags; removed legacy `needs_test` handling.
+- Added `is_required` to test types, category pivot, updated admin UI, seeders, translations, and coverage; committed as `Refactor test type scoping and optional tests`.
+- Tests UI tweaks: per-row thumbnails, always-allowed completion on active tests, hardware edit status uses native select.
+- Renamed former *_test attributes to capability fields (e.g., wifi, bluetooth), disabled asset overrides on them, and added a migration to carry existing data forward without the `_test` suffix.
+
+## Follow-ups
+- Run `php artisan migrate` and `php artisan optimize:clear` in the app container; rebuild front-end assets as needed.
+- Monitor for any remaining duplicate Test Types in existing data; consider a cleanup migration if duplicates persist.

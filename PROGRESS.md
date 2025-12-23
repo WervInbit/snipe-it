@@ -10,6 +10,8 @@
 - Tests index: moved photo thumbnails to render under their respective result rows instead of a single strip at the bottom of each run.
 - Tests active: removed the send-to-repair button and allow the completion action regardless of unfinished or failed checks (warnings handled elsewhere).
 - Hardware edit: replaced the status Select2 control with a plain select so mobile does not open the keyboard.
+- Session end note: context compression occurred mid-session; some conversational details were lost, but all implemented changes were captured in code/docs and committed (`Refactor test type scoping and optional tests`).
+- Follow-up: renamed the former *_test attributes to capability fields (wifi, bluetooth, etc.), disabled asset overrides on them, and added a migration to rename existing records; default slugs/keys now drop the `_test` suffix.
 
 # Session Progress (2025-12-18)
 
