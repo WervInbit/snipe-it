@@ -519,7 +519,7 @@
         canUpdate: {{ ($canUpdate ?? false) ? 'true' : 'false' }},
         progress: @json($progress),
         actions: {
-            completeUrl: '{{ $run ? route('hardware.edit', $asset->id) : '' }}',
+            completeUrl: '{{ $run ? route('hardware.show', $asset->id) : '' }}',
             repairUrl: '{{ $run ? route('hardware.edit', $asset->id) : '' }}',
         },
         messages: {
