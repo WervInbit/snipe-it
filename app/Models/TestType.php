@@ -3,13 +3,16 @@
 namespace App\Models;
 
 use App\Models\AttributeDefinition;
+use App\Models\Category;
 use App\Models\SnipeModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Asset;
 use App\Services\ModelAttributes\EffectiveAttributeResolver;
+use Illuminate\Support\Str;
 
 /**
  * Defines a kind of diagnostic test that can be executed.
@@ -30,10 +33,12 @@ class TestType extends SnipeModel
         'tooltip',
         'instructions',
         'category',
+        'is_required',
     ];
 
     protected $casts = [
         'attribute_definition_id' => 'int',
+        'is_required' => 'bool',
     ];
 
     public static function forAttribute(AttributeDefinition $definition): self
@@ -70,30 +75,83 @@ class TestType extends SnipeModel
     }
 
     /**
-     * Scope test types for the provided asset, deriving category via SKU.
+     * Categories this test applies to.
+     */
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'category_test_type');
+    }
+
+    /**
+     * Scope test types for the provided asset and its model/category.
      *
-     * Future enhancements may map tests directly to a SKU. For now, the
-     * asset's SKU (or model) determines its category and filters available
-     * tests accordingly.
+     * Attribute-linked tests apply when the attribute is assigned to the
+     * model number. Category selection further scopes those tests if set.
+     * Tests without an attribute must be scoped to a category to apply.
      */
     public function scopeForAsset(Builder $query, Asset $asset): Builder
     {
+        $asset->loadMissing('model.category', 'modelNumber');
         $resolver = app(EffectiveAttributeResolver::class);
-        $testIds = $resolver->resolveForAsset($asset)
-            ->filter(fn ($attribute) => $attribute->requiresTest)
-            ->flatMap(function ($attribute) {
-                $definition = $attribute->definition->loadMissing('tests');
+        $resolved = $resolver->resolveForAsset($asset);
 
-                return $definition->tests->pluck('id');
-            })
-            ->filter()
+        $attributeIds = $resolved
+            ->map(fn ($attribute) => $attribute->definition->id)
             ->unique()
             ->all();
 
-        if (empty($testIds)) {
+        $categoryId = $asset->model?->category_id;
+        $category = $asset->model?->category;
+        $categoryName = $category?->name;
+        $categorySlug = $categoryName ? Str::slug($categoryName) : null;
+        $categoryType = $category?->category_type;
+
+        $matchingIds = static::query()
+            ->with('categories')
+            ->get()
+            ->filter(function (TestType $type) use ($attributeIds, $categoryId, $categoryName, $categorySlug, $categoryType) {
+                $hasAttribute = $type->attribute_definition_id !== null
+                    && in_array($type->attribute_definition_id, $attributeIds, true);
+
+                $categoryMatches = false;
+
+                $legacyCategory = strtolower(trim((string) $type->category));
+                $categoryValue = ($legacyCategory !== '' && $legacyCategory !== 'attribute')
+                    ? $legacyCategory
+                    : null;
+
+                if ($type->categories->isNotEmpty()) {
+                    $categoryMatches = $categoryId
+                        ? $type->categories->contains('id', $categoryId)
+                        : false;
+                } elseif ($categoryValue) {
+                    $categoryMatches = ($categoryId && is_numeric($categoryValue) && (int) $categoryValue === $categoryId)
+                        || ($categoryName && strtolower($categoryName) === $categoryValue)
+                        || ($categorySlug && $categorySlug === $categoryValue)
+                        || ($categoryType && strtolower((string) $categoryType) === $categoryValue);
+                }
+
+                if ($type->attribute_definition_id !== null) {
+                    if (!$hasAttribute) {
+                        return false;
+                    }
+
+                    if ($type->categories->isNotEmpty() || $categoryValue) {
+                        return $categoryMatches;
+                    }
+
+                    return true;
+                }
+
+                return $categoryMatches;
+            })
+            ->pluck('id')
+            ->all();
+
+        if (empty($matchingIds)) {
             return $query->whereRaw('0 = 1');
         }
 
-        return $query->whereIn('id', $testIds);
+        return $query->whereIn('id', $matchingIds);
     }
 }

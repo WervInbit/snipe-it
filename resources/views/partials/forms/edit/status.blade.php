@@ -21,16 +21,21 @@
             </div>
         @endif
 
-        <x-input.select
+        @php($selectedStatus = old('status_id', $item->status_id))
+        <select
             name="status_id"
             id="status_select_id"
-            :options="$__status_options"
-            :selected="old('status_id', $item->status_id)"
-            :required="$required"
-            class="status_id"
+            class="form-control status_id"
             style="width:100%;"
             aria-label="status_id"
-        />
+            {{ $required ? 'required' : '' }}
+        >
+            @foreach($__status_options as $key => $value)
+                <option value="{{ $key }}" {{ (string) $selectedStatus === (string) $key ? 'selected' : '' }}>
+                    {{ $value }}
+                </option>
+            @endforeach
+        </select>
         {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
     </div>
     <div class="col-md-2 col-sm-2 text-left">

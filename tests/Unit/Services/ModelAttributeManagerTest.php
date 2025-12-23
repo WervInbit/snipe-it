@@ -26,7 +26,6 @@ class ModelAttributeManagerTest extends TestCase
             'datatype' => AttributeDefinition::DATATYPE_BOOL,
             'unit' => null,
             'required_for_category' => true,
-            'needs_test' => true,
             'allow_custom_values' => false,
             'allow_asset_override' => true,
         ], $overrides));

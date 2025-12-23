@@ -1,3 +1,16 @@
+# Session Progress (2025-12-23)
+
+## Addendum (2025-12-23 Codex)
+- Kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, and recent `docs/agents/*` logs before starting changes.
+- Test generation now runs off Test Types (attribute-linked or category-scoped), with new optional/required support and category scoping via `category_test_type`.
+- Added `is_required` to test types, surfaced it in the Test Types admin UI, and adjusted active-test progress so optional failures warn but do not block completion.
+- Removed the `needs_test` field from attribute definition requests/UI and stripped it from resolver/test generation logic.
+- Updated seeders, factories, and test coverage to use category-scoped test types and the new optional logic; refreshed fork notes.
+- Tests not run in this environment (no PHP CLI invoked).
+- Tests index: moved photo thumbnails to render under their respective result rows instead of a single strip at the bottom of each run.
+- Tests active: removed the send-to-repair button and allow the completion action regardless of unfinished or failed checks (warnings handled elsewhere).
+- Hardware edit: replaced the status Select2 control with a plain select so mobile does not open the keyboard.
+
 # Session Progress (2025-12-18)
 
 ## Addendum (2025-12-18 Codex)

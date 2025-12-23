@@ -24,7 +24,6 @@ class ModelNumberAttributeControllerTest extends TestCase
             'datatype' => AttributeDefinition::DATATYPE_TEXT,
             'unit' => null,
             'required_for_category' => false,
-            'needs_test' => false,
             'allow_custom_values' => true,
             'allow_asset_override' => true,
         ], $overrides));

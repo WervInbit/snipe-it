@@ -58,10 +58,6 @@ class EffectiveAttributeResolver
 
     protected function requiresTest(AttributeDefinition $definition): bool
     {
-        if ($definition->needs_test) {
-            return true;
-        }
-
         if ($definition->relationLoaded('tests')) {
             return $definition->tests->isNotEmpty();
         }

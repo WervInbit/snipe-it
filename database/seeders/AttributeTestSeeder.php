@@ -36,9 +36,9 @@ class AttributeTestSeeder extends Seeder
                 [
                     'name' => Arr::get($config, 'name', $definition->label),
                     'attribute_definition_id' => $definition->id,
-                    'category' => 'attribute',
                     'tooltip' => Arr::get($config, 'tooltip'),
                     'instructions' => Arr::get($config, 'instructions'),
+                    'is_required' => true,
                 ]
             );
         }

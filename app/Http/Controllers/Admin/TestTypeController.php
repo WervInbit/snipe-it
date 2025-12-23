@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\TestType\StoreTestTypeRequest;
 use App\Http\Requests\TestType\UpdateTestTypeRequest;
 use App\Models\AttributeDefinition;
+use App\Models\Category;
 use App\Models\TestType;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Str;
@@ -16,15 +17,21 @@ class TestTypeController extends Controller
     public function index(): View
     {
         $this->authorize('index', TestType::class);
-        $testTypes = TestType::with('attributeDefinition')->orderBy('name')->get();
+        $testTypes = TestType::with(['attributeDefinition', 'categories'])->orderBy('name')->get();
         $attributeDefinitions = AttributeDefinition::orderBy('label')->get();
+        $categories = Category::query()
+            ->where('category_type', 'asset')
+            ->orderBy('name')
+            ->get();
 
-        return view('settings.testtypes', compact('testTypes', 'attributeDefinitions'));
+        return view('settings.testtypes', compact('testTypes', 'attributeDefinitions', 'categories'));
     }
 
     public function store(StoreTestTypeRequest $request): RedirectResponse
     {
         $data = $request->validated();
+        $categoryIds = $data['category_ids'] ?? [];
+        unset($data['category_ids']);
 
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
@@ -34,9 +41,12 @@ class TestTypeController extends Controller
             $data['slug'] = Str::slug($data['name'] . '-' . Str::random(4));
         }
 
-        $data['category'] = 'attribute';
+        $data['is_required'] = $request->has('is_required')
+            ? $request->boolean('is_required')
+            : true;
 
-        TestType::create($data);
+        $testType = TestType::create($data);
+        $testType->categories()->sync($categoryIds);
 
         return redirect()
             ->route('settings.testtypes.index')
@@ -46,6 +56,8 @@ class TestTypeController extends Controller
     public function update(UpdateTestTypeRequest $request, TestType $testtype): RedirectResponse
     {
         $data = $request->validated();
+        $categoryIds = $data['category_ids'] ?? [];
+        unset($data['category_ids']);
 
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
@@ -55,9 +67,12 @@ class TestTypeController extends Controller
             $data['slug'] = Str::slug($data['name'] . '-' . Str::random(4));
         }
 
-        $data['category'] = 'attribute';
+        if ($request->has('is_required')) {
+            $data['is_required'] = $request->boolean('is_required');
+        }
 
         $testtype->update($data);
+        $testtype->categories()->sync($categoryIds);
 
         return redirect()->route('settings.testtypes.index')
             ->with('success', trans('admin/testtypes/message.update.success'));

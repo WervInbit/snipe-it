@@ -8,7 +8,6 @@ use Database\Seeders\Concerns\ProvidesDeviceCatalogData;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class DeviceAttributeSeeder extends Seeder
 {
@@ -46,7 +45,6 @@ class DeviceAttributeSeeder extends Seeder
                 'datatype' => $config['datatype'],
                 'unit' => $config['unit'] ?? null,
                 'required_for_category' => $config['required'] ?? false,
-                'needs_test' => $config['needs_test'] ?? Str::endsWith($key, '_test'),
                 'allow_custom_values' => $config['allow_custom_values'] ?? ($config['datatype'] === AttributeDefinition::DATATYPE_TEXT),
                 'allow_asset_override' => $config['allow_asset_override'] ?? false,
                 'constraints' => $config['constraints'] ?? [],

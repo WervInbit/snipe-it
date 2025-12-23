@@ -109,12 +109,6 @@
             </div>
             <div class="checkbox">
                 <label style="display:flex; align-items:center; gap:8px;">
-                    <input type="checkbox" name="needs_test" value="1" {{ old('needs_test', $definition->needs_test ?? ($versionSource->needs_test ?? false)) ? 'checked' : '' }}>
-                    <span>{{ __('Needs test item') }}</span>
-                </label>
-            </div>
-            <div class="checkbox">
-                <label style="display:flex; align-items:center; gap:8px;">
                     <input type="checkbox" name="allow_asset_override" value="1" {{ old('allow_asset_override', $definition->allow_asset_override ?? ($versionSource->allow_asset_override ?? false)) ? 'checked' : '' }}>
                     <span>{{ __('Allow asset overrides') }}</span>
                 </label>

@@ -33,6 +33,7 @@ return [
     'status_pass' => 'Pass',
     'status_fail' => 'Fail',
     'status_nvt' => 'N/A',
+    'optional' => 'Optional',
     'status_toggle' => 'Update status',
     'show_instructions' => 'Show instructions',
     'expected_value' => 'Expected: :value',

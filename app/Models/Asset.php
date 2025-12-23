@@ -1072,10 +1072,16 @@ class Asset extends Depreciable
      */
     public function refreshTestCompletionFlag(): void
     {
-        $latestRun = $this->tests()->with('results')->first();
+        $latestRun = $this->tests()->with(['results.type'])->first();
 
         $this->tests_completed_ok = $latestRun
-            ? $latestRun->results->where('status', TestResult::STATUS_FAIL)->isEmpty()
+            ? $latestRun->results
+                ->filter(function (TestResult $result) {
+                    $isRequired = $result->type?->is_required ?? true;
+                    return $isRequired;
+                })
+                ->where('status', TestResult::STATUS_FAIL)
+                ->isEmpty()
             : false;
 
         $this->save();

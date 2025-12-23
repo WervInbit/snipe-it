@@ -44,6 +44,7 @@ class TestResultController extends Controller
                     'completed' => 0,
                     'remaining' => 0,
                     'failures' => 0,
+                    'blocking_failures' => 0,
                 ],
                 'failingLabels' => collect(),
                 'canUpdate' => $canUpdateResults,
@@ -55,6 +56,7 @@ class TestResultController extends Controller
         $results = $run->results->map(function (TestResult $result) {
             $definition = $result->attributeDefinition;
             $type = $result->type;
+            $isRequired = $type?->is_required ?? true;
 
             $label = $definition?->label ?? $type?->name ?? trans('general.unknown');
             $slug = $type?->slug ?? Str::slug($label ?? 'result');
@@ -90,18 +92,24 @@ class TestResultController extends Controller
                 'attribute' => $definition?->label,
                 'note_saved_at' => $result->updated_at?->timezone(config('app.timezone'))?->format('Y-m-d H:i'),
                 'photos' => $photos,
+                'is_required' => $isRequired,
             ];
         })->values();
 
-        $total = $results->count();
-        $failCount = $results->where('status', TestResult::STATUS_FAIL)->count();
-        $openCount = $results->where('status', TestResult::STATUS_NVT)->count();
+        $requiredResults = $results->where('is_required', true);
+        $optionalResults = $results->where('is_required', false);
+
+        $total = $requiredResults->count();
+        $requiredFailCount = $requiredResults->where('status', TestResult::STATUS_FAIL)->count();
+        $optionalFailCount = $optionalResults->where('status', TestResult::STATUS_FAIL)->count();
+        $openCount = $requiredResults->where('status', TestResult::STATUS_NVT)->count();
 
         $progress = [
             'total' => $total,
             'completed' => $total - $openCount,
             'remaining' => $openCount,
-            'failures' => $failCount,
+            'failures' => $requiredFailCount + $optionalFailCount,
+            'blocking_failures' => $requiredFailCount,
         ];
 
         $failingLabels = $results

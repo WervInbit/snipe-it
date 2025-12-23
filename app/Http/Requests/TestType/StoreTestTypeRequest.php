@@ -22,6 +22,9 @@ class StoreTestTypeRequest extends FormRequest
             'attribute_definition_id' => ['nullable', 'exists:attribute_definitions,id'],
             'instructions' => ['nullable', 'string'],
             'tooltip' => ['nullable', 'string'],
+            'category_ids' => ['nullable', 'array'],
+            'category_ids.*' => ['integer', 'exists:categories,id'],
+            'is_required' => ['sometimes', 'boolean'],
         ];
     }
 

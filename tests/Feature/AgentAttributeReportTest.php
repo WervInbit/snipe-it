@@ -32,18 +32,24 @@ class AgentAttributeReportTest extends TestCase
             'datatype' => AttributeDefinition::DATATYPE_INT,
             'unit' => 'GB',
             'required_for_category' => true,
-            'needs_test' => true,
             'allow_custom_values' => false,
             'allow_asset_override' => false,
         ]);
         $definition->categories()->sync([$category->id]);
 
+        $testType = \App\Models\TestType::factory()->create([
+            'attribute_definition_id' => $definition->id,
+            'slug' => 'ram-capacity-test',
+        ]);
+
         $model = AssetModel::factory()->create([
             'category_id' => $category->id,
         ]);
 
+        $modelNumber = $model->ensurePrimaryModelNumber();
+
         ModelNumberAttribute::create([
-            'model_id' => $model->id,
+            'model_number_id' => $modelNumber->id,
             'attribute_definition_id' => $definition->id,
             'value' => '16',
             'raw_value' => '16 GB',
@@ -51,6 +57,7 @@ class AgentAttributeReportTest extends TestCase
 
         $asset = Asset::factory()->create([
             'model_id' => $model->id,
+            'model_number_id' => $modelNumber->id,
         ]);
 
         $payload = [
@@ -58,7 +65,7 @@ class AgentAttributeReportTest extends TestCase
             'asset_tag' => (string) $asset->asset_tag,
             'results' => [
                 [
-                    'test_slug' => 'attribute-' . $definition->id,
+                    'test_slug' => $testType->slug,
                     'status' => TestResult::STATUS_PASS,
                     'note' => 'Diagnostics passed',
                 ],

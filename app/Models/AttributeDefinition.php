@@ -41,7 +41,6 @@ class AttributeDefinition extends SnipeModel
         'datatype',
         'unit',
         'required_for_category',
-        'needs_test',
         'allow_custom_values',
         'allow_asset_override',
         'constraints',
@@ -51,7 +50,6 @@ class AttributeDefinition extends SnipeModel
 
     protected $casts = [
         'required_for_category' => 'bool',
-        'needs_test' => 'bool',
         'allow_custom_values' => 'bool',
         'allow_asset_override' => 'bool',
         'deprecated_at' => 'datetime',
@@ -64,7 +62,6 @@ class AttributeDefinition extends SnipeModel
         'datatype' => 'required|string|in:enum,int,decimal,text,bool',
         'unit' => 'nullable|string|max:50',
         'required_for_category' => 'boolean',
-        'needs_test' => 'boolean',
         'allow_custom_values' => 'boolean',
         'allow_asset_override' => 'boolean',
     ];

@@ -34,11 +34,15 @@ class AttributeTestRunGenerationTest extends TestCase
             'datatype' => AttributeDefinition::DATATYPE_BOOL,
             'unit' => null,
             'required_for_category' => true,
-            'needs_test' => true,
             'allow_custom_values' => false,
             'allow_asset_override' => true,
         ]);
         $definition->categories()->sync([$category->id]);
+
+        $testType = \App\Models\TestType::factory()->create([
+            'attribute_definition_id' => $definition->id,
+            'slug' => 'storage-capacity',
+        ]);
 
         $model = AssetModel::factory()->create([
             'category_id' => $category->id,
@@ -72,11 +76,12 @@ class AttributeTestRunGenerationTest extends TestCase
         $run = TestRun::first();
         $this->assertNotNull($run, 'Test run was not created');
         $this->assertEquals(302, $response->getStatusCode());
-        $this->assertSame(route('test-results.edit', [$asset->id, $run->id]), $response->getTargetUrl());
+        $this->assertSame(route('test-results.active', [$asset->id]), $response->getTargetUrl());
 
         $result = $run->results()->first();
         $this->assertNotNull($result, 'Test result was not created');
         $this->assertSame($definition->id, $result->attribute_definition_id);
+        $this->assertSame($testType->id, $result->test_type_id);
         $this->assertSame(TestResult::STATUS_NVT, $result->status);
         $this->assertSame('0', $result->expected_value);
         $this->assertNull($result->expected_raw_value);

@@ -23,7 +23,6 @@ class AssetSpecificationOverrideTest extends TestCase
             'label' => 'Test Attribute',
             'datatype' => AttributeDefinition::DATATYPE_BOOL,
             'required_for_category' => true,
-            'needs_test' => true,
             'allow_custom_values' => false,
             'allow_asset_override' => true,
         ], $overrides));

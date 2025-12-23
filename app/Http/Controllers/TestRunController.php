@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Asset;
 use App\Models\TestRun;
 use App\Models\TestResult;
+use App\Models\TestType;
 use App\Services\ModelAttributes\EffectiveAttributeResolver;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -51,21 +52,28 @@ class TestRunController extends Controller
         $run->started_at = now();
         $run->save();
 
-        $resolvedAttributes = $resolved->filter(fn ($attribute) => $attribute->requiresTest);
+        $resolvedByDefinition = $resolved->keyBy(fn ($attribute) => $attribute->definition->id);
+        $testTypes = TestType::forAsset($asset)->get();
 
-        foreach ($resolvedAttributes as $attribute) {
-            $definition = $attribute->definition->loadMissing('tests');
+        foreach ($testTypes as $testType) {
+            $attribute = null;
 
-            foreach ($definition->tests as $testType) {
-                $run->results()->create([
-                    'test_type_id' => $testType->id,
-                    'attribute_definition_id' => $definition->id,
-                    'status' => TestResult::STATUS_NVT,
-                    'note' => null,
-                    'expected_value' => $attribute->value,
-                    'expected_raw_value' => $attribute->rawValue,
-                ]);
+            if ($testType->attribute_definition_id) {
+                $attribute = $resolvedByDefinition->get($testType->attribute_definition_id);
+
+                if (!$attribute) {
+                    continue;
+                }
             }
+
+            $run->results()->create([
+                'test_type_id' => $testType->id,
+                'attribute_definition_id' => $testType->attribute_definition_id,
+                'status' => TestResult::STATUS_NVT,
+                'note' => null,
+                'expected_value' => $attribute?->value,
+                'expected_raw_value' => $attribute?->rawValue,
+            ]);
         }
 
         $asset->refreshTestCompletionFlag();

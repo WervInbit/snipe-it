@@ -82,25 +82,23 @@ class AgentReportController extends Controller
         $run->save();
 
         $resolver = app(EffectiveAttributeResolver::class);
-        $resolvedAttributes = $resolver->resolveForAsset($asset)
-            ->filter(fn ($attribute) => $attribute->requiresTest);
+        $resolvedAttributes = $resolver->resolveForAsset($asset);
+        $resolvedByDefinition = $resolvedAttributes->keyBy(fn ($attribute) => $attribute->definition->id);
 
-        $types = collect();
+        $types = TestType::forAsset($asset)->get()->mapWithKeys(function (TestType $testType) use ($resolvedByDefinition) {
+            $attribute = null;
 
-        foreach ($resolvedAttributes as $attribute) {
-            $definition = $attribute->definition->loadMissing('tests');
-
-            if ($definition->tests->isEmpty()) {
-                continue;
+            if ($testType->attribute_definition_id) {
+                $attribute = $resolvedByDefinition->get($testType->attribute_definition_id);
             }
 
-            foreach ($definition->tests as $testType) {
-                $types->put($testType->slug, [
+            return [
+                $testType->slug => [
                     'type' => $testType,
                     'attribute' => $attribute,
-                ]);
-            }
-        }
+                ],
+            ];
+        });
 
         $provided = collect($validated['results'])->keyBy('test_slug');
 
@@ -126,11 +124,11 @@ class AgentReportController extends Controller
 
             $run->results()->create([
                 'test_type_id' => $type->id,
-                'attribute_definition_id' => $attribute->definition->id,
+                'attribute_definition_id' => $attribute?->definition->id,
                 'status' => $status,
                 'note' => $note,
-                'expected_value' => $attribute->value,
-                'expected_raw_value' => $attribute->rawValue,
+                'expected_value' => $attribute?->value,
+                'expected_raw_value' => $attribute?->rawValue,
             ]);
         }
 

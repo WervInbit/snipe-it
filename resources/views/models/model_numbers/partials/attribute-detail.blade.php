@@ -16,9 +16,6 @@
             @if($definition->isHidden())
                 <span class="label label-default">{{ __('Hidden') }}</span>
             @endif
-            @if($definition->needs_test)
-                <span class="label label-info">{{ __('Tested') }}</span>
-            @endif
         </h4>
         @if($definition->unit)
             <p class="text-muted">{{ __('Unit: :unit', ['unit' => $definition->unit]) }}</p>

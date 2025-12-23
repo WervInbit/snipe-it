@@ -40,7 +40,6 @@
                             <th>{{ __('Status') }}</th>
                             <th>{{ __('Categories') }}</th>
                             <th>{{ __('Required') }}</th>
-                            <th>{{ __('Needs Test') }}</th>
                             <th>{{ __('Asset Overrides') }}</th>
                             <th>{{ __('Options') }}</th>
                             <th class="text-right"></th>
@@ -71,7 +70,6 @@
                                     @endif
                                 </td>
                                 <td>{!! $definition->required_for_category ? '<i class="fas fa-check text-success"></i>' : '<span class="text-muted">--</span>' !!}</td>
-                                <td>{!! $definition->needs_test ? '<i class="fas fa-vial text-info"></i>' : '<span class="text-muted">--</span>' !!}</td>
                                 <td>{!! $definition->allow_asset_override ? '<i class="fas fa-toggle-on text-primary"></i>' : '<span class="text-muted">--</span>' !!}</td>
                                 <td>{{ $definition->options_count }}</td>
                                 <td class="text-right" style="white-space: nowrap;">
@@ -94,7 +92,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="11" class="text-center text-muted">{{ __('No attributes defined yet.') }}</td>
+                                <td colspan="10" class="text-center text-muted">{{ __('No attributes defined yet.') }}</td>
                             </tr>
                         @endforelse
                         </tbody>

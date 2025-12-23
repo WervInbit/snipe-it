@@ -143,6 +143,21 @@
         font-size: 1.25rem;
     }
 
+    .testing-card__optional {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.2rem 0.5rem;
+        margin-left: 0.4rem;
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        border-radius: 999px;
+        color: #92400e;
+        background: #fef3c7;
+        border: 1px solid rgba(146, 64, 14, 0.2);
+    }
+
     .testing-card__attribute {
         font-size: 0.85rem;
     }
@@ -459,18 +474,10 @@
                     </div>
                     <div class="testing-floating-bar__actions">
                         <button type="button"
-                                class="btn btn-success btn-sm {{ $progress['remaining'] === 0 && $progress['failures'] === 0 ? '' : 'disabled' }}"
+                                class="btn btn-success btn-sm"
                                 id="tests-complete-btn"
-                                data-testid="tests-complete-btn"
-                                {{ $progress['remaining'] === 0 && $progress['failures'] === 0 ? '' : 'disabled' }}>
+                                data-testid="tests-complete-btn">
                             <i class="fas fa-check me-2" aria-hidden="true"></i>{{ trans('tests.cta_complete_ok') }}
-                        </button>
-                        <button type="button"
-                                class="btn btn-outline-light btn-sm text-white border {{ $progress['failures'] > 0 ? '' : 'disabled' }}"
-                                id="tests-repair-btn"
-                                data-testid="tests-repair-btn"
-                                {{ $progress['failures'] > 0 ? '' : 'disabled' }}>
-                            <i class="fas fa-tools me-2" aria-hidden="true"></i>{{ trans('tests.cta_send_repair') }}
                         </button>
                     </div>
                 </div>
@@ -520,7 +527,6 @@
         progress: @json($progress),
         actions: {
             completeUrl: '{{ $run ? route('hardware.show', $asset->id) : '' }}',
-            repairUrl: '{{ $run ? route('hardware.edit', $asset->id) : '' }}',
         },
         messages: {
             noteSaved: @json(trans('tests.note_saved_at', ['time' => ':time'])),

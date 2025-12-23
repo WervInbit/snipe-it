@@ -6,6 +6,7 @@
     $hasNote = trim((string) $note) !== '';
     $photos = $result['photos'] ?? [];
     $hasPhoto = !empty($photos);
+    $isRequired = $result['is_required'] ?? true;
 @endphp
 
 <article class="testing-card"
@@ -14,13 +15,19 @@
          data-testid="test-item-{{ $result['slug'] }}"
          data-current-status="{{ $status }}"
          data-initial-status="{{ $status }}"
+         data-is-required="{{ $isRequired ? '1' : '0' }}"
          data-status-pass-label="{{ trans('tests.status_pass') }}"
          data-status-fail-label="{{ trans('tests.status_fail') }}"
          data-status-nvt-label="{{ trans('tests.status_nvt') }}">
     <div class="testing-card__body">
         <div class="testing-card__head">
             <div>
-            <div class="testing-card__title h5 mb-0">{{ $result['label'] }}</div>
+            <div class="testing-card__title h5 mb-0">
+                {{ $result['label'] }}
+                @if(!$isRequired)
+                    <span class="testing-card__optional">{{ trans('tests.optional') }}</span>
+                @endif
+            </div>
             </div>
             @if(!empty($result['instructions']))
                 <button type="button"

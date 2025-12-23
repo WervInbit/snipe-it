@@ -43,5 +43,8 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 - Latest QR layout polish: only the asset name + asset tag render on the text column, which sticks to the bottom-right with a 5% inner margin while the QR honors the same top/bottom padding—PDFs now open with exactly one page and match the requested framing.
 - Raised the QR column so it shares the same top alignment as the text block and hardened the PDF styles to eliminate the stray blank pages; 99010 labels now render as a single page with the QR on the left and asset name/tag on the lower-right.
 
+### 2025-12-23
+- Test runs are now generated from configured Test Types (with optional tests and category scoping), and attribute definitions no longer drive test creation via a needs-test flag.
+
 
 

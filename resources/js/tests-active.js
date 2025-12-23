@@ -89,6 +89,9 @@ const bootTestsActiveUI = () => {
         completed: Number(config.progress?.completed ?? 0),
         remaining: Number(config.progress?.remaining ?? 0),
         failures: Number(config.progress?.failures ?? 0),
+        blockingFailures: Number(
+            config.progress?.blocking_failures ?? config.progress?.blockingFailures ?? config.progress?.failures ?? 0
+        ),
     };
 
     const progressBar = document.querySelector('[data-progress-bar]');
@@ -96,7 +99,6 @@ const bootTestsActiveUI = () => {
     const progressRemainingEls = document.querySelectorAll('[data-progress-remaining]');
     const failuresSummaryEls = document.querySelectorAll('[data-progress-failures]');
     const completeBtn = document.getElementById('tests-complete-btn');
-    const repairBtn = document.getElementById('tests-repair-btn');
 
     const noteMessageTemplate = config.messages?.noteSaved ?? '';
     const photoEmptyTemplate = config.messages?.photoDrawerEmpty ?? '';
@@ -233,35 +235,37 @@ const bootTestsActiveUI = () => {
             progressBar.setAttribute('aria-valuemax', progressState.total);
         }
         if (completeBtn) {
-            const canComplete = progressState.remaining === 0 && progressState.failures === 0;
-            completeBtn.disabled = !canComplete;
-            completeBtn.classList.toggle('disabled', !canComplete);
-        }
-        if (repairBtn) {
-            const canRepair = progressState.failures > 0;
-            repairBtn.disabled = !canRepair;
-            repairBtn.classList.toggle('disabled', !canRepair);
+            completeBtn.disabled = false;
+            completeBtn.classList.remove('disabled');
         }
         updateFailureSummary();
     };
 
-    const updateProgressCounts = (oldStatus, newStatus) => {
+    const updateProgressCounts = (oldStatus, newStatus, isRequired) => {
         if (oldStatus === newStatus) return;
         const isComplete = (status) => status === 'pass' || status === 'fail';
 
-        if (!isComplete(oldStatus) && isComplete(newStatus)) {
-            progressState.completed += 1;
-            progressState.remaining = Math.max(0, progressState.remaining - 1);
-        } else if (isComplete(oldStatus) && !isComplete(newStatus)) {
-            progressState.completed = Math.max(0, progressState.completed - 1);
-            progressState.remaining += 1;
+        if (isRequired) {
+            if (!isComplete(oldStatus) && isComplete(newStatus)) {
+                progressState.completed += 1;
+                progressState.remaining = Math.max(0, progressState.remaining - 1);
+            } else if (isComplete(oldStatus) && !isComplete(newStatus)) {
+                progressState.completed = Math.max(0, progressState.completed - 1);
+                progressState.remaining += 1;
+            }
         }
 
         if (oldStatus === 'fail') {
             progressState.failures = Math.max(0, progressState.failures - 1);
+            if (isRequired) {
+                progressState.blockingFailures = Math.max(0, progressState.blockingFailures - 1);
+            }
         }
         if (newStatus === 'fail') {
             progressState.failures += 1;
+            if (isRequired) {
+                progressState.blockingFailures += 1;
+            }
         }
     };
 
@@ -387,18 +391,19 @@ const bootTestsActiveUI = () => {
     const handleStatusChange = async (card, nextStatus) => {
         const resultId = card.dataset.resultId;
         if (!resultId) return;
+        const isRequired = card.dataset.isRequired !== '0';
 
         const previousStatus = card.dataset.currentStatus || 'nvt';
         card.dataset.currentStatus = nextStatus;
         setStatusPressedState(card, nextStatus);
-        updateProgressCounts(previousStatus, nextStatus);
+        updateProgressCounts(previousStatus, nextStatus, isRequired);
         refreshProgressUI();
 
         const response = await submitFormData(resultId, buildStatusPayload(nextStatus));
         if (!response.ok) {
             card.dataset.currentStatus = previousStatus;
             setStatusPressedState(card, previousStatus);
-            updateProgressCounts(nextStatus, previousStatus);
+            updateProgressCounts(nextStatus, previousStatus, isRequired);
             refreshProgressUI();
         }
     };
@@ -571,13 +576,6 @@ const bootTestsActiveUI = () => {
         if (completeBtn.classList.contains('disabled')) return;
         if (config.actions?.completeUrl) {
             window.location.href = config.actions.completeUrl;
-        }
-    });
-
-    repairBtn?.addEventListener('click', () => {
-        if (repairBtn.classList.contains('disabled')) return;
-        if (config.actions?.repairUrl) {
-            window.location.href = config.actions.repairUrl;
         }
     });
 

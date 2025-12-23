@@ -14,6 +14,17 @@
         padding-top: 0.25rem;
     }
 
+    .test-result-item {
+        margin-bottom: 0.5rem;
+    }
+
+    .test-result-meta {
+        display: inline-flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        align-items: center;
+    }
+
     .test-photo-strip img {
         width: 48px;
         height: 48px;
@@ -69,42 +80,39 @@
                             $definition = $result->attributeDefinition;
                             $label = $definition?->label ?? optional($result->type)->name;
                             $instructions = trim((string) (optional($result->type)->instructions ?: ($definition?->instructions ?? $definition?->help_text)));
+                            $photoItems = $result->photos->map(function ($photo) {
+                                return ['url' => url($photo->path)];
+                            });
+
+                            if ($photoItems->isEmpty() && $result->photo_path) {
+                                $photoItems = collect([['url' => url($result->photo_path)]]);
+                            }
                         @endphp
-                        <li>
-                            {{ $label }}
-                            @if($instructions !== '')
-                                <i class="fas fa-info-circle" data-tooltip="true" title="{{ $instructions }}"></i>
-                            @endif:
-                            {{ trans('tests.' . $result->status) }}
-                            @if ($result->note)
-                                <span class="text-muted">{{ $result->note }}</span>
+                        <li class="test-result-item">
+                            <div class="test-result-meta">
+                                <span>{{ $label }}</span>
+                                @if($instructions !== '')
+                                    <i class="fas fa-info-circle" data-tooltip="true" title="{{ $instructions }}"></i>
+                                @endif
+                                <span>:</span>
+                                <span>{{ trans('tests.' . $result->status) }}</span>
+                                @if ($result->note)
+                                    <span class="text-muted">{{ $result->note }}</span>
+                                @endif
+                            </div>
+                            @if ($photoItems->isNotEmpty())
+                                <div class="test-photo-strip">
+                                    @foreach ($photoItems as $photo)
+                                        <img src="{{ $photo['url'] }}"
+                                             alt="{{ trans('tests.photo_thumbnail_alt') }}"
+                                             data-action="open-photo"
+                                             data-photo-url="{{ $photo['url'] }}">
+                                    @endforeach
+                                </div>
                             @endif
                         </li>
                     @endforeach
                 </ul>
-                @php
-                    $photoItems = $run->results->flatMap(function ($result) {
-                        $items = $result->photos->map(function ($photo) {
-                            return ['url' => url($photo->path)];
-                        });
-
-                        if ($items->isEmpty() && $result->photo_path) {
-                            $items = collect([['url' => url($result->photo_path)]]);
-                        }
-
-                        return $items;
-                    });
-                @endphp
-                @if ($photoItems->isNotEmpty())
-                    <div class="test-photo-strip">
-                        @foreach ($photoItems as $photo)
-                            <img src="{{ $photo['url'] }}"
-                                 alt="{{ trans('tests.photo_thumbnail_alt') }}"
-                                 data-action="open-photo"
-                                 data-photo-url="{{ $photo['url'] }}">
-                        @endforeach
-                    </div>
-                @endif
             </div>
         </div>
     @endforeach

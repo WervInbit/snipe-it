@@ -62,7 +62,6 @@ class AttributeDefinitionRequest extends Request
             'datatype' => ['required', 'string', Rule::in(AttributeDefinition::DATATYPES)],
             'unit' => ['nullable', 'string', 'max:50'],
             'required_for_category' => ['sometimes', 'boolean'],
-            'needs_test' => ['sometimes', 'boolean'],
             'allow_custom_values' => ['sometimes', 'boolean'],
             'allow_asset_override' => ['sometimes', 'boolean'],
             'category_ids' => ['nullable', 'array'],

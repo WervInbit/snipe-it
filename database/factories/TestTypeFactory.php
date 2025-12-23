@@ -20,7 +20,8 @@ class TestTypeFactory extends Factory
             'tooltip' => $this->faker->sentence(),
             'instructions' => $this->faker->paragraph(),
             'attribute_definition_id' => null,
-            'category' => 'attribute',
+            'category' => null,
+            'is_required' => true,
         ];
     }
 }
