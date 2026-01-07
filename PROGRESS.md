@@ -1,3 +1,23 @@
+# Session Progress (2026-01-07)
+
+## Addendum (2026-01-07 Codex)
+- Kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, and recent `docs/agents/*` logs to align with current workflow before making changes.
+- Logged today's session stub here and created `docs/agents/agents-addendum-2026-01-07-session-init.md` for detailed tracking.
+- Fixed hardware image uploads to redirect back to the asset view with a flash message (non-AJAX form submissions were previously showing raw JSON).
+- Fixed asset image thumbnails in the Images tab by using the public disk URL for each stored path (consistent with cover image rendering).
+- Removed the temporary legacy path normalization for asset images so the Images tab reflects the current storage layout only.
+- Cleaned up orphaned asset image row(s) for asset 5 where the file was missing from the public disk.
+- Follow-up: after front-end changes, ensure storage/cache permissions are refreshed to avoid view cache write errors (e.g., `storage/framework/views` permission denied).
+- Tests not run yet in this environment.
+
+# Session Progress (2025-12-30)
+
+## Addendum (2025-12-30 Codex)
+- Kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, and recent `docs/agents/*` logs to align with the current workflow before resuming work.
+- Logged today's session stub here and created the `docs/agents/agents-addendum-2025-12-30-session-init.md` note for detailed tracking.
+- Fixed attribute definition versioning validation so new versions reuse the same key without triggering the model-level unique rule (uniqueness now scopes by key + version); DB constraint already matched this behaviour.
+- Tests not run yet in this environment.
+
 # Session Progress (2025-12-23)
 
 ## Addendum (2025-12-23 Codex)

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 
 class AssetImageController extends Controller
 {
@@ -38,7 +39,7 @@ class AssetImageController extends Controller
             $user->hasAccess('senior-refurbisher');
     }
 
-    public function store(Request $request, Asset $asset): JsonResponse
+    public function store(Request $request, Asset $asset): Response|JsonResponse
     {
         $this->authorize('update', $asset);
 
@@ -95,7 +96,13 @@ class AssetImageController extends Controller
 
             DB::commit();
 
-            return response()->json(['images' => $stored], 201);
+            if ($request->expectsJson()) {
+                return response()->json(['images' => $stored], 201);
+            }
+
+            return redirect()
+                ->route('hardware.show', $asset)
+                ->with('success', trans('general.file_upload_success'));
         } catch (\Throwable $e) {
             DB::rollBack();
 
@@ -103,7 +110,13 @@ class AssetImageController extends Controller
                 Storage::disk('public')->delete($path);
             }
 
-            return response()->json(['message' => trans('general.image_upload_failed')], 500);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => trans('general.image_upload_failed')], 500);
+            }
+
+            return redirect()
+                ->route('hardware.show', $asset)
+                ->with('error', trans('general.image_upload_failed'));
         }
     }
 

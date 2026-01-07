@@ -1,3 +1,45 @@
+# Agents Addendum - 2026-01-07 Session Init
+
+## Context
+- Reviewed `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, and recent `docs/agents/*` entries before making changes.
+- Started the 2026-01-07 stub in `PROGRESS.md` so today's work can be logged as it lands.
+
+## Worklog
+- Logged this session addendum to centralize 2026-01-07 notes and link them from the progress log.
+
+## Follow-ups
+- Tests not run in this environment; expand this log with updates, tests, and documentation touchpoints as the session progresses.
+
+# Agents Addendum - 2025-12-30 Session Init
+
+## Context
+- Reviewed `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, and recent `docs/agents/*` entries before making changes.
+- Started the 2025-12-30 stub in `PROGRESS.md` so today's work can be logged as it lands.
+
+## Worklog
+- Logged this session addendum to centralize 2025-12-30 notes and link them from the progress log.
+- Fixed attribute definition versioning validation to scope uniqueness by key + version so new versions can reuse the same key without server errors.
+
+## Follow-ups
+- Tests not run in this environment; rerun the attribute definition version creation flow after deploy to confirm resolution.
+- Expand this log with concrete updates, tests, and documentation changes as the session progresses.
+
+# Agents Addendum - 2025-12-23 Session Wrap
+
+## Context
+- Continued test-type scoping refactor; see PROGRESS.md (2025-12-23 addendum) for the detailed log.
+- Context compression occurred during this session; some conversational details were lost midstream.
+
+## Worklog
+- Shifted test creation to Test Types with category scoping and optional/required flags; removed legacy `needs_test` handling.
+- Added `is_required` to test types, category pivot, updated admin UI, seeders, translations, and coverage; committed as `Refactor test type scoping and optional tests`.
+- Tests UI tweaks: per-row thumbnails, always-allowed completion on active tests, hardware edit status uses native select.
+- Renamed former *_test attributes to capability fields (e.g., wifi, bluetooth), disabled asset overrides on them, and added a migration to carry existing data forward without the `_test` suffix.
+
+## Follow-ups
+- Run `php artisan migrate` and `php artisan optimize:clear` in the app container; rebuild front-end assets as needed.
+- Monitor for any remaining duplicate Test Types in existing data; consider a cleanup migration if duplicates persist.
+
 # Agents Addendum - 2025-12-18 Session Init
 
 ## Context
@@ -37,19 +79,3 @@
 
 ## Follow-ups
 - Expand this log with concrete updates, tests run, and any documentation touchpoints, mirroring user-facing changes into `PROGRESS.md` and `docs/fork-notes.md` when applicable.
-
-# Agents Addendum - 2025-12-23 Session Wrap
-
-## Context
-- Continued test-type scoping refactor; see PROGRESS.md (2025-12-23 addendum) for the detailed log.
-- Context compression occurred during this session; some conversational details were lost midstream.
-
-## Worklog
-- Shifted test creation to Test Types with category scoping and optional/required flags; removed legacy `needs_test` handling.
-- Added `is_required` to test types, category pivot, updated admin UI, seeders, translations, and coverage; committed as `Refactor test type scoping and optional tests`.
-- Tests UI tweaks: per-row thumbnails, always-allowed completion on active tests, hardware edit status uses native select.
-- Renamed former *_test attributes to capability fields (e.g., wifi, bluetooth), disabled asset overrides on them, and added a migration to carry existing data forward without the `_test` suffix.
-
-## Follow-ups
-- Run `php artisan migrate` and `php artisan optimize:clear` in the app container; rebuild front-end assets as needed.
-- Monitor for any remaining duplicate Test Types in existing data; consider a cleanup migration if duplicates persist.

@@ -1620,9 +1620,12 @@
                             <div class="col-12 text-muted small mb-2">{{ trans('general.cover_image_notice') }}</div>
 
                             @forelse ($asset->images as $image)
+                                @php
+                                    $imageUrl = Storage::disk('public')->url($image->file_path);
+                                @endphp
                                 <div class="col-6 col-md-3 mb-3 text-center">
-                                    <a href="{{ asset('storage/'.$image->file_path) }}" target="_blank">
-                                        <img src="{{ asset('storage/'.$image->file_path) }}" class="img-fluid img-thumbnail" alt="{{ $image->caption }}">
+                                    <a href="{{ $imageUrl }}" target="_blank">
+                                        <img src="{{ $imageUrl }}" class="img-fluid img-thumbnail" alt="{{ $image->caption }}">
                                     </a>
                                     <div class="mt-1">
 
