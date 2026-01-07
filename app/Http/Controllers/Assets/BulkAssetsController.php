@@ -268,18 +268,29 @@ class BulkAssetsController extends Controller
 
         if ($request->filled('status_id')) {
             $status = Statuslabel::find($request->input('status_id'));
-            if ($status && strcasecmp($status->name, 'Ready for Sale') === 0) {
+            if ($status && $this->statusRequiresTestAck($status->name)) {
                 $warnings = [];
                 foreach ($assets as $asset) {
-                    $failed = $asset->latestFailedTestNames();
-                    if ($failed->isNotEmpty()) {
-                        $warnings[] = $asset->asset_tag . ': ' . $failed->implode(', ');
+                    $summary = $asset->latestTestIssueSummary();
+                    $issues = collect();
+                    if ($summary['missing_run']) {
+                        $issues->push(trans('tests.no_test_run_recorded'));
+                    }
+                    if ($summary['failed']->isNotEmpty()) {
+                        $issues->push(trans('tests.failed_list', ['tests' => $summary['failed']->implode(', ')]));
+                    }
+                    if ($summary['incomplete']->isNotEmpty()) {
+                        $issues->push(trans('tests.incomplete_list', ['tests' => $summary['incomplete']->implode(', ')]));
+                    }
+                    if ($issues->isNotEmpty()) {
+                        $warnings[] = $asset->asset_tag . ': ' . $issues->implode(' ');
                     }
                 }
                 if ($warnings && !$request->boolean('ack_failed_tests')) {
                     return redirect()->back()
                         ->withInput()
-                        ->with('warning', trans('general.ready_for_sale_failed_tests', ['tests' => implode(' | ', $warnings)]))
+                        ->with('warning', trans('tests.status_change_warning'))
+                        ->with('test_issue_details', $warnings)
                         ->with('requires_ack_failed_tests', true);
                 }
             }
@@ -684,7 +695,26 @@ class BulkAssetsController extends Controller
 
          if($undeployable->isNotEmpty()) {
              return ['status' => true, 'tags' => $undeployableTags, 'asset_ids' => $filtered_ids];
-         }
+        }
+        return false;
+    }
+
+    private function statusRequiresTestAck(?string $statusName): bool
+    {
+        if (!$statusName) {
+            return false;
+        }
+
+        $name = strtolower(trim($statusName));
+
+        if (str_contains($name, 'ready for sale')) {
+            return true;
+        }
+
+        if ($name === 'sold' || str_starts_with($name, 'sold ')) {
+            return true;
+        }
+
         return false;
     }
 

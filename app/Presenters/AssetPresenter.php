@@ -96,6 +96,13 @@ class AssetPresenter extends Presenter
                 'visible' => true,
                 'formatter' => 'statuslabelsLinkObjFormatter',
             ], [
+                'field' => 'tests_completed_ok',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('tests.latest_run_status'),
+                'visible' => true,
+                'formatter' => 'testsHealthFormatter',
+            ], [
                 'field' => 'assigned_to',
                 'searchable' => true,
                 'sortable' => true,

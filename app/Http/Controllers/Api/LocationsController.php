@@ -291,7 +291,9 @@ class LocationsController extends Controller
         $this->authorize('view', Asset::class);
         $this->authorize('view', $location);
         $ids = Location::getLocationHierarchy($location->id);
-        $assets = Asset::whereIn('location_id', $ids)->with('model', 'model.category', 'assetstatus', 'location', 'company', 'defaultLoc');
+        $assets = Asset::whereIn('location_id', $ids)
+            ->with('model', 'model.category', 'assetstatus', 'location', 'company', 'defaultLoc')
+            ->withCount(['tests as test_runs_count']);
         $assets = $assets->get();
         return (new AssetsTransformer)->transformAssets($assets, $assets->count(), $request);
     }
@@ -301,7 +303,10 @@ class LocationsController extends Controller
         $this->authorize('view', Asset::class);
         $this->authorize('view', $location);
         $ids = Location::getLocationHierarchy($location->id);
-        $assets = Asset::whereIn('assigned_to', $ids)->where('assigned_type', '=', Location::class)->with('model', 'model.category', 'assetstatus', 'location', 'company', 'defaultLoc');
+        $assets = Asset::whereIn('assigned_to', $ids)
+            ->where('assigned_type', '=', Location::class)
+            ->with('model', 'model.category', 'assetstatus', 'location', 'company', 'defaultLoc')
+            ->withCount(['tests as test_runs_count']);
         $assets = $assets->get();
         return (new AssetsTransformer)->transformAssets($assets, $assets->count(), $request);
     }

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Watson\Validating\ValidatingTrait;
 use App\Models\AttributeOption;
 use App\Models\TestResult;
@@ -57,7 +58,7 @@ class AttributeDefinition extends SnipeModel
     ];
 
     protected $rules = [
-        'key' => 'required|string|min:3|max:100|regex:/^[a-z0-9_]+$/|unique:attribute_definitions,key,NULL,id,deleted_at,NULL',
+        'key' => 'required|string|min:3|max:100|regex:/^[a-z0-9_]+$/',
         'label' => 'required|string|min:3|max:255',
         'datatype' => 'required|string|in:enum,int,decimal,text,bool',
         'unit' => 'nullable|string|max:50',
@@ -240,6 +241,26 @@ class AttributeDefinition extends SnipeModel
         $this->forceFill([
             'hidden_at' => null,
         ])->save();
+    }
+
+    public function getRules(): array
+    {
+        $rules = $this->rules;
+
+        $rules['key'] = [
+            'required',
+            'string',
+            'min:3',
+            'max:100',
+            'regex:/^[a-z0-9_]+$/',
+            Rule::unique('attribute_definitions', 'key')
+                ->ignore($this->id)
+                ->where(fn ($query) => $query
+                    ->where('version', $this->version ?? 1)
+                    ->whereNull('deleted_at')),
+        ];
+
+        return $rules;
     }
 
     public function createNewVersion(array $attributes): self

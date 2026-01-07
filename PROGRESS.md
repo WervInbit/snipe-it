@@ -11,6 +11,15 @@
 - Adjusted attribute version create flow so the browser back button returns to the attributes list after saving a new version.
 - Enum options are now read-only on existing attributes; the new-version flow surfaces editable option rows (including active state) and saves them onto the new version.
 - Tweaked mobile tests active CTAs to left-align the note/photo controls and keep the indicator on the right edge.
+- Improved scan UX: added try-harder/inverted QR hints, faster fallback to higher resolution, reduced scan interval, simplified focus handling, and show a success overlay before redirect.
+- Clearing the assets list search storage now runs after a successful scan so the hardware list is not left filtered by the scanned tag.
+- Tests tab on the hardware detail page now renders each result's photos directly under its line item instead of a single strip per run.
+- Asset detail now highlights failed/incomplete latest tests, and status changes to Ready for Sale/Sold prompt for confirmation with the issue list.
+- Added a latest-test status badge on the asset detail view and a Tests column in asset listings, backed by test run counts in asset list APIs.
+- Preserved redirect selection when status-change confirmations are required so saving after the confirm returns to the intended page.
+- Confirmation submit now forces the redirect option to the asset detail page and uses requestSubmit when available.
+- Tests active completion now prompts when required tests are incomplete or any tests failed, without disabling the button.
+- Added `tests-active.js` to the Mix build so the tests execution UI uses the latest JS bundle.
 - Tests not run yet in this environment.
 
 # Session Progress (2025-12-30)

@@ -233,6 +233,54 @@
         </div><!-- end col-md-12 col-sm-12-->
     </div><!-- end col-md-12 col-sm-12-->
     </div><!-- end col-md-12 col-sm-12-->
+
+    @php
+        $testSummary = $testSummary ?? ['missing_run' => false, 'failed' => collect(), 'incomplete' => collect(), 'run' => null];
+        $testIssuesPresent = $testSummary['missing_run'] || $testSummary['failed']->isNotEmpty() || $testSummary['incomplete']->isNotEmpty();
+        $confirmStatusIds = collect($statuslabel_list ?? [])->filter(function ($label) {
+            $name = strtolower(trim((string) $label));
+            if (strpos($name, 'ready for sale') !== false) {
+                return true;
+            }
+            if ($name === 'sold' || str_starts_with($name, 'sold ')) {
+                return true;
+            }
+            return false;
+        })->keys()->values();
+    @endphp
+
+    @if ($testIssuesPresent)
+        <div class="modal fade" id="tests-status-confirm-modal" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="{{ trans('general.close') }}">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title">{{ trans('tests.status_change_warning') }}</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>{{ trans('tests.status_change_prompt') }}</p>
+                        <ul>
+                            @if ($testSummary['missing_run'])
+                                <li>{{ trans('tests.no_test_run_recorded') }}</li>
+                            @endif
+                            @if ($testSummary['failed']->isNotEmpty())
+                                <li>{{ trans('tests.failed_list', ['tests' => $testSummary['failed']->implode(', ')]) }}</li>
+                            @endif
+                            @if ($testSummary['incomplete']->isNotEmpty())
+                                <li>{{ trans('tests.incomplete_list', ['tests' => $testSummary['incomplete']->implode(', ')]) }}</li>
+                            @endif
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('general.cancel') }}</button>
+                        <button type="button" class="btn btn-warning" id="tests-status-confirm-yes">{{ trans('general.confirm') }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
    
 @stop
 
@@ -579,6 +627,64 @@
             var context = getModelSelectionContext();
             if (context.modelId) {
                 $.getJSON("{{ config('app.url') }}/api/v1/models/" + context.modelId, syncFromModel);
+            }
+        });
+    });
+
+    $(function () {
+        var statusConfirm = {
+            hasIssues: {{ $testIssuesPresent ? 'true' : 'false' }},
+            statusIds: @json($confirmStatusIds->map(fn ($id) => (string) $id)->values()),
+        };
+
+        if (!statusConfirm.hasIssues) {
+            return;
+        }
+
+        var form = document.getElementById('create-form');
+        var statusSelect = document.getElementById('status_select_id');
+        var modalEl = document.getElementById('tests-status-confirm-modal');
+        var confirmBtn = document.getElementById('tests-status-confirm-yes');
+        var redirectSelect = form ? form.querySelector('select[name="redirect_option"]') : null;
+        var allowSubmit = false;
+
+        if (!form || !statusSelect || !modalEl || !confirmBtn) {
+            return;
+        }
+
+        var shouldConfirm = function () {
+            var value = statusSelect.value || '';
+            return statusConfirm.statusIds.includes(String(value));
+        };
+
+        form.addEventListener('submit', function (event) {
+            if (allowSubmit || !shouldConfirm()) {
+                return;
+            }
+
+            event.preventDefault();
+            (window.jQuery || window.$)(modalEl).modal('show');
+        });
+
+        confirmBtn.addEventListener('click', function () {
+            var ack = document.getElementById('ack_failed_tests');
+            if (!ack) {
+                ack = document.createElement('input');
+                ack.type = 'hidden';
+                ack.name = 'ack_failed_tests';
+                ack.id = 'ack_failed_tests';
+                form.appendChild(ack);
+            }
+            ack.value = '1';
+            if (redirectSelect) {
+                redirectSelect.value = 'item';
+            }
+            allowSubmit = true;
+            (window.jQuery || window.$)(modalEl).modal('hide');
+            if (typeof form.requestSubmit === 'function') {
+                form.requestSubmit();
+            } else {
+                form.submit();
             }
         });
     });

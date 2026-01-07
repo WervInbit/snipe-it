@@ -365,6 +365,7 @@ class AssetsController extends Controller
         $specAttributes = $asset->model ? $resolver->resolveForAsset($asset) : collect();
         $modelNumbers = $asset->model ? $this->availableModelNumbersFor($asset->model, $asset->model_number_id) : collect();
         $selectedModelNumber = $asset->modelNumber ?? $asset->model?->primaryModelNumber;
+        $testSummary = $asset->latestTestIssueSummary();
 
         return view('hardware/edit')
             ->with('item', $asset)
@@ -372,7 +373,8 @@ class AssetsController extends Controller
             ->with('statuslabel_types', Helper::statusTypeList())
             ->with('specAttributes', $specAttributes)
             ->with('modelNumbers', $modelNumbers)
-            ->with('selectedModelNumber', $selectedModelNumber);
+            ->with('selectedModelNumber', $selectedModelNumber)
+            ->with('testSummary', $testSummary);
     }
 
 
@@ -415,10 +417,13 @@ class AssetsController extends Controller
             ]);
 
             $resolvedAttributes = app(\App\Services\ModelAttributes\EffectiveAttributeResolver::class)->resolveForAsset($asset);
+            $testSummary = $asset->latestTestIssueSummary();
 
             return view('hardware/view', compact('asset', 'settings'))
                 ->with('resolvedAttributes', $resolvedAttributes)
-                ->with('use_currency', $use_currency)->with('audit_log', $audit_log);
+                ->with('use_currency', $use_currency)
+                ->with('audit_log', $audit_log)
+                ->with('testSummary', $testSummary);
         }
 
         return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
@@ -517,14 +522,35 @@ class AssetsController extends Controller
             $asset->location_id = $asset->rtd_location_id;
         }
 
+        session()->put([
+            'redirect_option' => $request->get('redirect_option'),
+            'checkout_to_type' => $request->get('checkout_to_type'),
+            'other_redirect' => $request->get('redirect_option') === 'other_redirect' ? 'model' : null,
+        ]);
+
         $status = Statuslabel::find($request->input('status_id'));
 
-        if ($status && strcasecmp($status->name, 'Ready for Sale') === 0) {
-            $failed = $asset->latestFailedTestNames();
-            if ($failed->isNotEmpty() && !$request->boolean('ack_failed_tests')) {
+        if ($status && $this->statusRequiresTestAck($status->name)) {
+            $testSummary = $asset->latestTestIssueSummary();
+            $issueLines = collect();
+
+            if ($testSummary['missing_run']) {
+                $issueLines->push(trans('tests.no_test_run_recorded'));
+            }
+
+            if ($testSummary['failed']->isNotEmpty()) {
+                $issueLines->push(trans('tests.failed_list', ['tests' => $testSummary['failed']->implode(', ')]));
+            }
+
+            if ($testSummary['incomplete']->isNotEmpty()) {
+                $issueLines->push(trans('tests.incomplete_list', ['tests' => $testSummary['incomplete']->implode(', ')]));
+            }
+
+            if ($issueLines->isNotEmpty() && !$request->boolean('ack_failed_tests')) {
                 return redirect()->back()
                     ->withInput()
-                    ->with('warning', trans('general.ready_for_sale_failed_tests', ['tests' => $failed->implode(', ')]))
+                    ->with('warning', trans('tests.status_change_warning'))
+                    ->with('test_issue_details', $issueLines->all())
                     ->with('requires_ack_failed_tests', true);
             }
         }
@@ -606,13 +632,6 @@ class AssetsController extends Controller
                 }
             }
         }
-        session()->put([
-            'redirect_option' => $request->get('redirect_option'),
-            'checkout_to_type' => $request->get('checkout_to_type'),
-            'other_redirect' => $request->get('redirect_option') === 'other_redirect' ? 'model' : null,
-        ]);
-
-
             if ($asset->save()) {
                 if ($asset->model_id) {
                     try {
@@ -714,6 +733,25 @@ class AssetsController extends Controller
         $this->authorize('view', $asset);
 
         return redirect()->route('hardware.show', $asset->id)->with('topsearch', $topsearch);
+    }
+
+    private function statusRequiresTestAck(?string $statusName): bool
+    {
+        if (!$statusName) {
+            return false;
+        }
+
+        $name = strtolower(trim($statusName));
+
+        if (str_contains($name, 'ready for sale')) {
+            return true;
+        }
+
+        if ($name === 'sold' || str_starts_with($name, 'sold ')) {
+            return true;
+        }
+
+        return false;
     }
 
 

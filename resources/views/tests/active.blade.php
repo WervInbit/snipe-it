@@ -497,6 +497,34 @@
                 </div>
             </div>
 
+            <div class="modal fade" id="testsCompleteConfirmModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">{{ trans('tests.complete_confirm_title') }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ trans('general.close') }}"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>{{ trans('tests.complete_confirm_prompt') }}</p>
+                            <div data-tests-complete-summary>
+                                <div class="mb-2" data-tests-complete-failed-block style="display:none;">
+                                    <strong>{{ trans('tests.complete_confirm_failed') }}</strong>
+                                    <ul class="mb-0" data-tests-complete-failed></ul>
+                                </div>
+                                <div class="mb-0" data-tests-complete-incomplete-block style="display:none;">
+                                    <strong>{{ trans('tests.complete_confirm_incomplete') }}</strong>
+                                    <ul class="mb-0" data-tests-complete-incomplete></ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ trans('general.cancel') }}</button>
+                            <button type="button" class="btn btn-warning" id="testsCompleteConfirmContinue">{{ trans('tests.complete_confirm_continue') }}</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="modal fade" id="photoDeleteModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
@@ -546,6 +574,11 @@
             noteSaved: @json(trans('tests.note_saved_at', ['time' => ':time'])),
             photoDrawerEmpty: @json(trans('tests.photo_drawer_empty')),
             removePhoto: @json(trans('tests.remove_photo')),
+            completeConfirmTitle: @json(trans('tests.complete_confirm_title')),
+            completeConfirmPrompt: @json(trans('tests.complete_confirm_prompt')),
+            completeConfirmFailed: @json(trans('tests.complete_confirm_failed')),
+            completeConfirmIncomplete: @json(trans('tests.complete_confirm_incomplete')),
+            completeConfirmContinue: @json(trans('tests.complete_confirm_continue')),
         },
         layoutKey: 'tests.layout.twoCol',
     };

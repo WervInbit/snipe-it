@@ -845,6 +845,31 @@
         }
     }
 
+    function testsHealthFormatter(value, row) {
+        if (!row) {
+            return '';
+        }
+
+        var ok = (value === true || value === 'true' || value === 1 || value === '1');
+        var runs = parseInt(row.test_runs_count || 0, 10);
+        var hasRuns = !isNaN(runs) && runs > 0;
+        var labelClass = 'label-default';
+        var labelText = '{{ trans('tests.latest_run_missing_short') }}';
+        var tooltip = '{{ trans('tests.no_test_run_recorded') }}';
+
+        if (ok) {
+            labelClass = 'label-success';
+            labelText = '{{ trans('tests.latest_run_ok_short') }}';
+            tooltip = '{{ trans('tests.all_passed') }}';
+        } else if (hasRuns) {
+            labelClass = 'label-warning';
+            labelText = '{{ trans('tests.latest_run_attention_short') }}';
+            tooltip = '{{ trans('tests.latest_run_attention') }}';
+        }
+
+        return '<span class="label ' + labelClass + '" data-tooltip="true" title="' + tooltip + '">' + labelText + '</span>';
+    }
+
     function dateDisplayFormatter(value) {
         if (value) {
             return  value.formatted;

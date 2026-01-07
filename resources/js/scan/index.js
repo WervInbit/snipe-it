@@ -5,11 +5,11 @@ import { BarcodeFormat, DecodeHintType } from '@zxing/library';
 const defaults = {
   width: 640,
   height: 480,
-  interval: 120,
+  interval: 90,
   beep: true,
   fallbackWidth: 1280,
   fallbackHeight: 720,
-  failBeforeFallback: 8,
+  failBeforeFallback: 4,
 };
 const config = Object.assign({}, defaults, window.scanConfig || {});
 
@@ -23,6 +23,7 @@ const torchBtn = document.getElementById('scan-torch');
 const cameraSelect = document.getElementById('scan-camera-select');
 const requestBtn = document.getElementById('scan-request');
 const hintBanner = document.getElementById('scan-hint');
+const successBanner = document.getElementById('scan-success');
 
 const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
@@ -38,6 +39,7 @@ let failCount = 0;
 let bumped = false;
 let scrolledToCamera = false;
 let currentDeviceId = null;
+let scanLocked = false;
 const scrollOffset = 12; // px to keep header/nav visible
 const MIN_SCAN_HEIGHT = 240;
 
@@ -106,6 +108,57 @@ function hideHint() {
     hintBanner.classList.add('d-none');
     hintBanner.style.display = 'none';
   }
+}
+
+function showSuccess() {
+  if (successBanner) {
+    successBanner.classList.remove('d-none');
+    successBanner.style.display = '';
+  }
+}
+
+function hideSuccess() {
+  if (successBanner) {
+    successBanner.classList.add('d-none');
+    successBanner.style.display = 'none';
+  }
+}
+
+function setControlsDisabled(disabled) {
+  if (switchBtn) switchBtn.disabled = disabled;
+  if (torchBtn) torchBtn.disabled = disabled;
+  if (requestBtn) requestBtn.disabled = disabled;
+  if (cameraSelect) cameraSelect.disabled = disabled;
+}
+
+function clearAssetSearch(tag) {
+  const keys = ['assetsListingTable.bs.table.searchText'];
+  const storages = [window.localStorage, window.sessionStorage].filter(Boolean);
+
+  storages.forEach((store) => {
+    keys.forEach((key) => {
+      const value = store.getItem(key);
+      if (!value) {
+        return;
+      }
+      if (tag && value !== tag) {
+        return;
+      }
+      store.removeItem(key);
+    });
+  });
+
+  keys.forEach((key) => {
+    const match = document.cookie.match(new RegExp('(?:^|; )' + key.replace('.', '\\.') + '=([^;]*)'));
+    const value = match ? decodeURIComponent(match[1]) : null;
+    if (!value) {
+      return;
+    }
+    if (tag && value !== tag) {
+      return;
+    }
+    document.cookie = `${key}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+  });
 }
 
 function redirect(tag) {
@@ -180,8 +233,11 @@ async function start(deviceId = null) {
   hideError();
   hidePermissionBanner();
   hideHint();
+  hideSuccess();
+  setControlsDisabled(false);
   failCount = 0;
   bumped = false;
+  scanLocked = false;
 
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
     showError('Camera not available');
@@ -200,7 +256,7 @@ async function start(deviceId = null) {
   if (!videoConstraints.advanced) {
     videoConstraints.advanced = [];
   }
-  videoConstraints.advanced.push({ focusMode: 'continuous' }, { focusMode: 'auto' });
+  videoConstraints.advanced.push({ focusMode: 'continuous' });
 
   const constraints = {
     video: videoConstraints,
@@ -217,12 +273,21 @@ async function start(deviceId = null) {
 
     const hints = new Map();
     hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.QR_CODE]);
-    reader = new BrowserMultiFormatReader(hints);
+    hints.set(DecodeHintType.TRY_HARDER, true);
+    if (DecodeHintType.ALSO_INVERTED) {
+      hints.set(DecodeHintType.ALSO_INVERTED, true);
+    }
+    reader = new BrowserMultiFormatReader(hints, config.interval);
 
     await reader.decodeFromVideoDevice(deviceId || null, video, async (result, err) => {
       clearOverlay();
 
+      if (scanLocked) {
+        return;
+      }
+
       if (result) {
+        scanLocked = true;
         failCount = 0;
         const points = result.resultPoints || [];
         if (points.length >= 4) {
@@ -233,8 +298,11 @@ async function start(deviceId = null) {
           }
         }
         beep();
+        showSuccess();
+        setControlsDisabled(true);
+        clearAssetSearch(result.getText());
         stop();
-        redirect(result.getText());
+        setTimeout(() => redirect(result.getText()), 150);
         return;
       }
 
@@ -324,13 +392,6 @@ async function refocus() {
       if (caps.focusMode && caps.focusMode.length) {
         const mode = caps.focusMode.includes('continuous') ? 'continuous' : caps.focusMode[0];
         advanced.push({ focusMode: mode });
-      }
-      if (caps.focusDistance) {
-        const { min, max } = caps.focusDistance;
-        const mid = typeof min === 'number' && typeof max === 'number' ? (min + max) / 2 : undefined;
-        if (typeof mid === 'number') {
-          advanced.push({ focusDistance: mid });
-        }
       }
       if (advanced.length) {
         await track.applyConstraints({ advanced });

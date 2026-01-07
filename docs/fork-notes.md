@@ -46,5 +46,9 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 ### 2025-12-23
 - Test runs are now generated from configured Test Types (with optional tests and category scoping), and attribute definitions no longer drive test creation via a needs-test flag.
 
+### 2026-01-07
+- Asset detail now highlights latest test health (failed/incomplete/missing) and includes a compact latest-tests badge.
+- Asset list tables show a new Tests column reflecting latest run health, backed by test run counts in asset list APIs.
+- Status changes to Ready for Sale/Sold require confirmation when tests are missing or failed, and the tests active page now prompts before finishing with open failures.
 
 

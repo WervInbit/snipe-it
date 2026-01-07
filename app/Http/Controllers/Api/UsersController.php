@@ -615,7 +615,10 @@ class UsersController extends Controller
         if ($user = User::with('assets', 'assets.model', 'consumables', 'accessories', 'licenses', 'userloc')->withTrashed()->find($id)) {
             $this->authorize('view', $user);
 
-            $assets = Asset::where('assigned_to', '=', $id)->where('assigned_type', '=', User::class)->with('model');
+            $assets = Asset::where('assigned_to', '=', $id)
+                ->where('assigned_type', '=', User::class)
+                ->with('model')
+                ->withCount(['tests as test_runs_count']);
 
 
             // Filter on category ID

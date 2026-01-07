@@ -99,10 +99,20 @@ const bootTestsActiveUI = () => {
     const progressRemainingEls = document.querySelectorAll('[data-progress-remaining]');
     const failuresSummaryEls = document.querySelectorAll('[data-progress-failures]');
     const completeBtn = document.getElementById('tests-complete-btn');
+    const completeConfirmModalEl = document.getElementById('testsCompleteConfirmModal');
+    const completeConfirmModal = createModalController(completeConfirmModalEl);
+    const completeConfirmContinue = document.getElementById('testsCompleteConfirmContinue');
+    const completeConfirmFailedBlock = completeConfirmModalEl?.querySelector('[data-tests-complete-failed-block]');
+    const completeConfirmFailedList = completeConfirmModalEl?.querySelector('[data-tests-complete-failed]');
+    const completeConfirmIncompleteBlock = completeConfirmModalEl?.querySelector('[data-tests-complete-incomplete-block]');
+    const completeConfirmIncompleteList = completeConfirmModalEl?.querySelector('[data-tests-complete-incomplete]');
 
     const noteMessageTemplate = config.messages?.noteSaved ?? '';
     const photoEmptyTemplate = config.messages?.photoDrawerEmpty ?? '';
     const removePhotoLabel = config.messages?.removePhoto ?? '';
+    const confirmPrompt = config.messages?.completeConfirmPrompt ?? '';
+    const confirmFailedLabel = config.messages?.completeConfirmFailed ?? '';
+    const confirmIncompleteLabel = config.messages?.completeConfirmIncomplete ?? '';
 
     const noteDebouncers = new WeakMap();
 
@@ -378,6 +388,59 @@ const bootTestsActiveUI = () => {
     refreshProgressUI();
     setIndicator('clean');
 
+    const getCompletionIssues = () => {
+        const failed = [];
+        const incomplete = [];
+        cards.forEach((card) => {
+            const status = card.dataset.currentStatus || 'nvt';
+            const isRequired = card.dataset.isRequired !== '0';
+            const label = card.dataset.testLabel || '';
+            if (status === 'fail') {
+                failed.push(label || card.id || 'Unknown');
+            }
+            if (isRequired && status === 'nvt') {
+                incomplete.push(label || card.id || 'Unknown');
+            }
+        });
+        return { failed, incomplete };
+    };
+
+    const renderCompletionIssues = (issues) => {
+        if (!completeConfirmModalEl) return;
+        const renderList = (items, block, list) => {
+            if (!block || !list) return;
+            if (!items.length) {
+                block.style.display = 'none';
+                list.innerHTML = '';
+                return;
+            }
+            block.style.display = '';
+            list.innerHTML = '';
+            items.forEach((item) => {
+                const li = document.createElement('li');
+                li.textContent = item;
+                list.appendChild(li);
+            });
+        };
+
+        renderList(issues.failed, completeConfirmFailedBlock, completeConfirmFailedList);
+        renderList(issues.incomplete, completeConfirmIncompleteBlock, completeConfirmIncompleteList);
+    };
+
+    const buildCompletionPrompt = (issues) => {
+        const lines = [];
+        if (confirmPrompt) {
+            lines.push(confirmPrompt);
+        }
+        if (issues.failed.length) {
+            lines.push(`${confirmFailedLabel || 'Failed'}: ${issues.failed.join(', ')}`);
+        }
+        if (issues.incomplete.length) {
+            lines.push(`${confirmIncompleteLabel || 'Not executed'}: ${issues.incomplete.join(', ')}`);
+        }
+        return lines.join('\n');
+    };
+
     const buildStatusPayload = (status) => {
         const formData = new FormData();
         if (status === 'nvt') {
@@ -572,9 +635,31 @@ const bootTestsActiveUI = () => {
         handler();
     });
 
-    completeBtn?.addEventListener('click', () => {
-        if (completeBtn.classList.contains('disabled')) return;
+    completeConfirmContinue?.addEventListener('click', () => {
         if (config.actions?.completeUrl) {
+            window.location.href = config.actions.completeUrl;
+        }
+    });
+
+    completeBtn?.addEventListener('click', () => {
+        if (!config.actions?.completeUrl) {
+            return;
+        }
+
+        const issues = getCompletionIssues();
+        if (!issues.failed.length && !issues.incomplete.length) {
+            window.location.href = config.actions.completeUrl;
+            return;
+        }
+
+        if (completeConfirmModal) {
+            renderCompletionIssues(issues);
+            completeConfirmModal.show();
+            return;
+        }
+
+        const message = buildCompletionPrompt(issues);
+        if (!message || window.confirm(message)) {
             window.location.href = config.actions.completeUrl;
         }
     });

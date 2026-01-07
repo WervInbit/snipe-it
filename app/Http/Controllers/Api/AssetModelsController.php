@@ -201,7 +201,9 @@ class AssetModelsController extends Controller
     public function assets($id) : array
     {
         $this->authorize('view', AssetModel::class);
-        $assets = Asset::where('model_id', '=', $id)->get();
+        $assets = Asset::where('model_id', '=', $id)
+            ->withCount(['tests as test_runs_count'])
+            ->get();
 
         return (new AssetsTransformer)->transformAssets($assets, $assets->count());
     }

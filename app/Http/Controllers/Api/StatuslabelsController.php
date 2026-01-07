@@ -266,7 +266,9 @@ class StatuslabelsController extends Controller
     {
         $this->authorize('view', Statuslabel::class);
         $this->authorize('index', Asset::class);
-        $assets = Asset::where('status_id', '=', $id)->with('assignedTo');
+        $assets = Asset::where('status_id', '=', $id)
+            ->with('assignedTo')
+            ->withCount(['tests as test_runs_count']);
 
         $allowed_columns = [
             'id',

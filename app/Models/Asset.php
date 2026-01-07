@@ -311,8 +311,8 @@ class Asset extends Depreciable
                 $old = $oldId ? Statuslabel::find($oldId) : null;
                 $oldName = strtolower((string) ($old?->name ?? ''));
 
-                // Ready for Sale requires tests OK (can be confirmed) and supervisor/admin role
-                if (str_contains($name, 'ready for sale')) {
+                // Ready for Sale/Sold requires tests OK (can be confirmed) and supervisor/admin role
+                if (str_contains($name, 'ready for sale') || $name === 'sold' || str_starts_with($name, 'sold ')) {
                     $user = auth()->user();
                     $isAdmin = $user && method_exists($user, 'isAdmin') ? $user->isAdmin() : false;
                     $isSuper = $user && method_exists($user, 'isSuperUser') ? $user->isSuperUser() : false;
@@ -1068,21 +1068,71 @@ class Asset extends Depreciable
     }
 
     /**
+     * Summary of failed or incomplete required tests for the latest run.
+     *
+     * @return array{run: ?TestRun, failed: Collection, incomplete: Collection, missing_run: bool}
+     */
+    public function latestTestIssueSummary(): array
+    {
+        $latestRun = $this->tests()
+            ->with(['results.type', 'results.attributeDefinition'])
+            ->first();
+
+        if (!$latestRun) {
+            return [
+                'run' => null,
+                'failed' => collect(),
+                'incomplete' => collect(),
+                'missing_run' => true,
+            ];
+        }
+
+        $requiredResults = $latestRun->results->filter(function (TestResult $result) {
+            return $result->type?->is_required ?? true;
+        });
+
+        $labelFor = function (TestResult $result): string {
+            return $result->attributeDefinition?->label ?? (string) optional($result->type)->name;
+        };
+
+        $failed = $requiredResults
+            ->filter(fn (TestResult $result) => $result->status === TestResult::STATUS_FAIL)
+            ->map($labelFor)
+            ->values();
+
+        $incomplete = $requiredResults
+            ->filter(fn (TestResult $result) => $result->status !== TestResult::STATUS_PASS && $result->status !== TestResult::STATUS_FAIL)
+            ->map($labelFor)
+            ->values();
+
+        return [
+            'run' => $latestRun,
+            'failed' => $failed,
+            'incomplete' => $incomplete,
+            'missing_run' => false,
+        ];
+    }
+
+    /**
      * Recalculate the "all tests passed" flag based on the latest run.
      */
     public function refreshTestCompletionFlag(): void
     {
         $latestRun = $this->tests()->with(['results.type'])->first();
 
-        $this->tests_completed_ok = $latestRun
-            ? $latestRun->results
-                ->filter(function (TestResult $result) {
-                    $isRequired = $result->type?->is_required ?? true;
-                    return $isRequired;
-                })
-                ->where('status', TestResult::STATUS_FAIL)
-                ->isEmpty()
-            : false;
+        if (!$latestRun) {
+            $this->tests_completed_ok = false;
+            $this->save();
+            return;
+        }
+
+        $required = $latestRun->results->filter(function (TestResult $result) {
+            return $result->type?->is_required ?? true;
+        });
+
+        $this->tests_completed_ok = $required->isEmpty()
+            ? true
+            : $required->every(fn (TestResult $result) => $result->status === TestResult::STATUS_PASS);
 
         $this->save();
     }

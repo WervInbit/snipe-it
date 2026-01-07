@@ -17,7 +17,14 @@
 
         @if (session('requires_ack_failed_tests'))
             <div class="alert alert-warning" role="alert" style="margin-bottom:10px;">
-                {{ __('This asset has not passed all tests. Submit again to confirm Ready for Sale.') }}
+                <p class="mb-2">{{ trans('tests.status_change_prompt') }}</p>
+                @if (session('test_issue_details'))
+                    <ul class="mb-0">
+                        @foreach ((array) session('test_issue_details') as $detail)
+                            <li>{{ $detail }}</li>
+                        @endforeach
+                    </ul>
+                @endif
             </div>
         @endif
 

@@ -13,6 +13,10 @@
 - Attribute version creation now replaces browser history so back returns to the attributes list after saving.
 - Enum options are now read-only on existing attributes; the version creation form shows editable option rows and saves those to the new version.
 - Mobile tests-active CTAs now left-align note/photo controls and keep the indicator to the right.
+- Scan UX now uses stronger QR decode hints, faster high-res fallback, shorter scan intervals, simplified focus constraints, and a success overlay before redirect.
+- Scan success clears the assets list search storage when it matches the scanned tag to avoid sticky filters.
+- Hardware tests tab now renders result photos under each test line item.
+- Asset detail now highlights latest test failures/incomplete runs, and Ready for Sale/Sold status changes require confirmation with the issue list.
 
 ### Outstanding
 - Tests not run in this environment; add deliverables, tests, and doc updates here as the session progresses.

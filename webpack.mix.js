@@ -149,4 +149,5 @@ mix
  ).version();
 
 mix.js('resources/js/scan/index.js', 'public/js/dist/scan.js').version();
+mix.js('resources/js/tests-active.js', 'public/js/dist/tests-active.js').version();
 

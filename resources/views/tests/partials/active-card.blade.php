@@ -13,6 +13,7 @@
          id="test-{{ $result['id'] }}"
          data-result-id="{{ $result['id'] }}"
          data-testid="test-item-{{ $result['slug'] }}"
+         data-test-label="{{ $result['label'] }}"
          data-current-status="{{ $status }}"
          data-initial-status="{{ $status }}"
          data-is-required="{{ $isRequired ? '1' : '0' }}"

@@ -1,5 +1,16 @@
 # Agent & Progress Log (2025)
 
+## 2025-12-30 - Session Kickoff
+> See PROGRESS.md (2025-12-30) and docs/agents/agents-addendum-2025-12-30-session-init.md.
+
+### Completed
+- Session initialized: reviewed handbook/fork notes and refreshed `docs/agents/*`; opened the 2025-12-30 stubs in PROGRESS.md and docs/agents to capture ongoing work.
+- Fixed attribute definition versioning validation to align with the DB unique index (key + version), removing the 500 error when cloning an attribute definition.
+
+### Outstanding
+- Tests not run in this environment; recheck the attribute definition version create flow after deploy.
+- Add deliverables, tests, and doc updates here as the session progresses.
+
 ## 2025-12-18 - Session Kickoff
 > See PROGRESS.md (2025-12-18) and docs/agents/agents-addendum-2025-12-18-session-init.md.
 

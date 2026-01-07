@@ -51,13 +51,13 @@ class AttributeTestSeeder extends Seeder
     {
         return [
             'battery' => [
-                'instructions' => 'Charge and discharge the battery to confirm capacity and charging behaviour.',
+                'instructions' => 'Laad de batterij op tot 100%, haal de lader er af, en draai de extreme test 10 minuten. Als de batterij boven 90% is slaagt de test. (Suggestie powercfg /batteryreport /output battery.html)',
             ],
             'bluetooth' => [
-                'instructions' => 'Pair with a Bluetooth peripheral and confirm successful data transfer.',
+                'instructions' => 'Pair een bluetooth apparaat.',
             ],
             'cpu' => [
-                'instructions' => 'Run a processor stress utility and monitor for throttling or errors.',
+                'instructions' => 'Draai Prime95 10 minuten op de mode Small FFTs, als er geen errors, crashes, het systeem responsief blijft slaagt de test.',
             ],
             'front_camera' => [
                 'instructions' => 'Maak een selfie en controleer autofocus, belichting en eventuele vlekken op de lens.',
@@ -66,25 +66,25 @@ class AttributeTestSeeder extends Seeder
                 'instructions' => 'Maak meerdere foto\'s met de hoofdcamera en controleer scherpstelling en flitser.',
             ],
             'display' => [
-                'instructions' => 'Inspect the display for brightness consistency, colour accuracy, and stuck pixels.',
+                'instructions' => 'Ga naar https://www.eizo.be/monitor-test/ en draai de test op full screen, zet op max brightness, met spatie haal je de tekst weg. navigeer door de tests heen en let op kleine witte vlekken, krassen, oneffenheden dit moeten er 0 zijn, maak anders een foto.',
             ],
             'ethernet' => [
-                'instructions' => 'Connect an ethernet cable and confirm the device obtains a network address.',
+                'instructions' => 'Verbind een ethernet kabel en zorg dat het internet nog werkt zonder wifi.',
             ],
             'face_unlock' => [
                 'instructions' => 'Enroll a face and confirm multiple unlock attempts succeed without error.',
             ],
             'hdmi' => [
-                'instructions' => 'Connect an external monitor via HDMI and confirm video (and audio where applicable).',
+                'instructions' => 'Verbind de hdmi kabel en test of beeld en geluid werkt.',
             ],
             'keyboard' => [
-                'instructions' => 'Press each key in sequence to ensure every key registers correctly.',
+                'instructions' => 'Ga naar https://keyboard-test.space/ en test elke toets, voer de test 2x uit, alle toetsen moeten soepel werken.',
             ],
             'microphone' => [
-                'instructions' => 'Record audio and confirm playback is clear and free of distortion.',
+                'instructions' => 'Neem wat woorden geluid op en speel deze terug.',
             ],
             'ram' => [
-                'instructions' => 'Run memory diagnostics to confirm no errors occur across the installed RAM.',
+                'instructions' => 'Draai y-cruncher stress test 5 minuten. 0 errors en geen abort',
             ],
             'sd_card_reader' => [
                 'instructions' => 'Insert an SD card and verify it mounts and transfers data successfully.',
@@ -93,7 +93,7 @@ class AttributeTestSeeder extends Seeder
                 'instructions' => 'Play audio through the internal speakers and listen for clarity and balance.',
             ],
             'storage' => [
-                'instructions' => 'Run drive health checks (SMART) and read/write tests on the installed storage.',
+                'instructions' => 'Crystaldisk info portable of smartctl alle SMART moet 100% groen zijn.',
             ],
             'touchpad' => [
                 'instructions' => 'Verify cursor movement, tap-to-click, scrolling, and gesture support.',
@@ -109,6 +109,9 @@ class AttributeTestSeeder extends Seeder
             ],
             'wifi' => [
                 'instructions' => 'Connect to the designated Wi-Fi network and confirm internet access.',
+            ],
+            'igpu' => [
+                'instructions' => 'Draai GPU-Z 10 minuten, geen artifacts, driver reset, crash.',
             ],
         ];
     }

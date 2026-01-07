@@ -126,6 +126,33 @@
             </div>
         @endif
 
+        @if (!empty($testSummary) && ($testSummary['missing_run'] || $testSummary['failed']->isNotEmpty() || $testSummary['incomplete']->isNotEmpty()))
+            <div class="col-md-12">
+                <div class="callout callout-warning">
+                    <p><strong>{{ trans('tests.latest_run_attention') }}</strong></p>
+                    <ul class="mb-0">
+                        @if ($testSummary['missing_run'])
+                            <li>{{ trans('tests.no_test_run_recorded') }}</li>
+                        @endif
+                        @if ($testSummary['failed']->isNotEmpty())
+                            <li>{{ trans('tests.failed_list', ['tests' => $testSummary['failed']->implode(', ')]) }}</li>
+                        @endif
+                        @if ($testSummary['incomplete']->isNotEmpty())
+                            <li>{{ trans('tests.incomplete_list', ['tests' => $testSummary['incomplete']->implode(', ')]) }}</li>
+                        @endif
+                    </ul>
+                    @if ($testSummary['run'])
+                        <small class="text-muted">
+                            {{ trans('tests.last_run_with_user', [
+                                'date' => optional($testSummary['run']->finished_at ?? $testSummary['run']->created_at)->format('Y-m-d H:i'),
+                                'user' => optional($testSummary['run']->user)->name ?? trans('general.unknown'),
+                            ]) }}
+                        </small>
+                    @endif
+                </div>
+            </div>
+        @endif
+
         <div class="col-md-12">
             <div class="nav-tabs-custom">
                 <ul class="nav nav-tabs hidden-print">
@@ -554,6 +581,37 @@
                                         </div>
                                     @endif
 
+
+                                    @if (!empty($testSummary))
+                                        @php
+                                            $testBadgeClass = 'label-default';
+                                            $testBadgeText = trans('tests.latest_run_missing_short');
+
+                                            if (!$testSummary['missing_run'] && $testSummary['failed']->isEmpty() && $testSummary['incomplete']->isEmpty()) {
+                                                $testBadgeClass = 'label-success';
+                                                $testBadgeText = trans('tests.latest_run_ok_short');
+                                            } elseif (!$testSummary['missing_run']) {
+                                                $testBadgeClass = 'label-warning';
+                                                $testBadgeText = trans('tests.latest_run_attention_short');
+                                            }
+                                        @endphp
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <strong>{{ trans('tests.latest_run_status') }}</strong>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <span class="label {{ $testBadgeClass }}">{{ $testBadgeText }}</span>
+                                                @if ($testSummary['run'])
+                                                    <small class="text-muted">
+                                                        {{ trans('tests.last_run_with_user', [
+                                                            'date' => optional($testSummary['run']->finished_at ?? $testSummary['run']->created_at)->format('Y-m-d H:i'),
+                                                            'user' => optional($testSummary['run']->user)->name ?? trans('general.unknown'),
+                                                        ]) }}
+                                                    </small>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endif
 
                                     @if ($asset->company)
                                         <div class="row">
@@ -1537,6 +1595,13 @@
                                                             $definition = $result->attributeDefinition;
                                                             $label = $definition?->label ?? optional($result->type)->name;
                                                             $instructions = trim((string) (optional($result->type)->instructions ?: ($definition?->instructions ?? $definition?->help_text)));
+                                                            $resultPhotos = $result->photos->map(function ($photo) {
+                                                                return ['url' => url($photo->path)];
+                                                            });
+
+                                                            if ($resultPhotos->isEmpty() && $result->photo_path) {
+                                                                $resultPhotos = collect([['url' => url($result->photo_path)]]);
+                                                            }
                                                         @endphp
                                                         <li>
                                                             {{ $label }}
@@ -1547,32 +1612,19 @@
                                                             @if ($result->note)
                                                                 <span class="text-muted">{{ $result->note }}</span>
                                                             @endif
+                                                            @if ($resultPhotos->isNotEmpty())
+                                                                <div class="test-photo-strip mt-1">
+                                                                    @foreach ($resultPhotos as $photo)
+                                                                        <img src="{{ $photo['url'] }}"
+                                                                             alt="{{ trans('tests.photo_thumbnail_alt') }}"
+                                                                             data-action="open-photo"
+                                                                             data-photo-url="{{ $photo['url'] }}">
+                                                                    @endforeach
+                                                                </div>
+                                                            @endif
                                                         </li>
                                                     @endforeach
                                                 </ul>
-                                                @php
-                                                    $photoItems = $run->results->flatMap(function ($result) {
-                                                        $items = $result->photos->map(function ($photo) {
-                                                            return ['url' => url($photo->path)];
-                                                        });
-
-                                                        if ($items->isEmpty() && $result->photo_path) {
-                                                            $items = collect([['url' => url($result->photo_path)]]);
-                                                        }
-
-                                                        return $items;
-                                                    });
-                                                @endphp
-                                                @if ($photoItems->isNotEmpty())
-                                                    <div class="test-photo-strip">
-                                                        @foreach ($photoItems as $photo)
-                                                            <img src="{{ $photo['url'] }}"
-                                                                 alt="{{ trans('tests.photo_thumbnail_alt') }}"
-                                                                 data-action="open-photo"
-                                                                 data-photo-url="{{ $photo['url'] }}">
-                                                        @endforeach
-                                                    </div>
-                                                @endif
                                                 <div class="mt-2">
                                                     @can('update', $run)
                                                         <a href="{{ route('test-results.edit', [$asset->id, $run->id]) }}" class="btn btn-default btn-sm">{{ trans('button.edit') }}</a>

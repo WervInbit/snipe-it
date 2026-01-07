@@ -43,6 +43,7 @@ class AssetsTransformer
             'requestable' => ($asset->requestable ? true : false),
             'is_sellable' => ($asset->is_sellable ? true : false),
             'tests_completed_ok' => ($asset->tests_completed_ok ? true : false),
+            'test_runs_count' => (int) ($asset->test_runs_count ?? 0),
             'model_number' => $asset->displayModelNumber() ? e($asset->displayModelNumber()) : null,
             'model_number_id' => $asset->model_number_id ? (int) $asset->model_number_id : null,
             'eol' => (($asset->asset_eol_date != '') && ($asset->purchase_date != '')) ? (int) Carbon::parse($asset->asset_eol_date)->diffInMonths($asset->purchase_date, true) . ' months' : null,

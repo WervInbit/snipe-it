@@ -202,7 +202,7 @@ class DemoAssetsSeeder extends Seeder
         $assets = [];
         $records = [
             [
-                'tag' => 'RF-001',
+                'tag' => 'DEMO-001',
                 'name' => 'HP ProBook 450 G8',
                 'model_key' => 'HP ProBook 450 G8',
                 'status' => 'Ready for Sale',
@@ -212,7 +212,7 @@ class DemoAssetsSeeder extends Seeder
                 'supplier' => $suppliers->first(),
             ],
             [
-                'tag' => 'RF-002',
+                'tag' => 'DEMO-002',
                 'name' => 'HP ProBook 430 G7',
                 'model_key' => 'HP ProBook 430 G7',
                 'status' => 'Being Processed',
@@ -222,7 +222,7 @@ class DemoAssetsSeeder extends Seeder
                 'supplier' => $suppliers->first(),
             ],
             [
-                'tag' => 'RF-003',
+                'tag' => 'DEMO-003',
                 'name' => 'Samsung Galaxy A5',
                 'model_key' => 'Samsung Galaxy A5',
                 'status' => 'Stand-by',
@@ -232,7 +232,7 @@ class DemoAssetsSeeder extends Seeder
                 'supplier' => $suppliers->get('Renewed Supply Co.') ?? $suppliers->first(),
             ],
             [
-                'tag' => 'RF-004',
+                'tag' => 'DEMO-004',
                 'name' => 'Pixel 8 Pro',
                 'model_key' => 'Pixel 8 Pro',
                 'status' => 'Ready for Sale',
@@ -294,32 +294,32 @@ class DemoAssetsSeeder extends Seeder
         $qaUser = User::where('username', 'qa_manager')->first();
 
         $fixtures = [
-            'RF-001' => [
-                'battery_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'Wear level at 7%; passes HP battery diagnostics.'],
-                'cpu_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'Intel Core i5 stress test completed without throttling.'],
-                'keyboard_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'All keys responsive after deep clean.'],
-                'ethernet_test' => ['status' => TestResult::STATUS_PASS, 'note' => '1 Gbps link negotiated via RJ-45 port.'],
-                'storage_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'NVMe SMART reports 99% health.'],
+            'DEMO-001' => [
+                'battery' => ['status' => TestResult::STATUS_PASS, 'note' => 'Wear level at 7%; passes HP battery diagnostics.'],
+                'cpu' => ['status' => TestResult::STATUS_PASS, 'note' => 'Intel Core i5 stress test completed without throttling.'],
+                'keyboard' => ['status' => TestResult::STATUS_PASS, 'note' => 'All keys responsive after deep clean.'],
+                'ethernet' => ['status' => TestResult::STATUS_PASS, 'note' => '1 Gbps link negotiated via RJ-45 port.'],
+                'storage' => ['status' => TestResult::STATUS_PASS, 'note' => 'NVMe SMART reports 99% health.'],
             ],
-            'RF-002' => [
-                'battery_test' => ['status' => TestResult::STATUS_FAIL, 'note' => 'Capacity at 72%; replacement pack queued.'],
-                'display_test' => ['status' => TestResult::STATUS_PASS, 'note' => '13" panel calibrated with no stuck pixels.'],
-                'keyboard_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'Keycaps replaced on worn home-row.'],
-                'wifi_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'Connected to refurb AP at 866 Mbps.'],
+            'DEMO-002' => [
+                'battery' => ['status' => TestResult::STATUS_FAIL, 'note' => 'Capacity at 72%; replacement pack queued.'],
+                'display' => ['status' => TestResult::STATUS_PASS, 'note' => '13" panel calibrated with no stuck pixels.'],
+                'keyboard' => ['status' => TestResult::STATUS_PASS, 'note' => 'Keycaps replaced on worn home-row.'],
+                'wifi' => ['status' => TestResult::STATUS_PASS, 'note' => 'Connected to refurb AP at 866 Mbps.'],
             ],
-            'RF-003' => [
-                'battery_test' => ['status' => TestResult::STATUS_NVT, 'note' => 'Awaiting post-replacement discharge cycle.'],
-                'display_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'Super AMOLED panel inspected for burn-in.'],
-                'front_camera_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'Selfie camera autofocus verified.'],
-                'rear_camera_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'Primary camera optics cleaned and tested.'],
-                'speaker_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'Stereo speakers balanced after diagnostics.'],
+            'DEMO-003' => [
+                'battery' => ['status' => TestResult::STATUS_NVT, 'note' => 'Awaiting post-replacement discharge cycle.'],
+                'display' => ['status' => TestResult::STATUS_PASS, 'note' => 'Super AMOLED panel inspected for burn-in.'],
+                'front_camera' => ['status' => TestResult::STATUS_PASS, 'note' => 'Selfie camera autofocus verified.'],
+                'rear_camera' => ['status' => TestResult::STATUS_PASS, 'note' => 'Primary camera optics cleaned and tested.'],
+                'speaker' => ['status' => TestResult::STATUS_PASS, 'note' => 'Stereo speakers balanced after diagnostics.'],
             ],
-            'RF-004' => [
-                'display_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'LTPO panel validated at 120Hz peak.'],
-                'battery_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'Full charge/discharge cycle completed successfully.'],
-                'front_camera_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'Selfie camera HDR sample reviewed.'],
-                'rear_camera_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'Triple-camera suite tested in QA harness.'],
-                'wifi_test' => ['status' => TestResult::STATUS_PASS, 'note' => 'Wi-Fi 6E connectivity verified in lab.'],
+            'DEMO-004' => [
+                'display' => ['status' => TestResult::STATUS_PASS, 'note' => 'LTPO panel validated at 120Hz peak.'],
+                'battery' => ['status' => TestResult::STATUS_PASS, 'note' => 'Full charge/discharge cycle completed successfully.'],
+                'front_camera' => ['status' => TestResult::STATUS_PASS, 'note' => 'Selfie camera HDR sample reviewed.'],
+                'rear_camera' => ['status' => TestResult::STATUS_PASS, 'note' => 'Triple-camera suite tested in QA harness.'],
+                'wifi' => ['status' => TestResult::STATUS_PASS, 'note' => 'Wi-Fi 6E connectivity verified in lab.'],
             ],
         ];
 
@@ -358,3 +358,4 @@ class DemoAssetsSeeder extends Seeder
         }
     }
 }
+

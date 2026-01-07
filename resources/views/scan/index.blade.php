@@ -15,6 +15,7 @@
     .scan-actions .btn {padding: 1rem 1rem; font-size: 1.1rem;}
     .scan-actions select {padding: 1rem; font-size: 1.05rem;}
     #manual-section {max-width: 520px; margin: 1rem auto 0;}
+    #scan-success {position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem; color: #fff; background: rgba(15, 23, 42, 0.85); font-weight: 600; font-size: 1rem;}
 </style>
 <div class="container py-4 scan-screen">
     <div class="mx-auto" style="max-width:720px;">
@@ -33,6 +34,9 @@
             <canvas id="scan-overlay" class="position-absolute top-0 start-0 w-100 h-100" aria-hidden="true"></canvas>
             <div id="scan-hint" class="position-absolute bottom-0 start-0 end-0 text-white bg-dark bg-opacity-50 py-2 px-3 small d-none" style="display:none;">
                 {{ trans('general.scan_hint_move_closer') }}
+            </div>
+            <div id="scan-success" class="d-none" role="status" aria-live="polite" style="display:none;">
+                {{ trans('general.loading') }}
             </div>
         </div>
 
