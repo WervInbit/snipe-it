@@ -151,6 +151,26 @@
         </div>
     </div>
 
-    @include('attributes.partials.options', ['definition' => $definition])
+@include('attributes.partials.options', ['definition' => $definition])
 @endsection
+
+@push('js')
+@if($isVersion)
+    <script nonce="{{ csrf_token() }}">
+        (function () {
+            var form = document.getElementById('create-form');
+            if (!form || !window.history || !window.history.replaceState) {
+                return;
+            }
+            form.addEventListener('submit', function () {
+                try {
+                    window.history.replaceState(null, '', '{{ route('attributes.index') }}');
+                } catch (error) {
+                    // Ignore history errors and allow submit.
+                }
+            });
+        })();
+    </script>
+@endif
+@endpush
 

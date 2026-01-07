@@ -146,6 +146,10 @@ class AttributeDefinitionsController extends Controller
     {
         $this->authorize('update', $attribute);
 
+        $attribute->load(['options' => function ($query) {
+            $query->orderBy('sort_order')->orderBy('label');
+        }]);
+
         $draft = $attribute->replicate([
             'id',
             'version',
@@ -175,7 +179,7 @@ class AttributeDefinitionsController extends Controller
         $newVersion = DB::transaction(function () use ($attribute, $payload, $request) {
             $clone = $attribute->createNewVersion($payload);
             $clone->categories()->sync($request->input('category_ids', $attribute->categories->pluck('id')->all()));
-            $this->applyPendingOptions($clone, $request->input('options', []));
+            $this->replaceOptions($clone, $request->input('options', []));
 
             return $clone;
         });
@@ -235,7 +239,7 @@ class AttributeDefinitionsController extends Controller
         ], fn ($value) => $value !== null && $value !== '');
     }
 
-    private function applyPendingOptions(AttributeDefinition $attribute, array $options): void
+    private function applyPendingOptions(AttributeDefinition $attribute, array $options, bool $allowRestore = true): void
     {
         if (!$attribute->isEnum()) {
             return;
@@ -267,28 +271,41 @@ class AttributeDefinitionsController extends Controller
                 $currentSort = max($currentSort, $sortOrder);
             }
 
-            /** @var AttributeOption|null $existing */
-            $existing = AttributeOption::withTrashed()
-                ->where('attribute_definition_id', $attribute->id)
-                ->where('value', $value)
-                ->first();
-
             $payload = [
                 'label' => $label,
                 'sort_order' => $sortOrder,
-                'active' => true,
+                'active' => array_key_exists('active', $option) ? (bool) $option['active'] : true,
             ];
 
-            if ($existing) {
-                $existing->fill($payload);
-                $existing->restore();
-                $existing->save();
-            } else {
-                $attribute->options()->create(array_merge([
-                    'value' => $value,
-                ], $payload));
+            if ($allowRestore) {
+                /** @var AttributeOption|null $existing */
+                $existing = AttributeOption::withTrashed()
+                    ->where('attribute_definition_id', $attribute->id)
+                    ->where('value', $value)
+                    ->first();
+
+                if ($existing) {
+                    $existing->fill($payload);
+                    $existing->restore();
+                    $existing->save();
+                    continue;
+                }
             }
+
+            $attribute->options()->create(array_merge([
+                'value' => $value,
+            ], $payload));
         }
+    }
+
+    private function replaceOptions(AttributeDefinition $attribute, array $options): void
+    {
+        if (!$attribute->isEnum()) {
+            return;
+        }
+
+        $attribute->options()->forceDelete();
+        $this->applyPendingOptions($attribute, $options, false);
     }
 }
 

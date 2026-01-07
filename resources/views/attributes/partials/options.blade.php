@@ -1,8 +1,24 @@
 @php
     use App\Models\AttributeDefinition;
 
+    $versionSource = $versionSource ?? null;
+    $isVersion = (bool) $versionSource;
+
     $existingOptions = $definition->relationLoaded('options') ? $definition->options : $definition->options;
-    $pendingOptions = collect(old('options.new', []))
+    $versionOptions = $isVersion
+        ? ($versionSource->relationLoaded('options') ? $versionSource->options : $versionSource->options)
+        : collect();
+
+    $pendingOptions = collect(old('options.new', []));
+    if ($isVersion && $pendingOptions->isEmpty()) {
+        $pendingOptions = $versionOptions->map(fn ($option) => [
+            'value' => $option->value,
+            'label' => $option->label,
+            'sort_order' => $option->sort_order,
+            'active' => $option->active ? 1 : 0,
+        ]);
+    }
+    $pendingOptions = $pendingOptions
         ->filter(fn ($option) => is_array($option) && ($option['value'] ?? '') !== '' && ($option['label'] ?? '') !== '');
 
     $hasExisting = $existingOptions->count() > 0;
@@ -40,7 +56,11 @@
                 @endforeach
             </div>
         @endif
-        <p class="help-block">{{ __('Define the selectable values. They are saved with the attribute when you click Save.') }}</p>
+        @if($isVersion)
+            <p class="help-block">{{ __('Define the selectable values for this version. They are saved with the new version when you click Save.') }}</p>
+        @else
+            <p class="help-block">{{ __('Options are versioned. Create a new version to add, remove, or edit enum values.') }}</p>
+        @endif
 
         <table class="table table-condensed">
             <thead>
@@ -48,86 +68,99 @@
                 <th>{{ __('Value') }}</th>
                 <th>{{ __('Label') }}</th>
                 <th>{{ __('Sort') }}</th>
-                <th class="text-right">{{ __('Actions') }}</th>
+                @if($isVersion)
+                    <th>{{ __('Active') }}</th>
+                    <th class="text-right">{{ __('Actions') }}</th>
+                @else
+                    <th>{{ __('Status') }}</th>
+                @endif
             </tr>
             </thead>
             <tbody data-option-rows>
-            @foreach($existingOptions as $option)
-                <tr data-existing-option>
-                    <td>{{ $option->value }}</td>
-                    <td>
-                        {{ $option->label }}
-                        @unless($option->active)
-                            <span class="label label-default">{{ __('Inactive') }}</span>
-                        @endunless
-                    </td>
-                    <td>{{ $option->sort_order }}</td>
-                    <td class="text-right">
-                        @if($definition->exists)
-                            <form method="POST" action="{{ route('attributes.options.destroy', [$definition, $option]) }}" style="display:inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-xs btn-danger" onclick="return confirm('{{ __('Delete this option?') }}');">
-                                    {{ __('Delete') }}
-                                </button>
-                            </form>
-                        @endif
-                    </td>
-                </tr>
-            @endforeach
-
-            @foreach($pendingOptions as $index => $option)
-                @php
-                    $value = $option['value'] ?? '';
-                    $label = $option['label'] ?? '';
-                    $sort = $option['sort_order'] ?? $nextSort;
-                @endphp
-                <tr data-pending-row>
-                    <td>
-                        {{ $value }}
-                        <input type="hidden" name="options[new][{{ $index }}][value]" value="{{ e($value) }}">
-                    </td>
-                    <td>
-                        {{ $label }}
-                        <input type="hidden" name="options[new][{{ $index }}][label]" value="{{ e($label) }}">
-                    </td>
-                    <td>
-                        {{ $sort }}
-                        <input type="hidden" name="options[new][{{ $index }}][sort_order]" value="{{ e($sort) }}">
-                    </td>
-                    <td class="text-right">
-                        <button type="button" class="btn btn-xs btn-link text-danger" data-option-remove>&times;</button>
-                    </td>
-                </tr>
-            @endforeach
+            @if($isVersion)
+                @foreach($pendingOptions as $index => $option)
+                    @php
+                        $value = $option['value'] ?? '';
+                        $label = $option['label'] ?? '';
+                        $sort = $option['sort_order'] ?? $nextSort;
+                        $active = array_key_exists('active', $option) ? (bool) $option['active'] : true;
+                    @endphp
+                    <tr data-pending-row>
+                        <td>
+                            <input type="text" name="options[new][{{ $index }}][value]" value="{{ e($value) }}" class="form-control input-sm" required>
+                        </td>
+                        <td>
+                            <input type="text" name="options[new][{{ $index }}][label]" value="{{ e($label) }}" class="form-control input-sm" required>
+                        </td>
+                        <td>
+                            <input type="number" name="options[new][{{ $index }}][sort_order]" value="{{ e($sort) }}" class="form-control input-sm" min="0">
+                        </td>
+                        <td>
+                            <label class="checkbox-inline" style="margin:0;">
+                                <input type="hidden" name="options[new][{{ $index }}][active]" value="0">
+                                <input type="checkbox" name="options[new][{{ $index }}][active]" value="1" {{ $active ? 'checked' : '' }}>
+                            </label>
+                        </td>
+                        <td class="text-right">
+                            <button type="button" class="btn btn-xs btn-link text-danger" data-option-remove>&times;</button>
+                        </td>
+                    </tr>
+                @endforeach
+            @else
+                @foreach($existingOptions as $option)
+                    <tr data-existing-option>
+                        <td>{{ $option->value }}</td>
+                        <td>{{ $option->label }}</td>
+                        <td>{{ $option->sort_order }}</td>
+                        <td>
+                            @if($option->active)
+                                <span class="label label-success">{{ __('Active') }}</span>
+                            @else
+                                <span class="label label-default">{{ __('Inactive') }}</span>
+                            @endif
+                        </td>
+                    </tr>
+                @endforeach
+            @endif
 
             @if(!$hasExisting && !$hasPending)
                 <tr data-empty-row>
-                    <td colspan="4" class="text-muted">{{ __('No options yet.') }}</td>
+                    <td colspan="{{ $isVersion ? 5 : 4 }}" class="text-muted">{{ __('No options yet.') }}</td>
                 </tr>
             @endif
             </tbody>
         </table>
 
-        <div class="panel panel-default" data-option-entry>
-            <div class="panel-body">
-                <div class="row">
-                    <div class="col-sm-4 form-group">
-                        <label for="new_option_value" class="control-label">{{ __('Value') }}</label>
-                        <input type="text" id="new_option_value" class="form-control">
+        @if($isVersion)
+            <div class="panel panel-default" data-option-entry>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-3 form-group">
+                            <label for="new_option_value" class="control-label">{{ __('Value') }}</label>
+                            <input type="text" id="new_option_value" class="form-control">
+                        </div>
+                        <div class="col-sm-3 form-group">
+                            <label for="new_option_label" class="control-label">{{ __('Label') }}</label>
+                            <input type="text" id="new_option_label" class="form-control">
+                        </div>
+                        <div class="col-sm-3 form-group">
+                            <label for="new_option_sort" class="control-label">{{ __('Sort order') }}</label>
+                            <input type="number" id="new_option_sort" class="form-control" min="0" value="{{ $nextSort }}">
+                        </div>
+                        <div class="col-sm-3 form-group">
+                            <label class="control-label">{{ __('Active') }}</label>
+                            <div>
+                                <label class="checkbox-inline" style="margin:0;">
+                                    <input type="checkbox" id="new_option_active" checked>
+                                    {{ __('Active') }}
+                                </label>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-sm-4 form-group">
-                        <label for="new_option_label" class="control-label">{{ __('Label') }}</label>
-                        <input type="text" id="new_option_label" class="form-control">
-                    </div>
-                    <div class="col-sm-4 form-group">
-                        <label for="new_option_sort" class="control-label">{{ __('Sort order') }}</label>
-                        <input type="number" id="new_option_sort" class="form-control" min="0" value="{{ $nextSort }}">
-                    </div>
+                    <button type="button" class="btn btn-sm btn-primary" data-option-add>{{ __('Add to list') }}</button>
                 </div>
-                <button type="button" class="btn btn-sm btn-primary" data-option-add>{{ __('Add to list') }}</button>
             </div>
-        </div>
+        @endif
     </div>
 </div>
 
@@ -196,6 +229,7 @@
                     var valueField = wrapper.querySelector('#new_option_value');
                     var labelField = wrapper.querySelector('#new_option_label');
                     var sortField = wrapper.querySelector('#new_option_sort');
+                    var activeField = wrapper.querySelector('#new_option_active');
                     var tbody = wrapper.querySelector('[data-option-rows]');
 
                     if (!valueField.value.trim()) {
@@ -211,6 +245,7 @@
                     var value = valueField.value.trim();
                     var label = labelField.value.trim();
                     var sort = sortField.value.trim();
+                    var active = activeField ? activeField.checked : true;
 
                     if (sort === '') {
                         sort = wrapper.dataset.nextSort || '0';
@@ -229,9 +264,13 @@
                     var row = document.createElement('tr');
                     row.setAttribute('data-pending-row', '');
                     row.innerHTML =
-                        '<td>' + escapeHtml(value) + '<input type="hidden" name="options[new][' + index + '][value]" value="' + escapeHtml(value) + '"></td>' +
-                        '<td>' + escapeHtml(label) + '<input type="hidden" name="options[new][' + index + '][label]" value="' + escapeHtml(label) + '"></td>' +
-                        '<td>' + escapeHtml(sort) + '<input type="hidden" name="options[new][' + index + '][sort_order]" value="' + escapeHtml(sort) + '"></td>' +
+                        '<td><input type="text" name="options[new][' + index + '][value]" value="' + escapeHtml(value) + '" class="form-control input-sm" required></td>' +
+                        '<td><input type="text" name="options[new][' + index + '][label]" value="' + escapeHtml(label) + '" class="form-control input-sm" required></td>' +
+                        '<td><input type="number" name="options[new][' + index + '][sort_order]" value="' + escapeHtml(sort) + '" class="form-control input-sm" min="0"></td>' +
+                        '<td><label class="checkbox-inline" style="margin:0;">' +
+                            '<input type="hidden" name="options[new][' + index + '][active]" value="0">' +
+                            '<input type="checkbox" name="options[new][' + index + '][active]" value="1"' + (active ? ' checked' : '') + '>' +
+                        '</label></td>' +
                         '<td class="text-right"><button type="button" class="btn btn-xs btn-link text-danger" data-option-remove>&times;</button></td>';
 
                     tbody.appendChild(row);
@@ -239,6 +278,9 @@
                     valueField.value = '';
                     labelField.value = '';
                     sortField.value = wrapper.dataset.nextSort;
+                    if (activeField) {
+                        activeField.checked = true;
+                    }
                     valueField.focus();
                 });
 

@@ -334,6 +334,20 @@
             border-bottom: 1px solid var(--testing-border);
         }
 
+        .testing-card__cta {
+            justify-content: flex-start;
+            justify-items: start;
+            text-align: left;
+        }
+
+        .testing-card__cta-content {
+            justify-content: flex-start;
+        }
+
+        .testing-card__cta-indicator {
+            justify-self: end;
+        }
+
         .testing-grid {
             grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: var(--testing-space-md);

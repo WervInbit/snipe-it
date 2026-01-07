@@ -11,6 +11,9 @@
 - Removed the temporary Images tab legacy path normalization so it only reflects the current storage layout.
 - Removed orphaned asset image row(s) for asset 5 where the file was missing from the public disk.
 - Reminder: refresh storage/cache permissions after front-end updates to avoid view cache write errors (e.g., `storage/framework/views` permission denied).
+- Updated attribute version creation to replace history so browser back returns to the attributes list after saving.
+- Enum options are now read-only on existing attributes; the version creation form shows editable option rows and saves those to the new version.
+- Adjusted mobile tests-active CTAs so note/photo controls align left and the indicator stays right.
 
 ## Follow-ups
 - Tests not run in this environment; expand this log with updates, tests, and documentation touchpoints as the session progresses.

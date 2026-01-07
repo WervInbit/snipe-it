@@ -36,6 +36,12 @@ class AttributeDefinitionVersionRequest extends Request
             'constraints.regex' => ['nullable', 'string', 'max:255'],
             'category_ids' => ['nullable', 'array'],
             'category_ids.*' => ['integer', 'exists:categories,id'],
+            'options' => ['nullable', 'array'],
+            'options.new' => ['nullable', 'array'],
+            'options.new.*.value' => ['required', 'string', 'max:255'],
+            'options.new.*.label' => ['required', 'string', 'max:255'],
+            'options.new.*.sort_order' => ['nullable', 'integer', 'min:0', 'max:65535'],
+            'options.new.*.active' => ['nullable', 'boolean'],
         ];
     }
 }

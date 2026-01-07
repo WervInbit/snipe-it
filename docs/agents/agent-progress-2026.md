@@ -10,6 +10,9 @@
 - Images tab now reflects only the current storage layout (legacy path normalization removed).
 - Orphaned asset image row(s) for asset 5 removed when the file was missing from the public disk.
 - Follow-up: ensure storage/framework view cache permissions are refreshed after front-end updates to avoid “permission denied” on cached Blade views.
+- Attribute version creation now replaces browser history so back returns to the attributes list after saving.
+- Enum options are now read-only on existing attributes; the version creation form shows editable option rows and saves those to the new version.
+- Mobile tests-active CTAs now left-align note/photo controls and keep the indicator to the right.
 
 ### Outstanding
 - Tests not run in this environment; add deliverables, tests, and doc updates here as the session progresses.

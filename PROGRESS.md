@@ -8,6 +8,9 @@
 - Removed the temporary legacy path normalization for asset images so the Images tab reflects the current storage layout only.
 - Cleaned up orphaned asset image row(s) for asset 5 where the file was missing from the public disk.
 - Follow-up: after front-end changes, ensure storage/cache permissions are refreshed to avoid view cache write errors (e.g., `storage/framework/views` permission denied).
+- Adjusted attribute version create flow so the browser back button returns to the attributes list after saving a new version.
+- Enum options are now read-only on existing attributes; the new-version flow surfaces editable option rows (including active state) and saves them onto the new version.
+- Tweaked mobile tests active CTAs to left-align the note/photo controls and keep the indicator on the right edge.
 - Tests not run yet in this environment.
 
 # Session Progress (2025-12-30)
