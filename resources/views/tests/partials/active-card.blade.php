@@ -139,7 +139,7 @@
                         <label class="btn btn-outline-secondary btn-sm mb-0">
                             <i class="fas fa-camera me-1" aria-hidden="true"></i>{{ trans('tests.add_photo_cta') }}
                             <input type="file"
-                                   class="d-none"
+                                   class="testing-photo-input d-none"
                                    accept="image/*"
                                    data-action="upload-photo"
                                    multiple>

@@ -246,6 +246,10 @@
     .testing-card__cta-label {
         font-weight: 600;
     }
+
+    .testing-photo-input {
+        display: none !important;
+    }
     .testing-drawer {
         border-top: 1px solid var(--testing-border);
         background: rgba(248, 250, 252, 0.9);
@@ -335,8 +339,10 @@
         }
 
         .testing-card__cta {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
             justify-content: flex-start;
-            justify-items: start;
             text-align: left;
         }
 
@@ -345,7 +351,7 @@
         }
 
         .testing-card__cta-indicator {
-            justify-self: end;
+            margin-left: auto;
         }
 
         .testing-grid {

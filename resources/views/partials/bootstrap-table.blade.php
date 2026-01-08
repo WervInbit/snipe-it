@@ -845,30 +845,174 @@
         }
     }
 
+    var latestTestsLabels = {
+        allPassed: '{{ trans('tests.all_passed') }}',
+        failed: '{{ trans('tests.complete_confirm_failed') }}',
+        missing: '{{ trans('tests.complete_confirm_incomplete') }}',
+        loading: '{{ trans('general.loading') }}',
+        loadError: '{{ trans('general.something_went_wrong') }}',
+        noRun: '{{ trans('tests.no_test_run_recorded') }}',
+        note: '{{ trans('tests.note_cta') }}',
+        photo: '{{ trans('tests.photo_cta') }}'
+    };
+
+    var latestTestsSummaryBaseUrl = '/api/v1/hardware/';
+    var latestTestsSummaryCache = {};
+    var latestTestsSummaryRequests = {};
+
+    function escapeHtml(value) {
+        if (value === null || value === undefined) {
+            return '';
+        }
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function buildLatestTestsTooltip(summary) {
+        if (!summary) {
+            return latestTestsLabels.loadError;
+        }
+
+        var html = '';
+        var hasFailed = summary.failed && summary.failed.length;
+        var hasMissing = summary.missing && summary.missing.length;
+        if (summary.failed && summary.failed.length) {
+            summary.failed.forEach(function (item) {
+                var line = '<div style="margin-bottom:4px;"><span class="label label-danger">' + escapeHtml(latestTestsLabels.failed) + '</span> ' + escapeHtml(item.label || '');
+                if (item.photo_count && item.photo_count > 0) {
+                    line += ' <span class="label label-default">' + escapeHtml(latestTestsLabels.photo) + ' ' + item.photo_count + '</span>';
+                }
+                if (item.note_excerpt) {
+                    line += ' <span class="text-muted small">' + escapeHtml(latestTestsLabels.note) + ': ' + escapeHtml(item.note_excerpt) + '</span>';
+                }
+                line += '</div>';
+                html += line;
+            });
+        }
+
+        if (summary.missing && summary.missing.length) {
+            if (hasFailed) {
+                html += '<div style="margin-top:6px;"></div>';
+            }
+            summary.missing.forEach(function (item) {
+                html += '<div style="margin-bottom:4px;"><span class="label label-warning">' + escapeHtml(latestTestsLabels.missing) + '</span> ' + escapeHtml(item.label || '') + '</div>';
+            });
+        }
+
+        if (html === '') {
+            html = escapeHtml(latestTestsLabels.allPassed);
+        }
+
+        return html;
+    }
+
+    function requestLatestTestsSummary(assetId, callback) {
+        if (latestTestsSummaryCache[assetId]) {
+            callback(latestTestsSummaryCache[assetId], false);
+            return;
+        }
+        if (latestTestsSummaryRequests[assetId]) {
+            latestTestsSummaryRequests[assetId].push(callback);
+            return;
+        }
+
+        latestTestsSummaryRequests[assetId] = [callback];
+        $.ajax({
+            url: latestTestsSummaryBaseUrl + assetId + '/latest-test-summary',
+            dataType: 'json',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        })
+            .done(function (data) {
+                latestTestsSummaryCache[assetId] = data;
+                latestTestsSummaryRequests[assetId].forEach(function (cb) {
+                    cb(data, false);
+                });
+            })
+            .fail(function () {
+                latestTestsSummaryRequests[assetId].forEach(function (cb) {
+                    cb(null, true);
+                });
+            })
+            .always(function () {
+                delete latestTestsSummaryRequests[assetId];
+            });
+    }
+
     function testsHealthFormatter(value, row) {
         if (!row) {
             return '';
         }
 
-        var ok = (value === true || value === 'true' || value === 1 || value === '1');
-        var runs = parseInt(row.test_runs_count || 0, 10);
-        var hasRuns = !isNaN(runs) && runs > 0;
+        var total = parseInt(row.latest_tests_total || 0, 10);
+        var completed = parseInt(row.latest_tests_completed || 0, 10);
+        var failed = parseInt(row.latest_tests_failed || 0, 10);
         var labelClass = 'label-default';
-        var labelText = '{{ trans('tests.latest_run_missing_short') }}';
-        var tooltip = '{{ trans('tests.no_test_run_recorded') }}';
+        var tooltip = latestTestsLabels.noRun;
 
-        if (ok) {
-            labelClass = 'label-success';
-            labelText = '{{ trans('tests.latest_run_ok_short') }}';
-            tooltip = '{{ trans('tests.all_passed') }}';
-        } else if (hasRuns) {
-            labelClass = 'label-warning';
-            labelText = '{{ trans('tests.latest_run_attention_short') }}';
-            tooltip = '{{ trans('tests.latest_run_attention') }}';
+        if (total > 0) {
+            if (failed > 0 || completed < total) {
+                labelClass = 'label-warning';
+            } else {
+                labelClass = 'label-success';
+            }
+            tooltip = latestTestsLabels.loading;
         }
 
-        return '<span class="label ' + labelClass + '" data-tooltip="true" title="' + tooltip + '">' + labelText + '</span>';
+        var ratio = completed + '/' + total;
+
+        return '<span class="label ' + labelClass + ' js-latest-tests" data-asset-id="' + row.id + '" data-tests-total="' + total + '" data-tooltip="true" data-html="true" title="' + escapeHtml(tooltip) + '">' + ratio + '</span>';
     }
+
+    $(document).on('mouseenter', '.js-latest-tests', function () {
+        var $el = $(this);
+        var assetId = $el.data('asset-id');
+        var total = parseInt($el.data('tests-total') || 0, 10);
+
+        if (!assetId || total === 0) {
+            return;
+        }
+
+        if ($el.data('tests-loaded')) {
+            return;
+        }
+
+        requestLatestTestsSummary(assetId, function (summary, failed) {
+            var tooltip = failed ? latestTestsLabels.loadError : buildLatestTestsTooltip(summary);
+            $el.attr('data-original-title', tooltip).tooltip('fixTitle');
+            $el.data('tests-loaded', !failed);
+            if ($el.is(':hover')) {
+                $el.tooltip('show');
+            }
+        });
+    });
+
+    $(document).on('click', '.js-latest-tests', function () {
+        var $el = $(this);
+        var assetId = $el.data('asset-id');
+        var total = parseInt($el.data('tests-total') || 0, 10);
+
+        if (!assetId || total === 0) {
+            return;
+        }
+
+        if ($el.data('tests-loaded')) {
+            $el.tooltip('show');
+            return;
+        }
+
+        requestLatestTestsSummary(assetId, function (summary, failed) {
+            var tooltip = failed ? latestTestsLabels.loadError : buildLatestTestsTooltip(summary);
+            $el.attr('data-original-title', tooltip).tooltip('fixTitle');
+            $el.data('tests-loaded', !failed);
+            $el.tooltip('show');
+        });
+    });
 
     function dateDisplayFormatter(value) {
         if (value) {

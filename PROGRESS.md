@@ -1,3 +1,17 @@
+# Session Progress (2026-01-08)
+
+## Addendum (2026-01-08 Codex)
+- Kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md` to align with current workflow before starting work.
+- Drafted a detailed implementation plan for the Latest Tests column counts + lazy hover detail and linked it from `AGENTS.md`.
+- Updated the plan to compute counts on read and to show photo markers plus truncated note excerpts in hover details.
+- Implemented compute-on-read Latest Tests counts in the assets API, added a latest-test-summary endpoint, and updated the list UI to show ratios with lazy hover details (including note excerpts and photo markers).
+- Tests not run in this environment.
+- Fixed MariaDB incompatibility in the assets list query by switching latest-run subqueries from IN + LIMIT to scalar subqueries.
+- Added CSRF headers to the hover summary request so the API auth guard accepts the lazy-load calls.
+- Pointed the hover summary request to a relative `/api/v1/hardware/` base so APP_URL mismatches do not break hover calls.
+- Updated the Latest Tests hover tooltip to use per-item fail/open badges with inline note excerpts and photo markers for better readability.
+- Adjusted tests-active mobile layout: hide native file inputs and keep CTA indicators right-aligned on small screens.
+
 # Session Progress (2026-01-07)
 
 ## Addendum (2026-01-07 Codex)

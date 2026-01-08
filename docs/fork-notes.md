@@ -51,4 +51,7 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 - Asset list tables show a new Tests column reflecting latest run health, backed by test run counts in asset list APIs.
 - Status changes to Ready for Sale/Sold require confirmation when tests are missing or failed, and the tests active page now prompts before finishing with open failures.
 
+### 2026-01-08
+- Latest Tests list column now shows completed/total counts, with lazy hover details for failed/missing tests including note excerpts and photo markers.
+
 

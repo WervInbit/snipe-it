@@ -500,6 +500,12 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         )->name('api.assets.show.byserial')
         ->where('any', '.*');
 
+        Route::get('{asset}/latest-test-summary',
+            [
+                Api\AssetsController::class,
+                'latestTestSummary'
+            ]
+        )->name('api.assets.latest-test-summary');
 
 
 

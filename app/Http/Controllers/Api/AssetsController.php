@@ -25,6 +25,8 @@ use App\Models\CustomField;
 use App\Models\License;
 use App\Models\Location;
 use App\Models\Setting;
+use App\Models\TestResult;
+use App\Models\TestRun;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -34,6 +36,7 @@ use Illuminate\Support\Facades\Route;
 use App\View\Label;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 
 /**
@@ -149,6 +152,27 @@ class AssetsController extends Controller
                 'supplier'
             )
             ->withCount(['tests as test_runs_count']); // it might be tempting to add 'assetlog' here, but don't. It blows up update-heavy users.
+
+        $latestRunIdSub = TestRun::query()
+            ->select('id')
+            ->whereColumn('asset_id', 'assets.id')
+            ->orderByRaw('COALESCE(finished_at, created_at) DESC')
+            ->limit(1);
+
+        $assets->addSelect([
+            'latest_test_run_id' => $latestRunIdSub,
+            'latest_tests_total' => TestResult::query()
+                ->selectRaw('count(*)')
+                ->where('test_run_id', clone $latestRunIdSub),
+            'latest_tests_completed' => TestResult::query()
+                ->selectRaw('count(*)')
+                ->where('test_run_id', clone $latestRunIdSub)
+                ->where('status', '!=', TestResult::STATUS_NVT),
+            'latest_tests_failed' => TestResult::query()
+                ->selectRaw('count(*)')
+                ->where('test_run_id', clone $latestRunIdSub)
+                ->where('status', TestResult::STATUS_FAIL),
+        ]);
 
 
         if ($filter_non_deprecable_assets) {
@@ -458,6 +482,87 @@ class AssetsController extends Controller
         }
 
         return (new $transformer)->transformAssets($assets, $total, $request);
+    }
+
+    public function latestTestSummary(Asset $asset): JsonResponse
+    {
+        $this->authorize('view', $asset);
+
+        $run = $asset->tests()
+            ->select('id', 'asset_id', 'created_at', 'finished_at')
+            ->with(['results' => function ($query) {
+                $query->select('id', 'test_run_id', 'test_type_id', 'attribute_definition_id', 'status', 'note', 'photo_path')
+                    ->withCount('photos')
+                    ->with(['type:id,name', 'attributeDefinition:id,label'])
+                    ->orderBy('id');
+            }])
+            ->first();
+
+        if (!$run) {
+            return response()->json([
+                'run_id' => null,
+                'total' => 0,
+                'completed' => 0,
+                'failed_count' => 0,
+                'missing_count' => 0,
+                'failed' => [],
+                'missing' => [],
+            ]);
+        }
+
+        $results = $run->results;
+        $total = $results->count();
+        $completed = $results->where('status', '!=', TestResult::STATUS_NVT)->count();
+
+        $labelFor = function (TestResult $result): string {
+            return $result->attributeDefinition?->label
+                ?? $result->type?->name
+                ?? trans('general.unknown');
+        };
+
+        $excerptFor = function (?string $note): ?string {
+            if (!$note) {
+                return null;
+            }
+            $clean = trim(preg_replace('/\\s+/', ' ', strip_tags($note)));
+            if ($clean === '') {
+                return null;
+            }
+            return Str::limit($clean, 120, '...');
+        };
+
+        $failed = $results->where('status', TestResult::STATUS_FAIL);
+        $missing = $results->where('status', TestResult::STATUS_NVT);
+
+        $failedPayload = $failed->map(function (TestResult $result) use ($labelFor, $excerptFor) {
+            $photoCount = (int) ($result->photos_count ?? 0);
+            if ($photoCount === 0 && $result->photo_path) {
+                $photoCount = 1;
+            }
+
+            return [
+                'label' => $labelFor($result),
+                'note_present' => $result->note !== null && $result->note !== '',
+                'note_excerpt' => $excerptFor($result->note),
+                'photo_count' => $photoCount,
+            ];
+        })->values();
+
+        $missingPayload = $missing->map(function (TestResult $result) use ($labelFor) {
+            return [
+                'label' => $labelFor($result),
+            ];
+        })->values();
+
+        return response()->json([
+            'run_id' => (int) $run->id,
+            'total' => $total,
+            'completed' => $completed,
+            'failed_count' => $failedPayload->count(),
+            'missing_count' => $missingPayload->count(),
+            'failed' => $failedPayload,
+            'missing' => $missingPayload,
+        ]);
     }
 
 
