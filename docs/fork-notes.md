@@ -53,6 +53,6 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ### 2026-01-08
 - Latest Tests list column now shows completed/total counts, with lazy hover details for failed/missing tests including note excerpts and photo markers.
-- Asset creation now allows custom asset tags, while serial entry warns on duplicates and can be overridden with an explicit allow-duplicate toggle (asset tags remain unique).
+- Asset creation now allows custom asset tags (unlocking the auto-generated tag on create), while serial entry warns on duplicates and can be overridden with an explicit allow-duplicate toggle (asset tags remain unique).
 
 
