@@ -148,6 +148,8 @@ class Asset extends Depreciable
         'tests_completed_ok' => ['nullable', 'boolean']
     ];
 
+    protected bool $allowDuplicateSerial = false;
+
 
     /**
      * The attributes that are mass assignable.
@@ -188,6 +190,33 @@ class Asset extends Depreciable
         'last_checkin',
         'last_checkout',
     ];
+
+    public function allowDuplicateSerial(bool $allow = true): self
+    {
+        $this->allowDuplicateSerial = $allow;
+
+        return $this;
+    }
+
+    public function getRules(): array
+    {
+        $rules = $this->rules;
+
+        if ($this->allowDuplicateSerial && isset($rules['serial'])) {
+            $rules['serial'] = $this->stripSerialUniqueness($rules['serial']);
+        }
+
+        return $rules;
+    }
+
+    private function stripSerialUniqueness(array|string $rules): array
+    {
+        $rulesArray = is_array($rules) ? $rules : explode('|', $rules);
+
+        return array_values(array_filter($rulesArray, function ($rule) {
+            return !str_starts_with((string) $rule, 'unique_undeleted:assets,serial');
+        }));
+    }
 
     use Searchable;
 

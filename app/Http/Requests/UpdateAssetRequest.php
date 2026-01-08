@@ -60,6 +60,10 @@ class UpdateAssetRequest extends ImageUploadRequest
             $rules['purchase_cost'] = ['nullable', 'string'];
         }
 
+        if ($this->shouldAllowDuplicateSerial()) {
+            $rules['serial'] = $this->stripSerialUniqueness($rules['serial'] ?? []);
+        }
+
         $modelId = $this->input('model_id') ?: ($this->asset?->model_id);
         $model = $modelId ? AssetModel::find((int) $modelId) : null;
         $activeModelNumbers = $model
@@ -96,6 +100,31 @@ class UpdateAssetRequest extends ImageUploadRequest
         $rules['status_change_note'] = ['nullable', 'string', 'max:65535'];
 
         return $rules;
+    }
+
+    private function shouldAllowDuplicateSerial(): bool
+    {
+        if ($this->boolean('allow_duplicate_serial')) {
+            return true;
+        }
+
+        $flags = (array) $this->input('allow_duplicate_serials', []);
+        foreach ($flags as $flag) {
+            if (filter_var($flag, FILTER_VALIDATE_BOOLEAN)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function stripSerialUniqueness(array|string $rules): array
+    {
+        $rulesArray = is_array($rules) ? $rules : explode('|', $rules);
+
+        return array_values(array_filter($rulesArray, function ($rule) {
+            return !str_starts_with((string) $rule, 'unique_undeleted:assets,serial');
+        }));
     }
 
     protected function prepareForValidation(): void

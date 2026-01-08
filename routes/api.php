@@ -456,6 +456,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             ]
         )->name('assets.selectlist');
 
+        Route::get('serial-check',
+            [
+                Api\AssetsController::class,
+                'serialCheck'
+            ]
+        )->name('api.assets.serial-check');
+
         Route::get('{asset_id}/licenses',
             [
                 Api\AssetsController::class, 

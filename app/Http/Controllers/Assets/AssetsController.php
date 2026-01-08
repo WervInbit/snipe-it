@@ -181,10 +181,18 @@ class AssetsController extends Controller
                 $asset->serial = $serials[$a];
             }
 
-            $asset->asset_tag = Asset::generateTag();
-            if (!$asset->asset_tag) {
+            $requestedTag = $requestedTags[$a] ?? null;
+            $requestedTag = is_string($requestedTag) ? trim($requestedTag) : '';
+            if ($requestedTag !== '') {
+                $asset->asset_tag = $requestedTag;
+            } else {
                 $asset->asset_tag = Asset::generateTag();
+                if (!$asset->asset_tag) {
+                    $asset->asset_tag = Asset::generateTag();
+                }
             }
+
+            $asset->allowDuplicateSerial($request->boolean("allow_duplicate_serials.$a"));
 
             $asset->company_id              = Company::getIdForCurrentUser($request->input('company_id'));
             $asset->model_id                = $modelForAttributes?->id;
@@ -582,6 +590,8 @@ class AssetsController extends Controller
         if (is_array($request->input('serials'))) {
             $asset->serial = $serial[1];
         }
+
+        $asset->allowDuplicateSerial($request->boolean('allow_duplicate_serials.1'));
 
         $asset->name = $request->input('name');
         $asset->company_id = Company::getIdForCurrentUser($request->input('company_id'));

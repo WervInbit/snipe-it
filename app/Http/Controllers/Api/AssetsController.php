@@ -565,6 +565,49 @@ class AssetsController extends Controller
         ]);
     }
 
+    public function serialCheck(Request $request): JsonResponse
+    {
+        $this->authorize('index', Asset::class);
+
+        $serial = trim((string) $request->query('serial', ''));
+        if ($serial === '') {
+            return response()->json([
+                'serial' => '',
+                'exists' => false,
+                'count' => 0,
+                'assets' => [],
+            ]);
+        }
+
+        $ignoreId = $request->input('ignore_id');
+        $baseQuery = Asset::query()->where('serial', $serial);
+        if ($ignoreId) {
+            $baseQuery->where('id', '!=', (int) $ignoreId);
+        }
+
+        $count = (clone $baseQuery)->count();
+        $assets = $baseQuery
+            ->select('id', 'asset_tag', 'name')
+            ->orderBy('id')
+            ->limit(5)
+            ->get()
+            ->map(function (Asset $asset) {
+                return [
+                    'id' => $asset->id,
+                    'asset_tag' => $asset->asset_tag,
+                    'name' => $asset->name,
+                ];
+            })
+            ->values();
+
+        return response()->json([
+            'serial' => $serial,
+            'exists' => $count > 0,
+            'count' => $count,
+            'assets' => $assets,
+        ]);
+    }
+
 
     /**
      * Returns JSON with information about an asset (by tag) for detail view.
@@ -748,6 +791,9 @@ class AssetsController extends Controller
         $asset->model()->associate(AssetModel::find((int) $request->get('model_id')));
 
         $asset->fill($request->validated());
+        $asset->allowDuplicateSerial(
+            $request->boolean('allow_duplicate_serial') || $request->boolean('allow_duplicate_serials.1')
+        );
         $asset->created_by    = auth()->id();
 
         if ($asset->location_note) {
@@ -852,6 +898,9 @@ class AssetsController extends Controller
         $incoming_tag = $request->input('asset_tag', $original_tag);
 
         $asset->fill($request->validated());
+        $asset->allowDuplicateSerial(
+            $request->boolean('allow_duplicate_serial') || $request->boolean('allow_duplicate_serials.1')
+        );
 
         if ($asset->location_note) {
             $custom = Location::customLocation();

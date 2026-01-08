@@ -73,6 +73,10 @@ class StoreAssetRequest extends ImageUploadRequest
             $modelRules = $this->removeNumericRulesFromPurchaseCost($modelRules);
         }
 
+        if ($this->shouldAllowDuplicateSerial()) {
+            $modelRules['serial'] = $this->stripSerialUniqueness($modelRules['serial'] ?? []);
+        }
+
         $requireModelNumber = $availableModelNumbers->count() > 1;
 
         $modelNumberRules = $modelId
@@ -97,6 +101,31 @@ class StoreAssetRequest extends ImageUploadRequest
             ],
             parent::rules(),
         );
+    }
+
+    private function shouldAllowDuplicateSerial(): bool
+    {
+        if ($this->boolean('allow_duplicate_serial')) {
+            return true;
+        }
+
+        $flags = (array) $this->input('allow_duplicate_serials', []);
+        foreach ($flags as $flag) {
+            if (filter_var($flag, FILTER_VALIDATE_BOOLEAN)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function stripSerialUniqueness(array|string $rules): array
+    {
+        $rulesArray = is_array($rules) ? $rules : explode('|', $rules);
+
+        return array_values(array_filter($rulesArray, function ($rule) {
+            return !str_starts_with((string) $rule, 'unique_undeleted:assets,serial');
+        }));
     }
 
     private function parseLastAuditDate(): void

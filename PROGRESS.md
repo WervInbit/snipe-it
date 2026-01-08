@@ -1,5 +1,13 @@
 # Session Progress (2026-01-08)
 
+## Addendum (2026-01-08 Codex - Asset Tag/Serial Duplicates)
+- Kickoff: reviewed `PROGRESS.md` and `docs/fork-notes.md` to align with current workflow before starting asset tag/serial changes.
+- Asset creation now honors custom asset tags and keeps asset tags uniquely enforced, while serials can be overridden only with an explicit allow-duplicate flag.
+- Added a serial-duplicate check API endpoint and wired the asset form UI to warn on conflicts, show existing matches, and allow a deliberate duplicate toggle.
+- Updated request/model validation to drop serial uniqueness only when a duplicate override is requested.
+- Added an unlock button to enable editing the auto-generated asset tag on create.
+- Tests not run in this environment.
+
 ## Addendum (2026-01-08 Codex)
 - Kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md` to align with current workflow before starting work.
 - Drafted a detailed implementation plan for the Latest Tests column counts + lazy hover detail and linked it from `AGENTS.md`.
@@ -11,6 +19,8 @@
 - Pointed the hover summary request to a relative `/api/v1/hardware/` base so APP_URL mismatches do not break hover calls.
 - Updated the Latest Tests hover tooltip to use per-item fail/open badges with inline note excerpts and photo markers for better readability.
 - Adjusted tests-active mobile layout: hide native file inputs and keep CTA indicators right-aligned on small screens.
+- Logged a TODO to align user naming + email standards after manager discussion.
+- Noted status updates: tests-active graphics are done, direct printing from the asset view works, and only a few device catalog placeholders remain.
 
 # Session Progress (2026-01-07)
 
