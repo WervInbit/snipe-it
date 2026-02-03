@@ -1,7 +1,7 @@
 # Agents Addendum - 2025-10-30 Session Init
 
 ## Context
-- Reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/agents/agent-progress-2025.md` to confirm current workflow expectations before making changes.
+- Reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/agents/old/agent-progress-2025.md` to confirm current workflow expectations before making changes.
 
 ## Worklog
 - Logged the 2025-10-30 session stub in `PROGRESS.md` so the day's activities can be captured as work progresses.
@@ -23,3 +23,4 @@
 - Run `scripts/check-storage-permissions.sh` (inside the app container) post-change to confirm write access before refreshing Blade caches; document any failures and remediation in future logs.
 - Complete Laravel Dusk onboarding once GitHub auth is configured: run `composer update laravel/dusk`, execute `php artisan dusk:install`, provision Chromium/chromedriver in the PHP container, and add a smoke test that exercises the refurb testing buttons end-to-end.
 - Reflect any user-facing or process changes in `docs/fork-notes.md` and cross-link from `PROGRESS.md` if new documentation is added.
+

@@ -329,10 +329,18 @@
 
 
                               <!-- language -->
+                              @php
+                                  $localeSelection = old('locale', $user->locale);
+                                  if (! $localeSelection) {
+                                      $localeSelection = optional(auth()->user())->locale
+                                          ?: \App\Models\Setting::getSettings()->locale
+                                          ?: config('app.locale');
+                                  }
+                              @endphp
                               <div class="form-group {{ $errors->has('locale') ? 'has-error' : '' }}">
                                   <label class="col-md-3 control-label" for="locale">{{ trans('general.language') }}</label>
                                   <div class="col-md-6">
-                                      <x-input.locale-select name="locale" :selected="old('locale', $user->locale)" />
+                                      <x-input.locale-select name="locale" :selected="$localeSelection" />
                                       {!! $errors->first('locale', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
                                   </div>
                               </div>

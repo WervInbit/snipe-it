@@ -1,7 +1,7 @@
 # Agents Addendum - 2025-11-19 Session Init
 
 ## Context
-- Reviewed `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, `docs/agents/agent-progress-2025.md`, and the legacy addenda so today’s QR-label fix starts with the latest workflow guidance and carry-over issues.
+- Reviewed `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, `docs/agents/old/agent-progress-2025.md`, and the legacy addenda so today’s QR-label fix starts with the latest workflow guidance and carry-over issues.
 - Logged this dated addendum alongside the PROGRESS stub so the documentation trail captures the QR printing refresh from kickoff to verification.
 
 ## Worklog
@@ -13,9 +13,10 @@
 - Cleaned the curated demo assets so their `name` fields match the actual product (no “QA Ready”/“Intake Diagnostics” suffixes) to avoid confusing refurb testers.
 - Final polish: trimmed the text column down to asset name + asset tag, added the 5% right padding, tightened QR margins, and regenerated the PDFs so they now open with a single page containing the requested framing.
 - Raised the QR column to share the text block’s top alignment and reworked the PDF styles so Dompdf no longer inserts blank pages; one 99010 label per PDF with QR left/text bottom-right is now the default.
-- Updated docs/fork-notes.md and `docs/agents/agent-progress-2025.md` to capture today’s QR improvements for future reference.
+- Updated docs/fork-notes.md and `docs/agents/old/agent-progress-2025.md` to capture today’s QR improvements for future reference.
 
 ## Follow-ups
 - Run the refreshed PDFs through actual Dymo LabelWriter 400 Turbo printers (especially for the 30256 shipping roll) to verify the padding values; tweak `config/qr_templates.php` if any roll still crops QR codes.
 - Consider persisting the last-used template per user/session so creation-success notifications can surface the correct download links without revisiting the asset view.
 - Once hardware verification is complete, capture screenshots for inclusion in the README/docs so downstream teams see the updated print workflow without diffing code.
+

@@ -149,6 +149,8 @@ class Asset extends Depreciable
     ];
 
     protected bool $allowDuplicateSerial = false;
+    protected bool $preserveAssetTagCase = false;
+    protected bool $preserveSerialCase = false;
 
 
     /**
@@ -216,6 +218,44 @@ class Asset extends Depreciable
         return array_values(array_filter($rulesArray, function ($rule) {
             return !str_starts_with((string) $rule, 'unique_undeleted:assets,serial');
         }));
+    }
+
+    public function preserveAssetTagCase(bool $preserve = true): self
+    {
+        $this->preserveAssetTagCase = $preserve;
+
+        return $this;
+    }
+
+    public function preserveSerialCase(bool $preserve = true): self
+    {
+        $this->preserveSerialCase = $preserve;
+
+        return $this;
+    }
+
+    protected function normalizeIdentifier(?string $value, bool $preserveCase): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $value = trim((string) $value);
+        if ($value === '') {
+            return $value;
+        }
+
+        return $preserveCase ? $value : strtoupper($value);
+    }
+
+    public function setAssetTagAttribute($value): void
+    {
+        $this->attributes['asset_tag'] = $this->normalizeIdentifier($value, $this->preserveAssetTagCase);
+    }
+
+    public function setSerialAttribute($value): void
+    {
+        $this->attributes['serial'] = $this->normalizeIdentifier($value, $this->preserveSerialCase);
     }
 
     use Searchable;

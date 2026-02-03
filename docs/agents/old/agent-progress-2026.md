@@ -1,7 +1,7 @@
 # Agent & Progress Log (2026)
 
 ## 2026-01-07 - Session Kickoff
-> See `PROGRESS.md` (2026-01-07) and `docs/agents/agents-addendum-2026-01-07-session-init.md`.
+> See `PROGRESS.md` (2026-01-07) and `docs/agents/old/agents-addendum-2026-01-07-session-init.md`.
 
 ### Completed
 - Session initialized: reviewed handbook/fork notes and opened the 2026-01-07 stubs in `PROGRESS.md` and `docs/agents` to capture ongoing work.
@@ -20,3 +20,4 @@
 
 ### Outstanding
 - Tests not run in this environment; add deliverables, tests, and doc updates here as the session progresses.
+

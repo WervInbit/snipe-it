@@ -6,6 +6,7 @@ This guide keeps automation agents and human contributors aligned on the expecta
 - Read `PROGRESS.md` and `docs/fork-notes.md` before starting to confirm current context and open follow-ups.
 - Scan outstanding docs for drift (README, CONTRIBUTING, `docs/*`); plan updates alongside code changes.
 - When a new work session begins, add a dated stub to `PROGRESS.md` so the log captures context as the day unfolds.
+- When a new work session begins, create a dated addendum file under `docs/agents/agents-addendum-YYYY-MM-DD-session-init.md` to capture session-specific notes.
 - Prefer focused tests that exercise touched code; call out skipped coverage in `PROGRESS.md` when risk remains.
 - Close the loop by logging your work in `PROGRESS.md` (new dated addendum for a new day) and linking any supporting docs.
 
@@ -19,6 +20,8 @@ This guide keeps automation agents and human contributors aligned on the expecta
 ## Documentation Touchpoints
 - `AGENTS.md` (this file) captures the ground rules for agents and contributors working in the fork.
 - `PROGRESS.md` tracks session-level outcomes; update it at the end of each working block.
+- `docs/agents/agent-progress-consolidated.md` is a historical archive of past session notes; do not append new sessions there.
+- `docs/agents/old/` stores archived yearly logs and prior session addenda (read-only).
 - `docs/fork-notes.md` summarizes fork-level feature deltas; reference PRs or issues when logging changes.
 
 ## Repository Guidelines
@@ -68,3 +71,4 @@ This guide keeps automation agents and human contributors aligned on the expecta
 
 ## To-Do
 - Implement Latest Tests column counts with lazy hover detail (see `docs/plans/latest-tests-column-lazy-detail.md`).
+

@@ -16,3 +16,4 @@
 - Layer in additional Dusk coverage (e.g., refurb test flows, camera/QR interactions) now that the harness is stable.
 - Queue a Dusk scenario that walks the asset index (listing + filters) so UI regressions on the hardware grid are covered.
 - Populate the worklog with concrete updates as tasks complete and reflect key outcomes in `PROGRESS.md` before closing the session.
+

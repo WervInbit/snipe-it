@@ -19,3 +19,4 @@
 - Ensure `npm run dev` (or `npm run prod`) runs before deployment so `/js/dist/tests-active.js` is published; without the bundle the new UI falls back to basic rendering only.
 - Plan Dusk coverage for the new mobile workflows (start buttons, scan redirect, autosave interactions) and evaluate full offline photo queuing if future requirements demand it.
 - Next session: execute the A5-first plan (compact grid toggle, pass/fail deselect, drawers, autosave indicators, photo gallery UX).
+

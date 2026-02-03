@@ -103,13 +103,6 @@ class AssetPresenter extends Presenter
                 'visible' => true,
                 'formatter' => 'testsHealthFormatter',
             ], [
-                'field' => 'assigned_to',
-                'searchable' => true,
-                'sortable' => true,
-                'title' => trans('admin/hardware/form.checkedout_to'),
-                'visible' => true,
-                'formatter' => 'polymorphicItemFormatter',
-            ], [
                 'field' => 'employee_number',
                 'searchable' => false,
                 'sortable' => false,
@@ -165,20 +158,6 @@ class AssetPresenter extends Presenter
                 'visible' => false,
                 'title' => trans('general.age'),
             ], [
-                'field' => 'purchase_cost',
-                'searchable' => true,
-                'sortable' => true,
-                'title' => trans('general.purchase_cost'),
-                'footerFormatter' => 'sumFormatter',
-                'class' => 'text-right',
-            ], [
-                "field" => "book_value",
-                "searchable" => false,
-                "sortable" => false,
-                "title" => trans('admin/hardware/table.book_value'),
-                "footerFormatter" => 'sumFormatter',
-                "class" => "text-right",
-            ],[
                 'field' => 'order_number',
                 'searchable' => true,
                 'sortable' => true,
@@ -212,14 +191,6 @@ class AssetPresenter extends Presenter
                 'visible' => false,
                 'title' => trans('admin/hardware/form.warranty_expires'),
                 'formatter' => 'dateDisplayFormatter',
-            ], [
-                'field' => 'requestable',
-                'searchable' => false,
-                'sortable' => true,
-                'visible' => false,
-                'title' => trans('admin/hardware/general.requestable'),
-                'formatter' => 'trueFalseFormatter',
-
             ], [
                 'field' => 'notes',
                 'searchable' => true,

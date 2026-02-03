@@ -1,7 +1,7 @@
 # Agent & Progress Log (2025)
 
 ## 2025-12-30 - Session Kickoff
-> See PROGRESS.md (2025-12-30) and docs/agents/agents-addendum-2025-12-30-session-init.md.
+> See PROGRESS.md (2025-12-30) and docs/agents/old/agents-addendum-2025-12-30-session-init.md.
 
 ### Completed
 - Session initialized: reviewed handbook/fork notes and refreshed `docs/agents/*`; opened the 2025-12-30 stubs in PROGRESS.md and docs/agents to capture ongoing work.
@@ -12,7 +12,7 @@
 - Add deliverables, tests, and doc updates here as the session progresses.
 
 ## 2025-12-18 - Session Kickoff
-> See PROGRESS.md (2025-12-18) and docs/agents/agents-addendum-2025-12-18-session-init.md.
+> See PROGRESS.md (2025-12-18) and docs/agents/old/agents-addendum-2025-12-18-session-init.md.
 
 ### Completed
 - Session initialized: reviewed handbook/fork notes and opened the 2025-12-18 stubs in PROGRESS.md and docs/agents to capture ongoing work.
@@ -25,7 +25,7 @@
 - Prod follow-up: create/map test attributes for test types (no *_test defs exist), set needs_test=1, link test_types to definitions, and backfill model number attributes; clean any existing duplicate serials if present.
 
 ## 2025-12-17 - Mobile Spec Table
-> See PROGRESS.md (2025-12-17) and docs/agents/agents-addendum-2025-12-17-session-init.md.
+> See PROGRESS.md (2025-12-17) and docs/agents/old/agents-addendum-2025-12-17-session-init.md.
 
 ### Completed
 - Found Bootstrap's responsive table nowrap rule causing the spec table to overflow on very narrow screens (~327 px).
@@ -275,4 +275,5 @@
 - Monitor infrastructure tasks: ensure Docker entrypoint key regeneration holds, maintain writable storage paths for imports, and keep composer dev dependencies installed for the API testsuite.
 - Plan a unified QR/label pipeline that merges the legacy TCPDF feature set (field selection, 1D barcodes, sheets) into the new QR module so we can retire the duplicate systems safely.
 - Keep company selection hidden in asset forms while single-company refurb flows remain the focus; revisit once multi-company support becomes relevant again.
+
 

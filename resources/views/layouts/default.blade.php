@@ -403,14 +403,6 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                                 {{ trans('general.viewassets') }}
                                             </a></li>
 
-                                        @can('viewRequestable', \App\Models\Asset::class)
-                                            <li {!! (request()->is('account/requested') ? ' class="active"' : '') !!}>
-                                                <a href="{{ route('account.requested') }}">
-                                                    <x-icon type="checkmark" class="fa-fw" />
-                                                    {{ trans('general.requested_assets_menu') }}
-                                                </a></li>
-                                        @endcan
-
                                         <li {!! (request()->is('account/accept') ? ' class="active"' : '') !!}>
                                             <a href="{{ route('account.accept') }}">
                                                 <x-icon type="checkmark" class="fa-fw" />
@@ -875,16 +867,6 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                 </ul>
                             </li>
                         @endcan
-
-                        @can('viewRequestable', \App\Models\Asset::class)
-                            <li{!! (request()->is('account/requestable-assets') ? ' class="active"' : '') !!}>
-                                <a href="{{ route('requestable-assets') }}">
-                                    <x-icon type="requestable" class="fa-fw" />
-                                    <span>{{ trans('general.requestable_items') }}</span>
-                                </a>
-                            </li>
-                        @endcan
-
 
                     </ul>
                 </section>

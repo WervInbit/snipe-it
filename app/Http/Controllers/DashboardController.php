@@ -21,43 +21,47 @@ use App\Support\RefurbStatus;
 class DashboardController extends Controller
 {
     /**
-     * Check authorization and display admin dashboard, otherwise display
-     * the user's checked-out assets.
+     * Display the main dashboard for signed-in users.
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v1.0]
      */
     public function index() : View | RedirectResponse
     {
-        // Show the page
-        if (auth()->user()->hasAccess('admin') || auth()->user()->hasAccess('supervisor')) {
-            $asset_stats = null;
+        $asset_stats = null;
+        $user = auth()->user();
 
-            $counts['asset'] = \App\Models\Asset::count();
-            $counts['accessory'] = \App\Models\Accessory::count();
-            $counts['license'] = \App\Models\License::assetcount();
-            $counts['consumable'] = \App\Models\Consumable::count();
-            $counts['component'] = \App\Models\Component::count();
-            $counts['user'] = \App\Models\Company::scopeCompanyables(auth()->user())->count();
-            $counts['grand_total'] = $counts['asset'] + $counts['accessory'] + $counts['license'] + $counts['consumable'];
+        $counts['asset'] = $user->can('view', \App\Models\Asset::class)
+            ? \App\Models\Asset::AssetsForShow()->count()
+            : 0;
+        $counts['accessory'] = $user->can('view', \App\Models\Accessory::class)
+            ? \App\Models\Accessory::count()
+            : 0;
+        $counts['license'] = $user->can('view', \App\Models\License::class)
+            ? \App\Models\License::assetcount()
+            : 0;
+        $counts['consumable'] = $user->can('view', \App\Models\Consumable::class)
+            ? \App\Models\Consumable::count()
+            : 0;
+        $counts['component'] = $user->can('view', \App\Models\Component::class)
+            ? \App\Models\Component::count()
+            : 0;
+        $counts['user'] = $user->can('view', \App\Models\User::class)
+            ? \App\Models\Company::scopeCompanyables($user)->count()
+            : 0;
+        $counts['grand_total'] = $counts['asset'] + $counts['accessory'] + $counts['license'] + $counts['consumable'];
 
-            if ((! file_exists(storage_path().'/oauth-private.key')) || (! file_exists(storage_path().'/oauth-public.key'))) {
-                Artisan::call('migrate', ['--force' => true]);
-                Artisan::call('passport:install', ['--no-interaction' => true]);
-            }
-
-            $refurbFilters = $this->buildRefurbFilters();
-
-            return view('dashboard')
-                ->with('asset_stats', $asset_stats)
-                ->with('counts', $counts)
-                ->with('refurbFilters', $refurbFilters);
-        } else {
-            Session::reflash();
-
-            // Redirect to the profile page
-            return redirect()->intended('account/view-assets');
+        if ((! file_exists(storage_path().'/oauth-private.key')) || (! file_exists(storage_path().'/oauth-public.key'))) {
+            Artisan::call('migrate', ['--force' => true]);
+            Artisan::call('passport:install', ['--no-interaction' => true]);
         }
+
+        $refurbFilters = $this->buildRefurbFilters();
+
+        return view('dashboard')
+            ->with('asset_stats', $asset_stats)
+            ->with('counts', $counts)
+            ->with('refurbFilters', $refurbFilters);
     }
 
     /**

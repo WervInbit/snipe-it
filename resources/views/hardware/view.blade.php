@@ -555,28 +555,88 @@
                                                 <strong>{{ trans('general.status') }}</strong>
                                             </div>
                                             <div class="col-md-9">
-                                                @if (($asset->assignedTo) && ($asset->deleted_at==''))
-                                                    <x-icon type="circle-solid" class="text-blue" />
-                                                    {{ $asset->assetstatus->name }}
-                                                    <label class="label label-default">{{ trans('general.deployed') }}</label>
-
-
-                                                    <x-icon type="long-arrow-right" />
-                                                    <x-icon type="{{ $asset->assignedType() }}" class="fa-fw" />
-                                                    {!!  $asset->assignedTo->present()->nameUrl() !!}
-                                                @else
-                                                    @if (($asset->assetstatus) && ($asset->assetstatus->deployable=='1'))
-                                                        <x-icon type="circle-solid" class="text-green" />
-                                                    @elseif (($asset->assetstatus) && ($asset->assetstatus->pending=='1'))
-                                                        <x-icon type="circle-solid" class="text-orange" />
+                                                <div>
+                                                    @if (($asset->assignedTo) && ($asset->deleted_at==''))
+                                                        <x-icon type="circle-solid" class="text-blue" />
+                                                        {{ $asset->assetstatus->name }}
+                                                        <label class="label label-default">{{ trans('general.deployed') }}</label>
+                                                        <x-icon type="long-arrow-right" />
+                                                        <x-icon type="{{ $asset->assignedType() }}" class="fa-fw" />
+                                                        {!!  $asset->assignedTo->present()->nameUrl() !!}
                                                     @else
-                                                        <x-icon type="x" class="text-red" />
+                                                        @if (($asset->assetstatus) && ($asset->assetstatus->deployable=='1'))
+                                                            <x-icon type="circle-solid" class="text-green" />
+                                                        @elseif (($asset->assetstatus) && ($asset->assetstatus->pending=='1'))
+                                                            <x-icon type="circle-solid" class="text-orange" />
+                                                        @else
+                                                            <x-icon type="x" class="text-red" />
+                                                        @endif
+                                                        <a href="{{ route('statuslabels.show', $asset->assetstatus->id) }}">
+                                                            {{ $asset->assetstatus->name }}</a>
+                                                        <label class="label label-default">{{ $asset->present()->statusMeta }}</label>
                                                     @endif
-                                                    <a href="{{ route('statuslabels.show', $asset->assetstatus->id) }}">
-                                                        {{ $asset->assetstatus->name }}</a>
-                                                    <label class="label label-default">{{ $asset->present()->statusMeta }}</label>
+                                                </div>
 
-                                                @endif
+                                                @can('update', $asset)
+                                                    @php
+                                                        $__status_options = $statuslabel_list;
+                                                        $user = auth()->user();
+                                                        $isAdmin = $user && method_exists($user, 'isAdmin') ? $user->isAdmin() : false;
+                                                        $isSuper = $user && method_exists($user, 'isSuperUser') ? $user->isSuperUser() : false;
+                                                        if (!($isAdmin || $isSuper)) {
+                                                            $__status_options = collect($__status_options)
+                                                                ->reject(function($label){ return stripos($label, 'Ready for Sale') !== false; })
+                                                                ->all();
+                                                        }
+                                                        $selectedStatus = old('status_id', $asset->status_id);
+                                                    @endphp
+                                                    <form method="POST" action="{{ route('hardware.status.update', $asset) }}" style="margin-top:10px;">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        @if (session('requires_ack_failed_tests'))
+                                                            <input type="hidden" name="ack_failed_tests" value="1">
+                                                        @endif
+
+                                                        @if (session('requires_ack_failed_tests'))
+                                                            <div class="alert alert-warning" role="alert" style="margin-bottom:10px;">
+                                                                <p class="mb-2">{{ trans('tests.status_change_prompt') }}</p>
+                                                                @if (session('test_issue_details'))
+                                                                    <ul class="mb-0">
+                                                                        @foreach ((array) session('test_issue_details') as $detail)
+                                                                            <li>{{ $detail }}</li>
+                                                                        @endforeach
+                                                                    </ul>
+                                                                @endif
+                                                            </div>
+                                                        @endif
+
+                                                        <div class="form-group" style="margin-bottom:10px;">
+                                                            <select
+                                                                name="status_id"
+                                                                id="status_select_detail_{{ $asset->id }}"
+                                                                class="form-control"
+                                                                aria-label="status_id"
+                                                            >
+                                                                @foreach($__status_options as $key => $value)
+                                                                    <option value="{{ $key }}" {{ (string) $selectedStatus === (string) $key ? 'selected' : '' }}>
+                                                                        {{ $value }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                            {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                                        </div>
+                                                        <div class="form-group" style="margin-bottom:10px;">
+                                                            <textarea
+                                                                class="form-control"
+                                                                name="status_change_note"
+                                                                rows="2"
+                                                                placeholder="{{ __('Add a note for this status change (optional)') }}"
+                                                            >{{ old('status_change_note') }}</textarea>
+                                                            {!! $errors->first('status_change_note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                                        </div>
+                                                        <button type="submit" class="btn btn-sm btn-primary">{{ trans('general.save') }}</button>
+                                                    </form>
+                                                @endcan
                                             </div>
                                         </div>
                                     @endif
@@ -738,80 +798,6 @@
                                         </div>
                                     @endif
 
-                                    @if (($asset->model) && ($asset->model->manufacturer))
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <strong>
-                                                    {{ trans('admin/hardware/form.manufacturer') }}
-                                                </strong>
-                                            </div>
-                                            <div class="col-md-9">
-                                                <ul class="list-unstyled">
-                                                    @can('view', \App\Models\Manufacturer::class)
-
-                                                        <li>
-                                                            <a href="{{ route('manufacturers.show', $asset->model->manufacturer->id) }}">
-                                                                {{ $asset->model->manufacturer->name }}
-                                                            </a>
-                                                        </li>
-
-                                                    @else
-                                                        <li> {{ $asset->model->manufacturer->name }}</li>
-                                                    @endcan
-
-                                                    @if (($asset->model) && ($asset->model->manufacturer) &&  ($asset->model->manufacturer->url!=''))
-                                                        <li>
-                                                            <x-icon type="globe-us" />
-                                                            <a href="{{ $asset->present()->dynamicUrl($asset->model->manufacturer->url) }}" target="_blank">
-                                                                {{ $asset->present()->dynamicUrl($asset->model->manufacturer->url) }}
-                                                                <x-icon type="external-link" />
-                                                            </a>
-                                                        </li>
-                                                    @endif
-
-                                                    @if (($asset->model) && ($asset->model->manufacturer) &&  ($asset->model->manufacturer->support_url!=''))
-                                                        <li>
-                                                            <x-icon type="more-info" />
-                                                            <a href="{{ $asset->present()->dynamicUrl($asset->model->manufacturer->support_url) }}" target="_blank">
-                                                                {{ $asset->present()->dynamicUrl($asset->model->manufacturer->support_url) }}
-                                                                <x-icon type="external-link" />
-                                                            </a>
-                                                        </li>
-                                                    @endif
-
-                                                    @if (($asset->model) && ($asset->model->manufacturer) &&  ($asset->model->manufacturer->warranty_lookup_url!=''))
-                                                        <li>
-                                                            <x-icon type="maintenances" />
-                                                            <a href="{{ $asset->present()->dynamicUrl($asset->model->manufacturer->warranty_lookup_url) }}" target="_blank">
-                                                                {{ $asset->present()->dynamicUrl($asset->model->manufacturer->warranty_lookup_url) }}
-
-                                                                <x-icon type="external-link" />
-                                                                    <span class="sr-only">{{ trans('admin/hardware/general.mfg_warranty_lookup', ['manufacturer' => $asset->model->manufacturer->name]) }}</span></i>
-                                                            </a>
-                                                        </li>
-                                                    @endif
-
-                                                    @if (($asset->model) && ($asset->model->manufacturer->support_phone))
-                                                        <li>
-                                                            <x-icon type="phone" />
-                                                            <a href="tel:{{ $asset->model->manufacturer->support_phone }}">
-                                                                {{ $asset->model->manufacturer->support_phone }}
-                                                            </a>
-                                                        </li>
-                                                    @endif
-
-                                                    @if (($asset->model) && ($asset->model->manufacturer->support_email))
-                                                        <li>
-                                                            <x-icon type="email" />
-                                                            <a href="mailto:{{ $asset->model->manufacturer->support_email }}">
-                                                                {{ $asset->model->manufacturer->support_email }}
-                                                            </a>
-                                                        </li>
-                                                    @endif
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    @endif
 
                                     <div class="row">
                                         <div class="col-md-3">
@@ -877,16 +863,6 @@
                                         </div>
                                         <div class="col-md-9">
                                             {!! ($asset->byod=='1') ? '<i class="fas fa-check text-success" aria-hidden="true"></i> '.trans('general.yes') : '<i class="fas fa-times text-danger" aria-hidden="true"></i> '.trans('general.no')  !!}
-                                        </div>
-                                    </div>
-
-                                    <!-- requestable -->
-                                    <div class="row">
-                                        <div class="col-md-3">
-                                            <strong>{{ trans('admin/hardware/general.requestable') }}</strong>
-                                        </div>
-                                        <div class="col-md-9">
-                                            {!! ($asset->requestable=='1') ? '<i class="fas fa-check text-success" aria-hidden="true"></i> '.trans('general.yes') : '<i class="fas fa-times text-danger" aria-hidden="true"></i> '.trans('general.no')  !!}
                                         </div>
                                     </div>
 

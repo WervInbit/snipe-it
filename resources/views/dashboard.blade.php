@@ -28,13 +28,14 @@
 
 <div class="row">
 
+    @can('view', \App\Models\Asset::class)
     <!-- panel -->
     <div class="col-lg-2 col-xs-6">
         <a href="{{ route('hardware.index') }}">
             <!-- small hardware box -->
             <div class="dashboard small-box bg-teal">
                 <div class="inner">
-                    <h3>{{ number_format(\App\Models\Asset::AssetsForShow()->count()) }}</h3>
+                    <h3>{{ number_format($counts['asset']) }}</h3>
                     <p>{{ trans('general.assets') }}</p>
                 </div>
                 <div class="icon" aria-hidden="true">
@@ -47,7 +48,9 @@
             </div>
         </a>
     </div><!-- ./col -->
+    @endcan
 
+    @can('view', \App\Models\License::class)
     <div class="col-lg-2 col-xs-6">
         <a href="{{ route('licenses.index') }}" aria-hidden="true">
             <!-- small license box -->
@@ -66,8 +69,10 @@
             </div>
         </a>
     </div><!-- ./col -->
+    @endcan
 
 
+    @can('view', \App\Models\Accessory::class)
     <div class="col-lg-2 col-xs-6">
     <!-- small accessories box -->
         <a href="{{ route('accessories.index') }}">
@@ -86,7 +91,9 @@
             </div>
         </a>
     </div><!-- ./col -->
+    @endcan
 
+    @can('view', \App\Models\Consumable::class)
     <div class="col-lg-2 col-xs-6">
     <!-- small consumables box -->
         <a href="{{ route('consumables.index') }}">
@@ -105,7 +112,9 @@
             </div>
         </a>
     </div><!-- ./col -->
+    @endcan
 
+    @can('view', \App\Models\Component::class)
     <div class="col-lg-2 col-xs-6">
         <!-- small components box -->
         <a href="{{ route('components.index') }}">
@@ -124,7 +133,9 @@
             </div>
         </a>
     </div><!-- ./col -->
+    @endcan
 
+    @can('view', \App\Models\User::class)
     <div class="col-lg-2 col-xs-6">
         <!-- small users box -->
         <a href="{{ route('users.index') }}">
@@ -143,11 +154,14 @@
             </div>
         </a>
     </div><!-- ./col -->
+    @endcan
 
 </div>
 </div>
 
-@include('dashboard.partials.refurb-filter-row', ['filters' => $refurbFilters ?? collect()])
+@can('view', \App\Models\Asset::class)
+    @include('dashboard.partials.refurb-filter-row', ['filters' => $refurbFilters ?? collect()])
+@endcan
 
 @if ($counts['grand_total'] == 0)
 
@@ -214,6 +228,7 @@
 
 <!-- recent activity -->
 <div class="row">
+  @can('activity.view')
   <div class="col-md-8">
     <div class="box">
       <div class="box-header with-border">
@@ -273,6 +288,8 @@
       </div><!-- ./box-body -->
     </div><!-- /.box -->
   </div>
+  @endcan
+  @can('view', \App\Models\Statuslabel::class)
   <div class="col-md-4">
         <div class="box box-default">
             <div class="box-header with-border">
@@ -298,6 +315,7 @@
             </div><!-- /.box-body -->
         </div> <!-- /.box -->
   </div>
+  @endcan
 
 </div> <!--/row-->
 <div class="row">
@@ -305,6 +323,7 @@
 
 		@if ((($snipeSettings->scope_locations_fmcs!='1') && ($snipeSettings->full_multiple_companies_support=='1')))
 			 <!-- Companies -->	
+			@can('view', \App\Models\Company::class)
 			<div class="box box-default">
 				<div class="box-header with-border">
 					<h2 class="box-title">{{ trans('general.companies') }}</h2>
@@ -379,9 +398,11 @@
 
 				</div><!-- /.box-body -->
 			</div> <!-- /.box -->
+			@endcan
 		
 		@else
 			 <!-- Locations -->
+			@can('view', \App\Models\Location::class)
 			 <div class="box box-default">
 				<div class="box-header with-border">
 					<h2 class="box-title">{{ trans('general.locations') }}</h2>
@@ -446,6 +467,7 @@
 
 				</div><!-- /.box-body -->
 			</div> <!-- /.box -->
+			@endcan
 
 		@endif
 			
@@ -453,6 +475,7 @@
     <div class="col-md-6">
 
         <!-- Categories -->
+        @can('view', \App\Models\Category::class)
         <div class="box box-default">
             <div class="box-header with-border">
                 <h2 class="box-title">{{ trans('general.asset') }} {{ trans('general.categories') }}</h2>
@@ -525,6 +548,7 @@
 
             </div><!-- /.box-body -->
         </div> <!-- /.box -->
+        @endcan
     </div>
 
 
@@ -539,26 +563,31 @@
 
 @push('js')
 
-
+@can('view', \App\Models\Statuslabel::class)
         <script src="{{ url(mix('js/dist/Chart.min.js')) }}"></script>
 <script nonce="{{ csrf_token() }}">
-    // ---------------------------
-    // - ASSET STATUS CHART -
-    // ---------------------------
-      var pieChartCanvas = $("#statusPieChart").get(0).getContext("2d");
-      var pieChart = new Chart(pieChartCanvas);
-      var ctx = document.getElementById("statusPieChart");
-      var pieOptions = {
-              legend: {
-                  position: 'top',
-                  responsive: true,
-                  maintainAspectRatio: true,
-              },
-              tooltips: {
+    (function () {
+        var chartEl = document.getElementById("statusPieChart");
+        if (!chartEl) {
+            return;
+        }
+
+        // ---------------------------
+        // - ASSET STATUS CHART -
+        // ---------------------------
+        var pieChartCanvas = chartEl.getContext("2d");
+        var pieChart = new Chart(pieChartCanvas);
+        var pieOptions = {
+            legend: {
+                position: 'top',
+                responsive: true,
+                maintainAspectRatio: true,
+            },
+            tooltips: {
                 callbacks: {
                     label: function(tooltipItem, data) {
-                        counts = data.datasets[0].data;
-                        total = 0;
+                        var counts = data.datasets[0].data;
+                        var total = 0;
                         for(var i in counts) {
                             total += counts[i];
                         }
@@ -566,33 +595,38 @@
                         return prefix+" "+Math.round(counts[tooltipItem.index]/total*100)+"%";
                     }
                 }
-              }
-          };
+            }
+        };
 
-      $.ajax({
-          type: 'GET',
-          url: '{{ (\App\Models\Setting::getSettings()->dash_chart_type == 'name') ? route('api.statuslabels.assets.byname') : route('api.statuslabels.assets.bytype') }}',
-          headers: {
-              "X-Requested-With": 'XMLHttpRequest',
-              "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-          },
-          dataType: 'json',
-          success: function (data) {
-              var myPieChart = new Chart(ctx,{
-                  type   : 'pie',
-                  data   : data,
-                  options: pieOptions
-              });
-          },
-          error: function (data) {
-              // window.location.reload(true);
-          },
-      });
-        var last = document.getElementById('statusPieChart').clientWidth;
+        $.ajax({
+            type: 'GET',
+            url: '{{ (\App\Models\Setting::getSettings()->dash_chart_type == 'name') ? route('api.statuslabels.assets.byname') : route('api.statuslabels.assets.bytype') }}',
+            headers: {
+                "X-Requested-With": 'XMLHttpRequest',
+                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
+            },
+            dataType: 'json',
+            success: function (data) {
+                var myPieChart = new Chart(chartEl, {
+                    type   : 'pie',
+                    data   : data,
+                    options: pieOptions
+                });
+            },
+            error: function (data) {
+                // window.location.reload(true);
+            },
+        });
+
+        var last = chartEl.clientWidth;
         addEventListener('resize', function() {
-        var current = document.getElementById('statusPieChart').clientWidth;
-        if (current != last) location.reload();
-        last = current;
-    });
+            var current = chartEl.clientWidth;
+            if (current != last) {
+                location.reload();
+            }
+            last = current;
+        });
+    })();
 </script>
+@endcan
 @endpush

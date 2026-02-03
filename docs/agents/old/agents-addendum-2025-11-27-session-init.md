@@ -19,3 +19,4 @@
 - For all devices, confirm keyboard layout if non-US/ISO defaults apply.
 - Run hardware inventory on remaining devices and update seeders with real SKUs/ports/wireless/camera/battery where available; add corresponding SKU note files under `scripts/<device>/`.
 - Log today’s changes in `PROGRESS.md` next session.
+

@@ -1,7 +1,7 @@
 # Agents Addendum - 2025-10-28 Session Init
 
 ## Context
-- Reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/agents/agent-progress-2025.md` to confirm current workflow expectations before making changes.
+- Reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/agents/old/agent-progress-2025.md` to confirm current workflow expectations before making changes.
 
 ## Worklog
 - Logged this session addendum to capture ongoing notes for 2025-10-28.
@@ -24,3 +24,4 @@
 
 
 **Session closed** — 2025-10-28 13:38
+

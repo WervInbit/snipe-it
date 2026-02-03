@@ -15,3 +15,4 @@
 - Validate on an actual A5/phone viewport after cache clears and asset build/deploy; confirm the spec table stays contained below 350 px widths.
 - If overflow persists, inspect any remaining long, unbreakable strings in spec values and consider truncation or hyphenation helpers as a next step.
 - Confirm scan viewport behaviour across cameras with unusual aspect ratios; adjust min/max height if necessary.
+

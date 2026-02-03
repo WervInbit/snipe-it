@@ -15,3 +15,4 @@
 ## Follow-ups
 - Continue logging progress here as work advances and mirror any user-facing or process changes into PROGRESS.md and docs/fork-notes.md when applicable.
 - TODO: add a “copy model number” workflow so a model number/SKU variant can be duplicated within the same model and tweaked instead of re-entering attributes manually.
+

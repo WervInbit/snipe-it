@@ -790,6 +790,13 @@ class AssetsController extends Controller
         $asset = new Asset();
         $asset->model()->associate(AssetModel::find((int) $request->get('model_id')));
 
+        if ($request->boolean('asset_tag_case_override') || $request->boolean('asset_tag_case_override.1')) {
+            $asset->preserveAssetTagCase();
+        }
+        if ($request->boolean('serial_case_override') || $request->boolean('serial_case_override.1')) {
+            $asset->preserveSerialCase();
+        }
+
         $asset->fill($request->validated());
         $asset->allowDuplicateSerial(
             $request->boolean('allow_duplicate_serial') || $request->boolean('allow_duplicate_serials.1')
@@ -897,6 +904,13 @@ class AssetsController extends Controller
         $original_tag = $asset->asset_tag;
         $incoming_tag = $request->input('asset_tag', $original_tag);
 
+        if ($request->boolean('asset_tag_case_override') || $request->boolean('asset_tag_case_override.1')) {
+            $asset->preserveAssetTagCase();
+        }
+        if ($request->boolean('serial_case_override') || $request->boolean('serial_case_override.1')) {
+            $asset->preserveSerialCase();
+        }
+
         $asset->fill($request->validated());
         $asset->allowDuplicateSerial(
             $request->boolean('allow_duplicate_serial') || $request->boolean('allow_duplicate_serials.1')
@@ -912,7 +926,7 @@ class AssetsController extends Controller
             $asset->location_id = $request->validated()['rtd_location_id'];
         }
 
-        if ($incoming_tag !== $original_tag && !auth()->user()->isAdmin()) {
+        if (!auth()->user()->isAdmin() && strtoupper((string) $incoming_tag) !== strtoupper((string) $original_tag)) {
             return response()->json(
                 Helper::formatStandardApiResponse('error', null, trans('admin/hardware/message.tag_immutable')),
                 403

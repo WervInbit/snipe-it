@@ -81,6 +81,9 @@ Route::group(
         Route::patch('{asset}/internal-use-toggle', [AssetsController::class, 'toggleInternalUse'])
             ->name('hardware.toggle-internal');
 
+        Route::patch('{asset}/status', [AssetsController::class, 'updateStatus'])
+            ->name('hardware.status.update');
+
         Route::post(
             'bulkedit',
             [BulkAssetsController::class, 'edit']

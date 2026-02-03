@@ -168,6 +168,12 @@ class AssetsController extends Controller
 
         for ($a = 1; $a <= $count; $a++) {
             $asset = new Asset();
+            if ($request->boolean("asset_tag_case_override.$a")) {
+                $asset->preserveAssetTagCase();
+            }
+            if ($request->boolean("serial_case_override.$a")) {
+                $asset->preserveSerialCase();
+            }
             $asset->model()->associate($modelForAttributes);
             if ($modelNumber) {
                 $asset->model_number_id = $modelNumber->id;
@@ -431,10 +437,73 @@ class AssetsController extends Controller
                 ->with('resolvedAttributes', $resolvedAttributes)
                 ->with('use_currency', $use_currency)
                 ->with('audit_log', $audit_log)
-                ->with('testSummary', $testSummary);
+                ->with('testSummary', $testSummary)
+                ->with('statuslabel_list', Helper::statusLabelList());
         }
 
         return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
+    }
+
+    /**
+     * Update only the status from the detail view.
+     *
+     * @param Request $request
+     * @param Asset $asset
+     */
+    public function updateStatus(Request $request, Asset $asset) : RedirectResponse
+    {
+        $this->authorize($asset);
+
+        $validated = $request->validate([
+            'status_id' => ['required', 'integer', 'exists:status_labels,id'],
+            'status_change_note' => ['nullable', 'string', 'max:65535'],
+            'ack_failed_tests' => ['nullable', 'boolean'],
+        ]);
+
+        $status = Statuslabel::find($validated['status_id']);
+
+        if ($status && $this->statusRequiresTestAck($status->name)) {
+            $testSummary = $asset->latestTestIssueSummary();
+            $issueLines = collect();
+
+            if ($testSummary['missing_run']) {
+                $issueLines->push(trans('tests.no_test_run_recorded'));
+            }
+
+            if ($testSummary['failed']->isNotEmpty()) {
+                $issueLines->push(trans('tests.failed_list', ['tests' => $testSummary['failed']->implode(', ')]));
+            }
+
+            if ($testSummary['incomplete']->isNotEmpty()) {
+                $issueLines->push(trans('tests.incomplete_list', ['tests' => $testSummary['incomplete']->implode(', ')]));
+            }
+
+            if ($issueLines->isNotEmpty() && !$request->boolean('ack_failed_tests')) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('warning', trans('tests.status_change_warning'))
+                    ->with('test_issue_details', $issueLines->all())
+                    ->with('requires_ack_failed_tests', true);
+            }
+        }
+
+        $asset->status_id = $validated['status_id'];
+        $asset->withStatusChangeNote($validated['status_change_note'] ?? null);
+
+        if ($status && ($status->getStatuslabelType() != 'pending') && ($status->getStatuslabelType() != 'deployable') && ($target = $asset->assignedTo)) {
+            $originalValues = $asset->getRawOriginal();
+            $asset->assigned_to = null;
+            $asset->assigned_type = null;
+            $asset->accepted = null;
+            event(new CheckoutableCheckedIn($asset, $target, auth()->user(), 'Checkin on asset update with '.$status->getStatuslabelType().' status', date('Y-m-d H:i:s'), $originalValues));
+        }
+
+        if ($asset->save()) {
+            return redirect()->route('hardware.show', $asset)
+                ->with('success', trans('admin/hardware/message.update.success'));
+        }
+
+        return redirect()->back()->withInput()->withErrors($asset->getErrors());
     }
 
     /**
@@ -514,7 +583,9 @@ class AssetsController extends Controller
         }
         $asset->supplier_id = $request->input('supplier_id', null);
         $asset->expected_checkin = $request->input('expected_checkin', null);
-        $asset->requestable = $request->input('requestable', 0);
+        if ($request->has('requestable')) {
+            $asset->requestable = $request->boolean('requestable');
+        }
         $asset->is_sellable = $request->boolean('is_sellable');
         $asset->rtd_location_id = $request->input('rtd_location_id', null);
         $asset->byod = $request->boolean('byod');
@@ -584,6 +655,13 @@ class AssetsController extends Controller
 
         // Update the asset data
 
+        if ($request->boolean('asset_tag_case_override.1')) {
+            $asset->preserveAssetTagCase();
+        }
+        if ($request->boolean('serial_case_override.1')) {
+            $asset->preserveSerialCase();
+        }
+
         $serial = $request->input('serials');
         $asset->serial = $request->input('serials');
 
@@ -604,7 +682,7 @@ class AssetsController extends Controller
 
         if ($request->filled('asset_tags')) {
             $incoming_tag = is_array($asset_tags) ? $asset_tags[1] : $asset_tags;
-            if (!auth()->user()->isAdmin() && $incoming_tag !== $original_tag) {
+            if (!auth()->user()->isAdmin() && strtoupper((string) $incoming_tag) !== strtoupper((string) $original_tag)) {
                 return redirect()->back()->withErrors(['asset_tag' => trans('admin/hardware/message.tag_immutable')]);
             }
             $asset->asset_tag = $incoming_tag;

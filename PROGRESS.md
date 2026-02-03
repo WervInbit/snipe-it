@@ -1,3 +1,27 @@
+# Session Progress (2026-02-03)
+
+## Addendum (2026-02-03 Codex)
+- Session kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md` to align with current workflow before starting work.
+- Diagnosed local access failure: `dev.snipe.inbit` resolved to a stale host entry (10.10.10.123), so requests never reached the local nginx container.
+- Restored local dev host: mapped `dev.snipe.inbit` to `127.0.0.1` in the Windows hosts file, flushed DNS, and restarted app/web containers.
+- Reverted local overrides so `APP_URL` and nginx match `dev.snipe.inbit` again.
+- Normalized storage/cache permissions to avoid Blade view cache write errors.
+- Dashboard now hides unauthorized resource blocks; dashboard counts only compute for permitted resources, and activity/status chart sections are gated by their permissions to avoid 403-visible widgets.
+- Hardware list: removed the Checked Out To, Purchase Cost, and Current Value columns from the assets table layout.
+- Asset tags and serials now normalize to uppercase on save with per-field override toggles in the asset form; API endpoints honor override flags and the UI enforces uppercase while typing unless overridden.
+- Asset creation no longer renders checkout-to selectors in the refurb flow.
+- Asset edit/create no longer show manufacturer selection; model-level manufacturer stays authoritative.
+- Hardware detail no longer shows manufacturer block in the refurb flow.
+- Hardware assets list no longer includes the Requestable column.
+- Consolidated historical session logs into `docs/agents/agent-progress-consolidated.md`, updated `AGENTS.md` to reference the archive, and removed the duplicate `docs/agents/agents.md`.
+- Archived old yearly logs and session addenda under `docs/agents/old/`.
+
+# Session Progress (2026-01-15)
+
+## Addendum (2026-01-15 Codex)
+- Session kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md` to align with current workflow before starting work.
+- Pending: confirm today's scope and start tracking outcomes.
+
 # Session Progress (2026-01-08)
 
 ## Addendum (2026-01-08 Codex - Asset Tag/Serial Duplicates)
@@ -27,7 +51,7 @@
 
 ## Addendum (2026-01-07 Codex)
 - Kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, and recent `docs/agents/*` logs to align with current workflow before making changes.
-- Logged today's session stub here and created `docs/agents/agents-addendum-2026-01-07-session-init.md` for detailed tracking.
+- Logged today's session stub here and created `docs/agents/old/agents-addendum-2026-01-07-session-init.md` for detailed tracking.
 - Fixed hardware image uploads to redirect back to the asset view with a flash message (non-AJAX form submissions were previously showing raw JSON).
 - Fixed asset image thumbnails in the Images tab by using the public disk URL for each stored path (consistent with cover image rendering).
 - Removed the temporary legacy path normalization for asset images so the Images tab reflects the current storage layout only.
@@ -51,7 +75,7 @@
 
 ## Addendum (2025-12-30 Codex)
 - Kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, and recent `docs/agents/*` logs to align with the current workflow before resuming work.
-- Logged today's session stub here and created the `docs/agents/agents-addendum-2025-12-30-session-init.md` note for detailed tracking.
+- Logged today's session stub here and created the `docs/agents/old/agents-addendum-2025-12-30-session-init.md` note for detailed tracking.
 - Fixed attribute definition versioning validation so new versions reuse the same key without triggering the model-level unique rule (uniqueness now scopes by key + version); DB constraint already matched this behaviour.
 - Tests not run yet in this environment.
 
@@ -74,8 +98,8 @@
 
 ## Addendum (2025-12-18 Codex)
 - Kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, and recent `docs/agents/*` logs to align with current guidance before making changes.
-- Logged today's session in `docs/agents/agents.md` and started the dated addendum in `docs/agents/agents-addendum-2025-12-18-session-init.md` for detailed notes.
-- Added the 2025-12-18 entry to `docs/agents/agent-progress-2025.md` to keep the consolidated log current.
+- Logged today's session in `docs/agents/old/agent-progress-2025.md` and started the dated addendum in `docs/agents/old/agents-addendum-2025-12-18-session-init.md` for detailed notes.
+- Added the 2025-12-18 entry to `docs/agents/old/agent-progress-2025.md` to keep the consolidated log current.
 - Reset DB with core seeds (categories, manufacturers, attributes, presets, tests) and re-seeded demo assets when verifying; noted that prod will need a one-off to mark test attributes and link test types.
 - Updated model-number select list to show the model-number code; model-number creation now redirects to the new model number detail.
 - Scan page: added camera selector, permission request button, and refreshed the JS to populate devices after permission.
@@ -85,9 +109,9 @@
 # Session Progress (2025-12-09)
 
 ## Addendum (2025-12-09 Codex)
-- Kickoff: initialized session per `AGENTS.md` workflow; reviewed PROGRESS.md, docs/fork-notes.md, and docs/agents/agent-progress-2025.md to refresh current context.
+- Kickoff: initialized session per `AGENTS.md` workflow; reviewed PROGRESS.md, docs/fork-notes.md, and docs/agents/old/agent-progress-2025.md to refresh current context.
 - Created this dated stub to track today's work; ready for task assignments.
-- Logged session kickoff in `docs/agents/agents.md` so today's notes have a dedicated addendum.
+- Logged session kickoff in `docs/agents/old/agent-progress-2025.md` so today's notes have a dedicated addendum.
 - Restored dev printing path: attached the Dymo LabelWriter 330 Turbo to WSL, brought CUPS back up with queue `dymo25` (25x25 S0929120), updated `.env` to target it, installed `cups-client` in the `snipeit_app` container, and printed a sample 25x25 PDF via `lp` to verify end-to-end.
 - Reviewed QR label work from 2025-11-19 through 2025-12-02: server-side CUPS printing, multi-queue support, template consolidation.
 - Locked in the S0929120 (25x25) template as default (v13) with final offsets (qr_left 3.2mm, text_left 1.8mm, padding 1.8mm), cleared caches/labels, and validated printing via CUPS queue `dymo25` (job dymo25-25) using zero-margin Custom.W72H72 media.
@@ -113,14 +137,14 @@
 
 ## Addendum (2025-12-02 Codex)
 - Kickoff: re-read `AGENTS.md` and every `docs/agents/*` log so today's work starts with the latest workflow/context.
-- Logged `docs/agents/agents-addendum-2025-12-02-session-init.md` to track this session; no code or config changes yet.
+- Logged `docs/agents/old/agents-addendum-2025-12-02-session-init.md` to track this session; no code or config changes yet.
 - Seeded latest hardware variants (430 G3/G6, Surface Pro 4/5) and reset dev DB via `php artisan migrate:fresh --seed` to validate; QR/scan refinements shipped (refocus/torch, tighter spacing); model list now shows actual model-number codes/labels.
 
 # Session Progress (2025-11-25)
 
 ## Addendum (2025-11-25 Codex)
 - Kickoff: re-read `AGENTS.md`, `docs/fork-notes.md`, and all `docs/agents/*` logs to align with the latest guidance before making changes.
-- Logged this dated stub and created `docs/agents/agents-addendum-2025-11-25-session-init.md` to capture work for today; no code changes yet.
+- Logged this dated stub and created `docs/agents/old/agents-addendum-2025-11-25-session-init.md` to capture work for today; no code changes yet.
 
 # Session Progress (2025-11-20)
 
@@ -144,7 +168,7 @@
 - Cleaned up the demo seed data so curated assets use the actual product names (no more “Intake Diagnostics”/“QA Ready” suffixes) and remain less confusing for testers verifying the refurb flows.
 - Trimmed the sticker copy to just asset name + asset tag, anchored the text column to the bottom-right with a 5% internal margin, and ensured the QR respects the same top/bottom padding so each PDF displays as a single page with the requested framing.
 - Latest tweak: lifted the QR column so its top edge aligns with the text block, tightened the DOMPDF CSS, and removed the remaining blank pages—the PDF now renders a single 99010 label with the QR left and text bottom-right.
-- Updated translations, validation (`StoreLabelSettings`), docs/fork-notes.md, and docs/agents/agent-progress-2025.md to capture the new workflow and guidance for future sessions.
+- Updated translations, validation (`StoreLabelSettings`), docs/fork-notes.md, and docs/agents/old/agent-progress-2025.md to capture the new workflow and guidance for future sessions.
 
 ## Notes for Follow-up Agents
 - Run the refreshed PDFs through real Dymo LabelWriter 400 Turbo hardware for each template (especially the larger 30256 shipping roll) and tweak `config/qr_templates.php` padding if any QR codes still get cropped.
@@ -155,8 +179,8 @@
 # Session Progress (2025-11-13)
 
 ## Addendum (2025-11-13 Codex)
-- Re-read `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, `docs/agents/agent-progress-2025.md`, and every existing `docs/agents/agents-addendum-*` log so today's work begins with the latest workflow rules and carry-over issues.
-- Logged this dated stub and created `docs/agents/agents-addendum-2025-11-13-session-init.md` to capture detailed context before touching code or tests.
+- Re-read `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, `docs/agents/old/agent-progress-2025.md`, and every existing `docs/agents/old/agents-addendum-*` log so today's work begins with the latest workflow rules and carry-over issues.
+- Logged this dated stub and created `docs/agents/old/agents-addendum-2025-11-13-session-init.md` to capture detailed context before touching code or tests.
 - Reconfirmed the lingering blockers from the 2025-11-06 and 2025-11-11 sessions (new `/hardware/{asset}/tests/active` view not rendering, targeted PHPUnit/Dusk suites pending) and queued them for follow-up today.
 - Kickoff/context refresh captured before code changes resumed; all subsequent bullets reflect today's work.
 - Fixed the `bootstrap.Modal` runtime error on `/hardware/{asset}/tests/active` by adding compatibility helpers in `resources/js/tests-active.js` that prefer Bootstrap 5 components but gracefully fall back to the existing jQuery plugins (modal/collapse) when the namespace lacks constructors; rebuilt assets via `npm run dev` so the updated bundle is ready for verification.
@@ -277,7 +301,7 @@
 
 ## Addendum (2025-10-21 Codex)
 - Session kickoff: revisited `AGENTS.md`, prior `PROGRESS.md` entries, and the existing `docs/agents/` logs to confirm workflow expectations before making changes.
-- Logged today's documentation stubs at `docs/agents/agents-addendum-2025-10-21-session-init.md` and `docs/agents/progress-addendum-2025-10-21-session-init.md` to capture detailed notes as work progresses.
+- Logged today's documentation stubs at `docs/agents/old/agents-addendum-2025-10-21-session-init.md` and `docs/agents/progress-addendum-2025-10-21-session-init.md` to capture detailed notes as work progresses.
 - Brought up the docker stack, installed dependencies inside the `app` container, prepared `.env.testing` for sqlite, and ran the newly-added `API` PHPUnit testsuite via `php artisan test --testsuite=API` (538 tests in ~176s; 102 failed, 5 incomplete, 4 skipped—failures driven by permission redirects, select-list counts, maintenance uploads, manufacturer update flows, and missing import storage paths).
 - Simplified the hardware location selector to a single Select2 dropdown (`resources/views/partials/forms/edit/location-cascade-select.blade.php`) and realigned the location API feature tests with the new single-location expectation; reran `php artisan test --testsuite=API` (now 100 failures, 5 incomplete, 4 skipped) and refreshed the failure inventory at `codexlog/api-failures.csv`.
 - Provisioned `storage/private_uploads/imports`, hardened `tests/Support/Importing/FileBuilder.php` to create the directory automatically, migrated manufacturer API specs to JSON endpoints, and marked maintenance API flows as skipped while the module is disabled.
@@ -297,7 +321,7 @@
 
 ## Addendum (2025-10-14 Codex)
 - Session kicked off: reviewed AGENTS.md, prior PROGRESS entries, and docs/fork-notes.md to align with current fork expectations before making changes.
-- Logged new documentation stubs in docs/agents/agents-addendum-2025-10-14-session-init.md and docs/agents/progress-addendum-2025-10-14-session-init.md for detailed notes as the day advances.
+- Logged new documentation stubs in docs/agents/old/agents-addendum-2025-10-14-session-init.md and docs/agents/progress-addendum-2025-10-14-session-init.md for detailed notes as the day advances.
 - Fixed the asset model index API so persisted table offsets clamp to the last available page instead of returning an empty dataset, and added regression coverage for the scenario.
 - Promoted the offset clamp into the shared API controller base and rolled it out across list endpoints (assets, accessories, locations, etc.), with fresh assets index coverage to guard the shared helper.
 - Introduced attribute definition versioning, hide/unhide workflows, and supporting UI/actions/tests so teams can migrate specs safely.
@@ -305,7 +329,7 @@
 
 ## Notes for Follow-up Agents
 - Detailed worklog: docs/agents/progress-addendum-2025-10-14-session-init.md (extend with concrete updates and test evidence).
-- Handbook updates: docs/agents/agents-addendum-2025-10-14-session-init.md (record any process clarifications introduced today).
+- Handbook updates: docs/agents/old/agents-addendum-2025-10-14-session-init.md (record any process clarifications introduced today).
 - Testing follow-up: run the API feature suite (`php artisan test --group=api`) when PHP is available to exercise the new pagination helper under real execution.
 - QA follow-up: walk through the new specification builder end-to-end (add/remove/reorder attributes, save specs, verify overrides) once a UI-capable environment is available.
 
@@ -462,3 +486,23 @@ there are multiple duplicate functions that still need to be removed, sku will b
 
 
 \n## Notes for Next Session (2025-11-19)\n- TODO: Clean up the QR label sizing/margins once more and validate on hardware (short-term).\n- TODO: Implement one-click direct printing from the asset view to connected/network LabelWriter printers (long-term).\n\n# Session Progress (2025-12-17)\n- Reviewed AGENTS.md, fork-notes, and recent agent addenda before making changes; started this session log for traceability.\n- Investigated the specification details table overflow on narrow mobile widths; identified Bootstrap's responsive table rule forcing `white-space: nowrap` as the cause of horizontal overflow.\n- Added a targeted mobile override to allow spec table cells to wrap within their parent so the block stays inside the asset view at ~327 px widths.\n- Made the scan camera viewport dynamically size itself to the incoming stream aspect ratio while staying within the page frame; height now adapts per device instead of staying at a fixed width/aspect.\n- Removed leftover manual-entry hooks from the scan script that were throwing a runtime error and blocking camera startup after the manual form was dropped.\n- Follow-up: verify the asset view on an A5/phone viewport after cache clears; rerun Laravel view/config caches if needed once deployed.
+
+# Session Progress (2026-01-13)
+
+## Addendum (2026-01-13 Codex)
+- Session kickoff: reviewed `AGENTS.md`, recent `PROGRESS.md` entries, and `docs/fork-notes.md` to refresh context before new work.
+- Pending: confirm today's scope and start tracking outcomes.
+- Open-point sweep: reviewed TODO.md, PROGRESS.md, docs/agents/*, and docs/plans/* for outstanding items.
+- Updated login landing for non-admin/refurbisher users: start now redirects them to the dashboard, and the dashboard no longer falls back to the account view.
+- Defaulted the new-user language selection to the creator/app locale so fresh accounts inherit the expected language when none is set explicitly.
+- Simplified asset creation: removed manufacturer and requestable fields on create, and moved the status selector above spec overrides.
+- Redirected all roles away from the start shortcuts to the main dashboard, and made logins land on `/` instead of `/start`.
+- Hid requestable on asset edit and added a status-only update form on the hardware detail page.
+- Hid requestable items from user navigation and asset detail, and disabled the requestable assets index with a 404 to keep the UI aligned with the no-checkout workflow.
+- Investigated report that non-admin users with asset permissions see an empty hardware list: web `hardware.index` loads `api.assets.index`, which only requires `assets.view` and has no company scoping when FMCS is off, so the likely causes are API 401/403 or missing/denied `assets.view` in the user's permissions.
+
+## Notes for Follow-up Agents (2026-01-13)
+- Reproduce as the affected user and capture the `/api/v1/hardware` response (status + payload) to see if it is auth (401/403) or an empty dataset.
+- Verify the user has `assets.view` granted (not inherited or explicitly denied) in the `users.permissions` JSON and that no group sets `assets.view` to `-1`.
+- If the API is 401/403, check Passport cookie flow for web sessions and confirm the request is authenticated; if it is 200 with no rows, inspect any persisted table filters (`status`, `status_id`, search) and remove them.
+

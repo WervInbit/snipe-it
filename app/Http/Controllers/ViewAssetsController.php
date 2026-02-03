@@ -154,10 +154,7 @@ class ViewAssetsController extends Controller
      */
     public function getRequestableIndex() : View
     {
-        $assets = Asset::with('model', 'defaultLoc', 'location', 'assignedTo', 'requests')->Hardware()->RequestableAssets();
-        $models = AssetModel::with('category', 'requests', 'assets')->RequestableModels()->get();
-
-        return view('account/requestable-assets', compact('assets', 'models'));
+        abort(404);
     }
 
     public function getRequestItem(Request $request, $itemType, $itemId = null, $cancel_by_admin = false, $requestingUser = null): RedirectResponse
