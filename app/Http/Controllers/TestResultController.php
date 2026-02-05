@@ -19,14 +19,21 @@ class TestResultController extends Controller
     {
         $this->authorize('view', $asset);
 
-        $run = $asset->tests()
+        $requestedRunId = request()->query('run');
+        $runsQuery = $asset->tests()
             ->with([
                 'results' => function ($query) {
                     $query->with(['type', 'attributeDefinition', 'photos'])->orderBy('id');
                 },
                 'user',
-            ])
-            ->first();
+            ]);
+
+        if ($requestedRunId) {
+            $run = $runsQuery->whereKey($requestedRunId)->first();
+            abort_unless($run, 404);
+        } else {
+            $run = $runsQuery->first();
+        }
 
         $canUpdateResults = Gate::allows('update', $asset);
 
@@ -133,7 +140,7 @@ class TestResultController extends Controller
         $this->authorize('update', $testRun);
         abort_unless($testRun->asset_id === $asset->id, 404);
         $testRun->load('results.type', 'results.attributeDefinition');
-        return redirect()->route('test-results.active', $asset->id);
+        return redirect()->route('test-results.active', ['asset' => $asset->id, 'run' => $testRun->id]);
     }
 
     public function update(Request $request, Asset $asset, TestRun $testRun)

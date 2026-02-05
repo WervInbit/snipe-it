@@ -68,7 +68,3 @@ This guide keeps automation agents and human contributors aligned on the expecta
 - Never commit `.env*` files; use `.env.testing.example` and document overrides in `docs/`.
 - Secrets stay in your runtime environment; rotate tokens before sharing logs.
 - When adding third-party packages, vet licenses and update `SECURITY.md` if new attack surfaces appear.
-
-## To-Do
-- Implement Latest Tests column counts with lazy hover detail (see `docs/plans/latest-tests-column-lazy-detail.md`).
-

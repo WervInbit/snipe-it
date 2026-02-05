@@ -304,6 +304,28 @@ HTML;
     }
 
     /**
+     * Build the CSS used for label rendering in both PDF and UI previews.
+     */
+    public function labelStyles(array $tpl, bool $includePage = true): string
+    {
+        $width = (float) $tpl['width_mm'];
+        $height = (float) $tpl['height_mm'];
+        $fontSize = (float) ($tpl['caption_font_size'] ?? 8);
+        $lineHeight = (float) ($tpl['caption_line_height'] ?? 1.2);
+
+        $rules = [];
+        if ($includePage) {
+            $rules[] = "@page { margin: 0; size: {$width}mm {$height}mm; }";
+            $rules[] = "html, body { margin: 0; padding: 0; width: {$width}mm; height: {$height}mm; }";
+        }
+        $rules[] = ".qr-label { width: {$width}mm; height: {$height}mm; box-sizing: border-box; overflow: hidden; position: relative; }";
+        $rules[] = ".qr-text { font-size: {$fontSize}pt; line-height: {$lineHeight}; text-align: left; }";
+        $rules[] = ".qr-text-line { display: block; font-size: {$fontSize}pt; font-weight: 600; }";
+
+        return implode("\n", $rules);
+    }
+
+    /**
      * Wrap the provided fragments in a Dompdf-ready document.
      *
      * @param array<int, string> $fragments
@@ -313,17 +335,7 @@ HTML;
     {
         $width = (float) $tpl['width_mm'];
         $height = (float) $tpl['height_mm'];
-        $padding = (float) ($tpl['padding_mm'] ?? 1.2);
-        $fontSize = (float) ($tpl['caption_font_size'] ?? 8);
-        $lineHeight = (float) ($tpl['caption_line_height'] ?? 1.2);
-
-        $style = <<<CSS
-@page { margin: 0; size: {$width}mm {$height}mm; }
-html, body { margin: 0; padding: 0; width: {$width}mm; height: {$height}mm; }
-.qr-label { width: {$width}mm; height: {$height}mm; box-sizing: border-box; overflow: hidden; position: relative; }
-.qr-text { font-size: {$fontSize}pt; line-height: {$lineHeight}; text-align: left; }
-.qr-text-line { display: block; font-size: {$fontSize}pt; font-weight: 600; }
-CSS;
+        $style = $this->labelStyles($tpl, true);
 
         $html = '<html><head><meta charset="UTF-8"><style>' . $style . '</style></head><body>' .
             implode('', $fragments) .

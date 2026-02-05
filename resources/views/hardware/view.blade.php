@@ -82,6 +82,10 @@
     $qrPng = in_array('png', $qrFormats) ? $qrLabels->url($asset, 'png', $selectedTemplate) : null;
     $qrPdf = in_array('pdf', $qrFormats) ? $qrLabels->url($asset, 'pdf', $selectedTemplate) : null;
     $qrRaw = $qrLabels->url($asset, 'qr', $selectedTemplate);
+    $qrPreview = null;
+    if (config('qr_templates.enable_ui', true) && ($qrPdf || $qrPng)) {
+        $qrPreview = $qrLabels->previewData($asset, $selectedTemplate);
+    }
 @endphp
 
     <div class="row">
@@ -361,6 +365,7 @@
                                         'qrPdf' => $qrPdf,
                                         'qrPng' => $qrPng,
                                         'qrRaw' => $qrRaw,
+                                        'qrPreview' => $qrPreview,
                                         'qrTemplates' => $qrTemplates,
                                         'selectedTemplate' => $selectedTemplate,
                                     ])
@@ -1603,7 +1608,7 @@
                                                 </ul>
                                                 <div class="mt-2">
                                                     @can('update', $run)
-                                                        <a href="{{ route('test-results.edit', [$asset->id, $run->id]) }}" class="btn btn-default btn-sm">{{ trans('button.edit') }}</a>
+                                                        <a href="{{ route('test-results.active', ['asset' => $asset->id, 'run' => $run->id]) }}" class="btn btn-default btn-sm">{{ trans('button.edit') }}</a>
                                                     @endcan
                                                     @can('delete', $run)
                                                         <form method="POST" action="{{ route('test-runs.destroy', [$asset->id, $run->id]) }}" style="display:inline">

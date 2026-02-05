@@ -1,3 +1,14 @@
+# Session Progress (2026-02-05)
+
+## Addendum (2026-02-05 Codex)
+- Session kickoff: reviewed AGENTS.md, PROGRESS.md, and docs/fork-notes.md to align with current workflow before resuming work.
+- Hardware QR preview now renders the same label layout used for printed PDFs, so on-screen previews match print output.
+- Removed the completed Latest Tests hover-column task from AGENTS.md.
+- Noted that empty hardware lists still point to API/auth or persisted filters; capture `/api/v1/hardware` responses if the issue resurfaces.
+- Test run edit links now open the specific run in the active tests view, and edits update its finished timestamp so it becomes the latest run.
+- Marked the “resume closed test run” TODO as done after enabling targeted run editing.
+- Tests not run in this environment.
+
 # Session Progress (2026-02-03)
 
 ## Addendum (2026-02-03 Codex)
@@ -506,4 +517,5 @@ there are multiple duplicate functions that still need to be removed, sku will b
 - Reproduce as the affected user and capture the `/api/v1/hardware` response (status + payload) to see if it is auth (401/403) or an empty dataset.
 - Verify the user has `assets.view` granted (not inherited or explicitly denied) in the `users.permissions` JSON and that no group sets `assets.view` to `-1`.
 - If the API is 401/403, check Passport cookie flow for web sessions and confirm the request is authenticated; if it is 200 with no rows, inspect any persisted table filters (`status`, `status_id`, search) and remove them.
+
 

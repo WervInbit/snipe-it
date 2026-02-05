@@ -2,6 +2,7 @@
 @php($printQueues = array_values(array_filter(config('qr_templates.queues') ?? [])))
 @php($defaultQueue = config('qr_templates.print_queue') ?? ($printQueues[0] ?? null))
 @php($qrRaw = $qrRaw ?? null)
+@php($qrPreview = $qrPreview ?? null)
 <div class="panel panel-default qr-label-panel">
     <div class="panel-heading">
         <strong>{{ trans('general.print_qr') }}</strong>
@@ -9,7 +10,38 @@
     </div>
     <div class="panel-body text-center">
         @php($assetLabel = $asset->name ?: ($asset->asset_tag ?? $asset->id))
-        @if ($qrPng)
+        @if ($qrPreview)
+            <style>
+                .qr-label-preview {
+                    display: inline-block;
+                    padding: 6px;
+                    background: #fff;
+                    margin-bottom: 10px;
+                }
+                .qr-label-preview-frame {
+                    position: relative;
+                    overflow: hidden;
+                    background: #fff;
+                }
+                .qr-label-preview-scale {
+                    transform-origin: top left;
+                }
+{!! $qrPreview['styles'] !!}
+            </style>
+            <div class="img-thumbnail qr-label-preview" aria-label="{{ trans('general.qr_preview_for', ['asset' => $assetLabel]) }}">
+                <div
+                    class="qr-label-preview-frame"
+                    style="width: {{ $qrPreview['preview_width_px'] }}px; height: {{ $qrPreview['preview_height_px'] }}px;"
+                >
+                    <div
+                        class="qr-label-preview-scale"
+                        style="transform: scale({{ $qrPreview['scale'] }});"
+                    >
+                        {!! $qrPreview['html'] !!}
+                    </div>
+                </div>
+            </div>
+        @elseif ($qrPng)
             <img
                 src="{{ $qrPng }}"
                 class="img-thumbnail"

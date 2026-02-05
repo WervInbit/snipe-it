@@ -80,6 +80,43 @@ class QrLabelService
         return $disk->url($file);
     }
 
+    /**
+     * Build preview HTML + CSS for the label widget so it matches the printed layout.
+     *
+     * @return array{html: string, styles: string, scale: float, preview_width_px: float, preview_height_px: float}
+     */
+    public function previewData(Asset $asset, ?string $template = null): array
+    {
+        $settings = Setting::getSettings() ?? (object) [];
+        $template = $template ?? ($settings->qr_label_template ?? config('qr_templates.default'));
+        $disk = Storage::disk('public');
+        $logo = ($settings->qr_logo ?? null) ?: ($settings->label_logo ?? null);
+        $logoPath = ($logo && $disk->exists($logo)) ? $disk->path($logo) : null;
+        $templates = config('qr_templates.templates');
+        $tpl = $templates[$template] ?? reset($templates);
+        $qr = app(QrCodeService::class);
+
+        $caption = $this->assetLabelBlocks($asset, $settings, $template);
+        $png = $qr->png(
+            $asset->asset_tag,
+            ($settings->qr_text_redundancy ?? false) ? $asset->asset_tag : null,
+            $logoPath,
+            $template
+        );
+
+        $fragment = $qr->renderLabelFragment($png, $tpl, $caption, false);
+        $styles = $qr->labelStyles($tpl, false);
+        [$scale, $previewWidth, $previewHeight] = $this->previewScale($tpl);
+
+        return [
+            'html' => $fragment,
+            'styles' => $styles,
+            'scale' => $scale,
+            'preview_width_px' => $previewWidth,
+            'preview_height_px' => $previewHeight,
+        ];
+    }
+
     protected function path(Asset $asset, string $format, string $template): string
     {
         return $this->directory.'/qr-'.$this->version.'-'.$template.'-'.Str::slug($asset->asset_tag).'.'.$format;
@@ -291,6 +328,20 @@ class QrLabelService
             'top' => [],
             'bottom' => array_values($lines),
         ];
+    }
+
+    /**
+     * @return array{0: float, 1: float, 2: float}
+     */
+    protected function previewScale(array $tpl, int $maxWidthPx = 220, int $maxHeightPx = 180): array
+    {
+        $mmToPx = 96 / 25.4;
+        $widthPx = max(1.0, (float) ($tpl['width_mm'] ?? 0) * $mmToPx);
+        $heightPx = max(1.0, (float) ($tpl['height_mm'] ?? 0) * $mmToPx);
+        $scale = min($maxWidthPx / $widthPx, $maxHeightPx / $heightPx);
+        $scale = max(0.25, min($scale, 2.5));
+
+        return [$scale, $widthPx * $scale, $heightPx * $scale];
     }
 
     protected function generateRaw(Asset $asset, ?string $logoPath = null): void

@@ -4,6 +4,10 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-02-05
+- QR preview on the hardware detail page now renders the same label layout used for printed PDFs so on-screen previews match the final output.
+- Test run edit links can now target a specific prior run; editing an older run updates its finished timestamp so it becomes the latest run.
+
 ### 2026-02-03
 - Dashboard widgets now respect permissions: unauthorized summary blocks and charts are hidden, and counts are only computed when permitted.
 - Hardware list tables no longer show Checked Out To, Purchase Cost, or Current Value columns in the refurb flow.

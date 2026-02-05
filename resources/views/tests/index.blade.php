@@ -63,7 +63,7 @@
                     </div>
                     <div class="col-xs-5 text-right">
                         @can('update', $run)
-                            <a href="{{ route('test-results.edit', [$asset->id, $run->id]) }}" class="btn btn-default btn-sm mb-1">{{ trans('button.edit') }}</a>
+                            <a href="{{ route('test-results.active', ['asset' => $asset->id, 'run' => $run->id]) }}" class="btn btn-default btn-sm mb-1">{{ trans('button.edit') }}</a>
                         @endcan
                         @can('delete', $run)
                             <form method="POST" action="{{ route('test-runs.destroy', [$asset->id, $run->id]) }}" style="display:inline">
