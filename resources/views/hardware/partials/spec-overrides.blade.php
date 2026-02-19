@@ -1,4 +1,5 @@
 @php($attributes = $attributes ?? collect())
+@php($attributes = $attributes->reject(fn ($attribute) => $attribute->definition->key === \App\Models\Asset::CONDITION_GRADE_ATTRIBUTE_KEY)->values())
 @php($modelNumbers = $modelNumbers ?? collect())
 @php($selectedModelNumber = $selectedModelNumber ?? null)
 @php($selectedModelNumberId = old('model_number_id', $selectedModelNumber?->id))

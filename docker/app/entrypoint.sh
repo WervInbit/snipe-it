@@ -73,13 +73,30 @@ if [ -f artisan ]; then
 fi
 
 # Create storage symlink (idempotent)
-php artisan storage:link || true
+run_artisan() {
+  if [ -f artisan ]; then
+    if [ "$(id -u)" = "0" ]; then
+      # Avoid root-owned cache/view files that later block php-fpm (www-data) writes.
+      su -s /bin/bash www-data -c "php artisan $*"
+    else
+      php artisan "$@"
+    fi
+  fi
+}
+
+run_artisan storage:link || true
 
 # Clear/warm caches (idempotent; don’t fail container on errors)
-php artisan config:clear || true
-php artisan route:clear  || true
-php artisan view:clear   || true
-php artisan optimize     || true
+run_artisan config:clear || true
+run_artisan route:clear  || true
+run_artisan view:clear   || true
+run_artisan optimize     || true
+
+# Ensure cache artifacts remain writable by php-fpm workers.
+if [ "$(id -u)" = "0" ]; then
+  chown -R www-data:www-data bootstrap/cache storage/framework storage/logs 2>/dev/null || true
+  chmod -R ug+rwX bootstrap/cache storage/framework storage/logs 2>/dev/null || true
+fi
 
 # Hand off to CMD
 exec "$@"

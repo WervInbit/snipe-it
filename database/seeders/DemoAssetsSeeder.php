@@ -9,6 +9,7 @@ use App\Models\ModelNumberAttribute;
 use App\Models\Category;
 use App\Models\Location;
 use App\Models\Manufacturer;
+use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\TestResult;
@@ -41,6 +42,7 @@ class DemoAssetsSeeder extends Seeder
         $models = $this->seedModelBlueprints();
         $assets = $this->seedAssets($models);
         $this->seedTestRuns($assets);
+        $this->bumpUiStateVersion();
 
         if ($admin) {
             Auth::logout();
@@ -241,6 +243,66 @@ class DemoAssetsSeeder extends Seeder
                 'assigned_to' => null,
                 'supplier' => $suppliers->get('Renewed Supply Co.') ?? $suppliers->first(),
             ],
+            [
+                'tag' => 'DEMO-005',
+                'name' => 'HP ProBook 450 G7',
+                'model_key' => 'HP ProBook 450 G7',
+                'status' => 'QA Hold',
+                'location' => 'QA Station',
+                'notes' => 'Minor hinge play under review before final release.',
+                'assigned_to' => null,
+                'supplier' => $suppliers->first(),
+            ],
+            [
+                'tag' => 'DEMO-006',
+                'name' => 'HP ProBook 450 G6',
+                'model_key' => 'HP ProBook 450 G6',
+                'status' => 'Broken / Parts',
+                'location' => 'Repair Bench',
+                'notes' => 'Motherboard intermittently fails POST; retained for parts.',
+                'assigned_to' => null,
+                'supplier' => $suppliers->first(),
+            ],
+            [
+                'tag' => 'DEMO-007',
+                'name' => 'HP ProBook 430 G6',
+                'model_key' => 'HP ProBook 430 G6',
+                'status' => 'Internal Use',
+                'location' => 'Office',
+                'notes' => 'Allocated to internal bench for intake tooling.',
+                'assigned_to' => $users->get('demo_user'),
+                'supplier' => $suppliers->first(),
+            ],
+            [
+                'tag' => 'DEMO-008',
+                'name' => 'HP ProBook 430 G3',
+                'model_key' => 'HP ProBook 430 G3',
+                'status' => 'Archived',
+                'location' => 'Archive Storage',
+                'notes' => 'Legacy unit retained for historical tracking.',
+                'assigned_to' => null,
+                'supplier' => $suppliers->first(),
+            ],
+            [
+                'tag' => 'DEMO-009',
+                'name' => 'Microsoft Surface Pro 4',
+                'model_key' => 'Microsoft Surface Pro 4',
+                'status' => 'Returned / RMA',
+                'location' => 'Refurb Intake',
+                'notes' => 'Returned after touch flicker report; pending reassessment.',
+                'assigned_to' => null,
+                'supplier' => $suppliers->get('Renewed Supply Co.') ?? $suppliers->first(),
+            ],
+            [
+                'tag' => 'DEMO-010',
+                'name' => 'Microsoft Surface Pro 5',
+                'model_key' => 'Microsoft Surface Pro 5',
+                'status' => 'Sold',
+                'location' => 'Ready to Ship',
+                'notes' => 'Closed sale in latest ecommerce batch.',
+                'assigned_to' => null,
+                'supplier' => $suppliers->get('Renewed Supply Co.') ?? $suppliers->first(),
+            ],
         ];
 
         foreach ($records as $record) {
@@ -252,7 +314,9 @@ class DemoAssetsSeeder extends Seeder
 
             $statusName = $record['status'];
             $statusId = $status->get($statusName);
-            $testsOk = $statusName && str_contains(strtolower($statusName), 'ready for sale');
+            $normalizedStatus = strtolower((string) $statusName);
+            $testsOk = str_contains($normalizedStatus, 'ready for sale')
+                || str_contains($normalizedStatus, 'sold');
 
             $asset = Asset::factory()->create([
                 'asset_tag' => $record['tag'],
@@ -321,6 +385,35 @@ class DemoAssetsSeeder extends Seeder
                 'rear_camera' => ['status' => TestResult::STATUS_PASS, 'note' => 'Triple-camera suite tested in QA harness.'],
                 'wifi' => ['status' => TestResult::STATUS_PASS, 'note' => 'Wi-Fi 6E connectivity verified in lab.'],
             ],
+            'DEMO-005' => [
+                'display' => ['status' => TestResult::STATUS_PASS, 'note' => 'Panel uniformity within tolerance.'],
+                'keyboard' => ['status' => TestResult::STATUS_FAIL, 'note' => 'Backspace key requires higher actuation force.'],
+                'storage' => ['status' => TestResult::STATUS_PASS, 'note' => 'SSD read/write benchmark passed.'],
+            ],
+            'DEMO-006' => [
+                'cpu' => ['status' => TestResult::STATUS_FAIL, 'note' => 'Thermal throttling under sustained load.'],
+                'ram' => ['status' => TestResult::STATUS_PASS, 'note' => 'Memory diagnostics complete.'],
+                'storage' => ['status' => TestResult::STATUS_NVT, 'note' => 'Storage test skipped due to board instability.'],
+            ],
+            'DEMO-007' => [
+                'battery' => ['status' => TestResult::STATUS_PASS, 'note' => 'Battery still above 86% health.'],
+                'wifi' => ['status' => TestResult::STATUS_PASS, 'note' => 'Stable internal network throughput.'],
+                'keyboard' => ['status' => TestResult::STATUS_PASS, 'note' => 'Keyboard validated for office assignment.'],
+            ],
+            'DEMO-008' => [
+                'display' => ['status' => TestResult::STATUS_PASS, 'note' => 'Archived unit display still operational.'],
+                'battery' => ['status' => TestResult::STATUS_FAIL, 'note' => 'Battery below refurbishment threshold.'],
+            ],
+            'DEMO-009' => [
+                'display' => ['status' => TestResult::STATUS_FAIL, 'note' => 'Intermittent touch ghosting reproduced.'],
+                'battery' => ['status' => TestResult::STATUS_PASS, 'note' => 'Battery cycle count acceptable.'],
+                'front_camera' => ['status' => TestResult::STATUS_PASS, 'note' => 'Front camera capture validated.'],
+            ],
+            'DEMO-010' => [
+                'display' => ['status' => TestResult::STATUS_PASS, 'note' => 'Panel validated before sale.'],
+                'battery' => ['status' => TestResult::STATUS_PASS, 'note' => 'Battery diagnostics clean at dispatch.'],
+                'wifi' => ['status' => TestResult::STATUS_PASS, 'note' => 'Wireless connectivity verified before shipment.'],
+            ],
         ];
 
         foreach ($assets as $asset) {
@@ -356,6 +449,17 @@ class DemoAssetsSeeder extends Seeder
             $asset->refresh();
             $asset->refreshTestCompletionFlag();
         }
+    }
+
+    /**
+     * Bump settings.updated_at so hardware index table keys rotate after reseeds.
+     * This prevents stale bootstrap-table state from hiding seeded rows.
+     */
+    private function bumpUiStateVersion(): void
+    {
+        Setting::query()->update([
+            'updated_at' => now(),
+        ]);
     }
 }
 

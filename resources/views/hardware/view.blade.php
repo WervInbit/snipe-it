@@ -594,6 +594,8 @@
                                                                 ->all();
                                                         }
                                                         $selectedStatus = old('status_id', $asset->status_id);
+                                                        $selectedQualityGrade = old('quality_grade', $asset->quality_grade);
+                                                        $qualityOptions = \App\Models\Asset::qualityGradeOptions();
                                                     @endphp
                                                     <form method="POST" action="{{ route('hardware.status.update', $asset) }}" style="margin-top:10px;">
                                                         @csrf
@@ -629,6 +631,22 @@
                                                                 @endforeach
                                                             </select>
                                                             {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                                        </div>
+                                                        <div class="form-group" style="margin-bottom:10px;">
+                                                            <select
+                                                                name="quality_grade"
+                                                                id="quality_grade_detail_{{ $asset->id }}"
+                                                                class="form-control"
+                                                                aria-label="quality_grade"
+                                                            >
+                                                                <option value="">{{ trans('general.quality_grade_unset') }}</option>
+                                                                @foreach($qualityOptions as $value => $label)
+                                                                    <option value="{{ $value }}" {{ (string) $selectedQualityGrade === (string) $value ? 'selected' : '' }}>
+                                                                        {{ $label }}
+                                                                    </option>
+                                                                @endforeach
+                                                            </select>
+                                                            {!! $errors->first('quality_grade', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                                                         </div>
                                                         <div class="form-group" style="margin-bottom:10px;">
                                                             <textarea
@@ -674,6 +692,17 @@
                                                         ]) }}
                                                     </small>
                                                 @endif
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    @if ($asset->quality_grade)
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <strong>{{ trans('general.quality_grade') }}</strong>
+                                            </div>
+                                            <div class="col-md-9">
+                                                {{ $asset->qualityGradeLabel() }}
                                             </div>
                                         </div>
                                     @endif

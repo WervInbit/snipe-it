@@ -50,6 +50,11 @@ class Asset extends Depreciable
     public const LOCATION = 'location';
     public const ASSET = 'asset';
     public const USER = 'user';
+    public const CONDITION_GRADE_ATTRIBUTE_KEY = 'condition_grade';
+    public const QUALITY_GRADE_A = 'grade_a';
+    public const QUALITY_GRADE_B = 'grade_b';
+    public const QUALITY_GRADE_C = 'grade_c';
+    public const QUALITY_GRADE_D = 'grade_d';
 
     use Acceptable;
 
@@ -99,6 +104,7 @@ class Asset extends Depreciable
         'next_audit_date' => 'datetime:m-d-Y',
         'model_id'       => 'integer',
         'model_number_id' => 'integer',
+        'quality_grade'  => 'string',
         'status_id'      => 'integer',
         'category_id'    => 'integer',
         'company_id'     => 'integer',
@@ -116,6 +122,7 @@ class Asset extends Depreciable
         'model_id'          => ['nullable', 'integer', 'exists:models,id,deleted_at,NULL', 'not_array'],
         'model_number_id'   => ['nullable', 'integer', 'exists:model_numbers,id'],
         'status_id'         => ['nullable', 'integer', 'exists:status_labels,id'],
+        'quality_grade'     => ['nullable', 'in:grade_a,grade_b,grade_c,grade_d'],
         'category_id'       => ['nullable', 'integer', 'exists:categories,id'],
         'asset_tag'         => ['nullable', 'min:1', 'max:255', 'unique_undeleted:assets,asset_tag', 'not_array'],
         'name'              => ['nullable', 'max:255'],
@@ -167,6 +174,7 @@ class Asset extends Depreciable
         'location_id',
         'model_id',
         'model_number_id',
+        'quality_grade',
         'category_id',
         'name',
         'notes',
@@ -209,6 +217,26 @@ class Asset extends Depreciable
         }
 
         return $rules;
+    }
+
+    /**
+     * Allowed quality grades and their display labels.
+     *
+     * @return array<string,string>
+     */
+    public static function qualityGradeOptions(): array
+    {
+        return [
+            self::QUALITY_GRADE_A => trans('general.quality_grade_a'),
+            self::QUALITY_GRADE_B => trans('general.quality_grade_b'),
+            self::QUALITY_GRADE_C => trans('general.quality_grade_c'),
+            self::QUALITY_GRADE_D => trans('general.quality_grade_d'),
+        ];
+    }
+
+    public function qualityGradeLabel(): ?string
+    {
+        return static::qualityGradeOptions()[$this->quality_grade] ?? null;
     }
 
     private function stripSerialUniqueness(array|string $rules): array

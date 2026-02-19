@@ -4,6 +4,19 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-02-17
+- Quality grading is now tracked directly on assets via a dedicated hardware-detail dropdown (`Kwaliteit A` to `Kwaliteit D`) instead of being handled through the testing/spec workflow.
+- Added an asset `quality_grade` field with migration-time backfill from legacy `condition_grade` attribute overrides/model defaults.
+- Hardware specification override views now hide the legacy `condition_grade` attribute, and test-type resolution excludes that attribute so grading stays outside test runs.
+- Device catalog condition-grade option labels were renamed to `Kwaliteit A` through `Kwaliteit D`.
+
+### 2026-02-12
+- Dashboard now includes a camera quick-action card (same style as other summary cards) that links directly to the scan page.
+- The dashboard camera card is permission-gated by `scanning` and intentionally uses direct action copy instead of a `View All` footer.
+- Dev seeding now includes a broader refurb dataset (10 demo assets with status spread + test runs) and richer demo user personas with asset visibility enabled for operational roles.
+- Demo guide documentation now matches seeded account names and includes the full `migrate:fresh --seed` reset workflow.
+- Hardware asset list now invalidates stale persisted bootstrap-table state after resets by versioning the table cookie key, preventing "empty assets list" confusion when old filters survive a DB refresh.
+
 ### 2026-02-05
 - QR preview on the hardware detail page now renders the same label layout used for printed PDFs so on-screen previews match the final output.
 - Test run edit links can now target a specific prior run; editing an older run updates its finished timestamp so it becomes the latest run.

@@ -41,12 +41,16 @@ class DatabaseSeeder extends Seeder
 
         Group::updateOrCreate(
             ['name' => 'Refurbisher'],
-            ['permissions' => json_encode(['scanning' => 1])]
+            ['permissions' => json_encode([
+                'assets.view' => 1,
+                'scanning' => 1,
+            ])]
         );
 
         Group::updateOrCreate(
             ['name' => 'Senior Refurbisher'],
             ['permissions' => json_encode([
+                'assets.view'    => 1,
                 'scanning'      => 1,
                 'tests.execute' => 1,
             ])]
@@ -55,6 +59,7 @@ class DatabaseSeeder extends Seeder
         Group::updateOrCreate(
             ['name' => 'Supervisor'],
             ['permissions' => json_encode([
+                'assets.view'    => 1,
                 'scanning'      => 1,
                 'tests.execute' => 1,
                 'assets.create' => 1,
@@ -66,6 +71,7 @@ class DatabaseSeeder extends Seeder
         Group::updateOrCreate(
             ['name' => 'Admin'],
             ['permissions' => json_encode([
+                'assets.view'         => 1,
                 'scanning'           => 1,
                 'tests.execute'      => 1,
                 'assets.create'      => 1,

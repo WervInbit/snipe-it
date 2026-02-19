@@ -25,6 +25,7 @@ use App\Models\CustomField;
 use App\Models\License;
 use App\Models\Location;
 use App\Models\Setting;
+use App\Models\Statuslabel;
 use App\Models\TestResult;
 use App\Models\TestRun;
 use App\Models\User;
@@ -199,6 +200,15 @@ class AssetsController extends Controller
             $assets->TextSearch($request->input('search'));
         }
 
+        // Status IDs in URLs can become stale after DB reseeds. Resolve only valid IDs
+        // so invalid filters do not hide all rows.
+        $requestedStatusId = null;
+        if ($request->filled('status_id')) {
+            $requestedStatusId = Statuslabel::query()
+                ->whereKey((int) $request->input('status_id'))
+                ->value('id');
+        }
+
 
         /**
          * Handle due and overdue audits and checkin dates
@@ -297,7 +307,7 @@ class AssetsController extends Controller
                 break;
             default:
 
-                if ((! $request->filled('status_id')) && ($settings->show_archived_in_list != '1')) {
+                if ((! $requestedStatusId) && ($settings->show_archived_in_list != '1')) {
                     // terrible workaround for complex-query Laravel bug in fulltext
                     $assets->join('status_labels AS status_alias', function ($join) {
                         $join->on('status_alias.id', '=', 'assets.status_id')
@@ -314,8 +324,8 @@ class AssetsController extends Controller
 
 
         // Leave these under the TextSearch scope, else the fuzziness will override the specific ID (status ID, etc) requested
-        if ($request->filled('status_id')) {
-            $assets->where('assets.status_id', '=', $request->input('status_id'));
+        if ($requestedStatusId) {
+            $assets->where('assets.status_id', '=', $requestedStatusId);
         }
 
         if ($request->filled('asset_tag')) {

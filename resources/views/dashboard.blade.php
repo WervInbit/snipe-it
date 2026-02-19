@@ -50,6 +50,26 @@
     </div><!-- ./col -->
     @endcan
 
+    @can('scanning')
+    <div class="col-lg-2 col-xs-6">
+        <a href="{{ route('scan') }}" data-testid="dashboard-scan-card">
+            <div class="dashboard small-box bg-purple">
+                <div class="inner">
+                    <h3>&nbsp;</h3>
+                    <p>{{ trans('general.scan_qr') }}</p>
+                </div>
+                <div class="icon" aria-hidden="true">
+                    <x-icon type="camera" />
+                </div>
+                <span class="small-box-footer">
+                    {{ trans('general.scan_qr') }}
+                    <x-icon type="arrow-circle-right" />
+                </span>
+            </div>
+        </a>
+    </div><!-- ./col -->
+    @endcan
+
     @can('view', \App\Models\License::class)
     <div class="col-lg-2 col-xs-6">
         <a href="{{ route('licenses.index') }}" aria-hidden="true">

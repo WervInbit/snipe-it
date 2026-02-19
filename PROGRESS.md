@@ -1,3 +1,65 @@
+# Session Progress (2026-02-19)
+
+## Addendum (2026-02-19 Codex)
+- Session kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md` before starting work.
+- Created `docs/agents/agents-addendum-2026-02-19-session-init.md` for this session.
+- Re-read recent addenda (`2026-02-17`, `2026-02-12`, `2026-02-10`, `2026-02-05`) to reinitialize context and carry-forward blockers.
+- Current known carry-over: `tests/Feature/Assets/Ui/ReadyForSaleWarningTest.php` still fails on missing `warning` session key; empty-hardware regressions were mitigated via seed/UI/API fixes in prior session.
+
+# Session Progress (2026-02-17)
+
+## Addendum (2026-02-17 Codex)
+- Session kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md` before implementing the quality-grade workflow split.
+- Created `docs/agents/agents-addendum-2026-02-17-session-init.md` for detailed session notes.
+- Added `assets.quality_grade` (migration + backfill) and moved grading to the hardware detail status form as a dedicated dropdown.
+- Quality choices are now standardized as `Kwaliteit A`, `Kwaliteit B`, `Kwaliteit C`, and `Kwaliteit D`.
+- Legacy `condition_grade` is filtered out from spec override/detail displays and excluded from test-type scoping so grading is no longer part of test runs.
+- Added feature coverage for detail-page quality updates (`tests/Feature/Assets/Ui/QualityGradeDetailUpdateTest.php`).
+- Updated `docs/fork-notes.md` for this fork-level workflow change.
+- Validation: `docker compose exec app php artisan migrate --force` (pass, migration `2026_02_17_090000_add_quality_grade_to_assets` applied).
+- Validation: `docker compose exec app php artisan test tests/Feature/Assets/Ui/QualityGradeDetailUpdateTest.php` (pass, 2 tests).
+- Additional check: `docker compose exec app php artisan test tests/Feature/Assets/Ui/ReadyForSaleWarningTest.php` still fails on missing `warning` session key (appears unrelated to this change).
+- Hardened reseed UX guard for the hardware list: `DemoAssetsSeeder` now bumps `settings.updated_at` after seeding so the hardware index table key rotates on every demo reseed (including `db:seed --class=DemoAssetsSeeder`), preventing stale bootstrap-table state from hiding rows.
+- Verification: `docker compose exec app php artisan db:seed --class=DemoAssetsSeeder` (pass), `settings.updated_at` timestamp changed, and `assets=10` confirmed after reseed.
+- Verification: `docker compose exec app php artisan test tests/Feature/Assets/Ui/AssetIndexTest.php` (pass).
+- Hardened `api.assets.index` against stale status filters after reseeds: invalid/nonexistent `status_id` values are now ignored (treated as no status filter) instead of returning an empty list.
+- Added regression coverage in `tests/Feature/Assets/Api/AssetIndexTest.php::testAssetApiIndexIgnoresInvalidStatusIdFilter`.
+- Validation: simulated API request as admin with `status_id=999` now returns `total=8` (previously `total=0`), confirming hardware remains visible even when stale links/bookmarks carry old status IDs.
+- Fixed a frontend blocker that still caused an empty hardware table despite healthy API/data: `resources/lang/nl-NL/tests.php` contained a UTF-8 BOM that was injected into the `data-columns` attribute, triggering a jQuery/bootstrap-table init crash (`Cannot create property 'colspanIndex' on string '﻿'`).
+- Validation: captured browser console before/after with headless Playwright (`SEVERE_COUNT` from `1` to `0`) and confirmed `data-columns` no longer starts with `EF BB BF`.
+- Session close: products are visible again; detailed problems/solutions and handoff notes are documented in `docs/agents/agents-addendum-2026-02-17-session-init.md`.
+
+# Session Progress (2026-02-12)
+
+## Addendum (2026-02-12 Codex)
+- Session kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md` to align with current workflow before starting work.
+- Created `docs/agents/agents-addendum-2026-02-12-session-init.md` for this session's detailed notes.
+- Current task: documentation drift check (`README.md`, `CONTRIBUTING.md`, and `docs/*`) and report findings.
+- Docs audit result: `README.md`, `CONTRIBUTING.md`, and `docs/fork-notes.md` are aligned with current fork workflow/deltas.
+- Follow-up needed: `PROGRESS.md` still contains one malformed historical pasted block with literal `\\n` escapes that should be normalized in a dedicated cleanup pass.
+- Dashboard UX update: added a permission-gated camera quick-action card on the home dashboard that links directly to the scan page and uses a camera glyph (no `View All` footer copy).
+- Added a dedicated `camera` icon mapping in `IconHelper` for dashboard use.
+- Added dashboard scan-card feature coverage and refreshed the existing dashboard access assertion to match current behavior.
+- Validation: `docker compose exec app php artisan test tests/Feature/DashboardTest.php` (pass).
+- Environment recovery: reseeded dev DB via `docker compose exec app php artisan migrate:fresh --seed` after the app redirected to `/setup`; verified `settings_count=1`, `users_count=16`, and root now redirects to `/login` (not `/setup`).
+- Improved dev seeding for daily UX testing:
+- Added assets visibility (`assets.view`) to operational seeded users and aligned role/group seed permissions to include asset visibility.
+- Expanded demo user accounts (`demo_admin`, `demo_supervisor`, `demo_senior_refurbisher`, `demo_refurbisher`, `demo_user`) while keeping existing operational users.
+- Expanded demo asset dataset from 4 to 10 assets across refurbishment statuses (Stand-by, Being Processed, QA Hold, Ready for Sale, Sold, Broken/Parts, Internal Use, Archived, Returned/RMA) with corresponding test runs.
+- Updated `docs/demo-guide.md` so seeded account list and reset commands match actual behavior.
+- Validation: `docker compose exec app php artisan migrate:fresh --seed` (pass), resulting in `assets_count=10`, `users_count=21`, `test_runs_count=10`.
+- Fixed recurring dev UX issue where the assets page can appear empty after reseed/reset despite data existing: bootstrap-table persists state in long-lived cookies, so we now version the hardware index table cookie key to invalidate stale filters after DB resets.
+- Investigated recurring 500s on `/hardware` after reseeds/resets and found a container-level permissions failure writing compiled Blade views (`storage/framework/views/*` permission denied). Root cause was root-owned cache artifacts created during container startup.
+- Implemented a docker dev fix: update `docker/app/entrypoint.sh` to run artisan cache/view operations as `www-data` when the container starts as root and to `chown/chmod` cache directories afterwards; rebuild the `app` image so `/usr/local/bin/entrypoint.sh` matches.
+- Verified current expected dev state: DB seeded (`users=21 settings=1 assets=10`) and `www-data` can write `storage/framework/views` (no more `file_put_contents` permission errors in view compilation).
+
+# Session Progress (2026-02-10)
+
+## Addendum (2026-02-10 Codex)
+- Session kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md` to align with current workflow before starting work.
+- Created `docs/agents/agents-addendum-2026-02-10-session-init.md` for this session's detailed notes.
+- Pending: confirm today's implementation scope and begin logging outcomes.
+
 # Session Progress (2026-02-05)
 
 ## Addendum (2026-02-05 Codex)
@@ -497,7 +559,17 @@ there are multiple duplicate functions that still need to be removed, sku will b
 **Session closed** — 2025-10-28 13:38
 
 
-\n## Notes for Next Session (2025-11-19)\n- TODO: Clean up the QR label sizing/margins once more and validate on hardware (short-term).\n- TODO: Implement one-click direct printing from the asset view to connected/network LabelWriter printers (long-term).\n\n# Session Progress (2025-12-17)\n- Reviewed AGENTS.md, fork-notes, and recent agent addenda before making changes; started this session log for traceability.\n- Investigated the specification details table overflow on narrow mobile widths; identified Bootstrap's responsive table rule forcing `white-space: nowrap` as the cause of horizontal overflow.\n- Added a targeted mobile override to allow spec table cells to wrap within their parent so the block stays inside the asset view at ~327 px widths.\n- Made the scan camera viewport dynamically size itself to the incoming stream aspect ratio while staying within the page frame; height now adapts per device instead of staying at a fixed width/aspect.\n- Removed leftover manual-entry hooks from the scan script that were throwing a runtime error and blocking camera startup after the manual form was dropped.\n- Follow-up: verify the asset view on an A5/phone viewport after cache clears; rerun Laravel view/config caches if needed once deployed.
+## Notes for Next Session (2025-11-19)
+- TODO: Clean up the QR label sizing/margins once more and validate on hardware (short-term).
+- TODO: Implement one-click direct printing from the asset view to connected/network LabelWriter printers (long-term).
+
+# Session Progress (2025-12-17)
+- Reviewed AGENTS.md, fork-notes, and recent agent addenda before making changes; started this session log for traceability.
+- Investigated the specification details table overflow on narrow mobile widths; identified Bootstrap's responsive table rule forcing `white-space: nowrap` as the cause of horizontal overflow.
+- Added a targeted mobile override to allow spec table cells to wrap within their parent so the block stays inside the asset view at ~327 px widths.
+- Made the scan camera viewport dynamically size itself to the incoming stream aspect ratio while staying within the page frame; height now adapts per device instead of staying at a fixed width/aspect.
+- Removed leftover manual-entry hooks from the scan script that were throwing a runtime error and blocking camera startup after the manual form was dropped.
+- Follow-up: verify the asset view on an A5/phone viewport after cache clears; rerun Laravel view/config caches if needed once deployed.
 
 # Session Progress (2026-01-13)
 

@@ -12,6 +12,7 @@ class RolePermissionSeeder extends Seeder
         $user = User::where('username', 'admin')->first() ?? User::factory()->firstAdmin()->create();
 
         $permissions = array_merge((array) json_decode($user->permissions ?? '{}', true), [
+            'assets.view'   => '1',
             'scanning'      => '1',
             'tests.execute' => '1',
             'assets.create' => '1',

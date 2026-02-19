@@ -201,9 +201,10 @@ trait ProvidesDeviceCatalogData
                 'datatype' => AttributeDefinition::DATATYPE_ENUM,
                 'categories' => ['Laptops', 'Mobile Phones'],
                 'options' => [
-                    ['value' => 'grade_a', 'label' => 'A-kwaliteit'],
-                    ['value' => 'grade_b', 'label' => 'B-kwaliteit'],
-                    ['value' => 'grade_c', 'label' => 'C-kwaliteit'],
+                    ['value' => 'grade_a', 'label' => 'Kwaliteit A'],
+                    ['value' => 'grade_b', 'label' => 'Kwaliteit B'],
+                    ['value' => 'grade_c', 'label' => 'Kwaliteit C'],
+                    ['value' => 'grade_d', 'label' => 'Kwaliteit D'],
                 ],
                 'allow_asset_override' => true,
             ],

@@ -75,7 +75,9 @@
                 undefinedText: '',
                 iconsPrefix: 'fa',
                 cookieStorage: '{{ config('session.bs_table_storage') }}',
-                cookie: true,
+                // Allow per-table opt-out via data-cookie="false" to prevent confusing persisted state
+                // (especially in dev environments where the DB is frequently reseeded/reset).
+                cookie: data_with_default('cookie', true),
                 cookieExpire: '2y',
                 search: data_with_default('search', true),
                 advancedSearch: data_with_default('advanced-search', true),
@@ -95,7 +97,8 @@
                 maintainSelected: data_with_default('maintain-selected', true),
                 trimOnSearch: false,
                 showSearchClearButton: data_with_default('show-search-clear-button', true),
-                addrbar: {{ (config('session.bs_table_addrbar') == 'true') ? 'true' : 'false'}}, // deeplink search phrases, sorting, etc
+                // Allow per-table overrides via data-addrbar="false" to avoid "sticky" URL state across resets.
+                addrbar: data_with_default('addrbar', {{ (config('session.bs_table_addrbar') == 'true') ? 'true' : 'false'}}), // deeplink search phrases, sorting, etc
                 paginationFirstText: "{{ trans('general.first') }}",
                 paginationLastText: "{{ trans('general.last') }}",
                 paginationPreText: "{{ trans('general.previous') }}",
@@ -129,8 +132,22 @@
                 locale: '{{ app()->getLocale() }}',
                 exportOptions: export_options,
                 exportTypes: ['xlsx', 'excel', 'csv', 'pdf', 'json', 'xml', 'txt', 'sql', 'doc'],
-                onLoadSuccess: function () { // possible 'fixme'? this might be for contents, not for headers?
+                onLoadSuccess: function (data) { // possible 'fixme'? this might be for contents, not for headers?
                     $('[data-tooltip="true"]').tooltip(); // Needed to attach tooltips after ajax call
+
+                    // If bootstrap-table state persists a page/offset beyond the (new) total after reseeds/resets,
+                    // it can render an empty list even though rows exist. Snap back to page 1 in that case.
+                    try {
+                        if (data && data.total > 0 && (!data.rows || data.rows.length === 0)) {
+                            var table = $(this);
+                            var opts = table.bootstrapTable('getOptions') || {};
+                            if (opts.pageNumber && opts.pageNumber > 1) {
+                                table.bootstrapTable('selectPage', 1);
+                            }
+                        }
+                    } catch (e) {
+                        // Best-effort only; never block table render.
+                    }
                 },
                 onPostHeader: function () {
                     var lookup = {};

@@ -4,6 +4,7 @@ namespace Tests\Feature\Assets\Api;
 
 use App\Models\Asset;
 use App\Models\Company;
+use App\Models\Statuslabel;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Testing\Fluent\AssertableJson;
@@ -207,5 +208,19 @@ class AssetIndexTest extends TestCase
             ->getJson(route('api.assets.index'))
             ->assertResponseDoesNotContainInRows($assetA, 'asset_tag')
             ->assertResponseContainsInRows($assetB, 'asset_tag');
+    }
+
+    public function testAssetApiIndexIgnoresInvalidStatusIdFilter()
+    {
+        $visibleAsset = Asset::factory()->create();
+        $archivedAsset = Asset::factory()->create([
+            'status_id' => Statuslabel::factory()->archived()->create()->id,
+        ]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->getJson(route('api.assets.index', ['status_id' => 999999]))
+            ->assertOk()
+            ->assertResponseContainsInRows($visibleAsset, 'asset_tag')
+            ->assertResponseDoesNotContainInRows($archivedAsset, 'asset_tag');
     }
 }

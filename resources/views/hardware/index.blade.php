@@ -46,6 +46,11 @@
 
 {{-- Page content --}}
 @section('content')
+@php
+    $assetsTableScope = request()->has('status') ? e(request()->input('status')) : '';
+    $assetsTableVersion = optional($snipeSettings->updated_at)->timestamp;
+    $assetsTableId = $assetsTableScope.'assetsListingTable'.($assetsTableVersion ? '_'.$assetsTableVersion : '');
+@endphp
 
 <div class="row">
   <div class="col-md-12">
@@ -59,9 +64,11 @@
                    
               <table
                 data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-                data-cookie-id-table="{{ request()->has('status') ? e(request()->input('status')) : ''  }}assetsListingTable"
-                data-id-table="{{ request()->has('status') ? e(request()->input('status')) : ''  }}assetsListingTable"
-                data-search-text="{{ e(Session::get('search')) }}"
+                data-cookie-id-table="{{ $assetsTableId }}"
+                data-id-table="{{ $assetsTableId }}"
+                data-cookie="false"
+                data-addrbar="false"
+                data-search-text="{{ e(request()->query('search', '')) }}"
                 data-side-pagination="server"
                 data-show-footer="true"
                 data-sort-order="asc"
@@ -70,7 +77,7 @@
                 data-bulk-button-id="#bulkAssetEditButton"
                 data-bulk-form-id="#assetsBulkForm"
                 data-buttons="assetButtons"
-                id="{{ request()->has('status') ? e(request()->input('status')) : ''  }}assetsListingTable"
+                id="{{ $assetsTableId }}"
                 class="table table-striped snipe-table"
                 data-url="{{ route('api.assets.index',
                     array('status' => e(Request::get('status')),

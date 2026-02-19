@@ -30,6 +30,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use League\Csv\Reader;
 use Illuminate\Contracts\View\View;
@@ -376,7 +377,11 @@ class AssetsController extends Controller
         $this->authorize($asset);
         session()->put('back_url', url()->previous());
         $asset->loadMissing('model.modelNumbers', 'modelNumber');
-        $specAttributes = $asset->model ? $resolver->resolveForAsset($asset) : collect();
+        $specAttributes = $asset->model
+            ? $resolver->resolveForAsset($asset)
+                ->reject(fn ($attribute) => $attribute->definition->key === Asset::CONDITION_GRADE_ATTRIBUTE_KEY)
+                ->values()
+            : collect();
         $modelNumbers = $asset->model ? $this->availableModelNumbersFor($asset->model, $asset->model_number_id) : collect();
         $selectedModelNumber = $asset->modelNumber ?? $asset->model?->primaryModelNumber;
         $testSummary = $asset->latestTestIssueSummary();
@@ -430,7 +435,10 @@ class AssetsController extends Controller
                 'tests.user',
             ]);
 
-            $resolvedAttributes = app(\App\Services\ModelAttributes\EffectiveAttributeResolver::class)->resolveForAsset($asset);
+            $resolvedAttributes = app(\App\Services\ModelAttributes\EffectiveAttributeResolver::class)
+                ->resolveForAsset($asset)
+                ->reject(fn ($attribute) => $attribute->definition->key === Asset::CONDITION_GRADE_ATTRIBUTE_KEY)
+                ->values();
             $testSummary = $asset->latestTestIssueSummary();
 
             return view('hardware/view', compact('asset', 'settings'))
@@ -457,6 +465,7 @@ class AssetsController extends Controller
         $validated = $request->validate([
             'status_id' => ['required', 'integer', 'exists:status_labels,id'],
             'status_change_note' => ['nullable', 'string', 'max:65535'],
+            'quality_grade' => ['nullable', Rule::in(array_keys(Asset::qualityGradeOptions()))],
             'ack_failed_tests' => ['nullable', 'boolean'],
         ]);
 
@@ -488,6 +497,7 @@ class AssetsController extends Controller
         }
 
         $asset->status_id = $validated['status_id'];
+        $asset->quality_grade = $validated['quality_grade'] ?? null;
         $asset->withStatusChangeNote($validated['status_change_note'] ?? null);
 
         if ($status && ($status->getStatuslabelType() != 'pending') && ($status->getStatuslabelType() != 'deployable') && ($target = $asset->assignedTo)) {

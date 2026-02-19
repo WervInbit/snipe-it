@@ -12,11 +12,12 @@ use Tests\TestCase;
 
 class DashboardTest extends TestCase
 {
-    public function testUsersWithoutAdminAccessAreRedirected()
+    public function testUsersWithoutAdminAccessCanViewDashboard()
     {
         $this->actingAs(User::factory()->create())
             ->get(route('home'))
-            ->assertRedirect(route('view-assets'));
+            ->assertOk()
+            ->assertViewIs('dashboard');
     }
 
     public function testCountsAreLoadedCorrectlyForAdmins()
@@ -52,5 +53,37 @@ class DashboardTest extends TestCase
 
                 return true;
             });
+    }
+
+    public function testDashboardShowsScanCardWhenUserHasScanningPermission()
+    {
+        $user = User::factory()->create([
+            'permissions' => json_encode([
+                'admin' => '1',
+                'assets.view' => '1',
+                'scanning' => '1',
+            ]),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('home'))
+            ->assertOk()
+            ->assertSee('data-testid="dashboard-scan-card"', false)
+            ->assertSee(route('scan'));
+    }
+
+    public function testDashboardHidesScanCardWhenUserLacksScanningPermission()
+    {
+        $user = User::factory()->create([
+            'permissions' => json_encode([
+                'admin' => '1',
+                'assets.view' => '1',
+            ]),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('home'))
+            ->assertOk()
+            ->assertDontSee('data-testid="dashboard-scan-card"', false);
     }
 }

@@ -201,6 +201,8 @@ class IconHelper
                 return 'fa-solid fa-vial';
             case 'scan':
                 return 'fa-solid fa-qrcode';
+            case 'camera':
+                return 'fa-solid fa-camera';
         }
     }
 }

@@ -96,6 +96,7 @@ class TestType extends SnipeModel
         $resolved = $resolver->resolveForAsset($asset);
 
         $attributeIds = $resolved
+            ->reject(fn ($attribute) => $attribute->definition->key === Asset::CONDITION_GRADE_ATTRIBUTE_KEY)
             ->map(fn ($attribute) => $attribute->definition->id)
             ->unique()
             ->all();

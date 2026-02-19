@@ -360,6 +360,9 @@ class AssetModelsController extends Controller
         $attributes = $asset
             ? $resolver->resolveForAsset($asset, $selectedModelNumber)
             : $resolver->resolveForModelNumber($selectedModelNumber);
+        $attributes = $attributes
+            ->reject(fn ($attribute) => $attribute->definition->key === Asset::CONDITION_GRADE_ATTRIBUTE_KEY)
+            ->values();
 
         return view('hardware.partials.spec-overrides', [
             'attributes' => $attributes,
