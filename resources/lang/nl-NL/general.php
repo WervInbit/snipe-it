@@ -36,7 +36,7 @@ return [
     'audit'				    => 'Audit',
     'audits'				=> 'Audits',
     'audit_report'			=> 'Auditlogboek',
-    'assets'				=> 'Activa',
+    'assets'				=> 'Apparaten',
     'assets_audited'        => 'objecten gecontroleerd',
     'assets_checked_in_count'     => 'objecten ingecheckt',
     'assets_checked_out_count'     => 'objecten uitgecheckt',

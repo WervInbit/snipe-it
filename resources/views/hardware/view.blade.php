@@ -11,18 +11,26 @@
 
 @push('css')
 <style>
-.spec-override td {
-    background-color: #eef5ff;
+.spec-detail-row {
+    border-top: 1px solid #e5e7eb;
+    margin-top: 8px;
+    padding-top: 8px;
 }
-.spec-override td:first-child {
+.spec-detail-row .col-md-3,
+.spec-detail-row .col-md-9 {
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+.spec-detail-row--override {
+    background-color: #eef5ff;
     border-left: 4px solid #337ab7;
 }
-.spec-table { table-layout: auto; width: 100%; }
-.spec-table td,
-.spec-table th { white-space: normal; word-break: break-word; }
-.spec-label-cell { font-weight: 600; }
-.spec-value-cell { overflow-wrap: anywhere; word-break: break-word; }
-.spec-table-responsive { width: 100%; overflow-x: hidden; }
+.spec-detail-label {
+    font-weight: 600;
+}
+.spec-detail-meta {
+    margin-top: 6px;
+}
 .test-photo-strip {
     display: flex;
     flex-wrap: nowrap;
@@ -44,27 +52,6 @@
     width: auto;
     height: auto;
     object-fit: contain;
-}
-@media (max-width: 800px) {
-    .spec-table-responsive > .spec-table > tbody > tr > td,
-    .spec-table-responsive > .spec-table > tbody > tr > th {
-        white-space: normal !important;
-        word-break: break-word;
-        overflow-wrap: anywhere;
-    }
-    .spec-table { display: block; width: 100%; max-width: 100%; border-collapse: collapse; margin-bottom: 0; }
-    .spec-table tr { display: block; margin-bottom: 10px; width: 100%; }
-    .spec-table td,
-    .spec-table th {
-        display: block;
-        width: 100%;
-        padding: 4px 6px;
-        border: none;
-        box-sizing: border-box;
-    }
-    .spec-table td + td { padding-top: 2px; }
-    .spec-override td { border-left: none; }
-    .spec-inline-break { display: block; height: 2px; }
 }
 </style>
 @endpush
@@ -749,42 +736,37 @@
                                             <div class="col-md-3">
                                                 <strong>{{ __('Specification') }}</strong>
                                             </div>
-                                            <div class="col-md-9">
-                                                <div class="table-responsive spec-table-responsive">
-                                                    <table class="table table-condensed spec-table">
-                                                        <tbody>
-                                                        @foreach($resolvedAttributes as $attribute)
-                                                            @php
-                                                                $displayValue = $attribute->formattedValue();
-                                                                $modelDisplay = $attribute->formattedModelValue();
-                                                                $isOverride = $attribute->isOverride;
-                                                            @endphp
-                                                            <tr class="{{ $isOverride ? 'spec-override' : '' }}">
-                                                                <td class="spec-label-cell">{{ $attribute->definition->label }}</td>
-                                                                <td class="spec-value-cell">
-                                                                    @if($displayValue !== null && $displayValue !== '')
-                                                                        {{ $displayValue }}
-                                                                    @else
-                                                                        {{ __('Not specified') }}
-                                                                    @endif
+                                            <div class="col-md-9"></div>
+                                        </div>
+                                        @foreach($resolvedAttributes as $attribute)
+                                            @php
+                                                $displayValue = $attribute->formattedValue();
+                                                $modelDisplay = $attribute->formattedModelValue();
+                                                $isOverride = $attribute->isOverride;
+                                            @endphp
+                                            <div class="row spec-detail-row {{ $isOverride ? 'spec-detail-row--override' : '' }}">
+                                                <div class="col-md-3">
+                                                    <span class="spec-detail-label">{{ $attribute->definition->label }}</span>
+                                                </div>
+                                                <div class="col-md-9">
+                                                    @if($displayValue !== null && $displayValue !== '')
+                                                        {{ $displayValue }}
+                                                    @else
+                                                        {{ __('Not specified') }}
+                                                    @endif
 
-                                                                    @if($isOverride)
-                                                                        <span class="spec-inline-break"></span>
-                                                                        <span class="label label-info">{{ __('Override') }}</span>
-                                                                    @endif
+                                                    @if($isOverride)
+                                                        <div class="spec-detail-meta">
+                                                            <span class="label label-info">{{ __('Override') }}</span>
+                                                        </div>
+                                                    @endif
 
-                                                                    @if($isOverride && $modelDisplay)
-                                                                        <span class="spec-inline-break"></span>
-                                                                        <span class="text-muted">({{ __('Model: :value', ['value' => $modelDisplay]) }})</span>
-                                                                    @endif
-                                                                </td>
-                                                            </tr>
-                                                        @endforeach
-                                                        </tbody>
-                                                    </table>
+                                                    @if($isOverride && $modelDisplay)
+                                                        <div class="spec-detail-meta text-muted">{{ __('Model: :value', ['value' => $modelDisplay]) }}</div>
+                                                    @endif
                                                 </div>
                                             </div>
-                                        </div>
+                                        @endforeach
                                     @endif
 
                                     @if ($asset->last_checkout!='')

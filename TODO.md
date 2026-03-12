@@ -5,4 +5,5 @@
 - [ ] Improve mobile scan feedback and close-range behavior (currently gets stuck with no feedback).
 - [ ] Decide user naming + email standards with manager and document the agreed convention.
 - [ ] Decide whether to auto-calculate battery health percent from max/current capacity (and which fields/units to standardize).
+- [ ] Decide terminology in UI/docs: keep "tests" or rename user-facing wording to "tasks" where steps are execution actions (for example cleaning/installing drivers), while keeping technical model names stable unless explicitly migrated.
 

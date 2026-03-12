@@ -198,9 +198,9 @@ class IconHelper
                 return 'fas fa-sticky-note';
             case 'tests':
             case 'test-types':
-                return 'fa-solid fa-vial';
+                return 'fa-regular fa-clipboard';
             case 'scan':
-                return 'fa-solid fa-qrcode';
+                return 'fa-solid fa-camera';
             case 'camera':
                 return 'fa-solid fa-camera';
         }
