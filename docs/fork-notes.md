@@ -11,6 +11,8 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 - Added client-side image previews for model-number image uploads and replacement file selection in admin UI.
 - Hardened model-number image ordering integrity: appended uploads now start at sort order `0`, and reorder submissions must include the full image ID set for the model number.
 - Reworked model-number image editing into a single-save UX on edit screens: image captions, replacements, reorder state, staged removals, and new uploads now persist with the main model-number save instead of separate image-level save buttons.
+- Removed the now-obsolete standalone admin model-number image CRUD/reorder route path from the web UI, keeping the single-save model-number update flow as the only admin write path.
+- API model-number image creation now defaults the first created image to `sort_order = 0` when no explicit order is supplied.
 - Added explicit destructive-command governance to `AGENTS.md`: shared dev DB destructive actions require in-message approval and preflight context output before execution.
 
 ### 2026-03-12

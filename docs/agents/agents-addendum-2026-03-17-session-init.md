@@ -70,3 +70,13 @@
 - `docker compose exec app php -l app/Services/ModelNumberImageSyncService.php` (pass).
 - `docker compose exec app php -l app/Http/Controllers/Admin/ModelNumberController.php` (pass).
 - `docker compose exec app php -l app/Http/Controllers/Admin/ModelNumberSettingsController.php` (pass).
+
+## Session Updates (Production Cleanup)
+- Reviewed remaining uncommitted image-admin/API diffs against production impact.
+- Removed the obsolete standalone admin model-number image controller and web routes after confirming no remaining references to `model_numbers.images.*` in app/views/tests/routes.
+- Kept the API-side first-image ordering fix in `Api\ModelNumberImagesController` so API-created model-number image sets start at `sort_order = 0`.
+- Added `tests/Feature/Assets/Api/ModelNumberImagesApiTest.php` to cover the API create-order default.
+- Validation:
+- `docker compose exec app php artisan test tests/Feature/Assets/Api/ModelNumberImagesApiTest.php` (pass, serial run).
+- `docker compose exec app php -l app/Http/Controllers/Api/ModelNumberImagesController.php` (pass).
+- `docker compose exec app php -l routes/web.php` (pass).

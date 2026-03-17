@@ -30,7 +30,6 @@ use App\Http\Controllers\Admin\TestTypeController as AdminTestTypeController;
 use App\Http\Controllers\Admin\AttributeDefinitionsController;
 use App\Http\Controllers\Admin\AttributeOptionsController;
 use App\Http\Controllers\Admin\ModelNumberController;
-use App\Http\Controllers\Admin\ModelNumberImageController;
 use App\Http\Controllers\Admin\ModelNumberSettingsController;
 use App\Http\Controllers\Admin\ModelNumberAttributeController;
 use App\Http\Controllers\Admin\ModelSpecificationController;
@@ -139,10 +138,6 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('models/{model}/model-numbers/{modelNumber}', [ModelNumberController::class, 'update'])->name('models.numbers.update');
     Route::delete('models/{model}/model-numbers/{modelNumber}', [ModelNumberController::class, 'destroy'])->name('models.numbers.destroy');
     Route::patch('models/{model}/model-numbers/{modelNumber}/primary', [ModelNumberController::class, 'makePrimary'])->name('models.numbers.primary');
-    Route::post('model-numbers/{modelNumber}/images', [ModelNumberImageController::class, 'store'])->name('model_numbers.images.store');
-    Route::put('model-numbers/{modelNumber}/images/{modelNumberImage}', [ModelNumberImageController::class, 'update'])->name('model_numbers.images.update');
-    Route::delete('model-numbers/{modelNumber}/images/{modelNumberImage}', [ModelNumberImageController::class, 'destroy'])->name('model_numbers.images.destroy');
-
     Route::resource('manufacturers', ManufacturersController::class);
 
     /*

@@ -50,9 +50,10 @@ class ModelNumberImagesController extends Controller
         $filename = $modelNumber->id.'_'.Str::uuid().'.'.$file->getClientOriginalExtension();
         $path = $file->storeAs('model_numbers/'.$modelNumber->id, $filename, 'public');
 
+        $maxSortOrder = $modelNumber->images()->max('sort_order');
         $sortOrder = $request->filled('sort_order')
             ? (int) $request->input('sort_order')
-            : ((int) $modelNumber->images()->max('sort_order') + 1);
+            : ($maxSortOrder === null ? 0 : ((int) $maxSortOrder + 1));
 
         $image = $modelNumber->images()->create([
             'file_path' => $path,
