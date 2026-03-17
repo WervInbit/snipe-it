@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AssetModel;
 use App\Models\ModelNumber;
+use App\Services\ModelNumberImageSyncService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -67,12 +68,17 @@ class ModelNumberController extends Controller
         ]);
     }
 
-    public function update(Request $request, AssetModel $model, ModelNumber $modelNumber): RedirectResponse
+    public function update(
+        Request $request,
+        AssetModel $model,
+        ModelNumber $modelNumber,
+        ModelNumberImageSyncService $imageSyncService
+    ): RedirectResponse
     {
         $this->authorize('update', $model);
         $this->ensureModelNumber($model, $modelNumber);
 
-        $data = $this->validate($request, [
+        $data = $this->validate($request, array_merge([
             'code' => [
                 'required',
                 'string',
@@ -84,7 +90,7 @@ class ModelNumberController extends Controller
             'label' => ['nullable', 'string', 'max:255'],
             'status' => ['required', 'in:active,deprecated'],
             'make_primary' => ['nullable', 'boolean'],
-        ]);
+        ], $imageSyncService->validationRules()));
 
         if ($data['status'] === 'deprecated' && $model->primary_model_number_id === $modelNumber->id) {
             return redirect()
@@ -107,6 +113,8 @@ class ModelNumberController extends Controller
         if ($request->boolean('make_primary')) {
             $this->setPrimaryModelNumber($model, $modelNumber);
         }
+
+        $imageSyncService->sync($modelNumber, $request, $data);
 
         return redirect()
             ->route('models.show', $model)

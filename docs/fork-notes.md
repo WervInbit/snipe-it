@@ -7,6 +7,11 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 ### 2026-03-17
 - Added admin UI management for model-number default images on model-number edit screens (upload, caption update, sort-order update, replacement, and delete actions).
 - Added web routes/controller flow for model-number image CRUD in the authenticated settings/model management UX.
+- Updated model-number image ordering UX to drag-and-drop (with save action) instead of manual numeric order inputs, using a pointer-event handle that supports both mouse and touch interactions.
+- Added client-side image previews for model-number image uploads and replacement file selection in admin UI.
+- Hardened model-number image ordering integrity: appended uploads now start at sort order `0`, and reorder submissions must include the full image ID set for the model number.
+- Reworked model-number image editing into a single-save UX on edit screens: image captions, replacements, reorder state, staged removals, and new uploads now persist with the main model-number save instead of separate image-level save buttons.
+- Added explicit destructive-command governance to `AGENTS.md`: shared dev DB destructive actions require in-message approval and preflight context output before execution.
 
 ### 2026-03-12
 - Added an image-source workflow for hardware with explicit override control: assets now support `image_override_enabled` to switch between model-number defaults and asset-specific override images.

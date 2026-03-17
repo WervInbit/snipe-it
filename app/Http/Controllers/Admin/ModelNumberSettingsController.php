@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AssetModel;
 use App\Models\ModelNumber;
+use App\Services\ModelNumberImageSyncService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -111,19 +112,23 @@ class ModelNumberSettingsController extends Controller
             ->with('success', __('Model number added.'));
     }
 
-    public function update(Request $request, ModelNumber $modelNumber): RedirectResponse
+    public function update(
+        Request $request,
+        ModelNumber $modelNumber,
+        ModelNumberImageSyncService $imageSyncService
+    ): RedirectResponse
     {
         $model = $modelNumber->model;
         $this->authorize('update', $model);
 
-        $data = $request->validate([
+        $data = $request->validate(array_merge([
             'code' => ['required', 'string', 'max:255', Rule::unique('model_numbers', 'code')
                 ->ignore($modelNumber->id)
                 ->where('model_id', $modelNumber->model_id)],
             'label' => ['nullable', 'string', 'max:255'],
             'status' => ['required', 'in:active,deprecated'],
             'make_primary' => ['nullable', 'boolean'],
-        ]);
+        ], $imageSyncService->validationRules()));
 
         if ($data['status'] === 'deprecated' && $model->primary_model_number_id === $modelNumber->id) {
             return redirect()
@@ -149,6 +154,8 @@ class ModelNumberSettingsController extends Controller
                 'model_number' => $modelNumber->code,
             ])->save();
         }
+
+        $imageSyncService->sync($modelNumber, $request, $data);
 
         return redirect()
             ->route('settings.model_numbers.index')

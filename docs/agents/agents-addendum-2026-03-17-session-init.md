@@ -27,3 +27,46 @@
 - image-source backend/API schema and behavior.
 - model-number image admin UI + routes + controller.
 - feature/unit tests and fork/session documentation updates.
+
+## Session Updates (Post-Verification)
+- Implemented drag-and-drop ordering in the model-number image admin UI (replacing manual numeric order entry in the form UX).
+- Added a dedicated reorder endpoint in web admin flow: `PATCH model-numbers/{modelNumber}/images/reorder`.
+- Added upload image preview for the new-image input and replacement preview for per-row image replacement inputs.
+- Updated settings feature coverage to test reorder payload behavior through `ModelNumberImageController::reorder`.
+- Validation:
+- `php -l app/Http/Controllers/Admin/ModelNumberImageController.php` (pass).
+- `php artisan test tests/Feature/Settings/ModelNumberImageManagementTest.php` (pass).
+- Added policy-based destructive command enforcement in `AGENTS.md`:
+- destructive DB commands on shared dev require explicit user approval in the active message.
+- DB preflight context must be shown before any destructive execution (`APP_ENV`, `DB_CONNECTION`, `DB_DATABASE`).
+- Updated `docs/demo-guide.md` and `docs/DEMO.md` to align with explicit-approval policy rather than wrapper tooling.
+
+## Session Updates (UI Recheck And Hardening)
+- Re-reviewed the model-number image admin implementation after user-reported reorder failures and confirmed the original native `<tr>` drag approach was too brittle for real browser use.
+- Replaced row-native drag behavior with a pointer-event handle implementation so reordering works through the visible handle and supports touch as well as mouse interaction.
+- Enlarged the drag handle hit target and retained explicit save-order behavior after DOM reorder.
+- Fixed route-level test coverage to hit the actual web routes instead of directly invoking controller methods; corrected the CSRF middleware disabling to target `App\Http\Middleware\VerifyCsrfToken`.
+- Fixed upload append ordering so the first image starts at `sort_order = 0` instead of `1`.
+- Hardened admin reorder validation so payloads must include the full image set for that model number; partial payloads now fail with an order error rather than leaving stale ordering behind.
+- Validation:
+- `docker compose exec app php artisan test tests/Feature/Settings/ModelNumberImageManagementTest.php` (pass, 4 tests / 20 assertions).
+- `docker compose exec app php artisan test tests/Feature/Assets/Api/AssetImagesApiTest.php` (pass when rerun serially; avoid parallel sqlite-backed test jobs in this environment).
+
+## Session Updates (Single-Save UX Rework)
+- Reworked the model-number image admin UI to remove separate image save actions from the page UX.
+- Image captions, replacements, reorder state, staged removals, and new-image upload now bind to the main `create-form` and persist when the model number itself is saved.
+- Added `App\Services\ModelNumberImageSyncService` so both edit entry points (`settings.model_numbers.update` and `models.numbers.update`) share the same image synchronization behavior.
+- Replaced immediate delete buttons with staged `Remove` / `Undo Remove` toggles to keep the page on a single-save mental model.
+- Corrected the settings edit page script stack from `scripts` to `js` so page-specific JS is actually rendered by the layout.
+- Updated focused settings coverage to validate the integrated save flow for:
+- page rendering of the integrated image manager,
+- new image upload,
+- caption update + reorder,
+- staged removal,
+- image replacement,
+- partial payload rejection.
+- Validation:
+- `docker compose exec app php artisan test tests/Feature/Settings/ModelNumberImageManagementTest.php` (pass, 6 tests / 31 assertions).
+- `docker compose exec app php -l app/Services/ModelNumberImageSyncService.php` (pass).
+- `docker compose exec app php -l app/Http/Controllers/Admin/ModelNumberController.php` (pass).
+- `docker compose exec app php -l app/Http/Controllers/Admin/ModelNumberSettingsController.php` (pass).

@@ -71,7 +71,7 @@
     @include('models.model_numbers.partials.images-manager', ['modelNumber' => $modelNumber])
 @endsection
 
-@push('scripts')
+@push('js')
     <script nonce="{{ csrf_token() }}">
         $(function () {
             $('.select2').select2();
