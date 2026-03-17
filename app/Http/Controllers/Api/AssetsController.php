@@ -718,6 +718,22 @@ class AssetsController extends Controller
         return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/hardware/message.does_not_exist')), 200);
     }
 
+    public function images(Asset $asset): JsonResponse
+    {
+        $this->authorize('view', $asset);
+
+        $asset->loadMissing('images', 'model', 'modelNumber');
+
+        $resolved = $asset->resolvedImagePayload();
+
+        return response()->json(Helper::formatStandardApiResponse('success', [
+            'asset_id' => (int) $asset->id,
+            'image_override_enabled' => (bool) $asset->image_override_enabled,
+            'source' => $resolved['source'],
+            'images' => $resolved['images'],
+        ], trans('general.saved')));
+    }
+
     public function licenses(Request $request, $id): array
     {
         $this->authorize('view', Asset::class);

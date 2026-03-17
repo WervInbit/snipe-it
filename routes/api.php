@@ -514,6 +514,13 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             ]
         )->name('api.assets.latest-test-summary');
 
+        Route::get('{asset}/images',
+            [
+                Api\AssetsController::class,
+                'images'
+            ]
+        )->name('api.assets.images');
+
 
 
         // This gets the "due or overdue" API endpoints for audit/audits and checkins
@@ -846,6 +853,39 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         'parameters' => ['model' => 'model_id'],
         ]
         ); // end asset models API routes
+
+        /**
+        * Model number image API routes
+        */
+        Route::group(['prefix' => 'model-numbers'], function () {
+            Route::get('{modelNumber}/images',
+                [
+                    Api\ModelNumberImagesController::class,
+                    'index'
+                ]
+            )->name('api.model-numbers.images.index');
+
+            Route::post('{modelNumber}/images',
+                [
+                    Api\ModelNumberImagesController::class,
+                    'store'
+                ]
+            )->name('api.model-numbers.images.store');
+
+            Route::put('{modelNumber}/images/{modelNumberImage}',
+                [
+                    Api\ModelNumberImagesController::class,
+                    'update'
+                ]
+            )->name('api.model-numbers.images.update');
+
+            Route::delete('{modelNumber}/images/{modelNumberImage}',
+                [
+                    Api\ModelNumberImagesController::class,
+                    'destroy'
+                ]
+            )->name('api.model-numbers.images.destroy');
+        });
 
         /**
         * Settings API routes

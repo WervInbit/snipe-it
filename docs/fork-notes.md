@@ -4,6 +4,18 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-03-17
+- Added admin UI management for model-number default images on model-number edit screens (upload, caption update, sort-order update, replacement, and delete actions).
+- Added web routes/controller flow for model-number image CRUD in the authenticated settings/model management UX.
+
+### 2026-03-12
+- Added an image-source workflow for hardware with explicit override control: assets now support `image_override_enabled` to switch between model-number defaults and asset-specific override images.
+- Added ordered metadata to asset images (`sort_order`) plus source tracing (`source`, optional `source_photo_id`) so downstream consumers can reliably render image galleries.
+- Added `model_number_images` to store ordered default image sets per model number (with migration-time backfill from existing model image values).
+- Added webshop-oriented API endpoint `GET /api/v1/hardware/{asset}/images` that returns the active image source and ordered image payload.
+- Added API CRUD endpoints for model-number default images: `GET/POST/PUT/DELETE /api/v1/model-numbers/{modelNumber}/images`.
+- Added test-photo promotion route for refurb flows: `POST /hardware/{asset}/tests/{testRun}/results/{result}/photos/{photo}/promote`, allowing a captured test photo to become an asset override image.
+
 ### 2026-02-17
 - Quality grading is now tracked directly on assets via a dedicated hardware-detail dropdown (`Kwaliteit A` to `Kwaliteit D`) instead of being handled through the testing/spec workflow.
 - Added an asset `quality_grade` field with migration-time backfill from legacy `condition_grade` attribute overrides/model defaults.

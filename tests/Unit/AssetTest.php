@@ -5,6 +5,7 @@ use App\Http\Controllers\Assets\BulkAssetsController;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Category;
+use App\Models\ModelNumberImage;
 use App\Models\Statuslabel;
 use App\Models\User;
 use Carbon\Carbon;
@@ -240,6 +241,40 @@ class AssetTest extends TestCase
 
         $this->assertFalse($asset->refresh()->getImageUrl());
     }
+
+    public function testGetImageUrlPrefersModelNumberDefaultWhenOverrideDisabled()
+    {
+        $urlBase = config('filesystems.disks.public.url');
+
+        $model = AssetModel::factory()->create(['image' => 'asset-model-image.jpg']);
+        $primaryNumber = $model->ensurePrimaryModelNumber();
+
+        $asset = Asset::factory()->for($model, 'model')->create([
+            'image' => 'asset-image.jpg',
+            'model_number_id' => $primaryNumber->id,
+            'image_override_enabled' => false,
+        ]);
+
+        ModelNumberImage::create([
+            'model_number_id' => $primaryNumber->id,
+            'file_path' => 'model_numbers/'.$primaryNumber->id.'/default-front.jpg',
+            'caption' => 'Default front',
+            'sort_order' => 0,
+        ]);
+
+        $this->assertEquals(
+            "{$urlBase}/model_numbers/{$primaryNumber->id}/default-front.jpg",
+            $asset->fresh()->getImageUrl()
+        );
+
+        $asset->update(['image_override_enabled' => true]);
+
+        $this->assertEquals(
+            "{$urlBase}/assets/asset-image.jpg",
+            $asset->fresh()->getImageUrl()
+        );
+    }
+
     public function testUndeployableStatusReturnsFalseifAssetIsDeployable()
     {
         $assets = Asset::factory()->count(3)->create();

@@ -66,6 +66,7 @@ class ModelNumberSettingsController extends Controller
 
     public function edit(ModelNumber $modelNumber): View
     {
+        $modelNumber->loadMissing('images', 'model');
         $model = $modelNumber->model;
         $this->authorize('update', $model);
 

@@ -7,6 +7,7 @@ use App\Models\Traits\HasUploads;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use App\Models\ModelNumberImage;
 
 class ModelNumber extends SnipeModel
 {
@@ -44,6 +45,13 @@ class ModelNumber extends SnipeModel
     public function assets(): HasMany
     {
         return $this->hasMany(Asset::class, 'model_number_id');
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(ModelNumberImage::class, 'model_number_id')
+            ->orderBy('sort_order')
+            ->orderBy('id');
     }
 
     public function scopeActive($query)

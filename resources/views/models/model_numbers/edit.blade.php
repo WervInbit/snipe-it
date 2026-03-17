@@ -62,6 +62,8 @@
 @section('content')
     @parent
 
+    @include('models.model_numbers.partials.images-manager', ['modelNumber' => $modelNumber])
+
     <div class="row" id="files">
         <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-sm-12 col-sm-offset-0">
             <div class="box box-default">

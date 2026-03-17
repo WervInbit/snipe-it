@@ -66,6 +66,11 @@
     </div>
 @endsection
 
+@section('content')
+    @parent
+    @include('models.model_numbers.partials.images-manager', ['modelNumber' => $modelNumber])
+@endsection
+
 @push('scripts')
     <script nonce="{{ csrf_token() }}">
         $(function () {

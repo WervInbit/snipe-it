@@ -1,3 +1,79 @@
+# Session Progress (2026-03-17)
+
+## Addendum (2026-03-17 Codex)
+- Session kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md` before starting work.
+- Created `docs/agents/agents-addendum-2026-03-17-session-init.md` for this session.
+- Re-synced carry-over context from the prior 2026-03-12 image-source/admin workstream and confirmed commit `1e4af1570` only contained UX/icon/spec layout scope.
+- Verified in-progress image-source and model-number image admin UI work:
+- `docker compose exec app php artisan test tests/Feature/Assets/Api/AssetImagesApiTest.php` (pass).
+- `docker compose exec app php artisan test tests/Feature/Assets/PromoteTestResultPhotoToAssetImageTest.php` (pass).
+- `docker compose exec app php artisan test tests/Feature/Settings/ModelNumberImageManagementTest.php` (pass).
+- `docker compose exec app php artisan test tests/Unit/AssetTest.php --filter GetImageUrl` (pass).
+- Ran `php -l` against touched controller/model PHP files for image-source/admin changes (all pass, no syntax errors).
+
+# Session Progress (2026-03-12)
+
+## Addendum (2026-03-12 Codex)
+- Session kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md` before starting work.
+- Created `docs/agents/agents-addendum-2026-03-12-session-init.md` for this session.
+- Current task: initialize from recent session files and list open TODOs/unresolved handoffs for continuation.
+- Reviewed `TODO.md`, recent `docs/agents/agents-addendum-2026-*.md`, and `docs/plans/latest-tests-column-lazy-detail.md` to capture active carry-over items.
+- Documented the consolidated open-point backlog in today's addendum for implementation planning.
+- Updated the scan icon mapping to camera and changed the tests/test-types icon mapping from vial to clipboard in `IconHelper`.
+- Added a documentation decision item to evaluate whether user-facing wording should stay "tests" or shift to "tasks" for refurb execution steps (for example cleaning and driver installation) without renaming technical internals yet.
+- Updated Dutch translation `general.assets` from `Activa` to `Apparaten` for clearer hardware wording on dashboard and shared labels.
+- Updated hardware detail specification mobile CSS so label/value cells stay side-by-side on small screens while values wrap aggressively, preventing overflow without forcing stacked rows.
+- Expanded the hardware detail specification section to full-width (`col-md-12`) so specification values have more horizontal space and are less likely to wrap into unreadable fragments.
+- Replaced the specification table layout with a separator-style stacked list (label on top, value below) to improve readability and avoid narrow two-column squeezing on small screens.
+- Aligned the specification section back to the page's standard `col-md-3/col-md-9` detail-row layout while keeping each spec item vertically stacked (label line, then value line) to prevent side-by-side rendering.
+- Hardened the spec layout against CSS collisions by renaming to unique classes (`asset-spec-*`) and enforcing full-width block stacking for each spec row/label/value; cleared Laravel caches with `docker compose exec app php artisan optimize:clear` to ensure updated Blade/CSS render.
+- Replaced the custom spec-list approach entirely with standard detail rows per specification item (`row` + `col-md-3/9`) so rendering matches the rest of the hardware detail page and values stack predictably under one another; cleared caches again via `php artisan optimize:clear`.
+- Implemented image-source architecture for webshop/read APIs:
+- Added `assets.image_override_enabled` so asset-specific photos can explicitly override model-number defaults.
+- Added ordered/source-aware metadata on `asset_images` (`sort_order`, `source`, `source_photo_id`) and created `model_number_images` for per-model-number default image sets.
+- Backfilled defaults from existing model images into `model_number_images` and backfilled override flag for existing assets with an image.
+- Added ordered resolved-image API endpoint `GET /api/v1/hardware/{asset}/images` (`api.assets.images`) returning active source + ordered image payload for webshop usage.
+- Added model-number default image management API endpoints:
+- `GET/POST/PUT/DELETE /api/v1/model-numbers/{modelNumber}/images` (`api.model-numbers.images.*`).
+- Added test-photo promotion flow to asset overrides:
+- New route `POST /hardware/{asset}/tests/{testRun}/results/{result}/photos/{photo}/promote` (`test-results.photos.promote`) copies the test photo to asset storage, creates ordered `asset_images` entry, and can enable override + set as cover.
+- Updated `Asset::getImageUrl()` to resolve in this order:
+- model-number defaults when override is disabled,
+- asset override image when enabled (or when no defaults exist),
+- then legacy model/category fallback.
+- Added regression coverage:
+- `tests/Feature/Assets/Api/AssetImagesApiTest.php`
+- `tests/Feature/Assets/PromoteTestResultPhotoToAssetImageTest.php`
+- `tests/Unit/AssetTest.php::testGetImageUrlPrefersModelNumberDefaultWhenOverrideDisabled`
+- Validation run:
+- `docker compose exec app php artisan migrate --force` (pass; applied `2026_03_12_130000_add_image_override_and_model_number_images`).
+- `docker compose exec app php -l ...` on all touched PHP files (pass; no syntax errors).
+- Targeted tests passing when run serially:
+- `AssetImagesApiTest`, `PromoteTestResultPhotoToAssetImageTest`, and `AssetTest --filter GetImageUrl`.
+- Note: running sqlite-backed test commands in parallel corrupts `database/database.sqlite` in this environment; reruns were executed serially after resetting that file.
+
+# Session Progress (2026-03-05)
+
+## Addendum (2026-03-05 Codex)
+- Session kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md` before starting work.
+- Created `docs/agents/agents-addendum-2026-03-05-session-init.md` for this session.
+- Current task: initialize context and list unresolved open points, TODOs, and handoffs from prior sessions.
+- Completed open-point sweep across `TODO.md`, recent `docs/agents/agents-addendum-2026-*.md`, and `PROGRESS.md`; unresolved carry-overs are now documented in today's handoff summary.
+
+# Session Progress (2026-03-03)
+
+## Addendum (2026-03-03 Codex)
+- Session kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md` before starting work.
+- Created `docs/agents/agents-addendum-2026-03-03-session-init.md` for this session.
+- Current task: reinitialize context and summarize open points, TODOs, and in-progress items from recent sessions.
+
+# Session Progress (2026-02-24)
+
+## Addendum (2026-02-24 Codex)
+- Session kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md` before starting work.
+- Created `docs/agents/agents-addendum-2026-02-24-session-init.md` for this session.
+- Pending: confirm today's implementation scope and begin logging outcomes.
+
 # Session Progress (2026-02-19)
 
 ## Addendum (2026-02-19 Codex)
@@ -5,6 +81,13 @@
 - Created `docs/agents/agents-addendum-2026-02-19-session-init.md` for this session.
 - Re-read recent addenda (`2026-02-17`, `2026-02-12`, `2026-02-10`, `2026-02-05`) to reinitialize context and carry-forward blockers.
 - Current known carry-over: `tests/Feature/Assets/Ui/ReadyForSaleWarningTest.php` still fails on missing `warning` session key; empty-hardware regressions were mitigated via seed/UI/API fixes in prior session.
+- Revalidated current phone test scope from runtime (`TestType::forAsset`) for seeded phone assets (`DEMO-003`, `DEMO-004`): `battery`, `bluetooth`, `display`, `front_camera`, `microphone`, `rear_camera`, `speaker`, `wifi`.
+- Confirmed `face_unlock` exists as a test type but is not active for current seeded phone assets because those model capabilities do not include it.
+- Product-direction decision captured: stop relying on seeders for production parity for phone checks; move to deploy-safe, idempotent sync of attribute/test definitions.
+- Proposed next phone additions:
+- Data fields: `imei_1`, optional `imei_2`, `has_knox`, `knox_tripped`, keep/apply `quality_grade` (`Kwaliteit A-D`).
+- Test steps: `charge_port`, `sim_port`, `power_button`, `volume_buttons`, optional `home_button` only for models that actually have one.
+- Tests not run in this documentation-only update block.
 
 # Session Progress (2026-02-17)
 

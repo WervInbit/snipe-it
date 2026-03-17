@@ -27,6 +27,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Watson\Validating\ValidatingTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -116,6 +117,7 @@ class Asset extends Depreciable
         'deleted_at'  => 'datetime',
         'is_sellable'  => 'boolean',
         'tests_completed_ok' => 'boolean',
+        'image_override_enabled' => 'boolean',
     ];
 
     protected $rules = [
@@ -152,7 +154,8 @@ class Asset extends Depreciable
         'assigned_location' => ['integer', 'nullable', 'exists:locations,id,deleted_at,NULL', 'fmcs_location'],
         'assigned_asset'    => ['integer', 'nullable', 'exists:assets,id,deleted_at,NULL'],
         'is_sellable'       => ['nullable', 'boolean'],
-        'tests_completed_ok' => ['nullable', 'boolean']
+        'tests_completed_ok' => ['nullable', 'boolean'],
+        'image_override_enabled' => ['nullable', 'boolean'],
     ];
 
     protected bool $allowDuplicateSerial = false;
@@ -186,6 +189,7 @@ class Asset extends Depreciable
         'serial',
         'status_id',
         'supplier_id',
+        'image_override_enabled',
         'warranty_months',
         'requestable',
         'is_sellable',
@@ -864,11 +868,162 @@ class Asset extends Depreciable
      */
     public function getImageUrl()
     {
-        if ($this->image && ! empty($this->image)) {
+        $defaultModelNumberImage = $this->firstModelNumberImagePath();
+        $shouldUseAssetOverride = $this->image_override_enabled || !$defaultModelNumberImage;
+
+        if ($shouldUseAssetOverride && $this->image && !empty($this->image)) {
             return Storage::disk('public')->url(app('assets_upload_path').e($this->image));
-        } elseif ($this->model && ! empty($this->model->image)) {
+        }
+
+        if ($defaultModelNumberImage) {
+            return Storage::disk('public')->url($defaultModelNumberImage);
+        }
+
+        if ($this->model && ! empty($this->model->image)) {
             return Storage::disk('public')->url(app('models_upload_path').e($this->model->image));
-        } elseif ($this->model?->category && ! empty($this->model->category->image)) {
+        }
+
+        if ($this->model?->category && ! empty($this->model->category->image)) {
+            return Storage::disk('public')->url(app('categories_upload_path').e($this->model->category->image));
+        }
+
+        return false;
+    }
+
+    /**
+     * Ordered image payload resolved for API/webshop consumers.
+     */
+    public function resolvedImagePayload(): array
+    {
+        $source = 'none';
+        $images = collect();
+
+        $modelDefaults = $this->modelNumberDefaultImages();
+        $overrideImages = $this->images()->get();
+
+        if ($modelDefaults->isNotEmpty() && !$this->image_override_enabled) {
+            $source = 'model_number_default';
+            $images = $modelDefaults->map(function (ModelNumberImage $image) {
+                return [
+                    'id' => (int) $image->id,
+                    'source' => 'model_number_default',
+                    'sort_order' => (int) $image->sort_order,
+                    'caption' => $image->caption,
+                    'url' => Storage::disk('public')->url($image->file_path),
+                ];
+            });
+        } elseif ($overrideImages->isNotEmpty()) {
+            $source = 'asset_override';
+            $images = $overrideImages->map(function (AssetImage $image) {
+                return [
+                    'id' => (int) $image->id,
+                    'source' => $image->source ?: 'asset_upload',
+                    'source_photo_id' => $image->source_photo_id ? (int) $image->source_photo_id : null,
+                    'sort_order' => (int) $image->sort_order,
+                    'caption' => $image->caption,
+                    'url' => Storage::disk('public')->url($image->file_path),
+                ];
+            });
+        } elseif ($modelDefaults->isNotEmpty()) {
+            $source = 'model_number_default';
+            $images = $modelDefaults->map(function (ModelNumberImage $image) {
+                return [
+                    'id' => (int) $image->id,
+                    'source' => 'model_number_default',
+                    'sort_order' => (int) $image->sort_order,
+                    'caption' => $image->caption,
+                    'url' => Storage::disk('public')->url($image->file_path),
+                ];
+            });
+        } else {
+            $legacy = $this->legacyFallbackImageUrl();
+            if ($legacy) {
+                $source = 'legacy';
+                $images = collect([
+                    [
+                        'id' => null,
+                        'source' => 'legacy',
+                        'sort_order' => 0,
+                        'caption' => null,
+                        'url' => $legacy,
+                    ],
+                ]);
+            }
+        }
+
+        return [
+            'source' => $source,
+            'images' => $images->values()->all(),
+        ];
+    }
+
+    public function syncImageOverridePointers(): void
+    {
+        $first = $this->images()->first();
+
+        $this->image = $first ? Str::after($first->file_path, 'assets/') : null;
+        $this->image_override_enabled = $first ? true : false;
+        $this->save();
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int,\App\Models\ModelNumberImage>
+     */
+    private function modelNumberDefaultImages(): Collection
+    {
+        $modelNumberId = $this->effectiveModelNumberId();
+
+        if (!$modelNumberId) {
+            return collect();
+        }
+
+        return ModelNumberImage::query()
+            ->where('model_number_id', $modelNumberId)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+    }
+
+    private function firstModelNumberImagePath(): ?string
+    {
+        $modelNumberId = $this->effectiveModelNumberId();
+        if (!$modelNumberId) {
+            return null;
+        }
+
+        $path = ModelNumberImage::query()
+            ->where('model_number_id', $modelNumberId)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->value('file_path');
+
+        return $path ?: null;
+    }
+
+    private function effectiveModelNumberId(): ?int
+    {
+        if ($this->model_number_id) {
+            return (int) $this->model_number_id;
+        }
+
+        if ($this->model && $this->model->primary_model_number_id) {
+            return (int) $this->model->primary_model_number_id;
+        }
+
+        return null;
+    }
+
+    private function legacyFallbackImageUrl(): string|false
+    {
+        if ($this->image && !empty($this->image)) {
+            return Storage::disk('public')->url(app('assets_upload_path').e($this->image));
+        }
+
+        if ($this->model && !empty($this->model->image)) {
+            return Storage::disk('public')->url(app('models_upload_path').e($this->model->image));
+        }
+
+        if ($this->model?->category && !empty($this->model->category->image)) {
             return Storage::disk('public')->url(app('categories_upload_path').e($this->model->category->image));
         }
 
@@ -981,7 +1136,9 @@ class Asset extends Depreciable
      */
     public function images()
     {
-        return $this->hasMany(AssetImage::class);
+        return $this->hasMany(AssetImage::class)
+            ->orderBy('sort_order')
+            ->orderBy('id');
     }
 
     /**

@@ -58,6 +58,7 @@ class ModelNumberController extends Controller
     {
         $this->authorize('update', $model);
         $this->ensureModelNumber($model, $modelNumber);
+        $modelNumber->loadMissing('images');
 
         return view('models.model_numbers.edit', [
             'model' => $model,

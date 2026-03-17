@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Asset;
 use App\Models\TestRun;
 use App\Models\TestResult;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\AttributeDefinition;
 use App\Models\TestResultPhoto;
@@ -176,6 +178,86 @@ class TestResultController extends Controller
 
         return redirect()->route('test-runs.index', $asset->id)
             ->with('success', trans('tests.run_saved'));
+    }
+
+    public function promotePhoto(
+        Request $request,
+        Asset $asset,
+        TestRun $testRun,
+        TestResult $result,
+        TestResultPhoto $photo
+    ): JsonResponse {
+        $this->authorize('update', $testRun);
+        abort_unless(
+            $testRun->asset_id === $asset->id &&
+            $result->test_run_id === $testRun->id &&
+            $photo->test_result_id === $result->id,
+            404
+        );
+
+        $request->validate([
+            'caption' => ['nullable', 'string', 'max:255'],
+            'enable_override' => ['nullable', 'boolean'],
+            'make_cover' => ['nullable', 'boolean'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+        ]);
+
+        if (!$photo->path || !File::exists(public_path($photo->path))) {
+            return response()->json([
+                'message' => trans('admin/hardware/message.import.file_missing'),
+            ], 404);
+        }
+
+        $extension = pathinfo($photo->path, PATHINFO_EXTENSION) ?: 'jpg';
+        $filename = $asset->id.'_'.Str::uuid().'.'.$extension;
+        $targetPath = 'assets/'.$asset->id.'/'.$filename;
+
+        Storage::disk('public')->put($targetPath, File::get(public_path($photo->path)));
+
+        $caption = $request->input('caption');
+        if ($caption === null || trim($caption) === '') {
+            $label = $result->attributeDefinition?->label ?: $result->type?->name ?: trans('tests.photo_thumbnail_alt');
+            $caption = trim($label.' '.now()->format('Y-m-d H:i'));
+        }
+
+        $assetImage = null;
+
+        \DB::transaction(function () use ($request, $asset, $photo, $targetPath, $caption, &$assetImage) {
+            $makeCover = $request->boolean('make_cover', true);
+            if ($makeCover) {
+                $asset->images()->increment('sort_order');
+                $sortOrder = 0;
+            } else {
+                $sortOrder = $request->filled('sort_order')
+                    ? (int) $request->input('sort_order')
+                    : ((int) $asset->images()->max('sort_order') + 1);
+            }
+
+            $assetImage = $asset->images()->create([
+                'file_path' => $targetPath,
+                'caption' => $caption,
+                'sort_order' => $sortOrder,
+                'source' => 'test_photo',
+                'source_photo_id' => $photo->id,
+            ]);
+
+            if ($request->boolean('enable_override', true)) {
+                $asset->image = Str::after($targetPath, 'assets/');
+                $asset->image_override_enabled = true;
+                $asset->save();
+            }
+        });
+
+        return response()->json([
+            'message' => trans('general.saved'),
+            'image' => [
+                'id' => $assetImage->id,
+                'url' => Storage::disk('public')->url($assetImage->file_path),
+                'sort_order' => (int) $assetImage->sort_order,
+                'source' => $assetImage->source,
+            ],
+            'image_override_enabled' => (bool) $asset->fresh()->image_override_enabled,
+        ]);
     }
 
     public function partialUpdate(Request $request, Asset $asset, TestRun $testRun, TestResult $result)

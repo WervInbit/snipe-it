@@ -67,6 +67,8 @@ class AssetImageController extends Controller
 
         $stored = [];
         $paths = [];
+        $firstRelativePath = null;
+        $nextSortOrder = (int) $asset->images()->max('sort_order');
 
         DB::beginTransaction();
 
@@ -78,12 +80,12 @@ class AssetImageController extends Controller
                 $image = $asset->images()->create([
                     'file_path' => $path,
                     'caption' => $request->input('caption')[$index],
+                    'sort_order' => $nextSortOrder + $index + 1,
+                    'source' => 'asset_upload',
                 ]);
 
-                // If this is the first image for the asset, mark it as the cover image
-                if (! $asset->image) {
-                    $asset->image = Str::after($path, 'assets/');
-                    $asset->save();
+                if ($firstRelativePath === null) {
+                    $firstRelativePath = Str::after($path, 'assets/');
                 }
 
                 $paths[] = $path;
@@ -92,6 +94,14 @@ class AssetImageController extends Controller
                     'id' => $image->id,
                     'url' => Storage::disk('public')->url($path),
                 ];
+            }
+
+            if (!empty($stored)) {
+                if (!$asset->image) {
+                    $asset->image = $firstRelativePath;
+                }
+                $asset->image_override_enabled = true;
+                $asset->save();
             }
 
             DB::commit();
@@ -133,9 +143,35 @@ class AssetImageController extends Controller
 
         $request->validate([
             'caption' => ['required', 'string'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'make_cover' => ['nullable', 'boolean'],
+            'image_override_enabled' => ['nullable', 'boolean'],
         ]);
 
-        $assetImage->update(['caption' => $request->input('caption')]);
+        $assetImage->caption = $request->input('caption');
+
+        if ($request->filled('sort_order')) {
+            $assetImage->sort_order = (int) $request->input('sort_order');
+        }
+
+        if ($request->boolean('make_cover')) {
+            DB::transaction(function () use ($asset, $assetImage) {
+                $asset->images()->where('id', '!=', $assetImage->id)->increment('sort_order');
+                $assetImage->sort_order = 0;
+                $assetImage->save();
+
+                $asset->image = Str::after($assetImage->file_path, 'assets/');
+                $asset->image_override_enabled = true;
+                $asset->save();
+            });
+        } else {
+            $assetImage->save();
+        }
+
+        if ($request->has('image_override_enabled')) {
+            $asset->image_override_enabled = $request->boolean('image_override_enabled');
+            $asset->save();
+        }
 
         return back()->with('success', trans('general.image_caption_updated'));
     }
@@ -158,10 +194,8 @@ class AssetImageController extends Controller
         Storage::disk('public')->delete($assetImage->file_path);
         $assetImage->delete();
 
-        if ($asset->image === $relative) {
-            $next = $asset->images()->first();
-            $asset->image = $next ? Str::after($next->file_path, 'assets/') : null;
-            $asset->save();
+        if ($asset->image === $relative || $asset->images()->count() === 0) {
+            $asset->syncImageOverridePointers();
         }
 
         return back()->with('success', trans('general.image_deleted'));

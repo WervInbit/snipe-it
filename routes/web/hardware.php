@@ -123,6 +123,8 @@ Route::group(
             ->name('test-results.update');
         Route::post('{asset}/tests/{testRun}/results/{result}', [TestResultController::class, 'partialUpdate'])
             ->name('test-results.partial-update');
+        Route::post('{asset}/tests/{testRun}/results/{result}/photos/{photo}/promote', [TestResultController::class, 'promotePhoto'])
+            ->name('test-results.photos.promote');
 
         Route::post('{asset}/print-label', [AssetLabelPrintController::class, 'store'])
             ->name('hardware.print-label');
