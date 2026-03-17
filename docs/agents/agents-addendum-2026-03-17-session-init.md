@@ -80,3 +80,22 @@
 - `docker compose exec app php artisan test tests/Feature/Assets/Api/ModelNumberImagesApiTest.php` (pass, serial run).
 - `docker compose exec app php -l app/Http/Controllers/Api/ModelNumberImagesController.php` (pass).
 - `docker compose exec app php -l routes/web.php` (pass).
+
+## End Of Session Handoff
+- Pushed all committed session work to `origin/master`.
+- Pushed commits:
+- `dbc585951` `Unify Model Number Image Save Flow`
+- `12c75d008` `Remove Legacy Model Image Admin Routes`
+- `5bf48c152` `Update Agent And Demo Documentation`
+- Model-number image admin flow is now single-save only; no separate image save/reorder routes remain in web admin.
+- Session documentation was updated in `PROGRESS.md`, `docs/fork-notes.md`, and this addendum.
+- No uncommitted tracked code remains from this session.
+- Working tree still contains many unrelated untracked local artifacts (images, debug files, browser artifacts, local helper scripts); these were not touched or committed.
+- Open backlog items for later sessions:
+- QR label layout cleanup.
+- Replace remaining placeholder MPN/SKU catalog values.
+- Improve mobile scan feedback/close-range behavior.
+- Decide naming/email convention.
+- Decide battery health auto-calculation behavior.
+- Decide whether user-facing wording stays `tests` or changes to `tasks`.
+- Fix unresolved failing test: `tests/Feature/Assets/Ui/ReadyForSaleWarningTest.php`.
