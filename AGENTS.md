@@ -16,6 +16,8 @@ This guide keeps automation agents and human contributors aligned on the expecta
 - Default to ASCII when editing files; only add clarifying comments when logic is non-obvious.
 - Never revert uncommitted changes you did not author; coordinate if you encounter unexpected diffs.
 - Maintain sandbox hygiene: avoid privileged commands unless the task explicitly requires them.
+- Destructive database commands (`migrate:fresh`, `migrate:refresh`, `migrate:reset`, `db:wipe`) are forbidden on shared dev environments unless the user explicitly approves them in the current message.
+- Before any destructive DB command, print a DB preflight summary (`APP_ENV`, `DB_CONNECTION`, `DB_DATABASE`) and state the impact in plain language.
 
 ## Documentation Touchpoints
 - `AGENTS.md` (this file) captures the ground rules for agents and contributors working in the fork.
@@ -48,7 +50,7 @@ This guide keeps automation agents and human contributors aligned on the expecta
 
 ### Testing Guidelines
 - Copy `.env.testing.example` to `.env.testing` and point it at sqlite or your MySQL test database.
-- Execute `php artisan test` for the full suite, or target classes (`php artisan test tests/Feature/AssetTest.php`).
+- Execute `php artisan test --env=testing` for the full suite, or target classes (`php artisan test tests/Feature/AssetTest.php --env=testing`).
 - Use PHPUnit `@group` annotations to toggle expensive suites (e.g., `--exclude-group ldap`).
 - Name new test files `*Test.php`, keep assertions focused, and prefer factories over fixtures in `database/factories`.
 

@@ -7,10 +7,12 @@ This guide walks through the demo data included with the seeders.
 Run the database seeds to create demo assets, users and supporting data:
 
 ```
-php artisan migrate:fresh --seed
+php artisan migrate:fresh --seed --force
 ```
 
 This will also generate QR labels and baseline test runs for the demo assets.
+
+Use `migrate:fresh` on shared dev only with explicit approval, as it drops all tables before reseeding.
 
 ## Demo Accounts
 

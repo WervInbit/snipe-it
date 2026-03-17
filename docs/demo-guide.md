@@ -13,8 +13,10 @@ php artisan db:seed --class=DemoAssetsSeeder
 For a full dev reset (schema + settings + users + assets + test runs), use:
 
 ```bash
-php artisan migrate:fresh --seed
+php artisan migrate:fresh --seed --force
 ```
+
+Only run `migrate:fresh` on shared dev when explicitly approved, because it drops all tables and reseeds data.
 
 ## Demo users
 
