@@ -33,7 +33,7 @@
     <div class="col-lg-2 col-xs-6">
         <a href="{{ route('hardware.index') }}">
             <!-- small hardware box -->
-            <div class="dashboard small-box bg-teal">
+            <div class="dashboard dashboard-tile small-box bg-teal">
                 <div class="inner">
                     <h3>{{ number_format($counts['asset']) }}</h3>
                     <p>{{ trans('general.assets') }}</p>
@@ -53,7 +53,7 @@
     @can('scanning')
     <div class="col-lg-2 col-xs-6">
         <a href="{{ route('scan') }}" data-testid="dashboard-scan-card">
-            <div class="dashboard small-box bg-purple">
+            <div class="dashboard dashboard-tile dashboard-tile--scan small-box bg-purple">
                 <div class="inner">
                     <h3>&nbsp;</h3>
                     <p>{{ trans('general.scan_qr') }}</p>
@@ -62,7 +62,7 @@
                     <x-icon type="camera" />
                 </div>
                 <span class="small-box-footer">
-                    {{ trans('general.scan_qr') }}
+                    {{ trans('general.scan') }}
                     <x-icon type="arrow-circle-right" />
                 </span>
             </div>
@@ -74,7 +74,7 @@
     <div class="col-lg-2 col-xs-6">
         <a href="{{ route('licenses.index') }}" aria-hidden="true">
             <!-- small license box -->
-            <div class="dashboard small-box bg-maroon">
+            <div class="dashboard dashboard-tile small-box bg-maroon">
                 <div class="inner">
                     <h3>{{ number_format($counts['license']) }}</h3>
                     <p>{{ trans('general.licenses') }}</p>
@@ -96,7 +96,7 @@
     <div class="col-lg-2 col-xs-6">
     <!-- small accessories box -->
         <a href="{{ route('accessories.index') }}">
-            <div class="dashboard small-box bg-orange">
+            <div class="dashboard dashboard-tile small-box bg-orange">
                 <div class="inner">
                     <h3> {{ number_format($counts['accessory']) }}</h3>
                     <p>{{ trans('general.accessories') }}</p>
@@ -117,7 +117,7 @@
     <div class="col-lg-2 col-xs-6">
     <!-- small consumables box -->
         <a href="{{ route('consumables.index') }}">
-            <div class="dashboard small-box bg-purple">
+            <div class="dashboard dashboard-tile small-box bg-purple">
                 <div class="inner">
                     <h3> {{ number_format($counts['consumable']) }}</h3>
                     <p>{{ trans('general.consumables') }}</p>
@@ -138,7 +138,7 @@
     <div class="col-lg-2 col-xs-6">
         <!-- small components box -->
         <a href="{{ route('components.index') }}">
-            <div class="dashboard small-box bg-yellow">
+            <div class="dashboard dashboard-tile small-box bg-yellow">
                 <div class="inner">
                     <h3>{{ number_format($counts['component']) }}</h3>
                     <p>{{ trans('general.components') }}</p>
@@ -159,7 +159,7 @@
     <div class="col-lg-2 col-xs-6">
         <!-- small users box -->
         <a href="{{ route('users.index') }}">
-            <div class="dashboard small-box bg-light-blue">
+            <div class="dashboard dashboard-tile small-box bg-light-blue">
                 <div class="inner">
                     <h3>{{ number_format($counts['user']) }}</h3>
                     <p>{{ trans('general.people') }}</p>

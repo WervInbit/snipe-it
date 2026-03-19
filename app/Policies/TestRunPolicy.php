@@ -13,6 +13,14 @@ class TestRunPolicy
             return true;
         }
 
+        if ($testRun->asset && $user->can('update', $testRun->asset)) {
+            return true;
+        }
+
+        if ($testRun->user_id === $user->id && $user->hasAccess('tests.execute')) {
+            return true;
+        }
+
         if ($user->hasAccess('refurbisher') || $user->hasAccess('senior-refurbisher')) {
             return $testRun->user_id === $user->id;
         }

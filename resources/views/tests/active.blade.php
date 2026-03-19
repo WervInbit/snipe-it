@@ -284,11 +284,13 @@
 
     .testing-floating-bar {
         position: sticky;
+        top: auto;
         bottom: 1rem;
         margin-top: 2rem;
         display: flex;
         justify-content: center;
         pointer-events: none;
+        z-index: 1020;
     }
 
     .testing-floating-bar__inner {
@@ -321,6 +323,10 @@
     }
 
     @media (max-width: 576px) {
+        .testing-page {
+            padding-bottom: calc(10rem + env(safe-area-inset-bottom, 0px));
+        }
+
         .testing-shell {
             padding-inline: 1rem;
         }
@@ -364,7 +370,18 @@
         }
 
         .testing-floating-bar__inner {
+            width: 100%;
             border-radius: 24px;
+        }
+
+        .testing-floating-bar {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
+            top: auto;
+            margin-top: 0;
+            padding: 0 1rem;
         }
     }
 </style>

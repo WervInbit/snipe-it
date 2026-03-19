@@ -13,6 +13,56 @@
 - restored the subtle dashboard tile icons on screens below `768px` instead of letting the AdminLTE mobile rule hide them entirely.
 - adjusted the mobile dashboard card layout to keep tile copy readable while leaving room for the icon (`text-align: left`, extra right padding, slightly smaller/lighter icon treatment).
 - rebuilt frontend assets with `npm run dev` so the override is present in compiled CSS.
+- Follow-up refinement after visual feedback:
+- added dedicated `dashboard-tile` classes in the dashboard markup so the mobile override targets dashboard cards explicitly instead of generic `small-box` cards.
+- strengthened the mobile icon rule to `display: block !important`, reduced icon size, and tightened tile footer sizing so the icons stay visible on mobile.
+- shortened the scan card footer copy from `Scan QR` to `Scan` so the action tile scales more consistently with the count tiles.
+- Active tests reliability fix:
+- aligned backend test-run update authorization with the active-tests UI so non-admin asset editors and run owners with `tests.execute` can persist pass/fail toggles, notes, and photo uploads instead of seeing the optimistic UI revert after a 403 from `TestResultController::partialUpdate`.
+- added focused feature coverage for asset-editor updates on foreign runs and for non-refurbisher run owners with `tests.execute`.
+- hardened the active-tests progress action bar for phones by switching the bottom progress bar to a fixed mobile layout with extra page bottom padding, avoiding the occasional sticky/top overlap behavior reported on mobile browsers.
+- Verification:
+- `docker compose exec app php -l app/Policies/TestRunPolicy.php` (pass)
+- `docker compose exec app php -l app/Http/Controllers/TestResultController.php` (pass)
+- `docker compose exec app php -l tests/Feature/Assets/PartialUpdateTestResultTest.php` (pass)
+- `docker compose exec app php -l tests/Feature/Tests/ActiveTestViewTest.php` (pass)
+- `docker compose exec app php artisan test tests/Feature/Assets/PartialUpdateTestResultTest.php --env=testing` (blocked by existing testing DB migration-state conflicts in the container)
+- `docker compose exec app php artisan test tests/Feature/Tests/ActiveTestViewTest.php --env=testing` (blocked by the same existing testing DB migration-state conflicts)
+- Testing environment repair:
+- confirmed the container was incorrectly booting `--env=testing` with cached MySQL config even though `phpunit.xml` and `.env.testing` both specify sqlite.
+- cleared Laravel bootstrap caches in the app container so `testing` resolves back to sqlite.
+- identified the sqlite testing database file as corrupted (`database disk image is malformed`), reset only the test sqlite file after a testing DB preflight, and rebuilt the schema with `php artisan migrate --env=testing --force`.
+- reran the focused test suites serially to avoid shared-sqlite corruption:
+- `docker compose exec app php artisan test tests/Feature/Assets/PartialUpdateTestResultTest.php --env=testing` (pass, 8 tests / 48 assertions).
+- `docker compose exec app php artisan test tests/Feature/Tests/ActiveTestViewTest.php --env=testing` (6 passed, 1 failed).
+- remaining failure after environment repair is unrelated to the authorization patch:
+- `scan route redirects to active tests for testers` currently redirects to `/hardware/{id}` instead of `/hardware/{id}/tests/active`.
+- Practical takeaway for this environment:
+- stale config cache can make testing hit MySQL instead of sqlite.
+- parallel PHPUnit runs against the shared sqlite test DB are unsafe here and can corrupt the file; run sqlite-backed test commands serially.
+- Scan viewport stabilization:
+- kept the `/scan` camera frame visually fixed by switching `#scan-area` to a stable `4:3` aspect-ratio box instead of recalculating height from the active stream metadata and viewport height.
+- removed the runtime `resizeScanArea()` logic from `resources/js/scan/index.js`; scan quality fallback still applies higher camera constraints after repeated misses, but it no longer changes the visible camera box size.
+- retained overlay/canvas syncing against the rendered scan-area dimensions so scan guidance stays aligned with the fixed frame.
+- rebuilt frontend assets with `npm run dev` so the updated scan bundle and view styling are present in compiled output.
+- Coverage note:
+- no PHPUnit coverage added for the scan viewport change; verification was limited to source review plus `npm run dev`.
+- Dev DB recovery:
+- investigated a fresh `/setup`-style state reported during manual testing and confirmed the live `local` MySQL database was an empty-but-migrated schema (`migrations=454`, but `settings=0`, `users=0`, `assets=0`, `companies=0`).
+- verified this was distinct from the repaired sqlite testing DB: `php artisan about` still resolved `local` to MySQL and `--env=testing` to sqlite.
+- confirmed the app code paths only auto-run `migrate` when setup/passport prerequisites are missing; no automatic `migrate:fresh` / `db:wipe` path was found in the current Docker app entrypoint or setup controllers.
+- recovered the shared dev DB non-destructively with `docker compose exec app php artisan db:seed --force` instead of dropping tables.
+- post-seed verification:
+- `settings_count=1`
+- `users_count=21`
+- `assets_count=10`
+- `test_runs_count=10`
+- `models_count=10`
+- `statuslabels_count=9`
+- Test expectation cleanup:
+- updated `tests/Feature/Tests/ActiveTestViewTest.php` so the scan-tag redirect assertion matches the intended product flow: scan lookup lands on the asset detail page (`/hardware/{id}`), not directly on the active tests screen.
+- Verification:
+- `docker compose exec app php artisan test tests/Feature/Tests/ActiveTestViewTest.php --env=testing` (pass, 7 tests / 23 assertions).
 
 # Session Progress (2026-03-17)
 

@@ -8,7 +8,7 @@
 @section('content')
 <style>
     .scan-screen {min-height: 100vh; padding: 0 1rem 1.5rem;}
-    #scan-area {position: relative; width: 100%; max-width: 720px; margin: 0 auto; max-height: 70vh; min-height: 240px; background: #111; border-radius: 8px; overflow: hidden;}
+    #scan-area {position: relative; width: 100%; max-width: 720px; aspect-ratio: 4 / 3; min-height: 240px; margin: 0 auto; background: #111; border-radius: 8px; overflow: hidden;}
     #scan-video,
     #scan-overlay {width: 100%; height: 100%; object-fit: contain; display: block;}
     .scan-actions {display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: .75rem; margin-top: 1rem;}
@@ -16,6 +16,10 @@
     .scan-actions select {padding: 1rem; font-size: 1.05rem;}
     #manual-section {max-width: 520px; margin: 1rem auto 0;}
     #scan-success {position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem; color: #fff; background: rgba(15, 23, 42, 0.85); font-weight: 600; font-size: 1rem;}
+
+    @media (max-width: 575px) {
+        #scan-area {max-height: 70vh;}
+    }
 </style>
 <div class="container py-4 scan-screen">
     <div class="mx-auto" style="max-width:720px;">

@@ -40,6 +40,25 @@ class PartialUpdateTestResultTest extends TestCase
         return [$asset, $run, $result, $user];
     }
 
+    private function makeRunForUser(User $user): array
+    {
+        $asset = Asset::factory()->create();
+        $run = TestRun::factory()
+            ->for($asset)
+            ->for($user)
+            ->create([
+                'finished_at' => now()->subDay(),
+            ]);
+
+        $type = TestType::factory()->create();
+        $result = TestResult::factory()
+            ->for($run)
+            ->for($type, 'type')
+            ->create(['status' => TestResult::STATUS_NVT]);
+
+        return [$asset, $run, $result];
+    }
+
     public function test_status_can_be_updated_via_partial_endpoint(): void
     {
         [$asset, $run, $result, $user] = $this->makeRun();
@@ -223,5 +242,67 @@ class PartialUpdateTestResultTest extends TestCase
             File::delete(public_path($photo->path));
             $photo->delete();
         }
+    }
+
+    public function test_asset_editor_can_update_foreign_run_via_partial_endpoint(): void
+    {
+        $owner = User::factory()->create([
+            'permissions' => json_encode([
+                'tests.execute' => '1',
+                'assets.view' => '1',
+            ]),
+        ]);
+
+        [$asset, $run, $result] = $this->makeRunForUser($owner);
+
+        $editor = User::factory()->create([
+            'permissions' => json_encode([
+                'tests.execute' => '1',
+                'assets.view' => '1',
+                'assets.edit' => '1',
+            ]),
+        ]);
+
+        $response = $this->actingAs($editor, 'web')->postJson(
+            route('test-results.partial-update', [$asset->id, $run->id, $result->id]),
+            ['status' => TestResult::STATUS_FAIL]
+        );
+
+        $response
+            ->assertOk()
+            ->assertJsonFragment([
+                'status' => TestResult::STATUS_FAIL,
+                'message' => trans('general.saved'),
+            ]);
+
+        $result->refresh();
+        $this->assertSame(TestResult::STATUS_FAIL, $result->status);
+    }
+
+    public function test_run_owner_with_test_execution_permission_can_update_results_without_refurbisher_role(): void
+    {
+        $user = User::factory()->create([
+            'permissions' => json_encode([
+                'tests.execute' => '1',
+                'assets.view' => '1',
+            ]),
+        ]);
+
+        [$asset, $run, $result] = $this->makeRunForUser($user);
+
+        $response = $this->actingAs($user, 'web')->postJson(
+            route('test-results.partial-update', [$asset->id, $run->id, $result->id]),
+            ['status' => TestResult::STATUS_PASS]
+        );
+
+        $response
+            ->assertOk()
+            ->assertJsonFragment([
+                'status' => TestResult::STATUS_PASS,
+                'message' => trans('general.saved'),
+            ]);
+
+        $result->refresh();
+        $this->assertSame(TestResult::STATUS_PASS, $result->status);
     }
 }

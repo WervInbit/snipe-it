@@ -80,7 +80,7 @@ class ActiveTestViewTest extends TestCase
             ->assertSee('id="photos-' . $result->id . '"', false);
     }
 
-    public function test_scan_route_redirects_to_active_tests_for_testers(): void
+    public function test_scan_route_redirects_to_asset_detail_page(): void
     {
         $user = User::factory()->superuser()->create();
         $asset = Asset::factory()->create(['asset_tag' => 'TAG-REDIRECT']);
@@ -88,7 +88,7 @@ class ActiveTestViewTest extends TestCase
 
         $this->actingAs($user)
             ->get(route('findbytag/hardware', $asset->asset_tag))
-            ->assertRedirect("/hardware/{$asset->id}/tests/active");
+            ->assertRedirect("/hardware/{$asset->id}");
     }
 
     public function test_run_owner_without_asset_edit_can_update_results(): void
@@ -100,6 +100,25 @@ class ActiveTestViewTest extends TestCase
         ]);
 
         $asset = Asset::factory()->create(['asset_tag' => 'TAG-OWNED']);
+        $run = TestRun::factory()->for($asset)->for($user)->create();
+        TestResult::factory()->for($run)->create([
+            'status' => TestResult::STATUS_NVT,
+        ]);
+
+        $this->actingAs($user)
+            ->get("/hardware/{$asset->id}/tests/active")
+            ->assertOk()
+            ->assertSee('canUpdate: true', false);
+    }
+
+    public function test_run_owner_with_test_execution_permission_can_update_without_refurbisher_role(): void
+    {
+        $user = $this->makeUserWithPermissions([
+            'tests.execute' => '1',
+            'assets.view' => '1',
+        ]);
+
+        $asset = Asset::factory()->create(['asset_tag' => 'TAG-OWNED-TESTER']);
         $run = TestRun::factory()->for($asset)->for($user)->create();
         TestResult::factory()->for($run)->create([
             'status' => TestResult::STATUS_NVT,

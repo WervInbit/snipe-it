@@ -41,7 +41,6 @@ let scrolledToCamera = false;
 let currentDeviceId = null;
 let scanLocked = false;
 const scrollOffset = 12; // px to keep header/nav visible
-const MIN_SCAN_HEIGHT = 240;
 
 function showError(msg) {
   if (!errorEl) return;
@@ -268,7 +267,6 @@ async function start(deviceId = null) {
     video.srcObject = stream;
     await video.play();
 
-    resizeScanArea();
     syncViewportSizes();
 
     const hints = new Map();
@@ -314,7 +312,6 @@ async function start(deviceId = null) {
           if (track?.applyConstraints) {
             try {
               await track.applyConstraints({ width: { ideal: config.fallbackWidth }, height: { ideal: config.fallbackHeight } });
-              resizeScanArea();
               syncViewportSizes();
             } catch (e) {
               // ignore and keep going
@@ -424,28 +421,13 @@ async function init() {
 }
 
 function syncViewportSizes() {
-  resizeScanArea();
-  const rect = video.getBoundingClientRect();
+  const rect = scanArea?.getBoundingClientRect?.() || video.getBoundingClientRect();
   const vw = Math.max(1, Math.round(rect.width || config.width));
   const vh = Math.max(1, Math.round(rect.height || config.height));
   canvas.width = vw;
   canvas.height = vh;
   overlay.width = vw;
   overlay.height = vh;
-}
-
-function resizeScanArea() {
-  if (!scanArea || !video) return;
-  const track = stream?.getVideoTracks?.()[0];
-  const settings = track?.getSettings?.() || {};
-  const widthSetting = settings.width || video.videoWidth || config.width;
-  const heightSetting = settings.height || video.videoHeight || config.height;
-  const aspect = heightSetting && widthSetting ? heightSetting / widthSetting : config.height / config.width;
-  const containerWidth = Math.max(1, scanArea.clientWidth || config.width);
-  const idealHeight = Math.round(containerWidth * aspect);
-  const maxHeight = Math.max(MIN_SCAN_HEIGHT, Math.round(window.innerHeight * 0.7));
-  const height = Math.min(maxHeight, Math.max(MIN_SCAN_HEIGHT, idealHeight));
-  scanArea.style.height = `${height}px`;
 }
 
 if (switchBtn) {
@@ -494,7 +476,6 @@ window.addEventListener('resize', () => {
 
 if (video) {
   video.addEventListener('loadedmetadata', () => {
-    resizeScanArea();
     syncViewportSizes();
   });
 }

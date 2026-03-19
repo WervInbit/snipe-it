@@ -799,19 +799,38 @@ th.css-history > .th-inner::before {
 .small-box > a:hover {
   color: #fff;
 }
+.dashboard-tile .inner p,
+.dashboard-tile .small-box-footer {
+  white-space: nowrap;
+}
+@media screen and (max-width: 991px) {
+  .dashboard-tile .small-box-footer {
+    font-size: 12px;
+  }
+}
 @media screen and (max-width: 767px) {
-  .dashboard.small-box {
+  .dashboard-tile {
     text-align: left;
   }
-  .dashboard.small-box .inner {
-    padding-right: 86px;
+  .dashboard-tile .inner {
+    padding-right: 76px;
   }
-  .dashboard.small-box .icon {
+  .dashboard-tile .icon {
     display: block;
-    top: 6px;
-    right: 8px;
-    font-size: 64px;
+    top: 8px;
+    right: 10px;
+    font-size: 52px;
+    line-height: 1;
     color: rgba(0, 0, 0, 0.12);
+  }
+  .dashboard-tile .icon > i {
+    display: block;
+  }
+  .dashboard-tile .small-box-footer {
+    font-size: 11px;
+  }
+  .dashboard-tile--scan .small-box-footer {
+    letter-spacing: 0.01em;
   }
 }
 .select2-container--default .select2-selection--single,
