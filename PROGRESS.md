@@ -1,3 +1,19 @@
+# Session Progress (2026-03-19)
+
+## Addendum (2026-03-19 Codex)
+- Session kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, and the most recent session addenda before starting work.
+- Created `docs/agents/agents-addendum-2026-03-19-session-init.md` for this session.
+- Reinitialized carry-over context from the recent March workstream:
+- 2026-03-17 finalized the single-save model-number image admin flow and removed obsolete standalone web image-admin routes.
+- 2026-03-12 introduced ordered model-number default images, asset image override behavior, webshop/read APIs, and test-photo promotion into asset images.
+- Current known carry-over items remain documentation/decision oriented unless new implementation scope is provided:
+- unresolved failing test noted in prior handoffs: `tests/Feature/Assets/Ui/ReadyForSaleWarningTest.php`.
+- backlog items from recent handoffs include QR label layout cleanup, placeholder MPN/SKU catalog replacement, mobile scan feedback, naming/email convention, battery-health auto-calculation, and the `tests` vs `tasks` wording decision.
+- Mobile dashboard refinement:
+- restored the subtle dashboard tile icons on screens below `768px` instead of letting the AdminLTE mobile rule hide them entirely.
+- adjusted the mobile dashboard card layout to keep tile copy readable while leaving room for the icon (`text-align: left`, extra right padding, slightly smaller/lighter icon treatment).
+- rebuilt frontend assets with `npm run dev` so the override is present in compiled CSS.
+
 # Session Progress (2026-03-17)
 
 ## Addendum (2026-03-17 Codex)

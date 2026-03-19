@@ -799,6 +799,21 @@ th.css-history > .th-inner::before {
 .small-box > a:hover {
   color: #fff;
 }
+@media screen and (max-width: 767px) {
+  .dashboard.small-box {
+    text-align: left;
+  }
+  .dashboard.small-box .inner {
+    padding-right: 86px;
+  }
+  .dashboard.small-box .icon {
+    display: block;
+    top: 6px;
+    right: 8px;
+    font-size: 64px;
+    color: rgba(0, 0, 0, 0.12);
+  }
+}
 .select2-container--default .select2-selection--single,
 .select2-selection .select2-selection--single {
   border: 1px solid #d2d6de;
