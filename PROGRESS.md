@@ -1,3 +1,95 @@
+# Session Progress (2026-04-07)
+
+## Addendum (2026-04-07 Codex)
+- Session kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, `TODO.md`, and the latest dated session addendum before resuming work.
+- Created `docs/agents/agents-addendum-2026-04-07-session-init.md` for this session.
+- Reinitialized carry-over context from the 2026-04-02 workstream:
+- local dev hostname/cert flow is set up around `https://dev.inbit` for LAN/mobile testing.
+- hardware detail/edit cleanup pass 1 is in progress locally, including checkout-UI removal, hardware edit simplification, QR widget reduction, and follow-up layout fixes for status/quality rows.
+- the hardware detail Blade parse regression from the last session was resolved by replacing inline `@php(...)` shorthand with block `@php ... @endphp`.
+- Current known open items remain:
+- `TODO.md` backlog: QR label layout cleanup, placeholder MPN/SKU replacement, mobile scan feedback, naming/email convention, battery-health decision, and `tests` vs `tasks` wording.
+- explicit unresolved test from prior handoffs: `tests/Feature/Assets/Ui/ReadyForSaleWarningTest.php`.
+- environment-level testing blockers for the touched UI work remain unchanged:
+- sqlite testing DB corruption (`database disk image is malformed`) in the current container workflow.
+- existing Livewire support-file-uploads bootstrap error affecting `EditAssetTest`.
+- Existing local worktree changes were detected in the dev-host config files, hardware detail/edit/QR Blade files, translations, tests, and prior session docs; initialization is continuing without reverting or overwriting unrelated edits.
+- Hardware detail follow-up:
+- removed the current status-change note field from both the hardware detail page and the shared edit-status partial so asset notes can be redesigned later around a single consolidated note surface.
+- changed the hardware detail status and quality dropdowns to submit immediately on change rather than relying on a separate quality save button.
+- replaced the QR label download path again so the single download action now serves a full rendered label PNG image instead of a PDF or raw QR image.
+- verification:
+- `docker compose exec app php -l app/Services/QrCodeService.php` (pass)
+- `docker compose exec app php -l app/Services/QrLabelService.php` (pass)
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan optimize:clear` (pass)
+- Hardware detail tabs follow-up:
+- changed the tests tab icon from a vial to the existing clipboard-check icon to better match the refurb task flow.
+- added the missing `general.status_history` translation key in both English and Dutch so the history panel no longer renders the raw translation key.
+- reverted the experimental phone-tab layout changes after review because they made the hardware page feel less responsive; mobile tab UX is being left for a later dedicated design pass.
+- removed the upload tab's special `pull-right` float on the hardware detail page so the paperclip/upload action stays aligned with the rest of the tab list.
+- added a `Test uitvoeren` / `Run Test` button directly under the hardware edit action that activates the existing Tests tab instead of navigating away from the asset page.
+- restructured the test-runs index result rows into a simple grid so test labels, statuses, and notes stay vertically aligned instead of drifting as one inline-flex blob.
+- replaced the hardware Tests-tab top-right `Start New Run` control with responsive actions: a desktop text button aligned upper-left and a mobile/tablet lower-right floating plus-action button that only appears while the Tests tab is active.
+- increased the hardware Tests-tab mobile floating plus-action size and converted the latest-tests warning callout into a click-to-expand block with a right-side disclosure icon.
+- added muted helper copy to the latest-tests warning callout so it explicitly says it can be unfolded.
+- changed the hardware Tests-tab run list to a single full-width column so test runs no longer split into two columns on wide screens.
+- updated `ShowAssetTest` coverage to assert the clipboard-check icon and translated status-history heading.
+- Shared mobile header fix:
+- reverted the temporary content-header wrapper experiment after it introduced new xs layout issues.
+- restored the original standalone mobile sidebar toggle under the navbar and switched the shared header fix to a smaller xs-only rule: `h1.pagetitle` no longer keeps `pull-left` on narrow screens, so the breadcrumb/title can wrap beside the floated hamburger instead of dropping onto its own row.
+- adjusted the shared content-header on xs so the section keeps a small real side padding instead of letting the inner Bootstrap row cancel it out, preserving breathing room around the breadcrumb block on narrow screens.
+- verification:
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan test tests/Feature/Assets/Ui/ShowAssetTest.php --env=testing` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+
+# Session Progress (2026-04-02)
+
+## Addendum (2026-04-02 Codex)
+- Session kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, `TODO.md`, and the most recent session addenda before starting work.
+- Created `docs/agents/agents-addendum-2026-04-02-session-init.md` for this session.
+- Reinitialized carry-over context from the recent March workstream:
+- 2026-03-19 closed out active-tests/mobile scan follow-up work and documented one remaining local UI change in `resources/views/tests/active.blade.php`.
+- 2026-03-17 finalized the single-save model-number image admin flow and removed obsolete standalone web image-admin routes.
+- 2026-03-12 introduced ordered model-number default images, asset image override behavior, webshop/read APIs, and test-photo promotion into asset images.
+- Current known carry-over items from repo docs remain:
+- unresolved failing test noted in prior handoffs: `tests/Feature/Assets/Ui/ReadyForSaleWarningTest.php`.
+- backlog items from `TODO.md` and recent handoffs include QR label layout cleanup, placeholder MPN/SKU catalog replacement, mobile scan feedback, naming/email convention, battery-health auto-calculation, and the `tests` vs `tasks` wording decision.
+- Current user direction for this session:
+- an initial live showcase surfaced multiple UX/content cleanup items,
+- the system is being exercised primarily on a Samsung Galaxy A5,
+- mobile-first usability should be treated as the main validation target for upcoming changes.
+- Existing local worktree changes were detected in `PROGRESS.md`, `docs/agents/agents-addendum-2026-03-19-session-init.md`, and `resources/views/tests/active.blade.php`; initialization was logged without reverting or overwriting those unrelated edits.
+- Dev host/certificate setup:
+- extracted a `dev.inbit` server certificate and private key from the newly exported `dev+environment+snipe-it.p12` into `docker/certs/`.
+- updated local dev hostname references from `dev.snipe.inbit` to `dev.inbit` in Docker/nginx/local environment config so the stack can serve the pfSense-backed internal hostname with the matching cert.
+- verification and restart steps are being handled against the local stack only; no production environment changes were made.
+- Hardware detail/edit cleanup pass 1:
+- gave quality grading its own dedicated row on the hardware detail page while keeping status updates on the existing `hardware.status.update` endpoint.
+- removed checkout-oriented hardware detail UI: the checked-out-to side panel, deployed/assignee rendering inside the status row, checkout date display, and the conditional `checkin_and_delete` delete-button copy.
+- simplified the hardware edit page by removing the collapsed optional-information section, moving asset `name` into the visible main form, and moving general `notes` directly below status.
+- adjusted the shared hardware status form partial so the status note stays aligned with the status control column.
+- reduced the QR widget on the hardware detail page to a single download action that targets the rendered label PNG instead of the raw QR image, and removed the `Print PDF` action.
+- Added focused UI regression coverage in `ShowAssetTest` and `EditAssetTest` for the new detail/edit expectations.
+- Verification:
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan optimize:clear` (pass)
+- `docker compose exec app php artisan test tests/Feature/Assets/Ui/ShowAssetTest.php --env=testing` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+- `docker compose exec app php artisan test tests/Feature/Assets/Ui/QualityGradeDetailUpdateTest.php --env=testing` (blocked by the same existing sqlite testing DB corruption)
+- `docker compose exec app php artisan test tests/Feature/Assets/Ui/EditAssetTest.php --env=testing` (blocked in current environment by an existing Livewire support-file-uploads bootstrap error before reaching the new assertions)
+- Follow-up polish after manual review:
+- changed the hardware detail status form wiring to use a detached form id with `form=""` attributes so the status row and quality row remain true separate rows within the page's table-like `row-new-striped` layout.
+- switched the single QR download action to the generated label PDF so the downloaded file matches the actual printed output path instead of the plain QR PNG.
+- added width constraints on the QR widget controls so the printer dropdown no longer overflows the panel on narrow screens.
+- Verification:
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan optimize:clear` (pass)
+- Blade parse-error follow-up:
+- fixed a hardware detail view regression caused by inline `@php(...)` shorthand in the touched Blade files; replaced the shorthand with block `@php ... @endphp` in the asset detail view, QR widget partial, and shared status partial.
+- Verification:
+- `docker compose exec app php artisan view:clear` (pass)
+- `docker compose exec app php artisan view:cache` (pass)
+
 # Session Progress (2026-03-19)
 
 ## Addendum (2026-03-19 Codex)
@@ -63,6 +155,11 @@
 - updated `tests/Feature/Tests/ActiveTestViewTest.php` so the scan-tag redirect assertion matches the intended product flow: scan lookup lands on the asset detail page (`/hardware/{id}`), not directly on the active tests screen.
 - Verification:
 - `docker compose exec app php artisan test tests/Feature/Tests/ActiveTestViewTest.php --env=testing` (pass, 7 tests / 23 assertions).
+- Active tests mobile follow-up:
+- removed the sticky/fixed positioning from the `general.progress` block in `resources/views/tests/active.blade.php` after device feedback; it now stays in normal flow below the test list instead of pinning to the viewport.
+- Session handoff:
+- latest pushed commit is `6b5ff364e` (`Fix Test Permissions And Scan Viewport`).
+- one local follow-up remains uncommitted at session end: the `resources/views/tests/active.blade.php` change that removes sticky/fixed positioning from the bottom progress block so it stays at the end of the list on mobile.
 
 # Session Progress (2026-03-17)
 
@@ -773,5 +870,14 @@ there are multiple duplicate functions that still need to be removed, sku will b
 - Reproduce as the affected user and capture the `/api/v1/hardware` response (status + payload) to see if it is auth (401/403) or an empty dataset.
 - Verify the user has `assets.view` granted (not inherited or explicitly denied) in the `users.permissions` JSON and that no group sets `assets.view` to `-1`.
 - If the API is 401/403, check Passport cookie flow for web sessions and confirm the request is authenticated; if it is 200 with no rows, inspect any persisted table filters (`status`, `status_id`, search) and remove them.
+
+# Session Progress (2026-04-07)
+- Simplified the active test-run detail screen by removing the large top testing header and moving the live save/progress/history/start-run controls into the existing bottom action bar.
+- Disabled the old hidden two-column preference on the active testing screen so users now stay on the single-column card flow after the header/toggle removal.
+- Updated the dedicated active testing view feature test to assert the header is gone and the bottom-bar summary controls remain present.
+- Moved the hardware detail QR print/download panel below the primary action buttons (`Edit`, `Run Test`, `Add Note`, `Clone`, `Delete`) so the main action stack stays grouped before the print module.
+- Verification:
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan test tests/Feature/Tests/ActiveTestViewTest.php --env=testing` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
 
 

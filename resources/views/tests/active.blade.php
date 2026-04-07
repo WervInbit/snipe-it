@@ -30,38 +30,6 @@
         padding: var(--testing-space-lg) clamp(0.75rem, 3vw, 1.75rem) 3rem;
     }
 
-    .testing-header {
-        background: rgba(255, 255, 255, 0.92);
-        border: 1px solid var(--testing-border);
-        border-radius: var(--testing-radius);
-        box-shadow: var(--testing-shadow);
-        padding: var(--testing-space-md);
-        position: sticky;
-        top: 70px;
-        z-index: 1030;
-        display: flex;
-        flex-direction: column;
-        gap: var(--testing-space-md);
-    }
-
-    .testing-header__primary {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        gap: var(--testing-space-md);
-        align-items: flex-start;
-    }
-
-    .testing-asset__model {
-        font-size: 1.1rem;
-        font-weight: 600;
-    }
-
-    .testing-asset__meta {
-        font-size: 0.9rem;
-        color: #64748b;
-    }
-
     .testing-save-indicator {
         display: inline-flex;
         align-items: center;
@@ -77,31 +45,12 @@
         font-size: 1rem;
     }
 
-    .testing-header__secondary {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: var(--testing-space-sm);
-        align-items: center;
-    }
-
-    .testing-header__actions {
-        display: flex;
-        gap: 0.5rem;
-        justify-content: flex-end;
-        flex-wrap: wrap;
-        grid-column: 1 / -1;
-    }
-
     .testing-progress-chip {
         padding: 0.65rem 0.9rem;
         background: rgba(15, 23, 42, 0.03);
         border-radius: 12px;
         border: 1px solid var(--testing-border);
         font-size: 0.85rem;
-    }
-
-    .testing-layout-toggle .form-check-input {
-        pointer-events: none;
     }
 
     .testing-grid {
@@ -283,14 +232,9 @@
     }
 
     .testing-floating-bar {
-        position: sticky;
-        top: auto;
-        bottom: 1rem;
         margin-top: 2rem;
         display: flex;
         justify-content: center;
-        pointer-events: none;
-        z-index: 1020;
     }
 
     .testing-floating-bar__inner {
@@ -307,6 +251,24 @@
         color: #f1f5f9;
     }
 
+    .testing-floating-bar__meta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1 1 100%;
+    }
+
+    .testing-floating-bar__meta .testing-progress-chip {
+        color: #e2e8f0;
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .testing-floating-bar__meta .testing-progress-chip.text-danger {
+        color: #fecaca !important;
+    }
+
     .testing-floating-bar__progress {
         flex: 1 1 220px;
     }
@@ -315,6 +277,13 @@
         display: flex;
         flex-wrap: wrap;
         gap: 0.75rem;
+        align-items: center;
+    }
+
+    .testing-floating-bar__secondary-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
     }
 
     .testing-floating-bar .progress {
@@ -323,16 +292,8 @@
     }
 
     @media (max-width: 576px) {
-        .testing-page {
-            padding-bottom: calc(10rem + env(safe-area-inset-bottom, 0px));
-        }
-
         .testing-shell {
             padding-inline: 1rem;
-        }
-
-        .testing-header {
-            top: 60px;
         }
 
         .testing-card__footer {
@@ -374,14 +335,10 @@
             border-radius: 24px;
         }
 
-        .testing-floating-bar {
-            position: fixed;
-            left: 0;
-            right: 0;
-            bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem);
-            top: auto;
-            margin-top: 0;
-            padding: 0 1rem;
+        .testing-floating-bar__meta,
+        .testing-floating-bar__actions,
+        .testing-floating-bar__secondary-actions {
+            width: 100%;
         }
     }
 </style>
@@ -404,83 +361,7 @@
                 @endif
             </div>
         @else
-            <header class="testing-header">
-                <div class="testing-header__primary">
-                    <div class="testing-asset text-truncate">
-                        <div class="testing-asset__model" data-testid="asset-header">
-                            {{ optional($asset->model)->name ?? trans('general.unknown') }}
-                            @if(optional($asset->modelNumber)->label)
-                                <span class="text-muted fw-normal">&mdash; {{ $asset->modelNumber->label }}</span>
-                            @endif
-                        </div>
-                        <div class="testing-asset__meta">
-                            {{ $asset->asset_tag }} &middot; {{ trans('tests.last_run_with_user', [
-                                'date' => optional($run->created_at)->format('Y-m-d'),
-                                'user' => optional($run->user)->name ?? trans('general.unknown')
-                            ]) }}
-                        </div>
-                    </div>
-                    <div class="d-flex align-items-center gap-2 flex-wrap">
-                        <span id="saveIndicator" class="testing-save-indicator" aria-live="polite">
-                            <i class="fas fa-rotate fa-spin d-none" data-state="saving" aria-hidden="true"></i>
-                            <i class="fas fa-check d-none" data-state="clean" aria-hidden="true"></i>
-                            <i class="fas fa-triangle-exclamation d-none" data-state="error" aria-hidden="true"></i>
-                            <span class="small">{{ trans('general.status') }}</span>
-                        </span>
-                        <div class="btn-group testing-layout-toggle">
-                            <button type="button"
-                                    class="btn btn-outline-secondary btn-sm dropdown-toggle"
-                                    data-bs-toggle="dropdown"
-                                    aria-expanded="false"
-                                    id="toggleTwoCol">
-                                <i class="fas fa-layer-group me-1" aria-hidden="true"></i>{{ trans('tests.two_column_toggle') }}
-                                <input type="checkbox" class="form-check-input ms-2" id="twoColChk">
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('test-runs.index', $asset->id) }}">
-                                        <i class="fas fa-clock me-2" aria-hidden="true"></i>{{ trans('tests.view_history') }}
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="testing-header__secondary">
-                    <div class="testing-progress-chip"
-                         data-progress-completed
-                         data-template="{{ trans('tests.completed_count', ['completed' => ':completed', 'total' => ':total']) }}">
-                        {{ trans('tests.completed_count', ['completed' => $progress['completed'], 'total' => $progress['total']]) }}
-                    </div>
-                    <div class="testing-progress-chip"
-                         data-progress-remaining
-                         data-template="{{ trans('tests.remaining_count', ['remaining' => ':remaining']) }}">
-                        {{ trans('tests.remaining_count', ['remaining' => $progress['remaining']]) }}
-                    </div>
-                    <div class="testing-progress-chip"
-                         data-progress-failures
-                         data-template="{{ trans('tests.failure_count', ['failures' => ':failures']) }}">
-                        {{ trans('tests.failure_count', ['failures' => $progress['failures']]) }}
-                    </div>
-                    <div class="testing-header__actions">
-                        @if($canViewAudit ?? false)
-                            <a href="{{ route('test-runs.index', $asset->id) }}" class="btn btn-outline-secondary btn-sm">
-                                <i class="fas fa-history me-1" aria-hidden="true"></i>{{ trans('tests.view_history') }}
-                            </a>
-                        @endif
-                        @if($canStartRun ?? false)
-                            <form method="POST" action="{{ route('test-runs.store', $asset->id) }}">
-                                @csrf
-                                <button type="submit" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-redo me-1" aria-hidden="true"></i>{{ trans('tests.start_new_run') }}
-                                </button>
-                            </form>
-                        @endif
-                    </div>
-                </div>
-            </header>
-
-            <main class="mt-4">
+            <main>
                 <div id="testGrid" class="testing-grid" data-mode="one">
                     @forelse ($results as $result)
                         @include('tests.partials.active-card', ['result' => $result, 'canUpdate' => $canUpdate])
@@ -494,6 +375,29 @@
 
             <div class="testing-floating-bar">
                 <div class="testing-floating-bar__inner">
+                    <div class="testing-floating-bar__meta" data-testid="tests-active-summary">
+                        <span id="saveIndicator" class="testing-save-indicator" aria-live="polite" data-testid="testing-save-indicator">
+                            <i class="fas fa-rotate fa-spin d-none" data-state="saving" aria-hidden="true"></i>
+                            <i class="fas fa-check d-none" data-state="clean" aria-hidden="true"></i>
+                            <i class="fas fa-triangle-exclamation d-none" data-state="error" aria-hidden="true"></i>
+                            <span class="small">{{ trans('general.status') }}</span>
+                        </span>
+                        <div class="testing-progress-chip"
+                             data-progress-completed
+                             data-template="{{ trans('tests.completed_count', ['completed' => ':completed', 'total' => ':total']) }}">
+                            {{ trans('tests.completed_count', ['completed' => $progress['completed'], 'total' => $progress['total']]) }}
+                        </div>
+                        <div class="testing-progress-chip"
+                             data-progress-remaining
+                             data-template="{{ trans('tests.remaining_count', ['remaining' => ':remaining']) }}">
+                            {{ trans('tests.remaining_count', ['remaining' => $progress['remaining']]) }}
+                        </div>
+                        <div class="testing-progress-chip"
+                             data-progress-failures
+                             data-template="{{ trans('tests.failure_count', ['failures' => ':failures']) }}">
+                            {{ trans('tests.failure_count', ['failures' => $progress['failures']]) }}
+                        </div>
+                    </div>
                     <div class="testing-floating-bar__progress">
                         <div class="d-flex justify-content-between align-items-center text-uppercase small fw-semibold mb-2">
                             <span>{{ trans('general.progress') }}</span>
@@ -510,6 +414,21 @@
                         </div>
                     </div>
                     <div class="testing-floating-bar__actions">
+                        <div class="testing-floating-bar__secondary-actions">
+                            @if($canViewAudit ?? false)
+                                <a href="{{ route('test-runs.index', $asset->id) }}" class="btn btn-outline-light btn-sm" data-testid="tests-view-history-btn">
+                                    <i class="fas fa-history me-1" aria-hidden="true"></i>{{ trans('tests.view_history') }}
+                                </a>
+                            @endif
+                            @if($canStartRun ?? false)
+                                <form method="POST" action="{{ route('test-runs.store', $asset->id) }}">
+                                    @csrf
+                                    <button type="submit" class="btn btn-outline-light btn-sm" data-testid="tests-start-new-run-btn">
+                                        <i class="fas fa-redo me-1" aria-hidden="true"></i>{{ trans('tests.start_new_run') }}
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
                         <button type="button"
                                 class="btn btn-success btn-sm"
                                 id="tests-complete-btn"
@@ -603,7 +522,7 @@
             completeConfirmIncomplete: @json(trans('tests.complete_confirm_incomplete')),
             completeConfirmContinue: @json(trans('tests.complete_confirm_continue')),
         },
-        layoutKey: 'tests.layout.twoCol',
+        layoutKey: 'tests.layout.active.oneCol',
     };
 </script>
 @php($testsActiveAsset = public_path('js/dist/tests-active.js'))

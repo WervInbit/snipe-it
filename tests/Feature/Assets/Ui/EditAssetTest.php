@@ -31,6 +31,28 @@ class EditAssetTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function testEditPageHidesOptionalInformationBlockAndPlacesNotesBelowStatus(): void
+    {
+        $asset = Asset::factory()->create();
+        $response = $this->actingAs(User::factory()->editAssets()->create())
+            ->get(route('hardware.edit', $asset));
+
+        $response->assertOk();
+        $response->assertDontSee(trans('admin/hardware/form.optional_infos'));
+
+        $content = $response->getContent();
+        $statusPos = strpos($content, 'name="status_id"');
+        $notesPos = strpos($content, 'name="notes"');
+        $modelSpecPos = strpos($content, 'id="model_spec_content"');
+
+        $this->assertNotFalse($statusPos);
+        $this->assertNotFalse($notesPos);
+        $this->assertNotFalse($modelSpecPos);
+        $this->assertFalse(str_contains($content, 'name="status_change_note"'));
+        $this->assertTrue($statusPos < $notesPos);
+        $this->assertTrue($notesPos < $modelSpecPos);
+    }
+
     public function testAssetEditPostIsRedirectedIfRedirectSelectionIsIndex()
     {
         $asset = Asset::factory()->assignedToUser()->create();

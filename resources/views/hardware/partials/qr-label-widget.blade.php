@@ -1,15 +1,40 @@
-@php($templateName = $qrTemplates[$selectedTemplate]['name'] ?? $selectedTemplate)
-@php($printQueues = array_values(array_filter(config('qr_templates.queues') ?? [])))
-@php($defaultQueue = config('qr_templates.print_queue') ?? ($printQueues[0] ?? null))
-@php($qrRaw = $qrRaw ?? null)
-@php($qrPreview = $qrPreview ?? null)
+@php
+    $templateName = $qrTemplates[$selectedTemplate]['name'] ?? $selectedTemplate;
+    $printQueues = array_values(array_filter(config('qr_templates.queues') ?? []));
+    $defaultQueue = config('qr_templates.print_queue') ?? ($printQueues[0] ?? null);
+    $qrPreview = $qrPreview ?? null;
+@endphp
 <div class="panel panel-default qr-label-panel">
+    <style>
+        .qr-label-panel .qr-label-controls,
+        .qr-label-panel .qr-label-printer {
+            max-width: 100%;
+            width: 100%;
+        }
+        .qr-label-panel .qr-label-controls .form-control,
+        .qr-label-panel .qr-label-printer .form-control,
+        .qr-label-panel .qr-label-printer select {
+            width: 100%;
+            max-width: 100%;
+        }
+        .qr-label-panel .qr-label-actions {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+        .qr-label-panel .qr-label-actions .btn {
+            max-width: 100%;
+            white-space: normal;
+        }
+    </style>
     <div class="panel-heading">
         <strong>{{ trans('general.print_qr') }}</strong>
         <span class="text-muted">- {{ $templateName }}</span>
     </div>
     <div class="panel-body text-center">
-        @php($assetLabel = $asset->name ?: ($asset->asset_tag ?? $asset->id))
+        @php
+            $assetLabel = $asset->name ?: ($asset->asset_tag ?? $asset->id);
+        @endphp
         @if ($qrPreview)
             <style>
                 .qr-label-preview {
@@ -50,7 +75,7 @@
             >
         @endif
 
-        <form method="get" class="form-inline" style="margin-bottom: 10px;">
+        <form method="get" class="qr-label-controls" style="margin-bottom: 10px;">
             @foreach(request()->except('template') as $key => $value)
                 @if (is_array($value))
                     @foreach($value as $entry)
@@ -77,7 +102,7 @@
         </form>
 
         @if (!empty($printQueues))
-            <div class="form-group text-left">
+            <div class="form-group text-left qr-label-printer">
                 <label for="asset-printer-picker" class="control-label">{{ __('Printer location') }}</label>
                 <select
                     id="asset-printer-picker"
@@ -91,20 +116,10 @@
             </div>
         @endif
 
-        <div class="btn-group">
-            @if ($qrPdf)
-                <a href="{{ $qrPdf }}" target="_blank" class="btn btn-primary">
-                    <x-icon type="print" /> {{ trans('general.print_pdf') }}
-                </a>
-            @endif
-            @if ($qrRaw)
-                <a href="{{ $qrRaw }}" download class="btn btn-default">
-                    <x-icon type="download" /> {{ __('Download QR code') }}
-                </a>
-            @endif
+        <div class="btn-group qr-label-actions">
             @if ($qrPng)
                 <a href="{{ $qrPng }}" download class="btn btn-default">
-                    <x-icon type="download" /> {{ trans('general.download_png') }}
+                    <x-icon type="download" /> {{ trans('general.download_qr_label') }}
                 </a>
             @endif
         </div>

@@ -111,7 +111,9 @@
         'fieldname' => 'model_id',
         'hide_new' => !$item->id,
     ])
+    @include ('partials.forms.edit.name', ['translated_name' => trans('admin/hardware/form.name')])
     @include ('partials.forms.edit.status', ['required' => false])
+    @include ('partials.forms.edit.notes')
 
     <div id="model_spec_content">
         @include('hardware.partials.spec-overrides', [
@@ -127,7 +129,6 @@
         @include ('partials.forms.edit.location-cascade-select', ['translated_name' => trans('admin/hardware/form.checkout_to'), 'fieldname' => 'assigned_location', 'style' => 'display:none;', 'required' => 'false'])
     @endif
 
-    @include ('partials.forms.edit.notes')
     @include ('partials.forms.edit.location-cascade-select', ['translated_name' => trans('admin/hardware/form.default_location'), 'fieldname' => 'rtd_location_id', 'help_text' => trans('general.rtd_location_help')])
     <div class="form-group">
         <div class="col-md-7 col-md-offset-3">
@@ -201,42 +202,6 @@
         @include("models/custom_fields_form",["model" => $model])
         @endif
     </div>
-
-
-        <div class="col-md-12 col-sm-12">
-
-        <fieldset name="optional-details">
-
-            <legend class="highlight">
-                <a id="optional_info">
-                    <x-icon type="caret-right" id="optional_info_icon" />
-                    {{ trans('admin/hardware/form.optional_infos') }}
-                </a>
-            </legend>
-
-            <div id="optional_details" class="col-md-12" style="display:none">
-                @include ('partials.forms.edit.name', ['translated_name' => trans('admin/hardware/form.name')])
-                @include ('partials.forms.edit.warranty')
-                @include ('partials.forms.edit.datepicker', ['translated_name' => trans('admin/hardware/form.expected_checkin'),'fieldname' => 'expected_checkin'])
-                @include ('partials.forms.edit.datepicker', ['translated_name' => trans('general.next_audit_date'),'fieldname' => 'next_audit_date', 'help_text' => trans('general.next_audit_date_help')])
-                <!-- byod checkbox -->
-                <div class="form-group byod">
-                    <div class="col-md-7 col-md-offset-3">
-                        <label class="form-control">
-                            <input type="checkbox" value="1" name="byod" {{ (old('remote', $item->byod)) == '1' ? ' checked="checked"' : '' }} aria-label="byod">
-                            {{ trans('general.byod') }}
-                        </label>
-                        <p class="help-block">
-                            {{ trans('general.byod_help') }}
-                        </p>
-                    </div>
-                </div>
-
-            </div> <!-- end optional details -->
-        </fieldset>
-
-        </div><!-- end col-md-12 col-sm-12-->
-
 
 
         <div class="col-md-12 col-sm-12">

@@ -207,6 +207,117 @@ class QrCodeService
     }
 
     /**
+     * Render a full label as PNG binary data.
+     *
+     * @param array<string,array<int,string>>|string|null $caption
+     */
+    public function labelPng(string $data, ?string $label = null, ?string $logoPath = null, ?string $template = null, array|string|null $caption = null): string
+    {
+        $tpl = $this->template($template);
+        $qrPng = $this->png($data, $label, $logoPath, $template);
+
+        if (! function_exists('imagecreatetruecolor')) {
+            return $qrPng;
+        }
+
+        $qrImg = @imagecreatefromstring($qrPng);
+        if (! $qrImg) {
+            return $qrPng;
+        }
+
+        $dpi = (int) ($tpl['render_dpi'] ?? 300);
+        $pxPerMm = max(1, $dpi / 25.4);
+        $labelWidthPx = max(imagesx($qrImg), (int) round(((float) $tpl['width_mm']) * $pxPerMm));
+        $labelHeightPx = max(imagesy($qrImg), (int) round(((float) $tpl['height_mm']) * $pxPerMm));
+
+        $canvas = imagecreatetruecolor($labelWidthPx, $labelHeightPx);
+        $white = imagecolorallocate($canvas, 255, 255, 255);
+        $black = imagecolorallocate($canvas, 0, 0, 0);
+        imagefilledrectangle($canvas, 0, 0, $labelWidthPx, $labelHeightPx, $white);
+
+        $lines = $this->labelTextLines($caption, $tpl);
+        $font = $this->gdFontForTemplate($tpl);
+        $fontHeight = imagefontheight($font);
+        $fontWidth = imagefontwidth($font);
+        $lineGap = max(1, (int) round($fontHeight * max(1.0, (float) ($tpl['caption_line_height'] ?? 1.2)) - $fontHeight));
+
+        if (($tpl['layout'] ?? null) === 'square-stack') {
+            $qrBoxPx = max(1, (int) round(((float) ($tpl['qr_box_mm'] ?? 20.0)) * $pxPerMm));
+            $qrTopPx = (int) round(((float) ($tpl['padding_mm'] ?? 1.2)) * $pxPerMm);
+            $qrLeftPx = (int) round(((float) ($tpl['qr_left_mm'] ?? ($tpl['padding_mm'] ?? 1.2))) * $pxPerMm);
+            $textTopPx = (int) round((((float) ($tpl['padding_mm'] ?? 1.2)) + ((float) ($tpl['qr_box_mm'] ?? 20.0)) + ((float) ($tpl['text_gap_mm'] ?? 0.0))) * $pxPerMm);
+            $textLeftPx = (int) round(((float) ($tpl['text_left_mm'] ?? ($tpl['padding_mm'] ?? 1.2))) * $pxPerMm);
+            $textRightPx = (int) round(((float) ($tpl['text_right_mm'] ?? ($tpl['text_left_mm'] ?? ($tpl['padding_mm'] ?? 1.2)))) * $pxPerMm);
+            $textHeightPx = max(1, (int) round(((float) ($tpl['text_height_mm'] ?? 2.0)) * $pxPerMm));
+            $textWidthPx = max(1, $labelWidthPx - $textLeftPx - $textRightPx);
+
+            imagecopyresampled(
+                $canvas,
+                $qrImg,
+                $qrLeftPx,
+                $qrTopPx,
+                0,
+                0,
+                $qrBoxPx,
+                $qrBoxPx,
+                imagesx($qrImg),
+                imagesy($qrImg)
+            );
+
+            $totalTextHeight = max($fontHeight, count($lines) * $fontHeight + max(0, count($lines) - 1) * $lineGap);
+            $currentY = $textTopPx + max(0, (int) floor(($textHeightPx - $totalTextHeight) / 2));
+
+            foreach ($lines as $line) {
+                $textWidth = $fontWidth * strlen($line);
+                $textX = $textLeftPx + max(0, (int) floor(($textWidthPx - $textWidth) / 2));
+                imagestring($canvas, $font, $textX, $currentY, $line, $black);
+                $currentY += $fontHeight + $lineGap;
+            }
+        } else {
+            $topMarginPx = (int) round(max(0.0, ((float) $tpl['height_mm']) * 0.05) * $pxPerMm);
+            $bottomMarginPx = $topMarginPx;
+            $leftMarginPx = (int) round(max(0.0, ((float) $tpl['width_mm']) * 0.05) * $pxPerMm);
+            $rightMarginPx = $leftMarginPx;
+            $gutterPx = max(1, (int) round(max(1.0, ((float) $tpl['width_mm']) * 0.02) * $pxPerMm));
+            $qrWidthPx = max(1, (int) round(max(10.0, min(((float) $tpl['width_mm']) * 0.45, (float) ($tpl['qr_column_mm'] ?? ((float) $tpl['width_mm']) * 0.4))) * $pxPerMm));
+            $qrHeightPx = max(1, $labelHeightPx - $topMarginPx - $bottomMarginPx);
+            $textLeftPx = $leftMarginPx + $qrWidthPx + $gutterPx;
+            $textWidthPx = max(1, $labelWidthPx - $rightMarginPx - $textLeftPx);
+            $textHeightPx = $qrHeightPx;
+
+            imagecopyresampled(
+                $canvas,
+                $qrImg,
+                $leftMarginPx,
+                $topMarginPx,
+                0,
+                0,
+                $qrWidthPx,
+                $qrHeightPx,
+                imagesx($qrImg),
+                imagesy($qrImg)
+            );
+
+            $totalTextHeight = max($fontHeight, count($lines) * $fontHeight + max(0, count($lines) - 1) * $lineGap);
+            $currentY = $topMarginPx + max(0, $textHeightPx - $totalTextHeight);
+
+            foreach ($lines as $line) {
+                imagestring($canvas, $font, $textLeftPx, $currentY, $line, $black);
+                $currentY += $fontHeight + $lineGap;
+            }
+        }
+
+        ob_start();
+        imagepng($canvas);
+        $output = (string) ob_get_clean();
+
+        imagedestroy($qrImg);
+        imagedestroy($canvas);
+
+        return $output;
+    }
+
+    /**
      * Build the HTML fragment for a single label (used by both single/batch PDFs).
      *
      * @param array<string,array<int,string>>|string|null $caption
@@ -405,5 +516,49 @@ HTML;
         $escaped = array_map(fn ($line) => e(Str::limit($line, 64), false), $lines);
 
         return implode('', array_map(fn ($line) => '<div class="'.$class.'">'.$line.'</div>', $escaped));
+    }
+
+    /**
+     * @param array<string,array<int,string>>|string|null $caption
+     * @return array<int, string>
+     */
+    protected function labelTextLines(array|string|null $caption, array $tpl): array
+    {
+        $maxLines = (int) ($tpl['caption_lines'] ?? 2);
+        $wrapAt = (int) ($tpl['caption_wrap'] ?? 28);
+        $maxChars = (int) ($tpl['caption_max_chars'] ?? 64);
+
+        if (is_array($caption)) {
+            $lines = array_values(array_filter(
+                array_map(fn ($line) => trim((string) $line), $caption['bottom'] ?? []),
+                fn ($line) => $line !== ''
+            ));
+
+            if (empty($lines)) {
+                return [''];
+            }
+
+            return array_map(
+                fn ($line) => (string) Str::limit($line, $maxChars, ''),
+                array_slice($lines, 0, max(1, $maxLines))
+            );
+        }
+
+        $lines = $this->captionLines(is_string($caption) ? $caption : null, $maxChars, $wrapAt, $maxLines);
+
+        return empty($lines) ? [''] : $lines;
+    }
+
+    protected function gdFontForTemplate(array $tpl): int
+    {
+        $size = (float) ($tpl['caption_font_size'] ?? 8);
+
+        return match (true) {
+            $size <= 4 => 1,
+            $size <= 6 => 2,
+            $size <= 8 => 3,
+            $size <= 10 => 4,
+            default => 5,
+        };
     }
 }

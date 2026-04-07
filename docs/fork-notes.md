@@ -4,6 +4,23 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-04-02
+- Hardware detail page status editing now renders quality grading as its own row instead of bundling it into the same status control block.
+- Removed checkout-oriented hardware detail UI for the refurb flow: no checked-out-to side panel, no assigned/deployed rendering inside the status row, and no checkout-date detail line on the asset page.
+- Hardware detail delete action no longer uses `Checkin and Delete` wording; the page now consistently shows a plain delete action.
+- Hardware edit page no longer exposes the collapsed optional-information section; asset name was moved into the main visible form and notes now appear directly below status.
+- Hardware detail QR widget now exposes a single download action for the full rendered label PNG image and no longer shows a `Print PDF` action or a raw-QR download button.
+- Hardware detail tests tab icon now uses a clipboard-check symbol instead of a vial, and the history panel heading now has a dedicated translated `status_history` label.
+- Hardware detail upload tab no longer uses a special right float, so the paperclip/upload action stays aligned with the rest of the tab list on narrow screens.
+- Hardware detail now includes a `Test uitvoeren` shortcut button under the edit action that opens the existing Tests tab in place.
+- Hardware detail Tests tab now uses responsive new-run controls: desktop shows the action at the upper left, while phones/tablets get a lower-right floating plus-action button that appears only when the Tests tab is active.
+- Hardware detail latest-tests warning is now foldable via the full callout surface and shows a right-side disclosure icon; the mobile tests FAB was also enlarged for thumb reach.
+- Hardware detail latest-tests warning now also shows muted helper copy indicating that the block can be unfolded.
+- Hardware detail Tests-tab run history now stays in a single full-width column instead of splitting into two columns on desktop.
+- Test-run history rows now use a stable label/status/note grid so entries align cleanly under each other on the tests list page.
+- On small screens, the shared page title/breadcrumb header no longer keeps its left float, so it can wrap beside the existing floated sidebar hamburger instead of wasting a separate row below the navbar.
+- On small screens, the shared content header now preserves a small amount of side padding for the breadcrumb/title block instead of collapsing flush to the edge.
+
 ### 2026-03-17
 - Added admin UI management for model-number default images on model-number edit screens (upload, caption update, sort-order update, replacement, and delete actions).
 - Added web routes/controller flow for model-number image CRUD in the authenticated settings/model management UX.
@@ -95,5 +112,9 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 ### 2026-01-08
 - Latest Tests list column now shows completed/total counts, with lazy hover details for failed/missing tests including note excerpts and photo markers.
 - Asset creation now allows custom asset tags (unlocking the auto-generated tag on create), while serial entry warns on duplicates and can be overridden with an explicit allow-duplicate toggle (asset tags remain unique).
+
+### 2026-04-07
+- The active test-run screen now removes the large top testing header and keeps save/progress/history controls in the bottom action bar so operators stay focused on the test cards themselves.
+- The hardware detail QR print/download panel now renders below the main action buttons instead of sitting mid-stack inside the primary action group.
 
 

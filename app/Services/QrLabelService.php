@@ -40,7 +40,7 @@ class QrLabelService
         $caption = $this->assetLabelBlocks($asset, $settings, $template);
 
         if (in_array('png', $formats)) {
-            $png = $qr->png($data, $label, $logoPath, $template);
+            $png = $qr->labelPng($data, $label, $logoPath, $template, $caption);
             $disk->put($this->path($asset, 'png', $template), $png);
         }
 
@@ -136,6 +136,28 @@ class QrLabelService
         $caption = $this->assetLabelBlocks($asset, $settings, $template);
 
         return $qr->pdf(
+            $asset->asset_tag,
+            ($settings->qr_text_redundancy ?? false) ? $asset->asset_tag : null,
+            $logoPath,
+            $template,
+            $caption
+        );
+    }
+
+    /**
+     * Render and return a full-label PNG binary for a single asset.
+     */
+    public function pngBinary(Asset $asset, ?string $template = null): string
+    {
+        $settings = Setting::getSettings() ?? (object) [];
+        $template = $template ?? ($settings->qr_label_template ?? config('qr_templates.default'));
+        $disk = Storage::disk('public');
+        $logo = ($settings->qr_logo ?? null) ?: ($settings->label_logo ?? null);
+        $logoPath = ($logo && $disk->exists($logo)) ? $disk->path($logo) : null;
+        $qr = app(QrCodeService::class);
+        $caption = $this->assetLabelBlocks($asset, $settings, $template);
+
+        return $qr->labelPng(
             $asset->asset_tag,
             ($settings->qr_text_redundancy ?? false) ? $asset->asset_tag : null,
             $logoPath,

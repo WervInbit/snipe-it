@@ -19,10 +19,40 @@
     }
 
     .test-result-meta {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.25rem 0.75rem;
+        align-items: start;
+    }
+
+    .test-result-label {
         display: inline-flex;
         flex-wrap: wrap;
         gap: 0.35rem;
         align-items: center;
+        min-width: 0;
+        font-weight: 600;
+    }
+
+    .test-result-status {
+        white-space: nowrap;
+    }
+
+    .test-result-note {
+        grid-column: 1 / -1;
+        color: #6b7280;
+        line-height: 1.4;
+    }
+
+    @media (max-width: 480px) {
+        .test-result-meta {
+            grid-template-columns: 1fr;
+            gap: 0.2rem;
+        }
+
+        .test-result-status {
+            white-space: normal;
+        }
     }
 
     .test-photo-strip img {
@@ -90,14 +120,15 @@
                         @endphp
                         <li class="test-result-item">
                             <div class="test-result-meta">
-                                <span>{{ $label }}</span>
-                                @if($instructions !== '')
-                                    <i class="fas fa-info-circle" data-tooltip="true" title="{{ $instructions }}"></i>
-                                @endif
-                                <span>:</span>
-                                <span>{{ trans('tests.' . $result->status) }}</span>
+                                <div class="test-result-label">
+                                    <span>{{ $label }}</span>
+                                    @if($instructions !== '')
+                                        <i class="fas fa-info-circle" data-tooltip="true" title="{{ $instructions }}"></i>
+                                    @endif
+                                </div>
+                                <div class="test-result-status">{{ trans('tests.' . $result->status) }}</div>
                                 @if ($result->note)
-                                    <span class="text-muted">{{ $result->note }}</span>
+                                    <div class="test-result-note">{{ $result->note }}</div>
                                 @endif
                             </div>
                             @if ($photoItems->isNotEmpty())

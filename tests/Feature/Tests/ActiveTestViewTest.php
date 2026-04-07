@@ -8,14 +8,13 @@ use App\Models\TestRun;
 use App\Models\TestType;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class ActiveTestViewTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_active_view_renders_compact_layout(): void
+    public function test_active_view_removes_top_header_and_keeps_summary_in_bottom_bar(): void
     {
         $user = User::factory()->superuser()->create();
         $asset = Asset::factory()->create(['asset_tag' => 'TAG-001']);
@@ -46,13 +45,19 @@ class ActiveTestViewTest extends TestCase
             ->assertOk();
 
         $response
-            ->assertSee(trans('tests.two_column_toggle'))
             ->assertSee($failType->name)
             ->assertSee($passType->name)
             ->assertSee($openType->name)
             ->assertSee('data-action="set-pass"', false)
             ->assertSee('data-action="set-fail"', false)
-            ->assertSee('data-testid="test-item-', false);
+            ->assertSee('data-testid="test-item-', false)
+            ->assertDontSee('class="testing-header"', false)
+            ->assertSee('data-testid="tests-active-summary"', false)
+            ->assertSee('data-testid="testing-save-indicator"', false)
+            ->assertSee('data-testid="tests-view-history-btn"', false)
+            ->assertSee('data-testid="tests-start-new-run-btn"', false)
+            ->assertSee("layoutKey: 'tests.layout.active.oneCol'", false)
+            ->assertDontSee(trans('tests.two_column_toggle'));
     }
 
     public function test_active_view_contains_note_and_photo_drawers(): void

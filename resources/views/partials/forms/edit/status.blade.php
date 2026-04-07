@@ -1,7 +1,7 @@
 <!-- Status -->
 <div class="form-group {{ $errors->has('status_id') ? ' has-error' : '' }}">
     <label for="status_id" class="col-md-3 control-label">{{ trans('admin/hardware/form.status') }}</label>
-    <div class="col-md-7 col-sm-11">
+    <div class="col-md-7 col-sm-12">
         @php
             $__status_options = $statuslabel_list;
             $user = auth()->user();
@@ -28,7 +28,9 @@
             </div>
         @endif
 
-        @php($selectedStatus = old('status_id', $item->status_id))
+        @php
+            $selectedStatus = old('status_id', $item->status_id);
+        @endphp
         <select
             name="status_id"
             id="status_select_id"
@@ -44,30 +46,17 @@
             @endforeach
         </select>
         {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-    </div>
-    <div class="col-md-2 col-sm-2 text-left">
 
+        <div id="status_helptext" style="margin-top:10px;">
+            <p id="selected_status_status" style="display:none;"></p>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-12 text-left">
         @can('create', \App\Models\Statuslabel::class)
             <a href='{{ route('modal.show', 'statuslabel') }}' data-toggle="modal"  data-target="#createModal" data-select='status_select_id' class="btn btn-sm btn-primary">{{ trans('button.new') }}</a>
         @endcan
 
         <span class="status_spinner" style="padding-left: 10px; color: green; display:none; width: 30px;"><i class="fas fa-spinner fa-spin" aria-hidden="true"></i> </span>
-
-    </div>
-
-    <div class="col-md-7 col-sm-11 col-md-offset-3" id="status_helptext">
-        <p id="selected_status_status" style="display:none;"></p>
-    </div>
-
-    <div class="col-md-7 col-sm-11 col-md-offset-3" style="margin-top:10px;">
-        <textarea
-            class="form-control"
-            name="status_change_note"
-            id="status_change_note"
-            rows="2"
-            placeholder="{{ __('Add a note for this status change (optional)') }}"
-        >{{ old('status_change_note') }}</textarea>
-        {!! $errors->first('status_change_note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
     </div>
 
 </div>

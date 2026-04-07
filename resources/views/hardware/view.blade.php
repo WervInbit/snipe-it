@@ -53,6 +53,92 @@
     height: auto;
     object-fit: contain;
 }
+.row-new-striped > .row.asset-detail-edit-row > div {
+    vertical-align: top;
+}
+.row-new-striped > .row.asset-detail-edit-row .asset-detail-content,
+.row-new-striped > .row.asset-detail-edit-row .asset-detail-content div {
+    display: block;
+    border-top: 0;
+    padding: 0;
+}
+.row-new-striped > .row.asset-detail-edit-row .asset-detail-control {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.row-new-striped > .row.asset-detail-edit-row .asset-detail-control:last-child {
+    margin-bottom: 0;
+}
+.hardware-tests-tab-actions {
+    margin-bottom: 15px;
+    text-align: left;
+}
+.hardware-tests-tab-actions__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.hardware-tests-tab-fab {
+    position: fixed;
+    right: 20px;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    z-index: 1050;
+    display: none;
+}
+.hardware-tests-tab-fab.is-visible {
+    display: block;
+}
+.hardware-tests-tab-fab__button {
+    width: 84px;
+    height: 84px;
+    border: 0;
+    border-radius: 50%;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+.hardware-tests-tab-fab__button i {
+    font-size: 2rem;
+}
+@media (max-width: 991px) {
+    .hardware-tests-tab-actions {
+        margin-bottom: 10px;
+    }
+}
+.asset-tests-attention {
+    cursor: pointer;
+}
+.asset-tests-attention__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+.asset-tests-attention__title {
+    margin: 0;
+}
+.asset-tests-attention__hint {
+    display: block;
+    margin-top: 0.25rem;
+    color: #6b7280;
+    font-size: 0.85em;
+}
+.asset-tests-attention__content {
+    display: none;
+    margin-top: 0.75rem;
+}
+.asset-tests-attention.is-expanded .asset-tests-attention__content {
+    display: block;
+}
+.asset-tests-attention__chevron {
+    flex: 0 0 auto;
+    transition: transform 0.2s ease;
+}
+.asset-tests-attention.is-expanded .asset-tests-attention__chevron {
+    transform: rotate(180deg);
+}
 </style>
 @endpush
 
@@ -68,7 +154,6 @@
     $qrTemplates = config('qr_templates.templates');
     $qrPng = in_array('png', $qrFormats) ? $qrLabels->url($asset, 'png', $selectedTemplate) : null;
     $qrPdf = in_array('pdf', $qrFormats) ? $qrLabels->url($asset, 'pdf', $selectedTemplate) : null;
-    $qrRaw = $qrLabels->url($asset, 'qr', $selectedTemplate);
     $qrPreview = null;
     if (config('qr_templates.enable_ui', true) && ($qrPdf || $qrPng)) {
         $qrPreview = $qrLabels->previewData($asset, $selectedTemplate);
@@ -119,27 +204,41 @@
 
         @if (!empty($testSummary) && ($testSummary['missing_run'] || $testSummary['failed']->isNotEmpty() || $testSummary['incomplete']->isNotEmpty()))
             <div class="col-md-12">
-                <div class="callout callout-warning">
-                    <p><strong>{{ trans('tests.latest_run_attention') }}</strong></p>
-                    <ul class="mb-0">
-                        @if ($testSummary['missing_run'])
-                            <li>{{ trans('tests.no_test_run_recorded') }}</li>
+                <div class="callout callout-warning asset-tests-attention"
+                     data-testid="asset-tests-attention"
+                     role="button"
+                     tabindex="0"
+                     aria-expanded="false">
+                    <div class="asset-tests-attention__header">
+                        <div>
+                            <p class="asset-tests-attention__title"><strong>{{ trans('tests.latest_run_attention') }}</strong></p>
+                            <small class="asset-tests-attention__hint">{{ trans('tests.click_to_unfold') }}</small>
+                        </div>
+                        <span class="asset-tests-attention__chevron" aria-hidden="true">
+                            <x-icon type="caret-down" />
+                        </span>
+                    </div>
+                    <div class="asset-tests-attention__content">
+                        <ul class="mb-0">
+                            @if ($testSummary['missing_run'])
+                                <li>{{ trans('tests.no_test_run_recorded') }}</li>
+                            @endif
+                            @if ($testSummary['failed']->isNotEmpty())
+                                <li>{{ trans('tests.failed_list', ['tests' => $testSummary['failed']->implode(', ')]) }}</li>
+                            @endif
+                            @if ($testSummary['incomplete']->isNotEmpty())
+                                <li>{{ trans('tests.incomplete_list', ['tests' => $testSummary['incomplete']->implode(', ')]) }}</li>
+                            @endif
+                        </ul>
+                        @if ($testSummary['run'])
+                            <small class="text-muted">
+                                {{ trans('tests.last_run_with_user', [
+                                    'date' => optional($testSummary['run']->finished_at ?? $testSummary['run']->created_at)->format('Y-m-d H:i'),
+                                    'user' => optional($testSummary['run']->user)->name ?? trans('general.unknown'),
+                                ]) }}
+                            </small>
                         @endif
-                        @if ($testSummary['failed']->isNotEmpty())
-                            <li>{{ trans('tests.failed_list', ['tests' => $testSummary['failed']->implode(', ')]) }}</li>
-                        @endif
-                        @if ($testSummary['incomplete']->isNotEmpty())
-                            <li>{{ trans('tests.incomplete_list', ['tests' => $testSummary['incomplete']->implode(', ')]) }}</li>
-                        @endif
-                    </ul>
-                    @if ($testSummary['run'])
-                        <small class="text-muted">
-                            {{ trans('tests.last_run_with_user', [
-                                'date' => optional($testSummary['run']->finished_at ?? $testSummary['run']->created_at)->format('Y-m-d H:i'),
-                                'user' => optional($testSummary['run']->user)->name ?? trans('general.unknown'),
-                            ]) }}
-                        </small>
-                    @endif
+                    </div>
                 </div>
             </div>
         @endif
@@ -230,7 +329,7 @@
                     <li>
                         <a href="#tests" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
-                              <i class="fas fa-vial fa-2x"></i>
+                              <x-icon type="audit" class="fa-2x" />
                           </span>
                             <span class="hidden-xs hidden-sm">{{ trans('tests.tests') }}
                                 {!! ($asset->tests()->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($asset->tests()->count()).'</span>' : '' !!}
@@ -290,7 +389,7 @@
 
 
                     @can('update', \App\Models\Asset::class)
-                        <li class="pull-right">
+                        <li>
                             <a href="#" onclick="var f=document.getElementById('upload-form');f.style.display=f.style.display==='none'?'block':'none';return false;">
                                 <span class="hidden-lg hidden-xl hidden-md">
                                     <x-icon type="paperclip" class="fa-2x" />
@@ -345,20 +444,14 @@
                                 </div>
                             @endcan
 
-                            @if (config('qr_templates.enable_ui', true) && ($qrPdf || $qrPng))
+                            @can('view', \App\Models\Asset::class)
                                 <div class="col-md-12 hidden-print" style="padding-top: 5px;">
-                                    @include('hardware.partials.qr-label-widget', [
-                                        'asset' => $asset,
-                                        'qrPdf' => $qrPdf,
-                                        'qrPng' => $qrPng,
-                                        'qrRaw' => $qrRaw,
-                                        'qrPreview' => $qrPreview,
-                                        'qrTemplates' => $qrTemplates,
-                                        'selectedTemplate' => $selectedTemplate,
-                                    ])
+                                    <a href="#tests" data-toggle="tab" class="btn btn-sm btn-primary btn-social btn-block hidden-print" aria-controls="tests">
+                                        <x-icon type="audit" />
+                                        {{ trans('tests.run_test_button') }}
+                                    </a>
                                 </div>
-                            @endif
-
+                            @endcan
 
                             @can('update', \App\Models\Asset::class)
                                 <div class="col-md-12 hidden-print" style="padding-top: 5px;">
@@ -393,11 +486,7 @@
                                         @if ($asset->deleted_at=='')
                                             <button class="btn btn-sm btn-block btn-danger btn-social delete-asset" onclick="return confirm('{{ trans('general.sure_to_delete_var', ['item' => $asset->asset_tag]) }}');">
                                                 <x-icon type="delete" />
-                                                @if ($asset->assignedTo)
-                                                    {{ trans('general.checkin_and_delete') }}
-                                                @else
-                                                    {{ trans('general.delete') }}
-                                                @endif
+                                                {{ trans('general.delete') }}
                                             </button>
                                             <span class="sr-only">{{ trans('general.delete') }}</span>
                                         @else
@@ -412,91 +501,19 @@
                                     </div>
                                 @endcan
 
-                                @if (($asset->assignedTo) && ($asset->deleted_at==''))
-                                    <div class="col-md-12" style="text-align: left">
-                                        <h2>
-                                            {{ trans('admin/hardware/form.checkedout_to') }}
-                                            <x-icon type="long-arrow-right" />
-                                        </h2>
-
-                                        <ul class="list-unstyled" style="line-height: 25px; font-size: 14px">
-
-                                            @if (($asset->checkedOutToUser()) && ($asset->assignedTo->present()->gravatar()))
-                                                <li>
-                                                    <img src="{{ $asset->assignedTo->present()->gravatar() }}" class="user-image-inline hidden-print" alt="{{ $asset->assignedTo->present()->fullName() }}">
-                                                    {!! $asset->assignedTo->present()->nameUrl() !!}
-                                                </li>
-                                            @else
-                                                <li>
-                                                    <x-icon type="{{ $asset->assignedType() }}" class="fa-fw" />
-                                                    {!! $asset->assignedTo->present()->nameUrl() !!}
-                                                </li>
-                                            @endif
-
-
-                                            @if ((isset($asset->assignedTo->employee_num)) && ($asset->assignedTo->employee_num!=''))
-                                                <li>
-                                                    <x-icon type="employee_num" class="fa-fw"/>
-                                                    {{ $asset->assignedTo->employee_num }}
-                                                </li>
-                                            @endif
-                                            @if ((isset($asset->assignedTo->email)) && ($asset->assignedTo->email!=''))
-                                                <li>
-                                                    <x-icon type="email" class="fa-fw" />
-                                                    <a href="mailto:{{ $asset->assignedTo->email }}">{{ $asset->assignedTo->email }}</a>
-                                                </li>
-                                            @endif
-
-                                            @if ((isset($asset->assignedTo)) && ($asset->assignedTo->phone!=''))
-                                                <li>
-                                                    <x-icon type="phone" class="fa-fw" />
-                                                    <a href="tel:{{ $asset->assignedTo->phone }}">{{ $asset->assignedTo->phone }}</a>
-                                                </li>
-                                            @endif
-
-                                            @if((isset($asset->assignedTo)) && ($asset->assignedTo->department))
-                                                <li>
-                                                    <x-icon type="department" class="fa-fw" />
-                                                    {{ $asset->assignedTo->department->name}}</li>
-                                            @endif
-
-                                            @if (isset($asset->location))
-                                                <li>
-                                                    <x-icon type="locations" class="fa-fw" />
-                                                     {{ $asset->location->present()->fullName() }}
-                                                     @if ($asset->location_note)
-                                                         ({{ trans('general.see_note') }})
-                                                     @endif
-                                                </li>
-                                                <li>{{ $asset->location->address }}
-                                                    @if ($asset->location->address2!='')
-                                                        {{ $asset->location->address2 }}
-                                                    @endif
-                                                </li>
-
-                                                <li>{{ $asset->location->city }}
-                                                    @if (($asset->location->city!='') && ($asset->location->state!=''))
-                                                        ,
-                                                    @endif
-                                                    {{ $asset->location->state }} {{ $asset->location->zip }}
-                                                </li>
-                                            @endif
-                                            @if ($asset->location_note)
-                                                <li><strong>{{ trans('admin/hardware/form.location_note') }}:</strong> <em>{{ $asset->location_note }}</em></li>
-                                            @endif
-                                            <li>
-                                                <x-icon type="calendar" class="fa-fw" />
-                                                {{ trans('admin/hardware/form.checkout_date') }}: {{ Helper::getFormattedDateObject($asset->last_checkout, 'date', false) }}
-                                            </li>
-                                            @if (isset($asset->expected_checkin))
-                                                <li>
-                                                    <x-icon type="calendar" class="fa-fw" />
-                                                    {{ trans('general.expected_checkin') }}: {{ Helper::getFormattedDateObject($asset->expected_checkin, 'date', false) }}
-                                                </li>
-                                            @endif
-                                        </ul>
+                                @if (config('qr_templates.enable_ui', true) && ($qrPdf || $qrPng))
+                                    <div class="col-md-12 hidden-print" style="padding-top: 5px;" data-testid="asset-qr-action-panel">
+                                        @include('hardware.partials.qr-label-widget', [
+                                            'asset' => $asset,
+                                            'qrPdf' => $qrPdf,
+                                            'qrPng' => $qrPng,
+                                            'qrPreview' => $qrPreview,
+                                            'qrTemplates' => $qrTemplates,
+                                            'selectedTemplate' => $selectedTemplate,
+                                        ])
                                     </div>
                                 @endif
+
                             @endif
                                 <br><br>
                             </div>
@@ -541,58 +558,57 @@
 
 
                                     @if ($asset->assetstatus)
+                                        @php
+                                            $__status_options = $statuslabel_list;
+                                            $user = auth()->user();
+                                            $isAdmin = $user && method_exists($user, 'isAdmin') ? $user->isAdmin() : false;
+                                            $isSuper = $user && method_exists($user, 'isSuperUser') ? $user->isSuperUser() : false;
+                                            if (!($isAdmin || $isSuper)) {
+                                                $__status_options = collect($__status_options)
+                                                    ->reject(function($label){ return stripos($label, 'Ready for Sale') !== false; })
+                                                    ->all();
+                                            }
+                                            $selectedStatus = old('status_id', $asset->status_id);
+                                            $selectedQualityGrade = old('quality_grade', $asset->quality_grade);
+                                            $qualityOptions = \App\Models\Asset::qualityGradeOptions();
+                                            $statusType = $asset->assetstatus->getStatuslabelType();
+                                        @endphp
 
-                                        <div class="row">
+                                        @php
+                                            $detailStatusFormId = 'asset-detail-status-form-'.$asset->id;
+                                        @endphp
+                                        @can('update', $asset)
+                                            <form id="{{ $detailStatusFormId }}" method="POST" action="{{ route('hardware.status.update', $asset) }}" style="display:none;">
+                                                @csrf
+                                                @method('PATCH')
+                                                @if (session('requires_ack_failed_tests'))
+                                                    <input type="hidden" name="ack_failed_tests" value="1">
+                                                @endif
+                                            </form>
+                                        @endcan
+
+                                        <div class="row asset-detail-edit-row" id="asset-status-row">
                                             <div class="col-md-3">
                                                 <strong>{{ trans('general.status') }}</strong>
                                             </div>
                                             <div class="col-md-9">
-                                                <div>
-                                                    @if (($asset->assignedTo) && ($asset->deleted_at==''))
-                                                        <x-icon type="circle-solid" class="text-blue" />
-                                                        {{ $asset->assetstatus->name }}
-                                                        <label class="label label-default">{{ trans('general.deployed') }}</label>
-                                                        <x-icon type="long-arrow-right" />
-                                                        <x-icon type="{{ $asset->assignedType() }}" class="fa-fw" />
-                                                        {!!  $asset->assignedTo->present()->nameUrl() !!}
+                                                <div class="asset-detail-content">
+                                                    <div class="asset-detail-current-value">
+                                                    @if (($asset->assetstatus) && ($asset->assetstatus->deployable=='1'))
+                                                        <x-icon type="circle-solid" class="text-green" />
+                                                    @elseif (($asset->assetstatus) && ($asset->assetstatus->pending=='1'))
+                                                        <x-icon type="circle-solid" class="text-orange" />
                                                     @else
-                                                        @if (($asset->assetstatus) && ($asset->assetstatus->deployable=='1'))
-                                                            <x-icon type="circle-solid" class="text-green" />
-                                                        @elseif (($asset->assetstatus) && ($asset->assetstatus->pending=='1'))
-                                                            <x-icon type="circle-solid" class="text-orange" />
-                                                        @else
-                                                            <x-icon type="x" class="text-red" />
-                                                        @endif
-                                                        <a href="{{ route('statuslabels.show', $asset->assetstatus->id) }}">
-                                                            {{ $asset->assetstatus->name }}</a>
-                                                        <label class="label label-default">{{ $asset->present()->statusMeta }}</label>
+                                                        <x-icon type="x" class="text-red" />
                                                     @endif
-                                                </div>
+                                                    <a href="{{ route('statuslabels.show', $asset->assetstatus->id) }}">
+                                                        {{ $asset->assetstatus->name }}</a>
+                                                    <label class="label label-default">{{ $statusType }}</label>
+                                                    </div>
 
-                                                @can('update', $asset)
-                                                    @php
-                                                        $__status_options = $statuslabel_list;
-                                                        $user = auth()->user();
-                                                        $isAdmin = $user && method_exists($user, 'isAdmin') ? $user->isAdmin() : false;
-                                                        $isSuper = $user && method_exists($user, 'isSuperUser') ? $user->isSuperUser() : false;
-                                                        if (!($isAdmin || $isSuper)) {
-                                                            $__status_options = collect($__status_options)
-                                                                ->reject(function($label){ return stripos($label, 'Ready for Sale') !== false; })
-                                                                ->all();
-                                                        }
-                                                        $selectedStatus = old('status_id', $asset->status_id);
-                                                        $selectedQualityGrade = old('quality_grade', $asset->quality_grade);
-                                                        $qualityOptions = \App\Models\Asset::qualityGradeOptions();
-                                                    @endphp
-                                                    <form method="POST" action="{{ route('hardware.status.update', $asset) }}" style="margin-top:10px;">
-                                                        @csrf
-                                                        @method('PATCH')
+                                                    @can('update', $asset)
                                                         @if (session('requires_ack_failed_tests'))
-                                                            <input type="hidden" name="ack_failed_tests" value="1">
-                                                        @endif
-
-                                                        @if (session('requires_ack_failed_tests'))
-                                                            <div class="alert alert-warning" role="alert" style="margin-bottom:10px;">
+                                                            <div class="alert alert-warning asset-detail-control" role="alert">
                                                                 <p class="mb-2">{{ trans('tests.status_change_prompt') }}</p>
                                                                 @if (session('test_issue_details'))
                                                                     <ul class="mb-0">
@@ -604,12 +620,14 @@
                                                             </div>
                                                         @endif
 
-                                                        <div class="form-group" style="margin-bottom:10px;">
+                                                        <div class="asset-detail-control">
                                                             <select
                                                                 name="status_id"
                                                                 id="status_select_detail_{{ $asset->id }}"
                                                                 class="form-control"
                                                                 aria-label="status_id"
+                                                                form="{{ $detailStatusFormId }}"
+                                                                onchange="document.getElementById('{{ $detailStatusFormId }}').submit()"
                                                             >
                                                                 @foreach($__status_options as $key => $value)
                                                                     <option value="{{ $key }}" {{ (string) $selectedStatus === (string) $key ? 'selected' : '' }}>
@@ -619,12 +637,34 @@
                                                             </select>
                                                             {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                                                         </div>
-                                                        <div class="form-group" style="margin-bottom:10px;">
+                                                    @endcan
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row asset-detail-edit-row" id="asset-quality-row">
+                                            <div class="col-md-3">
+                                                <strong>{{ trans('general.quality_grade') }}</strong>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <div class="asset-detail-content">
+                                                    <div class="asset-detail-current-value">
+                                                    @if ($asset->quality_grade)
+                                                        {{ $asset->qualityGradeLabel() }}
+                                                    @else
+                                                        <span class="text-muted">{{ trans('general.quality_grade_unset') }}</span>
+                                                    @endif
+                                                    </div>
+
+                                                    @can('update', $asset)
+                                                        <div class="asset-detail-control">
                                                             <select
                                                                 name="quality_grade"
                                                                 id="quality_grade_detail_{{ $asset->id }}"
                                                                 class="form-control"
                                                                 aria-label="quality_grade"
+                                                                form="{{ $detailStatusFormId }}"
+                                                                onchange="document.getElementById('{{ $detailStatusFormId }}').submit()"
                                                             >
                                                                 <option value="">{{ trans('general.quality_grade_unset') }}</option>
                                                                 @foreach($qualityOptions as $value => $label)
@@ -635,18 +675,8 @@
                                                             </select>
                                                             {!! $errors->first('quality_grade', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                                                         </div>
-                                                        <div class="form-group" style="margin-bottom:10px;">
-                                                            <textarea
-                                                                class="form-control"
-                                                                name="status_change_note"
-                                                                rows="2"
-                                                                placeholder="{{ __('Add a note for this status change (optional)') }}"
-                                                            >{{ old('status_change_note') }}</textarea>
-                                                            {!! $errors->first('status_change_note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-                                                        </div>
-                                                        <button type="submit" class="btn btn-sm btn-primary">{{ trans('general.save') }}</button>
-                                                    </form>
-                                                @endcan
+                                                    @endcan
+                                                </div>
                                             </div>
                                         </div>
                                     @endif
@@ -679,17 +709,6 @@
                                                         ]) }}
                                                     </small>
                                                 @endif
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    @if ($asset->quality_grade)
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <strong>{{ trans('general.quality_grade') }}</strong>
-                                            </div>
-                                            <div class="col-md-9">
-                                                {{ $asset->qualityGradeLabel() }}
                                             </div>
                                         </div>
                                     @endif
@@ -767,19 +786,6 @@
                                                 </div>
                                             </div>
                                         @endforeach
-                                    @endif
-
-                                    @if ($asset->last_checkout!='')
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <strong>
-                                                    {{ trans('admin/hardware/table.checkout_date') }}
-                                                </strong>
-                                            </div>
-                                            <div class="col-md-9">
-                                                {{ Helper::getFormattedDateObject($asset->last_checkout, 'datetime', false) }}
-                                            </div>
-                                        </div>
                                     @endif
 
                                     @if ((isset($audit_log)) && ($audit_log->created_at))
@@ -1549,17 +1555,20 @@
                 @endcan
 
                     <div class="tab-pane fade" id="tests">
-                        <div class="mb-3 text-right">
+                        <div class="hardware-tests-tab-actions hidden-xs hidden-sm" data-testid="hardware-tests-tab-actions">
                             @can('tests.execute')
-                                <form method="POST" action="{{ route('test-runs.store', $asset->id) }}" style="display:inline">
+                                <form method="POST" action="{{ route('test-runs.store', $asset->id) }}" style="display:inline" data-testid="hardware-tests-start-form-desktop">
                                     @csrf
-                                    <button type="submit" class="btn btn-primary">{{ trans('tests.start_new_run') }}</button>
+                                    <button type="submit" class="btn btn-primary hardware-tests-tab-actions__button">
+                                        <x-icon type="plus" />
+                                        {{ trans('tests.start_new_run') }}
+                                    </button>
                                 </form>
                             @endcan
                         </div>
                         <div class="row">
                             @foreach ($asset->tests as $run)
-                                <div class="col-md-6 col-sm-12">
+                                <div class="col-md-12">
                                     <div class="panel panel-default">
                                         @php
                                             $timestamp = $run->finished_at ?: $run->created_at;
@@ -1833,6 +1842,21 @@
                         @endcan
                     @endif
             </div><!-- /.tab-content -->
+            @can('tests.execute')
+                <form method="POST"
+                      action="{{ route('test-runs.store', $asset->id) }}"
+                      class="hardware-tests-tab-fab hidden-md hidden-lg"
+                      data-testid="hardware-tests-tab-fab-form"
+                      aria-hidden="true">
+                    @csrf
+                    <button type="submit"
+                            class="btn btn-primary hardware-tests-tab-fab__button"
+                            data-testid="hardware-tests-tab-fab">
+                        <x-icon type="plus" />
+                        <span class="sr-only">{{ trans('tests.start_new_run') }}</span>
+                    </button>
+                </form>
+            @endcan
         </div><!-- nav-tabs-custom -->
     </div>
 
@@ -1898,6 +1922,72 @@
                         alert('{{ trans('general.caption_required') }}');
                         return;
                     }
+                }
+            });
+        })();
+    </script>
+    <script>
+        (function () {
+            var fab = document.querySelector('.hardware-tests-tab-fab');
+            var testsPane = document.getElementById('tests');
+            var $ = window.jQuery || window.$;
+
+            if (!fab || !testsPane || !$ || !$.fn || !$.fn.tab) {
+                return;
+            }
+
+            var $tabLinks = $('.nav-tabs a[data-toggle="tab"]');
+
+            function syncTestsFabVisibility() {
+                var isTestsActive = testsPane.classList.contains('active');
+                fab.classList.toggle('is-visible', isTestsActive);
+                fab.setAttribute('aria-hidden', isTestsActive ? 'false' : 'true');
+            }
+
+            function showTabFromHash() {
+                var hash = window.location.hash;
+                if (!hash) {
+                    syncTestsFabVisibility();
+                    return;
+                }
+
+                var $targetTab = $tabLinks.filter('[href="' + hash + '"]').first();
+                if ($targetTab.length) {
+                    $targetTab.tab('show');
+                    return;
+                }
+
+                syncTestsFabVisibility();
+            }
+
+            $tabLinks.on('shown.bs.tab', syncTestsFabVisibility);
+            $(window).on('hashchange', showTabFromHash);
+
+            showTabFromHash();
+            syncTestsFabVisibility();
+        })();
+    </script>
+    <script>
+        (function () {
+            var callout = document.querySelector('.asset-tests-attention');
+
+            if (!callout) {
+                return;
+            }
+
+            function toggleAttention() {
+                var isExpanded = callout.classList.toggle('is-expanded');
+                callout.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+            }
+
+            callout.addEventListener('click', function () {
+                toggleAttention();
+            });
+
+            callout.addEventListener('keydown', function (event) {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    toggleAttention();
                 }
             });
         })();

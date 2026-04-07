@@ -901,8 +901,25 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                 display: inline;
                                 list-style: none;
                             }
+                            @media (max-width: 767px) {
+                                .content-header {
+                                    padding: 10px 12px 0 12px;
+                                }
+                                .content-header > .row {
+                                    margin-left: 0;
+                                    margin-right: 0;
+                                }
+                                .content-header > .row > [class*="col-"] {
+                                    padding-left: 0;
+                                    padding-right: 0;
+                                }
+                                .content-header .pagetitle {
+                                    float: none !important;
+                                    margin-top: 0 !important;
+                                    white-space: normal;
+                                }
+                            }
                         </style>
-
                             <h1 class="pull-left pagetitle" style="font-size: 22px; margin-top: 5px;">
 
                                 @if (Breadcrumbs::has() && (Breadcrumbs::current()->count() > 1))
