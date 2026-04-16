@@ -1,3 +1,42 @@
+# Session Progress (2026-04-09)
+- Re-read `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, `TODO.md`, and the latest session addenda to resume the current workstream.
+- Fixed mobile overflow in shared bulk-action toolbars and QR widget controls so list-page dropdowns/buttons stay inside the viewport on narrow screens.
+- Hardened the Docker/PHPUnit workflow against hitting the live dev DB by preventing cached config from being used during test runs and documenting the required `optimize:clear` preflight.
+- Reseeded the empty local dev MySQL database after explicit preflight and restored the demo baseline (`users=21`, `assets=10`, `settings=1`, `test_runs=10`, `models=10`, `statuslabels=9`).
+- Enlarged the hardware detail `Test uitvoeren` call-to-action with a scoped style so it is roughly twice as tall, uses larger text, and reads as a lighter blue button for easier operator discovery.
+- Verification:
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan test tests/Feature/Assets/Ui/ShowAssetTest.php --env=testing --filter=testDetailPageShowsRunTestButtonLinkingToTestsTab` (blocked by the existing sqlite testing DB corruption: `database disk image is malformed`)
+- Model create/edit form cleanup:
+- removed `Minimum Quantity`, `EOL`, and `Requestable` controls from the model form UI in both create and edit flows; these fields are now treated as deprecated UI inputs for future removal.
+- added a focused create-page UI assertion to ensure the create form no longer exposes `min_amt`, `eol`, or `requestable` fields.
+- updated model save behavior so deprecated fields are only changed when explicitly present in request payloads; hidden-form updates now preserve existing legacy values.
+- added focused edit-page and update-flow assertions in `UpdateAssetModelsTest` to ensure hidden deprecated fields stay hidden and omitted payloads do not overwrite existing values.
+- Attribute enum options ordering UX:
+- replaced manual numeric sort entry on attribute version option lists with drag-and-drop row ordering.
+- option rows now keep `sort_order` in hidden inputs that are auto-synchronized from row position (`0..n`) on add/remove/reorder.
+- removed the standalone `Sort order` entry input from the add-option panel.
+- added a submit-time confirmation warning when admins typed a new enum option in the entry row but did not click `Add to list` before saving.
+- warning copy is now localized via `attribute_definitions.unsaved_option_confirm` in `en-US` and `nl-NL`.
+- added lifecycle coverage to assert the version form renders drag handles and that version creation still assigns sequential sort order when option sort values are omitted.
+- Verification:
+- `docker compose exec app php -l resources/views/models/edit.blade.php` (pass)
+- `docker compose exec app php -l tests/Feature/AssetModels/Ui/CreateAssetModelsTest.php` (pass)
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan test tests/Feature/AssetModels/Ui/CreateAssetModelsTest.php --env=testing` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+- `docker compose exec app php -l resources/views/attributes/partials/options.blade.php` (pass)
+- `docker compose exec app php -l tests/Feature/AttributeDefinitionLifecycleTest.php` (pass)
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan test tests/Feature/AttributeDefinitionLifecycleTest.php --env=testing` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+- Hardware page runtime fix:
+- fixed `htmlspecialchars(): Argument #1 ($string) must be of type string, array given` by removing translation-group key collisions for `__('Attributes')`.
+- moved unsaved-option warning copy from `attributes.unsaved_option_confirm` to `attribute_definitions.unsaved_option_confirm` and deleted the conflicting top-level `attributes.php` lang files.
+- verification:
+- `docker compose exec app php artisan tinker --execute "dump(gettype(__('Attributes'))); dump(__('Attributes'));"` (pass)
+- `docker compose exec app php artisan view:clear` (pass)
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan test tests/Feature/AttributeDefinitionLifecycleTest.php --env=testing` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+
 # Session Progress (2026-04-07)
 
 ## Addendum (2026-04-07 Codex)
@@ -741,6 +780,76 @@
 - Composer dev packages are missing in the container (`Collision` dependency); install them before attempting `php artisan test` so the new assertions can be exercised.
 # Session Progress (2025-09-28)
 
+# Session Progress (2026-04-09)
+- Session kickoff: re-read `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, `TODO.md`, and the latest dated agent addenda to reinitialize current fork context after the 2026-04-07 push.
+- Added `docs/agents/agents-addendum-2026-04-09-session-init.md` for today and reconfirmed the active carry-over state before new work begins.
+- Known environment blockers remain unchanged at session start:
+- sqlite-backed PHPUnit runs are still vulnerable to `database disk image is malformed` in the current container workflow.
+- `EditAssetTest` and related UI paths may still hit the existing Livewire support-file-uploads bootstrap issue.
+- Existing local-only changes present at session start were left untouched:
+- `docker-compose.yml`
+- `docker/nginx.conf`
+- `docs/agents/agents-addendum-2026-03-19-session-init.md`
+- Fixed mobile overflow for shared list-page bulk-action toolbars by removing hardcoded 400-500px minimum widths and making the shared toolbar/select/button layout stack within the viewport on narrow screens.
+- Tightened the hardware QR widget controls so the template/printer selects and print button stay within the panel width on small screens.
+- Added focused view-level assertions for the responsive bulk-toolbar markup and QR printer control constraints.
+- Investigated the test-environment safety failure that had been hitting the live dev MySQL database during PHPUnit runs.
+- Root cause: the local Docker app entrypoint was warming cached Laravel config in `APP_ENV=local`, and that cached config could override PHPUnit testing DB settings.
+- Added a hard pre-boot test guard in `tests/TestCase.php` that refuses to run tests while `bootstrap/cache/config.php` exists and validates that `.env.testing` is configured for the approved sqlite test DB target.
+- Updated the active Docker app entrypoint to keep `local` / `testing` containers uncached (`optimize:clear` only, no `optimize` warmup); production-like environments can still warm caches.
+- Updated `AGENTS.md` to require clearing cached config before PHPUnit runs inside Docker because cached config is not a safe testing baseline in this repo.
+- Verification:
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan test tests/Feature/Assets/Ui/AssetIndexTest.php --env=testing` (blocked by current MySQL test DB migration-state drift: unknown/drop-missing tables and missing `migrations`)
+- `docker compose exec app php artisan test tests/Feature/Assets/Ui/ShowAssetTest.php --env=testing` (10 passed, 2 failed; new responsive assertions passed, remaining failures were unrelated pre-existing environment/app-state issues around duplicate `users` migration setup and the existing checkout-date assertion mismatch)
+- `docker compose exec app php artisan test tests/Feature/Assets/Ui/AssetIndexTest.php --env=testing --filter=testPageRenders` with config cache present (expected fast-fail via new guard before DB work)
+- `docker compose exec app php artisan optimize:clear` (pass)
+- `docker compose exec app php artisan test tests/Feature/Assets/Ui/AssetIndexTest.php --env=testing --filter=testPageRenders` after cache clear (now resolves to sqlite again; blocked only by the existing sqlite corruption: `database disk image is malformed`)
+- Dev DB recovery:
+- preflight before reseed confirmed:
+- `APP_ENV=local`
+- `DB_CONNECTION=mysql`
+- `DB_DATABASE=snipeit`
+- restored the empty local dev database with `docker compose exec app php artisan db:seed --force`.
+- post-seed verification restored the expected demo baseline:
+- `users=21`
+- `assets=10`
+- `settings=1`
+- `test_runs=10`
+- `models=10`
+- `statuslabels=9`
+- Test type slug workflow cleanup:
+- test type create/edit now defaults slugs to an auto-generated normalized value from the current name while keeping a manual override checkbox available for admins.
+- manual overrides are sanitized to the standard lowercase hyphenated slug format before save, so punctuation and other odd characters do not persist in stored slugs.
+- auto-generated and manual override slugs now resolve collisions by appending a numeric suffix (`-2`, `-3`, etc.) before validation/save instead of surfacing a raw unique-key failure path.
+- added focused feature coverage for create auto-generation, duplicate-name suffixing, update auto-sync from name, and sanitized manual override behavior.
+- verification:
+- `docker compose exec app php -l app/Models/TestType.php` (pass)
+- `docker compose exec app php -l app/Http/Requests/TestType/StoreTestTypeRequest.php` (pass)
+- `docker compose exec app php -l app/Http/Requests/TestType/UpdateTestTypeRequest.php` (pass)
+- `docker compose exec app php -l app/Http/Controllers/Admin/TestTypeController.php` (pass)
+- `docker compose exec app php -l tests/Feature/Settings/ManageTestTypesTest.php` (pass)
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan test tests/Feature/Settings/ManageTestTypesTest.php --env=testing` (blocked by the pre-existing sqlite testing DB corruption: `database disk image is malformed`)
+- Attribute definition create-key workflow cleanup:
+- added centralized key helpers on `AttributeDefinition` so keys are normalized to snake_case and auto-suffixed on collisions (`_2`, `_3`, ...) against active attribute records.
+- moved create key generation into `AttributeDefinitionRequest::prepareForValidation()` with `manual_key_override` support.
+- default create behavior now derives key from `label`; manual override uses submitted key input (with label fallback if blank).
+- kept update/version key immutability semantics unchanged.
+- updated the attribute create form so key is disabled by default, manual override is explicit, and key text is normalized live while typing.
+- added focused feature coverage in `AttributeDefinitionLifecycleTest` for:
+- create auto-generated key from label.
+- create collision suffixing (`battery_health_2` pattern).
+- sanitized manual override plus suffixing on collision.
+- explicit key-change rejection on update.
+- verification:
+- `docker compose exec app php -l app/Models/AttributeDefinition.php` (pass)
+- `docker compose exec app php -l app/Http/Requests/AttributeDefinitionRequest.php` (pass)
+- `docker compose exec app php -l resources/views/attributes/edit.blade.php` (pass)
+- `docker compose exec app php -l tests/Feature/AttributeDefinitionLifecycleTest.php` (pass)
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan test tests/Feature/AttributeDefinitionLifecycleTest.php --env=testing` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+
 ## Addendum (2025-09-28 Codex)
 - Session restarted after prior context drop; reviewed AGENTS/PROGRESS/fork notes to re-establish scope on model number settings work.
 - Restored attribute creation form by passing the expected layout context so the form renders without `$item` errors.
@@ -879,5 +988,259 @@ there are multiple duplicate functions that still need to be removed, sku will b
 - Verification:
 - `docker compose exec app php artisan view:cache` (pass)
 - `docker compose exec app php artisan test tests/Feature/Tests/ActiveTestViewTest.php --env=testing` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+
+# Session Progress (2026-04-09)
+- traced the page-title overlap in intermediate widths to fixed-layout header offset drift: the shared layout relied on hardcoded top offsets while the custom navbar can grow in height as nav content wraps.
+- confirmed a second contributing factor in that viewport band: `.main-header { max-height: 150px; }` capped header growth, so wrapped nav rows could spill into the content area instead of pushing it down.
+- replaced the ad hoc fixed-offset override in `resources/views/layouts/default.blade.php` with a CSS-variable-based offset (`--fixed-header-offset`) plus runtime sync from the actual `.main-header` height.
+- added a `<=991px` override to remove the header max-height cap so the top nav can expand naturally when content wraps.
+- kept the existing `<=991px` content-header/pagetitle wrapping behavior so breadcrumb/title flow remains unchanged, while removing static fixed-offset guesses.
+- verification:
+- `docker compose exec app php artisan view:cache` (pass)
+- model number create/edit UX follow-up:
+- added serial-style case handling to model number code inputs (`Aa` toggle with hidden override flag) on model-number create/edit pages; uppercase is now the default behavior in the form unless override is enabled.
+- enforced the same behavior server-side in `ModelNumberController` by normalizing code to uppercase unless `code_case_override` is true, so direct/manual posts follow the same rules as the UI.
+- removed the model-number form checkbox for "Make this the default selection for new assets."
+- verification of your default-selection question:
+- model numbers are exposed individually in the selector API (`id` is `model_id:model_number_id` with explicit `model_number_id` meta).
+- primary model number is still used as fallback in legacy/model-only flows, so backend primary logic remains in place for compatibility.
+- verification:
+- `docker compose exec app php -l app/Http/Controllers/Admin/ModelNumberController.php` (pass)
+- `docker compose exec app php -l tests/Feature/Models/ModelNumberManagementTest.php` (pass)
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan test tests/Feature/Models/ModelNumberManagementTest.php --env=testing` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+- model number breadcrumbs follow-up:
+- added route-level breadcrumbs for `models.numbers.edit` and `models.numbers.spec.edit` in `BreadcrumbsServiceProvider`, parented under `models.show`.
+- model-number edit and spec-edit pages now render breadcrumb trails automatically via the shared default layout.
+- added focused breadcrumb assertions to `ModelNumberManagementTest`.
+- verification:
+- `docker compose exec app php -l app/Providers/BreadcrumbsServiceProvider.php` (pass)
+- `docker compose exec app php -l tests/Feature/Models/ModelNumberManagementTest.php` (pass)
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan test tests/Feature/Models/ModelNumberManagementTest.php --env=testing --filter="breadcrumb"` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+- hardware create/edit save action follow-up:
+- added a mobile-standard floating save CTA on hardware create/edit (`visible-xs`/`visible-sm`) that submits the existing `create-form`.
+- added xs/sm bottom content padding so the fixed save button does not cover lower form inputs.
+- added a focused UI assertion in `EditAssetTest` for the floating save button markers on both create and edit routes.
+- verification:
+- `docker compose exec app php -l resources/views/hardware/edit.blade.php` (pass)
+- `docker compose exec app php -l tests/Feature/Assets/Ui/EditAssetTest.php` (pass)
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan test tests/Feature/Assets/Ui/EditAssetTest.php --env=testing --filter="testCreateAndEditPagesRenderMobileFloatingSaveButton"` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+- hardware edit save crash follow-up:
+- fixed a backend type crash in `AssetsController@update` where `serials` (array form payload) was being assigned directly to `$asset->serial` before extracting index `1`.
+- update now normalizes serial input to a scalar (`serials[1]` when array, otherwise scalar/null) before assignment so `Asset::normalizeIdentifier(?string ...)` no longer receives an array.
+- added focused regression coverage in `EditAssetTest` for serial array payload shape used by the hardware edit form.
+- verification:
+- `docker compose exec app php -l app/Http/Controllers/Assets/AssetsController.php` (pass)
+- `docker compose exec app php -l tests/Feature/Assets/Ui/EditAssetTest.php` (pass)
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan test tests/Feature/Assets/Ui/EditAssetTest.php --env=testing --filter="testEditAcceptsSerialArrayInputFromFormShape"` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+
+- test pages start-run visibility follow-up:
+- kept `Start New Run` available on all widths (including mobile) on:
+- `resources/views/tests/active.blade.php` (empty-state CTA + active-run floating-bar secondary action)
+- `resources/views/tests/index.blade.php` (history-page top CTA)
+- normalized the temporary test markers to width-agnostic names (`tests-empty-start-run-form`, `tests-start-new-run-form`, `tests-index-start-run-form`).
+- updated `tests/Feature/Tests/ActiveTestViewTest.php` and `tests/Feature/Assets/Ui/ShowAssetTest.php` assertions to match the width-agnostic markers.
+- verification:
+- `docker compose exec app php -l resources/views/tests/active.blade.php` (pass)
+- `docker compose exec app php -l resources/views/tests/index.blade.php` (pass)
+- `docker compose exec app php -l tests/Feature/Tests/ActiveTestViewTest.php` (pass)
+- `docker compose exec app php -l tests/Feature/Assets/Ui/ShowAssetTest.php` (pass)
+- `docker compose exec app php artisan test tests/Feature/Tests/ActiveTestViewTest.php tests/Feature/Assets/Ui/ShowAssetTest.php --env=testing` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+
+- tests index UX redesign follow-up:
+- redesigned `resources/views/tests/index.blade.php` into expandable run rows so users see a clearer run list first (date/user/status summary), with edit/delete actions directly in each row.
+- added dropdown chevron + row-header click behavior to expand/collapse per-run details (results, notes, photos) without leaving the page.
+- kept existing routes, permissions, and photo modal behavior unchanged; this is a view-only interaction/layout update.
+- extended `tests/Feature/Assets/Ui/ShowAssetTest.php` assertions to cover the new run-row/toggle/details/action structure markers.
+- verification:
+- `docker compose exec app php -l resources/views/tests/index.blade.php` (pass)
+- `docker compose exec app php -l tests/Feature/Assets/Ui/ShowAssetTest.php` (pass)
+- `docker compose exec app php artisan optimize:clear` (pass)
+- `docker compose exec app php artisan test tests/Feature/Assets/Ui/ShowAssetTest.php --env=testing --filter=testTestsIndexUsesStructuredResultRows` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+
+- hardware detail tests-tab UX parity follow-up:
+- ported the same row + dropdown test-run layout into `resources/views/hardware/view.blade.php` so the tests list inside `/hardware/{id}#tests` now matches the redesigned dedicated tests page interaction.
+- moved run-level `Edit`/`Delete` actions into the row header and made details (results/photos/notes) collapse under each row.
+- added row-header click delegation on the hardware tests tab to toggle details when users click anywhere on the row except the action buttons.
+- added a new page marker assertion in `tests/Feature/Assets/Ui/ShowAssetTest.php` (`hardware-tests-run-list`) for the hardware tests-tab structure.
+- verification:
+- `docker compose exec app php -l resources/views/hardware/view.blade.php` (pass)
+- `docker compose exec app php -l tests/Feature/Assets/Ui/ShowAssetTest.php` (pass)
+- `docker compose exec app php artisan view:clear` (pass)
+- `docker compose exec app php artisan optimize:clear` (pass)
+- `docker compose exec app php artisan test tests/Feature/Assets/Ui/ShowAssetTest.php --env=testing --filter=testDetailPageTestsTabUsesSingleColumnRunList` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+
+- tests index compact-row refinement follow-up:
+- adjusted `resources/views/tests/index.blade.php` mobile row-header layout to stay one-line/high on small widths (removed forced wrap behavior and collapsed run identity/date/user into a single truncating primary line).
+- kept inline row actions and toggle behavior intact.
+- verification:
+- `docker compose exec app php -l resources/views/tests/index.blade.php` (pass)
+- `docker compose exec app php artisan view:clear` (pass)
+
+- hardware tests-tab compact-row follow-up:
+- adjusted `resources/views/hardware/view.blade.php` run-row header for small widths to keep each run in one compact row (no forced stacked summary/action rows).
+- merged run id/date/user into a single truncating primary line, tightened mobile spacing/button sizing, and removed mobile wrap rules that were pushing headers into multiple lines.
+- verification:
+- `docker compose exec app php -l resources/views/hardware/view.blade.php` (pass)
+- `docker compose exec app php artisan view:clear` (pass)
+
+- tests active mobile card-density follow-up:
+- updated `resources/views/tests/active.blade.php` mobile (`max-width: 576px`) card styles so Note and Photo CTAs remain side-by-side (2 columns) instead of stacking.
+- slightly reduced mobile card-body spacing/padding below the title area to flatten each card visually while preserving existing interaction behavior.
+- verification:
+- `docker compose exec app php -l resources/views/tests/active.blade.php` (pass)
+- `docker compose exec app php artisan view:clear` (pass)
+
+- asset create redirect UX follow-up:
+- removed the redirect destination dropdown from the asset **create** form in `resources/views/hardware/edit.blade.php` while keeping redirect options on asset **edit**.
+- this eliminates the broken/clipping create-form redirect selector and keeps create flow defaulting to the new asset detail page (`item`) via existing controller behavior.
+- added focused coverage updates:
+- `tests/Feature/Assets/Ui/EditAssetTest.php`: create page does not render redirect select; edit page still does.
+- `tests/Feature/Assets/Ui/StoreAssetWithMinimalDataTest.php`: create request now explicitly asserts redirect to `hardware.show` for the created asset.
+- verification:
+- `docker compose exec app php -l resources/views/hardware/edit.blade.php` (pass)
+- `docker compose exec app php -l tests/Feature/Assets/Ui/EditAssetTest.php` (pass)
+- `docker compose exec app php -l tests/Feature/Assets/Ui/StoreAssetWithMinimalDataTest.php` (pass)
+- `docker compose exec app php artisan optimize:clear` (pass)
+- `docker compose exec app php artisan test tests/Feature/Assets/Ui/StoreAssetWithMinimalDataTest.php tests/Feature/Assets/Ui/EditAssetTest.php --env=testing --filter="asset_can_be_created_with_minimal_data|testCreateAndEditPagesRenderMobileFloatingSaveButton"` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+
+- asset name field scope fix follow-up:
+- traced create-page `name` field to direct include in `resources/views/hardware/edit.blade.php` (`@include('partials.forms.edit.name', ...)`), introduced in commit `5a291ec80c` (2026-04-07), not by the redirect dropdown fix.
+- updated the view so `name` renders only for existing assets (`$item->id`), removing it from hardware create flow where naming is model-driven.
+- extended `tests/Feature/Assets/Ui/EditAssetTest.php` assertion: create page does not render `name="name"` while edit page still does.
+- verification:
+- `docker compose exec app php -l resources/views/hardware/edit.blade.php` (pass)
+- `docker compose exec app php -l tests/Feature/Assets/Ui/EditAssetTest.php` (pass)
+- `docker compose exec app php artisan view:clear` (pass)
+- `docker compose exec app php artisan optimize:clear` (pass)
+- `docker compose exec app php artisan test tests/Feature/Assets/Ui/EditAssetTest.php --env=testing --filter=testCreateAndEditPagesRenderMobileFloatingSaveButton` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+
+- legacy post-create QR notification removal follow-up:
+- removed the old blue `Print QR` session-notification dropdown from `resources/views/notifications.blade.php` (the non-labelwriter path that was misleading/non-working).
+- removed asset-create flash payload of `qr_pdf`/`qr_png` from `AssetsController@store` so the deprecated notification path is no longer fed.
+- kept the hardware detail QR label widget flow unchanged (download QR label / print to labelwriter remains the supported path).
+- extended `tests/Feature/Assets/Ui/StoreAssetWithMinimalDataTest.php` to assert `qr_pdf` and `qr_png` are absent from session after asset create.
+- verification:
+- `docker compose exec app php -l app/Http/Controllers/Assets/AssetsController.php` (pass)
+- `docker compose exec app php -l tests/Feature/Assets/Ui/StoreAssetWithMinimalDataTest.php` (pass)
+- `docker compose exec app php artisan view:clear` (pass)
+- `docker compose exec app php artisan optimize:clear` (pass)
+- code search check for `qr_pdf`/`qr_png`/`qr-notification` in `resources/views` + `app` (no remaining hits)
+- `docker compose exec app php artisan test tests/Feature/Assets/Ui/StoreAssetWithMinimalDataTest.php --env=testing` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+
+## 2026-04-16
+- session re-init and docs sync:
+- created `docs/agents/agents-addendum-2026-04-16-session-init.md`.
+- re-read `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md`.
+
+- hardware list mobile toolbar alignment follow-up:
+- fixed bootstrap-table mobile toolbar icon fragmentation where controls wrapped one-per-row.
+- adjusted `resources/views/partials/bootstrap-table.blade.php` mobile rules so toolbar icon groups remain auto-width and wrap in compact rows.
+- verification:
+- `docker compose exec app php -l resources/views/partials/bootstrap-table.blade.php` (pass)
+- `docker compose exec app php artisan view:clear` (pass)
+
+- hardware detail tests FAB consistency follow-up:
+- changed mobile tests floating action in `resources/views/hardware/view.blade.php` from icon-only circle to save-style pill with visible label (`tests.start_new_run`) to align with the hardware mobile save CTA pattern.
+- added marker assertion in `tests/Feature/Assets/Ui/ShowAssetTest.php` for the FAB label.
+- verification:
+- `docker compose exec app php -l resources/views/hardware/view.blade.php` (pass)
+- `docker compose exec app php -l tests/Feature/Assets/Ui/ShowAssetTest.php` (pass)
+- `docker compose exec app php artisan optimize:clear` (pass)
+- `docker compose exec app php artisan test tests/Feature/Assets/Ui/ShowAssetTest.php --env=testing --filter=testDetailPageRendersResponsiveTestsStartRunActions` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+
+- scan page viewport expansion follow-up:
+- widened the scan page container in `resources/views/scan/index.blade.php` by removing 720px width caps and switching to fluid wrapper layout for larger viewport usage.
+- increased scan area minimum height and reduced outer padding so camera occupies more screen space.
+- adjusted small-screen scan viewport toward portrait usage (`aspect-ratio: 3 / 4` with higher vh-driven minimum height) to reduce left/right letterboxing and make the camera area visibly taller on phones.
+- verification:
+- `docker compose exec app php -l resources/views/scan/index.blade.php` (pass)
+- `docker compose exec app php artisan view:clear` (pass)
+
+- model specification validation visibility follow-up:
+- improved `resources/views/models/spec.blade.php` error UX with a top-level attribute error navigator that lists failing fields and allows one-click jump/focus to the related attribute detail panel.
+- added invalid-state highlighting on selected attribute rows and detail panels via `resources/views/models/model_numbers/partials/selected-attribute-item.blade.php` and `resources/views/models/model_numbers/partials/attribute-detail.blade.php`.
+- updated spec page JS initialization to auto-open the first invalid attribute when errors are present instead of always opening the first selected attribute.
+- updated `app/Services/ModelAttributes/ModelAttributeManager.php` required-attribute validation to emit both summary (`attributes`) and per-field (`attributes.{id}`) errors so all failing fields can be surfaced/highlighted in one pass.
+- added focused UI coverage in `tests/Feature/Models/ModelSpecificationUiTest.php` for:
+- navigator rendering on attribute validation errors.
+- per-field required-attribute error emission.
+- verification:
+- `docker compose exec app php -l app/Services/ModelAttributes/ModelAttributeManager.php` (pass)
+- `docker compose exec app php -l resources/views/models/spec.blade.php` (pass)
+- `docker compose exec app php -l resources/views/models/model_numbers/partials/selected-attribute-item.blade.php` (pass)
+- `docker compose exec app php -l resources/views/models/model_numbers/partials/attribute-detail.blade.php` (pass)
+- `docker compose exec app php -l tests/Feature/Models/ModelSpecificationUiTest.php` (pass)
+- `docker compose exec app php artisan optimize:clear` (pass)
+- `docker compose exec app php artisan test tests/Feature/Models/ModelSpecificationUiTest.php --env=testing` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+
+- model spec parse error hotfix:
+- fixed a Blade parse regression in `resources/views/models/spec.blade.php` by replacing one-line `@php(...)` assignment with a standard `@php ... @endphp` block at the top of the section.
+- cleared and rebuilt compiled views in container; linted the compiled spec view file to confirm no syntax errors remain.
+- verification:
+- `docker compose exec app php artisan view:clear` (pass)
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app sh -lc "grep -R -n 'assignedDefinitionIds' storage/framework/views | head"` (pass)
+- `docker compose exec app php -l storage/framework/views/38ebbffe634f906cee186992fa90cb21.php` (pass)
+
+- test types/task ordering support:
+- added persistent `display_order` to `test_types` via migration (`2026_04_16_110000_add_display_order_to_test_types_table.php`) with backfill from current alphabetical order.
+- added admin reorder API endpoint `PATCH admin/testtypes/reorder` and request validation (`ReorderTestTypesRequest`) to save drag-and-drop ordering safely.
+- updated test type management UI (`resources/views/settings/testtypes.blade.php`) with draggable row handles and client-side persistence calls to the reorder endpoint.
+- switched test type selection/query ordering to `display_order` (with `name/id` fallback) and updated active run result ordering to follow configured test order.
+- updated test run creation flow so new run tasks are created in configured `display_order`.
+- added feature coverage:
+- `ManageTestTypesTest::test_admin_can_reorder_test_types`
+- `StartNewTestRunTest::test_start_new_run_uses_display_order_for_created_results`
+- verification:
+- `docker compose exec app php -l app/Models/TestType.php` (pass)
+- `docker compose exec app php -l app/Models/TestRun.php` (pass)
+- `docker compose exec app php -l app/Http/Controllers/Admin/TestTypeController.php` (pass)
+- `docker compose exec app php -l app/Http/Controllers/TestRunController.php` (pass)
+- `docker compose exec app php -l app/Http/Controllers/TestResultController.php` (pass)
+- `docker compose exec app php -l app/Http/Requests/TestType/ReorderTestTypesRequest.php` (pass)
+- `docker compose exec app php -l database/migrations/2026_04_16_110000_add_display_order_to_test_types_table.php` (pass)
+- `docker compose exec app php -l database/factories/TestTypeFactory.php` (pass)
+- `docker compose exec app php -l tests/Feature/Settings/ManageTestTypesTest.php` (pass)
+- `docker compose exec app php -l tests/Feature/Assets/StartNewTestRunTest.php` (pass)
+- `docker compose exec app php artisan route:list --name=settings.testtypes.reorder` (pass)
+- `docker compose exec app php artisan view:clear` (pass)
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan test tests/Feature/Settings/ManageTestTypesTest.php tests/Feature/Assets/StartNewTestRunTest.php --env=testing` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+
+- test type drag reorder interaction fix:
+- replaced HTML5 table-row drag handling on `resources/views/settings/testtypes.blade.php` with jQuery UI `sortable()` using the drag handle as the reorder handle.
+- retained the same reorder persistence endpoint (`settings.testtypes.reorder`) and rollback-on-failure behavior.
+- fixed a script-stack wiring bug where the page used `@push('scripts')` while the layout renders `@stack('js')`; moved the reorder script to `@push('js')` so drag behavior initializes.
+- adjusted drag handle visuals to be larger and centered in the reorder column.
+- verification:
+- `docker compose exec app php -l resources/views/settings/testtypes.blade.php` (pass)
+- `docker compose exec app php artisan view:clear` (pass)
+- `docker compose exec app php artisan view:cache` (pass)
+
+- components replacement / traceability planning:
+- added a full handoff-ready implementation plan at `docs/plans/components-replacement-part-traceability-work-orders.md`.
+- plan scope covers:
+- replacing the old pooled `components` module with unique component definitions/instances/events.
+- persisted tray flow with stale-item verification escalation.
+- asset-page expected/default components vs installed/history separation.
+- mobile-first QR/search remove/install workflows.
+- customer work-order and read-only portal foundation.
+- no code execution verification was required for the planning document itself.
+
+- test type drag reorder compatibility follow-up:
+- replaced pointer-only drag handling in `resources/views/settings/testtypes.blade.php` with a dual-path implementation:
+- pointer events path for modern browsers.
+- explicit mouse/touch fallback path for browsers with incomplete pointer support.
+- added permissive primary-pointer detection and non-`fetch` AJAX fallback for reorder persistence.
+- retained rollback behavior when reorder persistence fails.
+- verification:
+- `node --check storage/tmp-testtypes-reorder.js` (pass; extracted script syntax check)
+- `docker compose exec app php artisan view:clear` (pass)
+- `docker compose exec app php artisan view:cache` (pass)
+- `docker compose exec app php artisan test tests/Feature/Settings/ManageTestTypesTest.php --env=testing` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
 
 

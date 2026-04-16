@@ -4,7 +4,16 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-04-16
+- Model specification edit now surfaces validation issues in one pass: a top error navigator lists failing attributes with click-to-jump behavior, invalid selected rows/detail panels are visibly highlighted, and required-missing validation now emits per-field errors (`attributes.{id}`) in addition to summary copy.
+- Scan page viewport now uses a fluid-width layout (removed fixed 720px caps) with taller portrait-oriented small-screen sizing so camera framing fills more of the phone screen.
+
+### 2026-04-09
+- Fixed a runtime regression where `__('Attributes')` could resolve to a translation array and crash shared layout rendering (`htmlspecialchars(): ... array given`), by moving the new attribute-definition warning copy into a non-conflicting translation group (`attribute_definitions.*`).
+
 ### 2026-04-02
+- Test Type settings now keep the slug field admin-visible but default it to an auto-generated normalized value from the test name, with an explicit manual-override toggle.
+- Test Type slugs are now normalized and de-duplicated before validation/save; collisions automatically get numeric suffixes (`-2`, `-3`, etc.) instead of relying on users to hand-author unique slugs.
 - Hardware detail page status editing now renders quality grading as its own row instead of bundling it into the same status control block.
 - Removed checkout-oriented hardware detail UI for the refurb flow: no checked-out-to side panel, no assigned/deployed rendering inside the status row, and no checkout-date detail line on the asset page.
 - Hardware detail delete action no longer uses `Checkin and Delete` wording; the page now consistently shows a plain delete action.
@@ -116,5 +125,20 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 ### 2026-04-07
 - The active test-run screen now removes the large top testing header and keeps save/progress/history controls in the bottom action bar so operators stay focused on the test cards themselves.
 - The hardware detail QR print/download panel now renders below the main action buttons instead of sitting mid-stack inside the primary action group.
+
+### 2026-04-09
+- Shared bootstrap-table bulk-action toolbars now collapse within the viewport on mobile instead of forcing 400-500px minimum widths that pushed bulk-edit selects and action buttons off-screen.
+- The hardware QR widget now constrains its template/printer selects and print button so those controls stay inside the page width on narrow screens.
+- The hardware detail `Test uitvoeren` button is now intentionally oversized with larger text and a lighter blue treatment so refurbishers can find the testing action faster.
+- Attribute creation now defaults the `key` field to an auto-generated snake_case value derived from label text, with an explicit manual-override toggle for admins who need to set a custom key.
+- Attribute keys are now de-duplicated during create by appending numeric suffixes (`_2`, `_3`, etc.) before validation/save, while key immutability on existing attributes remains unchanged.
+- Attribute version option editing for enum datatypes now uses drag-and-drop row ordering instead of manual sort-number entry; sort order is synchronized from row position automatically when saving.
+- Attribute version save now warns when an enum option draft is filled in but not added to the list, with localized confirmation copy for English and Dutch.
+- Model create/edit now hide legacy model-level inventory/request fields (`min_amt`, `eol`, `requestable`) for the refurb flow; these fields are now treated as deprecated UI inputs and kept only for backward-compatible payload handling.
+- Model-number create/edit now use serial-style code casing controls: code is uppercased by default with an explicit `Aa` preserve-case override, and server-side normalization enforces the same behavior for direct/manual posts.
+- The model-number "default selection" checkbox was removed from create/edit forms; model-number selectors already return individual model-number entries, while primary-model fallback remains in backend compatibility paths.
+- Model-number edit and model-number specification edit pages now have route-level breadcrumbs (via `models.numbers.edit` and `models.numbers.spec.edit`) so navigation context matches other model-management screens.
+- Hardware create/edit now includes a mobile floating save CTA (fixed bottom) so operators can save without scrolling to form actions on small screens.
+- Test types now support persistent drag-and-drop ordering in admin settings; test runs and active test result cards follow this configured order through a new `display_order` workflow.
 
 
