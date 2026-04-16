@@ -4,8 +4,6 @@ namespace App\Http\Requests\TestType;
 
 use App\Models\TestType;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 
 class StoreTestTypeRequest extends FormRequest
 {
@@ -18,7 +16,8 @@ class StoreTestTypeRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:191'],
-            'slug' => ['nullable', 'string', 'max:191', 'regex:/^[A-Za-z0-9-_]+$/', 'unique:test_types,slug'],
+            'slug' => ['nullable', 'string', 'max:191', 'regex:/^[A-Za-z0-9-]+$/', 'unique:test_types,slug'],
+            'manual_slug_override' => ['sometimes', 'boolean'],
             'attribute_definition_id' => ['nullable', 'exists:attribute_definitions,id'],
             'instructions' => ['nullable', 'string'],
             'tooltip' => ['nullable', 'string'],
@@ -28,14 +27,27 @@ class StoreTestTypeRequest extends FormRequest
         ];
     }
 
-    public function validated($key = null, $default = null)
+    protected function prepareForValidation(): void
     {
-        $data = parent::validated($key, $default);
+        $manualOverride = $this->boolean('manual_slug_override');
+        $name = trim((string) $this->input('name'));
+        $slugInput = trim((string) $this->input('slug'));
+        $source = $manualOverride
+            ? ($slugInput !== '' ? $slugInput : $name)
+            : $name;
 
-        if (empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['name']);
+        if ($source === '') {
+            $this->merge([
+                'manual_slug_override' => $manualOverride,
+                'slug' => null,
+            ]);
+
+            return;
         }
 
-        return $data;
+        $this->merge([
+            'manual_slug_override' => $manualOverride,
+            'slug' => TestType::generateUniqueSlug($source),
+        ]);
     }
 }

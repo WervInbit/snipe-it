@@ -297,6 +297,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
     Route::post('testtypes', [AdminTestTypeController::class, 'store'])
         ->name('settings.testtypes.store');
 
+    Route::patch('testtypes/reorder', [AdminTestTypeController::class, 'reorder'])
+        ->name('settings.testtypes.reorder');
+
     Route::put('testtypes/{testtype}', [AdminTestTypeController::class, 'update'])
         ->name('settings.testtypes.update');
 

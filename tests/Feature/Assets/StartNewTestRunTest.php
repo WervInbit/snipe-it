@@ -56,5 +56,33 @@ class StartNewTestRunTest extends TestCase
         $this->assertNotNull($run);
         $this->assertCount(0, $run->results);
     }
+
+    public function test_start_new_run_uses_display_order_for_created_results(): void
+    {
+        $asset = Asset::factory()->laptopMbp()->create();
+        $categoryId = $asset->model?->category_id;
+
+        $first = TestType::factory()->create(['name' => 'First', 'display_order' => 0]);
+        $second = TestType::factory()->create(['name' => 'Second', 'display_order' => 1]);
+        $third = TestType::factory()->create(['name' => 'Third', 'display_order' => 2]);
+
+        if ($categoryId) {
+            collect([$first, $second, $third])->each(
+                fn (TestType $type) => $type->categories()->sync([$categoryId])
+            );
+        }
+
+        $first->update(['display_order' => 2]);
+        $second->update(['display_order' => 0]);
+        $third->update(['display_order' => 1]);
+
+        $user = User::factory()->superuser()->create();
+        $this->actingAs($user)->post(route('test-runs.store', $asset->id));
+
+        $run = TestRun::query()->where('asset_id', $asset->id)->latest()->firstOrFail();
+        $orderedTypeIds = $run->results()->pluck('test_type_id')->map(fn ($id) => (int) $id)->all();
+
+        $this->assertSame([$second->id, $third->id, $first->id], $orderedTypeIds);
+    }
 }
 

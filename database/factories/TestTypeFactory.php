@@ -17,6 +17,7 @@ class TestTypeFactory extends Factory
         return [
             'name' => ucfirst($name),
             'slug' => Str::slug($name) . '-' . Str::random(5),
+            'display_order' => 0,
             'tooltip' => $this->faker->sentence(),
             'instructions' => $this->faker->paragraph(),
             'attribute_definition_id' => null,

@@ -73,7 +73,9 @@ class TestRun extends SnipeModel
      */
     public function results(): HasMany
     {
-        return $this->hasMany(TestResult::class, 'test_run_id');
+        return $this->hasMany(TestResult::class, 'test_run_id')
+            ->orderByRaw('(select display_order from test_types where test_types.id = test_results.test_type_id)')
+            ->orderBy('id');
     }
 
     /**

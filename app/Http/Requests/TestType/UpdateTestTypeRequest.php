@@ -4,7 +4,6 @@ namespace App\Http\Requests\TestType;
 
 use App\Models\TestType;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class UpdateTestTypeRequest extends FormRequest
@@ -28,9 +27,10 @@ class UpdateTestTypeRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:191',
-                'regex:/^[A-Za-z0-9-_]+$/',
+                'regex:/^[A-Za-z0-9-]+$/',
                 Rule::unique('test_types', 'slug')->ignore($testtype->id),
             ],
+            'manual_slug_override' => ['sometimes', 'boolean'],
             'attribute_definition_id' => ['nullable', 'exists:attribute_definitions,id'],
             'instructions' => ['nullable', 'string'],
             'tooltip' => ['nullable', 'string'],
@@ -40,14 +40,29 @@ class UpdateTestTypeRequest extends FormRequest
         ];
     }
 
-    public function validated($key = null, $default = null)
+    protected function prepareForValidation(): void
     {
-        $data = parent::validated($key, $default);
+        /** @var TestType $testtype */
+        $testtype = $this->route('testtype');
+        $manualOverride = $this->boolean('manual_slug_override');
+        $name = trim((string) $this->input('name'));
+        $slugInput = trim((string) $this->input('slug'));
+        $source = $manualOverride
+            ? ($slugInput !== '' ? $slugInput : $name)
+            : $name;
 
-        if (empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['name']);
+        if ($source === '') {
+            $this->merge([
+                'manual_slug_override' => $manualOverride,
+                'slug' => null,
+            ]);
+
+            return;
         }
 
-        return $data;
+        $this->merge([
+            'manual_slug_override' => $manualOverride,
+            'slug' => TestType::generateUniqueSlug($source, $testtype->id),
+        ]);
     }
 }

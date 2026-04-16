@@ -29,6 +29,7 @@ class TestType extends SnipeModel
     protected $fillable = [
         'name',
         'slug',
+        'display_order',
         'attribute_definition_id',
         'tooltip',
         'instructions',
@@ -37,9 +38,47 @@ class TestType extends SnipeModel
     ];
 
     protected $casts = [
+        'display_order' => 'int',
         'attribute_definition_id' => 'int',
         'is_required' => 'bool',
     ];
+
+    public static function normalizeSlugSource(?string $value): string
+    {
+        $slug = Str::slug((string) $value);
+
+        return $slug !== '' ? $slug : 'test-type';
+    }
+
+    public static function generateUniqueSlug(?string $value, ?int $ignoreId = null): string
+    {
+        $baseSlug = static::normalizeSlugSource($value);
+        $candidate = $baseSlug;
+        $suffix = 2;
+
+        while (static::query()
+            ->when($ignoreId, fn (Builder $query) => $query->whereKeyNot($ignoreId))
+            ->where('slug', $candidate)
+            ->exists()) {
+            $candidate = $baseSlug . '-' . $suffix;
+            $suffix++;
+        }
+
+        return $candidate;
+    }
+
+    public static function slugUsesAutomaticPattern(?string $name, ?string $slug): bool
+    {
+        $slug = trim((string) $slug);
+        if ($slug === '') {
+            return true;
+        }
+
+        $baseSlug = static::normalizeSlugSource($name);
+
+        return $slug === $baseSlug
+            || preg_match('/^' . preg_quote($baseSlug, '/') . '-\d+$/', $slug) === 1;
+    }
 
     public static function forAttribute(AttributeDefinition $definition): self
     {
@@ -153,6 +192,14 @@ class TestType extends SnipeModel
             return $query->whereRaw('0 = 1');
         }
 
-        return $query->whereIn('id', $matchingIds);
+        return $query->whereIn('id', $matchingIds)->ordered();
+    }
+
+    public function scopeOrdered(Builder $query): Builder
+    {
+        return $query
+            ->orderBy('display_order')
+            ->orderBy('name')
+            ->orderBy('id');
     }
 }

@@ -25,7 +25,10 @@ class TestResultController extends Controller
         $runsQuery = $asset->tests()
             ->with([
                 'results' => function ($query) {
-                    $query->with(['type', 'attributeDefinition', 'photos'])->orderBy('id');
+                    $query
+                        ->with(['type', 'attributeDefinition', 'photos'])
+                        ->orderByRaw('(select display_order from test_types where test_types.id = test_results.test_type_id)')
+                        ->orderBy('id');
                 },
                 'user',
             ]);
