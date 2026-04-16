@@ -1,6 +1,11 @@
 @php($versionSource = $versionSource ?? null)
 @php($isEdit = $definition->exists)
 @php($isVersion = (bool) $versionSource)
+@php($isCreate = !$isEdit && !$isVersion)
+@php($createManualKeyOverride = $isCreate ? (bool) old('manual_key_override', false) : false)
+@php($createOldLabel = $isCreate ? trim((string) old('label', $definition->label)) : '')
+@php($createOldKey = $isCreate ? trim((string) old('key', $definition->key)) : '')
+@php($createKeyValue = $createOldKey !== '' ? $createOldKey : ($createOldLabel !== '' ? \App\Models\AttributeDefinition::normalizeKeySource($createOldLabel) : ''))
 
 @extends('layouts/edit-form', [
     'createText' => $isVersion ? __('Create Attribute Version') : __('Create Attribute'),
@@ -53,8 +58,16 @@
             @elseif($isEdit)
                 <input type="text" class="form-control" name="key" id="key" value="{{ $definition->key }}" readonly>
             @else
-                <input type="text" class="form-control" name="key" id="key" value="{{ old('key', $definition->key) }}" required>
+                <input type="hidden" name="manual_key_override" value="0">
+                <div class="checkbox">
+                    <label style="display:flex; align-items:center; gap:8px;">
+                        <input type="checkbox" name="manual_key_override" id="manual_key_override" value="1" {{ $createManualKeyOverride ? 'checked' : '' }}>
+                        <span>{{ __('Manual key override') }}</span>
+                    </label>
+                </div>
+                <input type="text" class="form-control" name="key" id="key" value="{{ $createKeyValue }}" {{ $createManualKeyOverride ? '' : 'disabled' }} required>
                 <span class="help-block">{{ __('Used in API payloads and reports.') }}</span>
+                <span class="help-block">{{ __('If manual override stays off, the key is generated from the label and normalized automatically.') }}</span>
             @endif
             {!! $errors->first('key', '<span class="alert-msg">:message</span>') !!}
         </div>
@@ -155,6 +168,56 @@
 @endsection
 
 @push('js')
+@if($isCreate)
+    <script nonce="{{ csrf_token() }}">
+        (function () {
+            var labelInput = document.getElementById('label');
+            var keyInput = document.getElementById('key');
+            var manualToggle = document.getElementById('manual_key_override');
+
+            if (!labelInput || !keyInput || !manualToggle) {
+                return;
+            }
+
+            function normalizeKey(value, fallback) {
+                var source = (value || '').toString().trim().toLowerCase();
+                source = source.replace(/[^a-z0-9]+/g, '_');
+                source = source.replace(/^_+|_+$/g, '');
+                source = source.replace(/_+/g, '_');
+
+                if (source.length >= 3) {
+                    return source;
+                }
+
+                return fallback || '';
+            }
+
+            function syncKeyState() {
+                var manual = manualToggle.checked;
+                keyInput.disabled = !manual;
+
+                if (!manual) {
+                    keyInput.value = normalizeKey(labelInput.value, labelInput.value.trim() !== '' ? 'attribute_key' : '');
+                    return;
+                }
+
+                keyInput.value = normalizeKey(keyInput.value, keyInput.value.trim() !== '' ? 'attribute_key' : '');
+            }
+
+            manualToggle.addEventListener('change', syncKeyState);
+            labelInput.addEventListener('input', syncKeyState);
+            keyInput.addEventListener('input', function () {
+                if (keyInput.disabled) {
+                    return;
+                }
+
+                keyInput.value = normalizeKey(keyInput.value, keyInput.value.trim() !== '' ? 'attribute_key' : '');
+            });
+
+            syncKeyState();
+        })();
+    </script>
+@endif
 @if($isVersion)
     <script nonce="{{ csrf_token() }}">
         (function () {

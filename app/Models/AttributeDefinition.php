@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -144,6 +145,39 @@ class AttributeDefinition extends SnipeModel
     public function scopeCurrent($query)
     {
         return $query->active()->visible();
+    }
+
+    public static function normalizeKeySource(?string $value): string
+    {
+        $normalized = Str::snake((string) $value);
+        $normalized = preg_replace('/[^a-z0-9_]+/', '_', $normalized) ?? '';
+        $normalized = trim($normalized, '_');
+        $normalized = preg_replace('/_+/', '_', $normalized) ?? '';
+
+        if ($normalized === '' || strlen($normalized) < 3) {
+            return 'attribute_key';
+        }
+
+        return $normalized;
+    }
+
+    public static function generateUniqueKey(?string $value, ?int $ignoreId = null): string
+    {
+        $baseKey = static::normalizeKeySource($value);
+        $candidate = $baseKey;
+        $suffix = 2;
+
+        while (static::query()
+            ->when($ignoreId, fn (Builder $query) => $query->whereKeyNot($ignoreId))
+            ->whereNull('deleted_at')
+            ->whereNull('deprecated_at')
+            ->where('key', $candidate)
+            ->exists()) {
+            $candidate = $baseKey . '_' . $suffix;
+            $suffix++;
+        }
+
+        return $candidate;
     }
 
     public function setKeyAttribute(string $value): void

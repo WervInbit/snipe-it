@@ -9,6 +9,37 @@ use Illuminate\Validation\Validator;
 
 class AttributeDefinitionRequest extends Request
 {
+    protected function prepareForValidation(): void
+    {
+        /** @var AttributeDefinition|null $attribute */
+        $attribute = $this->route('attribute');
+
+        if ($attribute instanceof AttributeDefinition) {
+            return;
+        }
+
+        $manualOverride = $this->boolean('manual_key_override');
+        $label = trim((string) $this->input('label'));
+        $keyInput = trim((string) $this->input('key'));
+        $source = $manualOverride
+            ? ($keyInput !== '' ? $keyInput : $label)
+            : $label;
+
+        if ($source === '') {
+            $this->merge([
+                'manual_key_override' => $manualOverride,
+                'key' => null,
+            ]);
+
+            return;
+        }
+
+        $this->merge([
+            'manual_key_override' => $manualOverride,
+            'key' => AttributeDefinition::generateUniqueKey($source),
+        ]);
+    }
+
     public function authorize(): bool
     {
         /** @var AttributeDefinition|null $attribute */
@@ -64,6 +95,7 @@ class AttributeDefinitionRequest extends Request
             'required_for_category' => ['sometimes', 'boolean'],
             'allow_custom_values' => ['sometimes', 'boolean'],
             'allow_asset_override' => ['sometimes', 'boolean'],
+            'manual_key_override' => ['sometimes', 'boolean'],
             'category_ids' => ['nullable', 'array'],
             'category_ids.*' => ['integer', 'exists:categories,id'],
             'constraints' => ['nullable', 'array'],
