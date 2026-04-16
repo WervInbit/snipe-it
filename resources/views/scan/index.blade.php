@@ -7,8 +7,9 @@
 
 @section('content')
 <style>
-    .scan-screen {min-height: 100vh; padding: 0 1rem 1.5rem;}
-    #scan-area {position: relative; width: 100%; max-width: 720px; aspect-ratio: 4 / 3; min-height: 240px; margin: 0 auto; background: #111; border-radius: 8px; overflow: hidden;}
+    .scan-screen {min-height: 100vh; padding: 0.5rem 0.5rem 1rem;}
+    .scan-shell {width: 100%; margin: 0 auto;}
+    #scan-area {position: relative; width: 100%; aspect-ratio: 4 / 3; min-height: 280px; margin: 0 auto; background: #111; border-radius: 8px; overflow: hidden;}
     #scan-video,
     #scan-overlay {width: 100%; height: 100%; object-fit: contain; display: block;}
     .scan-actions {display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: .75rem; margin-top: 1rem;}
@@ -17,12 +18,17 @@
     #manual-section {max-width: 520px; margin: 1rem auto 0;}
     #scan-success {position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 1rem; color: #fff; background: rgba(15, 23, 42, 0.85); font-weight: 600; font-size: 1rem;}
 
+    @media (max-width: 991px) {
+        .scan-screen {padding: 0.35rem 0.35rem 0.85rem;}
+        #scan-area {aspect-ratio: 3 / 4; min-height: clamp(380px, 68vh, 760px);}
+    }
+
     @media (max-width: 575px) {
-        #scan-area {max-height: 70vh;}
+        #scan-area {min-height: clamp(420px, 72vh, 820px);}
     }
 </style>
-<div class="container py-4 scan-screen">
-    <div class="mx-auto" style="max-width:720px;">
+<div class="container-fluid py-3 scan-screen">
+    <div class="scan-shell">
         <h1 class="h4 text-center mb-4">{{ trans('general.scan_qr') }}</h1>
 
         <div id="scan-permission" class="alert alert-warning d-none" role="alert" data-testid="scan-permission-banner" style="display:none;">
