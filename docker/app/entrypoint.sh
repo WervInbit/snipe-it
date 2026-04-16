@@ -86,11 +86,14 @@ run_artisan() {
 
 run_artisan storage:link || true
 
-# Clear/warm caches (idempotent; don’t fail container on errors)
-run_artisan config:clear || true
-run_artisan route:clear  || true
-run_artisan view:clear   || true
-run_artisan optimize     || true
+# Keep local/test containers uncached so PHPUnit env overrides cannot accidentally inherit
+# the dev MySQL configuration from a warmed config cache.
+run_artisan optimize:clear || true
+if [ "${APP_ENV:-local}" != "local" ] && [ "${APP_ENV:-local}" != "testing" ]; then
+  run_artisan optimize || true
+else
+  echo "Skipping artisan optimize in APP_ENV=${APP_ENV:-local} to keep local/test config uncached."
+fi
 
 # Ensure cache artifacts remain writable by php-fpm workers.
 if [ "$(id -u)" = "0" ]; then

@@ -18,6 +18,7 @@ This guide keeps automation agents and human contributors aligned on the expecta
 - Maintain sandbox hygiene: avoid privileged commands unless the task explicitly requires them.
 - Destructive database commands (`migrate:fresh`, `migrate:refresh`, `migrate:reset`, `db:wipe`) are forbidden on shared dev environments unless the user explicitly approves them in the current message.
 - Before any destructive DB command, print a DB preflight summary (`APP_ENV`, `DB_CONNECTION`, `DB_DATABASE`) and state the impact in plain language.
+- Before running PHPUnit inside Docker, clear cached Laravel config first (`php artisan optimize:clear`) and verify tests are resolving to the isolated testing DB; cached local config can override PHPUnit env vars and accidentally target the dev MySQL database.
 
 ## Documentation Touchpoints
 - `AGENTS.md` (this file) captures the ground rules for agents and contributors working in the fork.
