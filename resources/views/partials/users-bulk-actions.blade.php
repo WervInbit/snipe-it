@@ -1,5 +1,5 @@
 @can('view', \App\Models\User::class)
-    <div id="userBulkEditToolbar" class="pull-left" style="min-width:500px !important; padding-top: 10px;">
+    <div id="userBulkEditToolbar" class="pull-left bulk-edit-toolbar bulk-edit-toolbar--users" style="padding-top: 10px;">
 
         @if (request('status')!='deleted')
 
@@ -7,14 +7,14 @@
                 method="POST"
                 action="{{ route('users/bulkedit') }}"
                 accept-charset="UTF-8"
-                class="form-inline"
+                class="form-inline bulk-edit-toolbar__form"
                 id="usersBulkForm"
             >
             @csrf
 
-            <div id="users-toolbar" style="width:100% !important;">
+            <div id="users-toolbar" class="bulk-edit-toolbar__inner">
                 <label for="bulk_actions" class="sr-only">{{ trans('general.bulk_actions') }}</label>
-                <select name="bulk_actions" class="form-control select2" style="width: 50% !important;" aria-label="bulk_actions">
+                <select name="bulk_actions" class="form-control select2 bulk-edit-toolbar__select" aria-label="bulk_actions">
 
                     @can('update', \App\Models\User::class)
                         <option value="edit">{{ trans('general.bulk_edit') }}</option>
@@ -29,7 +29,7 @@
                     <option value="bulkpasswordreset">{{ trans('button.send_password_link') }}</option>
                     <option value="print">{{ trans('admin/users/general.print_assigned') }}</option>
                 </select>
-                <button class="btn btn-primary" id="bulkUserEditButton" disabled>{{ trans('button.go') }}</button>
+                <button class="btn btn-primary bulk-edit-toolbar__button" id="bulkUserEditButton" disabled>{{ trans('button.go') }}</button>
             </div>
             </form>
         @endif

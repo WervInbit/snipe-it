@@ -1,9 +1,9 @@
-<div id="{{ (isset($id_divname)) ? $id_divname : 'assetsBulkEditToolbar' }}" style="min-width:400px">
+<div id="{{ (isset($id_divname)) ? $id_divname : 'assetsBulkEditToolbar' }}" class="bulk-edit-toolbar bulk-edit-toolbar--assets">
     <form
     method="POST"
     action="{{ route('hardware/bulkedit') }}"
     accept-charset="UTF-8"
-    class="form-inline"
+    class="form-inline bulk-edit-toolbar__form"
     id="{{ (isset($id_formname)) ? $id_formname : 'assetsBulkForm' }}"
 >
     @csrf
@@ -16,7 +16,7 @@
             {{ trans('button.bulk_actions') }}
         </span>
     </label>
-    <select name="bulk_actions" class="form-control select2" aria-label="bulk_actions" style="min-width: 350px !important;">
+    <select name="bulk_actions" class="form-control select2 bulk-edit-toolbar__select" aria-label="bulk_actions">
         @if ((isset($status)) && ($status == 'Deleted'))
             @can('delete', \App\Models\Asset::class)
                 <option value="restore">{{trans('button.restore')}}</option>
@@ -50,9 +50,8 @@
             <select
                 name="qr_template"
                 id="bulk_qr_template"
-                class="form-control select2"
+                class="form-control select2 bulk-edit-toolbar__select bulk-edit-toolbar__select--template"
                 aria-label="qr_template"
-                style="min-width: 220px !important; margin-left: 10px;"
                 data-placeholder="{{ trans('admin/settings/general.qr_label_template') }}"
             >
                 @foreach($qrTemplates as $key => $tpl)
@@ -61,12 +60,12 @@
                     </option>
                 @endforeach
             </select>
-            <small class="text-muted" style="margin-left: 10px;">
+            <small class="text-muted bulk-edit-toolbar__hint">
                 {{ trans('general.bulk_qr_template_hint') }}
             </small>
         @endif
     @endif
 
-    <button class="btn btn-primary" id="{{ (isset($id_button)) ? $id_button : 'bulkAssetEditButton' }}" disabled>{{ trans('button.go') }}</button>
+    <button class="btn btn-primary bulk-edit-toolbar__button" id="{{ (isset($id_button)) ? $id_button : 'bulkAssetEditButton' }}" disabled>{{ trans('button.go') }}</button>
     </form>
 </div>

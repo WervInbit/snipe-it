@@ -897,11 +897,29 @@ dir="{{ Helper::determineLanguageDirection() }}">
                         <div class="col-md-12" style="margin-bottom: 0px;">
 
                         <style>
+                            :root {
+                                --fixed-header-offset: 50px;
+                            }
+                            @media (max-width: 767px) {
+                                :root {
+                                    --fixed-header-offset: 100px;
+                                }
+                            }
                             .breadcrumb-item {
                                 display: inline;
                                 list-style: none;
                             }
-                            @media (max-width: 767px) {
+                            .fixed .content-wrapper,
+                            .fixed .right-side,
+                            .fixed .main-sidebar,
+                            .fixed .left-side,
+                            .fixed .control-sidebar {
+                                padding-top: var(--fixed-header-offset) !important;
+                            }
+                            @media (max-width: 991px) {
+                                .main-header {
+                                    max-height: none;
+                                }
                                 .content-header {
                                     padding: 10px 12px 0 12px;
                                 }
@@ -1065,6 +1083,28 @@ dir="{{ Helper::determineLanguageDirection() }}">
 
 
         <script nonce="{{ csrf_token() }}">
+            function syncFixedHeaderOffset() {
+                var body = document.body;
+                if (!body || !body.classList.contains('fixed')) {
+                    return;
+                }
+
+                var header = document.querySelector('.main-header');
+                if (!header) {
+                    return;
+                }
+
+                var defaultOffset = window.matchMedia('(max-width: 767px)').matches ? 100 : 50;
+                var measuredOffset = Math.ceil(header.getBoundingClientRect().height);
+                var offset = Math.max(defaultOffset, measuredOffset);
+
+                document.documentElement.style.setProperty('--fixed-header-offset', offset + 'px');
+            }
+
+            document.addEventListener('DOMContentLoaded', syncFixedHeaderOffset);
+            window.addEventListener('load', syncFixedHeaderOffset);
+            window.addEventListener('resize', syncFixedHeaderOffset);
+
 
             $.fn.datepicker.dates['{{ app()->getLocale() }}'] = {
                 days: [

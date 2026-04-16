@@ -10,21 +10,31 @@
         .qr-label-panel .qr-label-printer {
             max-width: 100%;
             width: 100%;
+            min-width: 0;
         }
         .qr-label-panel .qr-label-controls .form-control,
         .qr-label-panel .qr-label-printer .form-control,
         .qr-label-panel .qr-label-printer select {
             width: 100%;
             max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
         }
         .qr-label-panel .qr-label-actions {
             display: flex;
             justify-content: center;
             width: 100%;
+            max-width: 100%;
         }
         .qr-label-panel .qr-label-actions .btn {
             max-width: 100%;
             white-space: normal;
+        }
+        .qr-label-panel #qr-server-print-button {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
         }
     </style>
     <div class="panel-heading">

@@ -1,5 +1,100 @@
 @push('css')
     <link rel="stylesheet" href="{{ url(mix('css/dist/bootstrap-table.css')) }}">
+    <style>
+        .bulk-edit-toolbar,
+        .bulk-edit-toolbar__form,
+        .bulk-edit-toolbar__inner {
+            max-width: 100%;
+        }
+
+        .bulk-edit-toolbar__form,
+        .bulk-edit-toolbar__inner {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bulk-edit-toolbar__select,
+        .bulk-edit-toolbar .select2-container {
+            width: auto;
+            max-width: 100%;
+            min-width: 0;
+        }
+
+        .bulk-edit-toolbar__hint {
+            margin-left: 0;
+        }
+
+        .bulk-edit-toolbar__button {
+            flex: 0 0 auto;
+        }
+
+        @media (max-width: 767px) {
+            .bootstrap-table .fixed-table-toolbar,
+            .bootstrap-table .fixed-table-toolbar .bs-bars,
+            .bootstrap-table .fixed-table-toolbar .columns,
+            .bootstrap-table .fixed-table-toolbar .search,
+            .bootstrap-table .fixed-table-toolbar .pull-left,
+            .bootstrap-table .fixed-table-toolbar .pull-right,
+            .bulk-edit-toolbar,
+            .bulk-edit-toolbar__form,
+            .bulk-edit-toolbar__inner {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .bootstrap-table .fixed-table-toolbar .pull-left,
+            .bootstrap-table .fixed-table-toolbar .pull-right,
+            .bootstrap-table .fixed-table-toolbar .search,
+            .bootstrap-table .fixed-table-toolbar .columns {
+                float: none !important;
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            .bootstrap-table .fixed-table-toolbar .columns {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .bootstrap-table .fixed-table-toolbar .columns .btn-group,
+            .bootstrap-table .fixed-table-toolbar .columns > .btn {
+                width: auto !important;
+                max-width: 100%;
+                float: none !important;
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            .bootstrap-table .fixed-table-toolbar .dropdown-menu {
+                left: 0;
+                right: auto;
+                max-width: calc(100vw - 32px);
+            }
+
+            .bulk-edit-toolbar__form,
+            .bulk-edit-toolbar__inner {
+                align-items: stretch;
+            }
+
+            .bulk-edit-toolbar__select,
+            .bulk-edit-toolbar .select2-container,
+            .bulk-edit-toolbar .select2-container .select2-selection,
+            .bulk-edit-toolbar__button,
+            .bulk-edit-toolbar__hint {
+                width: 100% !important;
+                max-width: 100%;
+                min-width: 0 !important;
+            }
+
+            .bulk-edit-toolbar__button {
+                display: block;
+            }
+        }
+    </style>
 @endpush
 
 @push('js')
