@@ -55,9 +55,23 @@ class ActiveTestViewTest extends TestCase
             ->assertSee('data-testid="tests-active-summary"', false)
             ->assertSee('data-testid="testing-save-indicator"', false)
             ->assertSee('data-testid="tests-view-history-btn"', false)
+            ->assertSee('data-testid="tests-start-new-run-form"', false)
             ->assertSee('data-testid="tests-start-new-run-btn"', false)
             ->assertSee("layoutKey: 'tests.layout.active.oneCol'", false)
             ->assertDontSee(trans('tests.two_column_toggle'));
+    }
+
+    public function test_no_active_run_start_button_is_desktop_only(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create(['asset_tag' => 'TAG-NO-RUN']);
+
+        $response = $this->actingAs($user)
+            ->get("/hardware/{$asset->id}/tests/active")
+            ->assertOk();
+
+        $response
+            ->assertSee('data-testid="tests-empty-start-run-form"', false);
     }
 
     public function test_active_view_contains_note_and_photo_drawers(): void

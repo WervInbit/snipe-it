@@ -296,21 +296,27 @@
             padding-inline: 1rem;
         }
 
+        .testing-card__body {
+            padding: 1rem;
+            gap: 0.95rem;
+        }
+
         .testing-card__footer {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
         .testing-card__cta:not(:last-child) {
-            border-right: none;
-            border-bottom: 1px solid var(--testing-border);
+            border-right: 1px solid var(--testing-border);
+            border-bottom: none;
         }
 
         .testing-card__cta {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.6rem;
             justify-content: flex-start;
             text-align: left;
+            padding: 0.7rem;
         }
 
         .testing-card__cta-content {
@@ -352,7 +358,9 @@
                 <h2 class="h5 mb-3">{{ trans('tests.no_active_run') }}</h2>
                 <p class="text-muted mb-4">{{ trans('tests.start_run_cta') }}</p>
                 @if($canStartRun ?? false)
-                    <form method="POST" action="{{ route('test-runs.store', $asset->id) }}">
+                    <form method="POST"
+                          action="{{ route('test-runs.store', $asset->id) }}"
+                          data-testid="tests-empty-start-run-form">
                         @csrf
                         <button type="submit" class="btn btn-primary btn-lg w-100">
                             <i class="fas fa-play me-2" aria-hidden="true"></i>{{ trans('tests.start_new_run') }}
@@ -421,7 +429,9 @@
                                 </a>
                             @endif
                             @if($canStartRun ?? false)
-                                <form method="POST" action="{{ route('test-runs.store', $asset->id) }}">
+                                <form method="POST"
+                                      action="{{ route('test-runs.store', $asset->id) }}"
+                                      data-testid="tests-start-new-run-form">
                                     @csrf
                                     <button type="submit" class="btn btn-outline-light btn-sm" data-testid="tests-start-new-run-btn">
                                         <i class="fas fa-redo me-1" aria-hidden="true"></i>{{ trans('tests.start_new_run') }}

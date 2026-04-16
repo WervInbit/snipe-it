@@ -53,6 +53,28 @@ class EditAssetTest extends TestCase
         $this->assertTrue($notesPos < $modelSpecPos);
     }
 
+    public function testCreateAndEditPagesRenderMobileFloatingSaveButton(): void
+    {
+        $asset = Asset::factory()->create();
+        $user = User::factory()->superuser()->create();
+
+        $this->actingAs($user)
+            ->get(route('hardware.create'))
+            ->assertOk()
+            ->assertSee('data-testid="hardware-mobile-save-fab-wrapper"', false)
+            ->assertSee('data-testid="hardware-mobile-save-fab"', false)
+            ->assertDontSee('<select class="redirect-options form-control select2"', false)
+            ->assertDontSee('name="name"', false);
+
+        $this->actingAs($user)
+            ->get(route('hardware.edit', $asset))
+            ->assertOk()
+            ->assertSee('data-testid="hardware-mobile-save-fab-wrapper"', false)
+            ->assertSee('data-testid="hardware-mobile-save-fab"', false)
+            ->assertSee('<select class="redirect-options form-control select2"', false)
+            ->assertSee('name="name"', false);
+    }
+
     public function testAssetEditPostIsRedirectedIfRedirectSelectionIsIndex()
     {
         $asset = Asset::factory()->assignedToUser()->create();
@@ -181,6 +203,26 @@ class EditAssetTest extends TestCase
         $asset->refresh();
         $this->assertEquals('New name', $asset->name);
         $this->assertEquals($currentLocation->id, $asset->location_id);
+    }
+
+    public function testEditAcceptsSerialArrayInputFromFormShape(): void
+    {
+        $asset = Asset::factory()->create();
+        $status = StatusLabel::factory()->create();
+
+        $this->actingAs(User::factory()->viewAssets()->editAssets()->create())
+            ->put(route('hardware.update', $asset), [
+                'redirect_option' => 'item',
+                'name' => $asset->name,
+                'asset_tags' => [1 => $asset->asset_tag],
+                'serials' => [1 => 'SERIAL-ARRAY-1'],
+                'status_id' => $status->id,
+                'model_id' => $asset->model_id,
+            ])
+            ->assertRedirect(route('hardware.show', $asset));
+
+        $asset->refresh();
+        $this->assertSame('SERIAL-ARRAY-1', $asset->serial);
     }
 
     public function testSellableFlagCanBeToggled()

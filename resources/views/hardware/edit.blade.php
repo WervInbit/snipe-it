@@ -8,12 +8,43 @@
     'formAction' => ($item->id) ? route('hardware.update', $item) : route('hardware.store'),
     'index_route' => 'hardware.index',
     'options' => [
-                'back' => trans('admin/hardware/form.redirect_to_type',['type' => trans('general.previous_page')]),
-                'index' => trans('admin/hardware/form.redirect_to_all', ['type' => 'assets']),
-                'item' => trans('admin/hardware/form.redirect_to_type', ['type' => trans('general.asset')]),
-                'other_redirect' => trans('admin/hardware/form.redirect_to_type', [ 'type' => trans('general.asset').' '.trans('general.asset_model')]),
+                ...($item->id ? [
+                    'back' => trans('admin/hardware/form.redirect_to_type',['type' => trans('general.previous_page')]),
+                    'index' => trans('admin/hardware/form.redirect_to_all', ['type' => 'assets']),
+                    'item' => trans('admin/hardware/form.redirect_to_type', ['type' => trans('general.asset')]),
+                    'other_redirect' => trans('admin/hardware/form.redirect_to_type', [ 'type' => trans('general.asset').' '.trans('general.asset_model')]),
+                ] : [])
                ]
 ])
+
+@push('css')
+    <style nonce="{{ csrf_token() }}">
+        @media (max-width: 991px) {
+            #main.content {
+                padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+            }
+
+            .hardware-save-fab-wrapper {
+                position: fixed;
+                right: 16px;
+                bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+                z-index: 1060;
+            }
+
+            .hardware-save-fab {
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+                min-height: 56px;
+                padding: 0 20px;
+                border-radius: 999px;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+                font-size: 1.6rem;
+                font-weight: 600;
+            }
+        }
+    </style>
+@endpush
 
 
 {{-- Page content --}}
@@ -111,7 +142,9 @@
         'fieldname' => 'model_id',
         'hide_new' => !$item->id,
     ])
-    @include ('partials.forms.edit.name', ['translated_name' => trans('admin/hardware/form.name')])
+    @if ($item->id)
+        @include ('partials.forms.edit.name', ['translated_name' => trans('admin/hardware/form.name')])
+    @endif
     @include ('partials.forms.edit.status', ['required' => false])
     @include ('partials.forms.edit.notes')
 
@@ -248,6 +281,18 @@
             return false;
         })->keys()->values();
     @endphp
+
+    <div class="hardware-save-fab-wrapper visible-xs visible-sm" data-testid="hardware-mobile-save-fab-wrapper">
+        <button
+            type="submit"
+            class="btn btn-primary hardware-save-fab"
+            data-testid="hardware-mobile-save-fab"
+            aria-label="{{ trans('general.save') }}"
+        >
+            <x-icon type="checkmark" />
+            <span>{{ trans('general.save') }}</span>
+        </button>
+    </div>
 
     @if ($testIssuesPresent)
         <div class="modal fade" id="tests-status-confirm-modal" tabindex="-1" role="dialog" aria-hidden="true">

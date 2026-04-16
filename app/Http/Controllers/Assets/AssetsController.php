@@ -164,7 +164,6 @@ class AssetsController extends Controller
         $serials = $request->input('serials', []);
         $asset = null;
         $qr = app(QrLabelService::class);
-
         $count = max(count($requestedTags), count($serials), 1);
 
         for ($a = 1; $a <= $count; $a++) {
@@ -343,15 +342,11 @@ class AssetsController extends Controller
                 if (count($successes) == 1) {
                     //the most common case, keeping it so we don't have to make every use of that translation string be trans_choice'ed
                     //and re-translated
-                    $print = $qr->url($asset, 'pdf');
-                    $download = $qr->url($asset);
                     return Helper::getRedirectOption($request, $asset->id, 'Assets')
                         ->with('success-unescaped', trans('admin/hardware/message.create.success_linked', [
                             'link' => route('hardware.show', $asset),
                             'tag' => e($asset->asset_tag),
-                        ]))
-                        ->with('qr_pdf', $print)
-                        ->with('qr_png', $download);
+                        ]));
                 } else {
                     //multi-success
                     return Helper::getRedirectOption($request, $asset->id, 'Assets')
@@ -672,12 +667,14 @@ class AssetsController extends Controller
             $asset->preserveSerialCase();
         }
 
-        $serial = $request->input('serials');
-        $asset->serial = $request->input('serials');
-
-        if (is_array($request->input('serials'))) {
-            $asset->serial = $serial[1];
+        $serialInput = $request->input('serials');
+        if (is_array($serialInput)) {
+            $serialInput = $serialInput[1] ?? null;
         }
+        if ($serialInput === '') {
+            $serialInput = null;
+        }
+        $asset->serial = is_scalar($serialInput) ? (string) $serialInput : null;
 
         $asset->allowDuplicateSerial($request->boolean('allow_duplicate_serials.1'));
 

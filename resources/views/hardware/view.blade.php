@@ -78,33 +78,208 @@
     align-items: center;
     gap: 0.5rem;
 }
+.hardware-tests-run-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.hardware-test-run-row {
+    border: 1px solid #d7dee8;
+    border-radius: 8px;
+    background: #fff;
+    overflow: hidden;
+}
+.hardware-test-run-row__header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid #edf1f6;
+}
+.hardware-test-run-row__summary {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    text-align: left;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.75rem;
+    align-items: center;
+}
+.hardware-test-run-row__summary-main {
+    min-width: 0;
+}
+.hardware-test-run-row__primary {
+    display: block;
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.85rem;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.hardware-test-run-row__stats {
+    font-size: 0.85rem;
+    color: #374151;
+    white-space: nowrap;
+}
+.hardware-test-run-row__chevron {
+    color: #4b5563;
+    transition: transform 0.2s ease;
+    font-size: 0.9rem;
+}
+.hardware-test-run-row__summary[aria-expanded="true"] .hardware-test-run-row__chevron {
+    transform: rotate(180deg);
+}
+.hardware-test-run-row__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 0 0 auto;
+}
+.hardware-test-run-row__actions form {
+    margin: 0;
+}
+.hardware-test-run-row__details {
+    background: #f8fafc;
+}
+.hardware-test-run-row__details .panel-body {
+    padding: 0.85rem 1rem;
+}
+.hardware-test-result-item {
+    padding: 0.45rem 0;
+}
+.hardware-test-result-item + .hardware-test-result-item {
+    border-top: 1px solid #e5e7eb;
+}
+.hardware-test-result-meta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.25rem 0.75rem;
+    align-items: start;
+}
+.hardware-test-result-label {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    align-items: center;
+    min-width: 0;
+    font-weight: 600;
+}
+.hardware-test-result-status {
+    white-space: nowrap;
+}
+.hardware-test-result-note {
+    grid-column: 1 / -1;
+    color: #6b7280;
+    line-height: 1.4;
+}
+.hardware-run-test-button {
+    display: block;
+    min-height: 84px;
+    padding: 0 18px 0 38px;
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 84px;
+    text-align: left;
+    background-color: #58a9fb;
+    border-color: #489df4;
+    color: #fff;
+}
+.hardware-run-test-button:hover,
+.hardware-run-test-button:focus {
+    background-color: #4a9cf0;
+    border-color: #3d91e7;
+    color: #fff;
+}
+.hardware-run-test-button > :first-child {
+    width: 28px;
+    line-height: 84px;
+}
+.hardware-run-test-button > i,
+.hardware-run-test-button svg {
+    font-size: 1.5rem;
+}
 .hardware-tests-tab-fab {
     position: fixed;
-    right: 20px;
-    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-    z-index: 1050;
+    right: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    z-index: 1060;
     display: none;
 }
 .hardware-tests-tab-fab.is-visible {
     display: block;
 }
 .hardware-tests-tab-fab__button {
-    width: 84px;
-    height: 84px;
-    border: 0;
-    border-radius: 50%;
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    padding: 0;
+    gap: 10px;
+    min-height: 56px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 999px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    font-size: 1.6rem;
+    font-weight: 600;
+    line-height: 1;
 }
 .hardware-tests-tab-fab__button i {
-    font-size: 2rem;
+    font-size: 1.5rem;
+}
+.hardware-tests-tab-fab__label {
+    font-size: 1.6rem;
+    font-weight: 600;
 }
 @media (max-width: 991px) {
+    .info-stack-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+    .info-stack-container > .info-stack {
+        width: 100%;
+        max-width: 100%;
+        float: none;
+        left: auto;
+        right: auto;
+        margin-top: 0;
+    }
     .hardware-tests-tab-actions {
         margin-bottom: 10px;
+    }
+    .hardware-test-run-row__summary {
+        grid-template-columns: minmax(0, 1fr) auto auto;
+    }
+    .hardware-test-run-row__stats {
+        grid-column: auto;
+        white-space: nowrap;
+        font-size: 0.78rem;
+    }
+    .hardware-test-run-row__header {
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: 0.5rem;
+    }
+    .hardware-test-run-row__actions {
+        width: auto;
+        justify-content: flex-end;
+        flex-wrap: nowrap;
+        gap: 0.35rem;
+    }
+    .hardware-test-run-row__actions .btn {
+        padding: 3px 8px;
+        font-size: 12px;
+        line-height: 1.2;
+    }
+    .hardware-test-result-meta {
+        grid-template-columns: 1fr;
+        gap: 0.2rem;
+    }
+    .hardware-test-result-status {
+        white-space: normal;
     }
 }
 .asset-tests-attention {
@@ -435,20 +610,20 @@
 
 
                                 @if ($asset->deleted_at=='')
-                                    @can('update', $asset)
-                                        <div class="col-md-12 hidden-print" style="padding-top: 5px;">
-                                    <a href="{{ route('hardware.edit', $asset) }}" class="btn btn-sm btn-warning btn-social btn-block hidden-print">
-                                        <x-icon type="edit" />
-                                        {{ trans('admin/hardware/general.edit') }}
+                            @can('view', \App\Models\Asset::class)
+                                <div class="col-md-12 hidden-print" style="padding-top: 5px;">
+                                    <a href="#tests" data-toggle="tab" class="btn btn-primary btn-social btn-block hidden-print hardware-run-test-button" aria-controls="tests" data-testid="hardware-run-test-button">
+                                        <x-icon type="audit" />
+                                        {{ trans('tests.run_test_button') }}
                                     </a>
                                 </div>
                             @endcan
 
-                            @can('view', \App\Models\Asset::class)
+                            @can('update', $asset)
                                 <div class="col-md-12 hidden-print" style="padding-top: 5px;">
-                                    <a href="#tests" data-toggle="tab" class="btn btn-sm btn-primary btn-social btn-block hidden-print" aria-controls="tests">
-                                        <x-icon type="audit" />
-                                        {{ trans('tests.run_test_button') }}
+                                    <a href="{{ route('hardware.edit', $asset) }}" class="btn btn-sm btn-warning btn-social btn-block hidden-print">
+                                        <x-icon type="edit" />
+                                        {{ trans('admin/hardware/general.edit') }}
                                     </a>
                                 </div>
                             @endcan
@@ -1567,66 +1742,41 @@
                             @endcan
                         </div>
                         <div class="row">
-                            @foreach ($asset->tests as $run)
-                                <div class="col-md-12">
-                                    <div class="panel panel-default">
+                            <div class="col-md-12">
+                                <div class="hardware-tests-run-list" data-testid="hardware-tests-run-list">
+                                    @forelse ($asset->tests as $run)
                                         @php
                                             $timestamp = $run->finished_at ?: $run->created_at;
                                             $passes = $run->results->where('status', 'pass')->count();
                                             $fails = $run->results->where('status', 'fail')->count();
                                             $nvts = $run->results->where('status', 'nvt')->count();
+                                            $detailId = 'hardware-test-run-' . $run->id;
                                         @endphp
-                                        <div class="panel-heading">
-                                            <a data-toggle="collapse" href="#test-run-{{ $run->id }}" aria-expanded="false" aria-controls="test-run-{{ $run->id }}">
-                                                {{ optional($timestamp)->format('Y-m-d H:i') }} - {{ optional($run->user)->name }}
-                                            </a>
-                                            <span class="pull-right">
-                                                {{ $passes }} {{ trans('tests.pass') }},
-                                                {{ $fails }} {{ trans('tests.fail') }}
-                                                @if ($nvts)
-                                                    , {{ $nvts }} {{ trans('tests.nvt') }}
-                                                @endif
-                                            </span>
-                                        </div>
-                                        <div id="test-run-{{ $run->id }}" class="panel-collapse collapse">
-                                            <div class="panel-body">
-                                                <ul class="list-unstyled">
-                                                    @foreach ($run->results as $result)
-                                                        @php
-                                                            $definition = $result->attributeDefinition;
-                                                            $label = $definition?->label ?? optional($result->type)->name;
-                                                            $instructions = trim((string) (optional($result->type)->instructions ?: ($definition?->instructions ?? $definition?->help_text)));
-                                                            $resultPhotos = $result->photos->map(function ($photo) {
-                                                                return ['url' => url($photo->path)];
-                                                            });
-
-                                                            if ($resultPhotos->isEmpty() && $result->photo_path) {
-                                                                $resultPhotos = collect([['url' => url($result->photo_path)]]);
-                                                            }
-                                                        @endphp
-                                                        <li>
-                                                            {{ $label }}
-                                                            @if ($instructions !== '')
-                                                                <x-icon type="info-circle" class="text-muted" data-tooltip="true" data-placement="top" title="{{ $instructions }}" />
-                                                            @endif:
-                                                            {{ trans('tests.' . $result->status) }}
-                                                            @if ($result->note)
-                                                                <span class="text-muted">{{ $result->note }}</span>
-                                                            @endif
-                                                            @if ($resultPhotos->isNotEmpty())
-                                                                <div class="test-photo-strip mt-1">
-                                                                    @foreach ($resultPhotos as $photo)
-                                                                        <img src="{{ $photo['url'] }}"
-                                                                             alt="{{ trans('tests.photo_thumbnail_alt') }}"
-                                                                             data-action="open-photo"
-                                                                             data-photo-url="{{ $photo['url'] }}">
-                                                                    @endforeach
-                                                                </div>
-                                                            @endif
-                                                        </li>
-                                                    @endforeach
-                                                </ul>
-                                                <div class="mt-2">
+                                        <div class="hardware-test-run-row" data-testid="hardware-test-run-row">
+                                            <div class="hardware-test-run-row__header" data-hardware-test-run-header>
+                                                <button type="button"
+                                                        class="hardware-test-run-row__summary"
+                                                        data-toggle="collapse"
+                                                        data-target="#{{ $detailId }}"
+                                                        data-hardware-test-run-toggle
+                                                        data-testid="hardware-test-run-toggle"
+                                                        aria-expanded="false"
+                                                        aria-controls="{{ $detailId }}">
+                                                    <span class="hardware-test-run-row__summary-main">
+                                                        <span class="hardware-test-run-row__primary">{{ trans('tests.test_run') }} #{{ $run->id }} &middot; {{ optional($timestamp)->format('Y-m-d H:i') }} &middot; {{ optional($run->user)->name }}</span>
+                                                    </span>
+                                                    <span class="hardware-test-run-row__stats">
+                                                        {{ $passes }} {{ trans('tests.pass') }} &middot;
+                                                        {{ $fails }} {{ trans('tests.fail') }}
+                                                        @if ($nvts)
+                                                            &middot; {{ $nvts }} {{ trans('tests.nvt') }}
+                                                        @endif
+                                                    </span>
+                                                    <span class="hardware-test-run-row__chevron" aria-hidden="true">
+                                                        <i class="fas fa-chevron-down"></i>
+                                                    </span>
+                                                </button>
+                                                <div class="hardware-test-run-row__actions">
                                                     @can('update', $run)
                                                         <a href="{{ route('test-results.active', ['asset' => $asset->id, 'run' => $run->id]) }}" class="btn btn-default btn-sm">{{ trans('button.edit') }}</a>
                                                     @endcan
@@ -1639,10 +1789,58 @@
                                                     @endcan
                                                 </div>
                                             </div>
+                                            <div id="{{ $detailId }}" class="collapse hardware-test-run-row__details" data-testid="hardware-test-run-details">
+                                                <div class="panel-body">
+                                                    <ul class="list-unstyled mb-0">
+                                                        @forelse ($run->results as $result)
+                                                            @php
+                                                                $definition = $result->attributeDefinition;
+                                                                $label = $definition?->label ?? optional($result->type)->name;
+                                                                $instructions = trim((string) (optional($result->type)->instructions ?: ($definition?->instructions ?? $definition?->help_text)));
+                                                                $resultPhotos = $result->photos->map(function ($photo) {
+                                                                    return ['url' => url($photo->path)];
+                                                                });
+
+                                                                if ($resultPhotos->isEmpty() && $result->photo_path) {
+                                                                    $resultPhotos = collect([['url' => url($result->photo_path)]]);
+                                                                }
+                                                            @endphp
+                                                            <li class="hardware-test-result-item">
+                                                                <div class="hardware-test-result-meta">
+                                                                    <div class="hardware-test-result-label">
+                                                                        <span>{{ $label }}</span>
+                                                                        @if ($instructions !== '')
+                                                                            <x-icon type="info-circle" class="text-muted" data-tooltip="true" data-placement="top" title="{{ $instructions }}" />
+                                                                        @endif
+                                                                    </div>
+                                                                    <div class="hardware-test-result-status">{{ trans('tests.' . $result->status) }}</div>
+                                                                    @if ($result->note)
+                                                                        <div class="hardware-test-result-note">{{ $result->note }}</div>
+                                                                    @endif
+                                                                </div>
+                                                                @if ($resultPhotos->isNotEmpty())
+                                                                    <div class="test-photo-strip mt-1">
+                                                                        @foreach ($resultPhotos as $photo)
+                                                                            <img src="{{ $photo['url'] }}"
+                                                                                 alt="{{ trans('tests.photo_thumbnail_alt') }}"
+                                                                                 data-action="open-photo"
+                                                                                 data-photo-url="{{ $photo['url'] }}">
+                                                                        @endforeach
+                                                                    </div>
+                                                                @endif
+                                                            </li>
+                                                        @empty
+                                                            <li class="text-muted">{{ trans('tests.no_results_in_group') }}</li>
+                                                        @endforelse
+                                                    </ul>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
+                                    @empty
+                                        <div class="alert alert-info mb-0">{{ trans('tests.no_test_run_recorded') }}</div>
+                                    @endforelse
                                 </div>
-                            @endforeach
+                            </div>
                         </div>
                         @can('audits.view')
                             @php
@@ -1851,9 +2049,10 @@
                     @csrf
                     <button type="submit"
                             class="btn btn-primary hardware-tests-tab-fab__button"
-                            data-testid="hardware-tests-tab-fab">
+                            data-testid="hardware-tests-tab-fab"
+                            aria-label="{{ trans('tests.start_new_run') }}">
                         <x-icon type="plus" />
-                        <span class="sr-only">{{ trans('tests.start_new_run') }}</span>
+                        <span class="hardware-tests-tab-fab__label" data-testid="hardware-tests-tab-fab-label">{{ trans('tests.start_new_run') }}</span>
                     </button>
                 </form>
             @endcan
@@ -1989,6 +2188,27 @@
                     event.preventDefault();
                     toggleAttention();
                 }
+            });
+        })();
+    </script>
+    <script>
+        (function () {
+            document.addEventListener('click', function (event) {
+                var header = event.target.closest('[data-hardware-test-run-header]');
+                if (!header) {
+                    return;
+                }
+                if (event.target.closest('.hardware-test-run-row__actions')) {
+                    return;
+                }
+                if (event.target.closest('[data-hardware-test-run-toggle]')) {
+                    return;
+                }
+                var toggle = header.querySelector('[data-hardware-test-run-toggle]');
+                if (!toggle) {
+                    return;
+                }
+                toggle.click();
             });
         })();
     </script>

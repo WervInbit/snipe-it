@@ -49,6 +49,25 @@ class ShowAssetTest extends TestCase
         $response->assertSee(trans('general.download_qr_label'));
     }
 
+    public function testDetailPageQrPanelUsesConstrainedPrinterControls(): void
+    {
+        $settings = Setting::getSettings();
+        if ($settings) {
+            Setting::unguarded(fn () => $settings->update(['qr_formats' => 'png,pdf,qr']));
+            Setting::$_cache = null;
+        }
+
+        $asset = Asset::factory()->create();
+
+        $response = $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('hardware.show', $asset));
+
+        $response->assertOk();
+        $response->assertSee('asset-printer-picker', false);
+        $response->assertSee('box-sizing: border-box;', false);
+        $response->assertSee('width: 100%;', false);
+    }
+
     public function testDetailPageRendersQrPanelBelowPrimaryActionButtons(): void
     {
         $settings = Setting::getSettings();
@@ -65,8 +84,8 @@ class ShowAssetTest extends TestCase
         $response->assertOk();
         $response->assertSee('data-testid="asset-qr-action-panel"', false);
         $response->assertSeeInOrder([
-            trans('admin/hardware/general.edit'),
             trans('tests.run_test_button'),
+            trans('admin/hardware/general.edit'),
             trans('general.add_note'),
             trans('admin/hardware/general.clone'),
             trans('general.delete'),
@@ -111,6 +130,8 @@ class ShowAssetTest extends TestCase
         $response->assertSee(trans('tests.run_test_button'));
         $response->assertSee('href="#tests"', false);
         $response->assertSee('aria-controls="tests"', false);
+        $response->assertSee('data-testid="hardware-run-test-button"', false);
+        $response->assertSee('hardware-run-test-button', false);
     }
 
     public function testDetailPageRendersResponsiveTestsStartRunActions(): void
@@ -123,6 +144,7 @@ class ShowAssetTest extends TestCase
         $response->assertOk();
         $response->assertSee('data-testid="hardware-tests-tab-actions"', false);
         $response->assertSee('data-testid="hardware-tests-tab-fab"', false);
+        $response->assertSee('data-testid="hardware-tests-tab-fab-label"', false);
         $response->assertSee(route('test-runs.store', $asset), false);
         $response->assertDontSee('class="mb-3 text-right"', false);
     }
@@ -137,6 +159,7 @@ class ShowAssetTest extends TestCase
         $response->assertOk();
         $response->assertSee('<div class="col-md-12">', false);
         $response->assertDontSee('<div class="col-md-6 col-sm-12">', false);
+        $response->assertSee('data-testid="hardware-tests-run-list"', false);
     }
 
     public function testDetailPageRendersFoldableLatestTestsAttentionBlock(): void
@@ -164,6 +187,12 @@ class ShowAssetTest extends TestCase
         $response->assertSee('test-result-label', false);
         $response->assertSee('test-result-status', false);
         $response->assertSee('test-result-note', false);
+        $response->assertSee('data-testid="test-run-row"', false);
+        $response->assertSee('data-testid="test-run-toggle"', false);
+        $response->assertSee('data-testid="test-run-details"', false);
+        $response->assertSee('test-run-row__actions', false);
+        $response->assertSee('data-testid="tests-index-start-run-form"', false);
+        $response->assertSee('class="mb-3"', false);
     }
 
     public function testDetailPageRendersSeparateStatusAndQualityRows(): void
