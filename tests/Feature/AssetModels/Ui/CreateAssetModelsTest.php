@@ -26,6 +26,16 @@ class CreateAssetModelsTest extends TestCase
             ->assertOk();
     }
 
+    public function testCreatePageHidesLegacyEolMinAmountAndRequestableFields(): void
+    {
+        $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('models.create'))
+            ->assertOk()
+            ->assertDontSee('id="min_amt"', false)
+            ->assertDontSee('id="eol"', false)
+            ->assertDontSee('id="requestable"', false);
+    }
+
     public function testUserCanCreateAssetModels()
     {
         $this->assertFalse(AssetModel::where('name', 'Test Model')->exists());

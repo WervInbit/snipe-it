@@ -18,7 +18,18 @@
     <div class="form-group{{ $errors->has('code') ? ' has-error' : '' }}">
         <label class="col-md-3 control-label" for="code">{{ __('Code') }}</label>
         <div class="col-md-7">
-            <input type="text" name="code" id="code" class="form-control" value="{{ old('code') }}" required>
+            @php($codeCaseOverrideActive = old('code_case_override', 0) ? true : false)
+            <div class="js-model-number-case-wrapper">
+                <div class="input-group">
+                    <input type="text" name="code" id="code" class="form-control js-uppercase-input" value="{{ old('code') }}" required>
+                    <span class="input-group-btn">
+                        <button type="button" class="btn {{ $codeCaseOverrideActive ? 'btn-warning active' : 'btn-default' }} js-case-override-toggle" aria-pressed="{{ $codeCaseOverrideActive ? 'true' : 'false' }}" title="{{ __('Preserve case') }}">
+                            Aa
+                        </button>
+                    </span>
+                </div>
+                <input type="hidden" name="code_case_override" class="js-case-override-input" value="{{ $codeCaseOverrideActive ? '1' : '0' }}">
+            </div>
             <span class="help-block">{{ __('Identifier for this preset (e.g., SKU or hardware variant code).') }}</span>
             {!! $errors->first('code', '<span class="alert-msg">:message</span>') !!}
         </div>
@@ -33,15 +44,10 @@
         </div>
     </div>
 
-    <div class="form-group">
-        <div class="col-md-7 col-md-offset-3">
-            <div class="checkbox">
-                <label>
-                    <input type="checkbox" name="make_primary" value="1" {{ old('make_primary', $hasExistingNumbers ? null : '1') ? 'checked' : '' }}>
-                    {{ __('Make this the default selection for new assets.') }}
-                </label>
-            </div>
-        </div>
-    </div>
+@endsection
+
+@section('moar_scripts')
+    @parent
+    @include('models.model_numbers.partials.case-override-script')
 @endsection
 

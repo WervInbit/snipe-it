@@ -8,6 +8,7 @@ use App\Models\ModelNumber;
 use App\Services\ModelNumberImageSyncService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -30,6 +31,12 @@ class ModelNumberController extends Controller
     {
         $this->authorize('update', $model);
 
+        $normalizedCode = $this->normalizeModelNumberCode(
+            (string) $request->input('code', ''),
+            $request->boolean('code_case_override')
+        );
+        $request->merge(['code' => $normalizedCode]);
+
         $data = $this->validate($request, [
             'code' => [
                 'required',
@@ -39,6 +46,7 @@ class ModelNumberController extends Controller
             ],
             'label' => ['nullable', 'string', 'max:255'],
             'make_primary' => ['nullable', 'boolean'],
+            'code_case_override' => ['nullable', 'boolean'],
         ]);
 
         $modelNumber = $model->modelNumbers()->create([
@@ -78,6 +86,12 @@ class ModelNumberController extends Controller
         $this->authorize('update', $model);
         $this->ensureModelNumber($model, $modelNumber);
 
+        $normalizedCode = $this->normalizeModelNumberCode(
+            (string) $request->input('code', ''),
+            $request->boolean('code_case_override')
+        );
+        $request->merge(['code' => $normalizedCode]);
+
         $data = $this->validate($request, array_merge([
             'code' => [
                 'required',
@@ -90,6 +104,7 @@ class ModelNumberController extends Controller
             'label' => ['nullable', 'string', 'max:255'],
             'status' => ['required', 'in:active,deprecated'],
             'make_primary' => ['nullable', 'boolean'],
+            'code_case_override' => ['nullable', 'boolean'],
         ], $imageSyncService->validationRules()));
 
         if ($data['status'] === 'deprecated' && $model->primary_model_number_id === $modelNumber->id) {
@@ -227,6 +242,17 @@ class ModelNumberController extends Controller
         if ($model->model_number !== $modelNumber->code) {
             $model->forceFill(['model_number' => $modelNumber->code])->save();
         }
+    }
+
+    private function normalizeModelNumberCode(string $code, bool $preserveCase): string
+    {
+        $trimmed = trim($code);
+
+        if ($preserveCase || $trimmed === '') {
+            return $trimmed;
+        }
+
+        return Str::upper($trimmed);
     }
 }
 

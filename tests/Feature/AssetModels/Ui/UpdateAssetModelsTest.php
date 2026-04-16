@@ -28,6 +28,18 @@ class UpdateAssetModelsTest extends TestCase
             ->assertOk();
     }
 
+    public function testEditPageHidesLegacyEolMinAmountAndRequestableFields(): void
+    {
+        $model = AssetModel::factory()->create();
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('models.edit', $model))
+            ->assertOk()
+            ->assertDontSee('id="min_amt"', false)
+            ->assertDontSee('id="eol"', false)
+            ->assertDontSee('id="requestable"', false);
+    }
+
     public function testUserCanEditAssetModels()
     {
         $category = Category::factory()->forAssets()->create();
@@ -46,6 +58,32 @@ class UpdateAssetModelsTest extends TestCase
         $this->followRedirects($response)->assertSee('Success');
         $this->assertTrue(AssetModel::where('name', 'Test Model Edited')->exists());
 
+    }
+
+    public function testUpdateWithoutDeprecatedLegacyFieldsPreservesExistingValues(): void
+    {
+        $category = Category::factory()->forAssets()->create();
+        $model = AssetModel::factory()->create([
+            'category_id' => $category->id,
+            'eol' => 24,
+            'min_amt' => 5,
+            'requestable' => true,
+        ]);
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->put(route('models.update', ['model' => $model]), [
+                'name' => 'Updated Legacy Model '.$model->id,
+                'category_id' => $category->id,
+            ])
+            ->assertStatus(302)
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('models.index'));
+
+        $model->refresh();
+
+        $this->assertSame(24, (int) $model->eol);
+        $this->assertSame(5, (int) $model->min_amt);
+        $this->assertTrue((bool) $model->requestable);
     }
 
     public function testUserCannotChangeAssetModelCategoryType()

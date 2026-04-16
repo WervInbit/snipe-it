@@ -74,15 +74,18 @@ class AssetModelsController extends Controller
         $this->authorize('create', AssetModel::class);
         $model = new AssetModel;
 
-        $model->eol = $request->input('eol');
+        // Deprecated in refurb flow: model-level EOL is hidden in UI but remains backward-compatible for explicit payloads.
+        $model->eol = $request->exists('eol') ? $request->input('eol') : null;
         $model->depreciation_id = $request->input('depreciation_id');
         $model->name = $request->input('name');
-        $model->min_amt = $request->input('min_amt');
+        // Deprecated in refurb flow: min amount is hidden in UI but remains backward-compatible for explicit payloads.
+        $model->min_amt = $request->exists('min_amt') ? $request->input('min_amt') : null;
         $model->manufacturer_id = $request->input('manufacturer_id');
         $model->category_id = $request->input('category_id');
         $model->notes = $request->input('notes');
         $model->created_by = auth()->id();
-        $model->requestable = $request->has('requestable');
+        // Deprecated in refurb flow: requestable is hidden in UI and defaults to false when omitted.
+        $model->requestable = $request->exists('requestable') ? $request->boolean('requestable') : false;
 
         if ($request->input('fieldset_id') != '') {
             $model->fieldset_id = $request->input('fieldset_id');
@@ -150,13 +153,23 @@ class AssetModelsController extends Controller
 
         $model = $request->handleImages($model);
         $model->depreciation_id = $request->input('depreciation_id');
-        $model->eol = $request->input('eol');
         $model->name = $request->input('name');
-        $model->min_amt = $request->input('min_amt');
         $model->manufacturer_id = $request->input('manufacturer_id');
         $model->category_id = $request->input('category_id');
         $model->notes = $request->input('notes');
-        $model->requestable = $request->input('requestable', '0');
+
+        // Deprecated in refurb flow: keep legacy values unless explicitly provided.
+        if ($request->exists('eol')) {
+            $model->eol = $request->input('eol');
+        }
+
+        if ($request->exists('min_amt')) {
+            $model->min_amt = $request->input('min_amt');
+        }
+
+        if ($request->exists('requestable')) {
+            $model->requestable = $request->boolean('requestable');
+        }
 
         $model->fieldset_id = $request->input('fieldset_id');
 
@@ -181,7 +194,7 @@ class AssetModelsController extends Controller
                 if ($model->eol > 0) {
                     $newEol = $model->eol;
                     $model->assets()->whereNotNull('purchase_date')->where('eol_explicit', false)
-                        ->update(['asset_eol_date' => DB::raw('DATE_ADD(purchase_date, INTERVAL ' . $newEol . ' MONTH)')]);
+                        ->update(['asset_eol_date' => DB::raw('DATE_ADD(purchase_date, INTERVAL '.$newEol.' MONTH)')]);
                 } elseif ($model->eol == 0) {
                     $model->assets()->whereNotNull('purchase_date')->where('eol_explicit', false)
                         ->update(['asset_eol_date' => DB::raw('null')]);

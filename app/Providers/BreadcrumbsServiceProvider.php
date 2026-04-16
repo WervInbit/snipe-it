@@ -17,6 +17,7 @@ use App\Models\License;
 use App\Models\LicenseSeat;
 use App\Models\Location;
 use App\Models\Manufacturer;
+use App\Models\ModelNumber;
 use App\Models\PredefinedKit;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
@@ -115,6 +116,16 @@ class BreadcrumbsServiceProvider extends ServiceProvider
         Breadcrumbs::for('models.edit', fn (Trail $trail, AssetModel $model) =>
         $trail->parent('models.index', route('models.index'))
             ->push(trans('general.breadcrumb_button_actions.edit_item', ['name' => $model->name]), route('models.edit', $model))
+        );
+
+        Breadcrumbs::for('models.numbers.edit', fn (Trail $trail, AssetModel $model, ModelNumber $modelNumber) =>
+        $trail->parent('models.show', $model)
+            ->push(__('Edit Model Number').': '.($modelNumber->label ?: $modelNumber->code), route('models.numbers.edit', [$model, $modelNumber]))
+        );
+
+        Breadcrumbs::for('models.numbers.spec.edit', fn (Trail $trail, AssetModel $model, ModelNumber $modelNumber) =>
+        $trail->parent('models.show', $model)
+            ->push(__('Edit Specification').': '.($modelNumber->label ?: $modelNumber->code), route('models.numbers.spec.edit', [$model, $modelNumber]))
         );
 
 
