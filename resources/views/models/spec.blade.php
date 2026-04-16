@@ -60,6 +60,15 @@
             color: #555;
         }
 
+        .selected-attribute-item--error {
+            border-left: 3px solid #d9534f;
+            background-color: #fff5f5;
+        }
+
+        .selected-attribute-item__error-badge {
+            margin-left: 6px;
+        }
+
         .selected-attribute-item__body {
             display: flex;
             align-items: center;
@@ -76,6 +85,13 @@
             margin-bottom: 20px;
         }
 
+        .attribute-detail-panel--error {
+            border: 1px solid #f5c6cb;
+            border-radius: 6px;
+            padding: 10px;
+            background-color: #fff9f9;
+        }
+
         .attribute-detail-empty {
             margin-top: 15px;
         }
@@ -90,11 +106,66 @@
         .attribute-column-header h4 {
             margin: 0;
         }
+
+        .model-spec-error-list {
+            margin: 10px 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .model-spec-error-list li + li {
+            margin-top: 6px;
+        }
+
+        .model-spec-error-link {
+            display: block;
+            width: 100%;
+            text-align: left;
+            white-space: normal;
+            padding: 8px 10px;
+        }
+
+        .model-spec-error-link__label {
+            font-weight: 700;
+            margin-right: 6px;
+        }
     </style>
 @endpush
 
 @section('inputFields')
-    @php($assignedDefinitionIds = $selectedDefinitionIds ?? [])
+    @php
+        $assignedDefinitionIds = $selectedDefinitionIds ?? [];
+    @endphp
+    @php
+        $attributeErrorItems = collect();
+        $invalidAttributeIds = collect();
+        $generalSpecErrors = collect();
+
+        foreach ($errors->getMessages() as $errorKey => $messages) {
+            $messages = collect($messages)->filter()->values();
+            if ($messages->isEmpty()) {
+                continue;
+            }
+
+            if (preg_match('/^attributes\.(\d+)$/', $errorKey, $matches)) {
+                $definitionId = (int) $matches[1];
+                $definition = $definitionsById->get($definitionId);
+
+                $attributeErrorItems->push([
+                    'id' => $definitionId,
+                    'label' => $definition?->label ?: __('Attribute #:id', ['id' => $definitionId]),
+                    'message' => $messages->first(),
+                ]);
+                $invalidAttributeIds->push($definitionId);
+                continue;
+            }
+
+            $generalSpecErrors = $generalSpecErrors->merge($messages);
+        }
+
+        $invalidAttributeIds = $invalidAttributeIds->unique()->values();
+        $attributeErrorItems = $attributeErrorItems->unique('id')->values();
+    @endphp
 
     @if(($modelNumbers ?? collect())->isEmpty() || !$modelNumber)
         <div class="alert alert-info">
@@ -107,11 +178,31 @@
                 <div class="alert alert-danger">
                     <strong>{{ __('Unable to save the specification.') }}</strong>
                     <p class="help-block">{{ __('Review the highlighted fields below. Allowed formats, ranges, and units are noted alongside each attribute when validation fails.') }}</p>
-                    <ul class="mb-0">
-                        @foreach($errors->all() as $message)
-                            <li>{{ $message }}</li>
-                        @endforeach
-                    </ul>
+                    @if($attributeErrorItems->isNotEmpty())
+                        <div data-testid="model-spec-error-navigator">
+                            <p class="help-block"><strong>{{ __('Fields with issues') }}</strong></p>
+                            <ul class="model-spec-error-list">
+                                @foreach($attributeErrorItems as $errorItem)
+                                    <li>
+                                        <button type="button"
+                                                class="btn btn-default btn-sm model-spec-error-link js-attribute-error-link"
+                                                data-testid="model-spec-error-link"
+                                                data-attribute-id="{{ $errorItem['id'] }}">
+                                            <span class="model-spec-error-link__label">{{ $errorItem['label'] }}</span>
+                                            <span>{{ $errorItem['message'] }}</span>
+                                        </button>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                    @if($generalSpecErrors->isNotEmpty())
+                        <ul class="mb-0">
+                            @foreach($generalSpecErrors as $message)
+                                <li>{{ $message }}</li>
+                            @endforeach
+                        </ul>
+                    @endif
                 </div>
             </div>
         @endif
@@ -137,7 +228,9 @@
             </div>
         </div>
 
-        <div class="model-attributes-builder row">
+        <div class="model-attributes-builder row"
+             data-testid="model-attributes-builder"
+             data-invalid-attribute-ids="{{ $invalidAttributeIds->implode(',') }}">
             <div class="col-md-4 attribute-column attribute-column--available">
                 <div class="attribute-column-header">
                     <h4>{{ __('Available Attributes') }}</h4>
@@ -246,6 +339,10 @@
             var detailContainer = builder.querySelector('.attribute-detail-container');
             var detailEmpty = detailContainer ? detailContainer.querySelector('.attribute-detail-empty') : null;
             var templateRoot = document.querySelector('.attribute-template-cache');
+            var invalidAttributeIds = (builder.dataset.invalidAttributeIds || '')
+                .split(',')
+                .map(function (id) { return id.trim(); })
+                .filter(function (id) { return id !== ''; });
 
             if (!selectedList || !detailContainer) {
                 return;
@@ -325,6 +422,21 @@
                 }
             }
 
+            function selectAndFocusAttribute(attributeId) {
+                if (!attributeId) {
+                    return;
+                }
+
+                selectAttribute(attributeId);
+
+                var panel = detailContainer.querySelector('.attribute-detail-panel[data-attribute-id="' + attributeId + '"]');
+                if (panel && typeof panel.scrollIntoView === 'function') {
+                    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+
+                focusDetailInput(attributeId);
+            }
+
             function focusDetailInput(attributeId) {
                 var panel = detailContainer.querySelector('.attribute-detail-panel[data-attribute-id="' + attributeId + '"]');
                 if (!panel) {
@@ -344,6 +456,19 @@
                 } else if (detailEmpty) {
                     detailEmpty.hidden = false;
                 }
+            }
+
+            function selectFirstInvalidOrFirstAttribute() {
+                for (var i = 0; i < invalidAttributeIds.length; i += 1) {
+                    var invalidId = invalidAttributeIds[i];
+                    var invalidItem = selectedList.querySelector('.selected-attribute-item[data-attribute-id="' + invalidId + '"]');
+                    if (invalidItem) {
+                        selectAndFocusAttribute(invalidId);
+                        return;
+                    }
+                }
+
+                selectFirstAttribute();
             }
 
             function filterList(input) {
@@ -479,8 +604,19 @@
                 });
             }
 
+            document.querySelectorAll('.js-attribute-error-link').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var attributeId = button.dataset.attributeId;
+                    if (!attributeId) {
+                        return;
+                    }
+
+                    selectAndFocusAttribute(attributeId);
+                });
+            });
+
             refreshReorderState();
-            selectFirstAttribute();
+            selectFirstInvalidOrFirstAttribute();
         });
     </script>
 @endsection

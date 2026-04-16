@@ -1,9 +1,17 @@
 @php($searchText = strtolower($definition->label.' '.$definition->key))
-<li class="list-group-item selected-attribute-item" data-attribute-id="{{ $definition->id }}" data-search-text="{{ $searchText }}">
+@php($fieldKey = 'attributes.'.$definition->id)
+@php($hasFieldError = $errors->has($fieldKey))
+<li class="list-group-item selected-attribute-item{{ $hasFieldError ? ' selected-attribute-item--error' : '' }}"
+    data-attribute-id="{{ $definition->id }}"
+    data-search-text="{{ $searchText }}"
+    data-has-error="{{ $hasFieldError ? '1' : '0' }}">
     <div class="selected-attribute-item__body">
         <div class="selected-attribute-item__info">
             <strong>{{ $definition->label }}</strong>
             <span class="text-muted small">({{ $definition->key }})</span>
+            @if($hasFieldError)
+                <span class="label label-danger selected-attribute-item__error-badge">{{ __('Invalid') }}</span>
+            @endif
             @if($definition->isDeprecated())
                 <span class="label label-warning" style="margin-left:6px;">{{ __('Deprecated') }}</span>
             @endif

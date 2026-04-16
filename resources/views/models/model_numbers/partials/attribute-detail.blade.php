@@ -5,7 +5,12 @@
 @php($current = old($fieldKey, $resolved->value))
 @php($isRequired = (bool) $definition->required_for_category)
 @php($searchText = strtolower($definition->label.' '.$definition->key))
-<div class="attribute-detail-panel" data-attribute-id="{{ $definition->id }}" data-search-text="{{ $searchText }}" hidden>
+@php($hasFieldError = $errors->has($fieldKey))
+<div class="attribute-detail-panel{{ $hasFieldError ? ' attribute-detail-panel--error' : '' }}"
+     data-attribute-id="{{ $definition->id }}"
+     data-search-text="{{ $searchText }}"
+     data-has-error="{{ $hasFieldError ? '1' : '0' }}"
+     hidden>
     <div class="attribute-detail-panel__header">
         <h4>
             {{ $definition->label }}

@@ -310,10 +310,18 @@ class ModelAttributeManager
 
         if ($missing->isNotEmpty()) {
             $labels = $missing->map(fn (ModelNumberAttribute $assignment) => $assignment->definition->label)->implode(', ');
+            $messages = [
+                'attributes' => [__('Complete required attributes: :list', ['list' => $labels])],
+            ];
 
-            throw ValidationException::withMessages([
-                'attributes' => __('Complete required attributes: :list', ['list' => $labels]),
-            ]);
+            foreach ($missing as $assignment) {
+                $definition = $assignment->definition;
+                $messages['attributes.' . $definition->id] = [__(':label is required.', [
+                    'label' => $definition->label ?: $definition->key,
+                ])];
+            }
+
+            throw ValidationException::withMessages($messages);
         }
     }
 
