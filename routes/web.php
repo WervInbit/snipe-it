@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Account;
+use App\Http\Controllers\Account\WorkOrdersController as AccountWorkOrdersController;
 use App\Http\Controllers\ActionlogController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
@@ -26,15 +27,21 @@ use App\Http\Controllers\SuppliersController;
 use App\Http\Controllers\StartController;
 use App\Http\Controllers\ScanController;
 use App\Http\Controllers\ViewAssetsController;
+use App\Http\Controllers\WorkOrders\WorkOrderAssetsController;
+use App\Http\Controllers\WorkOrders\WorkOrdersController;
+use App\Http\Controllers\WorkOrders\WorkOrderTasksController;
 use App\Http\Controllers\Admin\TestTypeController as AdminTestTypeController;
 use App\Http\Controllers\Admin\AttributeDefinitionsController;
 use App\Http\Controllers\Admin\AttributeOptionsController;
+use App\Http\Controllers\Admin\ComponentDefinitionSettingsController;
+use App\Http\Controllers\Admin\ComponentStorageLocationSettingsController;
 use App\Http\Controllers\Admin\ModelNumberController;
 use App\Http\Controllers\Admin\ModelNumberSettingsController;
 use App\Http\Controllers\Admin\ModelNumberAttributeController;
 use App\Http\Controllers\Admin\ModelSpecificationController;
 use App\Livewire\Importer;
 use App\Models\ReportTemplate;
+use App\Models\WorkOrder;
 use Illuminate\Support\Facades\Route;
 use Tabuna\Breadcrumbs\Trail;
 
@@ -123,6 +130,59 @@ Route::group(['middleware' => 'auth'], function () {
             ->name('model_numbers.primary');
     });
 
+    Route::group([
+        'prefix' => 'admin/settings',
+        'as' => 'settings.',
+    ], function () {
+        Route::get('component-definitions', [ComponentDefinitionSettingsController::class, 'index'])
+            ->name('component_definitions.index')
+            ->breadcrumbs(fn (Trail $trail) => $trail
+                ->parent('settings.index')
+                ->push(__('Component Definitions'), route('settings.component_definitions.index')));
+
+        Route::get('component-definitions/create', [ComponentDefinitionSettingsController::class, 'create'])
+            ->name('component_definitions.create');
+
+        Route::get('component-definitions/{componentDefinition}/edit', [ComponentDefinitionSettingsController::class, 'edit'])
+            ->name('component_definitions.edit');
+
+        Route::post('component-definitions', [ComponentDefinitionSettingsController::class, 'store'])
+            ->name('component_definitions.store');
+
+        Route::put('component-definitions/{componentDefinition}', [ComponentDefinitionSettingsController::class, 'update'])
+            ->name('component_definitions.update');
+
+        Route::patch('component-definitions/{componentDefinition}/deactivate', [ComponentDefinitionSettingsController::class, 'deactivate'])
+            ->name('component_definitions.deactivate');
+
+        Route::patch('component-definitions/{componentDefinition}/activate', [ComponentDefinitionSettingsController::class, 'activate'])
+            ->name('component_definitions.activate');
+
+        Route::get('component-storage-locations', [ComponentStorageLocationSettingsController::class, 'index'])
+            ->name('component_storage_locations.index')
+            ->breadcrumbs(fn (Trail $trail) => $trail
+                ->parent('settings.index')
+                ->push(__('Component Storage Locations'), route('settings.component_storage_locations.index')));
+
+        Route::get('component-storage-locations/create', [ComponentStorageLocationSettingsController::class, 'create'])
+            ->name('component_storage_locations.create');
+
+        Route::get('component-storage-locations/{componentStorageLocation}/edit', [ComponentStorageLocationSettingsController::class, 'edit'])
+            ->name('component_storage_locations.edit');
+
+        Route::post('component-storage-locations', [ComponentStorageLocationSettingsController::class, 'store'])
+            ->name('component_storage_locations.store');
+
+        Route::put('component-storage-locations/{componentStorageLocation}', [ComponentStorageLocationSettingsController::class, 'update'])
+            ->name('component_storage_locations.update');
+
+        Route::patch('component-storage-locations/{componentStorageLocation}/deactivate', [ComponentStorageLocationSettingsController::class, 'deactivate'])
+            ->name('component_storage_locations.deactivate');
+
+        Route::patch('component-storage-locations/{componentStorageLocation}/activate', [ComponentStorageLocationSettingsController::class, 'activate'])
+            ->name('component_storage_locations.activate');
+    });
+
     Route::get('models/{model}/spec', [ModelSpecificationController::class, 'edit'])->name('models.spec.edit');
     Route::put('models/{model}/spec', [ModelSpecificationController::class, 'update'])->name('models.spec.update');
     Route::get('models/{model}/model-numbers/{modelNumber}/spec', [ModelSpecificationController::class, 'editForNumber'])->name('models.numbers.spec.edit');
@@ -166,6 +226,56 @@ Route::group(['middleware' => 'auth'], function () {
       */
       Route::get('scan', [ScanController::class, 'index'])->name('scan');
   });
+
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('work-orders', [WorkOrdersController::class, 'index'])
+        ->name('work-orders.index')
+        ->breadcrumbs(fn (Trail $trail) =>
+            $trail->parent('home')
+                ->push(__('Work Orders'), route('work-orders.index')));
+
+    Route::get('work-orders/create', [WorkOrdersController::class, 'create'])
+        ->name('work-orders.create')
+        ->breadcrumbs(fn (Trail $trail) =>
+            $trail->parent('work-orders.index')
+                ->push(__('Create'), route('work-orders.create')));
+
+    Route::post('work-orders', [WorkOrdersController::class, 'store'])
+        ->name('work-orders.store');
+
+    Route::get('work-orders/{workOrder}', [WorkOrdersController::class, 'show'])
+        ->name('work-orders.show')
+        ->breadcrumbs(fn (Trail $trail, WorkOrder $workOrder) =>
+            $trail->parent('work-orders.index')
+                ->push($workOrder->work_order_number, route('work-orders.show', $workOrder)));
+
+    Route::get('work-orders/{workOrder}/edit', [WorkOrdersController::class, 'edit'])
+        ->name('work-orders.edit')
+        ->breadcrumbs(fn (Trail $trail, WorkOrder $workOrder) =>
+            $trail->parent('work-orders.show', $workOrder)
+                ->push(__('Edit'), route('work-orders.edit', $workOrder)));
+
+    Route::put('work-orders/{workOrder}', [WorkOrdersController::class, 'update'])
+        ->name('work-orders.update');
+
+    Route::post('work-orders/{workOrder}/assets', [WorkOrderAssetsController::class, 'store'])
+        ->name('work-orders.assets.store');
+
+    Route::put('work-orders/{workOrder}/assets/{workOrderAsset}', [WorkOrderAssetsController::class, 'update'])
+        ->name('work-orders.assets.update');
+
+    Route::delete('work-orders/{workOrder}/assets/{workOrderAsset}', [WorkOrderAssetsController::class, 'destroy'])
+        ->name('work-orders.assets.destroy');
+
+    Route::post('work-orders/{workOrder}/tasks', [WorkOrderTasksController::class, 'store'])
+        ->name('work-orders.tasks.store');
+
+    Route::put('work-orders/{workOrder}/tasks/{workOrderTask}', [WorkOrderTasksController::class, 'update'])
+        ->name('work-orders.tasks.update');
+
+    Route::delete('work-orders/{workOrder}/tasks/{workOrderTask}', [WorkOrderTasksController::class, 'destroy'])
+        ->name('work-orders.tasks.destroy');
+});
 
 
 /*
@@ -540,6 +650,18 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
         ]
     )->name('profile.email_assets');
 
+    Route::get('work-orders', [AccountWorkOrdersController::class, 'index'])
+        ->name('account.work-orders.index')
+        ->breadcrumbs(fn (Trail $trail) =>
+            $trail->parent('home')
+                ->push(__('My Work Orders'), route('account.work-orders.index')));
+
+    Route::get('work-orders/{workOrder}', [AccountWorkOrdersController::class, 'show'])
+        ->name('account.work-orders.show')
+        ->breadcrumbs(fn (Trail $trail, WorkOrder $workOrder) =>
+            $trail->parent('account.work-orders.index')
+                ->push($workOrder->work_order_number, route('account.work-orders.show', $workOrder)));
+
 });
 
 Route::group(['middleware' => ['auth']], function () {
@@ -804,7 +926,7 @@ Route::group(['middleware' => 'web'], function () {
             'show'
         ]
     )->name('ui.files.show')
-        ->where(['object_type' => 'assets|maintenances|hardware|models|model-numbers|users|locations|accessories|consumables|licenses|components']);
+        ->where(['object_type' => 'assets|maintenances|hardware|models|model-numbers|users|locations|accessories|consumables|licenses|components|component-instances|work-orders']);
 
     // Upload files(s)
     Route::post('{object_type}/{id}/files',
@@ -813,7 +935,7 @@ Route::group(['middleware' => 'web'], function () {
             'store'
         ]
     )->name('ui.files.store')
-        ->where(['object_type' => 'assets|maintenances|hardware|models|model-numbers|users|locations|accessories|consumables|licenses|components']);
+        ->where(['object_type' => 'assets|maintenances|hardware|models|model-numbers|users|locations|accessories|consumables|licenses|components|component-instances|work-orders']);
 
     // Delete files(s)
     Route::delete('{object_type}/{id}/files/{file_id}/delete',
@@ -822,7 +944,7 @@ Route::group(['middleware' => 'web'], function () {
             'destroy'
         ]
     )->name('ui.files.destroy')
-        ->where(['object_type' => 'assets|hardware|models|model-numbers|users|locations|accessories|consumables|licenses|components']);
+        ->where(['object_type' => 'assets|hardware|models|model-numbers|users|locations|accessories|consumables|licenses|components|component-instances|work-orders']);
 });
 
 

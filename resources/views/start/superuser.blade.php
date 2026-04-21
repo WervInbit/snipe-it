@@ -27,14 +27,16 @@
                 'testid' => 'start-new-asset'
             ])
         @endcan
-        @include('start.partials.action-button', [
-            'href' => route('home'),
-            'icon' => 'sliders-h',
-            'label' => trans('general.manage_portal'),
-            'variant' => 'outline-secondary',
-            'dusk' => 'start-manage',
-            'testid' => 'start-manage'
-        ])
+        @can('viewAny', \App\Models\WorkOrder::class)
+            @include('start.partials.action-button', [
+                'href' => route('work-orders.index'),
+                'icon' => 'sliders-h',
+                'label' => trans('general.manage_portal'),
+                'variant' => 'outline-secondary',
+                'dusk' => 'start-manage',
+                'testid' => 'start-manage'
+            ])
+        @endcan
         @include('start.partials.action-button', [
             'href' => route('hardware.index'),
             'icon' => 'desktop',

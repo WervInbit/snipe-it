@@ -7,6 +7,7 @@ use App\Http\Requests\ImageUploadRequest;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Company;
+use App\Models\ComponentInstance;
 use App\Models\Location;
 use App\Models\Setting;
 use App\Models\User;
@@ -238,6 +239,7 @@ class LocationsController extends Controller
     {
         $this->authorize('view', Location::class);
 
+        $locationHierarchyIds = Location::getLocationHierarchy($location);
         $location = Location::withCount('assignedAssets as assigned_assets_count')
             ->withCount('assets as assets_count')
             ->withCount('rtd_assets as rtd_assets_count')
@@ -247,7 +249,13 @@ class LocationsController extends Controller
             ->find($location->id);
 
         if (isset($location->id)) {
-            return view('locations/view', compact('location'));
+            $componentCount = ComponentInstance::query()
+                ->whereHas('storageLocation', function ($query) use ($locationHierarchyIds): void {
+                    $query->whereIn('site_location_id', $locationHierarchyIds);
+                })
+                ->count();
+
+            return view('locations/view', compact('location', 'componentCount'));
         }
 
         return redirect()->route('locations.index')->with('error', trans('admin/locations/message.does_not_exist'));

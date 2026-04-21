@@ -5,358 +5,578 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\ComponentsTransformer;
-use App\Models\Component;
-use App\Models\Location;
-use Illuminate\Http\Request;
-use App\Http\Requests\ImageUploadRequest;
-use App\Events\CheckoutableCheckedIn;
+use App\Http\Transformers\DatatablesTransformer;
+use App\Http\Transformers\SelectlistTransformer;
 use App\Models\Asset;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Facades\Log;
+use App\Models\ComponentInstance;
+use App\Models\ComponentStorageLocation;
+use App\Models\Location;
+use App\Services\ComponentLifecycleService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class ComponentsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
-     *
-     */
-    public function index(Request $request) : JsonResponse | array
+    public function __construct(
+        protected ComponentLifecycleService $lifecycle,
+    ) {
+    }
+
+    public function index(Request $request): JsonResponse|array
     {
-        $this->authorize('view', Component::class);
+        $this->authorize('view', ComponentInstance::class);
 
-        // This array is what determines which fields should be allowed to be sorted on ON the table itself, no relations
-        // Relations will be handled in query scopes a little further down.
-        $allowed_columns = 
-            [
-                'id',
-                'name',
-                'min_amt',
-                'order_number',
-                'model_number',
-                'serial',
-                'purchase_date',
-                'purchase_cost',
-                'qty',
-                'image',
-                'notes',
-            ];
+        $allowedColumns = [
+            'id',
+            'component_tag',
+            'display_name',
+            'serial',
+            'status',
+            'condition_code',
+            'source_type',
+            'installed_as',
+            'received_at',
+            'created_at',
+            'updated_at',
+        ];
 
-        $components = Component::select('components.*')
-            ->with('company', 'location', 'category', 'assets', 'supplier', 'adminuser', 'manufacturer', 'uncontrainedAssets')
-            ->withSum('uncontrainedAssets', 'components_assets.assigned_qty');
+        $components = ComponentInstance::query()
+            ->with([
+                'componentDefinition.category',
+                'componentDefinition.manufacturer',
+                'company',
+                'sourceAsset.model',
+                'currentAsset.model',
+                'storageLocation.siteLocation',
+                'heldBy',
+                'supplier',
+                'createdBy',
+            ]);
 
-        if ($request->filled('search')) {
-            $components = $components->TextSearch($request->input('search'));
-        }
-
-        if ($request->filled('name')) {
-            $components->where('name', '=', $request->input('name'));
-        }
-
-        if ($request->filled('company_id')) {
-            $components->where('components.company_id', '=', $request->input('company_id'));
-        }
-
-        if ($request->filled('category_id')) {
-            $components->where('category_id', '=', $request->input('category_id'));
-        }
-
-        if ($request->filled('supplier_id')) {
-            $components->where('supplier_id', '=', $request->input('supplier_id'));
-        }
-
-        if ($request->filled('manufacturer_id')) {
-            $components->where('manufacturer_id', '=', $request->input('manufacturer_id'));
-        }
-
-        if ($request->filled('model_number')) {
-            $components->where('model_number', '=', $request->input('model_number'));
-        }
-
-        if ($request->filled('location_id')) {
-            $ids = Location::getLocationHierarchy($request->input('location_id'));
-            $components->whereIn('location_id', $ids);
-        }
-
-        if ($request->filled('notes')) {
-            $components->where('notes','=',$request->input('notes'));
-        }
+        $this->applyFilters($components, $request);
 
         $limit = app('api_limit_value');
-
         $order = $request->input('order') === 'asc' ? 'asc' : 'desc';
-        $sort_override =  $request->input('sort');
-        $column_sort = in_array($sort_override, $allowed_columns) ? $sort_override : 'created_at';
+        $sort = in_array($request->input('sort'), $allowedColumns, true)
+            ? $request->input('sort')
+            : 'updated_at';
 
-        switch ($sort_override) {
-            case 'category':
-                $components = $components->OrderCategory($order);
-                break;
-            case 'location':
-                $components = $components->OrderLocation($order);
-                break;
-            case 'company':
-                $components = $components->OrderCompany($order);
-                break;
-            case 'supplier':
-                $components = $components->OrderSupplier($order);
-                break;
-            case 'manufacturer':
-                $components = $components->OrderManufacturer($order);
-                break;
-            case 'created_by':
-                $components = $components->OrderByCreatedBy($order);
-                break;
-            default:
-                $components = $components->orderBy($column_sort, $order);
-                break;
-        }
+        $components->orderBy($sort, $order);
 
         $total = $components->count();
         $offset = $this->resolveOffset($request, $total, $limit);
         $components = $components->skip($offset)->take($limit)->get();
 
-        return (new ComponentsTransformer)->transformComponents($components, $total);
+        return (new ComponentsTransformer())->transformComponents($components, $total);
     }
 
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
-     * @param  \App\Http\Requests\ImageUploadRequest  $request
-     */
-    public function store(ImageUploadRequest $request) : JsonResponse
+    public function store(Request $request): JsonResponse
     {
-        $this->authorize('create', Component::class);
-        $component = new Component;
-        $component->fill($request->all());
-        $component = $request->handleImages($component);
+        $this->authorize('create', ComponentInstance::class);
 
-        if ($component->save()) {
-            return response()->json(Helper::formatStandardApiResponse('success', $component, trans('admin/components/message.create.success')));
+        $validator = Validator::make($request->all(), $this->rules());
+
+        if ($validator->fails()) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
         }
 
-        return response()->json(Helper::formatStandardApiResponse('error', null, $component->getErrors()));
+        $component = $this->lifecycle->createInstance($this->payloadFromRequest($request), $request->user());
+
+        return response()->json(Helper::formatStandardApiResponse(
+            'success',
+            (new ComponentsTransformer())->transformComponent($component->fresh($this->showRelations())),
+            'Component created.'
+        ));
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @param  int  $id
-     */
-    public function show($id) : array
+    public function show(ComponentInstance $component_id): array
     {
-        $this->authorize('view', Component::class);
-        $component = Component::findOrFail($id);
+        $this->authorize('view', $component_id);
 
-        if ($component) {
-            return (new ComponentsTransformer)->transformComponent($component);
-        }
+        return (new ComponentsTransformer())->transformComponent(
+            $component_id->load($this->showRelations())
+        );
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
-     * @param   \App\Http\Requests\ImageUploadRequest  $request
-     * @param  int  $id
-     */
-    public function update(ImageUploadRequest $request, $id) : JsonResponse
+    public function update(Request $request, ComponentInstance $component_id): JsonResponse
     {
-        $this->authorize('update', Component::class);
-        $component = Component::findOrFail($id);
-        $component->fill($request->all());
-        $component = $request->handleImages($component);
-        
+        $this->authorize('update', $component_id);
 
-        if ($component->save()) {
-            return response()->json(Helper::formatStandardApiResponse('success', $component, trans('admin/components/message.update.success')));
+        $validator = Validator::make($request->all(), $this->rules($component_id));
+
+        if ($validator->fails()) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
         }
 
-        return response()->json(Helper::formatStandardApiResponse('error', null, $component->getErrors()));
+        $component_id->fill($this->payloadFromRequest($request, true));
+        $component_id->updated_by = $request->user()?->id;
+        $component_id->save();
+
+        return response()->json(Helper::formatStandardApiResponse(
+            'success',
+            (new ComponentsTransformer())->transformComponent($component_id->fresh($this->showRelations())),
+            'Component updated.'
+        ));
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.0]
-     * @param  int  $id
-     */
-    public function destroy($id) : JsonResponse
+    public function destroy(ComponentInstance $component_id): JsonResponse
     {
-        $this->authorize('delete', Component::class);
-        $component = Component::findOrFail($id);
-        $this->authorize('delete', $component);
+        $this->authorize('delete', $component_id);
 
-        if ($component->numCheckedOut() > 0) {
-            return response()->json(Helper::formatStandardApiResponse('error', null,  trans('admin/components/message.delete.error_qty')));
+        if ($component_id->status === ComponentInstance::STATUS_INSTALLED) {
+            return response()->json(Helper::formatStandardApiResponse(
+                'error',
+                null,
+                'Installed components must be removed before deletion.'
+            ), 422);
         }
 
-        $component->delete();
+        $component_id->delete();
 
-        return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/components/message.delete.success')));
+        return response()->json(Helper::formatStandardApiResponse('success', null, 'Component deleted.'));
     }
 
-    /**
-     * Display all assets attached to a component
-     *
-     * @author [A. Bergamasco] [@vjandrea]
-     * @since [v4.0]
-     * @param Request $request
-     * @param int $id
-    */
-    public function getAssets(Request $request, $id) : array
+    public function removeToTray(Request $request, ComponentInstance $component_id): JsonResponse
     {
-        $this->authorize('view', \App\Models\Asset::class);
-        
-        $component = Component::findOrFail($id);
-        
-        $offset = request('offset', 0);
-        $limit = $request->input('limit', 50);
-        
-        if ($request->filled('search')) {
-            $assets = $component->assets()
-                                ->where(function ($query) use ($request) {
-                                    $search_str = '%' . $request->input('search') . '%';
-                                    $query->where('name', 'like', $search_str)
-                                            ->orWhereIn('model_id', function (Builder $query) use ($request) {
-                                                $search_str = '%' . $request->input('search') . '%';
-                                                $query->selectRaw('id')->from('models')->where('name', 'like', $search_str);
-                                            })
-                                            ->orWhere('asset_tag', 'like', $search_str);
-                                         })
-                                         ->get();
-            $total = $assets->count();
-        } else {
-            $assets = $component->assets();
-            
-            $total = $assets->count();
-            $assets = $assets->skip($offset)->take($limit)->get();
-        }
-
-        return (new ComponentsTransformer)->transformCheckedoutComponents($assets, $total);
-    }
-
-
-    /**
-     * Validate and checkout the component.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * t
-     * @since [v5.1.8]
-     * @param Request $request
-     * @param int $componentId
-     */
-    public function checkout(Request $request, $componentId) : JsonResponse
-    {
-        // Check if the component exists
-        if (!$component = Component::find($componentId)) {
-            return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/components/message.does_not_exist')));
-        }
-
-        $this->authorize('checkout', $component);
+        $this->authorize('move', $component_id);
 
         $validator = Validator::make($request->all(), [
-            'assigned_to'          => 'required|exists:assets,id',
-            'assigned_qty'      => "required|numeric|min:1|digits_between:1,".$component->numRemaining(),
+            'held_by_user_id' => ['nullable', 'integer', 'exists:users,id'],
+            'note' => ['nullable', 'string'],
+            'related_work_order_id' => ['nullable', 'integer', 'exists:work_orders,id'],
+            'related_work_order_task_id' => ['nullable', 'integer', 'exists:work_order_tasks,id'],
         ]);
 
         if ($validator->fails()) {
-            return response()->json(Helper::formatStandardApiResponse('error', $validator->errors()));
-
+            return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
         }
 
-        // Make sure there is at least one available to checkout
-        if ($component->numRemaining() < $request->get('assigned_qty')) {
-            return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/components/message.checkout.unavailable', ['remaining' => $component->numRemaining(), 'requested' => $request->get('assigned_qty')])));
-        }
+        $component = $this->lifecycle->removeToTray(
+            $component_id,
+            $request->input('held_by_user_id', $request->user()->id),
+            $request->only(['note', 'related_work_order_id', 'related_work_order_task_id'])
+        );
 
-        if ($component->numRemaining() >= $request->get('assigned_qty')) {
-
-            $asset = Asset::find($request->input('assigned_to'));
-            $component->assigned_to = $request->input('assigned_to');
-
-            $component->assets()->attach($component->id, [
-                'component_id' => $component->id,
-                'created_at' => Carbon::now(),
-                'assigned_qty' => $request->get('assigned_qty', 1),
-                'created_by' => auth()->id(),
-                'asset_id' => $request->get('assigned_to'),
-                'note' => $request->get('note'),
-            ]);
-
-            $component->logCheckout($request->input('note'), $asset);
-
-            return response()->json(Helper::formatStandardApiResponse('success', null,  trans('admin/components/message.checkout.success')));
-        }
-
-        return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/components/message.checkout.unavailable', ['remaining' => $component->numRemaining(), 'requested' => $request->get('assigned_qty')])));
+        return response()->json(Helper::formatStandardApiResponse(
+            'success',
+            (new ComponentsTransformer())->transformComponent($component->fresh($this->showRelations())),
+            'Component moved to tray.'
+        ));
     }
 
-    /**
-     * Validate and store checkin data.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v5.1.8]
-     * @param Request $request
-     * @param $component_asset_id
-     */
-    public function checkin(Request $request, $component_asset_id) : JsonResponse
+    public function install(Request $request, ComponentInstance $component_id): JsonResponse
     {
-        if ($component_assets = DB::table('components_assets')->find($component_asset_id)) {
-            if (is_null($component = Component::find($component_assets->component_id))) {
-                return response()->json(Helper::formatStandardApiResponse('error', null, trans('admin/components/message.not_found')));
-            }
+        $this->authorize('install', $component_id);
 
-            $this->authorize('checkin', $component);
+        $validator = Validator::make($request->all(), [
+            'asset_id' => ['required', 'integer', 'exists:assets,id'],
+            'installed_as' => ['nullable', 'string', 'max:255'],
+            'note' => ['nullable', 'string'],
+            'related_work_order_id' => ['nullable', 'integer', 'exists:work_orders,id'],
+            'related_work_order_task_id' => ['nullable', 'integer', 'exists:work_order_tasks,id'],
+        ]);
 
-            $max_to_checkin = $component_assets->assigned_qty;
-
-            $validator = Validator::make($request->all(), [
-                "checkin_qty" => "required|numeric|between:1,$max_to_checkin"
-            ]);
-
-            if ($validator->fails()) {
-                return response()->json(Helper::formatStandardApiResponse('error', null, 'Checkin quantity must be between 1 and ' . $max_to_checkin));
-            }
-
-            // Validation passed, so let's figure out what we have to do here.
-            $qty_remaining_in_checkout = ($component_assets->assigned_qty - (int)$request->input('checkin_qty', 1));
-
-            // We have to modify the record to reflect the new qty that's
-            // actually checked out.
-            $component_assets->assigned_qty = $qty_remaining_in_checkout;
-
-            Log::debug($component_asset_id.' - '.$qty_remaining_in_checkout.' remaining in record '.$component_assets->id);
-
-            DB::table('components_assets')->where('id', $component_asset_id)->update(['assigned_qty' => $qty_remaining_in_checkout]);
-
-            // If the checked-in qty is exactly the same as the assigned_qty,
-            // we can simply delete the associated components_assets record
-            if ($qty_remaining_in_checkout === 0) {
-                DB::table('components_assets')->where('id', '=', $component_asset_id)->delete();
-            }
-
-            $asset = Asset::find($component_assets->asset_id);
-
-            event(new CheckoutableCheckedIn($component, $asset, auth()->user(), $request->input('note'), Carbon::now()));
-
-            return response()->json(Helper::formatStandardApiResponse('success', null,  trans('admin/components/message.checkin.success')));
+        if ($validator->fails()) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
         }
 
-        return response()->json(Helper::formatStandardApiResponse('error', null, 'No matching checkouts for that component join record'));
+        $asset = Asset::findOrFail($request->input('asset_id'));
+        $component = $this->lifecycle->installIntoAsset($component_id, $asset, [
+            'performed_by' => $request->user(),
+            'installed_as' => $request->input('installed_as'),
+            'note' => $request->input('note'),
+            'related_work_order_id' => $request->input('related_work_order_id'),
+            'related_work_order_task_id' => $request->input('related_work_order_task_id'),
+        ]);
+
+        return response()->json(Helper::formatStandardApiResponse(
+            'success',
+            (new ComponentsTransformer())->transformComponent($component->fresh($this->showRelations())),
+            'Component installed.'
+        ));
     }
 
+    public function moveToStock(Request $request, ComponentInstance $component_id): JsonResponse
+    {
+        $this->authorize('move', $component_id);
+
+        $validator = Validator::make($request->all(), [
+            'storage_location_id' => ['required', 'integer', 'exists:component_storage_locations,id'],
+            'needs_verification' => ['nullable', 'boolean'],
+            'verification_location_id' => ['nullable', 'integer', 'exists:component_storage_locations,id'],
+            'note' => ['nullable', 'string'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
+        }
+
+        $location = ComponentStorageLocation::findOrFail($request->input('storage_location_id'));
+        $verificationLocation = $request->filled('verification_location_id')
+            ? ComponentStorageLocation::findOrFail($request->input('verification_location_id'))
+            : $location;
+
+        $component = $this->lifecycle->moveToStock($component_id, $location, [
+            'performed_by' => $request->user(),
+            'needs_verification' => $request->boolean('needs_verification'),
+            'storage_location' => $verificationLocation,
+            'note' => $request->input('note'),
+        ]);
+
+        return response()->json(Helper::formatStandardApiResponse(
+            'success',
+            (new ComponentsTransformer())->transformComponent($component->fresh($this->showRelations())),
+            'Component moved.'
+        ));
+    }
+
+    public function flagNeedsVerification(Request $request, ComponentInstance $component_id): JsonResponse
+    {
+        $this->authorize('verify', $component_id);
+
+        $validator = Validator::make($request->all(), [
+            'storage_location_id' => ['nullable', 'integer', 'exists:component_storage_locations,id'],
+            'note' => ['nullable', 'string'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
+        }
+
+        $location = $request->filled('storage_location_id')
+            ? ComponentStorageLocation::findOrFail($request->input('storage_location_id'))
+            : $component_id->storageLocation;
+
+        $component = $this->lifecycle->flagNeedsVerification($component_id, [
+            'performed_by' => $request->user(),
+            'storage_location' => $location,
+            'note' => $request->input('note'),
+        ]);
+
+        return response()->json(Helper::formatStandardApiResponse(
+            'success',
+            (new ComponentsTransformer())->transformComponent($component->fresh($this->showRelations())),
+            'Verification required.'
+        ));
+    }
+
+    public function confirmVerification(Request $request, ComponentInstance $component_id): JsonResponse
+    {
+        $this->authorize('verify', $component_id);
+
+        $validator = Validator::make($request->all(), [
+            'storage_location_id' => ['required', 'integer', 'exists:component_storage_locations,id'],
+            'note' => ['nullable', 'string'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
+        }
+
+        $location = ComponentStorageLocation::findOrFail($request->input('storage_location_id'));
+        $component = $this->lifecycle->confirmVerification($component_id, $location, [
+            'performed_by' => $request->user(),
+            'note' => $request->input('note'),
+        ]);
+
+        return response()->json(Helper::formatStandardApiResponse(
+            'success',
+            (new ComponentsTransformer())->transformComponent($component->fresh($this->showRelations())),
+            'Verification confirmed.'
+        ));
+    }
+
+    public function markDestructionPending(Request $request, ComponentInstance $component_id): JsonResponse
+    {
+        $this->authorize('move', $component_id);
+
+        $validator = Validator::make($request->all(), [
+            'storage_location_id' => ['nullable', 'integer', 'exists:component_storage_locations,id'],
+            'note' => ['nullable', 'string'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
+        }
+
+        $location = $request->filled('storage_location_id')
+            ? ComponentStorageLocation::findOrFail($request->input('storage_location_id'))
+            : null;
+
+        $component = $this->lifecycle->markDestructionPending($component_id, $location, [
+            'performed_by' => $request->user(),
+            'note' => $request->input('note'),
+        ]);
+
+        return response()->json(Helper::formatStandardApiResponse(
+            'success',
+            (new ComponentsTransformer())->transformComponent($component->fresh($this->showRelations())),
+            'Component marked for destruction.'
+        ));
+    }
+
+    public function markDestroyed(Request $request, ComponentInstance $component_id): JsonResponse
+    {
+        $this->authorize('move', $component_id);
+
+        $validator = Validator::make($request->all(), [
+            'note' => ['nullable', 'string'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
+        }
+
+        $component = $this->lifecycle->markDestroyed($component_id, [
+            'performed_by' => $request->user(),
+            'note' => $request->input('note'),
+        ]);
+
+        return response()->json(Helper::formatStandardApiResponse(
+            'success',
+            (new ComponentsTransformer())->transformComponent($component->fresh($this->showRelations())),
+            'Component destroyed.'
+        ));
+    }
+
+    public function getAssets(Request $request, ComponentInstance $component_id): array
+    {
+        $this->authorize('view', $component_id);
+
+        $events = $component_id->events()
+            ->with(['fromAsset.model', 'toAsset.model', 'performedBy'])
+            ->where(function ($query) {
+                $query->whereNotNull('from_asset_id')->orWhereNotNull('to_asset_id');
+            })
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($event) {
+                return [
+                    'id' => $event->id,
+                    'event_type' => $event->event_type,
+                    'from_asset' => $event->fromAsset ? [
+                        'id' => (int) $event->fromAsset->id,
+                        'name' => e($event->fromAsset->present()->name()),
+                    ] : null,
+                    'to_asset' => $event->toAsset ? [
+                        'id' => (int) $event->toAsset->id,
+                        'name' => e($event->toAsset->present()->name()),
+                    ] : null,
+                    'performed_by' => $event->performedBy ? [
+                        'id' => (int) $event->performedBy->id,
+                        'name' => e($event->performedBy->present()->fullName()),
+                    ] : null,
+                    'note' => $event->note,
+                    'created_at' => Helper::getFormattedDateObject($event->created_at, 'datetime'),
+                ];
+            });
+
+        return (new DatatablesTransformer())->transformDatatables($events->all(), $events->count());
+    }
+
+    public function selectlist(Request $request): array
+    {
+        $this->authorize('view', ComponentInstance::class);
+
+        $components = ComponentInstance::query()
+            ->select([
+                'component_instances.id',
+                'component_instances.component_tag',
+                'component_instances.display_name',
+                'component_instances.serial',
+                'component_instances.status',
+            ]);
+
+        if ($request->filled('search')) {
+            $search = '%'.$request->get('search').'%';
+            $components->where(function ($query) use ($search): void {
+                $query->where('component_tag', 'LIKE', $search)
+                    ->orWhere('display_name', 'LIKE', $search)
+                    ->orWhere('serial', 'LIKE', $search);
+            });
+        }
+
+        $components = $components->orderBy('component_tag')->paginate(50);
+        $components->setCollection($components->getCollection()->map(function (ComponentInstance $component) {
+            $component->use_text = trim($component->component_tag.' '.$component->display_name);
+            $component->selectlist_meta = [
+                'status' => $component->status,
+                'serial' => $component->serial,
+            ];
+
+            return $component;
+        }));
+
+        return (new SelectlistTransformer())->transformSelectlist($components);
+    }
+
+    protected function rules(?ComponentInstance $component = null): array
+    {
+        $ignoreId = $component?->id;
+
+        return [
+            'component_definition_id' => ['nullable', 'integer', 'exists:component_definitions,id'],
+            'company_id' => ['nullable', 'integer', 'exists:companies,id'],
+            'component_tag' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::unique('component_instances', 'component_tag')->ignore($ignoreId),
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if ($value && Asset::withTrashed()->where('asset_tag', $value)->exists()) {
+                        $fail('Component tags must be globally unique and cannot overlap with asset tags.');
+                    }
+                },
+            ],
+            'display_name' => ['required_without:component_definition_id', 'nullable', 'string', 'max:255'],
+            'serial' => ['nullable', 'string', 'max:255'],
+            'status' => ['nullable', Rule::in(config('components.statuses', []))],
+            'condition_code' => ['nullable', Rule::in([
+                ComponentInstance::CONDITION_UNKNOWN,
+                ComponentInstance::CONDITION_GOOD,
+                ComponentInstance::CONDITION_FAIR,
+                ComponentInstance::CONDITION_POOR,
+                ComponentInstance::CONDITION_BROKEN,
+            ])],
+            'source_type' => ['nullable', Rule::in([
+                ComponentInstance::SOURCE_EXTRACTED,
+                ComponentInstance::SOURCE_PURCHASED,
+                ComponentInstance::SOURCE_EXTERNAL_INTAKE,
+                ComponentInstance::SOURCE_MANUAL,
+            ])],
+            'source_asset_id' => ['nullable', 'integer', 'exists:assets,id'],
+            'current_asset_id' => ['nullable', 'integer', 'exists:assets,id'],
+            'storage_location_id' => ['nullable', 'integer', 'exists:component_storage_locations,id'],
+            'held_by_user_id' => ['nullable', 'integer', 'exists:users,id'],
+            'installed_as' => ['nullable', 'string', 'max:255'],
+            'supplier_id' => ['nullable', 'integer', 'exists:suppliers,id'],
+            'purchase_cost' => ['nullable', 'numeric', 'gte:0'],
+            'received_at' => ['nullable', 'date'],
+            'metadata_json' => ['nullable', 'array'],
+            'notes' => ['nullable', 'string'],
+        ];
+    }
+
+    protected function payloadFromRequest(Request $request, bool $forUpdate = false): array
+    {
+        $payload = $request->only([
+            'component_definition_id',
+            'company_id',
+            'component_tag',
+            'display_name',
+            'serial',
+            'status',
+            'condition_code',
+            'source_type',
+            'source_asset_id',
+            'current_asset_id',
+            'storage_location_id',
+            'held_by_user_id',
+            'installed_as',
+            'supplier_id',
+            'purchase_cost',
+            'received_at',
+            'metadata_json',
+            'notes',
+        ]);
+
+        if (!$forUpdate) {
+            $payload['status'] = $payload['status'] ?? ComponentInstance::STATUS_IN_STOCK;
+            $payload['condition_code'] = $payload['condition_code'] ?? ComponentInstance::CONDITION_UNKNOWN;
+            $payload['source_type'] = $payload['source_type'] ?? ComponentInstance::SOURCE_MANUAL;
+        }
+
+        return $payload;
+    }
+
+    protected function applyFilters($query, Request $request): void
+    {
+        if ($request->filled('search')) {
+            $search = '%'.$request->input('search').'%';
+            $query->where(function ($searchQuery) use ($search): void {
+                $searchQuery->where('component_tag', 'LIKE', $search)
+                    ->orWhere('display_name', 'LIKE', $search)
+                    ->orWhere('serial', 'LIKE', $search)
+                    ->orWhere('installed_as', 'LIKE', $search)
+                    ->orWhereHas('componentDefinition', function ($definitionQuery) use ($search): void {
+                        $definitionQuery->where('name', 'LIKE', $search)
+                            ->orWhere('part_code', 'LIKE', $search)
+                            ->orWhere('model_number', 'LIKE', $search);
+                    })
+                    ->orWhereHas('sourceAsset', function ($assetQuery) use ($search): void {
+                        $assetQuery->where('asset_tag', 'LIKE', $search)
+                            ->orWhere('name', 'LIKE', $search)
+                            ->orWhere('serial', 'LIKE', $search);
+                    })
+                    ->orWhereHas('currentAsset', function ($assetQuery) use ($search): void {
+                        $assetQuery->where('asset_tag', 'LIKE', $search)
+                            ->orWhere('name', 'LIKE', $search)
+                            ->orWhere('serial', 'LIKE', $search);
+                    });
+            });
+        }
+
+        foreach (['status', 'source_type', 'company_id', 'source_asset_id', 'current_asset_id', 'held_by_user_id', 'storage_location_id'] as $filter) {
+            if ($request->filled($filter)) {
+                $query->where($filter, $request->input($filter));
+            }
+        }
+
+        if ($request->filled('component_definition_id')) {
+            $query->where('component_definition_id', $request->input('component_definition_id'));
+        }
+
+        if ($request->filled('supplier_id')) {
+            $query->where('supplier_id', $request->input('supplier_id'));
+        }
+
+        if ($request->filled('manufacturer_id')) {
+            $query->whereHas('componentDefinition', function ($definitionQuery) use ($request): void {
+                $definitionQuery->where('manufacturer_id', $request->input('manufacturer_id'));
+            });
+        }
+
+        if ($request->filled('location_id')) {
+            $locationIds = Location::getLocationHierarchy((int) $request->input('location_id'));
+            $query->whereHas('storageLocation', function ($locationQuery) use ($locationIds): void {
+                $locationQuery->whereIn('site_location_id', $locationIds);
+            });
+        }
+
+        if ($request->filled('category_id')) {
+            $query->whereHas('componentDefinition', function ($definitionQuery) use ($request): void {
+                $definitionQuery->where('category_id', $request->input('category_id'));
+            });
+        }
+
+        if ($request->boolean('needs_verification')) {
+            $query->where('status', ComponentInstance::STATUS_NEEDS_VERIFICATION);
+        }
+    }
+
+    protected function showRelations(): array
+    {
+        return [
+            'componentDefinition.category',
+            'componentDefinition.manufacturer',
+            'company',
+            'sourceAsset.model',
+            'currentAsset.model',
+            'storageLocation.siteLocation',
+            'heldBy',
+            'supplier',
+            'createdBy',
+            'updatedBy',
+            'events.performedBy',
+            'events.fromAsset.model',
+            'events.toAsset.model',
+            'events.fromStorageLocation',
+            'events.toStorageLocation',
+            'events.relatedWorkOrder',
+            'events.relatedWorkOrderTask',
+            'uploads.adminuser',
+        ];
+    }
 }

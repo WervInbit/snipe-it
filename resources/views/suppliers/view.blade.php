@@ -65,17 +65,19 @@
             </a>
           </li>
 
-            <li>
-                <a href="#components" data-toggle="tab">
-                    <span class="hidden-lg hidden-md">
-                        <x-icon type="components" class="fa-2x" />
-                    </span>
-                    <span class="hidden-xs hidden-sm">
-                          {{ trans('general.components') }}
-                        {!! ($supplier->components->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($supplier->components->count()).'</span>' : '' !!}
-                    </span>
-                </a>
-            </li>
+            @can('view', \App\Models\ComponentInstance::class)
+                <li>
+                    <a href="#components" data-toggle="tab">
+                        <span class="hidden-lg hidden-md">
+                            <x-icon type="components" class="fa-2x" />
+                        </span>
+                        <span class="hidden-xs hidden-sm">
+                              {{ trans('general.components') }}
+                            {!! ($supplier->componentInstances()->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($supplier->componentInstances()->count()).'</span>' : '' !!}
+                        </span>
+                    </a>
+                </li>
+            @endcan
 
             <li>
                 <a href="#consumables" data-toggle="tab">
@@ -178,25 +180,27 @@
             </div><!-- /.table-responsive -->
           </div><!-- /.tab-pane -->
 
-            <div class="tab-pane" id="components">
-                <h2 class="box-title">{{ trans('general.components') }}</h2>
-                <div class="table table-responsive">
-                    <table
-                            data-columns="{{ \App\Presenters\ComponentPresenter::dataTableLayout() }}"
-                            data-cookie-id-table="componentsListingTable"
-                            data-id-table="componentsListingTable"
-                            data-side-pagination="server"
-                            data-sort-order="asc"
-                            id="accessoriesListingTable"
-                            class="table table-striped snipe-table"
-                            data-url="{{route('api.components.index', ['supplier_id' => $supplier->id]) }}"
-                            data-export-options='{
-                              "fileName": "export-suppliers-{{ str_slug($supplier->name) }}-components-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
-                    </table>
-                </div><!-- /.table-responsive -->
-            </div><!-- /.tab-pane -->
+            @can('view', \App\Models\ComponentInstance::class)
+                <div class="tab-pane" id="components">
+                    <h2 class="box-title">{{ trans('general.components') }}</h2>
+                    <div class="table table-responsive">
+                        <table
+                                data-columns="{{ \App\Presenters\ComponentPresenter::dataTableLayout() }}"
+                                data-cookie-id-table="componentsListingTable"
+                                data-id-table="componentsListingTable"
+                                data-side-pagination="server"
+                                data-sort-order="asc"
+                                id="accessoriesListingTable"
+                                class="table table-striped snipe-table"
+                                data-url="{{route('api.components.index', ['supplier_id' => $supplier->id]) }}"
+                                data-export-options='{
+                                  "fileName": "export-suppliers-{{ str_slug($supplier->name) }}-components-{{ date('Y-m-d') }}",
+                                  "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                                  }'>
+                        </table>
+                    </div><!-- /.table-responsive -->
+                </div><!-- /.tab-pane -->
+            @endcan
 
             <div class="tab-pane" id="consumables">
             <h2 class="box-title">{{ trans('general.consumables') }}</h2>

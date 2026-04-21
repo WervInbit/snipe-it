@@ -1750,23 +1750,9 @@
     });
     @endcan
 
-    @can('create', \App\Models\Component::class)
+    @can('create', \App\Models\ComponentInstance::class)
     // Compoment table buttons
-    window.componentButtons = () => ({
-        btnAdd: {
-            text: '{{ trans('general.create') }}',
-            icon: 'fa fa-plus',
-            event () {
-                window.location.href = '{{ route('components.create') }}';
-            },
-            attributes: {
-                title: '{{ trans('general.create') }}',
-                @if ($snipeSettings->shortcuts_enabled == 1)
-                accesskey: 'n'
-                @endif
-            }
-        },
-    });
+    window.componentButtons = () => ({});
     @endcan
 
     @can('create', \App\Models\Consumable::class)
@@ -1838,7 +1824,7 @@
     });
     @endcan
 
-    @can('create', \App\Models\Component::class)
+    @can('create', \App\Models\License::class)
     // License table buttons
     window.licenseButtons = () => ({
         btnAdd: {

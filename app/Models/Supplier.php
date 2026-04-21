@@ -116,6 +116,11 @@ class Supplier extends SnipeModel
         return $this->hasMany(\App\Models\Component::class, 'supplier_id');
     }
 
+    public function componentInstances()
+    {
+        return $this->hasMany(ComponentInstance::class, 'supplier_id');
+    }
+
     /**
      * Establishes the supplier -> component relationship
      *

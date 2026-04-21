@@ -444,14 +444,14 @@
                     </li>
                     @endcan
 
-                    @can('view', \App\Models\Component::class)
+                    @can('view', \App\Models\ComponentInstance::class)
                     <li>
                         <a href="#components" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
                             <x-icon type="components" class="fa-2x" />
                           </span>
                             <span class="hidden-xs hidden-sm">{{ trans('general.components') }}
-                                {!! ($asset->components->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($asset->components->count()).'</span>' : '' !!}
+                                {!! (($asset->trackedComponents->count() + ($asset->modelNumber?->componentTemplates->count() ?? 0)) > 0) ? '<span class="badge badge-secondary">'.number_format($asset->trackedComponents->count() + ($asset->modelNumber?->componentTemplates->count() ?? 0)).'</span>' : '' !!}
                           </span>
                         </a>
                     </li>
@@ -1216,7 +1216,7 @@
                                             </div>
                                         </div>
                                     @endif
-                                    @if(($asset->components->count() > 0) && ($asset->purchase_cost))
+                                    @if(($asset->trackedComponents->count() > 0) && ($asset->purchase_cost))
                                         <div class="row">
                                             <div class="col-md-3">
                                                 <strong>
@@ -1231,7 +1231,7 @@
                                                 @else
                                                     {{ $snipeSettings->default_currency }}
                                                 @endif
-                                                {{Helper::formatCurrencyOutput($asset->getComponentCost())}}
+                                                {{ Helper::formatCurrencyOutput($asset->trackedComponents->sum('purchase_cost')) }}
                                             </div>
                                         </div>
                                     @endif
@@ -1608,59 +1608,8 @@
                     </div> <!-- /.tab-pane software -->
                     @endcan
 
-                    @can('view', \App\Models\Component::class)
-                    <div class="tab-pane fade" id="components">
-                        <!-- checked out assets table -->
-                        <div class="row{{($asset->components->count() > 0 ) ? '' : ' hidden-print'}}">
-                            <div class="col-md-12">
-
-                                    <table class="table table-striped">
-                                        <thead>
-                                        <th>{{ trans('general.name') }}</th>
-                                        <th>{{ trans('general.qty') }}</th>
-                                        <th>{{ trans('general.purchase_cost') }}</th>
-                                        <th>{{trans('admin/hardware/form.serial')}}</th>
-                                        <th>{{trans('general.checkin')}}</th>
-                                        <th></th>
-                                        </thead>
-                                        <tbody>
-                                            <?php $totalCost = 0; ?>
-                                        @foreach ($asset->components as $component)
-
-
-                                            @if (is_null($component->deleted_at))
-                                                <tr>
-                                                    <td>
-                                                        <a href="{{ route('components.show', $component->id) }}">{{ $component->name }}</a>
-                                                    </td>
-                                                    <td>{{ $component->pivot->assigned_qty }}</td>
-                                                    <td>
-                                                        @if ($component->purchase_cost!='')
-                                                            {{ trans('general.cost_each', ['amount' => Helper::formatCurrencyOutput($component->purchase_cost)])  }}
-                                                        @endif
-                                                    </td>
-                                                    <td>{{ $component->serial }}</td>
-                                                    <td>
-                                                        <a href="{{ route('components.checkin.show', $component->pivot->id) }}" class="btn btn-sm bg-purple hidden-print" data-tooltip="true">{{ trans('general.checkin') }}</a>
-                                                    </td>
-
-                                                        <?php $totalCost = $totalCost + ($component->purchase_cost *$component->pivot->assigned_qty) ?>
-                                                </tr>
-                                            @endif
-                                        @endforeach
-                                        </tbody>
-
-                                        <tfoot>
-                                        <tr>
-                                            <td colspan="2">
-                                            </td>
-                                            <td>{{ $totalCost }}</td>
-                                        </tr>
-                                        </tfoot>
-                                    </table>
-                            </div>
-                        </div>
-                    </div> <!-- /.tab-pane components -->
+                    @can('view', \App\Models\ComponentInstance::class)
+                        @include('components.partials.asset-tab')
                     @endcan
 
                     @can('view', \App\Models\Asset::class)

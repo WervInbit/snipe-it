@@ -8,6 +8,9 @@ use App\Models\AssetModel;
 use App\Models\Category;
 use App\Models\Company;
 use App\Models\Component;
+use App\Models\ComponentDefinition;
+use App\Models\ComponentInstance;
+use App\Models\ComponentStorageLocation;
 use App\Models\Consumable;
 use App\Models\CustomField;
 use App\Models\CustomFieldset;
@@ -22,12 +25,16 @@ use App\Models\Supplier;
 use App\Models\User;
 use App\Models\TestRun;
 use App\Models\TestType;
+use App\Models\WorkOrder;
 use App\Policies\AccessoryPolicy;
 use App\Policies\AssetModelPolicy;
 use App\Policies\AssetPolicy;
 use App\Policies\CategoryPolicy;
 use App\Policies\CompanyPolicy;
 use App\Policies\ComponentPolicy;
+use App\Policies\ComponentDefinitionPolicy;
+use App\Policies\ComponentInstancePolicy;
+use App\Policies\ComponentStorageLocationPolicy;
 use App\Policies\ConsumablePolicy;
 use App\Policies\CustomFieldPolicy;
 use App\Policies\CustomFieldsetPolicy;
@@ -42,6 +49,7 @@ use App\Policies\SupplierPolicy;
 use App\Policies\UserPolicy;
 use App\Policies\TestRunPolicy;
 use App\Policies\TestTypePolicy;
+use App\Policies\WorkOrderPolicy;
 use App\Models\AttributeDefinition;
 use App\Policies\AttributeDefinitionPolicy;
 use Carbon\Carbon;
@@ -64,6 +72,9 @@ class AuthServiceProvider extends ServiceProvider
         AssetModel::class => AssetModelPolicy::class,
         Category::class => CategoryPolicy::class,
         Component::class => ComponentPolicy::class,
+        ComponentDefinition::class => ComponentDefinitionPolicy::class,
+        ComponentInstance::class => ComponentInstancePolicy::class,
+        ComponentStorageLocation::class => ComponentStorageLocationPolicy::class,
         Consumable::class => ConsumablePolicy::class,
         CustomField::class => CustomFieldPolicy::class,
         CustomFieldset::class => CustomFieldsetPolicy::class,
@@ -79,6 +90,7 @@ class AuthServiceProvider extends ServiceProvider
         Company::class => CompanyPolicy::class,
         TestRun::class => TestRunPolicy::class,
         TestType::class => TestTypePolicy::class,
+        WorkOrder::class => WorkOrderPolicy::class,
         AttributeDefinition::class => AttributeDefinitionPolicy::class,
     ];
 
@@ -184,9 +196,13 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         Gate::define('components.files', function ($user) {
-            if ($user->hasAccess('components.files')) {
+            if ($user->hasAccess('components.update') || $user->hasAccess('components.edit')) {
                 return true;
             }
+        });
+
+        Gate::define('portal.view', function ($user) {
+            return $user->hasAccess('portal.view');
         });
 
         Gate::define('consumables.files', function ($user) {
@@ -289,11 +305,15 @@ class AuthServiceProvider extends ServiceProvider
                 || $user->can('update', License::class)   
                 || $user->can('create', License::class)   
                 || $user->can('update', Component::class)
+                || $user->can('update', ComponentInstance::class)
                 || $user->can('create', Component::class)   
+                || $user->can('create', ComponentInstance::class)   
                 || $user->can('update', Consumable::class)   
                 || $user->can('create', Consumable::class)   
                 || $user->can('update', Accessory::class)
                 || $user->can('create', Accessory::class)   
+                || $user->can('update', WorkOrder::class)
+                || $user->can('create', WorkOrder::class)
                 || $user->can('update', User::class)
                 || $user->can('create', User::class)
                 || ($user->hasAccess('reports.view'));

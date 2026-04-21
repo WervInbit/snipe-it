@@ -549,6 +549,16 @@ class Asset extends Depreciable
         return $this->belongsTo(\App\Models\Company::class, 'company_id');
     }
 
+    public function trackedComponents(): HasMany
+    {
+        return $this->hasMany(ComponentInstance::class, 'current_asset_id')->orderByDesc('updated_at');
+    }
+
+    public function sourcedComponents(): HasMany
+    {
+        return $this->hasMany(ComponentInstance::class, 'source_asset_id')->orderByDesc('updated_at');
+    }
+
     /**
      * Determines if an asset is available for checkout.
      * This checks to see if it's checked out to an invalid (deleted) user

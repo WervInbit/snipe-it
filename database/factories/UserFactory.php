@@ -286,6 +286,11 @@ class UserFactory extends Factory
         return $this->appendPermission(['components.edit' => '1']);
     }
 
+    public function updateComponents()
+    {
+        return $this->appendPermission(['components.update' => '1']);
+    }
+
     public function deleteComponents()
     {
         return $this->appendPermission(['components.delete' => '1']);
@@ -299,6 +304,61 @@ class UserFactory extends Factory
     public function checkoutComponents()
     {
         return $this->appendPermission(['components.checkout' => '1']);
+    }
+
+    public function extractComponents()
+    {
+        return $this->appendPermission(['components.extract' => '1']);
+    }
+
+    public function installComponents()
+    {
+        return $this->appendPermission(['components.install' => '1']);
+    }
+
+    public function moveComponents()
+    {
+        return $this->appendPermission(['components.move' => '1']);
+    }
+
+    public function verifyComponents()
+    {
+        return $this->appendPermission(['components.verify' => '1']);
+    }
+
+    public function manageComponentDefinitions()
+    {
+        return $this->appendPermission(['components.manage_definitions' => '1']);
+    }
+
+    public function manageComponentStorageLocations()
+    {
+        return $this->appendPermission(['components.manage_storage_locations' => '1']);
+    }
+
+    public function viewWorkOrders()
+    {
+        return $this->appendPermission(['workorders.view' => '1']);
+    }
+
+    public function createWorkOrders()
+    {
+        return $this->appendPermission(['workorders.create' => '1']);
+    }
+
+    public function updateWorkOrders()
+    {
+        return $this->appendPermission(['workorders.update' => '1']);
+    }
+
+    public function manageWorkOrderVisibility()
+    {
+        return $this->appendPermission(['workorders.manage_visibility' => '1']);
+    }
+
+    public function viewPortal()
+    {
+        return $this->appendPermission(['portal.view' => '1']);
     }
 
     public function viewCompanies()

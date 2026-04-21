@@ -134,7 +134,7 @@
     </div><!-- ./col -->
     @endcan
 
-    @can('view', \App\Models\Component::class)
+    @can('view', \App\Models\ComponentInstance::class)
     <div class="col-lg-2 col-xs-6">
         <!-- small components box -->
         <a href="{{ route('components.index') }}">
@@ -226,11 +226,6 @@
                         <div class="col-md-2">
                             @can('create', \App\Models\Consumable::class)
                                 <a class="btn bg-purple" style="width: 100%" href="{{ route('consumables.create') }}">{{ trans('general.new_consumable') }}</a>
-                            @endcan
-                        </div>
-                        <div class="col-md-2">
-                            @can('create', \App\Models\Component::class)
-                                <a class="btn bg-yellow" style="width: 100%" href="{{ route('components.create') }}">{{ trans('general.new_component') }}</a>
                             @endcan
                         </div>
                         <div class="col-md-2">

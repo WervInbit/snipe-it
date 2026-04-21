@@ -10,6 +10,8 @@ use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
 use App\Models\User;
 use App\Presenters\Presentable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -220,6 +222,21 @@ class Location extends SnipeModel
     public function components()
     {
         return $this->hasMany(\App\Models\Component::class, 'location_id');
+    }
+
+    public function componentStorageLocations(): HasMany
+    {
+        return $this->hasMany(ComponentStorageLocation::class, 'site_location_id');
+    }
+
+    public function storedComponentInstances(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            ComponentInstance::class,
+            ComponentStorageLocation::class,
+            'site_location_id',
+            'storage_location_id'
+        );
     }
 
     /**

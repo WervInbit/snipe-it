@@ -6,6 +6,17 @@
 @parent
 @stop
 
+@section('header_right')
+@can('create', \App\Models\ComponentInstance::class)
+<a href="{{ route('components.create') }}" class="btn btn-primary">
+    {{ __('Register Component') }}
+</a>
+@endcan
+<a href="{{ route('components.tray') }}" class="btn btn-default">
+    {{ __('My Tray') }}
+</a>
+@stop
+
 
 {{-- Page content --}}
 @section('content')
@@ -21,9 +32,8 @@
                 data-footer-style="footerStyle"
                 data-show-footer="true"
                 data-sort-order="asc"
-                data-sort-name="name"
+                data-sort-name="component_tag"
                 id="componentsTable"
-                data-buttons="componentButtons"
                 class="table table-striped snipe-table"
                 data-url="{{ route('api.components.index') }}"
                 data-export-options='{

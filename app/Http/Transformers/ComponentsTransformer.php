@@ -3,10 +3,9 @@
 namespace App\Http\Transformers;
 
 use App\Helpers\Helper;
-use App\Models\Component;
-use Illuminate\Support\Facades\Gate;
+use App\Models\ComponentInstance;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Gate;
 
 class ComponentsTransformer
 {
@@ -14,77 +13,118 @@ class ComponentsTransformer
     {
         $array = [];
         foreach ($components as $component) {
-            $array[] = self::transformComponent($component);
+            $array[] = $this->transformComponent($component);
         }
 
-        return (new DatatablesTransformer)->transformDatatables($array, $total);
+        return (new DatatablesTransformer())->transformDatatables($array, $total);
     }
 
-    public function transformComponent(Component $component)
+    public function transformComponent(ComponentInstance $component): array
     {
-        $array = [
+        $currentLocation = $component->storageLocation
+            ? $component->storageLocation->name
+            : ($component->currentAsset ? $component->currentAsset->present()->name() : null);
+
+        return [
             'id' => (int) $component->id,
-            'name' => e($component->name),
-            'image' =>   ($component->image) ? Storage::disk('public')->url('components/'.e($component->image)) : null,
-            'serial' => ($component->serial) ? e($component->serial) : null,
-            'location' => ($component->location) ? [
-                'id' => (int) $component->location->id,
-                'name' => e($component->location->name),
+            'component_tag' => e($component->component_tag),
+            'name' => e($component->display_name),
+            'display_name' => e($component->display_name),
+            'serial' => $component->serial ? e($component->serial) : null,
+            'status' => e($component->status),
+            'condition_code' => e($component->condition_code),
+            'installed_as' => $component->installed_as ? e($component->installed_as) : null,
+            'definition' => $component->componentDefinition ? [
+                'id' => (int) $component->componentDefinition->id,
+                'name' => e($component->componentDefinition->name),
             ] : null,
-            'qty' => ($component->qty != '') ? (int) $component->qty : null,
-            'min_amt' => ($component->min_amt != '') ? (int) $component->min_amt : null,
-            'category' => ($component->category) ? [
-                'id' => (int) $component->category->id,
-                'name' => e($component->category->name),
+            'category' => $component->componentDefinition?->category ? [
+                'id' => (int) $component->componentDefinition->category->id,
+                'name' => e($component->componentDefinition->category->name),
             ] : null,
-            'supplier' => ($component->supplier) ? ['id' => $component->supplier->id, 'name'=> e($component->supplier->name)] : null,
-            'manufacturer' => ($component->manufacturer) ? ['id' => $component->manufacturer->id, 'name'=> e($component->manufacturer->name)] : null,
-            'model_number' => ($component->model_number) ? e($component->model_number) : null,
-            'order_number'  => e($component->order_number),
-            'purchase_date' =>  Helper::getFormattedDateObject($component->purchase_date, 'date'),
-            'purchase_cost' => Helper::formatCurrencyOutput($component->purchase_cost),
-            'remaining'  => (int) $component->numRemaining(),
-            'company'   => ($component->company) ? [
+            'manufacturer' => $component->componentDefinition?->manufacturer ? [
+                'id' => (int) $component->componentDefinition->manufacturer->id,
+                'name' => e($component->componentDefinition->manufacturer->name),
+            ] : null,
+            'source_type' => e($component->source_type),
+            'source_asset' => $component->sourceAsset ? [
+                'id' => (int) $component->sourceAsset->id,
+                'name' => e($component->sourceAsset->present()->name()),
+            ] : null,
+            'current_asset' => $component->currentAsset ? [
+                'id' => (int) $component->currentAsset->id,
+                'name' => e($component->currentAsset->present()->name()),
+            ] : null,
+            'storage_location' => $component->storageLocation ? [
+                'id' => (int) $component->storageLocation->id,
+                'name' => e($component->storageLocation->name),
+            ] : null,
+            'current_location' => $currentLocation ? e($currentLocation) : null,
+            'held_by' => $component->heldBy ? [
+                'id' => (int) $component->heldBy->id,
+                'name' => e($component->heldBy->present()->fullName()),
+            ] : null,
+            'company' => $component->company ? [
                 'id' => (int) $component->company->id,
                 'name' => e($component->company->name),
             ] : null,
-            'notes' => ($component->notes) ? Helper::parseEscapedMarkedownInline($component->notes) : null,
-            'created_by' => ($component->adminuser) ? [
-                'id' => (int) $component->adminuser->id,
-                'name'=> e($component->adminuser->present()->fullName()),
+            'supplier' => $component->supplier ? [
+                'id' => (int) $component->supplier->id,
+                'name' => e($component->supplier->name),
+            ] : null,
+            'purchase_cost' => Helper::formatCurrencyOutput($component->purchase_cost),
+            'received_at' => Helper::getFormattedDateObject($component->received_at, 'datetime'),
+            'notes' => $component->notes ? Helper::parseEscapedMarkedownInline($component->notes) : null,
+            'created_by' => $component->createdBy ? [
+                'id' => (int) $component->createdBy->id,
+                'name' => e($component->createdBy->present()->fullName()),
             ] : null,
             'created_at' => Helper::getFormattedDateObject($component->created_at, 'datetime'),
             'updated_at' => Helper::getFormattedDateObject($component->updated_at, 'datetime'),
-            'user_can_checkout' =>  ($component->numRemaining() > 0) ? 1 : 0,
+            'qr_uid' => $component->qr_uid,
+            'uploads_count' => $component->uploads?->count() ?? 0,
+            'events' => $component->relationLoaded('events')
+                ? $component->events->map(fn ($event) => [
+                    'id' => (int) $event->id,
+                    'event_type' => $event->event_type,
+                    'from_status' => $event->from_status,
+                    'to_status' => $event->to_status,
+                    'from_asset' => $event->fromAsset ? [
+                        'id' => (int) $event->fromAsset->id,
+                        'name' => e($event->fromAsset->present()->name()),
+                    ] : null,
+                    'to_asset' => $event->toAsset ? [
+                        'id' => (int) $event->toAsset->id,
+                        'name' => e($event->toAsset->present()->name()),
+                    ] : null,
+                    'from_storage_location' => $event->fromStorageLocation ? [
+                        'id' => (int) $event->fromStorageLocation->id,
+                        'name' => e($event->fromStorageLocation->name),
+                    ] : null,
+                    'to_storage_location' => $event->toStorageLocation ? [
+                        'id' => (int) $event->toStorageLocation->id,
+                        'name' => e($event->toStorageLocation->name),
+                    ] : null,
+                    'held_by' => $event->heldBy ? [
+                        'id' => (int) $event->heldBy->id,
+                        'name' => e($event->heldBy->present()->fullName()),
+                    ] : null,
+                    'performed_by' => $event->performedBy ? [
+                        'id' => (int) $event->performedBy->id,
+                        'name' => e($event->performedBy->present()->fullName()),
+                    ] : null,
+                    'note' => $event->note,
+                    'created_at' => Helper::getFormattedDateObject($event->created_at, 'datetime'),
+                ])->values()->all()
+                : [],
+            'available_actions' => [
+                'update' => Gate::allows('update', $component),
+                'delete' => Gate::allows('delete', $component),
+                'extract' => Gate::allows('extract', $component),
+                'install' => Gate::allows('install', $component),
+                'move' => Gate::allows('move', $component),
+                'verify' => Gate::allows('verify', $component),
+            ],
         ];
-
-        $permissions_array['available_actions'] = [
-            'checkout' => Gate::allows('checkout', Component::class),
-            'checkin' => Gate::allows('checkin', Component::class),
-            'update' => Gate::allows('update', Component::class),
-            'delete' => $component->isDeletable(),
-        ];
-        $array += $permissions_array;
-
-        return $array;
-    }
-
-    public function transformCheckedoutComponents(Collection $components_assets, $total)
-    {
-        $array = [];
-        foreach ($components_assets as $asset) {
-            $array[] = [
-                'assigned_pivot_id' => $asset->pivot->id,
-                'id' => (int) $asset->id,
-                'name' =>  e($asset->model->present()->name).' '.e($asset->present()->name),
-                'qty' => $asset->pivot->assigned_qty,
-                'note' => $asset->pivot->note,
-                'type' => 'asset',
-                'created_at' => Helper::getFormattedDateObject($asset->pivot->created_at, 'datetime'),
-                'available_actions' => ['checkin' => true],
-            ];
-        }
-
-        return (new DatatablesTransformer)->transformDatatables($array, $total);
     }
 }

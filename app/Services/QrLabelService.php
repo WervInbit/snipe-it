@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Asset;
 use App\Models\Accessory;
 use App\Models\Component;
+use App\Models\ComponentInstance;
 use App\Models\Consumable;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Storage;
@@ -259,6 +260,39 @@ class QrLabelService
             return strtolower(trim($format));
         }, explode(',', $settings->qr_formats ?? 'png,pdf'));
         $base = $this->directory.'/qr-CMP-'.($item->name ? Str::slug($item->name) : $item->id);
+        $qr = app(QrCodeService::class);
+
+        if (in_array('png', $formats)) {
+            $disk->put($base.'.png', $qr->png($data, $label, $logoPath));
+        }
+        if (in_array('pdf', $formats)) {
+            $disk->put($base.'.pdf', $qr->pdf($data, $label, $logoPath));
+        }
+    }
+
+    /**
+     * Generate labels for a tracked component instance.
+     */
+    public function generateForComponentInstance(ComponentInstance $item): void
+    {
+        $settings = Setting::getSettings();
+        $disk = Storage::disk('public');
+        $disk->makeDirectory($this->directory);
+
+        if (empty($item->qr_uid)) {
+            $item->qr_uid = (string) Str::uuid();
+            $item->save();
+        }
+
+        $data = 'CMP:'.$item->qr_uid;
+        $text = $item->component_tag ?: ($item->display_name ?? (string) $item->id);
+        $label = $settings->qr_text_redundancy ? $text : null;
+        $logo = $settings->qr_logo ?: $settings->label_logo;
+        $logoPath = ($logo && $disk->exists($logo)) ? $disk->path($logo) : null;
+        $formats = array_map(function ($format) {
+            return strtolower(trim($format));
+        }, explode(',', $settings->qr_formats ?? 'png,pdf'));
+        $base = $this->directory.'/qr-CMP-'.Str::slug($text ?: (string) $item->id);
         $qr = app(QrCodeService::class);
 
         if (in_array('png', $formats)) {

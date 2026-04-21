@@ -254,8 +254,8 @@ return [
             'display'    => true,
         ],
         [
-            'permission' => 'components.edit',
-            'label'      => 'Edit ',
+            'permission' => 'components.update',
+            'label'      => 'Update ',
             'note'       => '',
             'display'    => true,
         ],
@@ -266,24 +266,78 @@ return [
             'display'    => true,
         ],
         [
-            'permission' => 'components.checkout',
-            'label'      => 'Checkout ',
+            'permission' => 'components.extract',
+            'label'      => 'Extract ',
             'note'       => '',
             'display'    => true,
         ],
         [
-            'permission' => 'components.checkin',
-            'label'      => 'Checkin ',
+            'permission' => 'components.install',
+            'label'      => 'Install ',
             'note'       => '',
             'display'    => true,
         ],
         [
-            'permission' => 'components.files',
-            'label'      => 'View and Modify Component Files',
+            'permission' => 'components.move',
+            'label'      => 'Move ',
+            'note'       => '',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'components.verify',
+            'label'      => 'Verify ',
+            'note'       => '',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'components.manage_definitions',
+            'label'      => 'Manage Definitions',
+            'note'       => '',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'components.manage_storage_locations',
+            'label'      => 'Manage Storage',
             'note'       => '',
             'display'    => true,
         ],
 
+    ],
+
+    'Work Orders' => [
+        [
+            'permission' => 'workorders.view',
+            'label'      => 'View',
+            'note'       => '',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'workorders.create',
+            'label'      => 'Create',
+            'note'       => '',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'workorders.update',
+            'label'      => 'Update',
+            'note'       => '',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'workorders.manage_visibility',
+            'label'      => 'Manage Visibility',
+            'note'       => '',
+            'display'    => true,
+        ],
+    ],
+
+    'Portal' => [
+        [
+            'permission' => 'portal.view',
+            'label'      => 'View Portal',
+            'note'       => '',
+            'display'    => true,
+        ],
     ],
 
     'Kits' => [

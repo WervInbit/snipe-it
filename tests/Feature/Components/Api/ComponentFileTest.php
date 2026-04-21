@@ -2,45 +2,35 @@
 
 namespace Tests\Feature\Components\Api;
 
-use App\Models\Component;
+use App\Models\ComponentInstance;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 class ComponentFileTest extends TestCase
 {
-    public function testComponentApiAcceptsFileUpload()
+    public function testComponentApiAcceptsFileUpload(): void
     {
-        // Create a model to work with
-        $component = Component::factory()->create();
-
-        // Create a superuser to run this as
+        $component = ComponentInstance::factory()->create();
         $user = User::factory()->superuser()->create();
 
-        //Upload a file
         $this->actingAsForApi($user)
             ->post(
-                route('api.files.store', ['object_type' => 'components', 'id' => $component->id]), [
+                route('api.files.store', ['object_type' => 'component-instances', 'id' => $component->id]), [
                 'file' => [UploadedFile::fake()->create("test.jpg", 100)]
                 ]
             )
             ->assertOk();
     }
 
-    public function testComponentApiListsFiles()
+    public function testComponentApiListsFiles(): void
     {
-        // List all files on a model
-
-        // Create a model to work with
-        $component = Component::factory()->create();
-
-        // Create a superuser to run this as
+        $component = ComponentInstance::factory()->create();
         $user = User::factory()->superuser()->create();
 
-        // List the files
         $this->actingAsForApi($user)
             ->getJson(
-                route('api.files.index', ['object_type' => 'components', 'id' => $component->id])
+                route('api.files.index', ['object_type' => 'component-instances', 'id' => $component->id])
             )
             ->assertOk()
             ->assertJsonStructure(
@@ -51,17 +41,11 @@ class ComponentFileTest extends TestCase
             );
     }
 
-    public function testComponentFailsIfInvalidTypePassedInUrl()
+    public function testComponentFailsIfInvalidTypePassedInUrl(): void
     {
-        // List all files on a model
-
-        // Create an model to work with
-        $component = Component::factory()->create();
-
-        // Create a superuser to run this as
+        $component = ComponentInstance::factory()->create();
         $user = User::factory()->superuser()->create();
 
-        // List the files
         $this->actingAsForApi($user)
             ->getJson(
                 route('api.files.index', ['object_type' => 'shibboleeeeeet', 'id' => $component->id])
@@ -69,39 +53,27 @@ class ComponentFileTest extends TestCase
             ->assertStatus(404);
     }
 
-    public function testComponentFailsIfInvalidIdPassedInUrl()
+    public function testComponentFailsIfInvalidIdPassedInUrl(): void
     {
-        // List all files on a model
-
-        // Create an model to work with
-        $component = Component::factory()->create();
-
-        // Create a superuser to run this as
+        $component = ComponentInstance::factory()->create();
         $user = User::factory()->superuser()->create();
 
-        // List the files
         $this->actingAsForApi($user)
             ->getJson(
-                route('api.files.index', ['object_type' => 'components', 'id' => 100000])
+                route('api.files.index', ['object_type' => 'component-instances', 'id' => 100000])
             )
             ->assertOk()
             ->assertStatusMessageIs('error');
     }
 
-    public function testComponentApiDownloadsFile()
+    public function testComponentApiDownloadsFile(): void
     {
-        // Download a file from a model
-
-        // Create a model to work with
-        $component = Component::factory()->create();
-
-        // Create a superuser to run this as
+        $component = ComponentInstance::factory()->create();
         $user = User::factory()->superuser()->create();
 
-        // Upload a file
         $this->actingAsForApi($user)
             ->post(
-                route('api.files.store', ['object_type' => 'components', 'id' => $component->id]), [
+                route('api.files.store', ['object_type' => 'component-instances', 'id' => $component->id]), [
                 'file' => [UploadedFile::fake()->create("test.jpg", 100)],
                 ]
             )
@@ -113,10 +85,9 @@ class ComponentFileTest extends TestCase
                 ]
             );
 
-        // Upload a file with notes
         $this->actingAsForApi($user)
             ->post(
-                route('api.files.store', ['object_type' => 'components', 'id' => $component->id]), [
+                route('api.files.store', ['object_type' => 'component-instances', 'id' => $component->id]), [
                 'file' => [UploadedFile::fake()->create("test.jpg", 100)],
                 'notes' => 'manual'
                 ]
@@ -129,10 +100,9 @@ class ComponentFileTest extends TestCase
                 ]
             );
 
-        // List the files to get the file ID
         $result = $this->actingAsForApi($user)
             ->getJson(
-                route('api.files.index', ['object_type' => 'components', 'id' => $component->id, 'order' => 'asc'])
+                route('api.files.index', ['object_type' => 'component-instances', 'id' => $component->id, 'order' => 'asc'])
             )
             ->assertOk()
             ->assertJsonStructure(
@@ -155,12 +125,11 @@ class ComponentFileTest extends TestCase
             ->assertJsonPath('rows.0.note', null)
             ->assertJsonPath('rows.1.note', 'manual');
 
-        // Get the file
         $this->actingAsForApi($user)
             ->get(
                 route(
                     'api.files.show', [
-                    'object_type' => 'components',
+                    'object_type' => 'component-instances',
                     'id' => $component->id,
                     'file_id' => $result->decodeResponseJson()->json()["rows"][0]["id"],
                     ]
@@ -169,38 +138,30 @@ class ComponentFileTest extends TestCase
             ->assertOk();
     }
 
-    public function testComponentApiDeletesFile()
+    public function testComponentApiDeletesFile(): void
     {
-        // Delete a file from a model
-
-        // Create a model to work with
-        $component = Component::factory()->create();
-
-        // Create a superuser to run this as
+        $component = ComponentInstance::factory()->create();
         $user = User::factory()->superuser()->create();
 
-        //Upload a file
         $this->actingAsForApi($user)
             ->post(
-                route('api.files.store', ['object_type' => 'components', 'id' => $component->id]), [
+                route('api.files.store', ['object_type' => 'component-instances', 'id' => $component->id]), [
                 'file' => [UploadedFile::fake()->create("test.jpg", 100)]
                 ]
             )
             ->assertOk();
 
-        // List the files to get the file ID
         $result = $this->actingAsForApi($user)
             ->getJson(
-                route('api.files.index', ['object_type' => 'components', 'id' => $component->id])
+                route('api.files.index', ['object_type' => 'component-instances', 'id' => $component->id])
             )
             ->assertOk();
 
-        // Delete the file
         $this->actingAsForApi($user)
             ->delete(
                 route(
                     'api.files.destroy', [
-                    'object_type' => 'components',
+                    'object_type' => 'component-instances',
                     'id' => $component->id,
                     'file_id' => $result->decodeResponseJson()->json()["rows"][0]["id"],
                     ]

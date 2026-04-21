@@ -2,230 +2,165 @@
 
 namespace App\Http\Controllers\Components;
 
+use App\Http\Controllers\Concerns\BuildsComponentWorkflowOptions;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ImageUploadRequest;
-use App\Models\Company;
-use App\Models\Component;
-use App\Helpers\Helper;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Input;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
+use App\Models\Actionlog;
+use App\Models\Asset;
+use App\Models\ComponentInstance;
+use App\Services\ComponentLifecycleService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+use InvalidArgumentException;
 
-/**
- * This class controls all actions related to Components for
- * the Snipe-IT Asset Management application.
- *
- * @version    v1.0
- */
 class ComponentsController extends Controller
 {
-    /**
-     * Returns a view that invokes the ajax tables which actually contains
-     * the content for the components listing, which is generated in getDatatable.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @see ComponentsController::getDatatable() method that generates the JSON response
-     * @since [v3.0]
-     * @return \Illuminate\Contracts\View\View
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     */
-    public function index()
-    {
-        $this->authorize('view', Component::class);
+    use BuildsComponentWorkflowOptions;
 
-        return view('components/index');
+    public function __construct(
+        protected ComponentLifecycleService $lifecycle,
+    ) {
     }
 
-
-    /**
-     * Returns a form to create a new component.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @see ComponentsController::postCreate() method that stores the data
-     * @since [v3.0]
-     * @return \Illuminate\Contracts\View\View
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     */
-    public function create()
+    public function index(): View
     {
-        $this->authorize('create', Component::class);
+        $this->authorize('view', ComponentInstance::class);
 
-        return view('components/edit')->with('category_type', 'component')
-            ->with('item', new Component);
+        return view('components.index');
     }
 
-    /**
-     * Validate and store data for new component.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @see ComponentsController::getCreate() method that generates the view
-     * @since [v3.0]
-     * @param ImageUploadRequest $request
-     * @return \Illuminate\Http\RedirectResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     */
-    public function store(ImageUploadRequest $request)
+    public function create(): View
     {
-        $this->authorize('create', Component::class);
-        $component = new Component();
-        $component->name                   = $request->input('name');
-        $component->category_id            = $request->input('category_id');
-        $component->supplier_id            = $request->input('supplier_id');
-        $component->manufacturer_id        = $request->input('manufacturer_id');
-        $component->model_number           = $request->input('model_number');
-        $component->location_id            = $request->input('location_id');
-        $component->company_id             = Company::getIdForCurrentUser($request->input('company_id'));
-        $component->order_number           = $request->input('order_number', null);
-        $component->min_amt                = $request->input('min_amt', null);
-        $component->serial                 = $request->input('serial', null);
-        $component->purchase_date          = $request->input('purchase_date', null);
-        $component->purchase_cost          = $request->input('purchase_cost', null);
-        $component->qty                    = $request->input('qty');
-        $component->created_by                = auth()->id();
-        $component->notes                  = $request->input('notes');
+        $this->authorize('create', ComponentInstance::class);
 
-        $component = $request->handleImages($component);
+        $locations = $this->storageLocationsByType();
 
-        if($request->get('redirect_option') === 'back'){
-            session()->put(['redirect_option' => 'index']);
-        } else {
-            session()->put(['redirect_option' => $request->get('redirect_option')]);
-        }
-
-
-        if ($component->save()) {
-            return Helper::getRedirectOption($request, $component->id, 'Components')
-                ->with('success', trans('admin/components/message.create.success'));
-        }
-
-        return redirect()->back()->withInput()->withErrors($component->getErrors());
+        return view('components.create', [
+            'componentDefinitions' => $this->activeComponentDefinitions(),
+            'stockLocations' => $locations['stock'],
+            'sourceTypeOptions' => array_diff_key(
+                $this->sourceTypeOptions(),
+                [ComponentInstance::SOURCE_EXTRACTED => __('Extracted')]
+            ),
+            'conditionOptions' => $this->conditionOptions(),
+        ]);
     }
 
-    /**
-     * Return a view to edit a component.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @see ComponentsController::postEdit() method that stores the data.
-     * @since [v3.0]
-     * @param int $componentId
-     * @return \Illuminate\Contracts\View\View
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     */
-    public function edit(Component $component)
+    public function store(Request $request): RedirectResponse
     {
+        $this->authorize('create', ComponentInstance::class);
 
-            $this->authorize('update', $component);
-            session()->put('back_url', url()->previous());
-            return view('components/edit')
-                ->with('item', $component)
-                ->with('category_type', 'component');
-    }
-
-
-    /**
-     * Return a view to edit a component.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @see ComponentsController::getEdit() method presents the form.
-     * @param ImageUploadRequest $request
-     * @param int $componentId
-     * @return \Illuminate\Http\RedirectResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     * @since [v3.0]
-     */
-    public function update(ImageUploadRequest $request, Component $component)
-    {
-        $min = $component->numCheckedOut();
-        $validator = Validator::make($request->all(), [
-            'qty' => "required|numeric|min:$min",
+        $data = $request->validate([
+            'component_definition_id' => ['nullable', 'integer', 'exists:component_definitions,id'],
+            'display_name' => ['required_without:component_definition_id', 'nullable', 'string', 'max:255'],
+            'serial' => ['nullable', 'string', 'max:255'],
+            'source_type' => ['required', 'string', 'max:255'],
+            'condition_code' => ['required', 'string', 'max:255'],
+            'storage_location_id' => ['required', 'integer', 'exists:component_storage_locations,id'],
+            'notes' => ['nullable', 'string'],
         ]);
 
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
+        try {
+            $component = $this->lifecycle->createInstance([
+                'component_definition_id' => $data['component_definition_id'] ?? null,
+                'display_name' => $data['display_name'] ?? null,
+                'serial' => $data['serial'] ?? null,
+                'status' => ComponentInstance::STATUS_IN_STOCK,
+                'condition_code' => $data['condition_code'],
+                'source_type' => $data['source_type'],
+                'storage_location_id' => $data['storage_location_id'],
+                'notes' => $data['notes'] ?? null,
+            ], $request->user());
+        } catch (InvalidArgumentException $exception) {
+            return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        $this->authorize('update', $component);
-
-        // Update the component data
-        $component->name                   = $request->input('name');
-        $component->category_id            = $request->input('category_id');
-        $component->supplier_id            = $request->input('supplier_id');
-        $component->manufacturer_id        = $request->input('manufacturer_id');
-        $component->model_number           = $request->input('model_number');
-        $component->location_id            = $request->input('location_id');
-        $component->company_id             = Company::getIdForCurrentUser($request->input('company_id'));
-        $component->order_number           = $request->input('order_number');
-        $component->min_amt                = $request->input('min_amt');
-        $component->serial                 = $request->input('serial');
-        $component->purchase_date          = $request->input('purchase_date');
-        $component->purchase_cost          = request('purchase_cost');
-        $component->qty                    = $request->input('qty');
-        $component->notes                  = $request->input('notes');
-
-        $component = $request->handleImages($component);
-
-        session()->put(['redirect_option' => $request->get('redirect_option')]);
-
-        if ($component->save()) {
-            return Helper::getRedirectOption($request, $component->id, 'Components')
-                ->with('success', trans('admin/components/message.update.success'));
-        }
-
-        return redirect()->back()->withInput()->withErrors($component->getErrors());
+        return redirect()
+            ->route('components.show', $component)
+            ->with('success', __('Component registered.'));
     }
 
-    /**
-     * Delete a component.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v3.0]
-     * @param int $componentId
-     * @return \Illuminate\Http\RedirectResponse
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     */
-    public function destroy($componentId)
+    public function show(ComponentInstance $component_id): View
     {
-        if (is_null($component = Component::find($componentId))) {
-            return redirect()->route('components.index')->with('error', trans('admin/components/message.does_not_exist'));
-        }
+        $this->authorize('view', $component_id);
 
-        $this->authorize('delete', $component);
+        $locations = $this->storageLocationsByType();
 
-        // Remove the image if one exists
-        if ($component->image && Storage::disk('public')->exists('components/' . $component->image)) {
-            try {
-                Storage::disk('public')->delete('components/'.$component->image);
-            } catch (\Exception $e) {
-                Log::debug($e);
-            }
-        }
+        $component = $component_id->load([
+            'componentDefinition.category',
+            'componentDefinition.manufacturer',
+            'company',
+            'sourceAsset.model',
+            'currentAsset.model',
+            'storageLocation.siteLocation',
+            'heldBy',
+            'supplier',
+            'createdBy',
+            'updatedBy',
+            'events.performedBy',
+            'events.fromAsset.model',
+            'events.toAsset.model',
+            'events.fromStorageLocation',
+            'events.toStorageLocation',
+            'events.relatedWorkOrder',
+            'events.relatedWorkOrderTask.workOrder',
+            'uploads.adminuser',
+        ]);
 
-        if ($component->numCheckedOut() > 0) {
-            return redirect()->route('components.index')->with('error', trans('admin/components/message.delete.error_qty'));
-        }
-
-        $component->delete();
-
-        return redirect()->route('components.index')->with('success', trans('admin/components/message.delete.success'));
+        return view('components.view', [
+            'component' => $component,
+            'installableAssets' => Asset::query()
+                ->with(['model', 'assetstatus'])
+                ->NotArchived()
+                ->orderBy('asset_tag')
+                ->get(),
+            'stockLocations' => $locations['stock'],
+            'verificationLocations' => $locations['verification'],
+            'destructionLocations' => $locations['destruction'],
+            'conditionOptions' => $this->conditionOptions(),
+        ]);
     }
 
-    /**
-     * Return a view to display component information.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @see ComponentsController::getDataView() method that generates the JSON response
-     * @since [v3.0]
-     * @param int $componentId
-     * @return \Illuminate\Contracts\View\View
-     * @throws \Illuminate\Auth\Access\AuthorizationException
-     */
-    public function show(Component $component)
+    public function edit(ComponentInstance $component_id): RedirectResponse
     {
-            $this->authorize('view', $component);
-            return view('components/view', compact('component'));
+        $this->authorize('update', $component_id);
+
+        return redirect()
+            ->route('components.show', $component_id)
+            ->with('info', 'Component editing UI is not implemented yet.');
+    }
+
+    public function update(Request $request, ComponentInstance $component_id): RedirectResponse
+    {
+        $this->authorize('update', $component_id);
+
+        return redirect()
+            ->route('components.show', $component_id)
+            ->with('error', 'Component editing UI is not implemented yet.');
+    }
+
+    public function destroy(ComponentInstance $component_id): RedirectResponse
+    {
+        $this->authorize('delete', $component_id);
+
+        if ($component_id->status === ComponentInstance::STATUS_INSTALLED) {
+            return redirect()
+                ->route('components.show', $component_id)
+                ->with('error', 'Installed components must be removed before deletion.');
+        }
+
+        $logAction = new Actionlog();
+        $logAction->item_type = ComponentInstance::class;
+        $logAction->item_id = $component_id->id;
+        $logAction->created_at = date('Y-m-d H:i:s');
+        $logAction->action_date = date('Y-m-d H:i:s');
+        $logAction->created_by = auth()->id();
+        $logAction->logaction('delete');
+
+        $component_id->delete();
+
+        return redirect()
+            ->route('components.index')
+            ->with('success', 'Component deleted.');
     }
 }

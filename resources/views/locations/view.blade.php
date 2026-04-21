@@ -101,11 +101,11 @@
                           </li>
                   @endcan
 
-                  @can('view', \App\Models\Component::class)
+                  @can('view', \App\Models\ComponentInstance::class)
                           <li>
                               <a href="#components" data-toggle="tab" data-tooltip="true" title="{{ trans('general.components') }}">
                                   <i class="fas fa-hdd fa-fw" style="font-size: 17px" aria-hidden="true"></i>
-                                  {!! ($location->components->count() > 0) ? '<span class="badge">'.number_format($location->components->count()).'</span>' : '' !!}
+                                  {!! ($componentCount > 0) ? '<span class="badge">'.number_format($componentCount).'</span>' : '' !!}
                                   <span class="sr-only">
                                     {{ trans('general.components') }}
                                   </span>

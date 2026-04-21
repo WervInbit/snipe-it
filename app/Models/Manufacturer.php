@@ -4,6 +4,8 @@ namespace App\Models;
 
 use App\Models\Traits\Searchable;
 use App\Presenters\Presentable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Gate;
@@ -111,6 +113,21 @@ class Manufacturer extends SnipeModel
     public function components()
     {
         return $this->hasMany(\App\Models\Component::class, 'manufacturer_id');
+    }
+
+    public function componentDefinitions(): HasMany
+    {
+        return $this->hasMany(ComponentDefinition::class, 'manufacturer_id');
+    }
+
+    public function componentInstances(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            ComponentInstance::class,
+            ComponentDefinition::class,
+            'manufacturer_id',
+            'component_definition_id'
+        );
     }
 
     public function adminuser()

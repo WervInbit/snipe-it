@@ -1345,7 +1345,7 @@ class Helper
      * @return string[]
      */
     public static function SettingUrls(){
-        $settings=['#','fields.index', 'attributes.index', 'statuslabels.index', 'models.index', 'settings.model_numbers.index', 'categories.index', 'manufacturers.index', 'suppliers.index', 'departments.index', 'locations.index', 'companies.index', 'depreciations.index'];
+        $settings=['#','fields.index', 'attributes.index', 'statuslabels.index', 'models.index', 'settings.model_numbers.index', 'settings.model_numbers.create', 'settings.model_numbers.edit', 'settings.component_definitions.index', 'settings.component_definitions.create', 'settings.component_definitions.edit', 'settings.component_storage_locations.index', 'settings.component_storage_locations.create', 'settings.component_storage_locations.edit', 'categories.index', 'manufacturers.index', 'suppliers.index', 'departments.index', 'locations.index', 'companies.index', 'depreciations.index'];
 
         return $settings;
         }

@@ -51,7 +51,7 @@
     <env name="MAIL_MAILER" value="array"/>
     <env name="QUEUE_DRIVER" value="sync"/>
     <env name="DB_CONNECTION" value="sqlite"/>
-    <env name="DB_DATABASE" value="/var/www/html/database/database.sqlite"/>
+    <env name="DB_DATABASE" value=":memory:"/>
     <env name="SESSION_DRIVER" value="array"/>
     <ini name="display_errors" value="true"/>
   </php>

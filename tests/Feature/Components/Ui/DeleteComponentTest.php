@@ -2,35 +2,43 @@
 
 namespace Tests\Feature\Components\Ui;
 
+use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\Company;
-use App\Models\Component;
+use App\Models\Asset;
+use App\Models\ComponentInstance;
 use App\Models\User;
-use Illuminate\Support\Facades\Storage;
 use Tests\Concerns\TestsFullMultipleCompaniesSupport;
 use Tests\Concerns\TestsPermissionsRequirement;
 use Tests\TestCase;
 
 class DeleteComponentTest extends TestCase implements TestsFullMultipleCompaniesSupport, TestsPermissionsRequirement
 {
-    public function testRequiresPermission()
+    protected function setUp(): void
     {
-        $component = Component::factory()->create();
+        parent::setUp();
+
+        $this->withoutMiddleware(VerifyCsrfToken::class);
+    }
+
+    public function testRequiresPermission(): void
+    {
+        $component = ComponentInstance::factory()->create();
 
         $this->actingAs(User::factory()->create())
             ->delete(route('components.destroy', $component->id))
             ->assertForbidden();
     }
 
-    public function testHandlesNonExistentComponent()
+    public function testHandlesNonExistentComponent(): void
     {
         $this->actingAs(User::factory()->deleteComponents()->create())
             ->delete(route('components.destroy', 10000))
-            ->assertSessionHas('error');
+            ->assertRedirect(route('components.index'));
     }
 
-    public function testCanDeleteComponent()
+    public function testCanDeleteComponent(): void
     {
-        $component = Component::factory()->create();
+        $component = ComponentInstance::factory()->create();
 
         $this->actingAs(User::factory()->deleteComponents()->create())
             ->delete(route('components.destroy', $component->id))
@@ -40,58 +48,43 @@ class DeleteComponentTest extends TestCase implements TestsFullMultipleCompanies
         $this->assertSoftDeleted($component);
     }
 
-    public function testCannotDeleteComponentIfCheckedOut()
+    public function testCannotDeleteComponentIfInstalled(): void
     {
-        $component = Component::factory()->checkedOutToAsset()->create();
+        $component = ComponentInstance::factory()->installed(Asset::factory()->create()->id)->create();
 
         $this->actingAs(User::factory()->deleteComponents()->create())
             ->delete(route('components.destroy', $component->id))
             ->assertSessionHas('error')
-            ->assertRedirect(route('components.index'));
+            ->assertRedirect(route('components.show', $component));
     }
 
-    public function testDeletingComponentRemovesComponentImage()
-    {
-        Storage::fake('public');
-
-        $component = Component::factory()->create(['image' => 'component-image.jpg']);
-
-        Storage::disk('public')->put('components/component-image.jpg', 'content');
-
-        Storage::disk('public')->assertExists('components/component-image.jpg');
-
-        $this->actingAs(User::factory()->deleteComponents()->create())->delete(route('components.destroy', $component->id));
-
-        Storage::disk('public')->assertMissing('components/component-image.jpg');
-    }
-
-    public function testDeletingComponentIsLogged()
+    public function testDeletingComponentIsLogged(): void
     {
         $user = User::factory()->deleteComponents()->create();
-        $component = Component::factory()->create();
+        $component = ComponentInstance::factory()->create();
 
         $this->actingAs($user)->delete(route('components.destroy', $component->id));
 
         $this->assertDatabaseHas('action_logs', [
             'created_by' => $user->id,
             'action_type' => 'delete',
-            'item_type' => Component::class,
+            'item_type' => ComponentInstance::class,
             'item_id' => $component->id,
         ]);
     }
 
-    public function testAdheresToFullMultipleCompaniesSupportScoping()
+    public function testAdheresToFullMultipleCompaniesSupportScoping(): void
     {
         $this->settings->enableMultipleFullCompanySupport();
 
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
-        $userInCompanyA = User::factory()->for($companyA)->create();
-        $componentForCompanyB = Component::factory()->for($companyB)->create();
+        $userInCompanyA = User::factory()->for($companyA)->deleteComponents()->create();
+        $componentForCompanyB = ComponentInstance::factory()->create(['company_id' => $companyB->id]);
 
         $this->actingAs($userInCompanyA)
             ->delete(route('components.destroy', $componentForCompanyB->id))
-            ->assertSessionHas('error');
+            ->assertRedirect(route('components.index'));
 
         $this->assertNotSoftDeleted($componentForCompanyB);
     }

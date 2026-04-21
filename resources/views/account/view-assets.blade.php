@@ -162,6 +162,15 @@
                 </div>
                 @endcan
 
+                @can('portal.view')
+                <div class="col-md-12" style="padding-top: 5px;">
+                  <a href="{{ route('account.work-orders.index') }}" style="width: 100%;" class="btn btn-sm btn-primary btn-social btn-block hidden-print">
+                    <i class="fas fa-clipboard-list fa-fw" aria-hidden="true"></i>
+                    {{ __('My Work Orders') }}
+                  </a>
+                </div>
+                @endcan
+
 
                   <div class="col-md-12" style="padding-top: 5px;">
                     <a href="{{ route('profile.print') }}" style="width: 100%;" class="btn btn-sm btn-primary btn-social btn-block hidden-print" target="_blank" rel="noopener">

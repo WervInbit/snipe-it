@@ -2,15 +2,8 @@
 
 namespace App\Presenters;
 
-/**
- * Class ComponentPresenter
- */
 class ComponentPresenter extends Presenter
 {
-    /**
-     * Json Column Layout for bootstrap table
-     * @return string
-     */
     public static function dataTableLayout()
     {
         $layout = [
@@ -23,13 +16,11 @@ class ComponentPresenter extends Presenter
                 'visible' => false,
             ],
             [
-                'field' => 'company',
+                'field' => 'component_tag',
                 'searchable' => true,
                 'sortable' => true,
-                'switchable' => true,
-                'title' => trans('general.company'),
-                'visible' => false,
-                'formatter' => 'companiesLinkObjFormatter',
+                'title' => trans('general.tag'),
+                'visible' => true,
             ],
             [
                 'field' => 'name',
@@ -38,168 +29,102 @@ class ComponentPresenter extends Presenter
                 'title' => trans('general.name'),
                 'visible' => true,
                 'formatter' => 'componentsLinkFormatter',
-            ], [
-                'field' => 'image',
-                'searchable' => false,
-                'sortable' => true,
-                'switchable' => true,
-                'title' => trans('general.image'),
-                'visible' => false,
-                'formatter' => 'imageFormatter',
-            ], [
+            ],
+            [
                 'field' => 'serial',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('admin/hardware/form.serial'),
-                'formatter' => 'componentsLinkFormatter',
-            ], [
-                'field' => 'category',
-                'searchable' => true,
-                'sortable' => true,
-                'title' => trans('general.category'),
-                'formatter' => 'categoriesLinkObjFormatter',
-            ], [
-                'field' => 'supplier',
-                'searchable' => true,
-                'sortable' => true,
-                'switchable' => true,
-                'title' => trans('general.supplier'),
-                'visible' => false,
-                'formatter' => 'suppliersLinkObjFormatter',
-            ], [
-                'field' => 'model_number',
-                'searchable' => true,
-                'sortable' => true,
-                'title' => trans('admin/models/table.modelnumber'),
-            ], [
-                'field' => 'manufacturer',
-                'searchable' => true,
-                'sortable' => true,
-                'switchable' => true,
-                'title' => trans('general.manufacturer'),
-                'visible' => false,
-                'formatter' => 'manufacturersLinkObjFormatter',
-            ], [
-                'field' => 'min_amt',
-                'searchable' => false,
-                'sortable' => true,
-                'title' => trans('general.min_amt'),
                 'visible' => true,
-                'class' => 'text-right text-padding-number-cell',
-                'formatter' => 'minAmtFormatter',
-            ], [
-                'field' => 'qty',
-                'searchable' => false,
+            ],
+            [
+                'field' => 'status',
+                'searchable' => true,
                 'sortable' => true,
-                'title' => trans('admin/components/general.total'),
+                'title' => trans('general.status'),
                 'visible' => true,
-                'class' => 'text-right text-padding-number-cell',
-                'footerFormatter' => 'qtySumFormatter',
-            ], [
-                'field' => 'remaining',
-                'searchable' => false,
-                'sortable' => false,
-                'title' => trans('admin/components/general.remaining'),
-                'visible' => true,
-                'class' => 'text-right text-padding-number-cell',
-                'footerFormatter' => 'qtySumFormatter',
-            ], [
-                'field' => 'location',
+            ],
+            [
+                'field' => 'installed_as',
                 'searchable' => true,
                 'sortable' => true,
                 'title' => trans('general.location'),
-                'formatter' => 'locationsLinkObjFormatter',
-            ], [
-                'field' => 'order_number',
-                'searchable' => true,
-                'sortable' => true,
-                'title' => trans('general.order_number'),
-                'visible' => true,
-            ], [
-                'field' => 'purchase_date',
-                'searchable' => true,
-                'sortable' => true,
-                'title' => trans('general.purchase_date'),
-                'visible' => true,
-                'formatter' => 'dateDisplayFormatter',
-            ], [
-                'field' => 'purchase_cost',
-                'searchable' => true,
-                'sortable' => true,
-                'title' => trans('general.purchase_cost'),
-                'visible' => true,
-                'footerFormatter' => 'sumFormatterQuantity',
-                'class' => 'text-right',
-            ], [
-                'field' => 'notes',
-                'searchable' => true,
-                'sortable' => true,
                 'visible' => false,
-                'title' => trans('general.notes'),
-                'formatter' => 'notesFormatter',
-            ],[
-                'field' => 'created_by',
+            ],
+            [
+                'field' => 'category',
+                'searchable' => true,
+                'sortable' => false,
+                'title' => trans('general.category'),
+                'visible' => true,
+                'formatter' => 'categoriesLinkObjFormatter',
+            ],
+            [
+                'field' => 'manufacturer',
+                'searchable' => true,
+                'sortable' => false,
+                'title' => trans('general.manufacturer'),
+                'visible' => false,
+                'formatter' => 'manufacturersLinkObjFormatter',
+            ],
+            [
+                'field' => 'source_type',
+                'searchable' => true,
+                'sortable' => true,
+                'title' => trans('general.type'),
+                'visible' => true,
+            ],
+            [
+                'field' => 'source_asset',
                 'searchable' => false,
-                'sortable' => true,
-                'title' => trans('general.created_by'),
-                'visible' => false,
+                'sortable' => false,
+                'title' => trans('general.source'),
+                'visible' => true,
+                'formatter' => 'hardwareLinkObjFormatter',
+            ],
+            [
+                'field' => 'current_asset',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.asset'),
+                'visible' => true,
+                'formatter' => 'hardwareLinkObjFormatter',
+            ],
+            [
+                'field' => 'current_location',
+                'searchable' => true,
+                'sortable' => false,
+                'title' => trans('general.location'),
+                'visible' => true,
+            ],
+            [
+                'field' => 'held_by',
+                'searchable' => false,
+                'sortable' => false,
+                'title' => trans('general.user'),
+                'visible' => true,
                 'formatter' => 'usersLinkObjFormatter',
-            ],[
-                'field' => 'created_at',
-                'searchable' => false,
-                'sortable' => true,
-                'visible' => false,
-                'title' => trans('general.created_at'),
-                'formatter' => 'dateDisplayFormatter',
-            ], [
+            ],
+            [
                 'field' => 'updated_at',
                 'searchable' => false,
                 'sortable' => true,
-                'visible' => false,
+                'visible' => true,
                 'title' => trans('general.updated_at'),
                 'formatter' => 'dateDisplayFormatter',
             ],
         ];
 
-        $layout[] = [
-            'field' => 'checkincheckout',
-            'searchable' => false,
-            'sortable' => false,
-            'switchable' => false,
-            'title' => trans('general.checkin').'/'.trans('general.checkout'),
-            'visible' => true,
-            'formatter' => 'componentsInOutFormatter',
-            'printIgnore' => true,
-        ];
-
-        $layout[] = [
-            'field' => 'actions',
-            'searchable' => false,
-            'sortable' => false,
-            'switchable' => false,
-            'title' => trans('table.actions'),
-            'formatter' => 'componentsActionsFormatter',
-            'printIgnore' => true,
-        ];
-
         return json_encode($layout);
     }
 
-    /**
-     * Generate html link to this items name.
-     * @return string
-     */
     public function nameUrl()
     {
-        return (string) link_to_route('consumables.show', e($this->name), $this->id);
+        return (string) link_to_route('components.show', e($this->name), $this->id);
     }
 
-    /**
-     * Url to view this item.
-     * @return string
-     */
     public function viewUrl()
     {
-        return route('accessories.show', $this->id);
+        return route('components.show', $this->id);
     }
 }

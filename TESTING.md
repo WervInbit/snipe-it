@@ -25,12 +25,8 @@ APP_LOCALE=en-US
 # --------------------------------------------
 # REQUIRED: DATABASE SETTINGS
 # --------------------------------------------
-DB_CONNECTION=sqlite_testing
-#DB_HOST=127.0.0.1
-#DB_PORT=3306
-#DB_DATABASE=null
-#DB_USERNAME=null
-#DB_PASSWORD=null
+DB_CONNECTION=sqlite
+DB_DATABASE=:memory:
 ```
 
 To use MySQL you should update the `DB_` variables to match your local test database:

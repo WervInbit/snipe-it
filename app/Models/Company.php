@@ -252,6 +252,11 @@ final class Company extends SnipeModel
         return $this->hasMany(Component::class, 'company_id');
     }
 
+    public function componentInstances()
+    {
+        return $this->hasMany(ComponentInstance::class, 'company_id');
+    }
+
     /**
      * START COMPANY SCOPING FOR FMCS
      */

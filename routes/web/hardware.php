@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\MaintenancesController;
 use App\Http\Controllers\Assets\AssetsController;
+use App\Http\Controllers\Assets\AssetComponentsController;
 use App\Http\Controllers\Assets\AssetLabelPrintController;
 use App\Http\Controllers\Assets\BulkAssetsController;
 use App\Http\Controllers\TestRunController;
@@ -136,6 +137,15 @@ Route::group(
             ->name('asset-images.update');
         Route::delete('{asset}/images/{assetImage}', [AssetImageController::class, 'destroy'])
             ->name('asset-images.destroy');
+
+        Route::post('{asset}/components/extract', [AssetComponentsController::class, 'extract'])
+            ->name('hardware.components.extract');
+        Route::post('{asset}/components/install-tray', [AssetComponentsController::class, 'installFromTray'])
+            ->name('hardware.components.install-tray');
+        Route::post('{asset}/components/install-existing', [AssetComponentsController::class, 'installExisting'])
+            ->name('hardware.components.install-existing');
+        Route::post('{asset}/components/register', [AssetComponentsController::class, 'register'])
+            ->name('hardware.components.register');
 
         // Asset individual tests
         Route::get('{asset}/asset-tests', [AssetTestController::class, 'index'])

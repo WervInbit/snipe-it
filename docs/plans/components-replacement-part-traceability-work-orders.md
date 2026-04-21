@@ -11,6 +11,73 @@ Read `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md` first, then read this 
 ## Planning Date
 2026-04-16
 
+## Status Update (2026-04-21)
+This document started as the forward-looking replacement plan. It is now partially historical because a large portion of the plan has already been implemented on the current branch.
+
+### Implemented Status By Tranche
+- Phase 1 foundation: implemented
+- Phase 2 registry/detail replacement: implemented
+- Phase 3 asset integration and event-driven history: implemented
+- Phase 4 browser lifecycle and tray workspace: implemented
+- Phase 5 tray aging and verification: partially implemented
+- Phase 6 internal work-order UI: implemented
+- Phase 7 read-only customer portal MVP: implemented
+
+### What Is Implemented
+- new component foundation (`ComponentDefinition`, `ComponentInstance`, `ComponentEvent`, storage locations, expected component templates)
+- instance-based `/components` registry and detail pages
+- event-driven asset component history with soft-delete-aware lineage visibility
+- operational asset `Components` tab for tracked components
+- browser lifecycle flow:
+- manual intake
+- extract to tray
+- remove to tray
+- install
+- move to stock
+- verification flag/confirm
+- destruction pending / destroyed
+- delete when not installed
+- persistent tray workspace and tray badge
+- internal work-order UI and authenticated read-only customer portal UI
+
+### Deltas From The Original Plan
+- `verification` replaced the earlier `quarantine` wording as the active workflow language/default destination.
+- Component definitions are global catalog records and are no longer company-scoped.
+- Serial tracking is intentionally deferred and hidden from the admin settings UI until it is either properly enforced or removed.
+- Work-order and portal UI now exist; the remaining work is deeper integration, not initial scaffolding.
+- Component tags and asset tags must never overlap and are treated as globally unique identifiers.
+
+### Remaining Scope / Gaps
+- model-number expected-component template management UI is still not implemented on model-number screens
+- work-order-driven component action UX is still deferred
+- component QR/mobile scan workflow is still only groundwork
+- tray aging exists, but there is not yet a richer operator reminder/notification system
+- portal remains read-only MVP
+- full-project regression has not been run
+- broader asset UI still has an unrelated older failure surface outside the new component feature area
+
+### Required Design Work
+- model-number template management UX
+- work-order/task-centered component action UX
+- component QR/mobile scan journey
+- future customer/account visibility abstraction beyond the current normal-user plus optional-company approach
+- final decision on serial tracking: implement or retire
+
+### Verification Status
+- `php artisan test tests/Feature/Components/Ui tests/Feature/Settings/ComponentDefinitionSettingsTest.php --env=testing`
+- result: `21` tests, `82` assertions
+- `php artisan test tests/Feature/WorkOrders tests/Feature/Assets/Ui/ComponentHistoryTest.php --env=testing`
+- result: `16` tests, `69` assertions
+- `php artisan test tests/Feature/Components/Ui/ShowComponentTest.php --env=testing`
+- result: pass
+- full-project regression: not yet run
+
+### Recommended Next Tranche
+- build model-number expected-component template management UI
+- move component actions into work-order/task workflows
+- implement the component QR/mobile scan journey
+- run broader regression and asset-suite triage after those workflows settle
+
 ## Executive Summary
 Replace the current Snipe-IT `components` module with a new `Components` experience built around:
 - unique physical component instances
@@ -39,7 +106,6 @@ These decisions were made during planning and should be treated as implementatio
   - in stock
   - in tray/in transfer
   - needing verification
-  - in quarantine
   - defective
   - destruction pending
   - destroyed/recycled
@@ -53,7 +119,7 @@ These decisions were made during planning and should be treated as implementatio
 - Operators need a persistent `Tray` workflow:
   - remove component from asset into tray
   - carry it while navigating
-  - install into another asset, move to stock, or move to quarantine
+  - install into another asset, move to stock, or move to verification
 - Tray is real persisted state, not browser-only state.
 - Tray aging must be monitored so stale floating components become visible and require verification.
 - QR labels are desired for component instances, but the system must work before the printer exists.

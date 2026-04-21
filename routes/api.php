@@ -236,27 +236,49 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             ]
         )->name('api.components.selectlist');
 
-        Route::get('{component}/assets',
+        Route::get('{component_id}/assets',
         [
             Api\ComponentsController::class, 
             'getAssets'
         ]
         )->name('api.components.assets');
 
-      });
-    Route::post('components/{id}/checkin',
-        [
+        Route::post('{component_id}/remove-to-tray', [
             Api\ComponentsController::class,
-            'checkin'
-        ]
-    )->name('api.components.checkin');
+            'removeToTray',
+        ])->name('api.components.remove_to_tray');
 
-    Route::post('components/{id}/checkout',
-        [
+        Route::post('{component_id}/install', [
             Api\ComponentsController::class,
-            'checkout'
-        ]
-    )->name('api.components.checkout');
+            'install',
+        ])->name('api.components.install');
+
+        Route::post('{component_id}/move-to-stock', [
+            Api\ComponentsController::class,
+            'moveToStock',
+        ])->name('api.components.move_to_stock');
+
+        Route::post('{component_id}/flag-needs-verification', [
+            Api\ComponentsController::class,
+            'flagNeedsVerification',
+        ])->name('api.components.flag_needs_verification');
+
+        Route::post('{component_id}/confirm-verification', [
+            Api\ComponentsController::class,
+            'confirmVerification',
+        ])->name('api.components.confirm_verification');
+
+        Route::post('{component_id}/mark-destruction-pending', [
+            Api\ComponentsController::class,
+            'markDestructionPending',
+        ])->name('api.components.mark_destruction_pending');
+
+        Route::post('{component_id}/mark-destroyed', [
+            Api\ComponentsController::class,
+            'markDestroyed',
+        ])->name('api.components.mark_destroyed');
+
+      });
 
 
       Route::resource('components', 
@@ -269,7 +291,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 'destroy' => 'api.components.destroy',
             ],
         'except' => ['create', 'edit'],
-        'parameters' => ['component' => 'component_id'],
+        'parameters' => ['components' => 'component_id'],
         ]
     ); // end components API routes
 
@@ -1366,7 +1388,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'index'
         ]
     )->name('api.files.index')
-        ->where(['object_type' => 'accessories|assets|components|consumables|hardware|licenses|locations|maintenances|models|model-numbers|users']);
+        ->where(['object_type' => 'accessories|assets|components|component-instances|consumables|hardware|licenses|locations|maintenances|models|model-numbers|users|work-orders']);
 
     // Get a file
     Route::get('{object_type}/{id}/files/{file_id}',
@@ -1375,7 +1397,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'show'
         ]
     )->name('api.files.show')
-        ->where(['object_type' => 'accessories|assets|components|consumables|hardware|licenses|locations|maintenances|models|model-numbers|users']);
+        ->where(['object_type' => 'accessories|assets|components|component-instances|consumables|hardware|licenses|locations|maintenances|models|model-numbers|users|work-orders']);
 
     // Upload files(s)
     Route::post('{object_type}/{id}/files',
@@ -1384,7 +1406,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'store'
         ]
     )->name('api.files.store')
-        ->where(['object_type' => 'accessories|assets|components|consumables|hardware|licenses|locations|maintenances|models|model-numbers|users']);
+        ->where(['object_type' => 'accessories|assets|components|component-instances|consumables|hardware|licenses|locations|maintenances|models|model-numbers|users|work-orders']);
 
     // Delete files(s)
     Route::delete('{object_type}/{id}/files/{file_id}/delete',
@@ -1393,7 +1415,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'destroy'
         ]
     )->name('api.files.destroy')
-        ->where(['object_type' => 'accessories|assets|components|consumables|hardware|licenses|locations|maintenances|models|model-numbers|users']);
+        ->where(['object_type' => 'accessories|assets|components|component-instances|consumables|hardware|licenses|locations|maintenances|models|model-numbers|users|work-orders']);
 
 }); // end API routes
 

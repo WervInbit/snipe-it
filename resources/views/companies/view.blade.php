@@ -58,15 +58,17 @@
                         </a>
                     </li>
 
-                    <li>
-                        <a href="#components_tab" data-toggle="tab">
-                            <span class="hidden-lg hidden-md">
-                            <i class="far fa-hdd"></i></span>
-                            <span class="hidden-xs hidden-sm">{{ trans('general.components') }}
-                                {!! (($company->components) && ($company->components->count() > 0 )) ? '<span class="badge badge-secondary">'.number_format($company->components->count()).'</span>' : '' !!}
-                            </span>
-                        </a>
-                    </li>
+                    @can('view', \App\Models\ComponentInstance::class)
+                        <li>
+                            <a href="#components_tab" data-toggle="tab">
+                                <span class="hidden-lg hidden-md">
+                                <i class="far fa-hdd"></i></span>
+                                <span class="hidden-xs hidden-sm">{{ trans('general.components') }}
+                                    {!! ($company->componentInstances()->count() > 0) ? '<span class="badge badge-secondary">'.number_format($company->componentInstances()->count()).'</span>' : '' !!}
+                                </span>
+                            </a>
+                        </li>
+                    @endcan
 
                     <li>
                         <a href="#users_tab" data-toggle="tab">
@@ -172,26 +174,28 @@
                         </div>
                     </div><!-- /consumables-tab -->
 
-                    <div class="tab-pane" id="components_tab">
-                        <div class="table-responsive">
+                    @can('view', \App\Models\ComponentInstance::class)
+                        <div class="tab-pane" id="components_tab">
+                            <div class="table-responsive">
 
-                            <table
-                                    data-columns="{{ \App\Presenters\ComponentPresenter::dataTableLayout() }}"
-                                    data-cookie-id-table="componentsTable"
-                                    data-id-table="componentsTable"
-                                    data-side-pagination="server"
-                                    data-sort-order="asc"
-                                    id="componentsTable"
-                                    class="table table-striped snipe-table"
-                                    data-url="{{route('api.components.index',['company_id' => $company->id]) }}"
-                                    data-export-options='{
-                              "fileName": "export-companies-{{ str_slug($company->name) }}-components-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
+                                <table
+                                        data-columns="{{ \App\Presenters\ComponentPresenter::dataTableLayout() }}"
+                                        data-cookie-id-table="componentsTable"
+                                        data-id-table="componentsTable"
+                                        data-side-pagination="server"
+                                        data-sort-order="asc"
+                                        id="componentsTable"
+                                        class="table table-striped snipe-table"
+                                        data-url="{{route('api.components.index',['company_id' => $company->id]) }}"
+                                        data-export-options='{
+                                  "fileName": "export-companies-{{ str_slug($company->name) }}-components-{{ date('Y-m-d') }}",
+                                  "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                                  }'>
 
-                            </table>
-                        </div>
-                    </div><!-- /consumables-tab -->
+                                </table>
+                            </div>
+                        </div><!-- /consumables-tab -->
+                    @endcan
 
                     <div class="tab-pane" id="users_tab">
                         <div class="table-responsive">

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Assets;
 use App\Events\CheckoutableCheckedIn;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\Concerns\BuildsComponentWorkflowOptions;
 use App\Http\Requests\StoreAssetRequest;
 use App\Http\Requests\UpdateAssetRequest;
 use App\Models\Actionlog;
@@ -14,6 +15,10 @@ use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\CheckoutRequest;
 use App\Models\Company;
+use App\Models\ComponentDefinition;
+use App\Models\ComponentEvent;
+use App\Models\ComponentInstance;
+use App\Models\ComponentStorageLocation;
 use App\Models\ModelNumber;
 use App\Models\Location;
 use App\Models\Setting;
@@ -47,6 +52,8 @@ use Illuminate\Support\Collection;
  */
 class AssetsController extends Controller
 {
+    use BuildsComponentWorkflowOptions;
+
     protected $barCodeDimensions = ['height' => 2, 'width' => 22];
 
     public function __construct()
@@ -421,6 +428,32 @@ class AssetsController extends Controller
                 }
             }
 
+            $componentHistory = ComponentEvent::query()
+                ->with([
+                    'componentInstance' => fn ($query) => $query
+                        ->withTrashed()
+                        ->with([
+                            'componentDefinition.category',
+                            'componentDefinition.manufacturer',
+                            'storageLocation.siteLocation',
+                        ]),
+                    'performedBy',
+                    'fromAsset.model',
+                    'toAsset.model',
+                    'fromStorageLocation',
+                    'toStorageLocation',
+                ])
+                ->whereIn('component_instance_id', function ($query) use ($asset): void {
+                    $query->select('component_instance_id')
+                        ->from('component_events')
+                        ->where(function ($inner) use ($asset): void {
+                            $inner->where('from_asset_id', $asset->id)
+                                ->orWhere('to_asset_id', $asset->id);
+                        });
+                })
+                ->orderByDesc('created_at')
+                ->get();
+
             $asset->load([
                 'tests.audits.user',
                 'tests.results.audits.user',
@@ -428,6 +461,18 @@ class AssetsController extends Controller
                 'tests.results.attributeDefinition',
                 'tests.results.photos',
                 'tests.user',
+                'trackedComponents.componentDefinition.category',
+                'trackedComponents.componentDefinition.manufacturer',
+                'trackedComponents.storageLocation.siteLocation',
+                'trackedComponents.heldBy',
+                'trackedComponents.createdBy',
+                'sourcedComponents.componentDefinition.category',
+                'sourcedComponents.componentDefinition.manufacturer',
+                'sourcedComponents.currentAsset.model',
+                'sourcedComponents.storageLocation.siteLocation',
+                'sourcedComponents.heldBy',
+                'modelNumber.componentTemplates.componentDefinition.category',
+                'modelNumber.componentTemplates.componentDefinition.manufacturer',
             ]);
 
             $resolvedAttributes = app(\App\Services\ModelAttributes\EffectiveAttributeResolver::class)
@@ -435,12 +480,30 @@ class AssetsController extends Controller
                 ->reject(fn ($attribute) => $attribute->definition->key === Asset::CONDITION_GRADE_ATTRIBUTE_KEY)
                 ->values();
             $testSummary = $asset->latestTestIssueSummary();
+            $componentLocations = $this->storageLocationsByType();
+            $currentUserTrayComponents = ComponentInstance::query()
+                ->with(['componentDefinition.category', 'componentDefinition.manufacturer', 'sourceAsset.model'])
+                ->inTray()
+                ->heldBy(auth()->user())
+                ->orderBy('component_tag')
+                ->get();
 
             return view('hardware/view', compact('asset', 'settings'))
                 ->with('resolvedAttributes', $resolvedAttributes)
                 ->with('use_currency', $use_currency)
                 ->with('audit_log', $audit_log)
                 ->with('testSummary', $testSummary)
+                ->with('componentHistory', $componentHistory)
+                ->with('componentDefinitions', $this->activeComponentDefinitions())
+                ->with('componentConditionOptions', $this->conditionOptions())
+                ->with('componentSourceTypeOptions', array_diff_key(
+                    $this->sourceTypeOptions(),
+                    [ComponentInstance::SOURCE_EXTRACTED => __('Extracted')]
+                ))
+                ->with('stockComponentLocations', $componentLocations['stock'])
+                ->with('verificationComponentLocations', $componentLocations['verification'])
+                ->with('destructionComponentLocations', $componentLocations['destruction'])
+                ->with('currentUserTrayComponents', $currentUserTrayComponents)
                 ->with('statuslabel_list', Helper::statusLabelList());
         }
 

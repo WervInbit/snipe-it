@@ -3,7 +3,8 @@
 namespace Tests\Feature\Components\Api;
 
 use App\Models\Company;
-use App\Models\Component;
+use App\Models\Asset;
+use App\Models\ComponentInstance;
 use App\Models\User;
 use Tests\Concerns\TestsFullMultipleCompaniesSupport;
 use Tests\Concerns\TestsPermissionsRequirement;
@@ -11,9 +12,9 @@ use Tests\TestCase;
 
 class DeleteComponentTest extends TestCase implements TestsFullMultipleCompaniesSupport, TestsPermissionsRequirement
 {
-    public function testRequiresPermission()
+    public function testRequiresPermission(): void
     {
-        $component = Component::factory()->create();
+        $component = ComponentInstance::factory()->create();
 
         $this->actingAsForApi(User::factory()->create())
             ->deleteJson(route('api.components.destroy', $component))
@@ -22,13 +23,13 @@ class DeleteComponentTest extends TestCase implements TestsFullMultipleCompanies
         $this->assertNotSoftDeleted($component);
     }
 
-    public function testAdheresToFullMultipleCompaniesSupportScoping()
+    public function testAdheresToFullMultipleCompaniesSupportScoping(): void
     {
         [$companyA, $companyB] = Company::factory()->count(2)->create();
 
-        $componentA = Component::factory()->for($companyA)->create();
-        $componentB = Component::factory()->for($companyB)->create();
-        $componentC = Component::factory()->for($companyB)->create();
+        $componentA = ComponentInstance::factory()->create(['company_id' => $companyA->id]);
+        $componentB = ComponentInstance::factory()->create(['company_id' => $companyB->id]);
+        $componentC = ComponentInstance::factory()->create(['company_id' => $companyB->id]);
 
         $superUser = $companyA->users()->save(User::factory()->superuser()->make());
         $userInCompanyA = $companyA->users()->save(User::factory()->deleteComponents()->make());
@@ -53,9 +54,9 @@ class DeleteComponentTest extends TestCase implements TestsFullMultipleCompanies
         $this->assertSoftDeleted($componentC);
     }
 
-    public function testCanDeleteComponents()
+    public function testCanDeleteComponents(): void
     {
-        $component = Component::factory()->create();
+        $component = ComponentInstance::factory()->create();
 
         $this->actingAsForApi(User::factory()->deleteComponents()->create())
             ->deleteJson(route('api.components.destroy', $component))
@@ -64,9 +65,9 @@ class DeleteComponentTest extends TestCase implements TestsFullMultipleCompanies
         $this->assertSoftDeleted($component);
     }
 
-    public function testCannotDeleteComponentIfCheckedOut()
+    public function testCannotDeleteComponentIfInstalled(): void
     {
-        $component = Component::factory()->checkedOutToAsset()->create();
+        $component = ComponentInstance::factory()->installed(Asset::factory()->create()->id)->create();
 
         $this->actingAsForApi(User::factory()->deleteComponents()->create())
             ->deleteJson(route('api.components.destroy', $component))

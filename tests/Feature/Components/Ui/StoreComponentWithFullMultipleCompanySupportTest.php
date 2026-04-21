@@ -2,33 +2,46 @@
 
 namespace Tests\Feature\Components\Ui;
 
-use App\Models\Category;
-use App\Models\Component;
-use PHPUnit\Framework\Attributes\DataProvider;
-use Tests\Support\ProvidesDataForFullMultipleCompanySupportTesting;
+use App\Http\Middleware\VerifyCsrfToken;
+use App\Models\User;
 use Tests\TestCase;
 
 class StoreComponentWithFullMultipleCompanySupportTest extends TestCase
 {
-    use ProvidesDataForFullMultipleCompanySupportTesting;
-
-    #[DataProvider('dataForFullMultipleCompanySupportTesting')]
-    public function testAdheresToFullMultipleCompaniesSupportScoping($data)
+    protected function setUp(): void
     {
-        ['actor' => $actor, 'company_attempting_to_associate' => $company, 'assertions' => $assertions] = $data();
+        parent::setUp();
 
-        $this->settings->enableMultipleFullCompanySupport();
+        $this->withoutMiddleware(VerifyCsrfToken::class);
+    }
 
-        $this->actingAs($actor)
+    public function testDirectWebStoreCreatesLooseComponent(): void
+    {
+        $user = User::factory()
+            ->viewComponents()
+            ->createComponents()
+            ->create();
+
+        $stock = \App\Models\ComponentStorageLocation::factory()->stock()->create();
+
+        $response = $this->actingAs($user)
             ->post(route('components.store'), [
-                'name' => 'My Cool Component',
-                'qty' => '1',
-                'category_id' => Category::factory()->create()->id,
-                'company_id' => $company->id,
+                'display_name' => 'My Cool Component',
+                'source_type' => \App\Models\ComponentInstance::SOURCE_MANUAL,
+                'condition_code' => \App\Models\ComponentInstance::CONDITION_GOOD,
+                'storage_location_id' => $stock->id,
+                'notes' => 'Bench intake',
             ]);
 
-        $component = Component::where('name', 'My Cool Component')->sole();
+        $component = \App\Models\ComponentInstance::query()->where('display_name', 'My Cool Component')->first();
 
-        $assertions($component);
+        $response->assertRedirect(route('components.show', $component))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('component_instances', [
+            'display_name' => 'My Cool Component',
+            'storage_location_id' => $stock->id,
+            'status' => \App\Models\ComponentInstance::STATUS_IN_STOCK,
+        ]);
     }
 }

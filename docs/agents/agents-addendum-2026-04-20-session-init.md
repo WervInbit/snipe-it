@@ -1,0 +1,22 @@
+# Addendum (2026-04-20 Codex)
+
+- Session resumed on the local Docker validation/setup stream after the component/work-order tranche.
+- Confirmed that the compiled CSS assets and `mix-manifest.json` were present and readable, so the unstyled pages were not caused by a missing front-end build.
+- Identified the actual issue as a stale container-level `APP_URL` coming from the base Docker compose file after restart/recreation.
+- Updated `docker-compose.local.yml` so the local app container explicitly inherits the repo/local `APP_URL` instead of the base dev-host default.
+- Recreated the local `app` and `web` containers and re-verified that the login page renders CSS asset links that resolve successfully.
+- After restart validation, confirmed the local DB was missing the two newest local-feature migrations even though the stack was pointed at the expected database.
+- Re-applied the pending component/work-order migrations and verified the new tables now exist.
+- Follow-up feature cleanup removed definition-level company scoping from the new component-definition catalog and applied a local migration to drop the unused `company_id` column from `component_definitions`.
+- Avoided logging local hostnames/IPs in this note; the key outcome is that the local compose override now controls the app URL for restarts.
+- Implemented Phase 4 browser workflow on top of the existing component lifecycle service:
+- manual loose-component intake page under `components.create`
+- new tray workspace under `components.tray`
+- actionable component detail lifecycle panels
+- asset-tab workflow forms for remove/install/register/extract
+- persistent tray badge/link in the main layout
+- Hid the deferred serial-tracking control from the component-definition admin UI so the settings surface no longer advertises a non-functional rule.
+- Re-ran targeted verification after restoring missing Composer dev dependencies in the app container:
+- `tests/Feature/Components/Ui` + `ComponentDefinitionSettingsTest` passed (`21` tests / `82` assertions)
+- `tests/Feature/WorkOrders` + `tests/Feature/Assets/Ui/ComponentHistoryTest.php` passed (`16` tests / `69` assertions)
+- This session did not run a full-project regression; only the surfaces touched by the browser workflow phase and its adjacent shared views/services were verified.

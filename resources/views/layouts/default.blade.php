@@ -195,10 +195,16 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                     </a>
                                 </li>
                             @endcan
-                            @can('view', \App\Models\Component::class)
+                            @can('view', \App\Models\ComponentInstance::class)
+                                @php
+                                    $componentTrayCount = \App\Models\ComponentInstance::query()->inTray()->heldBy(auth()->id())->count();
+                                @endphp
                                 <li aria-hidden="true"{!! (request()->is('components*') ? ' class="active"' : '') !!}>
                                     <a href="{{ route('components.index') }}" {{$snipeSettings->shortcuts_enabled == 1 ? "accesskey=5" : ''}} tabindex="-1" data-tooltip="true" data-placement="bottom" data-title="{{ trans('general.components') }}">
                                         <x-icon type="components" class="fa-fw" />
+                                        @if ($componentTrayCount > 0)
+                                            <span class="label label-warning" style="position:absolute; margin-left:-6px; margin-top:-8px;">{{ $componentTrayCount }}</span>
+                                        @endif
                                         <span class="sr-only">{{ trans('general.components') }}</span>
                                     </a>
                                 </li>
@@ -279,14 +285,6 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                                 <a href="{{ route('consumables.create') }}" tabindex="-1">
                                                     <x-icon type="consumables" />
                                                     {{ trans('general.consumable') }}
-                                                </a>
-                                            </li>
-                                        @endcan
-                                        @can('create', \App\Models\Component::class)
-                                            <li {!! (request()->is('components/create') ? 'class="active"' : '') !!}>
-                                                <a href="{{ route('components.create') }}" tabindex="-1">
-                                                    <x-icon type="components" />
-                                                    {{ trans('general.component') }}
                                                 </a>
                                             </li>
                                         @endcan
@@ -408,6 +406,14 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                                 <x-icon type="checkmark" class="fa-fw" />
                                                 {{ trans('general.accept_assets_menu') }}
                                             </a></li>
+
+                                        @can('portal.view')
+                                        <li {!! (request()->is('account/work-orders*') ? ' class="active"' : '') !!}>
+                                            <a href="{{ route('account.work-orders.index') }}">
+                                                <i class="fas fa-clipboard-list fa-fw" aria-hidden="true"></i>
+                                                {{ __('My Work Orders') }}
+                                            </a></li>
+                                        @endcan
 
 
                                         @can('self.profile')
@@ -626,11 +632,31 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                 </a>
                             </li>
                         @endcan
-                        @can('view', \App\Models\Component::class)
+                        @can('view', \App\Models\ComponentInstance::class)
+                            @php
+                                $componentTrayCount = \App\Models\ComponentInstance::query()->inTray()->heldBy(auth()->id())->count();
+                            @endphp
                             <li id="components-sidenav-option"{!! (request()->is('components*') ? ' class="active"' : '') !!}>
                                 <a href="{{ route('components.index') }}">
                                     <x-icon type="components" class="fa-fw" />
                                     <span>{{ trans('general.components') }}</span>
+                                </a>
+                            </li>
+                            <li id="components-tray-sidenav-option"{!! (request()->is('components/tray') ? ' class="active"' : '') !!}>
+                                <a href="{{ route('components.tray') }}">
+                                    <i class="fas fa-inbox fa-fw" aria-hidden="true"></i>
+                                    <span>{{ __('My Tray') }}</span>
+                                    @if ($componentTrayCount > 0)
+                                        <span class="badge badge-secondary">{{ $componentTrayCount }}</span>
+                                    @endif
+                                </a>
+                            </li>
+                        @endcan
+                        @can('viewAny', \App\Models\WorkOrder::class)
+                            <li id="workorders-sidenav-option"{!! (request()->is('work-orders*') ? ' class="active"' : '') !!}>
+                                <a href="{{ route('work-orders.index') }}">
+                                    <i class="fas fa-clipboard-list fa-fw" aria-hidden="true"></i>
+                                    <span>{{ __('Work Orders') }}</span>
                                 </a>
                             </li>
                         @endcan
@@ -753,6 +779,22 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                         <li {!! (request()->is('admin/settings/model-numbers*') ? ' class="active"' : '') !!}>
                                             <a href="{{ route('settings.model_numbers.index') }}">
                                                 {{ __('Model Numbers') }}
+                                            </a>
+                                        </li>
+                                    @endcan
+
+                                    @can('manage', \App\Models\ComponentDefinition::class)
+                                        <li {!! (request()->is('admin/settings/component-definitions*') ? ' class="active"' : '') !!}>
+                                            <a href="{{ route('settings.component_definitions.index') }}">
+                                                {{ __('Component Definitions') }}
+                                            </a>
+                                        </li>
+                                    @endcan
+
+                                    @can('manage', \App\Models\ComponentStorageLocation::class)
+                                        <li {!! (request()->is('admin/settings/component-storage-locations*') ? ' class="active"' : '') !!}>
+                                            <a href="{{ route('settings.component_storage_locations.index') }}">
+                                                {{ __('Component Storage') }}
                                             </a>
                                         </li>
                                     @endcan

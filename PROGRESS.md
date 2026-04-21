@@ -1,3 +1,69 @@
+# Session Progress (2026-04-21)
+
+## Addendum (2026-04-21 Codex)
+- Created a full handoff update for the current component/work-order/portal stream and aligned the main plan with the actual repository state.
+- Published the detailed handoff in `docs/agents/agents-addendum-2026-04-21-session-init.md` so the next contributor can resume without reconstructing prior chat history.
+- Current tranche status at handoff:
+- component replacement foundation is in place (`ComponentDefinition`, `ComponentInstance`, `ComponentEvent`, storage locations, expected component templates)
+- global `/components` registry and detail pages are instance-based, not pooled-stock based
+- asset `Components` tab is operational for tracked components
+- tray state, tray aging command, and browser tray workspace are implemented
+- component browser lifecycle actions are implemented:
+- manual intake
+- extract to tray
+- remove to tray
+- install
+- move to stock
+- verification flag/confirm
+- destruction pending / destroyed
+- delete when not installed
+- component tags are enforced to be unique across both component tags and asset tags
+- definition-level company scoping was removed
+- non-functional serial-tracking UI was hidden and deferred
+- internal work-order UI and authenticated read-only customer portal UI are implemented
+- Key remaining gaps at handoff:
+- work-order-driven component actions are still deferred; work orders show component activity but are not yet the operational action hub for installs/removals
+- model-number component template management is still not a full operator/admin workflow on the model-number screens
+- component QR/mobile scan flow exists only as groundwork; there is no dedicated component scan journey yet
+- tray aging currently escalates by command/schedule and logs reminders, but there is not yet a full user-facing reminder/notification system
+- broader project regression remains incomplete; only targeted suites around the touched surfaces were run
+- asset UI outside the new component surfaces still has an older unrelated failure surface in the wider asset suite
+- Additional reliability fix completed during handoff:
+- replaced the component-detail `Install Into Asset` AJAX asset picker with a server-rendered asset dropdown after the browser showed that the selectlist was not loading on `/components/{id}`
+- added regression coverage so the component detail page now proves installable assets render in the HTML
+- Verification state at handoff:
+- focused Phase 4 + settings suite: `21` tests passed, `82` assertions
+- adjacent work-order + asset component-history suite: `16` tests passed, `69` assertions
+- targeted `ShowComponentTest` rerun after the asset-picker fix: pass
+- full-project regression was not run in this handoff block
+- Handoff docs updated:
+- `docs/agents/agents-addendum-2026-04-21-session-init.md`
+- `docs/plans/components-replacement-part-traceability-work-orders.md`
+- Recommended next tranche at handoff:
+- complete model-number template management UI
+- move component actions into work-order/task-centered flows
+- add a dedicated component QR/mobile scan journey
+- run broader regression once those workflows settle
+
+# Session Progress (2026-04-20)
+
+## Addendum (2026-04-20 Codex)
+- Session kickoff: resumed from the component/work-order tranche and current local Docker validation work.
+- CSS/asset delivery follow-up after a restart:
+- confirmed the compiled CSS bundles and `public/mix-manifest.json` were present on disk and nginx could serve the CSS files directly.
+- traced the unstyled pages to a stale container-level `APP_URL` inherited from the base Docker compose file, which caused Laravel to emit secure/dev-host asset URLs after container recreation.
+- updated the local compose override so the app container now explicitly inherits the repo/local `APP_URL` value instead of the base dev-host default.
+- recreated the local app/web containers and verified the login page was again rendering HTTP CSS links that resolve successfully.
+- Database/schema follow-up after restart:
+- confirmed the restarted stack was pointing at the expected local MySQL database but still had the two latest local-feature migrations pending.
+- applied `2026_04_16_110000_add_display_order_to_test_types_table` and `2026_04_17_120000_create_component_traceability_tables` in the local container.
+- verified the new `component_*` and `work_order*` tables now exist and the login route responds normally again.
+- Component definition scope cleanup:
+- removed definition-level company scoping from the model, settings controller, and settings UI so component definitions are now global catalog records rather than visibility-scoped records.
+- removed the local `company_id` column from `component_definitions` via a follow-up migration and updated the instance lifecycle fallback so instance company scope is no longer inherited from definitions.
+- added focused settings coverage so the component-definition create form no longer exposes a `company_id` field.
+- current manual verification target remains the restarted local Docker stack; broader UI/manual validation is still in progress.
+
 # Session Progress (2026-04-09)
 - Re-read `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, `TODO.md`, and the latest session addenda to resume the current workstream.
 - Fixed mobile overflow in shared bulk-action toolbars and QR widget controls so list-page dropdowns/buttons stay inside the viewport on narrow screens.
@@ -43,7 +109,7 @@
 - Session kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, `TODO.md`, and the latest dated session addendum before resuming work.
 - Created `docs/agents/agents-addendum-2026-04-07-session-init.md` for this session.
 - Reinitialized carry-over context from the 2026-04-02 workstream:
-- local dev hostname/cert flow is set up around `https://dev.inbit` for LAN/mobile testing.
+- local dev hostname/cert flow is set up around the internal HTTPS dev hostname for LAN/mobile testing.
 - hardware detail/edit cleanup pass 1 is in progress locally, including checkout-UI removal, hardware edit simplification, QR widget reduction, and follow-up layout fixes for status/quality rows.
 - the hardware detail Blade parse regression from the last session was resolved by replacing inline `@php(...)` shorthand with block `@php ... @endphp`.
 - Current known open items remain:
@@ -100,8 +166,8 @@
 - mobile-first usability should be treated as the main validation target for upcoming changes.
 - Existing local worktree changes were detected in `PROGRESS.md`, `docs/agents/agents-addendum-2026-03-19-session-init.md`, and `resources/views/tests/active.blade.php`; initialization was logged without reverting or overwriting those unrelated edits.
 - Dev host/certificate setup:
-- extracted a `dev.inbit` server certificate and private key from the newly exported `dev+environment+snipe-it.p12` into `docker/certs/`.
-- updated local dev hostname references from `dev.snipe.inbit` to `dev.inbit` in Docker/nginx/local environment config so the stack can serve the pfSense-backed internal hostname with the matching cert.
+- extracted the internal dev server certificate and private key from the exported environment bundle into `docker/certs/`.
+- updated local dev hostname references in Docker/nginx/local environment config so the stack can serve the internal hostname with the matching cert.
 - verification and restart steps are being handled against the local stack only; no production environment changes were made.
 - Hardware detail/edit cleanup pass 1:
 - gave quality grading its own dedicated row on the hardware detail page while keeping status updates on the existing `hardware.status.update` endpoint.
@@ -395,9 +461,9 @@
 
 ## Addendum (2026-02-03 Codex)
 - Session kickoff: reviewed `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md` to align with current workflow before starting work.
-- Diagnosed local access failure: `dev.snipe.inbit` resolved to a stale host entry (10.10.10.123), so requests never reached the local nginx container.
-- Restored local dev host: mapped `dev.snipe.inbit` to `127.0.0.1` in the Windows hosts file, flushed DNS, and restarted app/web containers.
-- Reverted local overrides so `APP_URL` and nginx match `dev.snipe.inbit` again.
+- Diagnosed local access failure: the internal dev hostname resolved to a stale host entry, so requests never reached the local nginx container.
+- Restored local dev host by correcting the Windows hosts entry, flushing DNS, and restarting app/web containers.
+- Reverted local overrides so `APP_URL` and nginx match the internal dev hostname again.
 - Normalized storage/cache permissions to avoid Blade view cache write errors.
 - Dashboard now hides unauthorized resource blocks; dashboard counts only compute for permitted resources, and activity/status chart sections are gated by their permissions to avoid 403-visible widgets.
 - Hardware list: removed the Checked Out To, Purchase Cost, and Current Value columns from the assets table layout.
@@ -642,7 +708,7 @@
 ## Addendum (2025-11-05 Codex)
 - Brought the repo in line with the Dusk harness: reviewed AGENTS.md/doc logs, installed `laravel/dusk`, and scaffolded the browser testing assets inside the PHP container.
 - Updated `docker/app/Dockerfile` to install Chromium/Chromedriver so headless runs execute inside Docker; added `.env.dusk*` files plus sqlite backing and force-set Dusk bootstrap to the internal Nginx host.
-- Hardened `tests/DuskTestCase.php` to seed/migrate per test, launch Chrome with container-safe flags, and normalise APP_URL/asset URLs before requests.
+- Hardened `tests/DuskTestCase.php` to seed/migrate per test, launch Chrome with container-safe flags, and normalise configured app URLs before requests.
 - Added `tests/Browser/ExampleTest.php` (login inputs) and `tests/Browser/DashboardRefurbFiltersTest.php` (dashboard refurb chips via real login), wiring the Start-page shortcut into the dashboard view and getting the full Dusk suite green.
 - Follow-up: extend Dusk coverage beyond the smoke checks (refurb flow interactions, QR/camera handling) and continue using `scripts/check-storage-permissions.sh` after environment resets so compiled views remain writable.
 
@@ -1242,5 +1308,292 @@ there are multiple duplicate functions that still need to be removed, sku will b
 - `docker compose exec app php artisan view:clear` (pass)
 - `docker compose exec app php artisan view:cache` (pass)
 - `docker compose exec app php artisan test tests/Feature/Settings/ManageTestTypesTest.php --env=testing` (blocked by existing sqlite testing DB corruption: `database disk image is malformed`)
+
+## 2026-04-17
+- session re-init and environment baseline:
+- created `docs/agents/agents-addendum-2026-04-17-session-init.md`.
+- re-read `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, `TODO.md`, the recent 2026-04-16 / 2026-04-09 / 2026-04-07 / 2026-04-02 addenda, and `docs/plans/components-replacement-part-traceability-work-orders.md`.
+- confirmed this cleaned workstation is currently on the local HTTP dev path (`docker-compose.local.yml`, `docker/nginx.local.conf`, local `.env`) rather than the later internal HTTPS hostname path.
+- identified environment drift that must be reconciled during setup:
+- `.env.testing` is missing, while `tests/TestCase.php` now hard-fails without it and requires sqlite-only test DB targets.
+- the main compose/nginx stack and Dusk/browser tests still reference the legacy internal hostname.
+- recent April session notes describe the intended mobile/LAN hostname as the newer internal HTTPS hostname.
+- reviewed the current legacy components surface (`Component` model, component web/API controllers, routes, views, asset components tab, and component QR label generation) to prepare for the planned pooled-components replacement.
+- no code/runtime behavior was changed in this session block; initialization and context sync only.
+- local IP access follow-up:
+- detected the active LAN interface and switched the local stack to IP-based HTTP access for same-network testing.
+- updated local app URL in `.env` to the active LAN address and published local port.
+- widened the local nginx vhost in `docker/nginx.local.conf` so the HTTP dev stack accepts direct IP-host requests instead of only `localhost` / `127.0.0.1`.
+- fixed the local bootstrap handoff in `docker/app/entrypoint.local.sh` to execute the repo-mounted `docker/app/entrypoint.sh` instead of the stale image-baked copy.
+- normalized `docker/app/entrypoint.sh` to LF line endings so the Linux container no longer fails with `env: 'bash\\r': No such file or directory`.
+- started the isolated local stack under compose project `snipeit-local`; the local HTTP dev URL now uses the machine's active LAN address.
+- verification:
+- `docker ps --filter "name=snipeit-local"` shows `app`, `web`, and `db` up, with `web` publishing the configured local HTTP port.
+- `Invoke-WebRequest <local-ip-based-login-url>` (pass, HTTP 200).
+- attempted to add a Windows inbound firewall rule for the published local HTTP port, but `New-NetFirewallRule` failed with `Access is denied`; LAN access from other devices may still require a manual admin-side firewall allow rule if the current Windows profile blocks inbound traffic.
+- components traceability / work-order foundation implementation:
+- added new component/work-order foundation schema via `2026_04_17_120000_create_component_traceability_tables.php`:
+- `component_definitions`
+- `component_storage_locations`
+- `component_instances`
+- `component_events`
+- `model_number_component_templates`
+- `work_orders`
+- `work_order_assets`
+- `work_order_tasks`
+- `work_order_user_access`
+- added new core models and relations for the replacement domain:
+- `ComponentDefinition`
+- `ComponentStorageLocation`
+- `ComponentInstance`
+- `ComponentEvent`
+- `ModelNumberComponentTemplate`
+- `WorkOrder`
+- `WorkOrderAsset`
+- `WorkOrderTask`
+- added component lifecycle services for instance creation, asset extraction, tray removal, install, stock moves, verification, and destruction-state transitions.
+- added random asset-style component tag generation (`INBIT-XX0000` family) and component-instance QR label generation support.
+- added tray aging command `components:age-tray` and scheduled it every 15 minutes, with stale transfer escalation to `needs_verification`.
+- added optional portal/work-order visibility foundation through explicit `work_order_user_access` plus nullable `company_id` compatibility on work orders.
+- added upload route/controller mapping support for `component-instances` and `work-orders`, plus `Actionlog` path/url support for those new upload types.
+- extended `Asset` with tracked/sourced component relations and `ModelNumber` with expected component template relations.
+- replaced component permission definitions with the new semantics:
+- `components.view`
+- `components.create`
+- `components.update`
+- `components.delete`
+- `components.extract`
+- `components.install`
+- `components.move`
+- `components.verify`
+- `components.manage_definitions`
+- `components.manage_storage_locations`
+- added new permissions:
+- `workorders.view`
+- `workorders.create`
+- `workorders.update`
+- `workorders.manage_visibility`
+- `portal.view`
+- added factories for the new component/work-order models and focused tests for:
+- component lifecycle transitions
+- component-instance file upload route
+- explicit work-order portal visibility
+- local testing env follow-up:
+- created a local `.env.testing` pointing at the isolated sqlite testing DB path and created the sqlite file so guarded test commands can target the safe testing database.
+- verification:
+- `php -l` pass on all changed and new PHP files.
+- `php artisan optimize:clear` inside the local app container (pass).
+- `php artisan migrate --env=testing --pretend --path=database/migrations/2026_04_17_120000_create_component_traceability_tables.php` inside the local app container (pass; SQL emitted for the full new schema and seeded default component storage locations).
+- `php artisan about --env=testing` inside the local app container confirmed uncached `testing` environment with sqlite driver.
+- focused PHPUnit execution remains blocked in this environment:
+- `php artisan test ... --env=testing` fails because `SebastianBergmann\Environment\Console` is not present.
+- direct `vendor/bin/phpunit` execution is also unavailable because the current container image does not include a phpunit binary under `vendor/bin`.
+
+- continued the component replacement cutover beyond foundation:
+- enforced global uniqueness between `component_instances.component_tag` and `assets.asset_tag`; generated component tags now skip any value already used by an asset.
+- added company-scope participation for the new component definition / component instance models so FMCS-style query scoping still applies where the new registry replaces old component lists.
+- replaced the API `components` controller surface with instance-based behavior:
+- registry/detail/update/delete now operate on `ComponentInstance`
+- new action endpoints cover `remove-to-tray`, `install`, `move-to-stock`, `flag-needs-verification`, `confirm-verification`, `mark-destruction-pending`, and `mark-destroyed`
+- `components/{component_id}/assets` now returns lineage events instead of pooled pivot rows
+- corrected resource route parameter mapping so both API and web component routes use `{component_id}` and match controller model binding.
+- replaced the component presenter/transformer and web controller/detail view with instance-based data instead of pooled quantity/checkin-checkout semantics.
+- removed the misleading add button from the components registry until direct create/edit UI exists.
+- replaced the asset detail `Components` tab with:
+- installed tracked components
+- expected model-number component templates
+- per-asset component history derived from immutable component events
+- switched asset component counts and component cost display to tracked-instance data instead of legacy pooled relations.
+- removed component checkout/checkin routes from the active web route surface.
+- replaced or removed the old pooled-component test surface:
+- updated component API/UI tests to target `ComponentInstance`
+- added API coverage for cross-entity tag collisions and lifecycle action endpoints
+- removed obsolete component checkout/checkin tests tied to the old pooled mechanics
+- verification:
+- `php -l` pass on all newly changed PHP files in this continuation block.
+- `php artisan route:list --name=components` inside the local app container confirmed the live surface now only exposes the new component instance routes and action endpoints, with `{component_id}` parameter binding.
+
+- continued the component replacement cutover to remove the remaining mixed old/new operational surfaces before starting work-order or portal UI:
+- replaced asset component history assembly with a direct `ComponentEvent` query in `AssetsController`, including soft-deleted component instances and post-removal events for any component that touched the asset.
+- updated the asset Components tab to render event-driven lineage instead of deriving history from current/sourced relations, so removed or deleted tracked parts still remain visible on the asset page.
+- enforced company-scope propagation in `ComponentLifecycleService`:
+- instance creation now derives `company_id` from explicit input, current/source asset, component definition, or actor company
+- install now realigns the component scope with the destination asset
+- FMCS mode now throws if a tracked component would otherwise be created without a company scope
+- completed the operational filter cutover for tracked components:
+- API component index now supports location-hierarchy filtering via component storage locations
+- API component index now supports supplier and manufacturer filters for the new instance model
+- component list location display now uses the new current-location text instead of the old location-link assumption
+- updated visible remaining operational component counts/tabs to the new instance model on:
+- location detail
+- company detail
+- supplier detail
+- manufacturer detail
+- disabled the registry add button in the bootstrap-table component surface so operational screens no longer suggest a direct create UI that is intentionally deferred.
+- removed the now-dead legacy component checkout/checkin controllers and their unused Blade views after confirming no live route or test references remained.
+- added the admin settings catalog for the new component metadata:
+- `settings.component_definitions.*`
+- `settings.component_storage_locations.*`
+- added settings routes, controllers, menu/sidebar entries, settings index cards, reusable forms, and list/detail pages for component definitions and component storage locations.
+- added focused tests for:
+- asset history retaining component lineage after removal, stock move, and soft delete
+- FMCS company propagation and scope enforcement in component lifecycle flows
+- component API filtering by location hierarchy, supplier, and manufacturer
+- settings authorization and CRUD entry points for component definitions and component storage locations
+- verification:
+- `php -l` pass on all changed PHP files and added focused test files in this tranche.
+- `php artisan route:list --name=settings.component` inside the local app container confirmed the new settings route surface.
+- `php artisan route:list --path=admin/settings/component-definitions` and `--path=admin/settings/component-storage-locations` inside the local app container confirmed the catalog routes.
+- focused PHPUnit execution remains blocked on this workstation by the current container/dependency state, so the new tests were added but not run end-to-end here.
+
+- implemented the next tranche on top of the stabilized component/event model: internal work-order UI and authenticated read-only portal UI.
+- added internal work-order routes and server-rendered screens:
+- `/work-orders`
+- `/work-orders/create`
+- `/work-orders/{workOrder}`
+- `/work-orders/{workOrder}/edit`
+- added nested internal mutations for device and task management on the work-order detail page:
+- `work-orders.assets.store|update|destroy`
+- `work-orders.tasks.store|update|destroy`
+- the internal work-order detail page now acts as the operational hub with:
+- summary
+- devices
+- tasks
+- component activity sourced directly from `component_events`
+- linked assets now snapshot `asset_tag` and `serial` automatically when a real asset is selected on work-order devices.
+- added read-only authenticated portal pages under:
+- `/account/work-orders`
+- `/account/work-orders/{workOrder}`
+- portal visibility continues to use the existing `WorkOrder::scopeVisibleTo()` / `isVisibleTo()` rules with:
+- explicit visible users via `work_order_user_access`
+- optional company match for users with `portal.view`
+- `visibility_profile` behavior implemented as:
+- `full`: shows component activity and customer notes
+- `basic`: hides component activity while keeping visible tasks and customer-safe notes
+- `custom`: uses `portal_visibility_json.show_components` and `portal_visibility_json.show_notes_customer`
+- surfaced work-order/task links back into component history on the component detail page so the new work-order UI is connected into the existing traceability chain.
+- added navigation/entry points:
+- internal sidebar entry for work orders
+- staff start-page `Manage` button now points to internal work orders when permitted
+- account dropdown and account dashboard button for `My Work Orders` when `portal.view` is present
+- added focused tests for:
+- internal work-order route authorization and summary create/update flow
+- asset snapshot capture on linked work-order devices
+- task create/update flow
+- portal visibility filtering, customer-safe task rendering, and `basic` vs `full` component activity behavior
+- component detail rendering of linked work order/task history references
+- verification:
+- `php -l` across all newly changed PHP files and added tests (pass)
+- `php artisan route:list --name=work-orders` in the local app container (pass)
+- `php artisan route:list --name=account.work-orders` in the local app container (pass)
+- `php artisan optimize:clear` in the local app container (pass)
+- targeted `php artisan test ... --env=testing` remains blocked by the current container image because Laravel's test wrapper still fails on missing `SebastianBergmann\Environment\Console`
+- direct `vendor/bin/phpunit` remains unavailable in the same container because the binary is not present under `vendor/bin`
+
+- completed the post-implementation gap-closure pass for the work-order/portal tranche:
+- internal work-order component activity now links `fromAsset` and `toAsset` entries back to asset detail pages
+- added focused test coverage for:
+- unauthorized internal create/show/edit/update work-order access
+- company-matched portal visibility without explicit visible-user access
+- internal sidebar and account-area work-order entry visibility
+- start shortcut templates pointing their manage action at internal work orders
+- verification:
+- `php -l` on the newly added/updated gap-closure tests (pass)
+
+- repaired the PHPUnit/test runtime for this workstation/container:
+- installed missing Composer dev dependencies inside the app container so Laravel's test runner and `vendor/bin/phpunit` are available again
+- normalized test DB configuration to use in-memory sqlite instead of the mounted sqlite file:
+- `phpunit.xml` now sets `DB_DATABASE=:memory:`
+- `.env.testing.example` now documents sqlite in-memory defaults
+- `config/database.php` now respects `DB_DATABASE` for the `sqlite` connection instead of hardcoding `database/database.sqlite`
+- `TESTING.md` now documents `DB_CONNECTION=sqlite` with `DB_DATABASE=:memory:`
+- fixed the newly added work-order/settings tests to disable the app CSRF middleware class consistently for mutating requests
+- hardened `ComponentInstance` display-name fallback so work-order/component UI rendering no longer trips over inherited `display_name` access
+- added/retained focused coverage for:
+- work-order authorization and CRUD flow
+- work-order asset/task mutations
+- portal visibility paths
+- work-order navigation visibility
+- component detail history links to work orders/tasks
+- component definition settings
+- component storage location settings
+- verification:
+- `php artisan optimize:clear` in the app container (pass)
+- combined targeted suite in the app container (pass):
+- `php artisan test tests/Feature/WorkOrders tests/Feature/Components/Ui/ShowComponentTest.php tests/Feature/Settings/ComponentDefinitionSettingsTest.php tests/Feature/Settings/ComponentStorageLocationSettingsTest.php --env=testing`
+- result: `23` tests passed, `82` assertions
+
+- continued regression testing beyond the initial targeted tranche:
+- restarted the local app container and cleared Laravel caches after the browser surfaced stale 500s on admin component pages
+- container logs showed the browser failures were still serving the earlier `ComponentInstance::getDisplayNameAttribute($value)` fatal; the app container was restarted after the fix so PHP-FPM uses the corrected code
+- fixed a real FMCS settings-key bug in the component lifecycle/admin settings path:
+- `ComponentLifecycleService` and `ComponentDefinitionSettingsController` now read `full_multiple_companies_support` consistently
+- fixed component web delete behavior to log deletions for `ComponentInstance`
+- fixed the exception-handler route mapping for `ComponentInstance` model-not-found cases so hidden/missing component records redirect to `components.index` instead of throwing `Route [componentinstances.index] not defined`
+- aligned component web tests with the real app middleware/redirect behavior by disabling the app CSRF middleware class in the mutating web tests
+- verification:
+- full component feature suite in the app container (pass):
+- `php artisan test tests/Feature/Components --env=testing`
+- result: `35` tests passed, `134` assertions
+- broader asset UI suite also executed:
+- `php artisan test tests/Feature/Assets/Ui --env=testing`
+- result: large pre-existing/non-tranche failure surface remains in asset UI (`49` failed, `26` passed)
+- relevant note:
+- the new component-related asset history test remains green inside that broader asset UI run
+- the remaining asset UI failures are not confined to the new component/work-order tranche and include route mismatches, redirect expectation drift, and existing asset form/delete flows
+
+- cleared the final local manual-testing blocker after the browser hit `SQLSTATE[42S02]` for missing `component_definitions`
+- confirmed the local dev MySQL schema was behind on:
+- `2026_04_16_110000_add_display_order_to_test_types_table`
+- `2026_04_17_120000_create_component_traceability_tables`
+- patched `2026_04_17_120000_create_component_traceability_tables` for live MySQL compatibility in this fork:
+- replaced `foreignId()` references to legacy core tables with matching `unsignedInteger()` foreign keys
+- shortened the `model_number_component_templates` composite index name to fit MariaDB/MySQL identifier limits
+- cleaned up only the partial tables left by failed local migration attempts and reran the migration successfully
+- local migration status now shows both new migrations as applied
+- final verification after the migration compatibility patch:
+- `php artisan optimize:clear` in the app container (pass)
+- `php artisan test tests/Feature/WorkOrders tests/Feature/Components tests/Feature/Settings/ComponentDefinitionSettingsTest.php tests/Feature/Settings/ComponentStorageLocationSettingsTest.php --env=testing` (pass)
+- result: `56` tests passed, `211` assertions
+
+- implemented Phase 4 browser lifecycle and tray workspace for tracked components:
+- `components.create` is now a real manual stock-intake form for loose components
+- added browser lifecycle routes/actions for:
+- remove to tray
+- install into asset
+- move to stock
+- flag needs verification
+- confirm verification
+- mark destruction pending
+- mark destroyed
+- existing non-installed delete flow remains on component detail
+- added a dedicated tray workspace at `components.tray`:
+- current-user `in_transfer` components only
+- held duration + warning state using tray-aging thresholds
+- inline tray actions for install handoff, move to stock, needs verification, destruction pending, and open
+- upgraded the asset Components tab from read-only to operational:
+- installed rows now expose `Open` and `Remove To Tray`
+- expected rows now expose `Install From Tray`, `Install Existing`, and `Register Component`
+- added asset-context forms for:
+- install from tray
+- install existing loose component
+- register-and-install component
+- extract untracked component directly to tray
+- component detail pages now expose actionable lifecycle panels instead of history-only rendering
+- main layout now shows a persistent tray badge/count and a sidebar `My Tray` entry
+- hid the deferred/non-functional serial-tracking control from the component-definition admin UI (form and list)
+- verification after Phase 4 implementation:
+- `php artisan optimize:clear` in the app container (pass)
+- `php artisan route:list --name=components` (pass)
+- `php artisan route:list --name=hardware.components` (pass)
+- test runtime had to be restored after restart with `composer install` in the app container so `sebastian/environment` and the PHPUnit binaries were present again
+- focused Phase 4 + settings suite (pass):
+- `php artisan test tests/Feature/Components/Ui tests/Feature/Settings/ComponentDefinitionSettingsTest.php --env=testing`
+- result: `21` tests passed, `82` assertions
+- adjacent regression suite for touched shared surfaces (pass):
+- `php artisan test tests/Feature/WorkOrders tests/Feature/Assets/Ui/ComponentHistoryTest.php --env=testing`
+- result: `16` tests passed, `69` assertions
+- scope note:
+- full-project regression was not run in this block; verification covered the new browser workflow, component settings, work-order/portal linkage, and asset component history surfaces touched by the phase
 
 

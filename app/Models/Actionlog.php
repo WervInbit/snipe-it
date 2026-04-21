@@ -468,6 +468,10 @@ class Actionlog extends SnipeModel
 
         if ($object == 'asset_models') {
             $object = 'models';
+        } elseif ($this->item_type == ComponentInstance::class) {
+            $object = 'component-instances';
+        } elseif ($this->item_type == WorkOrder::class) {
+            $object = 'work-orders';
         }
 
         return route('ui.files.show', [
@@ -496,6 +500,8 @@ class Actionlog extends SnipeModel
             return 'private_uploads/consumables/'.$this->filename;
         case Component::class:
             return 'private_uploads/components/'.$this->filename;
+        case ComponentInstance::class:
+            return 'private_uploads/component_instances/'.$this->filename;
         case License::class:
             return 'private_uploads/licenses/'.$this->filename;
         case Location::class:
@@ -504,6 +510,8 @@ class Actionlog extends SnipeModel
              return 'private_uploads/maintenances/'.$this->filename;
         case User::class:
             return 'private_uploads/users/'.$this->filename;
+        case WorkOrder::class:
+            return 'private_uploads/work_orders/'.$this->filename;
         default:
             return null;
         }

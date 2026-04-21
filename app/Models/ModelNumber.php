@@ -54,6 +54,13 @@ class ModelNumber extends SnipeModel
             ->orderBy('id');
     }
 
+    public function componentTemplates(): HasMany
+    {
+        return $this->hasMany(ModelNumberComponentTemplate::class, 'model_number_id')
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
     public function scopeActive($query)
     {
         return $query->whereNull('deprecated_at');

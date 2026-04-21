@@ -26,12 +26,14 @@ use App\Models\Accessory;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Component;
+use App\Models\ComponentInstance;
 use App\Models\Consumable;
 use App\Models\License;
 use App\Models\ModelNumber;
 use App\Models\Location;
 use App\Models\Maintenance;
 use App\Models\User;
+use App\Models\WorkOrder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -48,6 +50,7 @@ abstract class Controller extends BaseController
         'maintenances' => Maintenance::class,
         'assets' => Asset::class,
         'components' => Component::class,
+        'component-instances' => ComponentInstance::class,
         'consumables' => Consumable::class,
         'hardware' => Asset::class,
         'licenses' => License::class,
@@ -55,6 +58,7 @@ abstract class Controller extends BaseController
         'models' => AssetModel::class,
         'model-numbers' => ModelNumber::class,
         'users' => User::class,
+        'work-orders' => WorkOrder::class,
     ];
 
     static $map_storage_path = [
@@ -62,6 +66,7 @@ abstract class Controller extends BaseController
         'maintenances' => 'private_uploads/maintenances/',
         'assets' => 'private_uploads/assets/',
         'components' => 'private_uploads/components/',
+        'component-instances' => 'private_uploads/component_instances/',
         'consumables' => 'private_uploads/consumables/',
         'hardware' => 'private_uploads/assets/',
         'licenses' => 'private_uploads/licenses/',
@@ -69,6 +74,7 @@ abstract class Controller extends BaseController
         'models' => 'private_uploads/models/',
         'model-numbers' => 'private_uploads/model_numbers/',
         'users' => 'private_uploads/users/',
+        'work-orders' => 'private_uploads/work_orders/',
     ];
 
     static $map_file_prefix= [
@@ -76,6 +82,7 @@ abstract class Controller extends BaseController
         'maintenances' => 'maintenance',
         'assets' => 'asset',
         'components' => 'component',
+        'component-instances' => 'component-instance',
         'consumables' => 'consumable',
         'hardware' => 'asset',
         'licenses' => 'license',
@@ -83,6 +90,7 @@ abstract class Controller extends BaseController
         'models' => 'model',
         'model-numbers' => 'model-number',
         'users' => 'user',
+        'work-orders' => 'work-order',
     ];
 
     public function __construct()

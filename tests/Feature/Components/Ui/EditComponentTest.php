@@ -2,16 +2,19 @@
 
 namespace Tests\Feature\Components\Ui;
 
-use App\Models\Component;
+use App\Models\ComponentInstance;
 use App\Models\User;
 use Tests\TestCase;
 
 class EditComponentTest extends TestCase
 {
-    public function testPageRenders()
+    public function testPageRedirectsUntilEditUiExists(): void
     {
+        $component = ComponentInstance::factory()->create();
+
         $this->actingAs(User::factory()->superuser()->create())
-            ->get(route('components.edit', Component::factory()->create()))
-            ->assertOk();
+            ->get(route('components.edit', $component))
+            ->assertRedirect(route('components.show', $component))
+            ->assertSessionHas('info');
     }
 }

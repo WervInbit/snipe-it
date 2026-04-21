@@ -7,6 +7,7 @@ use Illuminate\Http\RedirectResponse;
 use \Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Collection;
+use App\Models\ComponentInstance;
 use App\Models\Statuslabel;
 use App\Support\RefurbStatus;
 
@@ -43,13 +44,13 @@ class DashboardController extends Controller
         $counts['consumable'] = $user->can('view', \App\Models\Consumable::class)
             ? \App\Models\Consumable::count()
             : 0;
-        $counts['component'] = $user->can('view', \App\Models\Component::class)
-            ? \App\Models\Component::count()
+        $counts['component'] = $user->can('view', ComponentInstance::class)
+            ? ComponentInstance::count()
             : 0;
         $counts['user'] = $user->can('view', \App\Models\User::class)
             ? \App\Models\Company::scopeCompanyables($user)->count()
             : 0;
-        $counts['grand_total'] = $counts['asset'] + $counts['accessory'] + $counts['license'] + $counts['consumable'];
+        $counts['grand_total'] = $counts['asset'] + $counts['accessory'] + $counts['license'] + $counts['consumable'] + $counts['component'];
 
         if ((! file_exists(storage_path().'/oauth-private.key')) || (! file_exists(storage_path().'/oauth-public.key'))) {
             Artisan::call('migrate', ['--force' => true]);

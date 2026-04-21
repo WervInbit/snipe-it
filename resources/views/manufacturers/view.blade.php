@@ -82,19 +82,21 @@
           </a>
         </li>
 
-        <li>
-          <a href="#components" data-toggle="tab">
+        @can('view', \App\Models\ComponentInstance::class)
+            <li>
+              <a href="#components" data-toggle="tab">
 
-             <span class="hidden-lg hidden-md">
-               <x-icon type="components" class="fa-2x" />
-            </span>
-            <span class="hidden-xs hidden-sm">
-              {{ trans('general.components') }}
-              {!! ($manufacturer->components->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($manufacturer->components->count()).'</span>' : '' !!}
-            </span>
+                 <span class="hidden-lg hidden-md">
+                   <x-icon type="components" class="fa-2x" />
+                </span>
+                <span class="hidden-xs hidden-sm">
+                  {{ trans('general.components') }}
+                  {!! ($manufacturer->componentInstances()->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($manufacturer->componentInstances()->count()).'</span>' : '' !!}
+                </span>
 
-          </a>
-        </li>
+              </a>
+            </li>
+        @endcan
       </ul>
 
       <div class="tab-content">
@@ -185,25 +187,27 @@
 
         </div> <!-- /.tab-pan consumables-->
 
-        <div class="tab-pane fade" id="components">
+        @can('view', \App\Models\ComponentInstance::class)
+            <div class="tab-pane fade" id="components">
 
-          <table
-                  data-columns="{{ \App\Presenters\ComponentPresenter::dataTableLayout() }}"
-                  data-cookie-id-table="componentsTable"
-                  data-id-table="componentsTable"
-                  data-show-footer="true"
-                  data-side-pagination="server"
-                  data-sort-order="asc"
-                  id="componentsTable"
-                  class="table table-striped snipe-table"
-                  data-url="{{ route('api.components.index', ['manufacturer_id' => $manufacturer->id]) }}"
-                  data-export-options='{
-              "fileName": "export-manufacturers-{{ str_slug($manufacturer->name) }}-components-{{ date('Y-m-d') }}",
-              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-              }'>
-          </table>
+              <table
+                      data-columns="{{ \App\Presenters\ComponentPresenter::dataTableLayout() }}"
+                      data-cookie-id-table="componentsTable"
+                      data-id-table="componentsTable"
+                      data-show-footer="true"
+                      data-side-pagination="server"
+                      data-sort-order="asc"
+                      id="componentsTable"
+                      class="table table-striped snipe-table"
+                      data-url="{{ route('api.components.index', ['manufacturer_id' => $manufacturer->id]) }}"
+                      data-export-options='{
+                  "fileName": "export-manufacturers-{{ str_slug($manufacturer->name) }}-components-{{ date('Y-m-d') }}",
+                  "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+                  }'>
+              </table>
 
-        </div> <!-- /.tab-pan consumables-->
+            </div> <!-- /.tab-pan consumables-->
+        @endcan
 
       </div> <!-- /.tab-content -->
     </div>  <!-- /.nav-tabs-custom -->

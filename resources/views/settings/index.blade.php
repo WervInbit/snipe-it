@@ -203,6 +203,40 @@
           </div>
         </div>
 
+        @can('manage', \App\Models\ComponentDefinition::class)
+        <div class="col-md-4 col-lg-3 col-sm-6 col-xl-1">
+          <div class="admin box box-default">
+            <div class="box-body text-center">
+              <h5>
+                <a href="{{ route('settings.component_definitions.index') }}" class="settings_button">
+                  <x-icon type="components" class="fa-4x" />
+                  <br><br>
+                  <span class="name">{{ __('Component Definitions') }}</span>
+                </a>
+              </h5>
+              <p class="index-block">{{ __('Manage the reusable component catalog used by tracked part instances and model templates.') }}</p>
+            </div>
+          </div>
+        </div>
+        @endcan
+
+        @can('manage', \App\Models\ComponentStorageLocation::class)
+        <div class="col-md-4 col-lg-3 col-sm-6 col-xl-1">
+          <div class="admin box box-default">
+            <div class="box-body text-center">
+              <h5>
+                <a href="{{ route('settings.component_storage_locations.index') }}" class="settings_button">
+                  <i class="fas fa-boxes-stacked fa-4x" aria-hidden="true"></i>
+                  <br><br>
+                  <span class="name">{{ __('Component Storage') }}</span>
+                </a>
+              </h5>
+              <p class="index-block">{{ __('Manage stock, verification, tray, and destruction destinations for tracked components.') }}</p>
+            </div>
+          </div>
+        </div>
+        @endcan
+
         <div class="col-md-4 col-lg-3 col-sm-6 col-xl-1">
           <div class="admin box box-default">
             <div class="box-body text-center">

@@ -166,6 +166,8 @@ class Handler extends ExceptionHandler
             // Sigh.
             if ($route == 'assets.index') {
                 $route = 'hardware.index';
+            } elseif ($route === 'componentinstances.index') {
+                $route = 'components.index';
             } elseif ($route == 'reporttemplates.index') {
                 $route = 'reports/custom';
             } elseif ($route == 'assetmodels.index') {

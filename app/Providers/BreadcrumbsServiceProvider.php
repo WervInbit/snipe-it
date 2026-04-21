@@ -6,7 +6,7 @@ use App\Models\Maintenance;
 use App\Models\AssetModel;
 use App\Models\Category;
 use App\Models\Company;
-use App\Models\Component;
+use App\Models\ComponentInstance;
 use App\Models\Consumable;
 use App\Models\CustomField;
 use App\Models\CustomFieldset;
@@ -215,12 +215,12 @@ class BreadcrumbsServiceProvider extends ServiceProvider
             ->push(trans('general.create'), route('components.create'))
         );
 
-        Breadcrumbs::for('components.show', fn (Trail $trail, Component $component) =>
+        Breadcrumbs::for('components.show', fn (Trail $trail, ComponentInstance $component) =>
         $trail->parent('components.index', route('components.index'))
             ->push($component->name, route('components.show', $component))
         );
 
-        Breadcrumbs::for('components.edit', fn (Trail $trail, Component $component) =>
+        Breadcrumbs::for('components.edit', fn (Trail $trail, ComponentInstance $component) =>
         $trail->parent('components.index', route('components.index'))
             ->push(trans('general.breadcrumb_button_actions.edit_item', ['name' => $component->name]), route('components.edit', $component))
         );
