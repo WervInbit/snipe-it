@@ -373,7 +373,7 @@
                                 <span class="text-muted">{{ trans('general.na') }}</span>
                                 @endif
                             </td>
-                            <td>{{ \Illuminate\Support\Str::headline($event->event_type) }}</td>
+                            <td>{{ $event->actionLabel() }}</td>
                             <td>
                                 @if($event->relatedWorkOrderTask)
                                 <a href="#task-{{ $event->relatedWorkOrderTask->id }}">{{ $event->relatedWorkOrderTask->title }}</a>

@@ -16,6 +16,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use InvalidArgumentException;
 
 class ComponentsController extends Controller
 {
@@ -76,7 +77,7 @@ class ComponentsController extends Controller
     {
         $this->authorize('create', ComponentInstance::class);
 
-        $validator = Validator::make($request->all(), $this->rules());
+        $validator = Validator::make($request->all(), $this->createRules());
 
         if ($validator->fails()) {
             return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
@@ -104,13 +105,14 @@ class ComponentsController extends Controller
     {
         $this->authorize('update', $component_id);
 
-        $validator = Validator::make($request->all(), $this->rules($component_id));
+        $validator = Validator::make($request->all(), $this->updateRules($component_id));
+        $this->rejectLifecycleMutationFields($request, $validator);
 
         if ($validator->fails()) {
             return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
         }
 
-        $component_id->fill($this->payloadFromRequest($request, true));
+        $component_id->fill($this->metadataPayloadFromRequest($request));
         $component_id->updated_by = $request->user()?->id;
         $component_id->save();
 
@@ -143,7 +145,6 @@ class ComponentsController extends Controller
         $this->authorize('move', $component_id);
 
         $validator = Validator::make($request->all(), [
-            'held_by_user_id' => ['nullable', 'integer', 'exists:users,id'],
             'note' => ['nullable', 'string'],
             'related_work_order_id' => ['nullable', 'integer', 'exists:work_orders,id'],
             'related_work_order_task_id' => ['nullable', 'integer', 'exists:work_order_tasks,id'],
@@ -153,11 +154,15 @@ class ComponentsController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
         }
 
-        $component = $this->lifecycle->removeToTray(
-            $component_id,
-            $request->input('held_by_user_id', $request->user()->id),
-            $request->only(['note', 'related_work_order_id', 'related_work_order_task_id'])
-        );
+        try {
+            $component = $this->lifecycle->removeToTray(
+                $component_id,
+                $request->user(),
+                $request->only(['note', 'related_work_order_id', 'related_work_order_task_id'])
+            );
+        } catch (InvalidArgumentException $exception) {
+            return $this->lifecycleErrorResponse($exception->getMessage());
+        }
 
         return response()->json(Helper::formatStandardApiResponse(
             'success',
@@ -182,14 +187,18 @@ class ComponentsController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
         }
 
-        $asset = Asset::findOrFail($request->input('asset_id'));
-        $component = $this->lifecycle->installIntoAsset($component_id, $asset, [
-            'performed_by' => $request->user(),
-            'installed_as' => $request->input('installed_as'),
-            'note' => $request->input('note'),
-            'related_work_order_id' => $request->input('related_work_order_id'),
-            'related_work_order_task_id' => $request->input('related_work_order_task_id'),
-        ]);
+        try {
+            $asset = Asset::findOrFail($request->input('asset_id'));
+            $component = $this->lifecycle->installIntoAsset($component_id, $asset, [
+                'performed_by' => $request->user(),
+                'installed_as' => $request->input('installed_as'),
+                'note' => $request->input('note'),
+                'related_work_order_id' => $request->input('related_work_order_id'),
+                'related_work_order_task_id' => $request->input('related_work_order_task_id'),
+            ]);
+        } catch (InvalidArgumentException $exception) {
+            return $this->lifecycleErrorResponse($exception->getMessage());
+        }
 
         return response()->json(Helper::formatStandardApiResponse(
             'success',
@@ -213,17 +222,21 @@ class ComponentsController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
         }
 
-        $location = ComponentStorageLocation::findOrFail($request->input('storage_location_id'));
-        $verificationLocation = $request->filled('verification_location_id')
-            ? ComponentStorageLocation::findOrFail($request->input('verification_location_id'))
-            : $location;
+        try {
+            $location = ComponentStorageLocation::findOrFail($request->input('storage_location_id'));
+            $verificationLocation = $request->filled('verification_location_id')
+                ? ComponentStorageLocation::findOrFail($request->input('verification_location_id'))
+                : $location;
 
-        $component = $this->lifecycle->moveToStock($component_id, $location, [
-            'performed_by' => $request->user(),
-            'needs_verification' => $request->boolean('needs_verification'),
-            'storage_location' => $verificationLocation,
-            'note' => $request->input('note'),
-        ]);
+            $component = $this->lifecycle->moveToStock($component_id, $location, [
+                'performed_by' => $request->user(),
+                'needs_verification' => $request->boolean('needs_verification'),
+                'storage_location' => $verificationLocation,
+                'note' => $request->input('note'),
+            ]);
+        } catch (InvalidArgumentException $exception) {
+            return $this->lifecycleErrorResponse($exception->getMessage());
+        }
 
         return response()->json(Helper::formatStandardApiResponse(
             'success',
@@ -245,15 +258,19 @@ class ComponentsController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
         }
 
-        $location = $request->filled('storage_location_id')
-            ? ComponentStorageLocation::findOrFail($request->input('storage_location_id'))
-            : $component_id->storageLocation;
+        try {
+            $location = $request->filled('storage_location_id')
+                ? ComponentStorageLocation::findOrFail($request->input('storage_location_id'))
+                : $component_id->storageLocation;
 
-        $component = $this->lifecycle->flagNeedsVerification($component_id, [
-            'performed_by' => $request->user(),
-            'storage_location' => $location,
-            'note' => $request->input('note'),
-        ]);
+            $component = $this->lifecycle->flagNeedsVerification($component_id, [
+                'performed_by' => $request->user(),
+                'storage_location' => $location,
+                'note' => $request->input('note'),
+            ]);
+        } catch (InvalidArgumentException $exception) {
+            return $this->lifecycleErrorResponse($exception->getMessage());
+        }
 
         return response()->json(Helper::formatStandardApiResponse(
             'success',
@@ -275,11 +292,15 @@ class ComponentsController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
         }
 
-        $location = ComponentStorageLocation::findOrFail($request->input('storage_location_id'));
-        $component = $this->lifecycle->confirmVerification($component_id, $location, [
-            'performed_by' => $request->user(),
-            'note' => $request->input('note'),
-        ]);
+        try {
+            $location = ComponentStorageLocation::findOrFail($request->input('storage_location_id'));
+            $component = $this->lifecycle->confirmVerification($component_id, $location, [
+                'performed_by' => $request->user(),
+                'note' => $request->input('note'),
+            ]);
+        } catch (InvalidArgumentException $exception) {
+            return $this->lifecycleErrorResponse($exception->getMessage());
+        }
 
         return response()->json(Helper::formatStandardApiResponse(
             'success',
@@ -301,14 +322,18 @@ class ComponentsController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
         }
 
-        $location = $request->filled('storage_location_id')
-            ? ComponentStorageLocation::findOrFail($request->input('storage_location_id'))
-            : null;
+        try {
+            $location = $request->filled('storage_location_id')
+                ? ComponentStorageLocation::findOrFail($request->input('storage_location_id'))
+                : null;
 
-        $component = $this->lifecycle->markDestructionPending($component_id, $location, [
-            'performed_by' => $request->user(),
-            'note' => $request->input('note'),
-        ]);
+            $component = $this->lifecycle->markDestructionPending($component_id, $location, [
+                'performed_by' => $request->user(),
+                'note' => $request->input('note'),
+            ]);
+        } catch (InvalidArgumentException $exception) {
+            return $this->lifecycleErrorResponse($exception->getMessage());
+        }
 
         return response()->json(Helper::formatStandardApiResponse(
             'success',
@@ -329,10 +354,14 @@ class ComponentsController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
         }
 
-        $component = $this->lifecycle->markDestroyed($component_id, [
-            'performed_by' => $request->user(),
-            'note' => $request->input('note'),
-        ]);
+        try {
+            $component = $this->lifecycle->markDestroyed($component_id, [
+                'performed_by' => $request->user(),
+                'note' => $request->input('note'),
+            ]);
+        } catch (InvalidArgumentException $exception) {
+            return $this->lifecycleErrorResponse($exception->getMessage());
+        }
 
         return response()->json(Helper::formatStandardApiResponse(
             'success',
@@ -412,7 +441,7 @@ class ComponentsController extends Controller
         return (new SelectlistTransformer())->transformSelectlist($components);
     }
 
-    protected function rules(?ComponentInstance $component = null): array
+    protected function createRules(?ComponentInstance $component = null): array
     {
         $ignoreId = $component?->id;
 
@@ -441,16 +470,27 @@ class ComponentsController extends Controller
                 ComponentInstance::CONDITION_BROKEN,
             ])],
             'source_type' => ['nullable', Rule::in([
-                ComponentInstance::SOURCE_EXTRACTED,
-                ComponentInstance::SOURCE_PURCHASED,
-                ComponentInstance::SOURCE_EXTERNAL_INTAKE,
-                ComponentInstance::SOURCE_MANUAL,
+                ...array_keys(ComponentInstance::sourceTypeOptions()),
             ])],
             'source_asset_id' => ['nullable', 'integer', 'exists:assets,id'],
             'current_asset_id' => ['nullable', 'integer', 'exists:assets,id'],
             'storage_location_id' => ['nullable', 'integer', 'exists:component_storage_locations,id'],
             'held_by_user_id' => ['nullable', 'integer', 'exists:users,id'],
             'installed_as' => ['nullable', 'string', 'max:255'],
+            'supplier_id' => ['nullable', 'integer', 'exists:suppliers,id'],
+            'purchase_cost' => ['nullable', 'numeric', 'gte:0'],
+            'received_at' => ['nullable', 'date'],
+            'metadata_json' => ['nullable', 'array'],
+            'notes' => ['nullable', 'string'],
+        ];
+    }
+
+    protected function updateRules(?ComponentInstance $component = null): array
+    {
+        return [
+            'component_definition_id' => ['nullable', 'integer', 'exists:component_definitions,id'],
+            'display_name' => ['nullable', 'string', 'max:255'],
+            'serial' => ['nullable', 'string', 'max:255'],
             'supplier_id' => ['nullable', 'integer', 'exists:suppliers,id'],
             'purchase_cost' => ['nullable', 'numeric', 'gte:0'],
             'received_at' => ['nullable', 'date'],
@@ -489,6 +529,53 @@ class ComponentsController extends Controller
         }
 
         return $payload;
+    }
+
+    protected function metadataPayloadFromRequest(Request $request): array
+    {
+        return $request->only([
+            'component_definition_id',
+            'display_name',
+            'serial',
+            'supplier_id',
+            'purchase_cost',
+            'received_at',
+            'metadata_json',
+            'notes',
+        ]);
+    }
+
+    protected function rejectLifecycleMutationFields(Request $request, $validator): void
+    {
+        $message = __('Lifecycle state must be changed via the dedicated component lifecycle endpoints.');
+
+        $validator->after(function ($validator) use ($request, $message): void {
+            foreach ($this->lifecycleMutationFields() as $field) {
+                if ($request->exists($field)) {
+                    $validator->errors()->add($field, $message);
+                }
+            }
+        });
+    }
+
+    protected function lifecycleMutationFields(): array
+    {
+        return [
+            'status',
+            'current_asset_id',
+            'storage_location_id',
+            'held_by_user_id',
+            'transfer_started_at',
+            'needs_verification_at',
+            'last_verified_at',
+            'installed_as',
+            'destroyed_at',
+        ];
+    }
+
+    protected function lifecycleErrorResponse(string $message): JsonResponse
+    {
+        return response()->json(Helper::formatStandardApiResponse('error', null, $message), 422);
     }
 
     protected function applyFilters($query, Request $request): void

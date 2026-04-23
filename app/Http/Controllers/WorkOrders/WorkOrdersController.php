@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\Company;
 use App\Models\ComponentEvent;
+use App\Models\Setting;
 use App\Models\User;
 use App\Models\WorkOrder;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class WorkOrdersController extends Controller
@@ -21,7 +24,7 @@ class WorkOrdersController extends Controller
 
         $search = trim((string) $request->input('search'));
 
-        $workOrders = WorkOrder::query()
+        $workOrders = $this->workOrdersQuery($request)
             ->with(['company'])
             ->withCount(['assets', 'tasks'])
             ->when($search !== '', function ($query) use ($search): void {
@@ -45,6 +48,7 @@ class WorkOrdersController extends Controller
 
         return view('work-orders.create', [
             'workOrder' => new WorkOrder([
+                'company_id' => $this->defaultCompanyId($request),
                 'status' => WorkOrder::STATUS_DRAFT,
                 'priority' => WorkOrder::PRIORITY_NORMAL,
                 'visibility_profile' => WorkOrder::VISIBILITY_PROFILE_FULL,
@@ -59,13 +63,14 @@ class WorkOrdersController extends Controller
         $this->authorize('create', WorkOrder::class);
 
         $data = $this->validatedData($request);
+        $visibleUserIds = $this->validatedVisibleUserIds($request);
         $workOrder = new WorkOrder($data);
         $workOrder->portal_visibility_json = $this->portalVisibilityPayload($request);
         $workOrder->created_by = $request->user()?->id;
         $workOrder->updated_by = $request->user()?->id;
         $workOrder->save();
 
-        $this->syncVisibleUsers($request, $workOrder);
+        $this->syncVisibleUsers($request, $workOrder, $visibleUserIds);
 
         return redirect()
             ->route('work-orders.show', $workOrder)
@@ -75,6 +80,7 @@ class WorkOrdersController extends Controller
     public function show(Request $request, WorkOrder $workOrder): View
     {
         $this->authorize('viewAny', WorkOrder::class);
+        $this->authorize('view', $workOrder);
 
         $workOrder->load([
             'company',
@@ -111,6 +117,7 @@ class WorkOrdersController extends Controller
         $this->authorize('update', $workOrder);
 
         $data = $this->validatedData($request);
+        $visibleUserIds = $this->validatedVisibleUserIds($request);
 
         if (!$request->user()?->can('manageVisibility', $workOrder)) {
             $data['visibility_profile'] = $workOrder->visibility_profile;
@@ -125,7 +132,7 @@ class WorkOrdersController extends Controller
 
         $workOrder->save();
 
-        $this->syncVisibleUsers($request, $workOrder);
+        $this->syncVisibleUsers($request, $workOrder, $visibleUserIds);
 
         return redirect()
             ->route('work-orders.show', $workOrder)
@@ -152,7 +159,7 @@ class WorkOrdersController extends Controller
 
     protected function validatedData(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'company_id' => ['nullable', 'integer', 'exists:companies,id'],
@@ -163,16 +170,26 @@ class WorkOrdersController extends Controller
             'intake_date' => ['nullable', 'date'],
             'due_date' => ['nullable', 'date', 'after_or_equal:intake_date'],
         ]);
+
+        if ($this->usesRestrictedCompanyScope($request)) {
+            $data['company_id'] = (int) $request->user()->company_id;
+        }
+
+        $this->ensureSelectableUser($request, $data['primary_contact_user_id'] ?? null, 'primary_contact_user_id');
+
+        return $data;
     }
 
     protected function formOptions(Request $request): array
     {
+        $userOptions = $this->userOptionsQuery($request)->get();
+
         return [
-            'companies' => Company::query()->orderBy('name')->get(),
-            'contacts' => User::query()->orderBy('first_name')->orderBy('last_name')->get(),
-            'visibleUsers' => User::query()->orderBy('first_name')->orderBy('last_name')->get(),
+            'companies' => $this->companyOptionsQuery($request)->get(),
+            'contacts' => $userOptions,
+            'visibleUsers' => $userOptions,
             'assetOptions' => Asset::query()->orderBy('asset_tag')->get(),
-            'taskAssignees' => User::query()->orderBy('first_name')->orderBy('last_name')->get(),
+            'taskAssignees' => $userOptions,
             'statusOptions' => WorkOrder::statusOptions(),
             'priorityOptions' => WorkOrder::priorityOptions(),
             'visibilityProfileOptions' => WorkOrder::visibilityProfileOptions(),
@@ -191,10 +208,24 @@ class WorkOrdersController extends Controller
         ];
     }
 
-    protected function syncVisibleUsers(Request $request, WorkOrder $workOrder): void
+    protected function syncVisibleUsers(Request $request, WorkOrder $workOrder, Collection $visibleUserIds): void
     {
         if (!$request->user()?->can('manageVisibility', $workOrder)) {
             return;
+        }
+
+        $workOrder->visibleUsers()->sync(
+            $visibleUserIds
+                ->mapWithKeys(fn ($id) => [$id => ['granted_by' => $request->user()?->id]])
+                ->all()
+        );
+    }
+
+    protected function validatedVisibleUserIds(Request $request): Collection
+    {
+        if (!$request->user()?->can('manageVisibility', WorkOrder::class)
+            && !$request->user()?->can('manageVisibility', new WorkOrder())) {
+            return collect();
         }
 
         $visibleUserIds = collect($request->input('visible_user_ids', []))
@@ -203,10 +234,88 @@ class WorkOrdersController extends Controller
             ->unique()
             ->values();
 
-        $workOrder->visibleUsers()->sync(
-            $visibleUserIds
-                ->mapWithKeys(fn ($id) => [$id => ['granted_by' => $request->user()?->id]])
-                ->all()
-        );
+        foreach ($visibleUserIds as $userId) {
+            $this->ensureSelectableUser($request, $userId, 'visible_user_ids');
+        }
+
+        return $visibleUserIds;
+    }
+
+    protected function ensureSelectableUser(Request $request, ?int $userId, string $field): void
+    {
+        if (!$userId) {
+            return;
+        }
+
+        if ($this->userOptionsQuery($request)->whereKey($userId)->exists()) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            $field => __('The selected user is outside your company scope.'),
+        ]);
+    }
+
+    protected function userOptionsQuery(Request $request)
+    {
+        $query = User::query()
+            ->orderBy('first_name')
+            ->orderBy('last_name');
+
+        if ($this->usesRestrictedCompanyScope($request)) {
+            $query->where('company_id', $request->user()->company_id);
+        }
+
+        return $query;
+    }
+
+    protected function workOrdersQuery(Request $request)
+    {
+        $query = WorkOrder::query();
+
+        if ($this->bypassesCompanyScope($request)) {
+            $query->withoutGlobalScope(\App\Models\CompanyableScope::class);
+        }
+
+        return $query;
+    }
+
+    protected function companyOptionsQuery(Request $request)
+    {
+        $query = Company::query()->orderBy('name');
+
+        if ($this->bypassesCompanyScope($request)) {
+            $query->withoutGlobalScope(\App\Models\CompanyableScope::class);
+        }
+
+        return $query;
+    }
+
+    protected function usesRestrictedCompanyScope(Request $request): bool
+    {
+        return $this->fullMultipleCompaniesEnabled()
+            && !$request->user()?->isSuperUser()
+            && $request->user()?->company_id !== null;
+    }
+
+    protected function defaultCompanyId(Request $request): ?int
+    {
+        if (!$this->usesRestrictedCompanyScope($request)) {
+            return null;
+        }
+
+        return (int) $request->user()->company_id;
+    }
+
+    protected function bypassesCompanyScope(Request $request): bool
+    {
+        return $this->fullMultipleCompaniesEnabled()
+            && !$request->user()?->isSuperUser()
+            && $request->user()?->company_id === null;
+    }
+
+    protected function fullMultipleCompaniesEnabled(): bool
+    {
+        return (int) (Setting::getSettings()?->full_multiple_companies_support ?? 0) === 1;
     }
 }

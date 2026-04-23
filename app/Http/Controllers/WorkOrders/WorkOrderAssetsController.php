@@ -8,6 +8,7 @@ use App\Models\WorkOrder;
 use App\Models\WorkOrderAsset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class WorkOrderAssetsController extends Controller
 {
@@ -54,7 +55,7 @@ class WorkOrderAssetsController extends Controller
 
     protected function validatedData(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'asset_id' => ['nullable', 'integer', 'exists:assets,id'],
             'customer_label' => ['nullable', 'string', 'max:255', 'required_without:asset_id'],
             'asset_tag_snapshot' => ['nullable', 'string', 'max:255'],
@@ -63,6 +64,14 @@ class WorkOrderAssetsController extends Controller
             'status' => ['nullable', 'string', 'max:100'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
+
+        if (!empty($data['asset_id']) && !Asset::query()->whereKey($data['asset_id'])->exists()) {
+            throw ValidationException::withMessages([
+                'asset_id' => __('The selected asset is outside your company scope.'),
+            ]);
+        }
+
+        return $data;
     }
 
     protected function syncSnapshotFields(WorkOrderAsset $workOrderAsset): void

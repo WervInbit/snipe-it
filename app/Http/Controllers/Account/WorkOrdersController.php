@@ -17,6 +17,7 @@ class WorkOrdersController extends Controller
 
         $user = $request->user();
         $workOrders = WorkOrder::query()
+            ->withoutGlobalScope(\App\Models\CompanyableScope::class)
             ->visibleTo($user)
             ->with(['company', 'primaryContact'])
             ->withCount(['assets', 'tasks'])

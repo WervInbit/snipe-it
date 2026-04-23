@@ -168,4 +168,88 @@ class WorkOrdersControllerTest extends TestCase
             ->assertSee(route('hardware.show', $toAsset), false)
             ->assertSee('Moved during repair');
     }
+
+    public function testInternalWorkOrderIndexAndShowAreCompanyScopedUnderFmcs(): void
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        $companyA = Company::factory()->create(['name' => 'Scoped Company']);
+        $companyB = Company::factory()->create(['name' => 'Other Company']);
+        $allowedContact = User::factory()->for($companyA)->create([
+            'first_name' => 'Allowed',
+            'last_name' => 'Contact',
+        ]);
+        $blockedContact = User::factory()->for($companyB)->create([
+            'first_name' => 'Blocked',
+            'last_name' => 'Contact',
+        ]);
+        $allowedAsset = Asset::factory()->for($companyA)->create(['asset_tag' => 'SCOPED-ASSET']);
+        $blockedAsset = Asset::factory()->for($companyB)->create(['asset_tag' => 'BLOCKED-ASSET']);
+        $user = User::factory()
+            ->for($companyA)
+            ->viewWorkOrders()
+            ->createWorkOrders()
+            ->updateWorkOrders()
+            ->manageWorkOrderVisibility()
+            ->create();
+        $allowedWorkOrder = WorkOrder::factory()->for($companyA)->create([
+            'title' => 'Scoped Work Order',
+        ]);
+        $blockedWorkOrder = WorkOrder::factory()->for($companyB)->create([
+            'title' => 'Blocked Work Order',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('work-orders.index'))
+            ->assertOk()
+            ->assertSee('Scoped Work Order')
+            ->assertDontSee('Blocked Work Order');
+
+        $this->actingAs($user)
+            ->get(route('work-orders.show', $blockedWorkOrder))
+            ->assertRedirect(route('work-orders.index'));
+
+        $this->actingAs($user)
+            ->get(route('work-orders.show', $allowedWorkOrder))
+            ->assertOk()
+            ->assertSee('Scoped Company')
+            ->assertDontSee('Other Company')
+            ->assertSee('SCOPED-ASSET')
+            ->assertDontSee('BLOCKED-ASSET')
+            ->assertSee($allowedContact->present()->fullName())
+            ->assertDontSee($blockedContact->present()->fullName());
+    }
+
+    public function testWorkOrderStoreRejectsOutOfScopeVisibleUsersUnderFmcs(): void
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        $companyA = Company::factory()->create();
+        $companyB = Company::factory()->create();
+        $allowedContact = User::factory()->for($companyA)->create();
+        $blockedVisibleUser = User::factory()->for($companyB)->create();
+        $user = User::factory()
+            ->for($companyA)
+            ->viewWorkOrders()
+            ->createWorkOrders()
+            ->manageWorkOrderVisibility()
+            ->create();
+
+        $this->actingAs($user)
+            ->from(route('work-orders.create'))
+            ->post(route('work-orders.store'), [
+                'title' => 'FMCS Scoped Work Order',
+                'company_id' => $companyB->id,
+                'primary_contact_user_id' => $allowedContact->id,
+                'status' => WorkOrder::STATUS_DRAFT,
+                'visibility_profile' => WorkOrder::VISIBILITY_PROFILE_FULL,
+                'visible_user_ids' => [$blockedVisibleUser->id],
+            ])
+            ->assertRedirect(route('work-orders.create'))
+            ->assertSessionHasErrors('visible_user_ids');
+
+        $this->assertDatabaseMissing('work_orders', [
+            'title' => 'FMCS Scoped Work Order',
+        ]);
+    }
 }

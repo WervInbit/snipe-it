@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 class WorkOrder extends SnipeModel
 {
     use HasFactory;
+    use CompanyableTrait;
     use SoftDeletes;
 
     public const STATUS_DRAFT = 'draft';
@@ -104,6 +105,19 @@ class WorkOrder extends SnipeModel
                 $workOrder->work_order_number = $candidate;
             }
         });
+    }
+
+    public function resolveRouteBindingQuery($query, $value, $field = null)
+    {
+        $user = auth()->user();
+        $shouldBypassCompanyScope = request()?->routeIs('account.work-orders.*')
+            || ($user && !$user->isSuperUser() && $user->company_id === null);
+
+        if ($shouldBypassCompanyScope) {
+            $query->withoutGlobalScope(CompanyableScope::class);
+        }
+
+        return parent::resolveRouteBindingQuery($query, $value, $field);
     }
 
     public function company(): BelongsTo

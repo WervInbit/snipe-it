@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\WorkOrders;
 
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
+use App\Models\User;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderAsset;
 use App\Models\WorkOrderTask;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class WorkOrderTasksController extends Controller
 {
@@ -82,11 +85,37 @@ class WorkOrderTasksController extends Controller
             }
         }
 
+        if (!empty($data['assigned_to']) && !$this->assignableUsersQuery($request)->whereKey($data['assigned_to'])->exists()) {
+            throw ValidationException::withMessages([
+                'assigned_to' => __('The selected assignee is outside your company scope.'),
+            ]);
+        }
+
         return $data;
     }
 
     protected function ensureChildBelongsToWorkOrder(WorkOrder $workOrder, WorkOrderTask $workOrderTask): void
     {
         abort_unless((int) $workOrderTask->work_order_id === (int) $workOrder->id, 404);
+    }
+
+    protected function assignableUsersQuery(Request $request)
+    {
+        $query = User::query();
+
+        if ($this->usesRestrictedCompanyScope($request)) {
+            $query->where('company_id', $request->user()->company_id);
+        }
+
+        return $query;
+    }
+
+    protected function usesRestrictedCompanyScope(Request $request): bool
+    {
+        $settings = Setting::getSettings();
+
+        return (int) ($settings?->full_multiple_companies_support ?? 0) === 1
+            && !$request->user()?->isSuperUser()
+            && $request->user()?->company_id !== null;
     }
 }
