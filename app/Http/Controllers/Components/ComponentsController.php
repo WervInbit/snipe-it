@@ -114,6 +114,12 @@ class ComponentsController extends Controller
                 ->NotArchived()
                 ->orderBy('asset_tag')
                 ->get(),
+            'editableStorageLocations' => $locations['stock']
+                ->concat($locations['verification'])
+                ->concat($locations['destruction'])
+                ->unique('id')
+                ->sortBy(fn ($location) => [$location->type, $location->name, $location->id])
+                ->values(),
             'stockLocations' => $locations['stock'],
             'verificationLocations' => $locations['verification'],
             'destructionLocations' => $locations['destruction'],
@@ -134,9 +140,43 @@ class ComponentsController extends Controller
     {
         $this->authorize('update', $component_id);
 
+        $data = $request->validate([
+            'notes' => ['nullable', 'string'],
+            'storage_location_id' => ['nullable', 'integer', 'exists:component_storage_locations,id'],
+            'storage_location_note' => ['nullable', 'string'],
+        ]);
+
+        if ($request->has('storage_location_id')) {
+            $locationId = $data['storage_location_id'] ?? null;
+
+            try {
+                $this->lifecycle->updateStorageLocation(
+                    $component_id,
+                    $locationId ? \App\Models\ComponentStorageLocation::findOrFail($locationId) : null,
+                    [
+                        'performed_by' => $request->user(),
+                        'note' => $data['storage_location_note'] ?? null,
+                    ]
+                );
+            } catch (InvalidArgumentException $exception) {
+                return redirect()->back()->withInput()->with('error', $exception->getMessage());
+            }
+
+            return redirect()
+                ->route('components.show', ['component_id' => $component_id])
+                ->with('success', __('Component storage location updated.'));
+        }
+
+        $notes = trim((string) ($data['notes'] ?? ''));
+
+        $component_id->forceFill([
+            'notes' => $notes !== '' ? $notes : null,
+            'updated_by' => $request->user()->id,
+        ])->save();
+
         return redirect()
-            ->route('components.show', $component_id)
-            ->with('error', 'Component editing UI is not implemented yet.');
+            ->route('components.show', ['component_id' => $component_id])
+            ->with('success', __('Component note updated.'));
     }
 
     public function destroy(ComponentInstance $component_id): RedirectResponse

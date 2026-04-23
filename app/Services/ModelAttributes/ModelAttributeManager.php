@@ -45,7 +45,9 @@ class ModelAttributeManager
             ->unique()
             ->values();
 
-        DB::transaction(function () use ($modelNumber, $definitionIds, $model) {
+        $lockedDefinitionIds = $this->componentResolvedNumericDefinitionIds($modelNumber);
+
+        DB::transaction(function () use ($modelNumber, $definitionIds, $model, $lockedDefinitionIds) {
             $existingAssignments = ModelNumberAttribute::query()
                 ->where('model_number_id', $modelNumber->id)
                 ->get()
@@ -84,6 +86,8 @@ class ModelAttributeManager
 
                 $retainedDefinitionIds[] = $definitionId;
             }
+
+            $retainedDefinitionIds = array_values(array_unique(array_merge($retainedDefinitionIds, $lockedDefinitionIds)));
 
             $assignmentsToRemoveQuery = ModelNumberAttribute::query()
                 ->where('model_number_id', $modelNumber->id);
@@ -126,13 +130,19 @@ class ModelAttributeManager
             ]);
         }
 
+        $lockedDefinitionIds = $this->componentResolvedNumericDefinitionIds($modelNumber);
         $assignments = $this->fetchAssignments($modelNumber);
 
-        DB::transaction(function () use ($modelNumber, $payload, $assignments) {
+        DB::transaction(function () use ($modelNumber, $payload, $assignments, $lockedDefinitionIds) {
             $persisted = collect();
 
             foreach ($assignments as $assignment) {
                 $definition = $assignment->definition;
+                if (in_array((int) $definition->id, $lockedDefinitionIds, true)) {
+                    $persisted->put($definition->id, $assignment);
+                    continue;
+                }
+
                 $key = $this->resolvePayloadKey($payload, $definition);
                 $hasKey = array_key_exists($key, $payload);
                 $value = $payload[$key] ?? null;
@@ -186,6 +196,7 @@ class ModelAttributeManager
             return;
         }
 
+        $lockedDefinitionIds = $this->componentResolvedNumericDefinitionIds($modelNumber);
         $assignments = $this->fetchAssignments($modelNumber, $keys)->keyBy('attribute_definition_id');
 
         if ($assignments->isEmpty()) {
@@ -203,9 +214,18 @@ class ModelAttributeManager
             ->whereNotIn('attribute_definition_id', $validIds)
             ->delete();
 
-        DB::transaction(function () use ($asset, $payload, $assignments) {
+        DB::transaction(function () use ($asset, $payload, $assignments, $lockedDefinitionIds) {
             foreach ($assignments as $assignment) {
                 $definition = $assignment->definition;
+
+                if (in_array((int) $definition->id, $lockedDefinitionIds, true)) {
+                    AssetAttributeOverride::query()
+                        ->where('asset_id', $asset->id)
+                        ->where('attribute_definition_id', $definition->id)
+                        ->delete();
+                    continue;
+                }
+
                 $key = $this->resolvePayloadKey($payload, $definition);
                 $hasKey = array_key_exists($key, $payload);
                 $value = $payload[$key] ?? null;
@@ -340,6 +360,27 @@ class ModelAttributeManager
     private function isEmpty($value): bool
     {
         return $value === null || $value === '';
+    }
+
+    /**
+     * @return array<int, int>
+     */
+    public function componentResolvedNumericDefinitionIds(ModelNumber $modelNumber): array
+    {
+        $modelNumber->loadMissing([
+            'componentTemplates.componentDefinition.attributeContributions.definition',
+        ]);
+
+        return $modelNumber->componentTemplates
+            ->flatMap(fn ($template) => $template->componentDefinition?->attributeContributions ?? collect())
+            ->filter(fn ($contribution) => $contribution->definition
+                && $contribution->definition->isNumericDatatype()
+                && $contribution->resolves_to_spec)
+            ->pluck('attribute_definition_id')
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
     }
 }
 

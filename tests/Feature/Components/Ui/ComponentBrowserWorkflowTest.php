@@ -68,7 +68,6 @@ class ComponentBrowserWorkflowTest extends TestCase
         $this->actingAs($user)
             ->post(route('hardware.components.install-tray', $targetAsset), [
                 'component_id' => $component->id,
-                'installed_as' => 'SSD Bay 1',
                 'note' => 'Installed on target asset',
             ])
             ->assertSessionHas('success');
@@ -76,17 +75,17 @@ class ComponentBrowserWorkflowTest extends TestCase
         $component->refresh();
         $this->assertSame(ComponentInstance::STATUS_INSTALLED, $component->status);
         $this->assertSame($targetAsset->id, $component->current_asset_id);
-        $this->assertSame('SSD Bay 1', $component->installed_as);
+        $this->assertNull($component->installed_as);
 
         $this->actingAs($user)
             ->get(route('hardware.show', $sourceAsset))
             ->assertOk()
-            ->assertSeeText('removed to tray');
+            ->assertSeeText('Removed To Tray');
 
         $this->actingAs($user)
             ->get(route('hardware.show', $targetAsset))
             ->assertOk()
-            ->assertSeeText('installed');
+            ->assertSeeText('Installed');
     }
 
     public function testLooseComponentCanMoveThroughStockVerificationAndDestructionStates(): void
@@ -140,5 +139,79 @@ class ComponentBrowserWorkflowTest extends TestCase
 
         $component->refresh();
         $this->assertSame(ComponentInstance::STATUS_DESTROYED_RECYCLED, $component->status);
+    }
+
+    public function testLooseComponentCanMoveToStockWithoutLocationAndSetLocationLater(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $stock = ComponentStorageLocation::factory()->stock()->create(['name' => 'Late Shelf']);
+        $component = ComponentInstance::factory()->inTray($user)->create();
+
+        $this->actingAs($user)
+            ->post(route('components.move_to_stock', $component), [
+                'note' => 'Return this to stock first',
+            ])
+            ->assertSessionHas('success');
+
+        $component->refresh();
+        $this->assertSame(ComponentInstance::STATUS_IN_STOCK, $component->status);
+        $this->assertNull($component->storage_location_id);
+
+        $this->actingAs($user)
+            ->put(route('components.update', $component), [
+                'storage_location_id' => $stock->id,
+                'storage_location_note' => 'Shelved afterwards',
+            ])
+            ->assertRedirect(route('components.show', $component))
+            ->assertSessionHas('success', 'Component storage location updated.');
+
+        $component->refresh();
+        $this->assertSame($stock->id, $component->storage_location_id);
+
+        $this->actingAs($user)
+            ->get(route('components.show', $component))
+            ->assertOk()
+            ->assertSeeText('Late Shelf');
+    }
+
+    public function testLooseComponentCanBeMarkedDefective(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $component = ComponentInstance::factory()->inTray($user)->create();
+
+        $this->actingAs($user)
+            ->post(route('components.mark_defective', $component), [
+                'note' => 'Failed inspection',
+            ])
+            ->assertSessionHas('success', 'Component marked defective.');
+
+        $component->refresh();
+        $this->assertSame(ComponentInstance::STATUS_DEFECTIVE, $component->status);
+        $this->assertNull($component->current_asset_id);
+        $this->assertNull($component->held_by_user_id);
+
+        $this->actingAs($user)
+            ->get(route('components.show', $component))
+            ->assertOk()
+            ->assertSeeText('Defective');
+    }
+
+    public function testWebTrayInstallRejectsComponentsHeldByAnotherUser(): void
+    {
+        $holder = User::factory()->superuser()->create();
+        $installer = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create();
+        $component = ComponentInstance::factory()->inTray($holder)->create();
+
+        $this->actingAs($installer)
+            ->post(route('hardware.components.install-tray', $asset), [
+                'component_id' => $component->id,
+            ])
+            ->assertSessionHas('error');
+
+        $component->refresh();
+        $this->assertSame(ComponentInstance::STATUS_IN_TRANSFER, $component->status);
+        $this->assertNull($component->current_asset_id);
+        $this->assertSame($holder->id, $component->held_by_user_id);
     }
 }

@@ -98,6 +98,11 @@ class AttributeDefinition extends SnipeModel
         return $this->hasMany(AssetAttributeOverride::class);
     }
 
+    public function componentDefinitionAttributes(): HasMany
+    {
+        return $this->hasMany(ComponentDefinitionAttribute::class, 'attribute_definition_id');
+    }
+
     public function testResults(): HasMany
     {
         return $this->hasMany(TestResult::class, 'attribute_definition_id');
@@ -239,6 +244,14 @@ class AttributeDefinition extends SnipeModel
     public function isEnum(): bool
     {
         return $this->datatype === self::DATATYPE_ENUM;
+    }
+
+    public function isNumericDatatype(): bool
+    {
+        return in_array($this->datatype, [
+            self::DATATYPE_INT,
+            self::DATATYPE_DECIMAL,
+        ], true);
     }
 
     public function allowsAssetOverride(): bool

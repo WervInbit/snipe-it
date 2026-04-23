@@ -1,37 +1,45 @@
-@php($versionSource = $versionSource ?? null)
 @php($isEdit = $definition->exists)
-@php($isVersion = (bool) $versionSource)
-@php($isCreate = !$isEdit && !$isVersion)
-@php($createManualKeyOverride = $isCreate ? (bool) old('manual_key_override', false) : false)
-@php($createOldLabel = $isCreate ? trim((string) old('label', $definition->label)) : '')
-@php($createOldKey = $isCreate ? trim((string) old('key', $definition->key)) : '')
+@php($createManualKeyOverride = !$isEdit ? (bool) old('manual_key_override', false) : false)
+@php($createOldLabel = !$isEdit ? trim((string) old('label', $definition->label)) : '')
+@php($createOldKey = !$isEdit ? trim((string) old('key', $definition->key)) : '')
 @php($createKeyValue = $createOldKey !== '' ? $createOldKey : ($createOldLabel !== '' ? \App\Models\AttributeDefinition::normalizeKeySource($createOldLabel) : ''))
+@php($selectedCategories = old('category_ids', ($definition->categories ?? collect())->pluck('id')->toArray()))
 
 @extends('layouts/edit-form', [
-    'createText' => $isVersion ? __('Create Attribute Version') : __('Create Attribute'),
+    'createText' => __('Create Attribute'),
     'updateText' => __('Update Attribute'),
-    'helpText' => __('Attributes become the reusable specification fields your models and assets rely on. Configure the datatype, constraints, and override rules here to drive presets, validation, and reporting.'),
+    'helpText' => __('Attributes become the reusable specification fields your models, components, assets, tests, and reports rely on. Configure the datatype, constraints, and override rules here.'),
     'helpPosition' => 'right',
-    'formAction' => $isVersion ? route('attributes.versions.store', $versionSource) : ($isEdit ? route('attributes.update', $definition) : route('attributes.store')),
-    'method' => $isVersion ? 'POST' : ($isEdit ? 'PUT' : 'POST'),
+    'formAction' => $isEdit ? route('attributes.update', $definition) : route('attributes.store'),
+    'method' => $isEdit ? 'PUT' : 'POST',
     'item' => $definition,
     'index_route' => 'attributes.index',
 ])
 
 @section('inputFields')
-    @if($versionSource)
-        <div class="alert alert-info">
-            {{ __('Creating a new version based on :label (:type). Key will remain :key.', ['label' => $versionSource->label, 'type' => ucfirst($versionSource->datatype), 'key' => $versionSource->key]) }}
-        </div>
-    @elseif($isEdit)
-        <div class="alert alert-info">
-            {{ __('Keys and datatypes are immutable. Use "New Version" to change the datatype or structure.') }}
+    @if($isEdit && ($usageSummary['total'] ?? 0) > 0)
+        <div class="alert alert-warning">
+            {{ __('This attribute is already in use. Editing it updates current model specs, asset overrides, component definitions, and future test expectations that rely on this definition.') }}
+            <ul style="margin:8px 0 0 16px;">
+                @if(($usageSummary['model_values'] ?? 0) > 0)
+                    <li>{{ __('Model-number values: :count', ['count' => $usageSummary['model_values']]) }}</li>
+                @endif
+                @if(($usageSummary['asset_overrides'] ?? 0) > 0)
+                    <li>{{ __('Asset overrides: :count', ['count' => $usageSummary['asset_overrides']]) }}</li>
+                @endif
+                @if(($usageSummary['component_definitions'] ?? 0) > 0)
+                    <li>{{ __('Component definitions: :count', ['count' => $usageSummary['component_definitions']]) }}</li>
+                @endif
+                @if(($usageSummary['tests'] ?? 0) > 0)
+                    <li>{{ __('Test types: :count', ['count' => $usageSummary['tests']]) }}</li>
+                @endif
+            </ul>
         </div>
     @endif
 
     @if($isEdit && $definition->isDeprecated())
         <div class="alert alert-warning">
-            {{ __('This attribute is deprecated. Existing assets will continue to read stored values, but new assignments should use a newer version.') }}
+            {{ __('This attribute is deprecated. Existing records can still reference it, but it remains hidden from current selectors.') }}
         </div>
     @endif
 
@@ -44,7 +52,7 @@
     <div class="form-group{{ $errors->has('label') ? ' has-error' : '' }}">
         <label for="label" class="col-md-3 control-label">{{ __('Label') }}</label>
         <div class="col-md-7">
-            <input type="text" class="form-control" name="label" id="label" value="{{ old('label', $definition->label ?: ($versionSource->label ?? null)) }}" required>
+            <input type="text" class="form-control" name="label" id="label" value="{{ old('label', $definition->label) }}" required>
             {!! $errors->first('label', '<span class="alert-msg">:message</span>') !!}
         </div>
     </div>
@@ -52,11 +60,9 @@
     <div class="form-group{{ $errors->has('key') ? ' has-error' : '' }}">
         <label for="key" class="col-md-3 control-label">{{ __('Key') }}</label>
         <div class="col-md-4">
-            @if($isVersion)
-                <input type="text" class="form-control" id="key" value="{{ $versionSource->key }}" readonly>
-                <input type="hidden" name="key" value="{{ $versionSource->key }}">
-            @elseif($isEdit)
-                <input type="text" class="form-control" name="key" id="key" value="{{ $definition->key }}" readonly>
+            @if($isEdit)
+                <input type="text" class="form-control" name="key" id="key" value="{{ old('key', $definition->key) }}" required>
+                <span class="help-block">{{ __('Changing the key may affect API consumers, exports, and reports that reference it.') }}</span>
             @else
                 <input type="hidden" name="manual_key_override" value="0">
                 <div class="checkbox">
@@ -76,14 +82,15 @@
     <div class="form-group{{ $errors->has('datatype') ? ' has-error' : '' }}">
         <label for="datatype" class="col-md-3 control-label">{{ __('Datatype') }}</label>
         <div class="col-md-4">
-            <select name="datatype" id="datatype" class="form-control" {{ $isEdit && !$isVersion ? 'disabled' : '' }}>
+            <select name="datatype" id="datatype" class="form-control" {{ $isEdit ? 'disabled' : '' }}>
                 @foreach(\App\Models\AttributeDefinition::DATATYPES as $type)
-                    <option value="{{ $type }}" {{ old('datatype', $definition->datatype ?: ($versionSource->datatype ?? 'text')) === $type ? 'selected' : '' }}>{{ ucfirst($type) }}</option>
+                    <option value="{{ $type }}" {{ old('datatype', $definition->datatype ?: 'text') === $type ? 'selected' : '' }}>{{ ucfirst($type) }}</option>
                 @endforeach
             </select>
             {!! $errors->first('datatype', '<span class="alert-msg">:message</span>') !!}
-            @if($isEdit && !$isVersion)
+            @if($isEdit)
                 <input type="hidden" name="datatype" value="{{ $definition->datatype }}">
+                <span class="help-block">{{ __('Datatype cannot be changed after creation.') }}</span>
             @endif
         </div>
     </div>
@@ -91,7 +98,7 @@
     <div class="form-group{{ $errors->has('unit') ? ' has-error' : '' }}">
         <label for="unit" class="col-md-3 control-label">{{ __('Unit (optional)') }}</label>
         <div class="col-md-4">
-            <input type="text" class="form-control" name="unit" id="unit" value="{{ old('unit', $definition->unit ?: ($versionSource->unit ?? null)) }}">
+            <input type="text" class="form-control" name="unit" id="unit" value="{{ old('unit', $definition->unit) }}">
             {!! $errors->first('unit', '<span class="alert-msg">:message</span>') !!}
         </div>
     </div>
@@ -99,7 +106,6 @@
     <div class="form-group{{ $errors->has('category_ids') ? ' has-error' : '' }}">
         <label for="category_ids" class="col-md-3 control-label">{{ __('Category Scope') }}</label>
         <div class="col-md-7">
-            @php($selectedCategories = old('category_ids', ($definition->categories ?? collect())->pluck('id')->toArray() ?: ($versionSource?->categories->pluck('id')->toArray() ?? [])))
             <select name="category_ids[]" id="category_ids" class="form-control select2" multiple>
                 @foreach($categories as $category)
                     <option value="{{ $category->id }}" {{ in_array($category->id, $selectedCategories) ? 'selected' : '' }}>
@@ -116,19 +122,19 @@
         <div class="col-md-7 col-md-offset-3">
             <div class="checkbox">
                 <label style="display:flex; align-items:center; gap:8px;">
-                    <input type="checkbox" name="required_for_category" value="1" {{ old('required_for_category', $definition->required_for_category ?? ($versionSource->required_for_category ?? false)) ? 'checked' : '' }}>
+                    <input type="checkbox" name="required_for_category" value="1" {{ old('required_for_category', $definition->required_for_category) ? 'checked' : '' }}>
                     <span>{{ __('Required for category') }}</span>
                 </label>
             </div>
             <div class="checkbox">
                 <label style="display:flex; align-items:center; gap:8px;">
-                    <input type="checkbox" name="allow_asset_override" value="1" {{ old('allow_asset_override', $definition->allow_asset_override ?? ($versionSource->allow_asset_override ?? false)) ? 'checked' : '' }}>
+                    <input type="checkbox" name="allow_asset_override" value="1" {{ old('allow_asset_override', $definition->allow_asset_override) ? 'checked' : '' }}>
                     <span>{{ __('Allow asset overrides') }}</span>
                 </label>
             </div>
             <div class="checkbox">
                 <label style="display:flex; align-items:center; gap:8px;">
-                    <input type="checkbox" name="allow_custom_values" value="1" {{ old('allow_custom_values', $definition->allow_custom_values ?? ($versionSource->allow_custom_values ?? false)) ? 'checked' : '' }}>
+                    <input type="checkbox" name="allow_custom_values" value="1" {{ old('allow_custom_values', $definition->allow_custom_values) ? 'checked' : '' }}>
                     <span>{{ __('Allow custom values (enum only)') }}</span>
                 </label>
             </div>
@@ -140,7 +146,7 @@
     <div class="form-group">
         <label class="col-md-3 control-label">{{ __('Constraints') }}</label>
         <div class="col-md-7">
-            @php($constraintsSource = $definition->constraints ?: ($versionSource->constraints ?? []))
+            @php($constraintsSource = $definition->constraints ?: [])
             <div class="row">
                 <div class="col-sm-4">
                     <label for="constraints_min" class="control-label">{{ __('Minimum') }}</label>
@@ -164,11 +170,11 @@
         </div>
     </div>
 
-@include('attributes.partials.options', ['definition' => $definition])
+    @include('attributes.partials.options', ['definition' => $definition])
 @endsection
 
 @push('js')
-@if($isCreate)
+@if(!$isEdit)
     <script nonce="{{ csrf_token() }}">
         (function () {
             var labelInput = document.getElementById('label');
@@ -218,22 +224,4 @@
         })();
     </script>
 @endif
-@if($isVersion)
-    <script nonce="{{ csrf_token() }}">
-        (function () {
-            var form = document.getElementById('create-form');
-            if (!form || !window.history || !window.history.replaceState) {
-                return;
-            }
-            form.addEventListener('submit', function () {
-                try {
-                    window.history.replaceState(null, '', '{{ route('attributes.index') }}');
-                } catch (error) {
-                    // Ignore history errors and allow submit.
-                }
-            });
-        })();
-    </script>
-@endif
 @endpush
-

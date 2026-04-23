@@ -447,11 +447,16 @@
                     @can('view', \App\Models\ComponentInstance::class)
                     <li>
                         <a href="#components" data-toggle="tab">
-                          <span class="hidden-lg hidden-md">
+                            <span class="hidden-lg hidden-md">
                             <x-icon type="components" class="fa-2x" />
                           </span>
                             <span class="hidden-xs hidden-sm">{{ trans('general.components') }}
-                                {!! (($asset->trackedComponents->count() + ($asset->modelNumber?->componentTemplates->count() ?? 0)) > 0) ? '<span class="badge badge-secondary">'.number_format($asset->trackedComponents->count() + ($asset->modelNumber?->componentTemplates->count() ?? 0)).'</span>' : '' !!}
+                                @php
+                                    $componentTabCount = isset($componentRoster)
+                                        ? $componentRoster->rows->count()
+                                        : ($asset->trackedComponents->count() + ($asset->modelNumber?->componentTemplates->count() ?? 0));
+                                @endphp
+                                {!! ($componentTabCount > 0) ? '<span class="badge badge-secondary">'.number_format($componentTabCount).'</span>' : '' !!}
                           </span>
                         </a>
                     </li>
@@ -936,7 +941,17 @@
                                             @php
                                                 $displayValue = $attribute->formattedValue();
                                                 $modelDisplay = $attribute->formattedModelValue();
+                                                $manualModelDisplay = $attribute->formattedManualModelValue();
                                                 $isOverride = $attribute->isOverride;
+                                                $sourceLabel = $attribute->sourceLabel();
+                                                $sourceSummary = $attribute->contributorSummary($attribute->source);
+                                                $showSourceLabel = $attribute->source !== 'model';
+                                                $showContributorSummary = in_array($attribute->source, ['installed_components', 'expected_components', 'calculated_components'], true);
+                                                $calculatedBaselineTargetDisplay = $attribute->formattedCalculatedBaselineValue();
+                                                $calculatedExpectedSubtotal = $attribute->formattedCalculatedExpectedSubtotal();
+                                                $calculatedExtraSubtotal = $attribute->formattedCalculatedExtraSubtotal();
+                                                $calculatedExpectedSummary = $attribute->calculatedExpectedContributorSummary();
+                                                $calculatedExtraSummary = $attribute->calculatedExtraContributorSummary();
                                             @endphp
                                             <div class="row spec-detail-row {{ $isOverride ? 'spec-detail-row--override' : '' }}">
                                                 <div class="col-md-3">
@@ -949,14 +964,68 @@
                                                         {{ __('Not specified') }}
                                                     @endif
 
-                                                    @if($isOverride)
+                                                    @if(($showSourceLabel && $sourceLabel) || $isOverride)
                                                         <div class="spec-detail-meta">
-                                                            <span class="label label-info">{{ __('Override') }}</span>
+                                                            @if($showSourceLabel && $sourceLabel)
+                                                                <span class="label label-default">{{ $sourceLabel }}</span>
+                                                            @endif
+                                                            @if($isOverride)
+                                                                <span class="label label-info">{{ __('Override') }}</span>
+                                                            @endif
                                                         </div>
                                                     @endif
 
+                                                    @if($attribute->source === 'calculated_components')
+                                                        @if($calculatedExpectedSubtotal)
+                                                            <div class="spec-detail-meta text-muted">
+                                                                {{ __('Expected/default subtotal: :value', ['value' => $calculatedExpectedSubtotal]) }}
+                                                            </div>
+                                                        @endif
+
+                                                        @if($calculatedExpectedSummary)
+                                                            <div class="spec-detail-meta text-muted">
+                                                                {{ __('Expected/default parts: :value', ['value' => $calculatedExpectedSummary]) }}
+                                                            </div>
+                                                        @endif
+
+                                                        @if($calculatedExtraSubtotal)
+                                                            <div class="spec-detail-meta text-muted">
+                                                                {{ __('Extras/custom subtotal: :value', ['value' => $calculatedExtraSubtotal]) }}
+                                                            </div>
+                                                        @endif
+
+                                                        @if($calculatedExtraSummary)
+                                                            <div class="spec-detail-meta text-muted">
+                                                                {{ __('Extras/custom on top: :value', ['value' => $calculatedExtraSummary]) }}
+                                                            </div>
+                                                        @endif
+                                                    @elseif($showContributorSummary && $sourceSummary)
+                                                        <div class="spec-detail-meta text-muted">{{ __('Contributors: :value', ['value' => $sourceSummary]) }}</div>
+                                                    @endif
+
                                                     @if($isOverride && $modelDisplay)
-                                                        <div class="spec-detail-meta text-muted">{{ __('Model: :value', ['value' => $modelDisplay]) }}</div>
+                                                        <div class="spec-detail-meta text-muted">
+                                                            {{ __('Inherited (:source): :value', ['source' => $attribute->modelSourceLabel(), 'value' => $modelDisplay]) }}
+                                                        </div>
+                                                    @elseif(
+                                                        !$isOverride
+                                                        && $attribute->source === 'calculated_components'
+                                                        && $attribute->hasReducedExpectedBaseline()
+                                                        && $calculatedBaselineTargetDisplay
+                                                    )
+                                                        <div class="spec-detail-meta text-muted">
+                                                            {{ __('Expected baseline target: :value', ['value' => $calculatedBaselineTargetDisplay]) }}
+                                                        </div>
+                                                    @elseif(!$isOverride && $attribute->source === 'installed_components' && $modelDisplay)
+                                                        <div class="spec-detail-meta text-muted">
+                                                            {{ __('Model baseline (:source): :value', ['source' => $attribute->modelSourceLabel(), 'value' => $modelDisplay]) }}
+                                                        </div>
+                                                    @endif
+
+                                                    @if($attribute->hasReducedExpectedBaseline())
+                                                        <div class="spec-detail-meta text-warning">
+                                                            {{ __('Current calculated value is below the expected baseline because expected components were removed.') }}
+                                                        </div>
                                                     @endif
                                                 </div>
                                             </div>
@@ -2011,6 +2080,30 @@
 @stop
 @section('moar_scripts')
     @include ('partials.bootstrap-table')
+    <script>
+        (function () {
+            var $ = window.jQuery || window.$;
+            if (!$ || !$.fn || !$.fn.modal) {
+                return;
+            }
+
+            $('#assetComponentStorageModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var action = button.data('storage-action') || '';
+                var name = button.data('storage-name') || '{{ trans('general.none') }}';
+                var modal = $(this);
+
+                modal.find('[data-asset-component-storage-form]').attr('action', action);
+                modal.find('[data-asset-component-storage-name]').text(name);
+            }).on('hidden.bs.modal', function () {
+                var modal = $(this);
+                var form = modal.find('[data-asset-component-storage-form]');
+                form.attr('action', '');
+                form[0].reset();
+                modal.find('[data-asset-component-storage-name]').text('{{ trans('general.none') }}');
+            });
+        })();
+    </script>
     <script>
         (function () {
             var dropzone = document.getElementById('image-dropzone');

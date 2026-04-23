@@ -46,7 +46,7 @@ class ComponentsTransformer
                 'id' => (int) $component->componentDefinition->manufacturer->id,
                 'name' => e($component->componentDefinition->manufacturer->name),
             ] : null,
-            'source_type' => e($component->source_type),
+            'source_type' => e(ComponentInstance::sourceTypeLabel($component->source_type) ?? $component->source_type),
             'source_asset' => $component->sourceAsset ? [
                 'id' => (int) $component->sourceAsset->id,
                 'name' => e($component->sourceAsset->present()->name()),

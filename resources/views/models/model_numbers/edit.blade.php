@@ -56,6 +56,16 @@
         </div>
     </div>
 
+    <div class="form-group">
+        <label class="col-md-3 control-label">{{ __('Expected Components') }}</label>
+        <div class="col-md-7">
+            <a href="{{ route('models.numbers.spec.edit', [$model, $modelNumber]) }}#expected-components" class="btn btn-default">
+                {{ __('Edit Unified Specification') }}
+            </a>
+            <p class="help-block">{{ __('Manual attributes and expected components now live on the same specification screen.') }}</p>
+        </div>
+    </div>
+
 @endsection
 @section('content')
     @parent

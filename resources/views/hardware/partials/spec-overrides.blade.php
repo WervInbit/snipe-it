@@ -61,6 +61,13 @@
         @php($modelDisplay = $attribute->formattedModelValue())
         @php($effectiveDisplay = $attribute->formattedValue())
         @php($baseDisplay = $modelDisplay ?? $effectiveDisplay)
+        @php($modelSourceLabel = $attribute->modelSourceLabel())
+        @php($isCalculated = method_exists($attribute, 'isCalculatedFromComponents') && $attribute->isCalculatedFromComponents())
+        @php($calculatedBaselineTargetDisplay = method_exists($attribute, 'formattedCalculatedBaselineValue') ? $attribute->formattedCalculatedBaselineValue() : null)
+        @php($calculatedExpectedSubtotal = method_exists($attribute, 'formattedCalculatedExpectedSubtotal') ? $attribute->formattedCalculatedExpectedSubtotal() : null)
+        @php($calculatedExtraSubtotal = method_exists($attribute, 'formattedCalculatedExtraSubtotal') ? $attribute->formattedCalculatedExtraSubtotal() : null)
+        @php($calculatedExpectedSummary = method_exists($attribute, 'calculatedExpectedContributorSummary') ? $attribute->calculatedExpectedContributorSummary() : null)
+        @php($calculatedExtraSummary = method_exists($attribute, 'calculatedExtraContributorSummary') ? $attribute->calculatedExtraContributorSummary() : null)
         <div class="form-group{{ $errors->has($fieldKey) ? ' has-error' : '' }}">
             <label class="col-md-3 control-label" for="attribute_override_{{ $definition->id }}">
                 {{ $definition->label }}
@@ -69,7 +76,30 @@
                 @endif
             </label>
             <div class="col-md-7">
-                @if(!$definition->allow_asset_override)
+                @if($isCalculated)
+                    <p class="form-control-static">
+                        {{ $effectiveDisplay ?? __('Not specified') }}
+                    </p>
+                    <p class="help-block text-muted">{{ __('This value is calculated from components and cannot be overridden manually.') }}</p>
+                    @if($calculatedExpectedSubtotal)
+                        <p class="help-block text-muted">{{ __('Expected/default subtotal: :value', ['value' => $calculatedExpectedSubtotal]) }}</p>
+                    @endif
+                    @if($calculatedExpectedSummary)
+                        <p class="help-block text-muted">{{ __('Expected/default parts: :value', ['value' => $calculatedExpectedSummary]) }}</p>
+                    @endif
+                    @if($calculatedExtraSubtotal)
+                        <p class="help-block text-muted">{{ __('Extras/custom subtotal: :value', ['value' => $calculatedExtraSubtotal]) }}</p>
+                    @endif
+                    @if($calculatedExtraSummary)
+                        <p class="help-block text-muted">{{ __('Extras/custom on top: :value', ['value' => $calculatedExtraSummary]) }}</p>
+                    @endif
+                    @if(method_exists($attribute, 'hasReducedExpectedBaseline') && $attribute->hasReducedExpectedBaseline() && $calculatedBaselineTargetDisplay)
+                        <p class="help-block text-muted">{{ __('Expected baseline target: :value', ['value' => $calculatedBaselineTargetDisplay]) }}</p>
+                    @endif
+                    @if(method_exists($attribute, 'hasReducedExpectedBaseline') && $attribute->hasReducedExpectedBaseline())
+                        <p class="help-block text-warning">{{ __('Current calculated value is below the expected baseline because expected components were removed.') }}</p>
+                    @endif
+                @elseif(!$definition->allow_asset_override)
                     <p class="form-control-static">
                         {{ $baseDisplay ?? __('Not specified') }}
                     </p>
@@ -121,7 +151,7 @@
                     @endswitch
 
                     {!! $errors->first($fieldKey, '<span class="alert-msg">:message</span>') !!}
-                    <p class="help-block text-muted">{{ __('Model spec: :value', ['value' => $modelDisplay ?? __('Not specified')]) }}</p>
+                    <p class="help-block text-muted">{{ __('Model spec (:source): :value', ['source' => $modelSourceLabel, 'value' => $modelDisplay ?? __('Not specified')]) }}</p>
                 @endif
             </div>
        </div>

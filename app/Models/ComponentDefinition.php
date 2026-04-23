@@ -63,4 +63,11 @@ class ComponentDefinition extends SnipeModel
     {
         return $this->hasMany(ModelNumberComponentTemplate::class, 'component_definition_id');
     }
+
+    public function attributeContributions(): HasMany
+    {
+        return $this->hasMany(ComponentDefinitionAttribute::class, 'component_definition_id')
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
 }

@@ -44,12 +44,7 @@ trait BuildsComponentWorkflowOptions
 
     protected function sourceTypeOptions(): array
     {
-        return [
-            ComponentInstance::SOURCE_MANUAL => __('Manual'),
-            ComponentInstance::SOURCE_PURCHASED => __('Purchased'),
-            ComponentInstance::SOURCE_EXTERNAL_INTAKE => __('External Intake'),
-            ComponentInstance::SOURCE_EXTRACTED => __('Extracted'),
-        ];
+        return ComponentInstance::sourceTypeOptions();
     }
 
     protected function conditionOptions(): array

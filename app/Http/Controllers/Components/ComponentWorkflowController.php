@@ -26,7 +26,6 @@ class ComponentWorkflowController extends Controller
     {
         $this->authorize('view', ComponentInstance::class);
 
-        $locations = $this->storageLocationsByType();
         $trayComponents = ComponentInstance::query()
             ->with([
                 'componentDefinition.category',
@@ -45,9 +44,18 @@ class ComponentWorkflowController extends Controller
 
         return view('components.tray', [
             'trayComponents' => $trayComponents,
-            'stockLocations' => $locations['stock'],
-            'verificationLocations' => $locations['verification'],
-            'destructionLocations' => $locations['destruction'],
+        ]);
+    }
+
+    public function createRemoveToTray(Request $request, ComponentInstance $component_id): View
+    {
+        $this->authorize('move', $component_id);
+
+        abort_unless($component_id->status === ComponentInstance::STATUS_INSTALLED, 404);
+
+        return view('components.workflows.remove-to-tray', [
+            'component' => $component_id->loadMissing(['currentAsset.model']),
+            'returnTo' => $this->returnTo($request, $component_id),
         ]);
     }
 
@@ -67,7 +75,25 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->back()->with('success', __('Component moved to tray.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component moved to tray.'));
+    }
+
+    public function createInstall(Request $request, ComponentInstance $component_id): View
+    {
+        $this->authorize('install', $component_id);
+
+        abort_if(in_array($component_id->status, [
+            ComponentInstance::STATUS_INSTALLED,
+            ComponentInstance::STATUS_DESTROYED_RECYCLED,
+            ComponentInstance::STATUS_DESTRUCTION_PENDING,
+            ComponentInstance::STATUS_DEFECTIVE,
+        ], true), 404);
+
+        return view('components.workflows.install', [
+            'component' => $component_id->loadMissing(['sourceAsset.model', 'storageLocation.siteLocation', 'heldBy']),
+            'installableAssets' => $this->installableAssets(),
+            'returnTo' => $this->returnTo($request, $component_id),
+        ]);
     }
 
     public function install(Request $request, ComponentInstance $component_id): RedirectResponse
@@ -76,7 +102,6 @@ class ComponentWorkflowController extends Controller
 
         $data = $request->validate([
             'asset_id' => ['required', 'integer', 'exists:assets,id'],
-            'installed_as' => ['nullable', 'string', 'max:255'],
             'note' => ['nullable', 'string'],
         ]);
 
@@ -84,14 +109,29 @@ class ComponentWorkflowController extends Controller
             $asset = Asset::findOrFail($data['asset_id']);
             $this->lifecycle->installIntoAsset($component_id, $asset, [
                 'performed_by' => $request->user(),
-                'installed_as' => $data['installed_as'] ?? null,
                 'note' => $data['note'] ?? null,
             ]);
         } catch (InvalidArgumentException $exception) {
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->back()->with('success', __('Component installed.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component installed.'));
+    }
+
+    public function createMoveToStock(Request $request, ComponentInstance $component_id): View
+    {
+        $this->authorize('move', $component_id);
+
+        abort_if(in_array($component_id->status, [
+            ComponentInstance::STATUS_INSTALLED,
+            ComponentInstance::STATUS_DESTROYED_RECYCLED,
+            ComponentInstance::STATUS_DESTRUCTION_PENDING,
+        ], true), 404);
+
+        return view('components.workflows.storage', [
+            'component' => $component_id->loadMissing(['storageLocation.siteLocation', 'currentAsset.model', 'heldBy']),
+            'returnTo' => $this->returnTo($request, $component_id),
+        ]);
     }
 
     public function moveToStock(Request $request, ComponentInstance $component_id): RedirectResponse
@@ -99,14 +139,16 @@ class ComponentWorkflowController extends Controller
         $this->authorize('move', $component_id);
 
         $data = $request->validate([
-            'storage_location_id' => ['required', 'integer', 'exists:component_storage_locations,id'],
+            'storage_location_id' => ['nullable', 'integer', 'exists:component_storage_locations,id'],
             'needs_verification' => ['nullable', 'boolean'],
             'verification_location_id' => ['nullable', 'integer', 'exists:component_storage_locations,id'],
             'note' => ['nullable', 'string'],
         ]);
 
         try {
-            $stockLocation = ComponentStorageLocation::findOrFail($data['storage_location_id']);
+            $stockLocation = !empty($data['storage_location_id'])
+                ? ComponentStorageLocation::findOrFail($data['storage_location_id'])
+                : null;
             $verificationLocation = !empty($data['verification_location_id'])
                 ? ComponentStorageLocation::findOrFail($data['verification_location_id'])
                 : $stockLocation;
@@ -121,7 +163,28 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->back()->with('success', __('Component moved.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component moved to stock.'));
+    }
+
+    public function createFlagNeedsVerification(Request $request, ComponentInstance $component_id): View
+    {
+        $this->authorize('verify', $component_id);
+
+        abort_if(in_array($component_id->status, [
+            ComponentInstance::STATUS_INSTALLED,
+            ComponentInstance::STATUS_DESTROYED_RECYCLED,
+            ComponentInstance::STATUS_DESTRUCTION_PENDING,
+        ], true), 404);
+
+        $locations = $this->storageLocationsByType();
+
+        return view('components.workflows.verification', [
+            'component' => $component_id->loadMissing(['storageLocation.siteLocation', 'currentAsset.model', 'heldBy']),
+            'mode' => 'flag',
+            'verificationLocations' => $locations['verification'],
+            'stockLocations' => $locations['stock'],
+            'returnTo' => $this->returnTo($request, $component_id),
+        ]);
     }
 
     public function flagNeedsVerification(Request $request, ComponentInstance $component_id): RedirectResponse
@@ -147,7 +210,24 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->back()->with('success', __('Verification required.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Verification required.'));
+    }
+
+    public function createConfirmVerification(Request $request, ComponentInstance $component_id): View
+    {
+        $this->authorize('verify', $component_id);
+
+        abort_unless($component_id->status === ComponentInstance::STATUS_NEEDS_VERIFICATION, 404);
+
+        $locations = $this->storageLocationsByType();
+
+        return view('components.workflows.verification', [
+            'component' => $component_id->loadMissing(['storageLocation.siteLocation', 'currentAsset.model', 'heldBy']),
+            'mode' => 'confirm',
+            'verificationLocations' => $locations['verification'],
+            'stockLocations' => $locations['stock'],
+            'returnTo' => $this->returnTo($request, $component_id),
+        ]);
     }
 
     public function confirmVerification(Request $request, ComponentInstance $component_id): RedirectResponse
@@ -155,12 +235,14 @@ class ComponentWorkflowController extends Controller
         $this->authorize('verify', $component_id);
 
         $data = $request->validate([
-            'storage_location_id' => ['required', 'integer', 'exists:component_storage_locations,id'],
+            'storage_location_id' => ['nullable', 'integer', 'exists:component_storage_locations,id'],
             'note' => ['nullable', 'string'],
         ]);
 
         try {
-            $location = ComponentStorageLocation::findOrFail($data['storage_location_id']);
+            $location = !empty($data['storage_location_id'])
+                ? ComponentStorageLocation::findOrFail($data['storage_location_id'])
+                : null;
 
             $this->lifecycle->confirmVerification($component_id, $location, [
                 'performed_by' => $request->user(),
@@ -170,7 +252,27 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->back()->with('success', __('Verification confirmed.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Verification confirmed.'));
+    }
+
+    public function createMarkDestructionPending(Request $request, ComponentInstance $component_id): View
+    {
+        $this->authorize('move', $component_id);
+
+        abort_if(in_array($component_id->status, [
+            ComponentInstance::STATUS_INSTALLED,
+            ComponentInstance::STATUS_DESTROYED_RECYCLED,
+            ComponentInstance::STATUS_DESTRUCTION_PENDING,
+        ], true), 404);
+
+        $locations = $this->storageLocationsByType();
+
+        return view('components.workflows.destruction', [
+            'component' => $component_id->loadMissing(['storageLocation.siteLocation', 'currentAsset.model', 'heldBy']),
+            'mode' => 'pending',
+            'destructionLocations' => $locations['destruction'],
+            'returnTo' => $this->returnTo($request, $component_id),
+        ]);
     }
 
     public function markDestructionPending(Request $request, ComponentInstance $component_id): RedirectResponse
@@ -195,7 +297,21 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->back()->with('success', __('Component marked for destruction.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component marked for destruction.'));
+    }
+
+    public function createMarkDestroyed(Request $request, ComponentInstance $component_id): View
+    {
+        $this->authorize('move', $component_id);
+
+        abort_unless($component_id->status === ComponentInstance::STATUS_DESTRUCTION_PENDING, 404);
+
+        return view('components.workflows.destruction', [
+            'component' => $component_id->loadMissing(['storageLocation.siteLocation', 'currentAsset.model', 'heldBy']),
+            'mode' => 'destroyed',
+            'destructionLocations' => collect(),
+            'returnTo' => $this->returnTo($request, $component_id),
+        ]);
     }
 
     public function markDestroyed(Request $request, ComponentInstance $component_id): RedirectResponse
@@ -215,6 +331,54 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->back()->with('success', __('Component destroyed.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component destroyed.'));
+    }
+
+    public function markDefective(Request $request, ComponentInstance $component_id): RedirectResponse
+    {
+        $this->authorize('move', $component_id);
+
+        $data = $request->validate([
+            'note' => ['nullable', 'string'],
+        ]);
+
+        try {
+            $this->lifecycle->markDefective($component_id, [
+                'performed_by' => $request->user(),
+                'note' => $data['note'] ?? null,
+            ]);
+        } catch (InvalidArgumentException $exception) {
+            return redirect()->back()->withInput()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component marked defective.'));
+    }
+
+    private function installableAssets()
+    {
+        return Asset::query()
+            ->with(['model', 'assetstatus'])
+            ->NotArchived()
+            ->orderBy('asset_tag')
+            ->get();
+    }
+
+    private function returnTo(Request $request, ComponentInstance $component): string
+    {
+        $returnTo = trim((string) $request->input('return_to', $request->query('return_to', '')));
+
+        if ($returnTo === '') {
+            return route('components.show', $component);
+        }
+
+        if (str_starts_with($returnTo, '/')) {
+            return url($returnTo);
+        }
+
+        if (str_starts_with($returnTo, url('/'))) {
+            return $returnTo;
+        }
+
+        return route('components.show', $component);
     }
 }

@@ -160,8 +160,25 @@ function clearAssetSearch(tag) {
   });
 }
 
+function buildResolveUrl(tag) {
+  const basePath = config.resolveBasePath || '/scan/resolve';
+  const normalizedBasePath = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
+  const url = new URL(`${normalizedBasePath}/${encodeURIComponent(tag)}`, window.location.origin);
+  const query = config.resolveQuery || {};
+
+  Object.entries(query).forEach(([key, value]) => {
+    if (value === null || value === undefined || value === '') {
+      return;
+    }
+
+    url.searchParams.set(key, value);
+  });
+
+  return url.toString();
+}
+
 function redirect(tag) {
-  window.location.href = `/hardware/bytag/${encodeURIComponent(tag)}`;
+  window.location.href = buildResolveUrl(tag);
 }
 
 function stop() {

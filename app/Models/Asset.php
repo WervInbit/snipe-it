@@ -554,6 +554,11 @@ class Asset extends Depreciable
         return $this->hasMany(ComponentInstance::class, 'current_asset_id')->orderByDesc('updated_at');
     }
 
+    public function expectedComponentStates(): HasMany
+    {
+        return $this->hasMany(AssetExpectedComponentState::class, 'asset_id')->orderBy('model_number_component_template_id');
+    }
+
     public function sourcedComponents(): HasMany
     {
         return $this->hasMany(ComponentInstance::class, 'source_asset_id')->orderByDesc('updated_at');

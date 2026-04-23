@@ -1,7 +1,7 @@
 @extends('layouts/default')
 
 @section('title')
-    {{ __('Scan Asset Tag') }}
+    {{ __('Scan Asset Or Component') }}
     @parent
 @stop
 
@@ -29,7 +29,10 @@
 </style>
 <div class="container-fluid py-3 scan-screen">
     <div class="scan-shell">
-        <h1 class="h4 text-center mb-4">{{ trans('general.scan_qr') }}</h1>
+        <h1 class="h4 text-center mb-2">{{ __('Scan Asset Or Component') }}</h1>
+        <p class="text-center text-muted" style="margin-bottom: 1.5rem;">
+            {{ __('Point the camera at an asset tag or a tracked component QR label to open its detail page.') }}
+        </p>
 
         <div id="scan-permission" class="alert alert-warning d-none" role="alert" data-testid="scan-permission-banner" style="display:none;">
             {{ trans('general.scan_camera_denied') }}

@@ -138,14 +138,36 @@ Route::group(
         Route::delete('{asset}/images/{assetImage}', [AssetImageController::class, 'destroy'])
             ->name('asset-images.destroy');
 
-        Route::post('{asset}/components/extract', [AssetComponentsController::class, 'extract'])
-            ->name('hardware.components.extract');
+        Route::get('{asset}/components/add', [AssetComponentsController::class, 'add'])
+            ->name('hardware.components.add');
+        Route::post('{asset}/components/install', [AssetComponentsController::class, 'install'])
+            ->name('hardware.components.install');
         Route::post('{asset}/components/install-tray', [AssetComponentsController::class, 'installFromTray'])
             ->name('hardware.components.install-tray');
         Route::post('{asset}/components/install-existing', [AssetComponentsController::class, 'installExisting'])
             ->name('hardware.components.install-existing');
         Route::post('{asset}/components/register', [AssetComponentsController::class, 'register'])
             ->name('hardware.components.register');
+        Route::post('{asset}/components/expected/{template}/to-tray', [AssetComponentsController::class, 'expectedToTray'])
+            ->name('hardware.components.expected.tray');
+
+        Route::get('{asset}/components/expected/{template}/to-storage', [AssetComponentsController::class, 'createExpectedStorage'])
+            ->name('hardware.components.expected.storage.create');
+        Route::post('{asset}/components/expected/{template}/to-storage', [AssetComponentsController::class, 'storeExpectedStorage'])
+            ->name('hardware.components.expected.storage.store');
+        Route::get('{asset}/components/{component}/to-storage', [AssetComponentsController::class, 'createTrackedStorage'])
+            ->name('hardware.components.storage.create');
+        Route::post('{asset}/components/{component}/to-storage', [AssetComponentsController::class, 'storeTrackedStorage'])
+            ->name('hardware.components.storage.store');
+
+        Route::get('{asset}/components/expected/{template}/move', [AssetComponentsController::class, 'createExpectedTransfer'])
+            ->name('hardware.components.expected.transfer.create');
+        Route::post('{asset}/components/expected/{template}/move', [AssetComponentsController::class, 'storeExpectedTransfer'])
+            ->name('hardware.components.expected.transfer.store');
+        Route::get('{asset}/components/{component}/move', [AssetComponentsController::class, 'createTrackedTransfer'])
+            ->name('hardware.components.transfer.create');
+        Route::post('{asset}/components/{component}/move', [AssetComponentsController::class, 'storeTrackedTransfer'])
+            ->name('hardware.components.transfer.store');
 
         // Asset individual tests
         Route::get('{asset}/asset-tests', [AssetTestController::class, 'index'])

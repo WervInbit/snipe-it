@@ -129,17 +129,66 @@
             font-weight: 700;
             margin-right: 6px;
         }
+
+        .model-spec-preview-table td,
+        .model-spec-preview-table th {
+            vertical-align: top;
+        }
+
+        .component-template-row + .component-template-row {
+            margin-top: 12px;
+        }
+
+        .component-template-row.is-dragging {
+            opacity: 0.65;
+        }
+
+        .component-template-row__main {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .component-template-row__drag {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            align-self: stretch;
+            width: 44px;
+        }
+
+        .component-template-row__drag-handle {
+            cursor: move;
+        }
+
+        .component-template-row__actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .component-template-empty {
+            margin-bottom: 15px;
+        }
     </style>
 @endpush
 
 @section('inputFields')
     @php
         $assignedDefinitionIds = $selectedDefinitionIds ?? [];
+        $componentDefinitions = $componentDefinitions ?? collect();
+        $componentDefinitionsById = $componentDefinitions->keyBy('id');
     @endphp
     @php
         $attributeErrorItems = collect();
+        $componentTemplateErrorItems = collect();
         $invalidAttributeIds = collect();
         $generalSpecErrors = collect();
+        $componentTemplateFieldLabels = [
+            'component_definition_id' => __('Catalog Definition'),
+            'expected_qty' => trans('general.qty'),
+        ];
 
         foreach ($errors->getMessages() as $errorKey => $messages) {
             $messages = collect($messages)->filter()->values();
@@ -160,11 +209,46 @@
                 continue;
             }
 
+            if (preg_match('/^component_templates\.(\d+)\.(.+)$/', $errorKey, $matches)) {
+                $rowIndex = (int) $matches[1];
+                $fieldKey = $matches[2];
+
+                $componentTemplateErrorItems->push([
+                    'row' => $rowIndex,
+                    'field' => $fieldKey,
+                    'label' => __('Expected component #:row - :field', [
+                        'row' => $rowIndex + 1,
+                        'field' => $componentTemplateFieldLabels[$fieldKey] ?? $fieldKey,
+                    ]),
+                    'message' => $messages->first(),
+                ]);
+                continue;
+            }
+
             $generalSpecErrors = $generalSpecErrors->merge($messages);
         }
 
         $invalidAttributeIds = $invalidAttributeIds->unique()->values();
         $attributeErrorItems = $attributeErrorItems->unique('id')->values();
+        $componentTemplateErrorItems = $componentTemplateErrorItems
+            ->unique(fn ($item) => $item['row'] . ':' . $item['field'])
+            ->values();
+        $componentTemplateRows = collect();
+
+        if (($modelNumber ?? null) !== null) {
+            $componentTemplateRows = collect(old('component_templates', []));
+
+            if ($componentTemplateRows->isEmpty()) {
+                $componentTemplateRows = $modelNumber->componentTemplates->map(function ($template) {
+                    return [
+                        'id' => $template->id,
+                        'component_definition_id' => $template->component_definition_id,
+                        'expected_qty' => $template->expected_qty,
+                    ];
+                });
+            }
+
+        }
     @endphp
 
     @if(($modelNumbers ?? collect())->isEmpty() || !$modelNumber)
@@ -188,6 +272,23 @@
                                                 class="btn btn-default btn-sm model-spec-error-link js-attribute-error-link"
                                                 data-testid="model-spec-error-link"
                                                 data-attribute-id="{{ $errorItem['id'] }}">
+                                            <span class="model-spec-error-link__label">{{ $errorItem['label'] }}</span>
+                                            <span>{{ $errorItem['message'] }}</span>
+                                        </button>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                    @if($componentTemplateErrorItems->isNotEmpty())
+                        <div data-testid="component-template-error-navigator">
+                            <p class="help-block"><strong>{{ __('Expected component rows with issues') }}</strong></p>
+                            <ul class="model-spec-error-list">
+                                @foreach($componentTemplateErrorItems as $errorItem)
+                                    <li>
+                                        <button type="button"
+                                                class="btn btn-default btn-sm model-spec-error-link js-component-template-error-link"
+                                                data-component-template-row="{{ $errorItem['row'] }}">
                                             <span class="model-spec-error-link__label">{{ $errorItem['label'] }}</span>
                                             <span>{{ $errorItem['message'] }}</span>
                                         </button>
@@ -294,6 +395,136 @@
             </div>
         </div>
 
+        <div class="row" id="expected-components">
+            <div class="col-md-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">{{ __('Expected Components') }}</h3>
+                    </div>
+                    <div class="box-body">
+                        <p class="text-muted">
+                            {{ __('Expected components stay separate from manual attributes and define the baseline component set for assets using this model number.') }}
+                        </p>
+                        <p class="text-muted small">
+                            {{ __('Expected components added here are required by default. Drag rows to reorder them, or use the Up and Down buttons.') }}
+                        </p>
+
+                        <div data-component-template-rows data-next-index="{{ $componentTemplateRows->count() }}">
+                            <div class="alert alert-info component-template-empty{{ $componentTemplateRows->isNotEmpty() ? ' hidden' : '' }}" data-component-template-empty>
+                                {{ __('No expected components added yet.') }}
+                            </div>
+                            @foreach($componentTemplateRows->values() as $index => $row)
+                                @php($selectedComponentDefinition = $componentDefinitionsById->get((int) ($row['component_definition_id'] ?? 0)))
+                                @php($componentRowHasError = collect(array_keys($errors->getMessages()))->contains(fn ($key) => str_starts_with($key, 'component_templates.' . $index . '.')))
+                                <div class="panel panel-default component-template-row{{ $componentRowHasError ? ' has-error' : '' }}" data-component-template-row data-component-template-row-index="{{ $index }}">
+                                    <div class="panel-body">
+                                        <input type="hidden" name="component_templates[{{ $index }}][id]" value="{{ $row['id'] ?? '' }}">
+                                        <div class="component-template-row__main">
+                                            <div class="component-template-row__drag">
+                                                <button type="button" class="btn btn-default btn-sm component-template-row__drag-handle" data-component-template-drag-handle draggable="true" title="{{ __('Drag to reorder') }}">
+                                                    <i class="fa fa-bars" aria-hidden="true"></i>
+                                                </button>
+                                            </div>
+                                            <div class="row" style="flex:1; margin-left:0; margin-right:0;">
+                                                <div class="col-md-8 form-group {{ $errors->has('component_templates.' . $index . '.component_definition_id') ? 'has-error' : '' }}">
+                                                    <label>{{ __('Catalog Definition') }}</label>
+                                                    <select name="component_templates[{{ $index }}][component_definition_id]" class="form-control">
+                                                        <option value="">{{ __('Select a component definition') }}</option>
+                                                        @foreach($componentDefinitions as $componentDefinition)
+                                                            <option value="{{ $componentDefinition->id }}" @selected((string) ($row['component_definition_id'] ?? '') === (string) $componentDefinition->id)>
+                                                                {{ $componentDefinition->name }}
+                                                                @if($componentDefinition->manufacturer)
+                                                                    - {{ $componentDefinition->manufacturer->name }}
+                                                                @endif
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                    {!! $errors->first('component_templates.' . $index . '.component_definition_id', '<span class="help-block">:message</span>') !!}
+                                                </div>
+                                                <div class="col-md-2 form-group {{ $errors->has('component_templates.' . $index . '.expected_qty') ? 'has-error' : '' }}">
+                                                    <label>{{ trans('general.qty') }}</label>
+                                                    <input type="number" min="1" class="form-control" name="component_templates[{{ $index }}][expected_qty]" value="{{ $row['expected_qty'] ?? 1 }}">
+                                                    {!! $errors->first('component_templates.' . $index . '.expected_qty', '<span class="help-block">:message</span>') !!}
+                                                </div>
+                                                <div class="col-md-2 form-group">
+                                                    <label>&nbsp;</label>
+                                                    <div class="component-template-row__actions">
+                                                        <button type="button" class="btn btn-default btn-sm js-component-template-move-up">{{ __('Up') }}</button>
+                                                        <button type="button" class="btn btn-default btn-sm js-component-template-move-down">{{ __('Down') }}</button>
+                                                        <button type="button" class="btn btn-default btn-sm js-component-template-remove">{{ __('Remove') }}</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        @if($selectedComponentDefinition && $selectedComponentDefinition->attributeContributions->isNotEmpty())
+                                            <div class="text-muted small">
+                                                {{ __('Derived attributes: :attributes', [
+                                                    'attributes' => $selectedComponentDefinition->attributeContributions->map(function ($contribution) {
+                                                        $label = $contribution->definition?->label ?: __('Unknown attribute');
+                                                        $value = $contribution->value;
+
+                                                        return $label . ': ' . $value;
+                                                    })->implode(', '),
+                                                ]) }}
+                                            </div>
+                                        @elseif($selectedComponentDefinition)
+                                            <div class="text-muted small">{{ __('This definition does not contribute any shared attributes yet.') }}</div>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <template data-component-template-template>
+                            <div class="panel panel-default component-template-row" data-component-template-row>
+                                <div class="panel-body">
+                                    <input type="hidden" name="component_templates[__INDEX__][id]" value="">
+                                    <div class="component-template-row__main">
+                                        <div class="component-template-row__drag">
+                                            <button type="button" class="btn btn-default btn-sm component-template-row__drag-handle" data-component-template-drag-handle draggable="true" title="{{ __('Drag to reorder') }}">
+                                                <i class="fa fa-bars" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                        <div class="row" style="flex:1; margin-left:0; margin-right:0;">
+                                            <div class="col-md-8 form-group">
+                                                <label>{{ __('Catalog Definition') }}</label>
+                                                <select name="component_templates[__INDEX__][component_definition_id]" class="form-control">
+                                                    <option value="">{{ __('Select a component definition') }}</option>
+                                                    @foreach($componentDefinitions as $componentDefinition)
+                                                        <option value="{{ $componentDefinition->id }}">
+                                                            {{ $componentDefinition->name }}
+                                                            @if($componentDefinition->manufacturer)
+                                                                - {{ $componentDefinition->manufacturer->name }}
+                                                            @endif
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2 form-group">
+                                                <label>{{ trans('general.qty') }}</label>
+                                                <input type="number" min="1" class="form-control" name="component_templates[__INDEX__][expected_qty]" value="1">
+                                            </div>
+                                            <div class="col-md-2 form-group">
+                                                <label>&nbsp;</label>
+                                                <div class="component-template-row__actions">
+                                                    <button type="button" class="btn btn-default btn-sm js-component-template-move-up">{{ __('Up') }}</button>
+                                                    <button type="button" class="btn btn-default btn-sm js-component-template-move-down">{{ __('Down') }}</button>
+                                                    <button type="button" class="btn btn-default btn-sm js-component-template-remove">{{ __('Remove') }}</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <button type="button" class="btn btn-default" data-add-component-template>{{ __('Add Expected Component') }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="attribute-template-cache" hidden>
             @foreach($definitionsById as $definition)
                 <template class="js-selected-template" data-attribute-id="{{ $definition->id }}">
@@ -328,6 +559,162 @@
                     window.location.href = url.toString();
                 });
             }
+
+            var componentTemplateRoot = document.querySelector('[data-component-template-rows]');
+            var componentTemplateTemplate = document.querySelector('[data-component-template-template]');
+            var componentTemplateEmpty = document.querySelector('[data-component-template-empty]');
+            var draggedComponentTemplateRow = null;
+
+            function getComponentTemplateRows() {
+                if (!componentTemplateRoot) {
+                    return [];
+                }
+
+                return Array.from(componentTemplateRoot.querySelectorAll('[data-component-template-row]'));
+            }
+
+            function refreshComponentTemplateState() {
+                var rows = getComponentTemplateRows();
+
+                if (componentTemplateEmpty) {
+                    componentTemplateEmpty.classList.toggle('hidden', rows.length > 0);
+                }
+
+                rows.forEach(function (row, index) {
+                    var up = row.querySelector('.js-component-template-move-up');
+                    var down = row.querySelector('.js-component-template-move-down');
+
+                    if (up) {
+                        up.disabled = index === 0;
+                    }
+
+                    if (down) {
+                        down.disabled = index === rows.length - 1;
+                    }
+                });
+            }
+
+            function moveComponentTemplateRow(row, sibling, insertBefore) {
+                if (!componentTemplateRoot || !row || !sibling) {
+                    return;
+                }
+
+                if (insertBefore) {
+                    componentTemplateRoot.insertBefore(row, sibling);
+                } else {
+                    componentTemplateRoot.insertBefore(sibling, row);
+                }
+
+                refreshComponentTemplateState();
+            }
+
+            function appendBlankComponentTemplateRow() {
+                if (!componentTemplateRoot || !componentTemplateTemplate) {
+                    return;
+                }
+
+                var nextIndex = parseInt(componentTemplateRoot.dataset.nextIndex || '0', 10);
+                componentTemplateRoot.dataset.nextIndex = String(nextIndex + 1);
+                componentTemplateRoot.insertAdjacentHTML('beforeend', componentTemplateTemplate.innerHTML.replace(/__INDEX__/g, String(nextIndex)));
+                refreshComponentTemplateState();
+            }
+
+            document.addEventListener('click', function (event) {
+                var addComponentTemplateButton = event.target.closest('[data-add-component-template]');
+                if (addComponentTemplateButton) {
+                    appendBlankComponentTemplateRow();
+                    return;
+                }
+
+                var componentTemplateAction = event.target.closest('.js-component-template-remove, .js-component-template-move-up, .js-component-template-move-down');
+                if (!componentTemplateAction || !componentTemplateRoot) {
+                    return;
+                }
+
+                var row = componentTemplateAction.closest('[data-component-template-row]');
+                if (!row) {
+                    return;
+                }
+
+                if (componentTemplateAction.classList.contains('js-component-template-remove')) {
+                    row.remove();
+                    refreshComponentTemplateState();
+                    return;
+                }
+
+                var sibling = componentTemplateAction.classList.contains('js-component-template-move-up')
+                    ? row.previousElementSibling
+                    : row.nextElementSibling;
+
+                while (sibling && !sibling.hasAttribute('data-component-template-row')) {
+                    sibling = componentTemplateAction.classList.contains('js-component-template-move-up')
+                        ? sibling.previousElementSibling
+                        : sibling.nextElementSibling;
+                }
+
+                if (!sibling) {
+                    return;
+                }
+
+                if (componentTemplateAction.classList.contains('js-component-template-move-up')) {
+                    moveComponentTemplateRow(row, sibling, true);
+                } else {
+                    moveComponentTemplateRow(row, sibling, false);
+                }
+            });
+            if (componentTemplateRoot) {
+                componentTemplateRoot.addEventListener('dragstart', function (event) {
+                    var handle = event.target.closest('[data-component-template-drag-handle]');
+                    var row = handle ? handle.closest('[data-component-template-row]') : null;
+                    if (!row || !handle) {
+                        event.preventDefault();
+                        return;
+                    }
+
+                    draggedComponentTemplateRow = row;
+                    row.classList.add('is-dragging');
+
+                    if (event.dataTransfer) {
+                        event.dataTransfer.effectAllowed = 'move';
+                        event.dataTransfer.setData('text/plain', row.dataset.componentTemplateRowIndex || '');
+                    }
+                });
+
+                componentTemplateRoot.addEventListener('dragover', function (event) {
+                    var row = event.target.closest('[data-component-template-row]');
+                    if (!draggedComponentTemplateRow || !row || row === draggedComponentTemplateRow) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    if (event.dataTransfer) {
+                        event.dataTransfer.dropEffect = 'move';
+                    }
+                });
+
+                componentTemplateRoot.addEventListener('drop', function (event) {
+                    var row = event.target.closest('[data-component-template-row]');
+                    if (!draggedComponentTemplateRow || !row || row === draggedComponentTemplateRow) {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    var bounds = row.getBoundingClientRect();
+                    var insertBefore = event.clientY < (bounds.top + bounds.height / 2);
+                    moveComponentTemplateRow(draggedComponentTemplateRow, row, insertBefore);
+                });
+
+                componentTemplateRoot.addEventListener('dragend', function () {
+                    if (draggedComponentTemplateRow) {
+                        draggedComponentTemplateRow.classList.remove('is-dragging');
+                    }
+
+                    draggedComponentTemplateRow = null;
+                });
+            }
+
+            refreshComponentTemplateState();
 
             var builder = document.querySelector('.model-attributes-builder');
             if (!builder) {
@@ -612,6 +999,29 @@
                     }
 
                     selectAndFocusAttribute(attributeId);
+                });
+            });
+
+            document.querySelectorAll('.js-component-template-error-link').forEach(function (button) {
+                button.addEventListener('click', function () {
+                    var rowIndex = button.dataset.componentTemplateRow;
+                    if (rowIndex === undefined) {
+                        return;
+                    }
+
+                    var row = document.querySelector('[data-component-template-row-index="' + rowIndex + '"]');
+                    if (!row) {
+                        return;
+                    }
+
+                    if (typeof row.scrollIntoView === 'function') {
+                        row.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+
+                    var input = row.querySelector('.has-error input, .has-error select, .has-error textarea, input, select, textarea');
+                    if (input) {
+                        input.focus();
+                    }
                 });
             });
 

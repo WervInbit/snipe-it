@@ -60,11 +60,7 @@ class AttributeDefinitionRequest extends Request
         if ($attribute instanceof AttributeDefinition) {
             $validator->after(function (Validator $inner) use ($attribute) {
                 if ($this->filled('datatype') && $this->input('datatype') !== $attribute->datatype) {
-                    $inner->errors()->add('datatype', __('Datatype is immutable. Create a new version instead.'));
-                }
-
-                if ($this->filled('key') && $this->input('key') !== $attribute->key) {
-                    $inner->errors()->add('key', __('Key is immutable once created.'));
+                    $inner->errors()->add('datatype', __('Datatype is immutable after creation.'));
                 }
             });
         }

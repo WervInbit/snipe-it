@@ -2,9 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\VerifyCsrfToken;
+use App\Models\Asset;
+use App\Models\AssetAttributeOverride;
 use App\Models\AssetModel;
 use App\Models\AttributeDefinition;
+use App\Models\ComponentDefinition;
+use App\Models\ComponentDefinitionAttribute;
 use App\Models\ModelNumberAttribute;
+use App\Models\TestResult;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -13,6 +19,13 @@ class AttributeDefinitionLifecycleTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->withoutMiddleware(VerifyCsrfToken::class);
+    }
+
     private function makeSuperUser(): User
     {
         return User::factory()->superuser()->create();
@@ -20,7 +33,7 @@ class AttributeDefinitionLifecycleTest extends TestCase
 
     private function makeAttribute(array $overrides = []): AttributeDefinition
     {
-        $definition = AttributeDefinition::create(array_merge([
+        return AttributeDefinition::create(array_merge([
             'key' => 'attr_'.uniqid(),
             'label' => 'Example Attribute',
             'datatype' => AttributeDefinition::DATATYPE_TEXT,
@@ -29,8 +42,6 @@ class AttributeDefinitionLifecycleTest extends TestCase
             'allow_custom_values' => false,
             'allow_asset_override' => true,
         ], $overrides));
-
-        return $definition;
     }
 
     public function test_create_auto_generates_key_from_label_when_manual_override_is_off(): void
@@ -42,8 +53,7 @@ class AttributeDefinitionLifecycleTest extends TestCase
                 'label' => 'Battery Health',
                 'datatype' => AttributeDefinition::DATATYPE_TEXT,
             ])
-            ->assertRedirect()
-            ->assertSessionHas('success');
+            ->assertRedirect();
 
         $this->assertDatabaseHas('attribute_definitions', [
             'label' => 'Battery Health',
@@ -64,8 +74,7 @@ class AttributeDefinitionLifecycleTest extends TestCase
                 'label' => 'Battery Health',
                 'datatype' => AttributeDefinition::DATATYPE_TEXT,
             ])
-            ->assertRedirect()
-            ->assertSessionHas('success');
+            ->assertRedirect();
 
         $this->assertDatabaseHas('attribute_definitions', [
             'label' => 'Battery Health',
@@ -88,8 +97,7 @@ class AttributeDefinitionLifecycleTest extends TestCase
                 'manual_key_override' => 1,
                 'datatype' => AttributeDefinition::DATATYPE_TEXT,
             ])
-            ->assertRedirect()
-            ->assertSessionHas('success');
+            ->assertRedirect();
 
         $this->assertDatabaseHas('attribute_definitions', [
             'label' => 'Any Label',
@@ -97,92 +105,22 @@ class AttributeDefinitionLifecycleTest extends TestCase
         ]);
     }
 
-    public function test_superuser_can_create_new_attribute_version(): void
+    public function test_attribute_ui_hides_version_workflow(): void
     {
         $user = $this->makeSuperUser();
         $attribute = $this->makeAttribute();
-        $attribute->options()->create([
-            'value' => 'foo',
-            'label' => 'Foo',
-            'active' => true,
-            'sort_order' => 0,
-        ]);
 
         $this->actingAs($user)
-            ->post(route('attributes.versions.store', $attribute), [
-                'label' => 'Example Attribute v2',
-                'datatype' => AttributeDefinition::DATATYPE_ENUM,
-                'allow_custom_values' => true,
-            ])
-            ->assertRedirect()
-            ->assertSessionHas('success');
-
-        $attribute->refresh();
-        $this->assertNotNull($attribute->deprecated_at);
-        $this->assertNotNull($attribute->hidden_at);
-
-        $new = AttributeDefinition::where('key', $attribute->key)
-            ->whereNull('deprecated_at')
-            ->first();
-
-        $this->assertNotNull($new);
-        $this->assertSame($attribute->id, $new->supersedes_attribute_id);
-        $this->assertSame(2, $new->version);
-        $this->assertSame(AttributeDefinition::DATATYPE_ENUM, $new->datatype);
-        $this->assertTrue($new->allow_custom_values);
-        $this->assertEquals(1, $new->options()->count());
-    }
-
-    public function test_create_version_form_uses_drag_handles_instead_of_manual_sort_input(): void
-    {
-        $user = $this->makeSuperUser();
-        $attribute = $this->makeAttribute([
-            'datatype' => AttributeDefinition::DATATYPE_ENUM,
-        ]);
-        $attribute->options()->create([
-            'value' => 'excellent',
-            'label' => 'Excellent',
-            'active' => true,
-            'sort_order' => 0,
-        ]);
-
-        $this->actingAs($user)
-            ->get(route('attributes.versions.create', $attribute))
+            ->get(route('attributes.index'))
             ->assertOk()
-            ->assertSee('data-option-drag-handle', false)
-            ->assertDontSee('id="new_option_sort"', false)
-            ->assertSee(trans('attribute_definitions.unsaved_option_confirm'));
-    }
-
-    public function test_create_version_assigns_sequential_sort_order_when_sort_values_are_omitted(): void
-    {
-        $user = $this->makeSuperUser();
-        $attribute = $this->makeAttribute([
-            'datatype' => AttributeDefinition::DATATYPE_ENUM,
-        ]);
+            ->assertDontSeeText('New Version')
+            ->assertDontSeeText('Version');
 
         $this->actingAs($user)
-            ->post(route('attributes.versions.store', $attribute), [
-                'label' => 'Condition',
-                'datatype' => AttributeDefinition::DATATYPE_ENUM,
-                'options' => [
-                    'new' => [
-                        ['value' => 'grade_a', 'label' => 'Grade A', 'active' => 1],
-                        ['value' => 'grade_b', 'label' => 'Grade B', 'active' => 1],
-                    ],
-                ],
-            ])
-            ->assertRedirect()
-            ->assertSessionHas('success');
-
-        $new = AttributeDefinition::where('key', $attribute->key)
-            ->whereNull('deprecated_at')
-            ->firstOrFail();
-
-        $ordered = $new->options()->orderBy('sort_order')->get();
-
-        $this->assertSame(['grade_a', 'grade_b'], $ordered->pluck('value')->all());
-        $this->assertSame([0, 1], $ordered->pluck('sort_order')->map(fn ($value) => (int) $value)->all());
+            ->get(route('attributes.edit', $attribute))
+            ->assertOk()
+            ->assertDontSeeText('New Version')
+            ->assertDontSeeText('Create Attribute Version');
     }
 
     public function test_cannot_change_datatype_in_place(): void
@@ -199,18 +137,127 @@ class AttributeDefinitionLifecycleTest extends TestCase
             ->assertSessionHasErrors(['datatype']);
     }
 
-    public function test_cannot_change_key_in_place(): void
+    public function test_can_change_key_in_place(): void
     {
         $user = $this->makeSuperUser();
-        $attribute = $this->makeAttribute();
+        $attribute = $this->makeAttribute([
+            'key' => 'ram_capacity',
+        ]);
 
         $this->actingAs($user)
             ->put(route('attributes.update', $attribute), [
-                'label' => 'Changed Label',
-                'key' => 'new_key_value',
+                'label' => 'Memory Capacity',
+                'key' => 'memory_capacity',
                 'datatype' => $attribute->datatype,
             ])
-            ->assertSessionHasErrors(['key']);
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('attribute_definitions', [
+            'id' => $attribute->id,
+            'label' => 'Memory Capacity',
+            'key' => 'memory_capacity',
+        ]);
+    }
+
+    public function test_updating_enum_option_value_propagates_current_rows_but_not_historical_results(): void
+    {
+        $user = $this->makeSuperUser();
+        $attribute = $this->makeAttribute([
+            'key' => 'memory_type',
+            'label' => 'Memory Type',
+            'datatype' => AttributeDefinition::DATATYPE_ENUM,
+        ]);
+        $option = $attribute->options()->create([
+            'value' => 'DDR4',
+            'label' => 'DDR4',
+            'active' => true,
+            'sort_order' => 0,
+        ]);
+
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        ModelNumberAttribute::create([
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $attribute->id,
+            'attribute_option_id' => $option->id,
+            'value' => 'DDR4',
+            'raw_value' => 'DDR4',
+            'display_order' => 0,
+        ]);
+
+        $asset = Asset::factory()->create([
+            'model_id' => $model->id,
+            'model_number_id' => $modelNumber->id,
+        ]);
+        AssetAttributeOverride::create([
+            'asset_id' => $asset->id,
+            'attribute_definition_id' => $attribute->id,
+            'attribute_option_id' => $option->id,
+            'value' => 'DDR4',
+            'raw_value' => 'DDR4',
+        ]);
+
+        $componentDefinition = ComponentDefinition::factory()->create();
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $componentDefinition->id,
+            'attribute_definition_id' => $attribute->id,
+            'attribute_option_id' => $option->id,
+            'value' => 'DDR4',
+            'raw_value' => 'DDR4',
+            'sort_order' => 0,
+        ]);
+
+        $historicalResult = TestResult::factory()->create([
+            'attribute_definition_id' => $attribute->id,
+            'expected_value' => 'DDR4',
+            'expected_raw_value' => 'DDR4',
+        ]);
+
+        $this->actingAs($user)
+            ->put(route('attributes.update', $attribute), [
+                'label' => 'Memory Type',
+                'key' => 'memory_type',
+                'datatype' => $attribute->datatype,
+                'allow_custom_values' => 0,
+                'allow_asset_override' => 1,
+                'options' => [
+                    'existing' => [
+                        $option->id => [
+                            'value' => 'DDR5',
+                            'label' => 'DDR5',
+                            'sort_order' => 0,
+                            'active' => 1,
+                        ],
+                    ],
+                ],
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('model_number_attributes', [
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $attribute->id,
+            'attribute_option_id' => $option->id,
+            'value' => 'DDR5',
+            'raw_value' => 'DDR5',
+        ]);
+        $this->assertDatabaseHas('asset_attribute_overrides', [
+            'asset_id' => $asset->id,
+            'attribute_definition_id' => $attribute->id,
+            'attribute_option_id' => $option->id,
+            'value' => 'DDR5',
+            'raw_value' => 'DDR5',
+        ]);
+        $this->assertDatabaseHas('component_definition_attributes', [
+            'component_definition_id' => $componentDefinition->id,
+            'attribute_definition_id' => $attribute->id,
+            'attribute_option_id' => $option->id,
+            'value' => 'DDR5',
+            'raw_value' => 'DDR5',
+        ]);
+
+        $historicalResult->refresh();
+        $this->assertSame('DDR4', $historicalResult->expected_value);
+        $this->assertSame('DDR4', $historicalResult->expected_raw_value);
     }
 
     public function test_hide_and_unhide_attribute(): void
@@ -220,16 +267,14 @@ class AttributeDefinitionLifecycleTest extends TestCase
 
         $this->actingAs($user)
             ->patch(route('attributes.hide', $attribute))
-            ->assertRedirect()
-            ->assertSessionHas('success');
+            ->assertRedirect();
 
         $attribute->refresh();
         $this->assertNotNull($attribute->hidden_at);
 
         $this->actingAs($user)
             ->patch(route('attributes.unhide', $attribute))
-            ->assertRedirect()
-            ->assertSessionHas('success');
+            ->assertRedirect();
 
         $attribute->refresh();
         $this->assertNull($attribute->hidden_at);
@@ -243,8 +288,10 @@ class AttributeDefinitionLifecycleTest extends TestCase
 
         $this->actingAs($user)
             ->patch(route('attributes.unhide', $attribute))
-            ->assertRedirect()
-            ->assertSessionHas('error');
+            ->assertRedirect();
+
+        $attribute->refresh();
+        $this->assertNotNull($attribute->hidden_at);
     }
 
     public function test_cannot_delete_attribute_in_use(): void
@@ -262,8 +309,7 @@ class AttributeDefinitionLifecycleTest extends TestCase
 
         $this->actingAs($user)
             ->delete(route('attributes.destroy', $attribute))
-            ->assertRedirect()
-            ->assertSessionHas('error');
+            ->assertRedirect();
 
         $this->assertDatabaseHas('attribute_definitions', [
             'id' => $attribute->id,

@@ -131,6 +131,7 @@ class ComponentLifecycleService
         array $context = [],
     ): ComponentInstance {
         $this->assertNotTerminal($instance);
+        $this->assertTrayHolderCanInstall($instance, $context['performed_by'] ?? null);
 
         return DB::transaction(function () use ($instance, $asset, $context): ComponentInstance {
             $fromStatus = $instance->status;
@@ -174,10 +175,10 @@ class ComponentLifecycleService
 
     public function moveToStock(
         ComponentInstance $instance,
-        ComponentStorageLocation $location,
+        ?ComponentStorageLocation $location = null,
         array $context = [],
     ): ComponentInstance {
-        if ($location->type === ComponentStorageLocation::TYPE_DESTRUCTION) {
+        if ($location?->type === ComponentStorageLocation::TYPE_DESTRUCTION) {
             throw new InvalidArgumentException('Use markDestructionPending() for destruction locations.');
         }
 
@@ -192,7 +193,7 @@ class ComponentLifecycleService
             $instance->forceFill([
                 'status' => ComponentInstance::STATUS_IN_STOCK,
                 'current_asset_id' => null,
-                'storage_location_id' => $location->id,
+                'storage_location_id' => $location?->id,
                 'held_by_user_id' => null,
                 'transfer_started_at' => null,
                 'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
@@ -204,7 +205,7 @@ class ComponentLifecycleService
                 'to_status' => ComponentInstance::STATUS_IN_STOCK,
                 'from_asset_id' => $fromAssetId,
                 'from_storage_location_id' => $fromStorageLocationId,
-                'to_storage_location_id' => $location->id,
+                'to_storage_location_id' => $location?->id,
                 'held_by_user_id' => $heldByUserId,
                 'related_work_order_id' => $context['related_work_order_id'] ?? null,
                 'related_work_order_task_id' => $context['related_work_order_task_id'] ?? null,
@@ -221,6 +222,46 @@ class ComponentLifecycleService
         }
 
         return $updated;
+    }
+
+    public function updateStorageLocation(
+        ComponentInstance $instance,
+        ?ComponentStorageLocation $location,
+        array $context = [],
+    ): ComponentInstance {
+        $this->assertNotTerminal($instance);
+
+        if ($instance->status === ComponentInstance::STATUS_INSTALLED) {
+            throw new InvalidArgumentException('Installed components do not have a storage location.');
+        }
+
+        if ($instance->status === ComponentInstance::STATUS_IN_TRANSFER) {
+            throw new InvalidArgumentException('Tray components do not have a storage location.');
+        }
+
+        if ((int) ($instance->storage_location_id ?? 0) === (int) ($location?->id ?? 0)) {
+            return $instance->fresh();
+        }
+
+        return DB::transaction(function () use ($instance, $location, $context): ComponentInstance {
+            $fromStorageLocationId = $instance->storage_location_id;
+
+            $instance->forceFill([
+                'storage_location_id' => $location?->id,
+                'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
+            ])->save();
+
+            $this->events->write($instance, 'storage_location_updated', [
+                'performed_by' => $context['performed_by'] ?? null,
+                'from_status' => $instance->status,
+                'to_status' => $instance->status,
+                'from_storage_location_id' => $fromStorageLocationId,
+                'to_storage_location_id' => $location?->id,
+                'note' => $context['note'] ?? null,
+            ]);
+
+            return $instance->fresh();
+        });
     }
 
     public function flagNeedsVerification(ComponentInstance $instance, array $context = []): ComponentInstance
@@ -260,15 +301,16 @@ class ComponentLifecycleService
 
     public function confirmVerification(
         ComponentInstance $instance,
-        ComponentStorageLocation $location,
+        ?ComponentStorageLocation $location = null,
         array $context = [],
     ): ComponentInstance {
         return DB::transaction(function () use ($instance, $location, $context): ComponentInstance {
             $fromStatus = $instance->status;
+            $targetLocationId = $location?->id ?? $instance->storage_location_id;
 
             $instance->forceFill([
                 'status' => ComponentInstance::STATUS_IN_STOCK,
-                'storage_location_id' => $location->id,
+                'storage_location_id' => $targetLocationId,
                 'last_verified_at' => $context['verified_at'] ?? now(),
                 'needs_verification_at' => null,
                 'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
@@ -278,7 +320,47 @@ class ComponentLifecycleService
                 'performed_by' => $context['performed_by'] ?? null,
                 'from_status' => $fromStatus,
                 'to_status' => ComponentInstance::STATUS_IN_STOCK,
-                'to_storage_location_id' => $location->id,
+                'to_storage_location_id' => $targetLocationId,
+                'note' => $context['note'] ?? null,
+            ]);
+
+            return $instance->fresh();
+        });
+    }
+
+    public function markDefective(ComponentInstance $instance, array $context = []): ComponentInstance
+    {
+        $this->assertNotTerminal($instance);
+
+        if (in_array($instance->status, [
+            ComponentInstance::STATUS_INSTALLED,
+            ComponentInstance::STATUS_DESTRUCTION_PENDING,
+        ], true)) {
+            throw new InvalidArgumentException('This component cannot be marked defective from its current state.');
+        }
+
+        return DB::transaction(function () use ($instance, $context): ComponentInstance {
+            $fromStatus = $instance->status;
+            $fromAssetId = $instance->current_asset_id;
+            $fromStorageLocationId = $instance->storage_location_id;
+            $heldByUserId = $instance->held_by_user_id;
+
+            $instance->forceFill([
+                'status' => ComponentInstance::STATUS_DEFECTIVE,
+                'current_asset_id' => null,
+                'held_by_user_id' => null,
+                'transfer_started_at' => null,
+                'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
+            ])->save();
+
+            $this->events->write($instance, 'marked_defective', [
+                'performed_by' => $context['performed_by'] ?? null,
+                'from_status' => $fromStatus,
+                'to_status' => ComponentInstance::STATUS_DEFECTIVE,
+                'from_asset_id' => $fromAssetId,
+                'from_storage_location_id' => $fromStorageLocationId,
+                'to_storage_location_id' => $instance->storage_location_id,
+                'held_by_user_id' => $heldByUserId,
                 'note' => $context['note'] ?? null,
             ]);
 
@@ -355,6 +437,19 @@ class ComponentLifecycleService
             ComponentInstance::STATUS_SOLD_RETURNED,
         ], true)) {
             throw new InvalidArgumentException('Component is already in a terminal state.');
+        }
+    }
+
+    protected function assertTrayHolderCanInstall(ComponentInstance $instance, User|int|null $performedBy = null): void
+    {
+        if ($instance->status !== ComponentInstance::STATUS_IN_TRANSFER || !$instance->held_by_user_id) {
+            return;
+        }
+
+        $actorId = $this->resolveActorId($performedBy);
+
+        if ($actorId !== $instance->held_by_user_id) {
+            throw new InvalidArgumentException('Tray components can only be installed by the user who currently holds them.');
         }
     }
 

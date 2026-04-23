@@ -4,15 +4,22 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\AttributeDefinition;
 use App\Models\ComponentDefinition;
 use App\Models\Manufacturer;
+use App\Services\ModelAttributes\ComponentDefinitionAttributeManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class ComponentDefinitionSettingsController extends Controller
 {
+    public function __construct(private readonly ComponentDefinitionAttributeManager $attributeManager)
+    {
+    }
+
     public function index(Request $request): View
     {
         $this->authorize('manage', ComponentDefinition::class);
@@ -52,6 +59,11 @@ class ComponentDefinitionSettingsController extends Controller
     {
         $this->authorize('update', $componentDefinition);
 
+        $componentDefinition->load([
+            'attributeContributions.definition.options',
+            'attributeContributions.option',
+        ]);
+
         return view('settings.component_definitions.edit', [
             'item' => $componentDefinition,
             'componentDefinition' => $componentDefinition,
@@ -64,10 +76,15 @@ class ComponentDefinitionSettingsController extends Controller
         $this->authorize('create', ComponentDefinition::class);
 
         $data = $this->validatedData($request);
-        $definition = new ComponentDefinition($data);
-        $definition->created_by = $request->user()?->id;
-        $definition->updated_by = $request->user()?->id;
-        $definition->save();
+        $definition = DB::transaction(function () use ($data, $request) {
+            $definition = new ComponentDefinition($data);
+            $definition->created_by = $request->user()?->id;
+            $definition->updated_by = $request->user()?->id;
+            $definition->save();
+            $this->attributeManager->sync($definition, $request->input('attribute_contributions', []));
+
+            return $definition;
+        });
 
         return redirect()
             ->route('settings.component_definitions.edit', $definition)
@@ -79,9 +96,12 @@ class ComponentDefinitionSettingsController extends Controller
         $this->authorize('update', $componentDefinition);
 
         $data = $this->validatedData($request);
-        $componentDefinition->fill($data);
-        $componentDefinition->updated_by = $request->user()?->id;
-        $componentDefinition->save();
+        DB::transaction(function () use ($request, $componentDefinition, $data): void {
+            $componentDefinition->fill($data);
+            $componentDefinition->updated_by = $request->user()?->id;
+            $componentDefinition->save();
+            $this->attributeManager->sync($componentDefinition, $request->input('attribute_contributions', []));
+        });
 
         return redirect()
             ->route('settings.component_definitions.index')
@@ -127,6 +147,20 @@ class ComponentDefinitionSettingsController extends Controller
             'spec_summary' => ['nullable', 'string'],
             'serial_tracking_mode' => ['nullable', Rule::in(['optional', 'required', 'not_tracked'])],
             'is_active' => ['sometimes', 'boolean'],
+            'attribute_contributions' => ['nullable', 'array'],
+            'attribute_contributions.*.attribute_definition_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('attribute_definitions', 'id')->where(
+                    fn ($query) => $query
+                        ->whereNull('deleted_at')
+                        ->whereNull('deprecated_at')
+                        ->whereNull('hidden_at')
+                ),
+            ],
+            'attribute_contributions.*.attribute_search' => ['nullable', 'string', 'max:255'],
+            'attribute_contributions.*.value' => ['nullable'],
+            'attribute_contributions.*.resolves_to_spec' => ['nullable', 'boolean'],
         ]) + [
             'serial_tracking_mode' => $request->input('serial_tracking_mode', 'optional'),
         ];
@@ -137,6 +171,11 @@ class ComponentDefinitionSettingsController extends Controller
         return [
             'categories' => Category::query()->where('category_type', 'component')->orderBy('name')->pluck('name', 'id'),
             'manufacturers' => Manufacturer::query()->orderBy('name')->pluck('name', 'id'),
+            'attributeDefinitions' => AttributeDefinition::query()
+                ->current()
+                ->with('options')
+                ->orderBy('label')
+                ->get(),
         ];
     }
 }

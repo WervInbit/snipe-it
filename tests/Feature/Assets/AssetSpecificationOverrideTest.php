@@ -87,7 +87,22 @@ class AssetSpecificationOverrideTest extends TestCase
                 ]);
             $this->fail('Expected validation exception was not thrown.');
         } catch (\Illuminate\Validation\ValidationException $exception) {
-            $this->assertArrayHasKey($definition->key, $exception->errors());
+            $this->assertArrayHasKey('attributes.' . $definition->id, $exception->errors());
         }
+    }
+
+    public function test_hardware_details_hide_redundant_manual_model_meta_for_plain_model_values(): void
+    {
+        [$asset] = $this->makeAssetWithSpec();
+
+        $user = User::factory()->superuser()->create();
+
+        $response = $this->actingAs($user)->get(route('hardware.show', $asset));
+
+        $response
+            ->assertOk()
+            ->assertSeeText('Yes')
+            ->assertDontSeeText('Manual model value')
+            ->assertDontSeeText('Contributors:');
     }
 }

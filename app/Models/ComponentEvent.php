@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class ComponentEvent extends SnipeModel
 {
@@ -79,5 +80,20 @@ class ComponentEvent extends SnipeModel
     public function relatedWorkOrderTask(): BelongsTo
     {
         return $this->belongsTo(WorkOrderTask::class, 'related_work_order_task_id');
+    }
+
+    public function isAutoAgedVerificationEscalation(): bool
+    {
+        return $this->event_type === 'flagged_needs_verification'
+            && (bool) data_get($this->payload_json, 'aged_from_transfer', false);
+    }
+
+    public function actionLabel(): string
+    {
+        if ($this->isAutoAgedVerificationEscalation()) {
+            return __('Auto-Flagged Needs Verification');
+        }
+
+        return Str::headline($this->event_type);
     }
 }

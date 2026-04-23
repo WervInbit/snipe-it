@@ -2,7 +2,7 @@
 @php($fieldKey = 'attributes.'.$definition->id)
 @php($fieldName = 'attributes['.$definition->id.']')
 @php($inputId = 'attribute_'.$definition->id)
-@php($current = old($fieldKey, $resolved->value))
+@php($current = old($fieldKey, $resolved->manualModelValue))
 @php($isRequired = (bool) $definition->required_for_category)
 @php($searchText = strtolower($definition->label.' '.$definition->key))
 @php($hasFieldError = $errors->has($fieldKey))
@@ -26,7 +26,7 @@
             <p class="text-muted">{{ __('Unit: :unit', ['unit' => $definition->unit]) }}</p>
         @endif
         @if($definition->isDeprecated())
-            <p class="text-warning" style="margin-top:8px;">{{ __('This attribute is deprecated. Plan to migrate to a newer version.') }}</p>
+            <p class="text-warning" style="margin-top:8px;">{{ __('This attribute is deprecated and hidden from new selectors, but current model specs can still reference it.') }}</p>
         @endif
     </div>
 
@@ -56,17 +56,27 @@
                 @break
 
             @case(\App\Models\AttributeDefinition::DATATYPE_ENUM)
-                <input type="text" name="{{ $fieldName }}" id="{{ $inputId }}" class="form-control" value="{{ $current }}" list="{{ $inputId }}_options" {{ $isRequired ? 'required' : '' }}>
-                <datalist id="{{ $inputId }}_options">
-                    @foreach($definition->options as $option)
-                        @if($option->active)
-                            <option value="{{ $option->value }}">{{ $option->label }}</option>
-                        @endif
-                    @endforeach
-                </datalist>
-                <span class="help-block">
-                    {{ $definition->allow_custom_values ? __('Enter a custom value if no option matches.') : __('Use one of the defined options.') }}
-                </span>
+                @if($definition->allow_custom_values)
+                    <input type="text" name="{{ $fieldName }}" id="{{ $inputId }}" class="form-control" value="{{ $current }}" list="{{ $inputId }}_options" {{ $isRequired ? 'required' : '' }}>
+                    <datalist id="{{ $inputId }}_options">
+                        @foreach($definition->options as $option)
+                            @if($option->active)
+                                <option value="{{ $option->value }}">{{ $option->label }}</option>
+                            @endif
+                        @endforeach
+                    </datalist>
+                    <span class="help-block">{{ __('Enter a custom value if no option matches.') }}</span>
+                @else
+                    <select name="{{ $fieldName }}" id="{{ $inputId }}" class="form-control" {{ $isRequired ? 'required' : '' }}>
+                        <option value="" {{ ($current === null || $current === '') ? 'selected' : '' }}>{{ $isRequired ? __('Select an option') : __('Not specified') }}</option>
+                        @foreach($definition->options as $option)
+                            @if($option->active)
+                                <option value="{{ $option->value }}" {{ (string) $current === (string) $option->value ? 'selected' : '' }}>{{ $option->label }}</option>
+                            @endif
+                        @endforeach
+                    </select>
+                    <span class="help-block">{{ __('Use one of the defined options.') }}</span>
+                @endif
                 @break
 
             @default
@@ -75,10 +85,14 @@
 
         {!! $errors->first($fieldKey, '<span class="alert-msg">:message</span>') !!}
 
-        @if($resolved->source === 'missing')
+        @if($resolved->manualModelValue === null && $resolved->source === 'expected_components')
+            <span class="help-block text-info">
+                {{ __('Preview from expected components: :value', ['value' => $resolved->formattedValue() ?: __('Not specified')]) }}
+            </span>
+        @elseif($resolved->source === 'missing')
             <span class="help-block text-warning">{{ __('This attribute has no saved value yet.') }}</span>
-        @elseif($resolved->rawValue && $resolved->rawValue !== $resolved->value)
-            <span class="help-block text-muted">{{ __('Original input: :value', ['value' => $resolved->rawValue]) }}</span>
+        @elseif($resolved->manualModelRawValue && $resolved->manualModelRawValue !== $resolved->manualModelValue)
+            <span class="help-block text-muted">{{ __('Original input: :value', ['value' => $resolved->manualModelRawValue]) }}</span>
         @endif
     </div>
 </div>

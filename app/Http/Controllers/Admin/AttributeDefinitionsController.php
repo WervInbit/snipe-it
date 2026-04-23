@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AttributeDefinitionRequest;
-use App\Http\Requests\AttributeDefinitionVersionRequest;
+use App\Models\AssetAttributeOverride;
 use App\Models\AttributeDefinition;
 use App\Models\AttributeOption;
 use App\Models\Category;
-use Illuminate\Http\Request;
+use App\Models\ComponentDefinitionAttribute;
+use App\Models\ModelNumberAttribute;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class AttributeDefinitionsController extends Controller
@@ -22,7 +23,7 @@ class AttributeDefinitionsController extends Controller
         $search = trim((string) $request->input('search'));
 
         $definitions = AttributeDefinition::query()
-            ->with(['categories', 'previousVersion'])
+            ->with('categories')
             ->withCount(['options'])
             ->when($search, function ($query) use ($search) {
                 $like = '%' . $search . '%';
@@ -50,7 +51,7 @@ class AttributeDefinitionsController extends Controller
             'definition' => new AttributeDefinition(),
             'categories' => Category::orderBy('name')->get(),
             'item' => new AttributeDefinition(),
-            'versionSource' => null,
+            'usageSummary' => $this->usageSummary(new AttributeDefinition()),
         ]);
     }
 
@@ -73,15 +74,18 @@ class AttributeDefinitionsController extends Controller
     {
         $this->authorize('view', $attribute);
 
-        $attribute->load(['categories', 'options' => function ($query) {
-            $query->orderBy('sort_order')->orderBy('label');
-        }]);
+        $attribute->load([
+            'categories',
+            'options' => function ($query) {
+                $query->orderBy('sort_order')->orderBy('label');
+            },
+        ]);
 
         return view('attributes.edit', [
             'definition' => $attribute,
             'categories' => Category::orderBy('name')->get(),
             'item' => $attribute,
-            'versionSource' => null,
+            'usageSummary' => $this->usageSummary($attribute),
         ]);
     }
 
@@ -89,9 +93,10 @@ class AttributeDefinitionsController extends Controller
     {
         $this->authorize('update', $attribute);
 
-        $attribute->fill($this->payload($request, $attribute, includeIdentity: false));
+        $attribute->fill($this->payload($request, $attribute, includeDatatype: false));
         $attribute->save();
         $attribute->categories()->sync($request->input('category_ids', []));
+        $this->syncExistingOptions($attribute, $request->input('options', []));
         $this->applyPendingOptions($attribute, $request->input('options', []));
 
         return redirect()
@@ -106,6 +111,7 @@ class AttributeDefinitionsController extends Controller
         if (
             $attribute->modelValues()->exists()
             || $attribute->assetOverrides()->exists()
+            || $attribute->componentDefinitionAttributes()->exists()
             || $attribute->testResults()->exists()
             || $attribute->nextVersions()->exists()
         ) {
@@ -134,7 +140,7 @@ class AttributeDefinitionsController extends Controller
         $this->authorize('update', $attribute);
 
         if ($attribute->isDeprecated()) {
-            return back()->with('error', __('Deprecated attributes cannot be made visible. Create a new version instead.'));
+            return back()->with('error', __('Deprecated attributes cannot be made visible again.'));
         }
 
         $attribute->markVisible();
@@ -142,62 +148,16 @@ class AttributeDefinitionsController extends Controller
         return back()->with('success', __('Attribute is visible again.'));
     }
 
-    public function createVersion(AttributeDefinition $attribute): View
-    {
-        $this->authorize('update', $attribute);
-
-        $attribute->load(['options' => function ($query) {
-            $query->orderBy('sort_order')->orderBy('label');
-        }]);
-
-        $draft = $attribute->replicate([
-            'id',
-            'version',
-            'supersedes_attribute_id',
-            'deprecated_at',
-            'hidden_at',
-            'created_at',
-            'updated_at',
-        ]);
-        $draft->exists = false;
-        $draft->setRelation('categories', $attribute->categories);
-
-        return view('attributes.edit', [
-            'definition' => $draft,
-            'categories' => Category::orderBy('name')->get(),
-            'item' => $draft,
-            'versionSource' => $attribute,
-        ]);
-    }
-
-    public function storeVersion(AttributeDefinitionVersionRequest $request, AttributeDefinition $attribute): RedirectResponse
-    {
-        $this->authorize('update', $attribute);
-
-        $payload = $this->payloadForVersion($request);
-
-        $newVersion = DB::transaction(function () use ($attribute, $payload, $request) {
-            $clone = $attribute->createNewVersion($payload);
-            $clone->categories()->sync($request->input('category_ids', $attribute->categories->pluck('id')->all()));
-            $this->replaceOptions($clone, $request->input('options', []));
-
-            return $clone;
-        });
-
-        return redirect()
-            ->route('attributes.edit', $newVersion)
-            ->with('success', __('New attribute version created. Update dependent models as needed.'));
-    }
-
-    private function payload(AttributeDefinitionRequest $request, ?AttributeDefinition $attribute = null, bool $includeIdentity = true): array
+    private function payload(AttributeDefinitionRequest $request, ?AttributeDefinition $attribute = null, bool $includeDatatype = true): array
     {
         $data = $request->validated();
 
-        $currentDatatype = $includeIdentity
+        $currentDatatype = $includeDatatype
             ? ($data['datatype'] ?? AttributeDefinition::DATATYPE_TEXT)
             : ($attribute?->datatype ?? AttributeDefinition::DATATYPE_TEXT);
 
         $payload = [
+            'key' => $data['key'],
             'label' => $data['label'],
             'unit' => $data['unit'] ?? null,
             'required_for_category' => $request->boolean('required_for_category'),
@@ -206,27 +166,11 @@ class AttributeDefinitionsController extends Controller
             'constraints' => $this->filterConstraints($data['constraints'] ?? []),
         ];
 
-        if ($includeIdentity) {
-            $payload['key'] = $data['key'];
+        if ($includeDatatype) {
             $payload['datatype'] = $currentDatatype;
         }
 
         return $payload;
-    }
-
-    private function payloadForVersion(AttributeDefinitionVersionRequest $request): array
-    {
-        $data = $request->validated();
-
-        return [
-            'label' => $data['label'],
-            'datatype' => $data['datatype'],
-            'unit' => $data['unit'] ?? null,
-            'required_for_category' => $request->boolean('required_for_category'),
-            'allow_custom_values' => $request->boolean('allow_custom_values') && $data['datatype'] === AttributeDefinition::DATATYPE_ENUM,
-            'allow_asset_override' => $request->boolean('allow_asset_override'),
-            'constraints' => $this->filterConstraints($data['constraints'] ?? []),
-        ];
     }
 
     private function filterConstraints(array $constraints): array
@@ -298,15 +242,106 @@ class AttributeDefinitionsController extends Controller
         }
     }
 
-    private function replaceOptions(AttributeDefinition $attribute, array $options): void
+    private function syncExistingOptions(AttributeDefinition $attribute, array $options): void
     {
         if (!$attribute->isEnum()) {
             return;
         }
 
-        $attribute->options()->forceDelete();
-        $this->applyPendingOptions($attribute, $options, false);
+        $existingPayload = $options['existing'] ?? [];
+        if (!is_array($existingPayload) || $existingPayload === []) {
+            return;
+        }
+
+        $existingOptions = $attribute->options()->get()->keyBy('id');
+
+        foreach ($existingPayload as $optionId => $payload) {
+            if (!is_array($payload)) {
+                continue;
+            }
+
+            /** @var AttributeOption|null $option */
+            $option = $existingOptions->get((int) $optionId);
+            if (!$option) {
+                continue;
+            }
+
+            if (!empty($payload['delete'])) {
+                $option->delete();
+                continue;
+            }
+
+            $value = trim((string) ($payload['value'] ?? $option->value));
+            $label = trim((string) ($payload['label'] ?? $option->label));
+
+            if ($value === '' || $label === '') {
+                continue;
+            }
+
+            $valueChanged = $value !== $option->value;
+
+            $option->fill([
+                'value' => $value,
+                'label' => $label,
+                'sort_order' => isset($payload['sort_order']) && $payload['sort_order'] !== ''
+                    ? (int) $payload['sort_order']
+                    : $option->sort_order,
+                'active' => array_key_exists('active', $payload) ? (bool) $payload['active'] : false,
+            ])->save();
+
+            if ($valueChanged) {
+                $this->syncCurrentOptionValue($option);
+            }
+        }
+    }
+
+    private function syncCurrentOptionValue(AttributeOption $option): void
+    {
+        ModelNumberAttribute::query()
+            ->where('attribute_option_id', $option->id)
+            ->update([
+                'value' => $option->value,
+                'raw_value' => $option->value,
+            ]);
+
+        AssetAttributeOverride::query()
+            ->where('attribute_option_id', $option->id)
+            ->update([
+                'value' => $option->value,
+                'raw_value' => $option->value,
+            ]);
+
+        ComponentDefinitionAttribute::query()
+            ->where('attribute_option_id', $option->id)
+            ->update([
+                'value' => $option->value,
+                'raw_value' => $option->value,
+            ]);
+    }
+
+    private function usageSummary(AttributeDefinition $attribute): array
+    {
+        if (!$attribute->exists) {
+            return [
+                'model_values' => 0,
+                'asset_overrides' => 0,
+                'tests' => 0,
+                'test_results' => 0,
+                'component_definitions' => 0,
+                'total' => 0,
+            ];
+        }
+
+        $summary = [
+            'model_values' => $attribute->modelValues()->count(),
+            'asset_overrides' => $attribute->assetOverrides()->count(),
+            'tests' => $attribute->tests()->count(),
+            'test_results' => $attribute->testResults()->count(),
+            'component_definitions' => $attribute->componentDefinitionAttributes()->count(),
+        ];
+
+        $summary['total'] = array_sum($summary);
+
+        return $summary;
     }
 }
-
-

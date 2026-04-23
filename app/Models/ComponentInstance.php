@@ -37,6 +37,55 @@ class ComponentInstance extends SnipeModel
     public const SOURCE_PURCHASED = 'purchased';
     public const SOURCE_EXTERNAL_INTAKE = 'external_intake';
     public const SOURCE_MANUAL = 'manual';
+    public const SOURCE_EXPECTED_BASELINE = 'expected_baseline';
+
+    public static function sourceTypeOptions(bool $includeInternal = false): array
+    {
+        $options = [
+            self::SOURCE_MANUAL => __('Manual'),
+            self::SOURCE_PURCHASED => __('Purchased'),
+            self::SOURCE_EXTERNAL_INTAKE => __('External Intake'),
+            self::SOURCE_EXTRACTED => __('Extracted'),
+        ];
+
+        if ($includeInternal) {
+            $options[self::SOURCE_EXPECTED_BASELINE] = __('Expected Baseline');
+        }
+
+        return $options;
+    }
+
+    public static function sourceTypeLabel(?string $sourceType): ?string
+    {
+        if ($sourceType === null || $sourceType === '') {
+            return null;
+        }
+
+        return self::sourceTypeOptions(true)[$sourceType] ?? Str::headline($sourceType);
+    }
+
+    public static function statusOptions(): array
+    {
+        return [
+            self::STATUS_INSTALLED => __('Installed'),
+            self::STATUS_IN_STOCK => __('In Stock'),
+            self::STATUS_IN_TRANSFER => __('In Tray'),
+            self::STATUS_NEEDS_VERIFICATION => __('Needs Verification'),
+            self::STATUS_DEFECTIVE => __('Defective'),
+            self::STATUS_DESTRUCTION_PENDING => __('Destruction Pending'),
+            self::STATUS_DESTROYED_RECYCLED => __('Destroyed / Recycled'),
+            self::STATUS_SOLD_RETURNED => __('Sold / Returned'),
+        ];
+    }
+
+    public static function statusLabel(?string $status): ?string
+    {
+        if ($status === null || $status === '') {
+            return null;
+        }
+
+        return self::statusOptions()[$status] ?? Str::headline($status);
+    }
 
     protected $table = 'component_instances';
 

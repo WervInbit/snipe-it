@@ -102,6 +102,7 @@
                                             <div class="btn-group btn-group-xs" role="group">
                                                 <a href="{{ route('models.numbers.edit', [$model, $number]) }}" class="btn btn-default">{{ __('Edit') }}</a>
                                                 <a href="{{ route('models.numbers.spec.edit', ['model' => $model, 'modelNumber' => $number]) }}" class="btn btn-default">{{ __('Edit Spec') }}</a>
+                                                <a href="{{ route('models.numbers.spec.edit', ['model' => $model, 'modelNumber' => $number]) }}#expected-components" class="btn btn-default">{{ __('Expected Components') }}</a>
                                             </div>
                                         </td>
                                     @endcan

@@ -36,6 +36,7 @@ use App\Http\Controllers\Admin\AttributeOptionsController;
 use App\Http\Controllers\Admin\ComponentDefinitionSettingsController;
 use App\Http\Controllers\Admin\ComponentStorageLocationSettingsController;
 use App\Http\Controllers\Admin\ModelNumberController;
+use App\Http\Controllers\Admin\ModelNumberComponentTemplateController;
 use App\Http\Controllers\Admin\ModelNumberSettingsController;
 use App\Http\Controllers\Admin\ModelNumberAttributeController;
 use App\Http\Controllers\Admin\ModelSpecificationController;
@@ -86,8 +87,6 @@ Route::group(['middleware' => 'auth'], function () {
     });
 
     Route::resource('attributes', AttributeDefinitionsController::class)->except(['show']);
-    Route::get('attributes/{attribute}/versions/create', [AttributeDefinitionsController::class, 'createVersion'])->name('attributes.versions.create');
-    Route::post('attributes/{attribute}/versions', [AttributeDefinitionsController::class, 'storeVersion'])->name('attributes.versions.store');
     Route::patch('attributes/{attribute}/hide', [AttributeDefinitionsController::class, 'hide'])->name('attributes.hide');
     Route::patch('attributes/{attribute}/unhide', [AttributeDefinitionsController::class, 'unhide'])->name('attributes.unhide');
     Route::post('attributes/{attribute}/options', [AttributeOptionsController::class, 'store'])->name('attributes.options.store');
@@ -187,6 +186,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('models/{model}/spec', [ModelSpecificationController::class, 'update'])->name('models.spec.update');
     Route::get('models/{model}/model-numbers/{modelNumber}/spec', [ModelSpecificationController::class, 'editForNumber'])->name('models.numbers.spec.edit');
     Route::put('models/{model}/model-numbers/{modelNumber}/spec', [ModelSpecificationController::class, 'updateForNumber'])->name('models.numbers.spec.update');
+    Route::get('models/{model}/model-numbers/{modelNumber}/components', [ModelNumberComponentTemplateController::class, 'index'])->name('models.numbers.components.index');
+    Route::post('models/{model}/model-numbers/{modelNumber}/components', [ModelNumberComponentTemplateController::class, 'store'])->name('models.numbers.components.store');
+    Route::put('models/{model}/model-numbers/{modelNumber}/components/{componentTemplate}', [ModelNumberComponentTemplateController::class, 'update'])->name('models.numbers.components.update');
+    Route::delete('models/{model}/model-numbers/{modelNumber}/components/{componentTemplate}', [ModelNumberComponentTemplateController::class, 'destroy'])->name('models.numbers.components.destroy');
+    Route::patch('models/{model}/model-numbers/{modelNumber}/components/reorder', [ModelNumberComponentTemplateController::class, 'reorder'])->name('models.numbers.components.reorder');
     Route::post('models/{model}/model-numbers/{modelNumber}/attributes', [ModelNumberAttributeController::class, 'store'])->name('models.numbers.attributes.store');
     Route::delete('models/{model}/model-numbers/{modelNumber}/attributes/{attributeDefinition}', [ModelNumberAttributeController::class, 'destroy'])->name('models.numbers.attributes.destroy');
     Route::patch('models/{model}/model-numbers/{modelNumber}/attributes/reorder', [ModelNumberAttributeController::class, 'reorder'])->name('models.numbers.attributes.reorder');
@@ -225,6 +229,7 @@ Route::group(['middleware' => 'auth'], function () {
       * Asset scanner
       */
       Route::get('scan', [ScanController::class, 'index'])->name('scan');
+      Route::get('scan/resolve/{code}', [ScanController::class, 'resolve'])->name('scan.resolve');
   });
 
 Route::group(['middleware' => ['auth']], function () {

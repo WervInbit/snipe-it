@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AttributeOptionRequest;
 use App\Models\AttributeDefinition;
 use App\Models\AttributeOption;
+use App\Models\AssetAttributeOverride;
+use App\Models\ComponentDefinitionAttribute;
+use App\Models\ModelNumberAttribute;
 use Illuminate\Http\RedirectResponse;
 
 class AttributeOptionsController extends Controller
@@ -50,6 +53,7 @@ class AttributeOptionsController extends Controller
         $this->ensureOptionBelongsToAttribute($attribute, $option);
 
         $data = $request->validated();
+        $valueChanged = $data['value'] !== $option->value;
 
         $option->fill([
             'value' => $data['value'],
@@ -57,6 +61,10 @@ class AttributeOptionsController extends Controller
             'active' => $request->boolean('active', true),
             'sort_order' => $data['sort_order'] ?? 0,
         ])->save();
+
+        if ($valueChanged) {
+            $this->syncCurrentOptionValue($option);
+        }
 
         return redirect()
             ->route('attributes.edit', $attribute)
@@ -81,5 +89,29 @@ class AttributeOptionsController extends Controller
         if (!$attribute->isEnum()) {
             abort(403, __('Options can only be managed for enum attributes.'));
         }
+    }
+
+    private function syncCurrentOptionValue(AttributeOption $option): void
+    {
+        ModelNumberAttribute::query()
+            ->where('attribute_option_id', $option->id)
+            ->update([
+                'value' => $option->value,
+                'raw_value' => $option->value,
+            ]);
+
+        AssetAttributeOverride::query()
+            ->where('attribute_option_id', $option->id)
+            ->update([
+                'value' => $option->value,
+                'raw_value' => $option->value,
+            ]);
+
+        ComponentDefinitionAttribute::query()
+            ->where('attribute_option_id', $option->id)
+            ->update([
+                'value' => $option->value,
+                'raw_value' => $option->value,
+            ]);
     }
 }

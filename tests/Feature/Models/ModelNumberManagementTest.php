@@ -145,6 +145,27 @@ class ModelNumberManagementTest extends TestCase
             ->assertSeeText('Edit Specification: BREAD-002');
     }
 
+    public function test_model_number_pages_link_to_unified_spec_components_anchor(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->modelNumbers()->create([
+            'code' => 'COMP-001',
+        ]);
+        $componentsAnchor = route('models.numbers.spec.edit', [$model, $modelNumber]).'#expected-components';
+
+        $this->actingAs($user)
+            ->get(route('models.show', $model))
+            ->assertOk()
+            ->assertSee($componentsAnchor, false);
+
+        $this->actingAs($user)
+            ->get(route('models.numbers.edit', [$model, $modelNumber]))
+            ->assertOk()
+            ->assertSee($componentsAnchor, false)
+            ->assertSeeText('Edit Unified Specification');
+    }
+
     public function test_admin_cannot_delete_primary_model_number(): void
     {
         $user = User::factory()->superuser()->create();

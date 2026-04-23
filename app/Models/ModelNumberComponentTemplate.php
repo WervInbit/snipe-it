@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ModelNumberComponentTemplate extends SnipeModel
 {
@@ -36,5 +37,10 @@ class ModelNumberComponentTemplate extends SnipeModel
     public function componentDefinition(): BelongsTo
     {
         return $this->belongsTo(ComponentDefinition::class, 'component_definition_id');
+    }
+
+    public function assetStates(): HasMany
+    {
+        return $this->hasMany(AssetExpectedComponentState::class, 'model_number_component_template_id');
     }
 }

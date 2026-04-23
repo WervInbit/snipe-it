@@ -479,6 +479,8 @@ class AssetsController extends Controller
                 ->resolveForAsset($asset)
                 ->reject(fn ($attribute) => $attribute->definition->key === Asset::CONDITION_GRADE_ATTRIBUTE_KEY)
                 ->values();
+            $componentRoster = app(\App\Services\Components\AssetComponentRosterService::class)
+                ->buildForAsset($asset);
             $testSummary = $asset->latestTestIssueSummary();
             $componentLocations = $this->storageLocationsByType();
             $currentUserTrayComponents = ComponentInstance::query()
@@ -490,6 +492,7 @@ class AssetsController extends Controller
 
             return view('hardware/view', compact('asset', 'settings'))
                 ->with('resolvedAttributes', $resolvedAttributes)
+                ->with('componentRoster', $componentRoster)
                 ->with('use_currency', $use_currency)
                 ->with('audit_log', $audit_log)
                 ->with('testSummary', $testSummary)

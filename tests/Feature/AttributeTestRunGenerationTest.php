@@ -8,6 +8,9 @@ use App\Models\AssetAttributeOverride;
 use App\Models\AssetModel;
 use App\Models\AttributeDefinition;
 use App\Models\Category;
+use App\Models\ComponentDefinition;
+use App\Models\ComponentDefinitionAttribute;
+use App\Models\ComponentInstance;
 use App\Models\ModelNumberAttribute;
 use App\Models\TestResult;
 use App\Models\TestRun;
@@ -85,5 +88,65 @@ class AttributeTestRunGenerationTest extends TestCase
         $this->assertSame(TestResult::STATUS_NVT, $result->status);
         $this->assertSame('0', $result->expected_value);
         $this->assertNull($result->expected_raw_value);
+    }
+
+    public function test_generates_tests_from_component_derived_attributes(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $this->actingAs($user);
+
+        $definition = AttributeDefinition::create([
+            'key' => 'ram_capacity_gb',
+            'label' => 'RAM Capacity',
+            'datatype' => AttributeDefinition::DATATYPE_INT,
+            'unit' => 'GB',
+            'required_for_category' => false,
+            'allow_custom_values' => false,
+            'allow_asset_override' => true,
+        ]);
+
+        $testType = \App\Models\TestType::factory()->create([
+            'attribute_definition_id' => $definition->id,
+            'slug' => 'ram-capacity',
+        ]);
+
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $asset = Asset::factory()->create([
+            'model_id' => $model->id,
+            'model_number_id' => $modelNumber->id,
+        ]);
+
+        $componentDefinition = ComponentDefinition::factory()->create([
+            'name' => '8GB DDR4 SODIMM',
+        ]);
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $componentDefinition->id,
+            'attribute_definition_id' => $definition->id,
+            'value' => '8',
+            'raw_value' => '8',
+            'sort_order' => 0,
+        ]);
+
+        ComponentInstance::factory()->installed($asset->id)->create([
+            'component_definition_id' => $componentDefinition->id,
+        ]);
+
+        $controller = app(TestRunController::class);
+        $request = Request::create('/hardware/'.$asset->id.'/tests', 'POST');
+        $request->setUserResolver(fn () => $user);
+
+        $response = $controller->store($request, $asset, app(EffectiveAttributeResolver::class));
+
+        $run = TestRun::latest('id')->first();
+        $this->assertNotNull($run, 'Test run was not created');
+        $this->assertEquals(302, $response->getStatusCode());
+        $this->assertSame(route('test-results.active', [$asset->id]), $response->getTargetUrl());
+
+        $result = $run->results()->first();
+        $this->assertNotNull($result, 'Test result was not created');
+        $this->assertSame($definition->id, $result->attribute_definition_id);
+        $this->assertSame($testType->id, $result->test_type_id);
+        $this->assertSame('8', $result->expected_value);
     }
 }

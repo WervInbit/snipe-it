@@ -21,7 +21,7 @@
                                        name="search"
                                        value="{{ $search ?? '' }}"
                                        class="form-control input-sm"
-                                       placeholder="{{ __('Search attributes…') }}"
+                                       placeholder="{{ __('Search attributes...') }}"
                                        autocomplete="off"
                                        aria-label="{{ __('Search attributes') }}">
                             </div>
@@ -36,7 +36,6 @@
                             <th>{{ __('Name') }}</th>
                             <th>{{ __('Key') }}</th>
                             <th>{{ __('Datatype') }}</th>
-                            <th>{{ __('Version') }}</th>
                             <th>{{ __('Status') }}</th>
                             <th>{{ __('Categories') }}</th>
                             <th>{{ __('Required') }}</th>
@@ -51,7 +50,6 @@
                                 <td>{{ $definition->label }}</td>
                                 <td><code>{{ $definition->key }}</code></td>
                                 <td>{{ ucfirst($definition->datatype) }}</td>
-                                <td>{{ $definition->version }}</td>
                                 <td>
                                     @if($definition->isDeprecated())
                                         <span class="label label-warning">{{ __('Deprecated') }}</span>
@@ -74,7 +72,6 @@
                                 <td>{{ $definition->options_count }}</td>
                                 <td class="text-right" style="white-space: nowrap;">
                                     <a href="{{ route('attributes.edit', $definition) }}" class="btn btn-xs btn-default">{{ __('Edit') }}</a>
-                                    <a href="{{ route('attributes.versions.create', $definition) }}" class="btn btn-xs btn-info">{{ __('New Version') }}</a>
                                     @if($definition->isHidden())
                                         <form action="{{ route('attributes.unhide', $definition) }}" method="POST" style="display:inline-block;">
                                             @csrf
@@ -92,7 +89,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="text-center text-muted">{{ __('No attributes defined yet.') }}</td>
+                                <td colspan="9" class="text-center text-muted">{{ __('No attributes defined yet.') }}</td>
                             </tr>
                         @endforelse
                         </tbody>
