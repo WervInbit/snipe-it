@@ -1,9 +1,76 @@
+# Session Progress (2026-04-23)
+
+## Addendum (2026-04-23 Codex)
+- Session kickoff: re-read `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, and inspected the current worktree to audit the in-progress expected-baseline component redesign after the interrupted implementation/test recovery work.
+- Current task focus:
+- determine what parts of the expected-baseline component + calculated-spec redesign are actually implemented in code
+- identify what remains partial or inconsistent before resuming verification and cleanup
+- Audit result: the expected-baseline redesign is substantially implemented in code.
+- Confirmed implemented surfaces:
+- persistent per-asset expected baseline state (`asset_expected_component_states`) and materialization of expected rows into tracked instances
+- merged asset component roster service with `Expected`, `Expected (Tracked)`, `Extra`, and `Custom` classification
+- list-first asset Components tab with `Add / Install Component`, `To Tray`, `To Storage`, and `Move To Other Device` actions
+- dedicated asset-scoped add/install, storage-confirmation, and direct transfer workflow pages
+- direct asset-to-asset transfer flow that uses the scan resolver with manual destination fallback
+- numeric component-derived attribute aggregation and reduced-baseline notices on the asset/hardware surfaces
+- model-number spec workflow remains unified and component-driven
+- Still partial or inconsistent:
+- the model-number effective preview and related tests still reflect older wording/expectations where manual model values override derived totals, while the asset resolver now gives numeric calculated component values precedence
+- older tray and component detail pages still use the previous workflow/action layout rather than the new asset-row action model
+- verification is behind the code: focused tests for the expected-baseline redesign were interrupted earlier, and several current tests still assert pre-redesign behavior
+- Continuation tranche implemented and verified:
+- unified model-number spec preview now treats numeric component-derived values as authoritative and no longer renders the old manual-override copy
+- asset `Add / Install Component` now keeps tray/storage sections but changes `New` into a single definition/custom toggle workflow on the same page
+- tray and component detail pages now use dedicated workflow launch pages instead of embedded inline lifecycle forms
+- component workflow routes now include GET screens for install, to-tray, to-storage, verification, and destruction flows, with safe return-to redirects back to tray/detail surfaces
+- hardware detail component-tab badge parse error was fixed by replacing the inline one-line `@php(...)` assignment with a full Blade block
+- sqlite test migrations are now compatible with the expected-baseline tranche by replacing the MySQL-only `update ... join` statement in `2026_04_21_180000_add_expected_baseline_asset_component_state` with a cross-database query-builder update
+- Focused verification passed in Docker after `php artisan optimize:clear` plus explicit removal of `bootstrap/cache/config.php`:
+- `tests/Feature/ComponentDerivedAttributeResolutionTest.php`
+- `tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php`
+- `tests/Feature/Components/Ui/ShowComponentTest.php`
+- `tests/Feature/Models/ModelSpecificationComponentPreviewTest.php`
+- `tests/Feature/Assets/Ui/ComponentHistoryTest.php`
+- result: `13` tests passed, `73` assertions
+- Asset install UX simplified further:
+- removed the model-number `Effective Specification Preview` block from the spec page and updated the remaining expected-components copy to stop referencing that preview
+- merged asset add-page tray/storage installs into a single searchable `Install` picker with tray items listed before storage items
+- removed `installed_as` and install-note inputs from the asset add-page install workflow
+- hid the asset add-page `New Component` form behind an explicit reveal button instead of showing it by default
+- stripped the asset add-page new-component form down to definition/custom choice, serial, and optional notes; source type now defaults to `manual`, condition defaults to `unknown`, and installed-as/slot fields are omitted
+- kept the legacy tray/storage install POST routes as compatibility wrappers, but they now reuse the same simplified install behavior
+- Focused verification passed in Docker after `php artisan optimize:clear` plus explicit removal of `bootstrap/cache/config.php`:
+- `tests/Feature/Models/ModelSpecificationComponentPreviewTest.php`
+- `tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php`
+- `tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php`
+- result: `11` tests passed, `79` assertions
+
 # Session Progress (2026-04-21)
 
 ## Addendum (2026-04-21 Codex)
 - Created a full handoff update for the current component/work-order/portal stream and aligned the main plan with the actual repository state.
 - Published the detailed handoff in `docs/agents/agents-addendum-2026-04-21-session-init.md` so the next contributor can resume without reconstructing prior chat history.
-- Current tranche status at handoff:
+- Components gap-closure tranche implemented:
+- hardened internal work-order FMCS behavior so internal index/show and nested write flows are company-scoped while the portal keeps explicit cross-company visibility behavior.
+- narrowed the generic component API update endpoint to metadata-only edits and rejected direct lifecycle-field mutations.
+- enforced tray-holder ownership on install paths and removed arbitrary tray reassignment from the public remove-to-tray API.
+- added standalone model-number expected-component management routes/UI with create, update, delete, and reorder flows.
+- updated the asset Components tab so Expected Components is collapsed by default behind an explicit toggle and leaves installed/history surfaces visible first.
+- extended the existing scan flow with a resolver that opens component QR labels (`CMP:{qr_uid}`) while preserving asset-tag lookup behavior.
+- made tray-aging escalations explicitly visible in component/event history as an automatic verification escalation rather than looking identical to a manual flag.
+- fixed an exception-handler route alias bug so hidden/scoped work orders no longer explode into a 500 when route model binding fails.
+- New focused verification for this tranche passed:
+- `tests/Feature/WorkOrders/Ui/WorkOrdersControllerTest.php`
+- `tests/Feature/WorkOrders/Portal/PortalWorkOrdersTest.php`
+- `tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php`
+- `tests/Feature/Components/Api/ComponentLifecycleApiTest.php`
+- `tests/Feature/Components/Console/AgeTrayComponentsTest.php`
+- `tests/Feature/Assets/Ui/ComponentHistoryTest.php`
+- `tests/Feature/Models/ModelNumberManagementTest.php`
+- `tests/Feature/Models/ModelNumberComponentTemplateManagementTest.php`
+- `tests/Feature/Scan/ScanResolverTest.php`
+- result: `35` tests passed, `168` assertions
+- Earlier handoff snapshot before the gap-closure continuation:
 - component replacement foundation is in place (`ComponentDefinition`, `ComponentInstance`, `ComponentEvent`, storage locations, expected component templates)
 - global `/components` registry and detail pages are instance-based, not pooled-stock based
 - asset `Components` tab is operational for tracked components
@@ -21,7 +88,7 @@
 - definition-level company scoping was removed
 - non-functional serial-tracking UI was hidden and deferred
 - internal work-order UI and authenticated read-only customer portal UI are implemented
-- Key remaining gaps at handoff:
+- Remaining gaps that existed at the earlier handoff:
 - work-order-driven component actions are still deferred; work orders show component activity but are not yet the operational action hub for installs/removals
 - model-number component template management is still not a full operator/admin workflow on the model-number screens
 - component QR/mobile scan flow exists only as groundwork; there is no dedicated component scan journey yet
@@ -39,10 +106,8 @@
 - Handoff docs updated:
 - `docs/agents/agents-addendum-2026-04-21-session-init.md`
 - `docs/plans/components-replacement-part-traceability-work-orders.md`
-- Recommended next tranche at handoff:
-- complete model-number template management UI
+- Recommended next tranche at that earlier handoff:
 - move component actions into work-order/task-centered flows
-- add a dedicated component QR/mobile scan journey
 - run broader regression once those workflows settle
 
 # Session Progress (2026-04-20)
@@ -1595,5 +1660,209 @@ there are multiple duplicate functions that still need to be removed, sku will b
 - result: `16` tests passed, `69` assertions
 - scope note:
 - full-project regression was not run in this block; verification covered the new browser workflow, component settings, work-order/portal linkage, and asset component history surfaces touched by the phase
+
+- implemented the attribute simplification and component-driven spec tranche:
+- removed user-facing attribute versioning from admin UX:
+- no version column on the attribute index
+- no `New Version` action or version-create flow in normal admin screens
+- attribute keys are now editable in place
+- datatype remains immutable after create
+- enum option value edits now cascade current rows that reference the same option id across:
+- `model_number_attributes`
+- `asset_attribute_overrides`
+- `component_definition_attributes`
+- historical `test_results.expected_value` and `expected_raw_value` remain unchanged
+- added shared attribute contributions on component definitions:
+- new `component_definition_attributes` table and model
+- component-definition admin forms now manage shared attribute contributions validated through the existing attribute normalization pipeline
+- unified model-number specification editing:
+- the model-number spec page now contains manual attributes, expected components, and an effective-spec preview on one screen
+- legacy expected-component routes remain as compatibility entry points but redirect to the unified spec screen anchor
+- added runtime component-derived spec resolution:
+- model-number previews aggregate linked expected-component templates
+- asset effective specs now resolve with precedence:
+- asset override
+- installed-component-derived value
+- manual model value
+- expected-component-derived model value
+- derived provenance/source labels are exposed in the model preview and asset detail/spec override UI
+- verification after the attribute/component tranche (pass):
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/AttributeDefinitionLifecycleTest.php tests/Feature/Settings/ComponentDefinitionSettingsTest.php tests/Feature/Models/ModelNumberManagementTest.php tests/Feature/Models/ModelNumberComponentTemplateManagementTest.php tests/Feature/Models/ModelSpecificationComponentPreviewTest.php tests/Feature/ComponentDerivedAttributeResolutionTest.php tests/Feature/AttributeTestRunGenerationTest.php tests/Feature/Assets/Ui/ComponentHistoryTest.php tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php`
+- result: `38` tests passed, `171` assertions
+
+- tightened the unified model-number specification UX after manual save confusion:
+- expected-component validation errors on `models/spec` are now surfaced in the top error navigator and inline on the affected component row instead of only showing the generic “check the form” banner
+- quick regression re-run after the UI fix:
+- `php artisan test --env=testing tests/Feature/Models/ModelSpecificationComponentPreviewTest.php tests/Feature/Models/ModelNumberManagementTest.php`
+- result: `11` tests passed, `40` assertions
+
+- refined component-definition attribute contribution editing to match the model-spec workflow more closely:
+- replaced the raw contribution attribute select with a quicksearch/autocomplete picker keyed by shared attribute definitions
+- replaced the free-text contribution value box with datatype-aware inputs and hints:
+- bool attributes now use yes/no selection
+- int/decimal attributes now use numeric inputs with min/max/step hints when constraints exist
+- enum attributes now expose the same option guidance and autocomplete list used on model-spec values
+- added validation so partially typed contribution rows now fail clearly instead of being silently ignored when no valid attribute is selected
+- remapped contribution normalization errors back onto the edited row so invalid values show on `attribute_contributions.{row}.value`
+- focused verification after the component-definition form UX update:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Settings/ComponentDefinitionSettingsTest.php`
+- result: `8` tests passed, `32` assertions
+
+- follow-up fix for the component-definition attribute picker after manual retest feedback:
+- selecting a search result now applies on `mousedown` instead of relying only on `click`, which avoids losing the selection after clearing/retyping the search field
+- the picker now also handles the native `<input type="search">` clear action through the `search` event, so clearing a picked attribute resets the hidden id/value field consistently
+- focused verification after the picker interaction fix:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Settings/ComponentDefinitionSettingsTest.php`
+- result: `8` tests passed, `32` assertions
+
+- replaced the broken fixed-enum `datalist` pattern with real selects on shared spec-entry surfaces:
+- model-spec manual attribute editing now renders fixed enum attributes as `<select>` controls instead of free-text + datalist
+- component-definition attribute contribution rows now render fixed enum values as `<select>` controls both on first paint and when the row updates client-side after attribute selection
+- custom-value enums still keep the text + suggestion flow; only fixed-option enums were changed
+- focused verification after the enum control fix:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Settings/ComponentDefinitionSettingsTest.php tests/Feature/Models/ModelSpecificationComponentPreviewTest.php`
+- result: `12` tests passed, `52` assertions
+
+- simplified the model-number expected-components editor:
+- moved the `Expected Components` block above `Effective Specification Preview` on the unified model spec page
+- removed `slot_name` and `notes` from the model-number expected-component UI
+- updated the unified model-spec save path and compatibility component-template controller so those fields are cleared to `null` instead of lingering from older edits
+- adjusted the expected-components help copy to point at the preview below the editor
+- focused verification after the model-number expected-component simplification:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Models/ModelSpecificationComponentPreviewTest.php tests/Feature/Models/ModelNumberComponentTemplateManagementTest.php tests/Feature/Models/ModelNumberManagementTest.php`
+- result: `14` tests passed, `62` assertions
+
+- tightened the model-number expected-components workflow further around catalog definitions:
+- removed the `required by default` checkbox from the unified model-number spec UI; saved expected components are now always required by default
+- removed the `expected_name` field from the unified model-number spec UI; template names are now derived from the selected component definition
+- added drag-handle reordering on expected-component rows while keeping the existing Up/Down buttons as fallback controls
+- updated both the unified model-spec save path and the compatibility expected-component controller so definition-backed template rows automatically persist:
+- `expected_name = component_definition.name`
+- `is_required = true`
+- focused verification after the expected-component definition/drag update:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Models/ModelSpecificationComponentPreviewTest.php tests/Feature/Models/ModelNumberComponentTemplateManagementTest.php tests/Feature/Models/ModelNumberManagementTest.php`
+- result: `14` tests passed, `65` assertions
+
+- refined the unified model-number expected-components row layout:
+- moved the drag/sort handle into the row itself, positioned left of the catalog definition field instead of in a separate header strip
+- stopped seeding an empty expected-component row when the model number has no templates yet
+- added an explicit empty-state message instead, and kept row creation behind the `Add Expected Component` action only
+- focused verification after the expected-component row layout cleanup:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Models/ModelSpecificationComponentPreviewTest.php tests/Feature/Models/ModelNumberComponentTemplateManagementTest.php tests/Feature/Models/ModelNumberManagementTest.php`
+- result: `15` tests passed, `68` assertions
+
+- cleaned up redundant provenance noise on the hardware details specification section:
+- plain model-backed attributes no longer render repeated `Manual model value` source badges or `Contributors: Manual model value` helper text
+- component-derived rows still keep contributor detail, and override rows still keep their inherited-baseline context
+- added a hardware-details regression test covering a manual-model-only asset
+- focused verification after the hardware details provenance cleanup:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Assets/AssetSpecificationOverrideTest.php --filter=hide_redundant_manual_model_meta`
+- `php artisan test --env=testing tests/Feature/Assets/Ui/ComponentHistoryTest.php`
+- result: `3` tests passed, `14` assertions
+
+- refined the expected-baseline asset component roster and component detail flow:
+- asset component lists now render non-default rows (`Extra` / `Custom`) first, then insert a slim `Expected baseline` separator before the expected rows
+- component detail pages now include a small note editor instead of leaving notes read-only behind the unimplemented full edit flow
+- focused verification after the roster split + note editor update:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Assets/Ui/ComponentHistoryTest.php tests/Feature/Components/Ui/ShowComponentTest.php tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php`
+- result: `9` tests passed, `56` assertions
+
+- stabilized the expected-baseline component UX and semantics around calculated numeric specs:
+- hardware detail and asset spec-override surfaces now show calculated totals as an explicit split between `Expected/default subtotal` and `Extras/custom subtotal`, with matching contributor summaries instead of one ambiguous contributors line
+- kept the current baseline rule intact and locked it in tests: matching tracked installed components stay `Extra` until the expected baseline has been explicitly reduced, after which they fill as `Expected (Tracked)`
+- removed the remaining web `installed_as` / slot inputs and display from component install/transfer screens, the asset component roster, and the component detail page while keeping lower-level lifecycle compatibility in place
+- deleted the dead legacy `components/partials/actions.blade.php` form-first partial that was no longer referenced anywhere in the repo
+- aligned the asset override manager regression test with the current validation key shape (`attributes.{id}`)
+- focused verification after the stabilization pass:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/ComponentDerivedAttributeResolutionTest.php tests/Feature/Assets/Ui/ComponentHistoryTest.php tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php tests/Feature/Components/Ui/ShowComponentTest.php tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php tests/Feature/Assets/AssetSpecificationOverrideTest.php`
+- result: `22` tests passed, `132` assertions
+
+- separated stock-state changes from storage-location assignment in the component workflows:
+- `To Storage` / `Move To Storage` flows now move components into stock by default without requiring a location picker up front
+- the POST handlers still accept optional legacy `storage_location_id` / `verification_location_id` inputs for compatibility, but the web screens no longer expose those fields
+- component detail pages now include a dedicated storage-location editor for loose components so operators can shelve parts later after the stock move
+- made removed expected-baseline components stay visible on the source asset roster:
+- source assets now render materialized expected-baseline parts that have left the asset as greyed `Removed` rows with only an `Open` action, instead of only shrinking the expected baseline list
+- asset component tabs no longer show the old `Expected baseline reduced` alert banner now that the removed rows themselves carry that context
+- made component detail management more obvious:
+- component detail now shows a clearer human status label, surfaces the storage-location editor for loose parts, and moves the file upload box ahead of history with helper copy so uploads are easier to find
+- focused verification after the stock/location split + removed-row update:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php tests/Feature/Components/Ui/ShowComponentTest.php tests/Feature/Assets/Ui/ComponentHistoryTest.php`
+- result: `18` tests passed, `138` assertions
+
+- moved the asset-page `To Storage` confirmation back onto the asset page as a modal instead of navigating away:
+- tracked and expected component rows on the asset component tab now launch a shared `Move To Stock` modal with the verification checkbox and note field inline on the page
+- the asset-page modal posts to the existing stock-move endpoints, while the generic component/tray storage pages remain available for non-asset flows
+- focused verification after the asset-page storage modal change:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php tests/Feature/Assets/Ui/ComponentHistoryTest.php`
+- result: `9` tests passed, `78` assertions
+
+- added the same inline confirmation pattern for `To Tray` on the component detail page:
+- installed components on `components.show` now open a `Move To Tray` modal with the note field inline instead of navigating to the separate remove-to-tray page first
+- the modal still posts to the existing remove-to-tray endpoint, so lifecycle/history behavior is unchanged underneath
+- focused verification after the component-detail tray modal change:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Components/Ui/ShowComponentTest.php`
+- result: `5` tests passed, `26` assertions
+
+- converted component-detail status handling toward the asset-style pattern:
+- `components.show` now exposes a `Change Status` dropdown with status-specific confirmation modals instead of a row of separate lifecycle buttons
+- added a dedicated component `Status History` table that traces from/to status changes using the existing component event log
+- kept install and move-to-other-device as separate actions, but tightened install gating so `Defective` and `Destruction Pending` components cannot be installed from the detail-page path
+- added an explicit `Defective` lifecycle transition for loose components and made `Needs Verification -> In Stock` work without forcing a storage location first
+- focused verification after the component status dropdown/history change:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Components/Ui/ShowComponentTest.php tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php`
+- result: `11` tests passed, `80` assertions
+
+- polished the component-detail status dropdown label so the closed button now shows the current component status instead of the generic `Change Status`
+- focused verification after the current-status label update:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Components/Ui/ShowComponentTest.php`
+- result: `5` tests passed, `34` assertions
+
+- aligned the component-detail status control more closely with the asset-side status UI:
+- replaced the bootstrap dropdown menu on `components.show` with a real form-select status control that shows the current status as the selected/default entry
+- kept the modal-backed status transitions underneath so note/confirmation flows still work, but the visible control now behaves more like other status selectors in the app
+- focused verification after the select-style status alignment:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Components/Ui/ShowComponentTest.php tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php`
+- result: `11` tests passed, `80` assertions
+
+- refined the removed-row styling on the asset Components tab so only the descriptive cells are muted; the `Open` action now stays visually normal instead of being faded with the rest of the row
+- focused verification after the removed-row button styling fix:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Assets/Ui/ComponentHistoryTest.php`
+- result: `5` tests passed, `23` assertions
+
+- linked tracked component names and tags on the asset Components tab to the component detail page when the viewer can open that component; this now also applies to greyed `Removed` rows, not just active tracked rows
+- focused verification after the asset-row name/tag linking change:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Assets/Ui/ComponentHistoryTest.php`
+- result: `6` tests passed, `28` assertions
+
+- linked expected component names on the asset Components tab to the component-definition editor when the row is definition-backed and the viewer can manage that definition; assumed rows without a catalog definition still render as plain text
+- focused verification after the expected-row definition-link change:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Assets/Ui/ComponentHistoryTest.php`
+- result: `7` tests passed, `30` assertions
+
+- made `From asset:` and `To asset:` entries clickable in the component detail history when the viewer can open those devices; work-order/task history links continue to behave the same way
+- focused verification after the component-history asset-link change:
+- `php artisan optimize:clear` in the app container
+- `php artisan test --env=testing tests/Feature/Components/Ui/ShowComponentTest.php`
+- result: `6` tests passed, `37` assertions
 
 

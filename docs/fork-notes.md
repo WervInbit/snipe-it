@@ -4,6 +4,25 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-04-23
+- Finished the follow-up expected-baseline component UX cleanup: model-number spec previews now treat numeric component-derived values as authoritative, and the stale “manual model value overrides the derived total” messaging was removed.
+- Asset `Add / Install Component` pages now keep tray/storage flows intact but convert `New` into a single toggle-driven definition/custom creation form on the same page.
+- Tray and component detail pages now use dedicated workflow launch screens instead of embedding install/storage/verification/destruction forms inline.
+- Added explicit GET workflow pages for tracked component lifecycle actions (to tray, install, to storage, verification, destruction) with safe return-to redirects back to tray/detail surfaces.
+- Hardened test-environment support for the expected-baseline tranche by making the `component_definition_attributes.resolves_to_spec` backfill in `2026_04_21_180000_add_expected_baseline_asset_component_state` cross-database instead of MySQL-only.
+- Simplified the asset add/install UX again: tray and storage installs are now merged into one searchable picker, the add-page no longer asks for install notes or installed-as/slot metadata, and the new-component form is hidden by default.
+- The asset add-page new-component form now defaults source type to manual and condition to unknown without exposing either field, and it no longer asks for installed-as/slot metadata.
+- Removed the model-number `Effective Specification Preview` block entirely so model-number spec pages only show manual attributes and expected-component editing.
+
+### 2026-04-21
+- Internal work orders now respect FMCS company scoping in the staff UI: internal list/show and nested asset/task writes are company-scoped for company-bound staff, while the authenticated portal keeps its explicit visibility rules.
+- The generic component API update endpoint is now metadata-only; direct lifecycle fields such as `status`, install location, tray holder, verification timestamps, and destruction timestamps are rejected and must go through dedicated lifecycle endpoints.
+- Tray-install flows now enforce holder ownership, and the public remove-to-tray API no longer accepts arbitrary `held_by_user_id` reassignment.
+- Model-number screens now link to a dedicated Expected Components management page for each model number, with create/update/delete/reorder support for `model_number_component_templates`.
+- Asset detail `Components` tabs now keep Expected Components collapsed by default behind an explicit toggle so installed components and history remain the primary visible surfaces.
+- The existing scan page now resolves both asset tags and tracked component QR labels (`CMP:{qr_uid}`), redirecting to the correct detail page from the same camera flow.
+- Tray-aging escalations now render distinctly in component history/detail as automatic verification escalation events instead of looking identical to manual verification flags.
+
 ### 2026-04-16
 - Model specification edit now surfaces validation issues in one pass: a top error navigator lists failing attributes with click-to-jump behavior, invalid selected rows/detail panels are visibly highlighted, and required-missing validation now emits per-field errors (`attributes.{id}`) in addition to summary copy.
 - Scan page viewport now uses a fluid-width layout (removed fixed 720px caps) with taller portrait-oriented small-screen sizing so camera framing fills more of the phone screen.
@@ -140,5 +159,35 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 - Model-number edit and model-number specification edit pages now have route-level breadcrumbs (via `models.numbers.edit` and `models.numbers.spec.edit`) so navigation context matches other model-management screens.
 - Hardware create/edit now includes a mobile floating save CTA (fixed bottom) so operators can save without scrolling to form actions on small screens.
 - Test types now support persistent drag-and-drop ordering in admin settings; test runs and active test result cards follow this configured order through a new `display_order` workflow.
+
+### 2026-04-21
+- Attribute versioning is no longer a user-facing workflow: the admin attribute index/edit UI no longer shows version columns or `New Version`, while datatype remains immutable and attribute keys can now be corrected in place.
+- Editing an enum option value now propagates that corrected value to current model-number attributes, asset overrides, and component-definition attribute contributions that reference the same option id; historical test-result expected values remain unchanged.
+- Component definitions can now contribute shared specification values through the same `AttributeDefinition` vocabulary used by model specs and asset overrides.
+- Model-number specification editing is now unified: manual attributes, expected components, and an effective-spec preview live on the same screen, and legacy expected-component routes redirect to that unified screen anchor.
+- Effective spec resolution now understands component-derived values:
+- model-number previews aggregate linked expected-component templates
+- asset specs resolve with precedence `asset override -> installed components -> manual model value -> expected-component-derived model value`
+- asset detail/spec surfaces now show component-derived provenance/source labels instead of treating every inherited value as a plain model value
+
+### 2026-04-23
+- The asset Components tab now prioritizes tracked deviations: `Extra` and `Custom` rows render first, followed by a slim `Expected baseline` divider and the expected/default rows.
+- Component detail pages now support note editing directly on the detail screen instead of leaving notes trapped behind the old unimplemented full-edit flow.
+- Calculated numeric component specs now explain themselves on hardware/detail surfaces by showing separate `Expected/default` and `Extras/custom` subtotals instead of a single opaque total.
+- Matching tracked installed components intentionally remain `Extra` until expected baseline quantity is explicitly reduced; only then do matching tracked parts render as `Expected (Tracked)`.
+- Remaining web `installed_as` / slot inputs have been removed from component install/transfer workflows and related read surfaces, while lifecycle internals keep backward-compatible support underneath.
+- `To Storage` now means a stock-state change first: the web workflows no longer force a storage-location picker up front, and loose components can be assigned to a specific storage location later from the component detail page.
+- On the asset Components tab specifically, `To Storage` now opens a confirmation modal on the same page instead of navigating away; the modal keeps the verification checkbox and note field inline while still posting to the stock-move endpoints.
+- On the component detail page, installed components now use the same inline confirmation pattern for `To Tray`: the move opens a modal with the note field inline instead of bouncing out to a separate confirmation page.
+- Expected-baseline components that have been materialized away from the source asset now remain visible on that source asset as greyed `Removed` rows with only an `Open` action, instead of only shrinking the expected/default list.
+- Component detail now makes follow-up handling more explicit by showing a storage-location editor for loose parts, humanized status labels, and a more visible file-upload section above the history table.
+- Component detail status handling now follows the asset-style pattern more closely: there is a `Change Status` dropdown with modal confirmations plus a dedicated `Status History` table built from the existing component event log.
+- The closed status dropdown on component detail now shows the component’s current status directly instead of a generic `Change Status` label.
+- The component-detail status control now uses a select-style field rather than a bootstrap action menu, so it behaves more like other status selectors in the app while still opening the same confirmation modals underneath.
+- Loose components can now be explicitly marked `Defective`, and `Needs Verification -> In Stock` no longer forces a storage-location choice first; storage location can still be assigned afterward on the detail page.
+- Removed rows on the asset Components tab now keep the row content muted while leaving the `Open` action visually normal, so the follow-up detail action still reads like an active control.
+- On the asset Components tab, tracked component names and tags now link directly to the component detail page when the viewer has access, including greyed `Removed` rows.
+- On the asset Components tab, expected/default row names now link to the component-definition editor when they are backed by a catalog definition and the viewer has rights to manage that definition.
+- On the component detail history, `From asset:` and `To asset:` entries now link to the corresponding hardware detail pages when the viewer can access those assets.
 
 
