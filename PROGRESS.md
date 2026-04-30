@@ -1865,4 +1865,58 @@ there are multiple duplicate functions that still need to be removed, sku will b
 - `php artisan test --env=testing tests/Feature/Components/Ui/ShowComponentTest.php`
 - result: `6` tests passed, `37` assertions
 
+### 2026-04-28
+- Session reinitialized for the new week.
+- Reviewed `AGENTS.md`, the latest `PROGRESS.md` entries, `docs/fork-notes.md`, and the 2026-04-23 session addendum to recover the current component/spec workflow state.
+- Current branch baseline at reinit: `master` on commit `12586f04c` (`Document Component Workflow Changes`), with the recent feature stack already pushed to `origin/master`.
+- Remaining local-only dirt at session start:
+- `docker-compose.yml`
+- `docker/nginx.conf`
+- `docs/agents/agents-addendum-2026-03-19-session-init.md`
+- `storage/tmp-testtypes-reorder.js`
+- Created a fresh session addendum at `docs/agents/agents-addendum-2026-04-28-session-init.md` for new-week continuation notes.
+
+### 2026-04-30
+- Session resumed to prepare a local production-data clone for component migration/testing.
+- Planned setup path: import the production dump into `snipeit_prod_raw`, clone it into `snipeit_prod_work`, point local `.env` at `snipeit_prod_work`, and run current local migrations forward on the work copy.
+- Dev `APP_KEY` is kept for now unless encrypted production fields prove relevant during testing; auth remains local/dev-oriented.
+- Created a fresh session addendum at `docs/agents/agents-addendum-2026-04-30-session-init.md`.
+- Brought the Docker stack back up locally before the clone work (`snipeit_db`, `snipeit_node`, `snipeit_app`, `snipeit_web`).
+- Backed up the current local `.env` to `.env.before-prodclone.2026-04-30`.
+- Backed up the current `public/uploads` tree to `prodbak/local-uploads-before-prodclone-2026-04-30`.
+- Unpacked the provided production dump bundle from `prodbak/snipe-it-prod-export-20260428/dev-clone-20260428-105640/database.sql.gz`.
+- Created and populated two local clone databases:
+- `snipeit_prod_raw` = untouched imported production snapshot
+- `snipeit_prod_work` = working copy cloned from `snipeit_prod_raw`
+- Repointed local `.env` from `DB_DATABASE=snipeit` to `DB_DATABASE=snipeit_prod_work`.
+- Kept the current dev `APP_KEY` in place for now; the bundled `prod-app-key.env` was not applied during this pass.
+- Mirrored the provided production uploads bundle into `public/uploads`.
+- Cleared Laravel caches and migrated the working clone forward successfully:
+- `2026_04_16_110000_add_display_order_to_test_types_table`
+- `2026_04_17_120000_create_component_traceability_tables`
+- `2026_04_20_223648_remove_company_id_from_component_definitions_table`
+- `2026_04_21_140000_create_component_definition_attributes_table`
+- `2026_04_21_180000_add_expected_baseline_asset_component_state`
+- Verification after setup:
+- app container sees `DB_DATABASE=snipeit_prod_work`
+- `snipeit_prod_work` currently contains imported data (`assets=7`, `users=18`)
+- Created a separate local-only prod-key env file at `.env.prodclone.prodkey`:
+- keeps `DB_DATABASE=snipeit_prod_work`
+- swaps in the production `APP_KEY` from the bundle
+- leaves the active `.env` untouched for now so we can opt into the prod-key clone only when needed
+- Swapped the active `.env` over to the prod-key clone variant and cleared Laravel caches so local testing now uses the imported production bundle key against `snipeit_prod_work`.
+- Documented the next-stage hierarchical component/subcomponent architecture in `docs/plans/component-hierarchy-subcomponents-plan.md`.
+- The new plan explicitly replaces the flat-only component assumption for repairable integrated parts and captures the locked rules for:
+- `asset -> component -> subcomponent` depth cap
+- expected subcomponents assumed until first explicit change
+- parent moves carrying currently attached descendants only
+- instance and child-level attribute precedence
+- no spec reduction for damaged-but-attached items
+- closed ancestry snapshots instead of live inherited parent history
+- Swapped the active `.env` over to `.env.prodclone.prodkey`.
+- Cleared Laravel caches after the swap with `php artisan optimize:clear`.
+- Active clone state after the swap:
+- `DB_DATABASE=snipeit_prod_work`
+- active `.env` now uses the production app key from the bundle
+
 
