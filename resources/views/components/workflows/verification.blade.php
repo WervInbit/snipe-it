@@ -12,6 +12,9 @@
 @stop
 
 @section('content')
+    @php
+        $isStockPlacement = $component->effectiveLifecycleStatus() === \App\Models\ComponentInstance::LIFECYCLE_IN_STOCK;
+    @endphp
     <div class="row">
         <div class="col-md-8 col-md-offset-2">
             <div class="box box-default">
@@ -21,22 +24,23 @@
                 <div class="box-body">
                     <p class="text-muted">
                         @if($mode === 'confirm')
-                            {{ __('Confirm that this component has been verified and place it in stock.') }}
+                            {{ $isStockPlacement ? __('Confirm that this component has been verified and place it in stock.') : __('Confirm that this component has been verified without changing where it is attached or stored.') }}
                         @else
-                            {{ __('Flag this component so it is clearly marked for verification.') }}
+                            {{ $isStockPlacement ? __('Flag this component so it is clearly marked for verification.') : __('Flag this component as needing attention without changing where it is attached or stored.') }}
                         @endif
                     </p>
 
                     <div class="alert alert-info">
                         <strong>{{ __('Component') }}:</strong> {{ $component->display_name }}
-                        <br><strong>{{ trans('general.status') }}:</strong> {{ $component->status }}
+                        <br><strong>{{ trans('general.status') }}:</strong> {{ \App\Models\ComponentInstance::lifecycleStatusLabel($component->effectiveLifecycleStatus()) ?? $component->effectiveLifecycleStatus() }}
+                        <br><strong>{{ trans('general.condition') }}:</strong> {{ \App\Models\ComponentInstance::conditionStatusLabel($component->effectiveConditionStatus()) ?? $component->effectiveConditionStatus() }}
                     </div>
 
                     <form method="POST" action="{{ $mode === 'confirm' ? route('components.confirm_verification', $component) : route('components.flag_needs_verification', $component) }}">
                         @csrf
                         <input type="hidden" name="return_to" value="{{ $returnTo }}">
 
-                        @if($mode === 'confirm')
+                        @if($mode === 'confirm' && $isStockPlacement)
                             <div class="form-group {{ $errors->has('storage_location_id') ? 'has-error' : '' }}">
                                 <label for="component_confirm_location_id">{{ __('Stock Location') }}</label>
                                 <select class="form-control" id="component_confirm_location_id" name="storage_location_id" required>
@@ -52,7 +56,7 @@
                                 </select>
                                 {!! $errors->first('storage_location_id', '<span class="help-block">:message</span>') !!}
                             </div>
-                        @else
+                        @elseif($mode !== 'confirm' && $isStockPlacement)
                             <div class="form-group {{ $errors->has('storage_location_id') ? 'has-error' : '' }}">
                                 <label for="component_flag_location_id">{{ __('Verification Location') }}</label>
                                 <select class="form-control" id="component_flag_location_id" name="storage_location_id">
@@ -77,7 +81,7 @@
                         </div>
 
                         <button type="submit" class="btn {{ $mode === 'confirm' ? 'btn-success' : 'btn-warning' }}">
-                            {{ $mode === 'confirm' ? __('Confirm Verification') : __('Mark Needs Verification') }}
+                            {{ $mode === 'confirm' ? __('Confirm Verification') : __('Mark Needs Attention') }}
                         </button>
                     </form>
                 </div>

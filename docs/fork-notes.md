@@ -4,6 +4,29 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-05-19
+- Asset selling-state web flows now warn before proceeding when attached damaged or needs-attention components remain on the asset. The warning covers hardware detail status changes, hardware edit status changes, bulk status changes, and the explicit available-for-sale toggle; confirmed actions proceed, while detached parts do not trigger the warning.
+- Component instances now support structured instance-level attributes through service/API sync. Instance attributes override component-definition attributes for the same component row during calculated component-derived spec resolution, while definition attributes remain the fallback when no instance override exists. Attribute option propagation and usage/delete safeguards include these instance rows.
+- Asset calculated specs are now hierarchy-aware: attached child component values suppress parent component values for the same attribute, detached/non-attached parts do not contribute, and generic specification screens warn when a parent value is ignored in favor of attached child values.
+- Asset Components tabs now render hierarchy context inline: attached child components, expected child templates, and removed expected children appear under their parent rows, with damaged/needs-attention issue badges visible while preserving existing expected/default/extra/custom classifications.
+- Model-number specification screens now preview nested expected child structure for selected component definitions and link to definition editors, while component-definition and model-number edit surfaces show non-blocking warnings when parent and expected child definitions both contribute the same numeric calculated spec.
+- Added a read-only `component-hierarchy:preview-conversion` command that scans production-like data for candidate parent/child component definitions, suggested expected-subcomponent templates, and numeric calculated-spec overlaps without applying any writes.
+- Added selected-pair conversion tooling via `component-hierarchy:apply-conversion`: it defaults to dry-run, requires explicit `--pair=parent_id:child_id` selections, only writes with `--apply`, records conversion provenance on created templates, and prints rollback guidance for the exact created rows.
+- Added `docs/component-hierarchy-operations.md` as the operator/admin reference for the completed asset/component/subcomponent hierarchy, warning policy, spec precedence, and conversion command workflow.
+- Review follow-up hardened hierarchy behavior: parent tray/stock/destruction transitions now carry attached children off the old asset, expected subcomponent templates contribute to calculated specs until materialized children replace them, placement modes are enforced on direct asset vs subcomponent usage, and final destruction now requires destruction-pending state plus a note or verification payload.
+
+### 2026-05-07
+- Added the component hierarchy persistence foundation: component instances can now reference one parent component, track the root attached asset, and keep materialization/ancestry fields for later expected-subcomponent workflows.
+- Component definitions now carry a `placement_mode` (`asset_only`, `subcomponent_only`, or `either`), with the current default kept at `either` for compatibility while later UI and validation sprints refine behavior.
+- Component definitions can now define expected subcomponents, including catalog-backed child definitions or freeform expected child names, with quantity, required flag, notes, and editor-side reorder/delete support.
+- Component detail pages now show a read-only child structure with attached child component links and assumed expected subcomponent rows from the component definition.
+- Expected subcomponent rows on component detail can now be explicitly tracked, creating an installed child component attached to the parent and decrementing the expected remaining quantity through parent-specific state.
+- Attached child components can now be detached from the parent detail page to tray or stock; detached/directly transferred expected children keep a closed ancestry snapshot and remain visible on the parent as removed expected child components.
+- Moving a parent component to another asset now carries currently attached child components with it and writes both a parent movement summary and individual child movement events.
+- Component instances now split placement from condition through `lifecycle_status` and `condition_status`: attached/tray/stock placement can coexist with `Needs Attention` or `Damaged`, damaged/needs-attention components can still be installed, and destroyed/destruction-pending remains blocked for normal attachment.
+- Installing or attaching damaged, needs-attention, and sold/returned components now requires an explicit warning confirmation across web and API install paths; confirmed actions proceed, while destroyed terminal components remain blocked.
+- Creating a definition-backed component from an asset now persists the definition name into `component_instances.display_name`, avoiding null-name insert failures when no custom component name is entered.
+
 ### 2026-04-23
 - Finished the follow-up expected-baseline component UX cleanup: model-number spec previews now treat numeric component-derived values as authoritative, and the stale “manual model value overrides the derived total” messaging was removed.
 - Asset `Add / Install Component` pages now keep tray/storage flows intact but convert `New` into a single toggle-driven definition/custom creation form on the same page.

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\ComponentConditionWarningException;
+use App\Exceptions\ComponentLifecycleWarningException;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\ComponentsTransformer;
@@ -12,16 +14,20 @@ use App\Models\ComponentInstance;
 use App\Models\ComponentStorageLocation;
 use App\Models\Location;
 use App\Services\ComponentLifecycleService;
+use App\Services\ModelAttributes\ComponentInstanceAttributeManager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
 class ComponentsController extends Controller
 {
     public function __construct(
         protected ComponentLifecycleService $lifecycle,
+        protected ComponentInstanceAttributeManager $attributeManager,
     ) {
     }
 
@@ -35,7 +41,9 @@ class ComponentsController extends Controller
             'display_name',
             'serial',
             'status',
+            'lifecycle_status',
             'condition_code',
+            'condition_status',
             'source_type',
             'installed_as',
             'received_at',
@@ -83,11 +91,25 @@ class ComponentsController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
         }
 
-        $component = $this->lifecycle->createInstance($this->payloadFromRequest($request), $request->user());
+        try {
+            $component = DB::transaction(function () use ($request): ComponentInstance {
+                $component = $this->lifecycle->createInstance($this->payloadFromRequest($request), $request->user());
+
+                if ($request->exists('instance_attributes')) {
+                    $this->attributeManager->sync($component, $request->input('instance_attributes', []));
+                }
+
+                return $component->fresh($this->showRelations());
+            });
+        } catch (ValidationException $exception) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, $exception->errors()), 422);
+        } catch (InvalidArgumentException $exception) {
+            return $this->lifecycleErrorResponse($exception->getMessage());
+        }
 
         return response()->json(Helper::formatStandardApiResponse(
             'success',
-            (new ComponentsTransformer())->transformComponent($component->fresh($this->showRelations())),
+            (new ComponentsTransformer())->transformComponent($component),
             'Component created.'
         ));
     }
@@ -112,13 +134,25 @@ class ComponentsController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()), 422);
         }
 
-        $component_id->fill($this->metadataPayloadFromRequest($request));
-        $component_id->updated_by = $request->user()?->id;
-        $component_id->save();
+        try {
+            $component = DB::transaction(function () use ($request, $component_id): ComponentInstance {
+                $component_id->fill($this->metadataPayloadFromRequest($request));
+                $component_id->updated_by = $request->user()?->id;
+                $component_id->save();
+
+                if ($request->exists('instance_attributes')) {
+                    $this->attributeManager->sync($component_id, $request->input('instance_attributes', []));
+                }
+
+                return $component_id->fresh($this->showRelations());
+            });
+        } catch (ValidationException $exception) {
+            return response()->json(Helper::formatStandardApiResponse('error', null, $exception->errors()), 422);
+        }
 
         return response()->json(Helper::formatStandardApiResponse(
             'success',
-            (new ComponentsTransformer())->transformComponent($component_id->fresh($this->showRelations())),
+            (new ComponentsTransformer())->transformComponent($component),
             'Component updated.'
         ));
     }
@@ -127,7 +161,7 @@ class ComponentsController extends Controller
     {
         $this->authorize('delete', $component_id);
 
-        if ($component_id->status === ComponentInstance::STATUS_INSTALLED) {
+        if ($component_id->effectiveLifecycleStatus() === ComponentInstance::LIFECYCLE_ATTACHED) {
             return response()->json(Helper::formatStandardApiResponse(
                 'error',
                 null,
@@ -178,6 +212,8 @@ class ComponentsController extends Controller
         $validator = Validator::make($request->all(), [
             'asset_id' => ['required', 'integer', 'exists:assets,id'],
             'installed_as' => ['nullable', 'string', 'max:255'],
+            'condition_warning_confirmed' => ['nullable', 'boolean'],
+            'lifecycle_warning_confirmed' => ['nullable', 'boolean'],
             'note' => ['nullable', 'string'],
             'related_work_order_id' => ['nullable', 'integer', 'exists:work_orders,id'],
             'related_work_order_task_id' => ['nullable', 'integer', 'exists:work_order_tasks,id'],
@@ -192,10 +228,16 @@ class ComponentsController extends Controller
             $component = $this->lifecycle->installIntoAsset($component_id, $asset, [
                 'performed_by' => $request->user(),
                 'installed_as' => $request->input('installed_as'),
+                'condition_warning_confirmed' => $request->boolean('condition_warning_confirmed'),
+                'lifecycle_warning_confirmed' => $request->boolean('lifecycle_warning_confirmed'),
                 'note' => $request->input('note'),
                 'related_work_order_id' => $request->input('related_work_order_id'),
                 'related_work_order_task_id' => $request->input('related_work_order_task_id'),
             ]);
+        } catch (ComponentLifecycleWarningException $exception) {
+            return $this->lifecycleWarningResponse($exception);
+        } catch (ComponentConditionWarningException $exception) {
+            return $this->conditionWarningResponse($exception);
         } catch (InvalidArgumentException $exception) {
             return $this->lifecycleErrorResponse($exception->getMessage());
         }
@@ -284,7 +326,7 @@ class ComponentsController extends Controller
         $this->authorize('verify', $component_id);
 
         $validator = Validator::make($request->all(), [
-            'storage_location_id' => ['required', 'integer', 'exists:component_storage_locations,id'],
+            'storage_location_id' => ['nullable', 'integer', 'exists:component_storage_locations,id'],
             'note' => ['nullable', 'string'],
         ]);
 
@@ -293,7 +335,9 @@ class ComponentsController extends Controller
         }
 
         try {
-            $location = ComponentStorageLocation::findOrFail($request->input('storage_location_id'));
+            $location = $request->filled('storage_location_id')
+                ? ComponentStorageLocation::findOrFail($request->input('storage_location_id'))
+                : null;
             $component = $this->lifecycle->confirmVerification($component_id, $location, [
                 'performed_by' => $request->user(),
                 'note' => $request->input('note'),
@@ -462,6 +506,7 @@ class ComponentsController extends Controller
             'display_name' => ['required_without:component_definition_id', 'nullable', 'string', 'max:255'],
             'serial' => ['nullable', 'string', 'max:255'],
             'status' => ['nullable', Rule::in(config('components.statuses', []))],
+            'lifecycle_status' => ['nullable', Rule::in(array_keys(ComponentInstance::lifecycleStatusOptions()))],
             'condition_code' => ['nullable', Rule::in([
                 ComponentInstance::CONDITION_UNKNOWN,
                 ComponentInstance::CONDITION_GOOD,
@@ -469,6 +514,7 @@ class ComponentsController extends Controller
                 ComponentInstance::CONDITION_POOR,
                 ComponentInstance::CONDITION_BROKEN,
             ])],
+            'condition_status' => ['nullable', Rule::in(array_keys(ComponentInstance::conditionStatusOptions()))],
             'source_type' => ['nullable', Rule::in([
                 ...array_keys(ComponentInstance::sourceTypeOptions()),
             ])],
@@ -482,6 +528,12 @@ class ComponentsController extends Controller
             'received_at' => ['nullable', 'date'],
             'metadata_json' => ['nullable', 'array'],
             'notes' => ['nullable', 'string'],
+            'instance_attributes' => ['nullable', 'array'],
+            'instance_attributes.*.attribute_definition_id' => ['nullable', 'integer'],
+            'instance_attributes.*.attribute_key' => ['nullable', 'string', 'max:100'],
+            'instance_attributes.*.attribute_search' => ['nullable', 'string', 'max:255'],
+            'instance_attributes.*.value' => ['nullable'],
+            'instance_attributes.*.resolves_to_spec' => ['nullable', 'boolean'],
         ];
     }
 
@@ -496,6 +548,12 @@ class ComponentsController extends Controller
             'received_at' => ['nullable', 'date'],
             'metadata_json' => ['nullable', 'array'],
             'notes' => ['nullable', 'string'],
+            'instance_attributes' => ['nullable', 'array'],
+            'instance_attributes.*.attribute_definition_id' => ['nullable', 'integer'],
+            'instance_attributes.*.attribute_key' => ['nullable', 'string', 'max:100'],
+            'instance_attributes.*.attribute_search' => ['nullable', 'string', 'max:255'],
+            'instance_attributes.*.value' => ['nullable'],
+            'instance_attributes.*.resolves_to_spec' => ['nullable', 'boolean'],
         ];
     }
 
@@ -508,7 +566,9 @@ class ComponentsController extends Controller
             'display_name',
             'serial',
             'status',
+            'lifecycle_status',
             'condition_code',
+            'condition_status',
             'source_type',
             'source_asset_id',
             'current_asset_id',
@@ -523,8 +583,10 @@ class ComponentsController extends Controller
         ]);
 
         if (!$forUpdate) {
-            $payload['status'] = $payload['status'] ?? ComponentInstance::STATUS_IN_STOCK;
-            $payload['condition_code'] = $payload['condition_code'] ?? ComponentInstance::CONDITION_UNKNOWN;
+            $payload['status'] = $payload['status']
+                ?? ComponentInstance::legacyStatusForLifecycleStatus($payload['lifecycle_status'] ?? null);
+            $payload['condition_code'] = $payload['condition_code']
+                ?? ComponentInstance::legacyConditionCodeForConditionStatus($payload['condition_status'] ?? null);
             $payload['source_type'] = $payload['source_type'] ?? ComponentInstance::SOURCE_MANUAL;
         }
 
@@ -562,6 +624,9 @@ class ComponentsController extends Controller
     {
         return [
             'status',
+            'lifecycle_status',
+            'condition_code',
+            'condition_status',
             'current_asset_id',
             'storage_location_id',
             'held_by_user_id',
@@ -576,6 +641,24 @@ class ComponentsController extends Controller
     protected function lifecycleErrorResponse(string $message): JsonResponse
     {
         return response()->json(Helper::formatStandardApiResponse('error', null, $message), 422);
+    }
+
+    protected function conditionWarningResponse(ComponentConditionWarningException $exception): JsonResponse
+    {
+        return response()->json(Helper::formatStandardApiResponse(
+            'warning',
+            $exception->payload(),
+            $exception->getMessage()
+        ), 409);
+    }
+
+    protected function lifecycleWarningResponse(ComponentLifecycleWarningException $exception): JsonResponse
+    {
+        return response()->json(Helper::formatStandardApiResponse(
+            'warning',
+            $exception->payload(),
+            $exception->getMessage()
+        ), 409);
     }
 
     protected function applyFilters($query, Request $request): void
@@ -605,7 +688,7 @@ class ComponentsController extends Controller
             });
         }
 
-        foreach (['status', 'source_type', 'company_id', 'source_asset_id', 'current_asset_id', 'held_by_user_id', 'storage_location_id'] as $filter) {
+        foreach (['status', 'lifecycle_status', 'condition_status', 'source_type', 'company_id', 'source_asset_id', 'current_asset_id', 'held_by_user_id', 'storage_location_id'] as $filter) {
             if ($request->filled($filter)) {
                 $query->where($filter, $request->input($filter));
             }
@@ -639,7 +722,7 @@ class ComponentsController extends Controller
         }
 
         if ($request->boolean('needs_verification')) {
-            $query->where('status', ComponentInstance::STATUS_NEEDS_VERIFICATION);
+            $query->where('condition_status', ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION);
         }
     }
 
@@ -648,6 +731,10 @@ class ComponentsController extends Controller
         return [
             'componentDefinition.category',
             'componentDefinition.manufacturer',
+            'componentDefinition.attributeContributions.definition.options',
+            'componentDefinition.attributeContributions.option',
+            'instanceAttributes.definition.options',
+            'instanceAttributes.option',
             'company',
             'sourceAsset.model',
             'currentAsset.model',

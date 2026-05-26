@@ -19,6 +19,12 @@
             || $errors->has('serial')
             || $errors->has('note')
             || old('creation_mode');
+        $hasConditionWarningInstallOptions = $trayComponents
+            ->concat($stockComponents)
+            ->contains(fn ($component) => $component->requiresConditionWarningForAttachment());
+        $hasLifecycleWarningInstallOptions = $trayComponents
+            ->concat($stockComponents)
+            ->contains(fn ($component) => $component->requiresLifecycleWarningForAttachment());
     @endphp
 
     <div class="row">
@@ -56,7 +62,7 @@
                                         <optgroup label="{{ __('My Tray') }}">
                                             @foreach($trayComponents as $trayComponent)
                                                 <option value="{{ $trayComponent->id }}" @selected((string) old('component_id') === (string) $trayComponent->id)>
-                                                    [{{ __('Tray') }}] {{ $trayComponent->component_tag }} - {{ $trayComponent->display_name }}
+                                                    [{{ __('Tray') }}] {{ $trayComponent->component_tag }} - {{ $trayComponent->display_name }}@if($trayComponent->requiresConditionWarningForAttachment()) ({{ \App\Models\ComponentInstance::conditionStatusLabel($trayComponent->effectiveConditionStatus()) }})@endif
                                                 </option>
                                             @endforeach
                                         </optgroup>
@@ -64,8 +70,9 @@
                                     @if($stockComponents->isNotEmpty())
                                         <optgroup label="{{ __('Storage') }}">
                                             @foreach($stockComponents as $stockComponent)
+                                                @php($sourceLabel = $stockComponent->effectiveLifecycleStatus() === \App\Models\ComponentInstance::LIFECYCLE_SOLD_RETURNED ? __('Sold / Returned') : __('Storage'))
                                                 <option value="{{ $stockComponent->id }}" @selected((string) old('component_id') === (string) $stockComponent->id)>
-                                                    [{{ __('Storage') }}] {{ $stockComponent->component_tag }} - {{ $stockComponent->display_name }}@if($stockComponent->status === \App\Models\ComponentInstance::STATUS_NEEDS_VERIFICATION) ({{ __('Needs verification') }})@endif
+                                                    [{{ $sourceLabel }}] {{ $stockComponent->component_tag }} - {{ $stockComponent->display_name }}@if($stockComponent->effectiveConditionStatus() !== \App\Models\ComponentInstance::CONDITION_STATUS_GOOD) ({{ \App\Models\ComponentInstance::conditionStatusLabel($stockComponent->effectiveConditionStatus()) }})@endif
                                                 </option>
                                             @endforeach
                                         </optgroup>
@@ -74,6 +81,16 @@
                                 <p class="help-block">{{ __('Search once and install directly. Tray components appear before storage components.') }}</p>
                                 {!! $errors->first('component_id', '<span class="help-block">:message</span>') !!}
                             </div>
+                            @include('components.partials.condition-warning-confirmation', [
+                                'show' => $hasConditionWarningInstallOptions,
+                                'message' => __('Some available components are marked Damaged or Needs Attention. If you select one of those parts, confirm the warning before installing it.'),
+                                'checkboxLabel' => __('I understand the selected component condition and want to install it.'),
+                            ])
+                            @include('components.partials.lifecycle-warning-confirmation', [
+                                'show' => $hasLifecycleWarningInstallOptions,
+                                'message' => __('Some available components are marked Sold / Returned. If you select one of those parts, confirm the warning before installing it.'),
+                                'checkboxLabel' => __('I understand the selected component lifecycle and want to install it.'),
+                            ])
                             <button type="submit" class="btn btn-primary">{{ __('Install') }}</button>
                         </form>
                     @endif
@@ -122,6 +139,11 @@
                             'showInstalledAs' => false,
                             'showCreationModeToggle' => true,
                             'creationModeField' => 'creation_mode',
+                        ])
+                        @include('components.partials.condition-warning-confirmation', [
+                            'conditionStatus' => \App\Models\ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION,
+                            'message' => __('New components created here start as Needs Attention until they are verified. Confirm the warning before installing this new component.'),
+                            'checkboxLabel' => __('I understand this new component starts as Needs Attention and want to install it.'),
                         ])
                         <button type="submit" class="btn btn-success">{{ __('Create And Install') }}</button>
                     </form>

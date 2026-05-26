@@ -26,6 +26,7 @@ use App\Models\Statuslabel;
 use App\Models\User;
 use App\View\Label;
 use App\Services\QrLabelService;
+use App\Services\Components\AttachedComponentIssueService;
 use App\Services\ModelAttributes\EffectiveAttributeResolver;
 use App\Services\ModelAttributes\ModelAttributeManager;
 use Carbon\Carbon;
@@ -481,6 +482,26 @@ class AssetsController extends Controller
                 ->values();
             $componentRoster = app(\App\Services\Components\AssetComponentRosterService::class)
                 ->buildForAsset($asset);
+            $topLevelComponentIds = $componentRoster->rows
+                ->pluck('component')
+                ->filter(fn ($component) => $component instanceof ComponentInstance && !$component->parent_component_instance_id)
+                ->pluck('id')
+                ->values();
+            $removedExpectedSubcomponentsByParent = ComponentInstance::query()
+                ->with([
+                    'componentDefinition.category',
+                    'componentDefinition.manufacturer',
+                    'currentAsset.model',
+                    'storageLocation.siteLocation',
+                    'heldBy',
+                ])
+                ->whereIn('ancestry_parent_component_instance_id', $topLevelComponentIds)
+                ->where('source_type', ComponentInstance::SOURCE_EXPECTED_BASELINE)
+                ->where('is_materialized_expected', true)
+                ->whereNull('parent_component_instance_id')
+                ->orderByDesc('updated_at')
+                ->get()
+                ->groupBy('ancestry_parent_component_instance_id');
             $testSummary = $asset->latestTestIssueSummary();
             $componentLocations = $this->storageLocationsByType();
             $currentUserTrayComponents = ComponentInstance::query()
@@ -493,6 +514,7 @@ class AssetsController extends Controller
             return view('hardware/view', compact('asset', 'settings'))
                 ->with('resolvedAttributes', $resolvedAttributes)
                 ->with('componentRoster', $componentRoster)
+                ->with('removedExpectedSubcomponentsByParent', $removedExpectedSubcomponentsByParent)
                 ->with('use_currency', $use_currency)
                 ->with('audit_log', $audit_log)
                 ->with('testSummary', $testSummary)
@@ -528,6 +550,7 @@ class AssetsController extends Controller
             'status_change_note' => ['nullable', 'string', 'max:65535'],
             'quality_grade' => ['nullable', Rule::in(array_keys(Asset::qualityGradeOptions()))],
             'ack_failed_tests' => ['nullable', 'boolean'],
+            'ack_component_issues' => ['nullable', 'boolean'],
         ]);
 
         $status = Statuslabel::find($validated['status_id']);
@@ -554,6 +577,13 @@ class AssetsController extends Controller
                     ->with('warning', trans('tests.status_change_warning'))
                     ->with('test_issue_details', $issueLines->all())
                     ->with('requires_ack_failed_tests', true);
+            }
+        }
+
+        if ($status && $this->statusRequiresComponentIssueAck($status->name)) {
+            $warningRedirect = $this->componentIssueWarningRedirect($request, $asset);
+            if ($warningRedirect) {
+                return $warningRedirect;
             }
         }
 
@@ -702,6 +732,13 @@ class AssetsController extends Controller
                     ->with('warning', trans('tests.status_change_warning'))
                     ->with('test_issue_details', $issueLines->all())
                     ->with('requires_ack_failed_tests', true);
+            }
+        }
+
+        if ($status && $this->statusRequiresComponentIssueAck($status->name)) {
+            $warningRedirect = $this->componentIssueWarningRedirect($request, $asset);
+            if ($warningRedirect) {
+                return $warningRedirect;
             }
         }
 
@@ -913,6 +950,41 @@ class AssetsController extends Controller
         }
 
         return false;
+    }
+
+    private function statusRequiresComponentIssueAck(?string $statusName): bool
+    {
+        if (!$statusName) {
+            return false;
+        }
+
+        $name = strtolower(trim($statusName));
+
+        return str_contains($name, 'ready for sale')
+            || $name === 'for sale'
+            || str_starts_with($name, 'for sale ')
+            || str_contains($name, 'selling')
+            || $name === 'sold'
+            || str_starts_with($name, 'sold ');
+    }
+
+    private function componentIssueWarningRedirect(Request $request, Asset $asset): ?RedirectResponse
+    {
+        if ($request->boolean('ack_component_issues')) {
+            return null;
+        }
+
+        $issueLines = app(AttachedComponentIssueService::class)->warningLinesForAsset($asset);
+
+        if ($issueLines === []) {
+            return null;
+        }
+
+        return redirect()->back()
+            ->withInput()
+            ->with('warning', __('Attached damaged or needs-attention components remain on this asset. Submit again to confirm the selling-state change.'))
+            ->with('component_issue_details', $issueLines)
+            ->with('requires_ack_component_issues', true);
     }
 
 
@@ -1227,6 +1299,13 @@ class AssetsController extends Controller
 
         if ($desiredState && $asset->byod) {
             return redirect()->back()->with('warning', trans('admin/hardware/message.internal_use_conflict'));
+        }
+
+        if ($desiredState) {
+            $warningRedirect = $this->componentIssueWarningRedirect($request, $asset);
+            if ($warningRedirect) {
+                return $warningRedirect;
+            }
         }
 
         $asset->is_sellable = $desiredState;

@@ -3,8 +3,9 @@
 namespace App\Http\Requests;
 
 use App\Models\AssetModel;
-use Illuminate\Validation\Rule;
+use App\Models\ComponentDefinition;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 
 class ModelSpecificationRequest extends Request
 {
@@ -34,7 +35,9 @@ class ModelSpecificationRequest extends Request
                 'nullable',
                 'integer',
                 Rule::exists('component_definitions', 'id')->where(
-                    fn ($query) => $query->where('is_active', true)
+                    fn ($query) => $query
+                        ->where('is_active', true)
+                        ->whereIn('placement_mode', ComponentDefinition::assetPlacementModes())
                 ),
             ],
             'component_templates.*.expected_qty' => ['nullable', 'integer', 'min:1'],

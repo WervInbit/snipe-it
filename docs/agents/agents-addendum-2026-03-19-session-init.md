@@ -102,3 +102,8 @@
 - updated the scan redirect assertion in `tests/Feature/Tests/ActiveTestViewTest.php` from `/hardware/{id}/tests/active` to `/hardware/{id}`.
 - verification:
 - `docker compose exec app php artisan test tests/Feature/Tests/ActiveTestViewTest.php --env=testing` (pass, 7 tests / 23 assertions).
+- Active tests UI follow-up:
+- removed the sticky/fixed mobile positioning from the bottom `general.progress` block in `resources/views/tests/active.blade.php`; it now renders as a normal bottom section after the test cards instead of pinning over the viewport.
+- Session close:
+- latest pushed commit for this session is `6b5ff364e` (`Fix Test Permissions And Scan Viewport`).
+- remaining local-only change at pause is the active-tests bottom progress-bar follow-up in `resources/views/tests/active.blade.php`; it has been documented but not committed/pushed yet.

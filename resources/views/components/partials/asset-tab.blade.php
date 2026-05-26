@@ -1,8 +1,27 @@
 @php
     $componentRoster = $componentRoster ?? new \App\Services\Components\AssetComponentRoster(collect());
     $rosterRows = $componentRoster->rows ?? collect();
-    $priorityRows = $rosterRows->filter(fn ($row) => !$row->isExpected() && !$row->isRemoved())->values();
-    $baselineRows = $rosterRows->filter(fn ($row) => $row->isExpected() || $row->isRemoved())->values();
+    $removedExpectedSubcomponentsByParent = $removedExpectedSubcomponentsByParent ?? collect();
+    $topLevelComponentIds = $rosterRows
+        ->pluck('component')
+        ->filter(fn ($component) => $component && !$component->parent_component_instance_id)
+        ->pluck('id')
+        ->map(fn ($id) => (int) $id)
+        ->all();
+    $nestedChildRows = $rosterRows
+        ->filter(fn ($row) => $row->component && in_array((int) $row->component->parent_component_instance_id, $topLevelComponentIds, true))
+        ->values();
+    $nestedChildRowComponentIds = $nestedChildRows
+        ->pluck('component.id')
+        ->map(fn ($id) => (int) $id)
+        ->all();
+    $childRowsByParentId = $nestedChildRows
+        ->groupBy(fn ($row) => (int) $row->component->parent_component_instance_id);
+    $primaryRows = $rosterRows
+        ->reject(fn ($row) => $row->component && in_array((int) $row->component->id, $nestedChildRowComponentIds, true))
+        ->values();
+    $priorityRows = $primaryRows->filter(fn ($row) => !$row->isExpected() && !$row->isRemoved())->values();
+    $baselineRows = $primaryRows->filter(fn ($row) => $row->isExpected() || $row->isRemoved())->values();
 @endphp
 
 <div class="tab-pane fade" id="components">
@@ -35,7 +54,13 @@
                                 </thead>
                                 <tbody>
                                 @foreach($priorityRows as $row)
-                                    @include('components.partials.asset-roster-row', ['row' => $row, 'asset' => $asset])
+                                    @include('components.partials.asset-roster-row', ['row' => $row, 'asset' => $asset, 'depth' => 0])
+                                    @include('components.partials.asset-subcomponent-rows', [
+                                        'parentRow' => $row,
+                                        'asset' => $asset,
+                                        'childRowsByParentId' => $childRowsByParentId,
+                                        'removedExpectedSubcomponentsByParent' => $removedExpectedSubcomponentsByParent,
+                                    ])
                                 @endforeach
 
                                 @if($priorityRows->isNotEmpty() && $baselineRows->isNotEmpty())
@@ -47,7 +72,13 @@
                                 @endif
 
                                 @foreach($baselineRows as $row)
-                                    @include('components.partials.asset-roster-row', ['row' => $row, 'asset' => $asset])
+                                    @include('components.partials.asset-roster-row', ['row' => $row, 'asset' => $asset, 'depth' => 0])
+                                    @include('components.partials.asset-subcomponent-rows', [
+                                        'parentRow' => $row,
+                                        'asset' => $asset,
+                                        'childRowsByParentId' => $childRowsByParentId,
+                                        'removedExpectedSubcomponentsByParent' => $removedExpectedSubcomponentsByParent,
+                                    ])
                                 @endforeach
                                 </tbody>
                             </table>

@@ -7,6 +7,8 @@ use App\Models\Category;
 use App\Models\AttributeDefinition;
 use App\Models\ComponentDefinition;
 use App\Models\Manufacturer;
+use App\Services\Components\ComponentDefinitionHierarchyWarningService;
+use App\Services\Components\ComponentDefinitionSubcomponentTemplateManager;
 use App\Services\ModelAttributes\ComponentDefinitionAttributeManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,8 +18,11 @@ use Illuminate\View\View;
 
 class ComponentDefinitionSettingsController extends Controller
 {
-    public function __construct(private readonly ComponentDefinitionAttributeManager $attributeManager)
-    {
+    public function __construct(
+        private readonly ComponentDefinitionAttributeManager $attributeManager,
+        private readonly ComponentDefinitionSubcomponentTemplateManager $subcomponentTemplateManager,
+        private readonly ComponentDefinitionHierarchyWarningService $hierarchyWarningService,
+    ) {
     }
 
     public function index(Request $request): View
@@ -62,11 +67,15 @@ class ComponentDefinitionSettingsController extends Controller
         $componentDefinition->load([
             'attributeContributions.definition.options',
             'attributeContributions.option',
+            'subcomponentTemplates.childComponentDefinition.category',
+            'subcomponentTemplates.childComponentDefinition.manufacturer',
+            'subcomponentTemplates.childComponentDefinition.attributeContributions.definition',
         ]);
 
         return view('settings.component_definitions.edit', [
             'item' => $componentDefinition,
             'componentDefinition' => $componentDefinition,
+            'hierarchyOverlapWarnings' => $this->hierarchyWarningService->overlapWarnings($componentDefinition),
             ...$this->formOptions(),
         ]);
     }
@@ -82,6 +91,7 @@ class ComponentDefinitionSettingsController extends Controller
             $definition->updated_by = $request->user()?->id;
             $definition->save();
             $this->attributeManager->sync($definition, $request->input('attribute_contributions', []));
+            $this->subcomponentTemplateManager->sync($definition, $request->input('expected_subcomponents', []));
 
             return $definition;
         });
@@ -101,6 +111,7 @@ class ComponentDefinitionSettingsController extends Controller
             $componentDefinition->updated_by = $request->user()?->id;
             $componentDefinition->save();
             $this->attributeManager->sync($componentDefinition, $request->input('attribute_contributions', []));
+            $this->subcomponentTemplateManager->sync($componentDefinition, $request->input('expected_subcomponents', []));
         });
 
         return redirect()
@@ -146,7 +157,21 @@ class ComponentDefinitionSettingsController extends Controller
             'part_code' => ['nullable', 'string', 'max:255'],
             'spec_summary' => ['nullable', 'string'],
             'serial_tracking_mode' => ['nullable', Rule::in(['optional', 'required', 'not_tracked'])],
+            'placement_mode' => ['nullable', Rule::in(ComponentDefinition::placementModes())],
             'is_active' => ['sometimes', 'boolean'],
+            'expected_subcomponents' => ['nullable', 'array'],
+            'expected_subcomponents.*.id' => ['nullable', 'integer'],
+            'expected_subcomponents.*.child_component_definition_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('component_definitions', 'id')->where(
+                    fn ($query) => $query->whereIn('placement_mode', ComponentDefinition::subcomponentPlacementModes())
+                ),
+            ],
+            'expected_subcomponents.*.expected_name' => ['nullable', 'string', 'max:255'],
+            'expected_subcomponents.*.expected_qty' => ['nullable', 'integer', 'min:1', 'max:999'],
+            'expected_subcomponents.*.is_required' => ['nullable', 'boolean'],
+            'expected_subcomponents.*.notes' => ['nullable', 'string'],
             'attribute_contributions' => ['nullable', 'array'],
             'attribute_contributions.*.attribute_definition_id' => [
                 'nullable',
@@ -163,6 +188,7 @@ class ComponentDefinitionSettingsController extends Controller
             'attribute_contributions.*.resolves_to_spec' => ['nullable', 'boolean'],
         ]) + [
             'serial_tracking_mode' => $request->input('serial_tracking_mode', 'optional'),
+            'placement_mode' => $request->input('placement_mode', ComponentDefinition::PLACEMENT_EITHER),
         ];
     }
 
@@ -171,6 +197,11 @@ class ComponentDefinitionSettingsController extends Controller
         return [
             'categories' => Category::query()->where('category_type', 'component')->orderBy('name')->pluck('name', 'id'),
             'manufacturers' => Manufacturer::query()->orderBy('name')->pluck('name', 'id'),
+            'componentDefinitions' => ComponentDefinition::query()
+                ->with(['category', 'manufacturer', 'attributeContributions.definition'])
+                ->whereIn('placement_mode', ComponentDefinition::subcomponentPlacementModes())
+                ->orderBy('name')
+                ->get(),
             'attributeDefinitions' => AttributeDefinition::query()
                 ->current()
                 ->with('options')

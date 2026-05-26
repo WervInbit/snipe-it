@@ -11,6 +11,7 @@ use App\Models\Statuslabel;
 use App\Models\Setting;
 use App\View\Label;
 use App\Services\QrLabelService;
+use App\Services\Components\AttachedComponentIssueService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -292,6 +293,27 @@ class BulkAssetsController extends Controller
                         ->with('warning', trans('tests.status_change_warning'))
                         ->with('test_issue_details', $warnings)
                         ->with('requires_ack_failed_tests', true);
+                }
+            }
+
+            if ($status && $this->statusRequiresComponentIssueAck($status->name) && !$request->boolean('ack_component_issues')) {
+                $warnings = [];
+                $issueService = app(AttachedComponentIssueService::class);
+
+                foreach ($assets as $asset) {
+                    $issues = $issueService->warningLinesForAsset($asset);
+
+                    if ($issues !== []) {
+                        $warnings[] = $asset->asset_tag . ': ' . implode('; ', $issues);
+                    }
+                }
+
+                if ($warnings !== []) {
+                    return redirect()->back()
+                        ->withInput()
+                        ->with('warning', __('Attached damaged or needs-attention components remain on selected assets. Submit again to confirm the selling-state change.'))
+                        ->with('component_issue_details', $warnings)
+                        ->with('requires_ack_component_issues', true);
                 }
             }
         }
@@ -697,6 +719,22 @@ class BulkAssetsController extends Controller
              return ['status' => true, 'tags' => $undeployableTags, 'asset_ids' => $filtered_ids];
         }
         return false;
+    }
+
+    private function statusRequiresComponentIssueAck(?string $statusName): bool
+    {
+        if (!$statusName) {
+            return false;
+        }
+
+        $name = strtolower(trim($statusName));
+
+        return str_contains($name, 'ready for sale')
+            || $name === 'for sale'
+            || str_starts_with($name, 'for sale ')
+            || str_contains($name, 'selling')
+            || $name === 'sold'
+            || str_starts_with($name, 'sold ');
     }
 
     private function statusRequiresTestAck(?string $statusName): bool

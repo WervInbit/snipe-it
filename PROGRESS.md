@@ -1,3 +1,423 @@
+# Session Progress (2026-05-26)
+
+## Addendum (2026-05-26 Codex)
+- Session kickoff: re-read `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, plus the README/CONTRIBUTING fork pointers for initial documentation drift context.
+- Created `docs/agents/agents-addendum-2026-05-26-session-init.md` for this session.
+- Current branch baseline at initialization: `codex/component-hierarchy-sprints` on commit `4ad83dd3d`.
+- Existing local worktree changes remain present, including the uncommitted component hierarchy sprint implementation, prior addenda/docs, Docker/local environment changes, prod-clone artifacts, upload placeholder files, and `storage/tmp-testtypes-reorder.js`; these were left untouched.
+- Current task focus: initialize on `AGENTS.md` and relevant fork context files; no implementation request has been started yet.
+- `docs/fork-notes.md` latest entry is 2026-05-19 and documents the completed component hierarchy, warning policy, conversion tooling, and operations reference.
+- `README.md` and `CONTRIBUTING.md` still point contributors to `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md`; no immediate drift edit was needed during initialization.
+- `rg` is still unavailable in this workspace because `rg.exe` returns `Access denied`; PowerShell file reads/searches are the current fallback.
+- Additional handoff context read after kickoff: recent addenda from 2026-05-19, 2026-05-07, 2026-05-06, 2026-04-30, 2026-04-28, 2026-04-23, 2026-04-21, and 2026-04-20.
+- Product-attribute/component context recovered: shared attribute definitions drive model-number specs, component-definition contributions, asset overrides, component instance attributes, and hierarchy-aware component-derived calculated specs.
+- Carry-forward implementation posture: component definitions are global catalog records; component instances are the physical traceability records; hierarchy depth remains capped at asset -> component -> subcomponent; warnings are preferred over blocking for damaged/needs-attention flows, while destroyed/destruction-pending remains locked.
+- Attribute/component design check for RAM re-entry:
+- component definition attributes are browser-editable and are the right place for reusable/default structured values such as RAM size/type/speed.
+- component instance attributes are implemented through service/API sync and participate in spec resolution, but component detail browser editing was intentionally deferred; the browser currently exposes component notes for per-tracked-part specifics.
+- notes are suitable for brand, exact part number, batch, or other non-calculated details; notes do not participate in calculated specs, filtering, or structured attribute aggregation.
+- Added explicit browser support for arbitrary child component creation from a component detail page:
+- `components.children.store` now creates a definition-backed or custom child under an installed top-level component.
+- the child form uses active definitions whose placement mode allows subcomponent use, or a custom tracked component name.
+- new child components attach directly to the parent asset, start as `Needs Attention`, require warning confirmation, preserve the parent/root asset hierarchy fields, and store freeform specifics in `notes`.
+- Focused verification passed after Docker `php artisan optimize:clear` and test DB preflight (`APP_ENV=testing`, `DB_CONNECTION=sqlite`, `DB_DATABASE=/var/www/html/database/database.sqlite`):
+- `docker compose run --rm --no-deps -e APP_ENV=testing app sh -lc 'php artisan optimize:clear && echo Test_DB_preflight && grep APP_ENV .env.testing && grep DB_CONNECTION .env.testing && grep DB_DATABASE .env.testing && ./vendor/bin/phpunit --filter ComponentDetail tests/Feature/Components/Ui/ShowComponentTest.php'`
+- result: `10` tests passed, `92` assertions.
+- Top-level asset add page regression also passed with the same cache-clear/test-DB preflight pattern:
+- `docker compose run --rm --no-deps -e APP_ENV=testing app sh -lc 'php artisan optimize:clear && echo Test_DB_preflight && grep APP_ENV .env.testing && grep DB_CONNECTION .env.testing && grep DB_DATABASE .env.testing && ./vendor/bin/phpunit --filter AssetAddPage tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php'`
+- result: `1` test passed, `13` assertions.
+- A route-list diagnostic was attempted after cache clear, but the local non-testing route bootstrap hit a pre-existing missing settings row (`Attempt to read property "saml_enabled" on null`); the browser tests still resolved the new child route successfully.
+
+# Session Progress (2026-05-19)
+
+## Addendum (2026-05-19 Codex)
+- Session kickoff: re-read `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, `docs/plans/component-hierarchy-sprint-implementation-plan.md`, and relevant warning-policy sections of `docs/plans/component-hierarchy-subcomponents-plan.md`.
+- Created `docs/agents/agents-addendum-2026-05-19-session-init.md` for this session.
+- Current branch baseline at initialization: `codex/component-hierarchy-sprints` on commit `4ad83dd3d`.
+- Existing local worktree changes remain present, including the uncommitted component hierarchy sprint work from 2026-05-07 and older local environment/prod-clone artifacts; these were left untouched.
+- Current task focus: reinitialize after the later date and prepare to continue the review-gated component hierarchy sprint plan.
+- Plan status confirmed: Sprints 0 through 8 are documented as implemented; the next planned increment is Sprint 9, `Selling-State Warnings`.
+- Alignment check: the sprint plan and original hierarchy plan both require warnings, not hard blocking, when moving assets into ready-for-sale/selling/sold states while damaged or needs-attention parts remain attached.
+- Carry-forward policy remains unchanged: damaged, needs-attention, and sold/returned install paths are warning-confirmed; destroyed/destruction-pending components remain locked from normal reinstall/reattach.
+- No implementation or verification has been run yet in this session beyond documentation initialization and repo-state inspection.
+- Broad investigation before continuing implementation:
+- `rg` is unavailable in this workspace due `Access denied`, so PowerShell file discovery/search was used.
+- Sprint 9 warning surfaces are `AssetsController::updateStatus`, `AssetsController::update`, `BulkAssetsController::update`, and possibly `AssetsController::toggleSaleAvailability`; API asset updates remain a review choice because the API controller currently saves through the model without a structured warning response.
+- Existing ready-for-sale/sold failed-test warnings already use a two-submit confirmation pattern with `ack_failed_tests`; attached component issue warnings should use a separate confirmation flag so failed-test and component warnings can coexist.
+- Attached component issue detection should include top-level and child `component_instances` with `current_asset_id` on the asset and attached/installed lifecycle, and should exclude tray, stock, destroyed, and detached rows.
+- Current asset component roster/spec aggregation is still flat: attached child components appear through `Asset::trackedComponents()` and will be treated as ordinary top-level extras until the hierarchy-aware roster/spec sprints are implemented.
+- No instance-level component attribute table/model exists yet, so Sprint 10 has not been partially implemented.
+- Existing hierarchy/lifecycle tests cover parent-child persistence, expected child materialization, child detach ancestry, parent move cascade, lifecycle/condition split, and install warnings for damaged, needs-attention, and sold/returned parts.
+- Docker stack was started after Docker Desktop became available: `snipeit_db`, `snipeit_app`, and `snipeit_web` are running, and `https://localhost` redirects to `https://dev.inbit/login` with the expected local certificate warning.
+- Sprint 9 test check: no Sprint 9-specific attached-component selling-state warning tests were found. The closest existing status-warning test is `tests/Feature/Assets/Ui/ReadyForSaleWarningTest.php`.
+- Test attempt after `docker compose exec app php artisan optimize:clear` and testing DB preflight (`DB_CONNECTION=sqlite`, `DB_DATABASE=/var/www/html/database/database.sqlite`):
+- `docker compose exec app php artisan test --env=testing tests/Feature/Assets/Ui/ReadyForSaleWarningTest.php`
+- result: failed, `1` test, `3` assertions; missing expected session key `warning` at `tests/Feature/Assets/Ui/ReadyForSaleWarningTest.php:37`.
+- Sprint 9 selling-state warnings implemented:
+- added `AttachedComponentIssueService` to find currently attached top-level and child components whose condition is `Damaged` or `Needs Attention`.
+- hardware detail status updates, hardware edit status updates, bulk status updates, and the hardware available-for-sale toggle now warn before selling-state transitions when affected attached parts remain present.
+- confirmations use `ack_component_issues` and do not reuse `ack_failed_tests`, so failed-test warnings and component warnings remain separate.
+- detached, tray, stock, destroyed, and current-asset-null components do not trigger current attached-part selling warnings.
+- API asset status changes were intentionally left for a later explicit review choice.
+- updated the stale ready-for-sale failed-test warning test fixture to disable CSRF for the mutating request, use a unique status name, and use a superuser actor so it matches the current supervisor/admin sale-status rule.
+- Sprint 9 focused verification passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Assets/Ui/SellingStateComponentWarningTest.php`
+- result: `5` tests passed, `39` assertions.
+- related status-warning regression passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Assets/Ui/SellingStateComponentWarningTest.php tests/Feature/Assets/Ui/ReadyForSaleWarningTest.php`
+- result: `6` tests passed, `46` assertions.
+- `docker compose exec app php artisan view:cache` passed.
+- broader asset UI regression attempt found pre-existing/stale CSRF test issues, not Sprint 9 failures:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Assets/Ui/QualityGradeDetailUpdateTest.php tests/Feature/Assets/Ui/BulkEditAssetsTest.php tests/Feature/Assets/Ui/EditAssetTest.php`
+- result: `QualityGradeDetailUpdateTest` passed; `BulkEditAssetsTest` and several mutating `EditAssetTest` cases failed because legacy tests do not disable CSRF and requests redirect before controller logic runs.
+- final `docker compose exec app php artisan optimize:clear` passed.
+- `git diff --check` passed with line-ending warnings only.
+- Sprint 10 instance-level attributes implemented:
+- added `component_instance_attributes` plus `ComponentInstanceAttribute` relations on component instances and attribute definitions.
+- added `ComponentInstanceAttributeManager` to sync rows, validate values through the shared attribute value rules, reject duplicate attributes per instance, inherit definition-level spec-resolution behavior for overrides when no explicit flag is provided, and remove rows omitted from a sync payload.
+- API component create/update now accepts `instance_attributes`; omitted payload leaves existing instance attributes untouched and an empty array clears them.
+- `ComponentsTransformer` now returns synced instance attributes on component API responses.
+- `ComponentAttributeAggregator` now resolves same-row component values from instance attributes first and falls back to component-definition attributes when no instance override exists.
+- custom component instances, including custom child rows already present in the flat roster, can carry spec-resolving structured attributes.
+- attribute option value propagation, usage summaries, and delete safeguards now include component instance attribute rows.
+- Component detail UI editing was intentionally left as a later review choice; Sprint 10 used the service/API-first path.
+- Sprint 10 focused verification passed after `docker compose exec app php artisan optimize:clear` and testing DB preflight (`DB_CONNECTION=sqlite`, `DB_DATABASE=/var/www/html/database/database.sqlite`):
+- `docker compose exec app php artisan test --env=testing tests/Unit/Services/ComponentInstanceAttributeManagerTest.php tests/Feature/Components/Api/ComponentLifecycleApiTest.php tests/Feature/ComponentDerivedAttributeResolutionTest.php tests/Feature/AttributeDefinitionLifecycleTest.php`
+- result: `27` tests passed, `90` assertions.
+- Sprint 11 hierarchy-aware spec resolver implemented:
+- `AssetComponentRosterService` now filters calculated spec roster input to attached component instances and treats attached child components as extra/custom rather than letting them satisfy asset-level expected component slots.
+- `ComponentAttributeAggregator` now suppresses parent component records for an attribute when an attached child under that parent contributes the same calculated spec attribute; child values are retained and parent values are kept as overlap-warning metadata.
+- `EffectiveAttributeResolver` now preserves aggregate metadata on calculated asset attributes so overlap warnings reach the UI.
+- hardware detail and hardware edit specification areas now show a generic parent/child overlap warning when child values override parent-level values.
+- damaged-but-attached child components still contribute to current specs and continue to appear in attached component issue warnings.
+- detached, in-tray, in-stock, destroyed, and current-asset-null parts are excluded from calculated asset specs through the attached roster filter.
+- Sprint 11 focused verification passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/ComponentDerivedAttributeResolutionTest.php`
+- result: `12` tests passed, `43` assertions.
+- Related regression verification passed:
+- `docker compose exec app php artisan test --env=testing tests/Unit/Services/ComponentInstanceAttributeManagerTest.php tests/Feature/Components/Api/ComponentLifecycleApiTest.php tests/Feature/Assets/Ui/SellingStateComponentWarningTest.php tests/Feature/ComponentDerivedAttributeResolutionTest.php`
+- result: `26` tests passed, `109` assertions.
+- `docker compose exec app php artisan view:cache` passed.
+- Sprint 12 asset Components tab tree implemented:
+- the asset Components tab now keeps top-level roster rows primary and renders attached child component rows directly below their parent rows.
+- expected child template rows are visible under parent rows with expected/tracked/removed/remaining counts.
+- detached expected child components remain visible under their parent using the child ancestry snapshot.
+- damaged and needs-attention component rows now show inline issue badges on the asset Components tab.
+- existing top-level `Expected`, `Expected (Tracked)`, `Extra`, `Custom`, and `Removed` classifications remain unchanged; child rows add child-context text and indentation.
+- implemented the Sprint 12 review choice as expanded-by-default child rows so validation targets are visible without adding a new collapse UI.
+- Sprint 12 focused verification passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Assets/Ui/ComponentHistoryTest.php --filter=AssetComponentsTabRendersHierarchy`
+- result: `1` test passed, `13` assertions.
+- Existing asset component tab regression passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Assets/Ui/ComponentHistoryTest.php`
+- result: `8` tests passed, `43` assertions.
+- Related hierarchy/spec regression passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Components/Ui/ShowComponentTest.php tests/Feature/Components/Domain/ComponentExpectedSubcomponentMaterializationTest.php tests/Feature/ComponentDerivedAttributeResolutionTest.php`
+- result: `25` tests passed, `143` assertions.
+- `git diff --check` passed with line-ending warnings only.
+- Sprint 13 component definition and model-number preview polish implemented:
+- added static hierarchy overlap warnings when a parent component definition and an expected child definition both contribute the same numeric calculated spec.
+- component definition edit pages now show non-blocking overlap warnings near expected subcomponent management.
+- model-number specification rows now preview expected child structure for selected component definitions, including child/freeform label, quantity, part code, and component-definition links where permitted.
+- model-number specification rows also show overlap warnings for selected definitions.
+- implemented the preview/link review choice only; no inline nested expected-subcomponent editor was added to model-number specification pages.
+- Sprint 13 focused verification passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Models/ModelSpecificationComponentPreviewTest.php tests/Feature/Settings/ComponentDefinitionSettingsTest.php --filter='expected_component_child_preview|HierarchyOverlapWarning'`
+- result: `2` tests passed, `20` assertions.
+- adjacent model/spec regression passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Models/ModelSpecificationComponentPreviewTest.php tests/Feature/Settings/ComponentDefinitionSettingsTest.php`
+- result: `18` tests passed, `96` assertions.
+- related spec resolver regression passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/ComponentDerivedAttributeResolutionTest.php`
+- result: `12` tests passed, `43` assertions.
+- broader model-spec UI regression initially exposed a stale CSRF fixture in `ModelSpecificationUiTest`; the fixture now disables `VerifyCsrfToken` for mutating test requests.
+- broader model-spec UI regression passed after the fixture update:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Models/ModelSpecificationUiTest.php tests/Feature/Models/ModelNumberComponentTemplateManagementTest.php`
+- result: `4` tests passed, `26` assertions.
+- Sprint 14 read-only conversion preview implemented:
+- added `ComponentHierarchyConversionPreviewService` to scan component definitions, model-number expected-component templates, existing expected-subcomponent templates, and numeric calculated-spec overlap evidence.
+- added the `component-hierarchy:preview-conversion` Artisan command with table output and `--json` full-report output.
+- detection is conservative: parents need existing children or top-level expected usage plus parent/assembly naming, children can come from existing child usage, `subcomponent_only`, or embedded/serviceable child naming, and suggestions require same-model-number co-occurrence as flat expected components.
+- existing parent/child templates are not suggested again, but existing numeric calculated-spec overlaps are reported.
+- no write mode was added; Sprint 15 remains the review gate for any optional conversion write path.
+- Sprint 14 focused verification passed after cache clear and testing DB preflight:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Components/Console/ComponentHierarchyConversionPreviewTest.php`
+- result: `3` tests passed, `21` assertions.
+- related Sprint 13 overlap-warning regression passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Models/ModelSpecificationComponentPreviewTest.php tests/Feature/Settings/ComponentDefinitionSettingsTest.php --filter='expected_component_child_preview|HierarchyOverlapWarning'`
+- result: `2` tests passed, `20` assertions.
+- local clone validation ran against `local|mysql|snipeit_prod_work`; the preview scanned `2` active component definitions and `0` model-number component templates, so it emitted no conversion suggestions from that clone.
+- manual before/after counts around the local clone preview command stayed unchanged at `2|1|0` for `component_definitions|component_definition_subcomponent_templates|model_number_component_templates`.
+- Sprint 15 selected-pair conversion write tooling implemented:
+- added `ComponentHierarchyConversionApplyService` and `component-hierarchy:apply-conversion`.
+- the command requires explicit `--pair=parent_definition_id:child_definition_id` selections and never applies all preview suggestions automatically.
+- the command defaults to dry-run and only writes when `--apply` is passed.
+- apply mode creates only selected pairs that are still current preview suggestions; stale, already-existing, unsupported, or filtered pairs are reported as unavailable.
+- created templates store conversion provenance in `metadata_json`, including source model-number evidence, confidence, reasons, and `applied_at`.
+- apply output includes created template IDs and a rollback tinker example for deleting those exact `component_definition_subcomponent_templates` rows before dependent expected-subcomponent states are created.
+- Sprint 15 focused verification passed after cache clear and testing DB preflight:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Components/Console/ComponentHierarchyConversionPreviewTest.php`
+- result: `6` tests passed, `35` assertions.
+- local clone validation remained dry-run only against `local|mysql|snipeit_prod_work`; because the clone has no current conversion suggestions, `component-hierarchy:apply-conversion --pair=2:1` reported the pair unavailable, created `0` templates, and before/after counts stayed `2|1|0`.
+- focused conversion/settings/spec regression passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Components/Console/ComponentHierarchyConversionPreviewTest.php tests/Feature/Settings/ComponentDefinitionSettingsTest.php tests/Feature/ComponentDerivedAttributeResolutionTest.php`
+- result: `31` tests passed, `143` assertions.
+- Sprint 16 documentation and regression wrap-up completed:
+- added `docs/component-hierarchy-operations.md` as the operator/admin reference for hierarchy setup, model-number preview behavior, operator workflows, warnings, spec precedence, conversion commands, and current limits.
+- updated `docs/fork-notes.md`, `docs/plans/component-hierarchy-sprint-implementation-plan.md`, and this progress log for Sprint 16 completion.
+- corrected stale adjacent coverage in `ComponentCompanyScopingTest`; component definitions no longer have `company_id`, so the fixture no longer writes the removed column.
+- focused hierarchy/domain/spec/conversion verification passed after cache clear and testing DB preflight:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Components/Domain/ComponentHierarchyFoundationTest.php tests/Feature/Components/Domain/ComponentExpectedSubcomponentMaterializationTest.php tests/Feature/Components/Domain/ComponentChildDetachmentTest.php tests/Feature/Components/Domain/ComponentParentMoveCascadeTest.php tests/Feature/Components/Domain/ComponentLifecycleConditionSplitTest.php tests/Feature/Components/Domain/ComponentInstallConditionWarningTest.php tests/Feature/Components/Domain/ComponentLifecycleServiceTest.php tests/Unit/Services/ComponentInstanceAttributeManagerTest.php tests/Feature/ComponentDerivedAttributeResolutionTest.php tests/Feature/Components/Console/ComponentHierarchyConversionPreviewTest.php`
+- result: `55` tests passed, `246` assertions.
+- focused UI/API/model/settings hierarchy verification passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Assets/Ui/ComponentHistoryTest.php tests/Feature/Assets/Ui/SellingStateComponentWarningTest.php tests/Feature/Assets/Ui/ReadyForSaleWarningTest.php tests/Feature/Components/Ui/ShowComponentTest.php tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php tests/Feature/Components/Api/ComponentLifecycleApiTest.php tests/Feature/Components/Api/ComponentLifecycleActionTest.php tests/Feature/Settings/ComponentDefinitionSettingsTest.php tests/Feature/Models/ModelSpecificationComponentPreviewTest.php tests/Feature/Models/ModelNumberComponentTemplateManagementTest.php tests/Feature/Models/ModelSpecificationUiTest.php`
+- result: `68` tests passed, `470` assertions.
+- broader adjacent component registry/file/company-scope and work-order verification passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Components/Api/ComponentFileTest.php tests/Feature/Components/Api/ComponentIndexTest.php tests/Feature/Components/Api/ComponentInstanceFilesTest.php tests/Feature/Components/Api/DeleteComponentTest.php tests/Feature/Components/Console/AgeTrayComponentsTest.php tests/Feature/Components/Domain/ComponentCompanyScopingTest.php tests/Feature/Components/Ui/ComponentIndexTest.php tests/Feature/Components/Ui/DeleteComponentTest.php tests/Feature/Components/Ui/EditComponentTest.php tests/Feature/Components/Ui/StoreComponentWithFullMultipleCompanySupportTest.php tests/Feature/WorkOrders/Domain/WorkOrderVisibilityTest.php tests/Feature/WorkOrders/Portal/PortalWorkOrdersTest.php tests/Feature/WorkOrders/Ui/WorkOrderAssetsAndTasksTest.php tests/Feature/WorkOrders/Ui/WorkOrderNavigationTest.php tests/Feature/WorkOrders/Ui/WorkOrdersControllerTest.php`
+- result: `45` tests passed, `186` assertions.
+- no additional conversion `--apply` command was run against `snipeit_prod_work`; write-mode conversion remains limited to isolated PHPUnit coverage unless explicitly approved against a selected clone subset.
+- Review follow-up fixes completed for the full-implementation findings:
+- parent moves to tray/stock now carry attached child rows off the old asset while preserving the parent-child relationship; destruction-pending parent moves lock attached children into destruction-pending, and final parent destruction cascades destroyed state to those children.
+- calculated specs now include assumed expected subcomponent template contributions until those children are materialized, so a note-only Track action does not change the calculated value.
+- `placement_mode` is now enforced for top-level asset expectations/install paths and expected subcomponent templates: `subcomponent_only` definitions cannot be expected or installed directly on assets, and `asset_only` definitions cannot be selected as subcomponents.
+- final `markDestroyed()` now requires the component to already be destruction-pending and requires either a destruction note or verification payload; API calls receive a 422 instead of bypassing the guard.
+- focused review-regression verification passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Components/Domain/ComponentParentMoveCascadeTest.php tests/Feature/Components/Domain/ComponentLifecycleConditionSplitTest.php tests/Feature/Components/Domain/ComponentHierarchyFoundationTest.php tests/Feature/ComponentDerivedAttributeResolutionTest.php tests/Feature/Components/Api/ComponentLifecycleApiTest.php tests/Feature/Models/ModelNumberComponentTemplateManagementTest.php`
+- result: `45` tests passed, `187` assertions.
+- adjacent hierarchy/UI/API verification passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Components/Domain/ComponentExpectedSubcomponentMaterializationTest.php tests/Feature/Components/Domain/ComponentInstallConditionWarningTest.php tests/Feature/Components/Api/ComponentLifecycleActionTest.php tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php tests/Feature/Settings/ComponentDefinitionSettingsTest.php tests/Feature/Models/ModelSpecificationComponentPreviewTest.php tests/Feature/Models/ModelSpecificationUiTest.php`
+- result: `40` tests passed, `242` assertions.
+- `docker compose exec app php artisan view:cache` passed.
+- `git diff --check` passed with line-ending warnings only.
+- Local dev MySQL schema follow-up:
+- `https://dev.inbit/hardware/1` exposed `SQLSTATE[42S02]` because `snipeit_prod_work.component_instance_attributes` had not been created outside the testing DB.
+- preflight confirmed `APP_ENV=local`, `DB_CONNECTION=mysql`, `DB_DATABASE=snipeit_prod_work`; `migrate:status` showed only `2026_05_19_100000_create_component_instance_attributes_table` pending.
+- ran `docker compose exec app php artisan migrate`; the migration completed and is now batch `[7] Ran`.
+- cleared Laravel caches and a CLI HTTP check against `https://dev.inbit/hardware/1` now reaches the app and redirects to login instead of throwing the missing-table error.
+
+# Session Progress (2026-05-07)
+
+## Addendum (2026-05-07 Codex)
+- Session kickoff: re-read `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md` before starting the component hierarchy implementation investigation.
+- Created `docs/agents/agents-addendum-2026-05-07-session-init.md` for this session.
+- Current branch baseline at initialization: `master` on commit `4ad83dd3d`.
+- Existing local worktree changes remain present from prior environment/prod-clone work plus the uncommitted 2026-05-06 initialization docs; these were left untouched.
+- Current task focus: compare `docs/plans/component-hierarchy-subcomponents-plan.md` against the implemented flat component workflow and identify misalignments, risks, and implementation guidance before coding.
+- Investigation outcome before implementation:
+- the subcomponent plan is still directionally aligned with the current codebase, especially the decision to reuse `ComponentInstance` rather than creating a separate subcomponent entity.
+- current code remains strongly flat: asset attachment is represented by `component_instances.current_asset_id`, asset rosters come from `Asset::trackedComponents()`, and calculated attributes aggregate flat roster rows.
+- the biggest implementation misalignment is lifecycle/status semantics: current `status` mixes placement and operational attention (`installed`, `in_stock`, `needs_verification`, `defective`), while the plan requires separate lifecycle placement and condition/attention state.
+- current `markDefective()` and `flagNeedsVerification()` flows detach components from assets, which conflicts with the planned rule that attached damaged/needs-attention parts should stay attached and still contribute to specs.
+- the plan should add parent context to component events, not only instance ancestry fields, so parent attach/detach/move history can be queried without relying entirely on JSON payloads.
+- environment check: active `.env` is `APP_ENV=local`, `DB_CONNECTION=mysql`, `DB_DATABASE=snipeit_prod_work`; `bootstrap/cache/config.php` is currently absent.
+- User clarified hierarchy policy: damaged or needs-attention parts must not block install/attach or selling-state transitions; those flows should warn and allow confirmation, while destroyed components should be lockable with destruction note or verification evidence.
+- Updated `docs/plans/component-hierarchy-subcomponents-plan.md` with the warning-not-blocking policy and destroyed-component lock/audit expectations.
+- Created `docs/plans/component-hierarchy-sprint-implementation-plan.md` as a standalone review-gated sprint plan so future implementation can proceed in small validatable increments without relying on chat history.
+- Reviewed sprint plan against the original hierarchy plan and tightened it:
+- Sprint 3 now only promises attached and assumed expected child display, leaving removed/detached rows for later state-aware sprints.
+- Sprint 5/6 now explicitly forbid cloning old parent event history or introducing live inherited-history behavior.
+- lifecycle/condition field naming is now a review choice before schema work instead of being deferred until later implementation.
+- Sprint 0 baseline started on branch `codex/component-hierarchy-sprints` with existing dirty local env/prod-clone artifacts left in place.
+- Environment/config preflight:
+- active `.env`: `APP_ENV=local`, `DB_CONNECTION=mysql`, `DB_DATABASE=snipeit_prod_work`
+- `bootstrap/cache/config.php` was absent before cache clearing
+- `docker compose exec app php artisan optimize:clear` passed
+- testing Laravel config resolves to `APP_ENV=testing`, `DB_CONNECTION=sqlite`, `DB_DATABASE=/var/www/html/database/database.sqlite`
+- Focused baseline verification passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/ComponentDerivedAttributeResolutionTest.php tests/Feature/Assets/Ui/ComponentHistoryTest.php tests/Feature/Components/Ui/ShowComponentTest.php tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php tests/Feature/Components/Domain/ComponentLifecycleServiceTest.php`
+- result: `31` tests passed, `210` assertions
+- Sprint 1 persistence foundation implemented:
+- added `component_instances.parent_component_instance_id`, `root_asset_id`, materialized-expected flags/reason, and ancestry snapshot fields.
+- added `component_definitions.placement_mode` with model-level allowed values `asset_only`, `subcomponent_only`, and `either`; default remains `either` per the approved sprint direction.
+- extended `ComponentInstance` with parent/child/root/ancestry relations plus hard one-level hierarchy validation.
+- updated `ComponentLifecycleService` so current top-level install/remove/stock/verification/destruction flows keep `root_asset_id` and parent linkage consistent for flat components.
+- added `ComponentHierarchyFoundationTest` covering `asset -> component -> subcomponent`, rejection of deeper nesting, rejection of reparenting a component that already has children, top-level lifecycle root maintenance, and placement mode validation.
+- Sprint 1 verification passed after `docker compose exec app php artisan optimize:clear` and testing DB preflight:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Components/Domain/ComponentHierarchyFoundationTest.php`
+- result: `5` tests passed, `21` assertions
+- focused baseline rerun passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/ComponentDerivedAttributeResolutionTest.php tests/Feature/Assets/Ui/ComponentHistoryTest.php tests/Feature/Components/Ui/ShowComponentTest.php tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php tests/Feature/Components/Domain/ComponentLifecycleServiceTest.php`
+- result: `31` tests passed, `210` assertions
+- MySQL migration SQL sanity check passed in pretend mode:
+- `docker compose exec app php artisan migrate --pretend --path=database/migrations/2026_05_07_120000_add_component_hierarchy_foundation.php`
+- Sprint 1 review notes:
+- no new blockers were found.
+- parent move/detach cascades are intentionally still deferred to the later movement sprint.
+- parent context on component events remains a review choice for Sprint 4 rather than being silently added here.
+- lifecycle/condition split naming remains planned as `lifecycle_status` plus `condition_status` unless changed at the next relevant review gate.
+- Sprint 2 expected subcomponents implemented:
+- added `component_definition_subcomponent_templates` for definition-level expected child templates.
+- added `ComponentDefinitionSubcomponentTemplate` model, factory, and `ComponentDefinition` relations.
+- added same-form component definition editor support for expected subcomponent create/update/delete/reorder.
+- expected child rows can reference another component definition or use a freeform expected name.
+- deleting an expected subcomponent template does not delete tracked component instances.
+- existing model-number expected-component management remains unchanged.
+- Sprint 2 verification passed after `docker compose exec app php artisan optimize:clear` and testing DB preflight:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Settings/ComponentDefinitionSettingsTest.php`
+- result: `12` tests passed, `57` assertions
+- `docker compose exec app php artisan view:cache` passed
+- `docker compose exec app php artisan test --env=testing tests/Feature/Models/ModelNumberComponentTemplateManagementTest.php tests/Feature/Components/Domain/ComponentHierarchyFoundationTest.php`
+- result: `7` tests passed, `36` assertions
+- focused baseline rerun passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/ComponentDerivedAttributeResolutionTest.php tests/Feature/Assets/Ui/ComponentHistoryTest.php tests/Feature/Components/Ui/ShowComponentTest.php tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php tests/Feature/Components/Domain/ComponentLifecycleServiceTest.php`
+- result: `31` tests passed, `210` assertions
+- MySQL migration SQL sanity check passed in pretend mode:
+- `docker compose exec app php artisan migrate --pretend --path=database/migrations/2026_05_07_130000_create_component_definition_subcomponent_templates.php`
+- Sprint 2 review notes:
+- no new blockers were found.
+- Sprint 2 uses the component definition editor as the only management surface for expected subcomponents; read-only previews from model-number screens remain a possible later choice, not implemented.
+- freeform expected child rows are implemented now, matching the sprint plan.
+- expected child templates are definition-level only; no asset/component instance child state exists until Sprint 4.
+- Sprint 3 component detail child structure implemented:
+- component detail now eager-loads attached child components and definition-level expected subcomponent templates.
+- component detail now renders a read-only inline `Child Structure` section with `Attached Child Components` and `Expected Subcomponents`.
+- tracked child rows link to the normal component detail page; no separate subcomponent detail page was added.
+- expected child rows remain assumed definition rows only; removed/detached/materialized child state remains deferred to Sprint 4.
+- Sprint 3 verification passed after `docker compose exec app php artisan optimize:clear` and testing DB preflight:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Components/Ui/ShowComponentTest.php`
+- result: `8` tests passed, `53` assertions
+- `docker compose exec app php artisan view:cache` passed
+- `docker compose exec app php artisan test --env=testing tests/Feature/Components/Domain/ComponentHierarchyFoundationTest.php tests/Feature/Settings/ComponentDefinitionSettingsTest.php`
+- result: `17` tests passed, `78` assertions
+- focused baseline rerun passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/ComponentDerivedAttributeResolutionTest.php tests/Feature/Assets/Ui/ComponentHistoryTest.php tests/Feature/Components/Ui/ShowComponentTest.php tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php tests/Feature/Components/Domain/ComponentLifecycleServiceTest.php`
+- result: `33` tests passed, `226` assertions
+- Sprint 3 review notes:
+- no new blockers were found.
+- the child structure is inline and visible by default; no collapsible/toggle UI was added.
+- no operational child actions were added in this sprint.
+- expected rows are not matched against tracked children yet, so seeing both an expected row and an attached tracked child is possible until the materialization/state sprint adds explicit state.
+- Asset add definition-backed component follow-up:
+- user reported `SQLSTATE[23000]: Integrity constraint violation: 1048 Column 'display_name' cannot be null` when creating a new component from an existing asset.
+- root cause: `ComponentInstance` creation checked the `display_name` accessor, which could return the component definition name without setting the raw non-null `display_name` database attribute.
+- fixed the create hook to inspect/set the raw `display_name` attribute from the selected component definition before insert.
+- added regression coverage for creating and installing a definition-backed component from the asset add page without a custom name.
+- verification passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php --filter=testAssetAddPageCanCreateDefinitionBackedComponentWithoutCustomName`
+- result: `1` test passed, `5` assertions
+- `docker compose exec app php artisan test --env=testing tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php`
+- result: `7` tests passed, `51` assertions
+- focused baseline rerun passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/ComponentDerivedAttributeResolutionTest.php tests/Feature/Assets/Ui/ComponentHistoryTest.php tests/Feature/Components/Ui/ShowComponentTest.php tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php tests/Feature/Components/Domain/ComponentLifecycleServiceTest.php`
+- result: `34` tests passed, `231` assertions
+- Sprint 4 materialize expected child implemented:
+- added `component_expected_subcomponent_states` with parent component/template uniqueness, `removed_qty`, and `materialized_qty`.
+- added `ComponentExpectedSubcomponentState`, factory support, and `ComponentExpectedSubcomponentService::materializeAttachedChild()`.
+- materializing an expected child now creates an installed child `ComponentInstance` attached to the parent component, inherits current/root asset context, stores `is_materialized_expected`, records `materialized_reason`, and writes source-template metadata into the created event payload.
+- component detail expected-subcomponent rows now show expected/tracked/removed/remaining counts and expose an explicit `Track` form while remaining quantity exists.
+- applied the Sprint 4 migration to the local dev MySQL clone (`snipeit_prod_work`) after the MySQL pretend output was checked.
+- Sprint 4 verification passed after `docker compose exec app php artisan optimize:clear` and testing DB preflight:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Components/Domain/ComponentExpectedSubcomponentMaterializationTest.php tests/Feature/Components/Ui/ShowComponentTest.php`
+- result: `11` tests passed, `82` assertions
+- broader component workflow/settings regression passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Assets/Ui/ComponentHistoryTest.php tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php tests/Feature/Components/Domain/ComponentHierarchyFoundationTest.php tests/Feature/Settings/ComponentDefinitionSettingsTest.php`
+- result: `35` tests passed, `215` assertions
+- `docker compose exec app php artisan view:cache` passed.
+- final `docker compose exec app php artisan optimize:clear` passed.
+- Sprint 4 review notes:
+- no new blockers were found.
+- the Sprint 4 state schema intentionally includes `materialized_qty` in addition to the likely-schema `removed_qty` because the feature requirements call for both removed and materialized accounting.
+- the first UI trigger is explicit `Track`, not note-only or service-only.
+- detaching/removing child components and keeping removed expected-child rows visible remains Sprint 5.
+- current materialization only requires the parent to be installed; poor/broken/damaged condition values are not blocked.
+- Sprint 5 detach child to tray or stock implemented:
+- `ComponentLifecycleService::removeToTray()` and `moveToStock()` now detect attached child components and close their ancestry snapshot before clearing `parent_component_instance_id`.
+- `ComponentLifecycleService::installIntoAsset()` now uses the same snapshot handling if an existing child is moved directly to another asset through an existing transfer route.
+- detached children keep `ancestry_parent_component_instance_id`, `ancestry_attached_through_at`, and `ancestry_attached_through_event_id` pointing to the detach event.
+- materialized expected children that are detached transfer parent expected-subcomponent state from `materialized_qty` to `removed_qty`.
+- parent component detail now exposes child row actions for `To Tray` and `To Stock`.
+- parent component detail now keeps detached expected child components visible in a `Removed Expected Child Components` section.
+- Sprint 5 verification passed after `docker compose exec app php artisan optimize:clear` and testing DB preflight:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Components/Domain/ComponentChildDetachmentTest.php tests/Feature/Components/Ui/ShowComponentTest.php`
+- result: `16` tests passed, `110` assertions
+- broader component workflow/settings regression passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Assets/Ui/ComponentHistoryTest.php tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php tests/Feature/Components/Domain/ComponentHierarchyFoundationTest.php tests/Feature/Components/Domain/ComponentExpectedSubcomponentMaterializationTest.php tests/Feature/Settings/ComponentDefinitionSettingsTest.php`
+- result: `37` tests passed, `230` assertions
+- `docker compose exec app php artisan view:cache` passed.
+- Sprint 5 review notes:
+- no new blockers were found.
+- no schema migration was needed for Sprint 5.
+- detach notes remain optional because existing workflow routes already treat notes as optional.
+- the implemented UI path is parent detail for both tray and stock; child detail still has the existing generic tray workflow.
+- direct child transfer to another asset is covered defensively so existing transfer routes do not bypass ancestry snapshots.
+- Sprint 6 still owns moving attached children when a parent moves.
+- Sprint 6 parent move carries attached children implemented:
+- `ComponentLifecycleService::installIntoAsset()` now captures currently attached installed child components when a top-level parent moves to another asset.
+- attached children keep `parent_component_instance_id` and move to the destination asset with updated `current_asset_id` and `root_asset_id`.
+- detached tray/stock children remain detached and do not move when the old parent later moves.
+- parent `installed` events include `moved_child_component_ids` and `moved_child_count` in the payload.
+- each moved child receives an individual `moved_with_parent` event with a pointer to the parent component and parent event.
+- Sprint 6 verification passed after `docker compose exec app php artisan optimize:clear` and testing DB preflight:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Components/Domain/ComponentParentMoveCascadeTest.php tests/Feature/Components/Domain/ComponentChildDetachmentTest.php`
+- result: `10` tests passed, `53` assertions
+- broader component workflow/settings regression passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Assets/Ui/ComponentHistoryTest.php tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php tests/Feature/Components/Ui/ShowComponentTest.php tests/Feature/Components/Domain/ComponentHierarchyFoundationTest.php tests/Feature/Components/Domain/ComponentExpectedSubcomponentMaterializationTest.php tests/Feature/Settings/ComponentDefinitionSettingsTest.php`
+- result: `47` tests passed, `307` assertions
+- `docker compose exec app php artisan view:cache` passed.
+- Sprint 6 review notes:
+- no schema migration was needed.
+- selected event strategy is both parent summary and individual child movement events.
+- no live inherited-history mechanism was introduced; child event history only gets its own movement event.
+- Sprint 7 placement/condition split implemented:
+- added `component_instances.lifecycle_status` and `condition_status` with backfill from existing `status` and `condition_code` values.
+- kept the old `status` and `condition_code` columns as compatibility/history fields while new code uses lifecycle/condition helpers for placement and physical/attention state.
+- `needs_verification` now maps to lifecycle `in_stock` plus condition `needs_attention`; `defective` now maps to lifecycle `in_stock` plus condition `damaged`.
+- damaging or flagging an attached component now keeps it attached to its asset/parent instead of detaching it.
+- damaging a tray or stock component now keeps its tray/stock placement instead of converting placement into a defect status.
+- damaged or needs-attention stock/tray components can still be installed; destroyed lifecycle states remain terminal for normal install/attach.
+- component detail and install/add workflows now show lifecycle and condition separately where relevant, with `Needs Attention` and `Damaged` wording for the new condition states.
+- applied the additive Sprint 7 migration to the local dev MySQL clone (`snipeit_prod_work`).
+- Sprint 7 verification passed after `docker compose exec app php artisan optimize:clear` and testing DB preflight:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Components/Domain/ComponentLifecycleConditionSplitTest.php tests/Feature/Components/Domain/ComponentLifecycleServiceTest.php tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php tests/Feature/Components/Ui/ShowComponentTest.php tests/Feature/Components/Api/ComponentLifecycleActionTest.php tests/Feature/Components/Console/AgeTrayComponentsTest.php`
+- result: `31` tests passed, `209` assertions
+- broader hierarchy/component regression passed:
+- `docker compose exec app php artisan test --env=testing tests/Feature/Assets/Ui/ComponentHistoryTest.php tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php tests/Feature/Components/Ui/ComponentBrowserWorkflowTest.php tests/Feature/Components/Ui/ShowComponentTest.php tests/Feature/Components/Domain/ComponentHierarchyFoundationTest.php tests/Feature/Components/Domain/ComponentExpectedSubcomponentMaterializationTest.php tests/Feature/Components/Domain/ComponentChildDetachmentTest.php tests/Feature/Components/Domain/ComponentParentMoveCascadeTest.php tests/Feature/Components/Domain/ComponentLifecycleConditionSplitTest.php tests/Feature/Components/Api/ComponentLifecycleActionTest.php tests/Feature/Components/Console/AgeTrayComponentsTest.php tests/Feature/Settings/ComponentDefinitionSettingsTest.php`
+- result: `67` tests passed, `416` assertions
+- `docker compose exec app php artisan view:cache` passed.
+- `docker compose exec app php artisan migrate --force` applied `2026_05_07_150000_add_component_lifecycle_and_condition_statuses` to dev MySQL.
+- final `docker compose exec app php artisan optimize:clear` passed.
+- `git diff --check` passed with line-ending warnings only.
+- Sprint 7 review notes:
+- no new blockers were found.
+- compatibility with old `status` values is implemented as a durable mapping layer for now, not a removal of the old column.
+- warning confirmations for installing/attaching damaged or needs-attention components remain Sprint 8.
+- selling-state warnings remain unimplemented because component-to-asset sale readiness integration is a separate warning-flow sprint.
+
+## Sprint 8 Install/Attach Warning Flow
+- Added shared condition-warning confirmation behavior for normal component install/attach flows.
+- Damaged and needs-attention components now warn and require explicit confirmation before installation or attachment proceeds.
+- Confirmed damaged or needs-attention installs proceed and keep the component condition state.
+- Sold/returned components now warn and require explicit lifecycle confirmation before installation or attachment proceeds.
+- Confirmed sold/returned installs proceed and move the component back to attached placement.
+- Destroyed and destruction-pending lifecycle states remain hard-blocked for normal install/attach even when confirmation is present.
+- Web confirmation checkboxes were added to component install, asset add/install, asset new-component install, asset transfer, expected top-level transfer, and expected-subcomponent tracking flows.
+- API install now accepts `condition_warning_confirmed` and `lifecycle_warning_confirmed`; missing confirmation for an affected component returns a structured warning response.
+- Asset new-component registration is now wrapped in an outer transaction so a missing confirmation does not leave behind an unattached component.
+- Expected component and expected subcomponent materialization now use the same warning policy because materialized expected parts start as `Needs Attention` until verified.
+- Verification:
+- `docker compose exec app php artisan optimize:clear` passed.
+- testing preflight resolved to `APP_ENV=testing`, `DB_CONNECTION=sqlite`, `DB_DATABASE=/var/www/html/database/database.sqlite`.
+- focused Sprint 8 suite passed with `28` tests and `202` assertions after the sold/returned correction.
+- broader hierarchy/component regression passed with `83` tests and `509` assertions.
+- `docker compose exec app php artisan view:cache` passed.
+- Review notes:
+- no new blockers were found.
+- selected web and API behavior together rather than web-only first.
+- selected explicit checkbox/boolean confirmation rather than a modal or second POST.
+- sold/returned was corrected from hard-blocked to warning-confirmed installable; destroyed remains the hard lock.
+- selling-state warnings remain Sprint 9 and were not implemented here.
+- notes remain optional for condition-warning confirmations.
+
+# Session Progress (2026-05-06)
+
+## Addendum (2026-05-06 Codex)
+- Session kickoff: re-read `AGENTS.md`, `PROGRESS.md`, and `docs/fork-notes.md` to recover the current fork context before making further changes.
+- Created `docs/agents/agents-addendum-2026-05-06-session-init.md` for this session.
+- Current branch baseline at initialization: `master` on commit `4ad83dd3d`.
+- Existing local worktree changes were detected in local Docker config, upload placeholder files, prior addenda, production-clone env backups, `prodbak/`, and `storage/tmp-testtypes-reorder.js`; these were left untouched.
+- Last documented active environment state from 2026-04-30 remains the production-key clone against `snipeit_prod_work`, so destructive database commands remain off-limits without explicit current-message approval and DB preflight.
+- No implementation or verification has been run yet in this session.
+
 # Session Progress (2026-04-23)
 
 ## Addendum (2026-04-23 Codex)

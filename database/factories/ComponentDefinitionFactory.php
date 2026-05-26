@@ -25,6 +25,7 @@ class ComponentDefinitionFactory extends Factory
             'spec_summary' => $this->faker->sentence(),
             'metadata_json' => null,
             'serial_tracking_mode' => 'optional',
+            'placement_mode' => ComponentDefinition::PLACEMENT_EITHER,
             'is_active' => true,
             'created_by' => User::factory()->superuser(),
             'updated_by' => User::factory()->superuser(),

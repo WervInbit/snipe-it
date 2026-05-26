@@ -29,7 +29,7 @@
 
                     <div class="alert alert-info">
                         <strong>{{ __('Component') }}:</strong> {{ $component->display_name }}
-                        <br><strong>{{ trans('general.status') }}:</strong> {{ $component->status }}
+                        <br><strong>{{ trans('general.status') }}:</strong> {{ \App\Models\ComponentInstance::lifecycleStatusLabel($component->effectiveLifecycleStatus()) ?? $component->effectiveLifecycleStatus() }}
                     </div>
 
                     <form method="POST" action="{{ $mode === 'destroyed' ? route('components.mark_destroyed', $component) : route('components.mark_destruction_pending', $component) }}">

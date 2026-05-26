@@ -9,6 +9,7 @@ use App\Models\AttributeDefinition;
 use App\Models\AttributeOption;
 use App\Models\Category;
 use App\Models\ComponentDefinitionAttribute;
+use App\Models\ComponentInstanceAttribute;
 use App\Models\ModelNumberAttribute;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -112,6 +113,7 @@ class AttributeDefinitionsController extends Controller
             $attribute->modelValues()->exists()
             || $attribute->assetOverrides()->exists()
             || $attribute->componentDefinitionAttributes()->exists()
+            || $attribute->componentInstanceAttributes()->exists()
             || $attribute->testResults()->exists()
             || $attribute->nextVersions()->exists()
         ) {
@@ -317,6 +319,13 @@ class AttributeDefinitionsController extends Controller
                 'value' => $option->value,
                 'raw_value' => $option->value,
             ]);
+
+        ComponentInstanceAttribute::query()
+            ->where('attribute_option_id', $option->id)
+            ->update([
+                'value' => $option->value,
+                'raw_value' => $option->value,
+            ]);
     }
 
     private function usageSummary(AttributeDefinition $attribute): array
@@ -328,6 +337,7 @@ class AttributeDefinitionsController extends Controller
                 'tests' => 0,
                 'test_results' => 0,
                 'component_definitions' => 0,
+                'component_instances' => 0,
                 'total' => 0,
             ];
         }
@@ -338,6 +348,7 @@ class AttributeDefinitionsController extends Controller
             'tests' => $attribute->tests()->count(),
             'test_results' => $attribute->testResults()->count(),
             'component_definitions' => $attribute->componentDefinitionAttributes()->count(),
+            'component_instances' => $attribute->componentInstanceAttributes()->count(),
         ];
 
         $summary['total'] = array_sum($summary);

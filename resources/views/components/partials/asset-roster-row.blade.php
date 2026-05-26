@@ -3,25 +3,39 @@
     $template = $row->template;
     $definition = $component?->componentDefinition ?? $template?->componentDefinition;
     $mutedCellClass = $row->isRemoved() ? 'text-muted' : '';
+    $depth = (int) ($depth ?? 0);
+    $nameCellStyle = $depth > 0 ? 'padding-left: '.(20 + ($depth * 18)).'px;' : null;
     $componentDetailUrl = $component ? route('components.show', $component) : null;
     $canViewComponent = $component && auth()->user()?->can('view', $component);
     $definitionDetailUrl = $definition ? route('settings.component_definitions.edit', $definition) : null;
     $canViewDefinition = $definition && auth()->user()?->can('update', $definition);
+    $conditionStatus = $component?->effectiveConditionStatus();
+    $issueLabelClass = match ($conditionStatus) {
+        \App\Models\ComponentInstance::CONDITION_STATUS_DAMAGED => 'label-danger',
+        \App\Models\ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION => 'label-warning',
+        default => null,
+    };
 @endphp
 
-<tr data-testid="asset-component-row" data-component-classification="{{ $row->classification }}">
+<tr data-testid="asset-component-row" data-component-classification="{{ $row->classification }}" data-component-depth="{{ $depth }}">
     <td @class([$mutedCellClass])>
         <span class="label {{ $row->isExpected() ? 'label-primary' : ($row->isExtra() ? 'label-warning' : 'label-default') }}">
             {{ $row->label }}
         </span>
+        @if($depth > 0)
+            <div class="text-muted small">{{ __('Child component') }}</div>
+        @endif
     </td>
-    <td @class([$mutedCellClass])>
+    <td @class([$mutedCellClass]) @if($nameCellStyle) style="{{ $nameCellStyle }}" @endif>
         @if($component && $canViewComponent)
             <a href="{{ $componentDetailUrl }}">{{ $row->name }}</a>
         @elseif(!$component && $definition && $canViewDefinition)
             <a href="{{ $definitionDetailUrl }}">{{ $row->name }}</a>
         @else
             {{ $row->name }}
+        @endif
+        @if($issueLabelClass)
+            <span class="label {{ $issueLabelClass }}">{{ \App\Models\ComponentInstance::conditionStatusLabel($conditionStatus) }}</span>
         @endif
         @if($row->isRemoved())
             <div class="small">{{ __('Removed from this asset') }}</div>

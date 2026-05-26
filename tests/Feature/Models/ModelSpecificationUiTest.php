@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Models;
 
+use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\AssetModel;
 use App\Models\AttributeDefinition;
 use App\Models\Category;
+use App\Models\ComponentDefinition;
 use App\Models\ModelNumberAttribute;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,6 +15,13 @@ use Tests\TestCase;
 class ModelSpecificationUiTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->withoutMiddleware(VerifyCsrfToken::class);
+    }
 
     private function makeDefinitionForModel(AssetModel $model, array $overrides = []): AttributeDefinition
     {
@@ -100,5 +109,34 @@ class ModelSpecificationUiTest extends TestCase
                 'attributes',
                 'attributes.'.$definition->id,
             ]);
+    }
+
+    public function test_specification_update_rejects_subcomponent_only_expected_components(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $definition = ComponentDefinition::factory()->create([
+            'is_active' => true,
+            'placement_mode' => ComponentDefinition::PLACEMENT_SUBCOMPONENT_ONLY,
+        ]);
+
+        $this->actingAs($user)
+            ->from(route('models.spec.edit', ['model' => $model, 'model_number_id' => $modelNumber->id]))
+            ->put(route('models.spec.update', $model), [
+                'model_number_id' => $modelNumber->id,
+                'component_templates' => [
+                    [
+                        'component_definition_id' => $definition->id,
+                        'expected_qty' => 1,
+                    ],
+                ],
+            ])
+            ->assertSessionHasErrors(['component_templates.0.component_definition_id']);
+
+        $this->assertDatabaseMissing('model_number_component_templates', [
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $definition->id,
+        ]);
     }
 }

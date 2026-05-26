@@ -28,6 +28,19 @@
             </div>
         @endif
 
+        @if (session('requires_ack_component_issues'))
+            <div class="alert alert-warning" role="alert" style="margin-bottom:10px;">
+                <p class="mb-2">{{ __('Attached damaged or needs-attention components remain on this asset. Submit again to confirm the selling-state change.') }}</p>
+                @if (session('component_issue_details'))
+                    <ul class="mb-0">
+                        @foreach ((array) session('component_issue_details') as $detail)
+                            <li>{{ $detail }}</li>
+                        @endforeach
+                    </ul>
+                @endif
+            </div>
+        @endif
+
         @php
             $selectedStatus = old('status_id', $item->status_id);
         @endphp

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\AssetAttributeOverride;
 use App\Models\AttributeDefinition;
 use App\Models\AttributeOption;
+use App\Models\ComponentInstanceAttribute;
 use App\Models\ModelNumberAttribute;
 use Illuminate\Console\Command;
 use Illuminate\Support\Arr;
@@ -82,6 +83,11 @@ class PromoteAttributeCustomValues extends Command
                     ->where('attribute_definition_id', $definition->id)
                     ->where('value', $value)
                     ->update(['attribute_option_id' => $option->id]);
+
+                ComponentInstanceAttribute::query()
+                    ->where('attribute_definition_id', $definition->id)
+                    ->where('value', $value)
+                    ->update(['attribute_option_id' => $option->id]);
             }
         });
 
@@ -104,8 +110,15 @@ class PromoteAttributeCustomValues extends Command
             ->whereNotNull('value')
             ->pluck('value');
 
+        $componentInstanceValues = ComponentInstanceAttribute::query()
+            ->where('attribute_definition_id', $definition->id)
+            ->whereNull('attribute_option_id')
+            ->whereNotNull('value')
+            ->pluck('value');
+
         return $modelValues
             ->merge($overrideValues)
+            ->merge($componentInstanceValues)
             ->map(fn ($value) => trim((string) $value))
             ->filter(fn ($value) => $value !== '')
             ->countBy()

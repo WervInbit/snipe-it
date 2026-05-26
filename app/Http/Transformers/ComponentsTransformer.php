@@ -32,7 +32,12 @@ class ComponentsTransformer
             'display_name' => e($component->display_name),
             'serial' => $component->serial ? e($component->serial) : null,
             'status' => e($component->status),
+            'status_label' => e(ComponentInstance::statusLabel($component->status) ?? $component->status),
+            'lifecycle_status' => e($component->effectiveLifecycleStatus()),
+            'lifecycle_status_label' => e(ComponentInstance::lifecycleStatusLabel($component->effectiveLifecycleStatus()) ?? $component->effectiveLifecycleStatus()),
             'condition_code' => e($component->condition_code),
+            'condition_status' => e($component->effectiveConditionStatus()),
+            'condition_status_label' => e(ComponentInstance::conditionStatusLabel($component->effectiveConditionStatus()) ?? $component->effectiveConditionStatus()),
             'installed_as' => $component->installed_as ? e($component->installed_as) : null,
             'definition' => $component->componentDefinition ? [
                 'id' => (int) $component->componentDefinition->id,
@@ -75,6 +80,25 @@ class ComponentsTransformer
             'purchase_cost' => Helper::formatCurrencyOutput($component->purchase_cost),
             'received_at' => Helper::getFormattedDateObject($component->received_at, 'datetime'),
             'notes' => $component->notes ? Helper::parseEscapedMarkedownInline($component->notes) : null,
+            'instance_attributes' => $component->relationLoaded('instanceAttributes')
+                ? $component->instanceAttributes->map(fn ($attribute) => [
+                    'id' => (int) $attribute->id,
+                    'attribute_definition_id' => (int) $attribute->attribute_definition_id,
+                    'key' => $attribute->definition ? e($attribute->definition->key) : null,
+                    'label' => $attribute->definition ? e($attribute->definition->label) : null,
+                    'datatype' => $attribute->definition ? e($attribute->definition->datatype) : null,
+                    'unit' => $attribute->definition?->unit ? e($attribute->definition->unit) : null,
+                    'value' => $attribute->value !== null ? e($attribute->value) : null,
+                    'raw_value' => $attribute->raw_value !== null ? e($attribute->raw_value) : null,
+                    'option' => $attribute->option ? [
+                        'id' => (int) $attribute->option->id,
+                        'value' => e($attribute->option->value),
+                        'label' => e($attribute->option->label),
+                    ] : null,
+                    'resolves_to_spec' => (bool) $attribute->resolves_to_spec,
+                    'sort_order' => (int) $attribute->sort_order,
+                ])->values()->all()
+                : [],
             'created_by' => $component->createdBy ? [
                 'id' => (int) $component->createdBy->id,
                 'name' => e($component->createdBy->present()->fullName()),

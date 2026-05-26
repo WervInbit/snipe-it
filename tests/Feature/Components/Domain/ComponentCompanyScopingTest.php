@@ -18,7 +18,7 @@ class ComponentCompanyScopingTest extends TestCase
     {
         $company = Company::factory()->create();
         $actor = User::factory()->for($company)->superuser()->create();
-        $definition = ComponentDefinition::factory()->create(['company_id' => null]);
+        $definition = ComponentDefinition::factory()->create();
         $location = ComponentStorageLocation::factory()->stock()->create();
 
         $this->settings->enableMultipleFullCompanySupport();
@@ -54,7 +54,7 @@ class ComponentCompanyScopingTest extends TestCase
     public function testCreateInstanceRequiresCompanyScopeWhenFmcsIsEnabledAndNoFallbackExists(): void
     {
         $actor = User::factory()->superuser()->create(['company_id' => null]);
-        $definition = ComponentDefinition::factory()->create(['company_id' => null]);
+        $definition = ComponentDefinition::factory()->create();
         $location = ComponentStorageLocation::factory()->stock()->create();
 
         $this->settings->enableMultipleFullCompanySupport();

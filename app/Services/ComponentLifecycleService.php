@@ -2,7 +2,12 @@
 
 namespace App\Services;
 
+use App\Exceptions\ComponentConditionWarningException;
+use App\Exceptions\ComponentLifecycleWarningException;
 use App\Models\Asset;
+use App\Models\ComponentDefinition;
+use App\Models\ComponentEvent;
+use App\Models\ComponentExpectedSubcomponentState;
 use App\Models\ComponentInstance;
 use App\Models\ComponentStorageLocation;
 use App\Models\Setting;
@@ -10,6 +15,7 @@ use App\Models\User;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderTask;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Collection;
 use InvalidArgumentException;
 
 class ComponentLifecycleService
@@ -24,6 +30,7 @@ class ComponentLifecycleService
         return DB::transaction(function () use ($attributes, $performedBy): ComponentInstance {
             $actorId = $this->resolveActorId($performedBy);
             $normalizedAttributes = $this->normalizeInstanceAttributes($attributes, $actorId);
+            $this->assertPlacementAllowedForInstanceAttributes($normalizedAttributes);
 
             $instance = new ComponentInstance(array_merge([
                 'created_by' => $attributes['created_by'] ?? $actorId,
@@ -45,6 +52,8 @@ class ComponentLifecycleService
                 'componentDefinition',
                 'sourceAsset',
                 'currentAsset',
+                'rootAsset',
+                'parentComponent',
                 'storageLocation',
                 'heldBy',
             ]);
@@ -60,17 +69,20 @@ class ComponentLifecycleService
     ): ComponentInstance {
         $holderId = $holder instanceof User ? $holder->id : $holder;
 
-        $instance = $this->createInstance(array_merge($attributes, [
-            'source_type' => ComponentInstance::SOURCE_EXTRACTED,
-            'company_id' => $attributes['company_id'] ?? $asset->company_id,
-            'source_asset_id' => $attributes['source_asset_id'] ?? $asset->id,
+            $instance = $this->createInstance(array_merge($attributes, [
+                'source_type' => ComponentInstance::SOURCE_EXTRACTED,
+                'company_id' => $attributes['company_id'] ?? $asset->company_id,
+                'source_asset_id' => $attributes['source_asset_id'] ?? $asset->id,
             'current_asset_id' => null,
+            'parent_component_instance_id' => null,
+            'root_asset_id' => null,
             'storage_location_id' => null,
-            'held_by_user_id' => $holderId,
-            'transfer_started_at' => $attributes['transfer_started_at'] ?? now(),
-            'status' => ComponentInstance::STATUS_IN_TRANSFER,
-            'display_name' => $attributes['display_name'] ?? 'Extracted component',
-        ]), $holder);
+                'held_by_user_id' => $holderId,
+                'transfer_started_at' => $attributes['transfer_started_at'] ?? now(),
+                'status' => ComponentInstance::STATUS_IN_TRANSFER,
+                'lifecycle_status' => ComponentInstance::LIFECYCLE_IN_TRAY,
+                'display_name' => $attributes['display_name'] ?? 'Extracted component',
+            ]), $holder);
 
         $this->events->write($instance, 'extracted', [
             'performed_by' => $holder,
@@ -93,22 +105,27 @@ class ComponentLifecycleService
         $this->assertNotTerminal($instance);
 
         return DB::transaction(function () use ($instance, $holder, $context): ComponentInstance {
+            $detachedChild = $this->prepareDetachedChildSnapshot($instance);
+            $attachedChildren = $this->attachedChildrenForParentMove($instance);
             $holderId = $holder instanceof User ? $holder->id : $holder;
             $fromAssetId = $instance->current_asset_id;
             $fromStatus = $instance->status;
             $fromStorageLocationId = $instance->storage_location_id;
 
-            $instance->forceFill([
+            $instance->forceFill(array_merge([
                 'status' => ComponentInstance::STATUS_IN_TRANSFER,
+                'lifecycle_status' => ComponentInstance::LIFECYCLE_IN_TRAY,
                 'source_asset_id' => $instance->source_asset_id ?? $fromAssetId,
                 'current_asset_id' => null,
+                'parent_component_instance_id' => null,
+                'root_asset_id' => null,
                 'storage_location_id' => null,
                 'held_by_user_id' => $holderId,
                 'transfer_started_at' => $context['transfer_started_at'] ?? now(),
                 'updated_by' => $holderId,
-            ])->save();
+            ], $this->detachedChildInstanceAttributes($detachedChild)))->save();
 
-            $this->events->write($instance, 'removed_to_tray', [
+            $event = $this->events->write($instance, 'removed_to_tray', [
                 'performed_by' => $holder,
                 'from_status' => $fromStatus,
                 'to_status' => ComponentInstance::STATUS_IN_TRANSFER,
@@ -118,8 +135,14 @@ class ComponentLifecycleService
                 'related_work_order_id' => $context['related_work_order_id'] ?? null,
                 'related_work_order_task_id' => $context['related_work_order_task_id'] ?? null,
                 'note' => $context['note'] ?? null,
-                'payload_json' => $context['payload_json'] ?? null,
+                'payload_json' => $this->mergeAttachedChildMovePayload(
+                    $attachedChildren,
+                    $this->mergeDetachedChildPayload($detachedChild, $context['payload_json'] ?? null)
+                ),
             ]);
+
+            $this->completeDetachedChildEventSnapshot($instance, $detachedChild, $event);
+            $this->moveAttachedChildrenOffAssetWithParent($instance, $attachedChildren, $context, $event);
 
             return $instance->fresh();
         });
@@ -130,30 +153,38 @@ class ComponentLifecycleService
         Asset $asset,
         array $context = [],
     ): ComponentInstance {
-        $this->assertNotTerminal($instance);
+        $this->assertCanInstall($instance);
+        $this->assertComponentDefinitionCanBeInstalledOnAsset($instance);
+        $this->assertLifecycleWarningConfirmed($instance, $context);
+        $this->assertConditionWarningConfirmed($instance, $context);
         $this->assertTrayHolderCanInstall($instance, $context['performed_by'] ?? null);
 
         return DB::transaction(function () use ($instance, $asset, $context): ComponentInstance {
+            $detachedChild = $this->prepareDetachedChildSnapshot($instance);
+            $attachedChildren = $this->attachedChildrenForParentMove($instance);
             $fromStatus = $instance->status;
             $fromAssetId = $instance->current_asset_id;
             $fromStorageLocationId = $instance->storage_location_id;
             $heldByUserId = $instance->held_by_user_id;
 
-            $instance->forceFill([
+            $instance->forceFill(array_merge([
                 'status' => ComponentInstance::STATUS_INSTALLED,
+                'lifecycle_status' => ComponentInstance::LIFECYCLE_ATTACHED,
                 'company_id' => $context['company_id'] ?? $asset->company_id ?? $instance->company_id,
                 'current_asset_id' => $asset->id,
+                'parent_component_instance_id' => null,
+                'root_asset_id' => $asset->id,
                 'storage_location_id' => null,
                 'held_by_user_id' => null,
                 'transfer_started_at' => null,
                 'installed_as' => $context['installed_as'] ?? $instance->installed_as,
                 'last_verified_at' => $context['last_verified_at'] ?? $instance->last_verified_at,
                 'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
-            ])->save();
+            ], $this->detachedChildInstanceAttributes($detachedChild)))->save();
 
             $this->ensureInstanceCompanyId($instance);
 
-            $this->events->write($instance, 'installed', [
+            $event = $this->events->write($instance, 'installed', [
                 'performed_by' => $context['performed_by'] ?? null,
                 'from_status' => $fromStatus,
                 'to_status' => ComponentInstance::STATUS_INSTALLED,
@@ -164,10 +195,13 @@ class ComponentLifecycleService
                 'related_work_order_id' => $context['related_work_order_id'] ?? null,
                 'related_work_order_task_id' => $context['related_work_order_task_id'] ?? null,
                 'note' => $context['note'] ?? null,
-                'payload_json' => [
+                'payload_json' => $this->mergeAttachedChildMovePayload($attachedChildren, $this->mergeDetachedChildPayload($detachedChild, [
                     'installed_as' => $instance->installed_as,
-                ],
+                ])),
             ]);
+
+            $this->completeDetachedChildEventSnapshot($instance, $detachedChild, $event);
+            $this->moveAttachedChildrenWithParent($instance, $attachedChildren, $asset, $context, $event);
 
             return $instance->fresh();
         });
@@ -185,21 +219,26 @@ class ComponentLifecycleService
         $this->assertNotTerminal($instance);
 
         $updated = DB::transaction(function () use ($instance, $location, $context): ComponentInstance {
+            $detachedChild = $this->prepareDetachedChildSnapshot($instance);
+            $attachedChildren = $this->attachedChildrenForParentMove($instance);
             $fromStatus = $instance->status;
             $fromAssetId = $instance->current_asset_id;
             $fromStorageLocationId = $instance->storage_location_id;
             $heldByUserId = $instance->held_by_user_id;
 
-            $instance->forceFill([
+            $instance->forceFill(array_merge([
                 'status' => ComponentInstance::STATUS_IN_STOCK,
+                'lifecycle_status' => ComponentInstance::LIFECYCLE_IN_STOCK,
                 'current_asset_id' => null,
+                'parent_component_instance_id' => null,
+                'root_asset_id' => null,
                 'storage_location_id' => $location?->id,
                 'held_by_user_id' => null,
                 'transfer_started_at' => null,
                 'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
-            ])->save();
+            ], $this->detachedChildInstanceAttributes($detachedChild)))->save();
 
-            $this->events->write($instance, 'moved_to_stock', [
+            $event = $this->events->write($instance, 'moved_to_stock', [
                 'performed_by' => $context['performed_by'] ?? null,
                 'from_status' => $fromStatus,
                 'to_status' => ComponentInstance::STATUS_IN_STOCK,
@@ -210,7 +249,14 @@ class ComponentLifecycleService
                 'related_work_order_id' => $context['related_work_order_id'] ?? null,
                 'related_work_order_task_id' => $context['related_work_order_task_id'] ?? null,
                 'note' => $context['note'] ?? null,
+                'payload_json' => $this->mergeAttachedChildMovePayload(
+                    $attachedChildren,
+                    $this->mergeDetachedChildPayload($detachedChild, $context['payload_json'] ?? null)
+                ),
             ]);
+
+            $this->completeDetachedChildEventSnapshot($instance, $detachedChild, $event);
+            $this->moveAttachedChildrenOffAssetWithParent($instance, $attachedChildren, $context, $event);
 
             return $instance->fresh();
         });
@@ -231,11 +277,11 @@ class ComponentLifecycleService
     ): ComponentInstance {
         $this->assertNotTerminal($instance);
 
-        if ($instance->status === ComponentInstance::STATUS_INSTALLED) {
+        if ($instance->effectiveLifecycleStatus() === ComponentInstance::LIFECYCLE_ATTACHED) {
             throw new InvalidArgumentException('Installed components do not have a storage location.');
         }
 
-        if ($instance->status === ComponentInstance::STATUS_IN_TRANSFER) {
+        if ($instance->effectiveLifecycleStatus() === ComponentInstance::LIFECYCLE_IN_TRAY) {
             throw new InvalidArgumentException('Tray components do not have a storage location.');
         }
 
@@ -272,27 +318,46 @@ class ComponentLifecycleService
             $location = $context['storage_location'] ?? $instance->storageLocation;
             $fromStatus = $instance->status;
             $fromAssetId = $instance->current_asset_id;
+            $fromConditionStatus = $instance->effectiveConditionStatus();
+            $lifecycleStatus = $instance->effectiveLifecycleStatus();
+            $targetStorageLocationId = $lifecycleStatus === ComponentInstance::LIFECYCLE_IN_STOCK
+                ? $location?->id
+                : null;
+            $payload = is_array($context['payload_json'] ?? null) ? $context['payload_json'] : [];
 
-            $instance->forceFill([
-                'status' => ComponentInstance::STATUS_NEEDS_VERIFICATION,
-                'current_asset_id' => null,
-                'storage_location_id' => $location?->id,
-                'held_by_user_id' => null,
-                'transfer_started_at' => null,
+            $attributes = [
+                'condition_status' => ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION,
+                'condition_code' => ComponentInstance::CONDITION_UNKNOWN,
                 'needs_verification_at' => $context['needs_verification_at'] ?? now(),
                 'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
-            ])->save();
+            ];
+
+            if ($lifecycleStatus === ComponentInstance::LIFECYCLE_IN_STOCK) {
+                $attributes['storage_location_id'] = $targetStorageLocationId;
+            }
+
+            if (in_array($instance->status, [
+                ComponentInstance::STATUS_NEEDS_VERIFICATION,
+                ComponentInstance::STATUS_DEFECTIVE,
+            ], true)) {
+                $attributes['status'] = ComponentInstance::legacyStatusForLifecycleStatus($lifecycleStatus);
+            }
+
+            $instance->forceFill($attributes)->save();
 
             $this->events->write($instance, 'flagged_needs_verification', [
                 'performed_by' => $context['performed_by'] ?? null,
                 'from_status' => $fromStatus,
-                'to_status' => ComponentInstance::STATUS_NEEDS_VERIFICATION,
+                'to_status' => $instance->status,
                 'from_asset_id' => $fromAssetId,
-                'to_storage_location_id' => $location?->id,
+                'to_storage_location_id' => $targetStorageLocationId,
                 'related_work_order_id' => $context['related_work_order_id'] ?? null,
                 'related_work_order_task_id' => $context['related_work_order_task_id'] ?? null,
                 'note' => $context['note'] ?? null,
-                'payload_json' => $context['payload_json'] ?? null,
+                'payload_json' => array_merge($payload, [
+                    'from_condition_status' => $fromConditionStatus,
+                    'to_condition_status' => ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION,
+                ]),
             ]);
 
             return $instance->fresh();
@@ -304,24 +369,47 @@ class ComponentLifecycleService
         ?ComponentStorageLocation $location = null,
         array $context = [],
     ): ComponentInstance {
+        $this->assertNotTerminal($instance);
+
         return DB::transaction(function () use ($instance, $location, $context): ComponentInstance {
             $fromStatus = $instance->status;
+            $fromConditionStatus = $instance->effectiveConditionStatus();
+            $lifecycleStatus = $instance->effectiveLifecycleStatus();
             $targetLocationId = $location?->id ?? $instance->storage_location_id;
 
-            $instance->forceFill([
-                'status' => ComponentInstance::STATUS_IN_STOCK,
-                'storage_location_id' => $targetLocationId,
+            $attributes = [
+                'condition_status' => ComponentInstance::CONDITION_STATUS_GOOD,
+                'condition_code' => ComponentInstance::CONDITION_GOOD,
                 'last_verified_at' => $context['verified_at'] ?? now(),
                 'needs_verification_at' => null,
                 'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
-            ])->save();
+            ];
+
+            if ($lifecycleStatus === ComponentInstance::LIFECYCLE_IN_STOCK) {
+                $attributes = array_merge($attributes, [
+                    'status' => ComponentInstance::STATUS_IN_STOCK,
+                    'lifecycle_status' => ComponentInstance::LIFECYCLE_IN_STOCK,
+                    'current_asset_id' => null,
+                    'parent_component_instance_id' => null,
+                    'root_asset_id' => null,
+                    'storage_location_id' => $targetLocationId,
+                ]);
+            } elseif ($instance->status === ComponentInstance::STATUS_NEEDS_VERIFICATION) {
+                $attributes['status'] = ComponentInstance::legacyStatusForLifecycleStatus($lifecycleStatus);
+            }
+
+            $instance->forceFill($attributes)->save();
 
             $this->events->write($instance, 'verification_confirmed', [
                 'performed_by' => $context['performed_by'] ?? null,
                 'from_status' => $fromStatus,
-                'to_status' => ComponentInstance::STATUS_IN_STOCK,
+                'to_status' => $instance->status,
                 'to_storage_location_id' => $targetLocationId,
                 'note' => $context['note'] ?? null,
+                'payload_json' => [
+                    'from_condition_status' => $fromConditionStatus,
+                    'to_condition_status' => ComponentInstance::CONDITION_STATUS_GOOD,
+                ],
             ]);
 
             return $instance->fresh();
@@ -332,36 +420,42 @@ class ComponentLifecycleService
     {
         $this->assertNotTerminal($instance);
 
-        if (in_array($instance->status, [
-            ComponentInstance::STATUS_INSTALLED,
-            ComponentInstance::STATUS_DESTRUCTION_PENDING,
-        ], true)) {
-            throw new InvalidArgumentException('This component cannot be marked defective from its current state.');
-        }
-
         return DB::transaction(function () use ($instance, $context): ComponentInstance {
             $fromStatus = $instance->status;
             $fromAssetId = $instance->current_asset_id;
             $fromStorageLocationId = $instance->storage_location_id;
             $heldByUserId = $instance->held_by_user_id;
+            $fromConditionStatus = $instance->effectiveConditionStatus();
+            $lifecycleStatus = $instance->effectiveLifecycleStatus();
 
-            $instance->forceFill([
-                'status' => ComponentInstance::STATUS_DEFECTIVE,
-                'current_asset_id' => null,
-                'held_by_user_id' => null,
-                'transfer_started_at' => null,
+            $attributes = [
+                'condition_status' => ComponentInstance::CONDITION_STATUS_DAMAGED,
+                'condition_code' => ComponentInstance::CONDITION_BROKEN,
                 'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
-            ])->save();
+            ];
+
+            if (in_array($instance->status, [
+                ComponentInstance::STATUS_NEEDS_VERIFICATION,
+                ComponentInstance::STATUS_DEFECTIVE,
+            ], true)) {
+                $attributes['status'] = ComponentInstance::legacyStatusForLifecycleStatus($lifecycleStatus);
+            }
+
+            $instance->forceFill($attributes)->save();
 
             $this->events->write($instance, 'marked_defective', [
                 'performed_by' => $context['performed_by'] ?? null,
                 'from_status' => $fromStatus,
-                'to_status' => ComponentInstance::STATUS_DEFECTIVE,
+                'to_status' => $instance->status,
                 'from_asset_id' => $fromAssetId,
                 'from_storage_location_id' => $fromStorageLocationId,
                 'to_storage_location_id' => $instance->storage_location_id,
                 'held_by_user_id' => $heldByUserId,
                 'note' => $context['note'] ?? null,
+                'payload_json' => [
+                    'from_condition_status' => $fromConditionStatus,
+                    'to_condition_status' => ComponentInstance::CONDITION_STATUS_DAMAGED,
+                ],
             ]);
 
             return $instance->fresh();
@@ -376,26 +470,42 @@ class ComponentLifecycleService
         $this->assertNotTerminal($instance);
 
         return DB::transaction(function () use ($instance, $location, $context): ComponentInstance {
+            $detachedChild = $this->prepareDetachedChildSnapshot($instance);
+            $attachedChildren = $this->attachedChildrenForParentMove($instance);
             $fromStatus = $instance->status;
+            $fromAssetId = $instance->current_asset_id;
             $fromStorageLocationId = $instance->storage_location_id;
+            $heldByUserId = $instance->held_by_user_id;
 
-            $instance->forceFill([
+            $instance->forceFill(array_merge([
                 'status' => ComponentInstance::STATUS_DESTRUCTION_PENDING,
+                'lifecycle_status' => ComponentInstance::LIFECYCLE_DESTRUCTION_PENDING,
                 'current_asset_id' => null,
+                'parent_component_instance_id' => null,
+                'root_asset_id' => null,
                 'storage_location_id' => $location?->id,
                 'held_by_user_id' => null,
                 'transfer_started_at' => null,
                 'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
-            ])->save();
+            ], $this->detachedChildInstanceAttributes($detachedChild)))->save();
 
-            $this->events->write($instance, 'marked_destruction_pending', [
+            $event = $this->events->write($instance, 'marked_destruction_pending', [
                 'performed_by' => $context['performed_by'] ?? null,
                 'from_status' => $fromStatus,
                 'to_status' => ComponentInstance::STATUS_DESTRUCTION_PENDING,
+                'from_asset_id' => $fromAssetId,
                 'from_storage_location_id' => $fromStorageLocationId,
                 'to_storage_location_id' => $location?->id,
+                'held_by_user_id' => $heldByUserId,
                 'note' => $context['note'] ?? null,
+                'payload_json' => $this->mergeAttachedChildMovePayload(
+                    $attachedChildren,
+                    $this->mergeDetachedChildPayload($detachedChild, $context['payload_json'] ?? null)
+                ),
             ]);
+
+            $this->completeDetachedChildEventSnapshot($instance, $detachedChild, $event);
+            $this->markAttachedChildrenDestructionPendingWithParent($instance, $attachedChildren, $location, $context, $event);
 
             return $instance->fresh();
         });
@@ -405,26 +515,41 @@ class ComponentLifecycleService
         ComponentInstance $instance,
         array $context = [],
     ): ComponentInstance {
+        $this->assertCanMarkDestroyed($instance, $context);
+
         return DB::transaction(function () use ($instance, $context): ComponentInstance {
+            $attachedChildren = $this->childrenForParentDestruction($instance);
             $fromStatus = $instance->status;
+            $fromAssetId = $instance->current_asset_id;
+            $fromStorageLocationId = $instance->storage_location_id;
 
             $instance->forceFill([
                 'status' => ComponentInstance::STATUS_DESTROYED_RECYCLED,
+                'lifecycle_status' => ComponentInstance::LIFECYCLE_DESTROYED,
                 'current_asset_id' => null,
+                'parent_component_instance_id' => null,
+                'root_asset_id' => null,
                 'held_by_user_id' => null,
                 'transfer_started_at' => null,
                 'destroyed_at' => $context['destroyed_at'] ?? now(),
                 'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
             ])->save();
 
-            $this->events->write($instance, 'destroyed_recycled', [
+            $event = $this->events->write($instance, 'destroyed_recycled', [
                 'performed_by' => $context['performed_by'] ?? null,
                 'from_status' => $fromStatus,
                 'to_status' => ComponentInstance::STATUS_DESTROYED_RECYCLED,
+                'from_asset_id' => $fromAssetId,
+                'from_storage_location_id' => $fromStorageLocationId,
                 'to_storage_location_id' => $instance->storage_location_id,
                 'note' => $context['note'] ?? null,
-                'payload_json' => $context['payload_json'] ?? null,
+                'payload_json' => $this->mergeAttachedChildMovePayload(
+                    $attachedChildren,
+                    is_array($context['payload_json'] ?? null) ? $context['payload_json'] : null
+                ),
             ]);
+
+            $this->markAttachedChildrenDestroyedWithParent($instance, $attachedChildren, $context, $event);
 
             return $instance->fresh();
         });
@@ -432,7 +557,7 @@ class ComponentLifecycleService
 
     protected function assertNotTerminal(ComponentInstance $instance): void
     {
-        if (in_array($instance->status, [
+        if ($instance->isTerminalLifecycle() || in_array($instance->status, [
             ComponentInstance::STATUS_DESTROYED_RECYCLED,
             ComponentInstance::STATUS_SOLD_RETURNED,
         ], true)) {
@@ -440,9 +565,366 @@ class ComponentLifecycleService
         }
     }
 
+    protected function assertCanInstall(ComponentInstance $instance): void
+    {
+        $lifecycleStatus = $instance->effectiveLifecycleStatus();
+
+        if (in_array($lifecycleStatus, [
+            ComponentInstance::LIFECYCLE_DESTROYED,
+            ComponentInstance::LIFECYCLE_DESTRUCTION_PENDING,
+        ], true) || in_array($instance->status, [
+            ComponentInstance::STATUS_DESTROYED_RECYCLED,
+            ComponentInstance::STATUS_DESTRUCTION_PENDING,
+        ], true)) {
+            throw new InvalidArgumentException('Destroyed or destruction-pending components cannot be installed.');
+        }
+    }
+
+    protected function assertComponentDefinitionCanBeInstalledOnAsset(ComponentInstance $instance): void
+    {
+        $instance->loadMissing('componentDefinition');
+
+        if ($instance->componentDefinition && !$instance->componentDefinition->canBeInstalledOnAsset()) {
+            throw new InvalidArgumentException('This component definition is restricted to subcomponent placement and cannot be installed directly on an asset.');
+        }
+    }
+
+    protected function assertCanMarkDestroyed(ComponentInstance $instance, array $context): void
+    {
+        if ($instance->effectiveLifecycleStatus() !== ComponentInstance::LIFECYCLE_DESTRUCTION_PENDING
+            && $instance->status !== ComponentInstance::STATUS_DESTRUCTION_PENDING
+        ) {
+            throw new InvalidArgumentException('Component must be marked destruction pending before it can be destroyed.');
+        }
+
+        $note = trim((string) ($context['note'] ?? ''));
+        $evidence = $context['payload_json'] ?? null;
+
+        if ($note === '' && (empty($evidence) || !is_array($evidence))) {
+            throw new InvalidArgumentException('A destruction note or verification evidence is required before marking a component destroyed.');
+        }
+    }
+
+    private function prepareDetachedChildSnapshot(ComponentInstance $instance): array
+    {
+        if (!$instance->parent_component_instance_id) {
+            return [];
+        }
+
+        $parentId = (int) $instance->parent_component_instance_id;
+        $templateId = (int) data_get($instance->metadata_json, 'component_definition_subcomponent_template_id', 0);
+
+        if ($instance->is_materialized_expected && $templateId > 0) {
+            $this->markExpectedSubcomponentRemoved($parentId, $templateId);
+        }
+
+        return [
+            'parent_component_instance_id' => $parentId,
+            'component_definition_subcomponent_template_id' => $templateId ?: null,
+            'attached_through_at' => now(),
+        ];
+    }
+
+    private function markExpectedSubcomponentRemoved(int $parentComponentInstanceId, int $templateId): void
+    {
+        $state = ComponentExpectedSubcomponentState::query()->firstOrCreate(
+            [
+                'component_instance_id' => $parentComponentInstanceId,
+                'component_definition_subcomponent_template_id' => $templateId,
+            ],
+            [
+                'removed_qty' => 0,
+                'materialized_qty' => 0,
+            ]
+        );
+
+        $state->forceFill([
+            'materialized_qty' => max(0, (int) $state->materialized_qty - 1),
+            'removed_qty' => max(0, (int) $state->removed_qty) + 1,
+        ])->save();
+    }
+
+    private function detachedChildInstanceAttributes(array $detachedChild): array
+    {
+        if ($detachedChild === []) {
+            return [];
+        }
+
+        return [
+            'ancestry_parent_component_instance_id' => $detachedChild['parent_component_instance_id'],
+            'ancestry_attached_through_at' => $detachedChild['attached_through_at'],
+            'ancestry_attached_through_event_id' => null,
+        ];
+    }
+
+    private function mergeDetachedChildPayload(array $detachedChild, mixed $payload): ?array
+    {
+        $payload = is_array($payload) ? $payload : [];
+
+        if ($detachedChild === []) {
+            return $payload === [] ? null : $payload;
+        }
+
+        if ($detachedChild !== []) {
+            $payload = array_merge($payload, [
+                'detached_parent_component_instance_id' => $detachedChild['parent_component_instance_id'],
+                'component_definition_subcomponent_template_id' => $detachedChild['component_definition_subcomponent_template_id'],
+            ]);
+        }
+
+        $payload = array_filter($payload, fn ($value) => $value !== null && $value !== '');
+
+        return $payload === [] ? null : $payload;
+    }
+
+    private function completeDetachedChildEventSnapshot(ComponentInstance $instance, array $detachedChild, ComponentEvent $event): void
+    {
+        if ($detachedChild === []) {
+            return;
+        }
+
+        $instance->forceFill([
+            'ancestry_attached_through_event_id' => $event->id,
+        ])->save();
+    }
+
+    private function attachedChildrenForParentMove(ComponentInstance $instance): Collection
+    {
+        if ($instance->parent_component_instance_id) {
+            return collect();
+        }
+
+        return ComponentInstance::query()
+            ->where('parent_component_instance_id', $instance->id)
+            ->where(function ($query): void {
+                $query
+                    ->where('lifecycle_status', ComponentInstance::LIFECYCLE_ATTACHED)
+                    ->orWhere('status', ComponentInstance::STATUS_INSTALLED);
+            })
+            ->orderBy('id')
+            ->get();
+    }
+
+    private function childrenForParentDestruction(ComponentInstance $instance): Collection
+    {
+        if ($instance->parent_component_instance_id) {
+            return collect();
+        }
+
+        return ComponentInstance::query()
+            ->where('parent_component_instance_id', $instance->id)
+            ->where(function ($query): void {
+                $query
+                    ->whereIn('lifecycle_status', [
+                        ComponentInstance::LIFECYCLE_ATTACHED,
+                        ComponentInstance::LIFECYCLE_DESTRUCTION_PENDING,
+                    ])
+                    ->orWhereIn('status', [
+                        ComponentInstance::STATUS_INSTALLED,
+                        ComponentInstance::STATUS_DESTRUCTION_PENDING,
+                    ]);
+            })
+            ->orderBy('id')
+            ->get();
+    }
+
+    private function mergeAttachedChildMovePayload(Collection $attachedChildren, ?array $payload): ?array
+    {
+        $payload = $payload ?? [];
+
+        if ($attachedChildren->isNotEmpty()) {
+            $payload['moved_child_component_ids'] = $attachedChildren->pluck('id')->values()->all();
+            $payload['moved_child_count'] = $attachedChildren->count();
+        }
+
+        return $payload === [] ? null : $payload;
+    }
+
+    private function moveAttachedChildrenWithParent(
+        ComponentInstance $parent,
+        Collection $attachedChildren,
+        Asset $asset,
+        array $context,
+        ComponentEvent $parentEvent,
+    ): void {
+        if ($attachedChildren->isEmpty()) {
+            return;
+        }
+
+        foreach ($attachedChildren as $child) {
+            $fromStatus = $child->status;
+            $fromAssetId = $child->current_asset_id;
+            $fromStorageLocationId = $child->storage_location_id;
+            $heldByUserId = $child->held_by_user_id;
+
+            $child->forceFill([
+                'status' => ComponentInstance::STATUS_INSTALLED,
+                'lifecycle_status' => ComponentInstance::LIFECYCLE_ATTACHED,
+                'company_id' => $parent->company_id ?: $asset->company_id ?: $child->company_id,
+                'current_asset_id' => $asset->id,
+                'root_asset_id' => $asset->id,
+                'storage_location_id' => null,
+                'held_by_user_id' => null,
+                'transfer_started_at' => null,
+                'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
+            ])->save();
+
+            $this->events->write($child, 'moved_with_parent', [
+                'performed_by' => $context['performed_by'] ?? null,
+                'from_status' => $fromStatus,
+                'to_status' => $child->status,
+                'from_asset_id' => $fromAssetId,
+                'to_asset_id' => $asset->id,
+                'from_storage_location_id' => $fromStorageLocationId,
+                'held_by_user_id' => $heldByUserId,
+                'related_work_order_id' => $context['related_work_order_id'] ?? null,
+                'related_work_order_task_id' => $context['related_work_order_task_id'] ?? null,
+                'note' => $context['note'] ?? null,
+                'payload_json' => [
+                    'parent_component_instance_id' => $parent->id,
+                    'parent_component_event_id' => $parentEvent->id,
+                ],
+            ]);
+        }
+    }
+
+    private function moveAttachedChildrenOffAssetWithParent(
+        ComponentInstance $parent,
+        Collection $attachedChildren,
+        array $context,
+        ComponentEvent $parentEvent,
+    ): void {
+        if ($attachedChildren->isEmpty()) {
+            return;
+        }
+
+        foreach ($attachedChildren as $child) {
+            $fromStatus = $child->status;
+            $fromAssetId = $child->current_asset_id;
+            $fromStorageLocationId = $child->storage_location_id;
+            $heldByUserId = $child->held_by_user_id;
+
+            $child->forceFill([
+                'status' => ComponentInstance::STATUS_INSTALLED,
+                'lifecycle_status' => ComponentInstance::LIFECYCLE_ATTACHED,
+                'current_asset_id' => null,
+                'root_asset_id' => null,
+                'storage_location_id' => null,
+                'held_by_user_id' => null,
+                'transfer_started_at' => null,
+                'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
+            ])->save();
+
+            $this->events->write($child, 'moved_with_parent', [
+                'performed_by' => $context['performed_by'] ?? null,
+                'from_status' => $fromStatus,
+                'to_status' => $child->status,
+                'from_asset_id' => $fromAssetId,
+                'from_storage_location_id' => $fromStorageLocationId,
+                'held_by_user_id' => $heldByUserId,
+                'related_work_order_id' => $context['related_work_order_id'] ?? null,
+                'related_work_order_task_id' => $context['related_work_order_task_id'] ?? null,
+                'note' => $context['note'] ?? null,
+                'payload_json' => [
+                    'parent_component_instance_id' => $parent->id,
+                    'parent_component_event_id' => $parentEvent->id,
+                ],
+            ]);
+        }
+    }
+
+    private function markAttachedChildrenDestructionPendingWithParent(
+        ComponentInstance $parent,
+        Collection $attachedChildren,
+        ?ComponentStorageLocation $location,
+        array $context,
+        ComponentEvent $parentEvent,
+    ): void {
+        if ($attachedChildren->isEmpty()) {
+            return;
+        }
+
+        foreach ($attachedChildren as $child) {
+            $fromStatus = $child->status;
+            $fromAssetId = $child->current_asset_id;
+            $fromStorageLocationId = $child->storage_location_id;
+            $heldByUserId = $child->held_by_user_id;
+
+            $child->forceFill([
+                'status' => ComponentInstance::STATUS_DESTRUCTION_PENDING,
+                'lifecycle_status' => ComponentInstance::LIFECYCLE_DESTRUCTION_PENDING,
+                'current_asset_id' => null,
+                'root_asset_id' => null,
+                'storage_location_id' => $location?->id,
+                'held_by_user_id' => null,
+                'transfer_started_at' => null,
+                'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
+            ])->save();
+
+            $this->events->write($child, 'marked_destruction_pending', [
+                'performed_by' => $context['performed_by'] ?? null,
+                'from_status' => $fromStatus,
+                'to_status' => ComponentInstance::STATUS_DESTRUCTION_PENDING,
+                'from_asset_id' => $fromAssetId,
+                'from_storage_location_id' => $fromStorageLocationId,
+                'to_storage_location_id' => $location?->id,
+                'held_by_user_id' => $heldByUserId,
+                'related_work_order_id' => $context['related_work_order_id'] ?? null,
+                'related_work_order_task_id' => $context['related_work_order_task_id'] ?? null,
+                'note' => $context['note'] ?? null,
+                'payload_json' => [
+                    'parent_component_instance_id' => $parent->id,
+                    'parent_component_event_id' => $parentEvent->id,
+                ],
+            ]);
+        }
+    }
+
+    private function markAttachedChildrenDestroyedWithParent(
+        ComponentInstance $parent,
+        Collection $attachedChildren,
+        array $context,
+        ComponentEvent $parentEvent,
+    ): void {
+        if ($attachedChildren->isEmpty()) {
+            return;
+        }
+
+        foreach ($attachedChildren as $child) {
+            $fromStatus = $child->status;
+            $fromAssetId = $child->current_asset_id;
+            $fromStorageLocationId = $child->storage_location_id;
+
+            $child->forceFill([
+                'status' => ComponentInstance::STATUS_DESTROYED_RECYCLED,
+                'lifecycle_status' => ComponentInstance::LIFECYCLE_DESTROYED,
+                'current_asset_id' => null,
+                'root_asset_id' => null,
+                'held_by_user_id' => null,
+                'transfer_started_at' => null,
+                'destroyed_at' => $context['destroyed_at'] ?? now(),
+                'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
+            ])->save();
+
+            $this->events->write($child, 'destroyed_recycled', [
+                'performed_by' => $context['performed_by'] ?? null,
+                'from_status' => $fromStatus,
+                'to_status' => ComponentInstance::STATUS_DESTROYED_RECYCLED,
+                'from_asset_id' => $fromAssetId,
+                'from_storage_location_id' => $fromStorageLocationId,
+                'to_storage_location_id' => $child->storage_location_id,
+                'note' => $context['note'] ?? null,
+                'payload_json' => [
+                    'parent_component_instance_id' => $parent->id,
+                    'parent_component_event_id' => $parentEvent->id,
+                ],
+            ]);
+        }
+    }
+
     protected function assertTrayHolderCanInstall(ComponentInstance $instance, User|int|null $performedBy = null): void
     {
-        if ($instance->status !== ComponentInstance::STATUS_IN_TRANSFER || !$instance->held_by_user_id) {
+        if ($instance->effectiveLifecycleStatus() !== ComponentInstance::LIFECYCLE_IN_TRAY || !$instance->held_by_user_id) {
             return;
         }
 
@@ -451,6 +933,58 @@ class ComponentLifecycleService
         if ($actorId !== $instance->held_by_user_id) {
             throw new InvalidArgumentException('Tray components can only be installed by the user who currently holds them.');
         }
+    }
+
+    public function assertConditionWarningConfirmed(ComponentInstance $instance, array $context = []): void
+    {
+        if (!$instance->requiresConditionWarningForAttachment()) {
+            return;
+        }
+
+        if ($this->conditionWarningConfirmed($context)) {
+            return;
+        }
+
+        throw ComponentConditionWarningException::forComponent($instance);
+    }
+
+    public function assertLifecycleWarningConfirmed(ComponentInstance $instance, array $context = []): void
+    {
+        if (!$instance->requiresLifecycleWarningForAttachment()) {
+            return;
+        }
+
+        if ($this->lifecycleWarningConfirmed($context)) {
+            return;
+        }
+
+        throw ComponentLifecycleWarningException::forComponent($instance);
+    }
+
+    public function assertConditionWarningConfirmedForCondition(
+        string $conditionStatus,
+        array $context = [],
+        ?string $componentName = null,
+    ): void {
+        if (!in_array($conditionStatus, ComponentInstance::attachmentWarningConditionStatuses(), true)) {
+            return;
+        }
+
+        if ($this->conditionWarningConfirmed($context)) {
+            return;
+        }
+
+        throw ComponentConditionWarningException::forCondition($conditionStatus, $componentName);
+    }
+
+    protected function conditionWarningConfirmed(array $context): bool
+    {
+        return filter_var($context['condition_warning_confirmed'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    protected function lifecycleWarningConfirmed(array $context): bool
+    {
+        return filter_var($context['lifecycle_warning_confirmed'] ?? false, FILTER_VALIDATE_BOOLEAN);
     }
 
     protected function resolveActorId(User|int|null $actor): ?int
@@ -465,6 +999,93 @@ class ComponentLifecycleService
     protected function normalizeInstanceAttributes(array $attributes, ?int $actorId): array
     {
         $attributes['company_id'] = $this->resolveInstanceCompanyId($attributes, $actorId);
+        $attributes = $this->normalizeLifecycleCompatibilityAttributes($attributes);
+        $attributes = $this->normalizeHierarchyAttributes($attributes);
+
+        return $attributes;
+    }
+
+    protected function assertPlacementAllowedForInstanceAttributes(array $attributes): void
+    {
+        $definitionId = $attributes['component_definition_id'] ?? null;
+
+        if (!$definitionId) {
+            return;
+        }
+
+        $definition = ComponentDefinition::query()->find((int) $definitionId);
+
+        if (!$definition) {
+            throw new InvalidArgumentException('Component definition could not be found.');
+        }
+
+        if (!empty($attributes['parent_component_instance_id'])) {
+            if (!$definition->canBeUsedAsSubcomponent()) {
+                throw new InvalidArgumentException('This component definition is restricted to direct asset placement and cannot be used as a subcomponent.');
+            }
+
+            return;
+        }
+
+        $isAssetAttachment = !empty($attributes['current_asset_id'])
+            || ($attributes['lifecycle_status'] ?? null) === ComponentInstance::LIFECYCLE_ATTACHED
+            || ($attributes['status'] ?? null) === ComponentInstance::STATUS_INSTALLED;
+
+        if ($isAssetAttachment && !$definition->canBeInstalledOnAsset()) {
+            throw new InvalidArgumentException('This component definition is restricted to subcomponent placement and cannot be installed directly on an asset.');
+        }
+    }
+
+    protected function normalizeLifecycleCompatibilityAttributes(array $attributes): array
+    {
+        $hasLifecycleStatus = array_key_exists('lifecycle_status', $attributes)
+            && filled($attributes['lifecycle_status']);
+        $hasStatus = array_key_exists('status', $attributes)
+            && filled($attributes['status']);
+
+        if ($hasLifecycleStatus && !$hasStatus) {
+            $attributes['status'] = ComponentInstance::legacyStatusForLifecycleStatus($attributes['lifecycle_status']);
+        }
+
+        $hasConditionStatus = array_key_exists('condition_status', $attributes)
+            && filled($attributes['condition_status']);
+        $hasConditionCode = array_key_exists('condition_code', $attributes)
+            && filled($attributes['condition_code']);
+
+        if ($hasConditionStatus && !$hasConditionCode) {
+            $attributes['condition_code'] = ComponentInstance::legacyConditionCodeForConditionStatus($attributes['condition_status']);
+        }
+
+        return $attributes;
+    }
+
+    protected function normalizeHierarchyAttributes(array $attributes): array
+    {
+        $parentId = $attributes['parent_component_instance_id'] ?? null;
+
+        if ($parentId !== null && $parentId !== '') {
+            $parent = ComponentInstance::query()->whereKey((int) $parentId)->first();
+
+            if ($parent) {
+                if (!array_key_exists('current_asset_id', $attributes) || $attributes['current_asset_id'] === null || $attributes['current_asset_id'] === '') {
+                    $attributes['current_asset_id'] = $parent->current_asset_id;
+                }
+
+                if (!array_key_exists('root_asset_id', $attributes) || $attributes['root_asset_id'] === null || $attributes['root_asset_id'] === '') {
+                    $attributes['root_asset_id'] = $parent->root_asset_id ?: $parent->current_asset_id;
+                }
+            }
+
+            return $attributes;
+        }
+
+        if (!empty($attributes['current_asset_id']) && (
+            !array_key_exists('root_asset_id', $attributes)
+            || $attributes['root_asset_id'] === null
+            || $attributes['root_asset_id'] === ''
+        )) {
+            $attributes['root_asset_id'] = $attributes['current_asset_id'];
+        }
 
         return $attributes;
     }

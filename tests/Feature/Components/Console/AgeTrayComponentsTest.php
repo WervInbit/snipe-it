@@ -27,7 +27,9 @@ class AgeTrayComponentsTest extends TestCase
         $staleComponent->refresh();
         $freshComponent->refresh();
 
-        $this->assertSame(ComponentInstance::STATUS_NEEDS_VERIFICATION, $staleComponent->status);
+        $this->assertSame(ComponentInstance::STATUS_IN_TRANSFER, $staleComponent->status);
+        $this->assertSame(ComponentInstance::LIFECYCLE_IN_TRAY, $staleComponent->lifecycle_status);
+        $this->assertSame(ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION, $staleComponent->condition_status);
         $this->assertSame(ComponentInstance::STATUS_IN_TRANSFER, $freshComponent->status);
         $this->assertDatabaseHas('component_events', [
             'component_instance_id' => $staleComponent->id,

@@ -12,7 +12,7 @@ class AgeTrayComponents extends Command
 {
     protected $signature = 'components:age-tray';
 
-    protected $description = 'Escalate stale tray components into needs-verification status.';
+    protected $description = 'Escalate stale tray components into needs-attention condition.';
 
     public function handle(ComponentLifecycleService $lifecycle): int
     {

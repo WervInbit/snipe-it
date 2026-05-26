@@ -8,6 +8,7 @@ use App\Models\AttributeDefinition;
 use App\Models\ComponentDefinition;
 use App\Models\ModelNumber;
 use App\Models\ModelNumberComponentTemplate;
+use App\Services\Components\ComponentDefinitionHierarchyWarningService;
 use App\Services\ModelAttributes\EffectiveAttributeResolver;
 use App\Services\ModelAttributes\ModelAttributeManager;
 use Illuminate\Http\RedirectResponse;
@@ -20,7 +21,8 @@ class ModelSpecificationController extends Controller
 {
     public function __construct(
         private readonly EffectiveAttributeResolver $resolver,
-        private readonly ModelAttributeManager $attributeManager
+        private readonly ModelAttributeManager $attributeManager,
+        private readonly ComponentDefinitionHierarchyWarningService $hierarchyWarningService
     ) {
     }
 
@@ -66,6 +68,9 @@ class ModelSpecificationController extends Controller
         $modelNumber->loadMissing([
             'componentTemplates.componentDefinition.category',
             'componentTemplates.componentDefinition.manufacturer',
+            'componentTemplates.componentDefinition.subcomponentTemplates.childComponentDefinition.category',
+            'componentTemplates.componentDefinition.subcomponentTemplates.childComponentDefinition.manufacturer',
+            'componentTemplates.componentDefinition.subcomponentTemplates.childComponentDefinition.attributeContributions.definition',
             'componentTemplates.componentDefinition.attributeContributions.definition.options',
             'componentTemplates.componentDefinition.attributeContributions.option',
         ]);
@@ -122,6 +127,8 @@ class ModelSpecificationController extends Controller
             );
         }
 
+        $componentDefinitions = $this->activeComponentDefinitions();
+
         return view('models.spec', [
             'model' => $model,
             'item' => $model,
@@ -133,7 +140,8 @@ class ModelSpecificationController extends Controller
             'resolvedAttributes' => $resolvedAttributes,
             'resolvedPreviewAttributes' => $resolvedAssignments->values(),
             'availableAttributes' => $availableDefinitions,
-            'componentDefinitions' => $this->activeComponentDefinitions(),
+            'componentDefinitions' => $componentDefinitions,
+            'componentDefinitionOverlapWarnings' => $this->hierarchyWarningService->overlapWarningsByDefinition($componentDefinitions),
         ]);
     }
 
@@ -206,8 +214,17 @@ class ModelSpecificationController extends Controller
     private function activeComponentDefinitions(): Collection
     {
         return ComponentDefinition::query()
-            ->with(['category', 'manufacturer', 'attributeContributions.definition.options', 'attributeContributions.option'])
+            ->with([
+                'category',
+                'manufacturer',
+                'attributeContributions.definition.options',
+                'attributeContributions.option',
+                'subcomponentTemplates.childComponentDefinition.category',
+                'subcomponentTemplates.childComponentDefinition.manufacturer',
+                'subcomponentTemplates.childComponentDefinition.attributeContributions.definition',
+            ])
             ->where('is_active', true)
+            ->whereIn('placement_mode', ComponentDefinition::assetPlacementModes())
             ->orderBy('name')
             ->get();
     }

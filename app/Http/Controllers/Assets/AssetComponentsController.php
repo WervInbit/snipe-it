@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Assets;
 
+use App\Exceptions\ComponentConditionWarningException;
+use App\Exceptions\ComponentLifecycleWarningException;
 use App\Http\Controllers\Concerns\BuildsComponentWorkflowOptions;
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
+use App\Models\ComponentDefinition;
 use App\Models\ComponentInstance;
 use App\Models\ComponentStorageLocation;
 use App\Models\ModelNumberComponentTemplate;
@@ -12,6 +15,7 @@ use App\Services\Components\AssetExpectedComponentService;
 use App\Services\ComponentLifecycleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use InvalidArgumentException;
@@ -44,25 +48,33 @@ class AssetComponentsController extends Controller
 
         $data = $request->validate([
             'component_id' => ['required', 'integer', 'exists:component_instances,id'],
+            'condition_warning_confirmed' => ['nullable', 'boolean'],
+            'lifecycle_warning_confirmed' => ['nullable', 'boolean'],
         ]);
 
         $component = ComponentInstance::findOrFail($data['component_id']);
         $this->authorize('install', $component);
 
+        $lifecycleStatus = $component->effectiveLifecycleStatus();
+
         if (
-            ($component->status === ComponentInstance::STATUS_IN_TRANSFER)
+                $lifecycleStatus === ComponentInstance::LIFECYCLE_IN_TRAY
+            || $lifecycleStatus === ComponentInstance::LIFECYCLE_SOLD_RETURNED
             || (
-                in_array($component->status, [
-                    ComponentInstance::STATUS_IN_STOCK,
-                    ComponentInstance::STATUS_NEEDS_VERIFICATION,
-                ], true)
+                $lifecycleStatus === ComponentInstance::LIFECYCLE_IN_STOCK
                 && !$component->current_asset_id
             )
         ) {
             try {
                 $this->lifecycle->installIntoAsset($component, $asset, [
                     'performed_by' => $request->user(),
+                    'condition_warning_confirmed' => $request->boolean('condition_warning_confirmed'),
+                    'lifecycle_warning_confirmed' => $request->boolean('lifecycle_warning_confirmed'),
                 ]);
+            } catch (ComponentLifecycleWarningException $exception) {
+                return redirect()->back()->withInput()->with('warning', $exception->getMessage());
+            } catch (ComponentConditionWarningException $exception) {
+                return redirect()->back()->withInput()->with('warning', $exception->getMessage());
             } catch (InvalidArgumentException $exception) {
                 return redirect()->back()->withInput()->with('error', $exception->getMessage());
             }
@@ -94,7 +106,11 @@ class AssetComponentsController extends Controller
             'component_definition_id' => [
                 'nullable',
                 'integer',
-                'exists:component_definitions,id',
+                Rule::exists('component_definitions', 'id')->where(
+                    fn ($query) => $query
+                        ->where('is_active', true)
+                        ->whereIn('placement_mode', ComponentDefinition::assetPlacementModes())
+                ),
                 Rule::requiredIf(fn () => $request->input('creation_mode') === 'definition'),
             ],
             'display_name' => [
@@ -104,6 +120,8 @@ class AssetComponentsController extends Controller
                 Rule::requiredIf(fn () => $request->input('creation_mode') === 'custom'),
             ],
             'serial' => ['nullable', 'string', 'max:255'],
+            'condition_warning_confirmed' => ['nullable', 'boolean'],
+            'lifecycle_warning_confirmed' => ['nullable', 'boolean'],
             'note' => ['nullable', 'string'],
         ]);
 
@@ -112,21 +130,29 @@ class AssetComponentsController extends Controller
         }
 
         try {
-            $component = $this->lifecycle->createInstance([
-                'component_definition_id' => $data['component_definition_id'] ?? null,
-                'display_name' => $data['display_name'] ?? null,
-                'serial' => $data['serial'] ?? null,
-                'status' => ComponentInstance::STATUS_IN_STOCK,
-                'condition_code' => ComponentInstance::CONDITION_UNKNOWN,
-                'source_type' => ComponentInstance::SOURCE_MANUAL,
-                'company_id' => $asset->company_id,
-                'notes' => $data['note'] ?? null,
-            ], $request->user());
+            DB::transaction(function () use ($asset, $data, $request): void {
+                $component = $this->lifecycle->createInstance([
+                    'component_definition_id' => $data['component_definition_id'] ?? null,
+                    'display_name' => $data['display_name'] ?? null,
+                    'serial' => $data['serial'] ?? null,
+                    'status' => ComponentInstance::STATUS_IN_STOCK,
+                    'condition_code' => ComponentInstance::CONDITION_UNKNOWN,
+                    'source_type' => ComponentInstance::SOURCE_MANUAL,
+                    'company_id' => $asset->company_id,
+                    'notes' => $data['note'] ?? null,
+                ], $request->user());
 
-            $this->lifecycle->installIntoAsset($component, $asset, [
-                'performed_by' => $request->user(),
-                'note' => $data['note'] ?? null,
-            ]);
+                $this->lifecycle->installIntoAsset($component, $asset, [
+                    'performed_by' => $request->user(),
+                    'condition_warning_confirmed' => $request->boolean('condition_warning_confirmed'),
+                    'lifecycle_warning_confirmed' => $request->boolean('lifecycle_warning_confirmed'),
+                    'note' => $data['note'] ?? null,
+                ]);
+            });
+        } catch (ComponentLifecycleWarningException $exception) {
+            return redirect()->back()->withInput()->with('warning', $exception->getMessage());
+        } catch (ComponentConditionWarningException $exception) {
+            return redirect()->back()->withInput()->with('warning', $exception->getMessage());
         } catch (InvalidArgumentException $exception) {
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
@@ -268,6 +294,8 @@ class AssetComponentsController extends Controller
 
         $data = $request->validate([
             'destination_asset_id' => ['required', 'integer', 'exists:assets,id'],
+            'condition_warning_confirmed' => ['nullable', 'boolean'],
+            'lifecycle_warning_confirmed' => ['nullable', 'boolean'],
             'note' => ['nullable', 'string'],
         ]);
 
@@ -281,8 +309,14 @@ class AssetComponentsController extends Controller
         try {
             $this->lifecycle->installIntoAsset($component, $destinationAsset, [
                 'performed_by' => $request->user(),
+                'condition_warning_confirmed' => $request->boolean('condition_warning_confirmed'),
+                'lifecycle_warning_confirmed' => $request->boolean('lifecycle_warning_confirmed'),
                 'note' => $data['note'] ?? null,
             ]);
+        } catch (ComponentLifecycleWarningException $exception) {
+            return redirect()->back()->withInput()->with('warning', $exception->getMessage());
+        } catch (ComponentConditionWarningException $exception) {
+            return redirect()->back()->withInput()->with('warning', $exception->getMessage());
         } catch (InvalidArgumentException $exception) {
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
@@ -313,6 +347,8 @@ class AssetComponentsController extends Controller
 
         $data = $request->validate([
             'destination_asset_id' => ['required', 'integer', 'exists:assets,id'],
+            'condition_warning_confirmed' => ['nullable', 'boolean'],
+            'lifecycle_warning_confirmed' => ['nullable', 'boolean'],
             'note' => ['nullable', 'string'],
         ]);
 
@@ -325,8 +361,14 @@ class AssetComponentsController extends Controller
 
         try {
             $this->expectedComponents->materializeToAsset($asset, $template, $destinationAsset, $request->user(), [
+                'condition_warning_confirmed' => $request->boolean('condition_warning_confirmed'),
+                'lifecycle_warning_confirmed' => $request->boolean('lifecycle_warning_confirmed'),
                 'note' => $data['note'] ?? null,
             ]);
+        } catch (ComponentLifecycleWarningException $exception) {
+            return redirect()->back()->withInput()->with('warning', $exception->getMessage());
+        } catch (ComponentConditionWarningException $exception) {
+            return redirect()->back()->withInput()->with('warning', $exception->getMessage());
         } catch (InvalidArgumentException $exception) {
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
@@ -348,12 +390,13 @@ class AssetComponentsController extends Controller
     {
         return ComponentInstance::query()
             ->with(['componentDefinition.category', 'componentDefinition.manufacturer', 'storageLocation.siteLocation'])
-            ->whereIn('status', [
-                ComponentInstance::STATUS_IN_STOCK,
-                ComponentInstance::STATUS_NEEDS_VERIFICATION,
+            ->whereIn('lifecycle_status', [
+                ComponentInstance::LIFECYCLE_IN_STOCK,
+                ComponentInstance::LIFECYCLE_SOLD_RETURNED,
             ])
             ->whereNull('current_asset_id')
-            ->orderBy('status')
+            ->orderBy('lifecycle_status')
+            ->orderBy('condition_status')
             ->orderBy('component_tag')
             ->get();
     }

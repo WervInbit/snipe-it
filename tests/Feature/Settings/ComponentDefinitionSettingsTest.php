@@ -6,6 +6,9 @@ use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\AttributeDefinition;
 use App\Models\Category;
 use App\Models\ComponentDefinition;
+use App\Models\ComponentDefinitionAttribute;
+use App\Models\ComponentDefinitionSubcomponentTemplate;
+use App\Models\ComponentInstance;
 use App\Models\Manufacturer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -120,6 +123,225 @@ class ComponentDefinitionSettingsTest extends TestCase
             'value' => 'DDR4',
             'raw_value' => 'DDR4',
         ]);
+    }
+
+    public function testDefinitionCanPersistExpectedSubcomponentTemplates(): void
+    {
+        $user = User::factory()->manageComponentDefinitions()->create();
+        $childDefinition = ComponentDefinition::factory()->create([
+            'name' => 'USB-C Port Board',
+            'part_code' => 'USB-C-PORT',
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post(route('settings.component_definitions.store'), [
+                'name' => 'Main Board Assembly',
+                'is_active' => '1',
+                'expected_subcomponents' => [
+                    [
+                        'child_component_definition_id' => $childDefinition->id,
+                        'expected_name' => '',
+                        'expected_qty' => 2,
+                        'is_required' => '1',
+                        'notes' => 'One on each side.',
+                    ],
+                    [
+                        'child_component_definition_id' => '',
+                        'expected_name' => 'Thermal Pad',
+                        'expected_qty' => 1,
+                        'is_required' => '0',
+                        'notes' => 'Freeform expected child.',
+                    ],
+                ],
+            ]);
+
+        $definition = ComponentDefinition::query()->where('name', 'Main Board Assembly')->firstOrFail();
+
+        $response->assertRedirect(route('settings.component_definitions.edit', $definition))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('component_definition_subcomponent_templates', [
+            'parent_component_definition_id' => $definition->id,
+            'child_component_definition_id' => $childDefinition->id,
+            'expected_name' => 'USB-C Port Board',
+            'expected_qty' => 2,
+            'is_required' => 1,
+            'sort_order' => 0,
+            'notes' => 'One on each side.',
+        ]);
+        $this->assertDatabaseHas('component_definition_subcomponent_templates', [
+            'parent_component_definition_id' => $definition->id,
+            'child_component_definition_id' => null,
+            'expected_name' => 'Thermal Pad',
+            'expected_qty' => 1,
+            'is_required' => 0,
+            'sort_order' => 1,
+            'notes' => 'Freeform expected child.',
+        ]);
+    }
+
+    public function testDefinitionCanReorderAndDeleteExpectedSubcomponentTemplatesWithoutDeletingInstances(): void
+    {
+        $user = User::factory()->manageComponentDefinitions()->create();
+        $parentDefinition = ComponentDefinition::factory()->create([
+            'name' => 'Main Board Assembly',
+        ]);
+        $firstChildDefinition = ComponentDefinition::factory()->create([
+            'name' => 'USB-C Port Board',
+        ]);
+        $secondChildDefinition = ComponentDefinition::factory()->create([
+            'name' => 'Speaker Connector',
+        ]);
+        $firstTemplate = ComponentDefinitionSubcomponentTemplate::factory()->create([
+            'parent_component_definition_id' => $parentDefinition->id,
+            'child_component_definition_id' => $firstChildDefinition->id,
+            'expected_name' => 'USB-C Port Board',
+            'expected_qty' => 1,
+            'sort_order' => 0,
+        ]);
+        $secondTemplate = ComponentDefinitionSubcomponentTemplate::factory()->create([
+            'parent_component_definition_id' => $parentDefinition->id,
+            'child_component_definition_id' => $secondChildDefinition->id,
+            'expected_name' => 'Speaker Connector',
+            'expected_qty' => 1,
+            'sort_order' => 1,
+        ]);
+        $trackedInstance = ComponentInstance::factory()->create([
+            'component_definition_id' => $firstChildDefinition->id,
+            'display_name' => 'Tracked USB-C Port Board',
+        ]);
+
+        $this->actingAs($user)
+            ->put(route('settings.component_definitions.update', $parentDefinition), [
+                'name' => 'Main Board Assembly',
+                'is_active' => '1',
+                'expected_subcomponents' => [
+                    [
+                        'id' => $secondTemplate->id,
+                        'child_component_definition_id' => $secondChildDefinition->id,
+                        'expected_name' => 'Speaker Connector',
+                        'expected_qty' => 2,
+                        'is_required' => '1',
+                    ],
+                    [
+                        'id' => $firstTemplate->id,
+                        'child_component_definition_id' => $firstChildDefinition->id,
+                        'expected_name' => 'USB-C Port Board',
+                        'expected_qty' => 1,
+                        'is_required' => '1',
+                    ],
+                ],
+            ])
+            ->assertRedirect(route('settings.component_definitions.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('component_definition_subcomponent_templates', [
+            'id' => $secondTemplate->id,
+            'expected_qty' => 2,
+            'sort_order' => 0,
+        ]);
+        $this->assertDatabaseHas('component_definition_subcomponent_templates', [
+            'id' => $firstTemplate->id,
+            'sort_order' => 1,
+        ]);
+
+        $this->actingAs($user)
+            ->put(route('settings.component_definitions.update', $parentDefinition), [
+                'name' => 'Main Board Assembly',
+                'is_active' => '1',
+                'expected_subcomponents' => [
+                    [
+                        'id' => $secondTemplate->id,
+                        'child_component_definition_id' => $secondChildDefinition->id,
+                        'expected_name' => 'Speaker Connector',
+                        'expected_qty' => 2,
+                        'is_required' => '1',
+                    ],
+                ],
+            ])
+            ->assertRedirect(route('settings.component_definitions.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseMissing('component_definition_subcomponent_templates', [
+            'id' => $firstTemplate->id,
+        ]);
+        $this->assertDatabaseHas('component_instances', [
+            'id' => $trackedInstance->id,
+            'component_definition_id' => $firstChildDefinition->id,
+        ]);
+    }
+
+    public function testDefinitionEditFormRendersExpectedSubcomponentEditor(): void
+    {
+        $user = User::factory()->manageComponentDefinitions()->create();
+        $parentDefinition = ComponentDefinition::factory()->create([
+            'name' => 'Main Board Assembly',
+        ]);
+        $childDefinition = ComponentDefinition::factory()->create([
+            'name' => 'USB-C Port Board',
+        ]);
+        ComponentDefinitionSubcomponentTemplate::factory()->create([
+            'parent_component_definition_id' => $parentDefinition->id,
+            'child_component_definition_id' => $childDefinition->id,
+            'expected_name' => 'USB-C Port Board',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('settings.component_definitions.edit', $parentDefinition))
+            ->assertOk()
+            ->assertSeeText('Expected Subcomponents')
+            ->assertSee('data-subcomponent-template-row', false)
+            ->assertSeeText('USB-C Port Board')
+            ->assertSeeText('Add Expected Subcomponent');
+    }
+
+    public function testDefinitionEditFormShowsHierarchyOverlapWarning(): void
+    {
+        $user = User::factory()->manageComponentDefinitions()->create();
+        $usbPorts = AttributeDefinition::create([
+            'key' => 'usb_port_count',
+            'label' => 'USB Port Count',
+            'datatype' => AttributeDefinition::DATATYPE_INT,
+            'allow_asset_override' => true,
+        ]);
+        $parentDefinition = ComponentDefinition::factory()->create([
+            'name' => 'Motherboard Assembly',
+        ]);
+        $childDefinition = ComponentDefinition::factory()->create([
+            'name' => 'USB-C Port Board',
+        ]);
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $parentDefinition->id,
+            'attribute_definition_id' => $usbPorts->id,
+            'value' => '4',
+            'raw_value' => '4',
+            'resolves_to_spec' => true,
+        ]);
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $childDefinition->id,
+            'attribute_definition_id' => $usbPorts->id,
+            'value' => '1',
+            'raw_value' => '1',
+            'resolves_to_spec' => true,
+        ]);
+        ComponentDefinitionSubcomponentTemplate::factory()->create([
+            'parent_component_definition_id' => $parentDefinition->id,
+            'child_component_definition_id' => $childDefinition->id,
+            'expected_name' => 'Left USB-C Port Board',
+            'expected_qty' => 2,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('settings.component_definitions.edit', $parentDefinition))
+            ->assertOk()
+            ->assertSee('data-testid="component-definition-hierarchy-overlap-warning"', false)
+            ->assertSeeText('Hierarchy overlap warning')
+            ->assertSeeText('Motherboard Assembly')
+            ->assertSeeText('Left USB-C Port Board')
+            ->assertSeeText('USB Port Count')
+            ->assertSeeText('Parent: 4')
+            ->assertSeeText('Child: 1');
     }
 
     public function testDefinitionCreateFormUsesQuicksearchContributionPicker(): void

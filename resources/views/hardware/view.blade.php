@@ -764,6 +764,9 @@
                                                 @if (session('requires_ack_failed_tests'))
                                                     <input type="hidden" name="ack_failed_tests" value="1">
                                                 @endif
+                                                @if (session('requires_ack_component_issues'))
+                                                    <input type="hidden" name="ack_component_issues" value="1">
+                                                @endif
                                             </form>
                                         @endcan
 
@@ -793,6 +796,19 @@
                                                                 @if (session('test_issue_details'))
                                                                     <ul class="mb-0">
                                                                         @foreach ((array) session('test_issue_details') as $detail)
+                                                                            <li>{{ $detail }}</li>
+                                                                        @endforeach
+                                                                    </ul>
+                                                                @endif
+                                                            </div>
+                                                        @endif
+
+                                                        @if (session('requires_ack_component_issues'))
+                                                            <div class="alert alert-warning asset-detail-control" role="alert">
+                                                                <p class="mb-2">{{ __('Attached damaged or needs-attention components remain on this asset. Submit again to confirm the selling-state change.') }}</p>
+                                                                @if (session('component_issue_details'))
+                                                                    <ul class="mb-0">
+                                                                        @foreach ((array) session('component_issue_details') as $detail)
                                                                             <li>{{ $detail }}</li>
                                                                         @endforeach
                                                                     </ul>
@@ -952,6 +968,7 @@
                                                 $calculatedExtraSubtotal = $attribute->formattedCalculatedExtraSubtotal();
                                                 $calculatedExpectedSummary = $attribute->calculatedExpectedContributorSummary();
                                                 $calculatedExtraSummary = $attribute->calculatedExtraContributorSummary();
+                                                $hierarchyOverlapSummary = $attribute->hierarchyOverlapSummary();
                                             @endphp
                                             <div class="row spec-detail-row {{ $isOverride ? 'spec-detail-row--override' : '' }}">
                                                 <div class="col-md-3">
@@ -1025,6 +1042,12 @@
                                                     @if($attribute->hasReducedExpectedBaseline())
                                                         <div class="spec-detail-meta text-warning">
                                                             {{ __('Current calculated value is below the expected baseline because expected components were removed.') }}
+                                                        </div>
+                                                    @endif
+
+                                                    @if($hierarchyOverlapSummary)
+                                                        <div class="spec-detail-meta text-warning">
+                                                            {{ __('Parent/child overlap: :value', ['value' => $hierarchyOverlapSummary]) }}
                                                         </div>
                                                     @endif
                                                 </div>
@@ -1142,6 +1165,9 @@
                                                 <form method="POST" action="{{ route('hardware.toggle-sale', $asset) }}" class="form-inline" style="display:flex; align-items:center; gap:8px;">
                                                     @csrf
                                                     @method('PATCH')
+                                                    @if (session('requires_ack_component_issues'))
+                                                        <input type="hidden" name="ack_component_issues" value="1">
+                                                    @endif
                                                     <input type="hidden" name="is_sellable" value="0">
                                                     <label class="checkbox-inline" style="margin:0;">
                                                         <input type="checkbox" name="is_sellable" value="1" aria-label="{{ trans('admin/hardware/general.available_for_sale') }}" onchange="this.form.submit();" {{ $asset->is_sellable ? 'checked' : '' }}>

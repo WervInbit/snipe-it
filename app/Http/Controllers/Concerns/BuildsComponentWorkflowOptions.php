@@ -15,6 +15,17 @@ trait BuildsComponentWorkflowOptions
         return ComponentDefinition::query()
             ->with(['category', 'manufacturer'])
             ->where('is_active', true)
+            ->whereIn('placement_mode', ComponentDefinition::assetPlacementModes())
+            ->orderBy('name')
+            ->get();
+    }
+
+    protected function activeSubcomponentDefinitions(): Collection
+    {
+        return ComponentDefinition::query()
+            ->with(['category', 'manufacturer'])
+            ->where('is_active', true)
+            ->whereIn('placement_mode', ComponentDefinition::subcomponentPlacementModes())
             ->orderBy('name')
             ->get();
     }

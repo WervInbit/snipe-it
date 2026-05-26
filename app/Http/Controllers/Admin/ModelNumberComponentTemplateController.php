@@ -124,7 +124,9 @@ class ModelNumberComponentTemplateController extends Controller
                 'required',
                 'integer',
                 Rule::exists('component_definitions', 'id')->where(
-                    fn ($query) => $query->where('is_active', true)
+                    fn ($query) => $query
+                        ->where('is_active', true)
+                        ->whereIn('placement_mode', ComponentDefinition::assetPlacementModes())
                 ),
             ],
             'expected_qty' => ['required', 'integer', 'min:1'],
@@ -133,6 +135,7 @@ class ModelNumberComponentTemplateController extends Controller
 
         $componentDefinition = ComponentDefinition::query()
             ->where('is_active', true)
+            ->whereIn('placement_mode', ComponentDefinition::assetPlacementModes())
             ->findOrFail((int) $data['component_definition_id']);
 
         $data['model_number_id'] = $modelNumber->id;
@@ -165,6 +168,7 @@ class ModelNumberComponentTemplateController extends Controller
         return ComponentDefinition::query()
             ->with(['category', 'manufacturer'])
             ->where('is_active', true)
+            ->whereIn('placement_mode', ComponentDefinition::assetPlacementModes())
             ->orderBy('name')
             ->get();
     }

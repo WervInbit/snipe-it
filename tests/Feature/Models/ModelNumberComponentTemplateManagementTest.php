@@ -113,4 +113,28 @@ class ModelNumberComponentTemplateManagementTest extends TestCase
             ->get(route('models.numbers.components.index', [$model, $modelNumber]))
             ->assertRedirect($specAnchor);
     }
+
+    public function testSubcomponentOnlyDefinitionCannotBeExpectedAtAssetLevel(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $definition = ComponentDefinition::factory()->create([
+            'is_active' => true,
+            'placement_mode' => ComponentDefinition::PLACEMENT_SUBCOMPONENT_ONLY,
+        ]);
+
+        $this->actingAs($user)
+            ->from(route('models.numbers.spec.edit', [$model, $modelNumber]))
+            ->post(route('models.numbers.components.store', [$model, $modelNumber]), [
+                'component_definition_id' => $definition->id,
+                'expected_qty' => 1,
+            ])
+            ->assertSessionHasErrors(['component_definition_id']);
+
+        $this->assertDatabaseMissing('model_number_component_templates', [
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $definition->id,
+        ]);
+    }
 }

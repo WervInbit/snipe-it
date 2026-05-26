@@ -68,6 +68,7 @@
         @php($calculatedExtraSubtotal = method_exists($attribute, 'formattedCalculatedExtraSubtotal') ? $attribute->formattedCalculatedExtraSubtotal() : null)
         @php($calculatedExpectedSummary = method_exists($attribute, 'calculatedExpectedContributorSummary') ? $attribute->calculatedExpectedContributorSummary() : null)
         @php($calculatedExtraSummary = method_exists($attribute, 'calculatedExtraContributorSummary') ? $attribute->calculatedExtraContributorSummary() : null)
+        @php($hierarchyOverlapSummary = method_exists($attribute, 'hierarchyOverlapSummary') ? $attribute->hierarchyOverlapSummary() : null)
         <div class="form-group{{ $errors->has($fieldKey) ? ' has-error' : '' }}">
             <label class="col-md-3 control-label" for="attribute_override_{{ $definition->id }}">
                 {{ $definition->label }}
@@ -98,6 +99,9 @@
                     @endif
                     @if(method_exists($attribute, 'hasReducedExpectedBaseline') && $attribute->hasReducedExpectedBaseline())
                         <p class="help-block text-warning">{{ __('Current calculated value is below the expected baseline because expected components were removed.') }}</p>
+                    @endif
+                    @if($hierarchyOverlapSummary)
+                        <p class="help-block text-warning">{{ __('Parent/child overlap: :value', ['value' => $hierarchyOverlapSummary]) }}</p>
                     @endif
                 @elseif(!$definition->allow_asset_override)
                     <p class="form-control-static">

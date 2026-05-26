@@ -6,6 +6,8 @@
 @php
     $attributeDefinitions = $attributeDefinitions ?? collect();
     $attributeDefinitionsById = $attributeDefinitions->keyBy('id');
+    $componentDefinitionOptions = ($componentDefinitions ?? collect())->sortBy('name')->values();
+    $hierarchyOverlapWarnings = collect($hierarchyOverlapWarnings ?? []);
     $attributeDefinitionPayload = $attributeDefinitions->map(function ($definition) {
         return [
             'id' => $definition->id,
@@ -70,6 +72,33 @@
             'attribute_search' => '',
             'value' => '',
             'resolves_to_spec' => false,
+        ]]);
+    }
+
+    $subcomponentTemplateRows = collect(old('expected_subcomponents', []));
+
+    if ($subcomponentTemplateRows->isEmpty() && $item->exists) {
+        $item->loadMissing(['subcomponentTemplates.childComponentDefinition']);
+        $subcomponentTemplateRows = $item->subcomponentTemplates->map(function ($template) {
+            return [
+                'id' => $template->id,
+                'child_component_definition_id' => $template->child_component_definition_id,
+                'expected_name' => $template->expected_name,
+                'expected_qty' => $template->expected_qty,
+                'is_required' => (bool) $template->is_required,
+                'notes' => $template->notes,
+            ];
+        });
+    }
+
+    if ($subcomponentTemplateRows->isEmpty()) {
+        $subcomponentTemplateRows = collect([[
+            'id' => '',
+            'child_component_definition_id' => '',
+            'expected_name' => '',
+            'expected_qty' => '',
+            'is_required' => true,
+            'notes' => '',
         ]]);
     }
 @endphp
@@ -166,6 +195,50 @@
 
         <hr>
 
+        <div class="form-group{{ $errors->has('expected_subcomponents') ? ' has-error' : '' }}" id="expected-subcomponents">
+            <label>{{ __('Expected Subcomponents') }}</label>
+            <p class="help-block">
+                {{ __('Define child parts that are normally expected inside this component definition.') }}
+            </p>
+            {!! $errors->first('expected_subcomponents', '<span class="help-block">:message</span>') !!}
+
+            @include('settings.component_definitions.partials.hierarchy-overlap-warnings', [
+                'warnings' => $hierarchyOverlapWarnings,
+            ])
+
+            <div data-subcomponent-template-rows data-next-index="{{ $subcomponentTemplateRows->count() }}">
+                @foreach($subcomponentTemplateRows->values() as $index => $row)
+                    @include('settings.component_definitions.partials.subcomponent-template-row', [
+                        'index' => $index,
+                        'row' => $row,
+                        'componentDefinitionOptions' => $componentDefinitionOptions,
+                        'currentDefinitionId' => $item->id,
+                    ])
+                @endforeach
+            </div>
+
+            <template data-subcomponent-template>
+                @include('settings.component_definitions.partials.subcomponent-template-row', [
+                    'index' => '__INDEX__',
+                    'row' => [
+                        'id' => '',
+                        'child_component_definition_id' => '',
+                        'expected_name' => '',
+                        'expected_qty' => '',
+                        'is_required' => true,
+                        'notes' => '',
+                    ],
+                    'componentDefinitionOptions' => $componentDefinitionOptions,
+                    'currentDefinitionId' => $item->id,
+                    'showErrors' => false,
+                ])
+            </template>
+
+            <button type="button" class="btn btn-default" data-add-subcomponent-template>{{ __('Add Expected Subcomponent') }}</button>
+        </div>
+
+        <hr>
+
         <div class="form-group{{ $errors->has('attribute_contributions') ? ' has-error' : '' }}">
             <label>{{ __('Attribute Contributions') }}</label>
             <p class="help-block">
@@ -212,6 +285,94 @@
 @once
     @push('js')
         <script nonce="{{ csrf_token() }}">
+            (function () {
+                function wrapper() {
+                    return document.querySelector('[data-subcomponent-template-rows]');
+                }
+
+                function wireRow(row) {
+                    if (!row || row.dataset.subcomponentTemplateReady === '1') {
+                        return;
+                    }
+
+                    row.dataset.subcomponentTemplateReady = '1';
+                }
+
+                function ensureOneRow(container) {
+                    if (!container || container.querySelector('[data-subcomponent-template-row]')) {
+                        return;
+                    }
+
+                    var template = document.querySelector('[data-subcomponent-template]');
+                    if (!template) {
+                        return;
+                    }
+
+                    var nextIndex = parseInt(container.dataset.nextIndex || '0', 10);
+                    container.dataset.nextIndex = String(nextIndex + 1);
+                    container.insertAdjacentHTML('beforeend', template.innerHTML.replace(/__INDEX__/g, String(nextIndex)));
+                    wireRow(container.querySelector('[data-subcomponent-template-row]:last-child'));
+                }
+
+                document.querySelectorAll('[data-subcomponent-template-row]').forEach(wireRow);
+
+                document.addEventListener('click', function (event) {
+                    var addButton = event.target.closest('[data-add-subcomponent-template]');
+                    if (addButton) {
+                        var container = wrapper();
+                        var template = document.querySelector('[data-subcomponent-template]');
+
+                        if (!container || !template) {
+                            return;
+                        }
+
+                        var nextIndex = parseInt(container.dataset.nextIndex || '0', 10);
+                        container.dataset.nextIndex = String(nextIndex + 1);
+                        container.insertAdjacentHTML('beforeend', template.innerHTML.replace(/__INDEX__/g, String(nextIndex)));
+                        wireRow(container.querySelector('[data-subcomponent-template-row]:last-child'));
+                        return;
+                    }
+
+                    var removeButton = event.target.closest('[data-remove-subcomponent-template]');
+                    if (removeButton) {
+                        var row = removeButton.closest('[data-subcomponent-template-row]');
+                        var containerForRemove = wrapper();
+
+                        if (row) {
+                            row.remove();
+                        }
+
+                        ensureOneRow(containerForRemove);
+                        return;
+                    }
+
+                    var moveButton = event.target.closest('[data-move-subcomponent-template]');
+                    if (!moveButton) {
+                        return;
+                    }
+
+                    event.preventDefault();
+
+                    var movingRow = moveButton.closest('[data-subcomponent-template-row]');
+                    if (!movingRow) {
+                        return;
+                    }
+
+                    if (moveButton.getAttribute('data-move-subcomponent-template') === 'up') {
+                        var previous = movingRow.previousElementSibling;
+                        if (previous) {
+                            movingRow.parentNode.insertBefore(movingRow, previous);
+                        }
+                        return;
+                    }
+
+                    var next = movingRow.nextElementSibling;
+                    if (next) {
+                        movingRow.parentNode.insertBefore(next, movingRow);
+                    }
+                });
+            })();
+
             (function () {
                 var definitions = @json($attributeDefinitionPayload);
                 var definitionMap = {};

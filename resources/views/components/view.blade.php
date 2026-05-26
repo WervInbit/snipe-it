@@ -21,57 +21,72 @@
 
 @section('content')
 @php
-    $isInstalled = $component->status === \App\Models\ComponentInstance::STATUS_INSTALLED;
-    $isInTray = $component->status === \App\Models\ComponentInstance::STATUS_IN_TRANSFER;
-    $isInStock = $component->status === \App\Models\ComponentInstance::STATUS_IN_STOCK;
-    $isNeedsVerification = $component->status === \App\Models\ComponentInstance::STATUS_NEEDS_VERIFICATION;
-    $isDefective = $component->status === \App\Models\ComponentInstance::STATUS_DEFECTIVE;
-    $isDestructionPending = $component->status === \App\Models\ComponentInstance::STATUS_DESTRUCTION_PENDING;
-    $isDestroyed = $component->status === \App\Models\ComponentInstance::STATUS_DESTROYED_RECYCLED;
+    $lifecycleStatus = $component->effectiveLifecycleStatus();
+    $conditionStatus = $component->effectiveConditionStatus();
+    $isInstalled = $lifecycleStatus === \App\Models\ComponentInstance::LIFECYCLE_ATTACHED;
+    $isInTray = $lifecycleStatus === \App\Models\ComponentInstance::LIFECYCLE_IN_TRAY;
+    $isInStock = $lifecycleStatus === \App\Models\ComponentInstance::LIFECYCLE_IN_STOCK;
+    $isNeedsAttention = $conditionStatus === \App\Models\ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION;
+    $isDamaged = $conditionStatus === \App\Models\ComponentInstance::CONDITION_STATUS_DAMAGED;
+    $isDestructionPending = $lifecycleStatus === \App\Models\ComponentInstance::LIFECYCLE_DESTRUCTION_PENDING;
+    $isDestroyed = $lifecycleStatus === \App\Models\ComponentInstance::LIFECYCLE_DESTROYED;
+    $isSoldReturned = $lifecycleStatus === \App\Models\ComponentInstance::LIFECYCLE_SOLD_RETURNED;
+    $isLifecycleManaged = !$isDestroyed && !$isSoldReturned;
     $returnTo = route('components.show', $component);
     $statusTransitions = [];
 
     if ($isInstalled) {
         $statusTransitions[] = [
-            'label' => \App\Models\ComponentInstance::statusLabel(\App\Models\ComponentInstance::STATUS_IN_TRANSFER),
+            'label' => \App\Models\ComponentInstance::lifecycleStatusLabel(\App\Models\ComponentInstance::LIFECYCLE_IN_TRAY),
             'target' => '#componentToTrayModal',
         ];
-    } elseif (!$isDestroyed) {
-        if ($isInTray || $isNeedsVerification || $isDefective) {
+    }
+
+    if ($isLifecycleManaged) {
+        if (!$isInstalled && !$isInStock && !$isDestructionPending) {
             $statusTransitions[] = [
-                'label' => \App\Models\ComponentInstance::statusLabel(\App\Models\ComponentInstance::STATUS_IN_STOCK),
+                'label' => \App\Models\ComponentInstance::lifecycleStatusLabel(\App\Models\ComponentInstance::LIFECYCLE_IN_STOCK),
                 'target' => '#componentToStockModal',
             ];
         }
 
-        if ($isInTray || $isInStock || $isDefective) {
+        if (!$isNeedsAttention) {
             $statusTransitions[] = [
-                'label' => \App\Models\ComponentInstance::statusLabel(\App\Models\ComponentInstance::STATUS_NEEDS_VERIFICATION),
+                'label' => \App\Models\ComponentInstance::conditionStatusLabel(\App\Models\ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION),
                 'target' => '#componentNeedsVerificationModal',
             ];
         }
 
-        if ($isInTray || $isInStock || $isNeedsVerification) {
+        if (!$isDamaged) {
             $statusTransitions[] = [
-                'label' => \App\Models\ComponentInstance::statusLabel(\App\Models\ComponentInstance::STATUS_DEFECTIVE),
+                'label' => \App\Models\ComponentInstance::conditionStatusLabel(\App\Models\ComponentInstance::CONDITION_STATUS_DAMAGED),
                 'target' => '#componentDefectiveModal',
             ];
         }
 
-        if (!$isDestructionPending) {
+        if (!$isInstalled && !$isDestructionPending) {
             $statusTransitions[] = [
-                'label' => \App\Models\ComponentInstance::statusLabel(\App\Models\ComponentInstance::STATUS_DESTRUCTION_PENDING),
+                'label' => \App\Models\ComponentInstance::lifecycleStatusLabel(\App\Models\ComponentInstance::LIFECYCLE_DESTRUCTION_PENDING),
                 'target' => '#componentDestructionPendingModal',
             ];
-        } else {
+        } elseif ($isDestructionPending) {
             $statusTransitions[] = [
-                'label' => \App\Models\ComponentInstance::statusLabel(\App\Models\ComponentInstance::STATUS_DESTROYED_RECYCLED),
+                'label' => \App\Models\ComponentInstance::lifecycleStatusLabel(\App\Models\ComponentInstance::LIFECYCLE_DESTROYED),
                 'target' => '#componentDestroyedModal',
             ];
         }
     }
 
     $statusHistory = $component->events->filter(fn ($event) => filled($event->from_status) || filled($event->to_status))->values();
+    $attachedChildren = $component->childComponents ?? collect();
+    $removedExpectedChildren = $removedExpectedSubcomponents ?? collect();
+    $expectedSubcomponents = $component->componentDefinition?->subcomponentTemplates ?? collect();
+    $childComponentDefinitions = $childComponentDefinitions ?? collect();
+    $canCreateChildComponent = $isInstalled
+        && !$component->parent_component_instance_id
+        && filled($component->current_asset_id);
+    $expectedSubcomponentStates = ($component->expectedSubcomponentStates ?? collect())
+        ->keyBy('component_definition_subcomponent_template_id');
 @endphp
 
 <div class="row">
@@ -89,13 +104,13 @@
                     <dd>{{ $component->display_name }}</dd>
 
                     <dt>{{ trans('general.status') }}</dt>
-                    <dd>{{ \App\Models\ComponentInstance::statusLabel($component->status) ?? $component->status }}</dd>
+                    <dd>{{ \App\Models\ComponentInstance::lifecycleStatusLabel($lifecycleStatus) ?? $lifecycleStatus }}</dd>
 
                     <dt>{{ trans('general.type') }}</dt>
                     <dd>{{ \App\Models\ComponentInstance::sourceTypeLabel($component->source_type) ?? $component->source_type }}</dd>
 
                     <dt>{{ trans('general.condition') }}</dt>
-                    <dd>{{ $component->condition_code }}</dd>
+                    <dd>{{ \App\Models\ComponentInstance::conditionStatusLabel($conditionStatus) ?? $conditionStatus }}</dd>
 
                     @if($component->serial)
                     <dt>{{ trans('admin/hardware/form.serial') }}</dt>
@@ -168,11 +183,9 @@
             </div>
         </div>
 
-        @if(in_array($component->status, [
-            \App\Models\ComponentInstance::STATUS_IN_STOCK,
-            \App\Models\ComponentInstance::STATUS_NEEDS_VERIFICATION,
-            \App\Models\ComponentInstance::STATUS_DEFECTIVE,
-            \App\Models\ComponentInstance::STATUS_DESTRUCTION_PENDING,
+        @if(in_array($lifecycleStatus, [
+            \App\Models\ComponentInstance::LIFECYCLE_IN_STOCK,
+            \App\Models\ComponentInstance::LIFECYCLE_DESTRUCTION_PENDING,
         ], true))
             <div class="box box-default">
                 <div class="box-header with-border">
@@ -227,7 +240,7 @@
                         <div class="form-group" style="display:inline-block; min-width:260px; margin-right:10px; margin-bottom:0; vertical-align:top;">
                             <label class="sr-only" for="component_status_transition">{{ __('Status') }}</label>
                             <select class="form-control" id="component_status_transition">
-                                <option value="">{{ __('Status') }}: {{ \App\Models\ComponentInstance::statusLabel($component->status) ?? $component->status }}</option>
+                                <option value="">{{ __('Status') }}: {{ \App\Models\ComponentInstance::lifecycleStatusLabel($lifecycleStatus) ?? $lifecycleStatus }}</option>
                                 @foreach($statusTransitions as $transition)
                                     <option value="{{ $transition['target'] }}">{{ $transition['label'] }}</option>
                                 @endforeach
@@ -243,7 +256,7 @@
                         @endcan
                     @elseif (!$isDestroyed)
                         @can('install', $component)
-                            @if(!$isDestructionPending && !$isDefective)
+                            @if(!$isDestructionPending)
                                 <a href="{{ route('components.install.create', [$component, 'return_to' => $returnTo]) }}" class="btn btn-primary">{{ __('Install') }}</a>
                             @endif
                         @endcan
@@ -254,6 +267,224 @@
                     @endif
                     <a href="{{ route('components.tray') }}" class="btn btn-default">{{ __('My Tray') }}</a>
                 </div>
+            </div>
+        </div>
+
+        <div class="box box-default">
+            <div class="box-header with-border">
+                <h3 class="box-title">{{ __('Child Structure') }}</h3>
+            </div>
+            <div class="box-body">
+                <h4 style="margin-top:0;">{{ __('Attached Child Components') }}</h4>
+                @if($attachedChildren->isEmpty())
+                    <p class="text-muted">{{ __('No child components attached.') }}</p>
+                @else
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>{{ trans('general.name') }}</th>
+                                <th>{{ trans('general.tag') }}</th>
+                                <th>{{ trans('general.status') }}</th>
+                                <th>{{ trans('general.condition') }}</th>
+                                <th>{{ trans('general.asset') }}</th>
+                                <th>{{ trans('general.action') }}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach($attachedChildren as $child)
+                                <tr>
+                                    <td>
+                                        <a href="{{ route('components.show', $child) }}">{{ $child->display_name }}</a>
+                                        @if($child->componentDefinition)
+                                            <div class="text-muted small">{{ $child->componentDefinition->name }}</div>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('components.show', $child) }}">{{ $child->component_tag }}</a>
+                                    </td>
+                                    <td>{{ \App\Models\ComponentInstance::lifecycleStatusLabel($child->effectiveLifecycleStatus()) ?? $child->effectiveLifecycleStatus() }}</td>
+                                    <td>{{ \App\Models\ComponentInstance::conditionStatusLabel($child->effectiveConditionStatus()) ?? $child->effectiveConditionStatus() }}</td>
+                                    <td>
+                                        @if($child->currentAsset)
+                                            <a href="{{ route('hardware.show', $child->currentAsset) }}">{{ $child->currentAsset->present()->name() }}</a>
+                                        @else
+                                            <span class="text-muted">{{ trans('general.na') }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="text-nowrap">
+                                        @can('move', $child)
+                                            <form method="POST" action="{{ route('components.remove_to_tray', $child) }}" style="display:inline;">
+                                                @csrf
+                                                <input type="hidden" name="return_to" value="{{ route('components.show', $component) }}">
+                                                <button type="submit" class="btn btn-xs btn-warning">{{ __('To Tray') }}</button>
+                                            </form>
+                                            <form method="POST" action="{{ route('components.move_to_stock', $child) }}" style="display:inline;">
+                                                @csrf
+                                                <input type="hidden" name="return_to" value="{{ route('components.show', $component) }}">
+                                                <button type="submit" class="btn btn-xs btn-default">{{ __('To Stock') }}</button>
+                                            </form>
+                                        @endcan
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+
+                @can('create', \App\Models\ComponentInstance::class)
+                    @can('install', new \App\Models\ComponentInstance())
+                        @if($canCreateChildComponent)
+                            <h4>{{ __('Add Child Component') }}</h4>
+                            <form method="POST" action="{{ route('components.children.store', $component) }}">
+                                @csrf
+                                @include('components.partials.manual-fields', [
+                                    'componentDefinitions' => $childComponentDefinitions,
+                                    'notesField' => 'note',
+                                    'showSourceType' => false,
+                                    'showCondition' => false,
+                                    'showStorageLocation' => false,
+                                    'showInstalledAs' => false,
+                                    'showCreationModeToggle' => true,
+                                    'creationModeField' => 'creation_mode',
+                                ])
+                                @include('components.partials.condition-warning-confirmation', [
+                                    'conditionStatus' => \App\Models\ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION,
+                                    'message' => __('New child components start as Needs Attention until they are verified. Confirm the warning before attaching this child component.'),
+                                    'checkboxLabel' => __('I understand this child component starts as Needs Attention and want to attach it.'),
+                                ])
+                                <button type="submit" class="btn btn-success">{{ __('Create Child Component') }}</button>
+                            </form>
+                        @endif
+                    @endcan
+                @endcan
+
+                <h4>{{ __('Removed Expected Child Components') }}</h4>
+                @if($removedExpectedChildren->isEmpty())
+                    <p class="text-muted">{{ __('No expected child components removed.') }}</p>
+                @else
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>{{ trans('general.name') }}</th>
+                                <th>{{ trans('general.tag') }}</th>
+                                <th>{{ trans('general.status') }}</th>
+                                <th>{{ trans('general.location') }}</th>
+                                <th>{{ trans('general.action') }}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach($removedExpectedChildren as $child)
+                                <tr>
+                                    <td>
+                                        <a href="{{ route('components.show', $child) }}">{{ $child->display_name }}</a>
+                                        @if($child->componentDefinition)
+                                            <div class="text-muted small">{{ $child->componentDefinition->name }}</div>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('components.show', $child) }}">{{ $child->component_tag }}</a>
+                                    </td>
+                                    <td>{{ \App\Models\ComponentInstance::lifecycleStatusLabel($child->effectiveLifecycleStatus()) ?? $child->effectiveLifecycleStatus() }}</td>
+                                    <td>
+                                        @if($child->storageLocation)
+                                            {{ $child->storageLocation->name }}
+                                        @elseif($child->heldBy)
+                                            {{ __('Tray') }}: {{ $child->heldBy->present()->fullName() }}
+                                        @elseif($child->currentAsset)
+                                            <a href="{{ route('hardware.show', $child->currentAsset) }}">{{ $child->currentAsset->present()->name() }}</a>
+                                        @else
+                                            <span class="text-muted">{{ trans('general.na') }}</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('components.show', $child) }}" class="btn btn-xs btn-default">{{ __('Open') }}</a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+
+                <h4>{{ __('Expected Subcomponents') }}</h4>
+                @if($expectedSubcomponents->isEmpty())
+                    <p class="text-muted">{{ __('No expected subcomponents defined.') }}</p>
+                @else
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>{{ trans('general.name') }}</th>
+                                <th>{{ __('Definition') }}</th>
+                                <th>{{ __('Quantity') }}</th>
+                                <th>{{ __('Required') }}</th>
+                                <th>{{ trans('general.notes') }}</th>
+                                <th>{{ trans('general.action') }}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach($expectedSubcomponents as $template)
+                                @php
+                                    $state = $expectedSubcomponentStates->get($template->id);
+                                    $expectedQty = max(1, (int) $template->expected_qty);
+                                    $materializedQty = min($expectedQty, max(0, (int) ($state?->materialized_qty ?? 0)));
+                                    $removedQty = min($expectedQty - $materializedQty, max(0, (int) ($state?->removed_qty ?? 0)));
+                                    $remainingQty = max(0, $expectedQty - $materializedQty - $removedQty);
+                                    $canMaterializeExpectedChild = $lifecycleStatus === \App\Models\ComponentInstance::LIFECYCLE_ATTACHED
+                                        && filled($component->current_asset_id)
+                                        && $remainingQty > 0;
+                                @endphp
+                                <tr>
+                                    <td>{{ $template->expected_name }}</td>
+                                    <td>
+                                        @if($template->childComponentDefinition)
+                                            {{ $template->childComponentDefinition->name }}
+                                            @if($template->childComponentDefinition->part_code)
+                                                <div class="text-muted small">{{ $template->childComponentDefinition->part_code }}</div>
+                                            @endif
+                                        @else
+                                            <span class="text-muted">{{ __('Freeform') }}</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        {{ __('Expected') }}: {{ $expectedQty }}
+                                        <div class="text-muted small">{{ __('Tracked') }}: {{ $materializedQty }} | {{ __('Removed') }}: {{ $removedQty }} | {{ __('Remaining') }}: {{ $remainingQty }}</div>
+                                    </td>
+                                    <td>{{ $template->is_required ? __('Yes') : __('No') }}</td>
+                                    <td>{{ $template->notes ?: trans('general.none') }}</td>
+                                    <td class="text-nowrap">
+                                        @can('install', new \App\Models\ComponentInstance())
+                                            @if($canMaterializeExpectedChild)
+                                                <form method="POST" action="{{ route('components.expected_subcomponents.materialize', [$component, $template]) }}" class="form-inline">
+                                                    @csrf
+                                                    @include('components.partials.condition-warning-confirmation', [
+                                                        'component' => null,
+                                                        'compact' => true,
+                                                        'conditionStatus' => \App\Models\ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION,
+                                                        'message' => __('Tracking creates a Needs Attention child component until it is verified.'),
+                                                        'checkboxLabel' => __('Confirm warning'),
+                                                    ])
+                                                    <div class="input-group input-group-sm" style="max-width:280px;">
+                                                        <input type="text" name="note" class="form-control" placeholder="{{ __('Reason') }}">
+                                                        <span class="input-group-btn">
+                                                            <button type="submit" class="btn btn-primary">{{ __('Track') }}</button>
+                                                        </span>
+                                                    </div>
+                                                </form>
+                                            @else
+                                                <span class="text-muted">{{ $remainingQty === 0 ? __('Complete') : __('Unavailable') }}</span>
+                                            @endif
+                                        @endcan
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
             </div>
         </div>
 
@@ -295,7 +526,7 @@
             @endcan
         @endif
 
-        @if (($isInTray || $isNeedsVerification || $isDefective) && !$isDestroyed)
+        @if ($isInTray && !$isDestroyed)
             <div class="modal fade" id="componentToStockModal" data-component-status-modal tabindex="-1" role="dialog" aria-labelledby="componentToStockModalLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
@@ -325,7 +556,7 @@
             </div>
         @endif
 
-        @if (($isInTray || $isInStock || $isDefective) && !$isDestroyed)
+        @if (!$isDestroyed && !$isNeedsAttention)
             <div class="modal fade" id="componentNeedsVerificationModal" data-component-status-modal tabindex="-1" role="dialog" aria-labelledby="componentNeedsVerificationModalLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
@@ -336,10 +567,10 @@
                                 <button type="button" class="close" data-dismiss="modal" aria-label="{{ trans('general.close') }}">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
-                                <h4 class="modal-title" id="componentNeedsVerificationModalLabel">{{ __('Mark Needs Verification') }}</h4>
+                                <h4 class="modal-title" id="componentNeedsVerificationModalLabel">{{ __('Mark Needs Attention') }}</h4>
                             </div>
                             <div class="modal-body">
-                                <p class="text-muted">{{ __('Mark this component as needing verification.') }}</p>
+                                <p class="text-muted">{{ __('Mark this component as needing attention without changing where it is attached or stored.') }}</p>
                                 <div class="form-group">
                                     <label for="component_needs_verification_note_modal">{{ trans('general.notes') }}</label>
                                     <textarea class="form-control" id="component_needs_verification_note_modal" name="note" rows="4"></textarea>
@@ -347,7 +578,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('general.cancel') }}</button>
-                                <button type="submit" class="btn btn-warning">{{ __('Confirm Needs Verification') }}</button>
+                                <button type="submit" class="btn btn-warning">{{ __('Confirm Needs Attention') }}</button>
                             </div>
                         </form>
                     </div>
@@ -355,7 +586,7 @@
             </div>
         @endif
 
-        @if (($isInTray || $isInStock || $isNeedsVerification) && !$isDestroyed && !$isDefective)
+        @if (!$isDestroyed && !$isDamaged)
             <div class="modal fade" id="componentDefectiveModal" data-component-status-modal tabindex="-1" role="dialog" aria-labelledby="componentDefectiveModalLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
@@ -366,10 +597,10 @@
                                 <button type="button" class="close" data-dismiss="modal" aria-label="{{ trans('general.close') }}">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
-                                <h4 class="modal-title" id="componentDefectiveModalLabel">{{ __('Mark Defective') }}</h4>
+                                <h4 class="modal-title" id="componentDefectiveModalLabel">{{ __('Mark Damaged') }}</h4>
                             </div>
                             <div class="modal-body">
-                                <p class="text-muted">{{ __('Mark this component as defective so it is clearly separated from normal stock.') }}</p>
+                                <p class="text-muted">{{ __('Mark this component as damaged without changing where it is attached or stored.') }}</p>
                                 <div class="form-group">
                                     <label for="component_defective_note_modal">{{ trans('general.notes') }}</label>
                                     <textarea class="form-control" id="component_defective_note_modal" name="note" rows="4"></textarea>
@@ -377,7 +608,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('general.cancel') }}</button>
-                                <button type="submit" class="btn btn-danger">{{ __('Confirm Defective') }}</button>
+                                <button type="submit" class="btn btn-danger">{{ __('Confirm Damaged') }}</button>
                             </div>
                         </form>
                     </div>

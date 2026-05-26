@@ -365,8 +365,24 @@ Important nuance:
 - a part can be `attached + damaged`
 - a part can be `attached + needs_attention`
 - a part can be `in_stock + good`
+- a part can remain `damaged` or `needs_attention` after it is removed to tray or stock
 
 This is why lifecycle and condition must not be collapsed into one field.
+
+### 3. Warning Policy
+Damaged or needs-attention parts should warn operators, not hard-block normal lifecycle work.
+
+Do not prevent:
+- installing or attaching a damaged part
+- installing or attaching a needs-attention part
+- setting an asset to a selling/sold/ready-for-sale state while damaged or needs-attention parts remain attached
+
+Instead:
+- show a clear warning before installing or attaching affected parts
+- show a clear warning when moving an asset into a selling/sold/ready-for-sale state with affected attached parts
+- preserve the action if the operator confirms and provides any required note the workflow asks for
+
+The only hard terminal placement state is `destroyed`. Destroyed components should be lockable and must not be reinstalled or reattached through normal workflows. Destruction should carry a destruction note, verification event, or equivalent audit trail so the lock is explainable later.
 
 ## Movement Rules
 
@@ -556,6 +572,8 @@ Warnings should also exist for:
 - parent/child overlapping contributions
 - duplicate active contributors for the same scalar
 - expected baseline that has been reduced
+- installing or attaching damaged or needs-attention parts
+- moving an asset into a selling/sold/ready-for-sale state while damaged or needs-attention parts remain attached
 
 ## UI Changes
 
@@ -678,6 +696,9 @@ Must-have coverage:
 - detached child does not move with parent
 - damaged-but-attached child still contributes to spec
 - damaged-but-attached child is visibly flagged in summaries
+- damaged or needs-attention parts can still be installed or attached after warning/confirmation
+- assets can still move into selling/sold/ready-for-sale states after warning/confirmation when affected parts remain attached
+- destroyed components are locked from normal reinstall/reattach flows and carry destruction note or verification evidence
 - instance attributes override definition attributes
 - child level overrides parent level
 - overlap warnings appear but do not block save

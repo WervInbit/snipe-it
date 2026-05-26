@@ -23,12 +23,20 @@
 
                     <div class="alert alert-info">
                         <strong>{{ __('Component') }}:</strong> {{ $component->display_name }}
-                        <br><strong>{{ trans('general.status') }}:</strong> {{ $component->status }}
+                        <br><strong>{{ trans('general.status') }}:</strong> {{ \App\Models\ComponentInstance::lifecycleStatusLabel($component->effectiveLifecycleStatus()) ?? $component->effectiveLifecycleStatus() }}
+                        <br><strong>{{ trans('general.condition') }}:</strong> {{ \App\Models\ComponentInstance::conditionStatusLabel($component->effectiveConditionStatus()) ?? $component->effectiveConditionStatus() }}
                     </div>
 
                     <form method="POST" action="{{ route('components.install', $component) }}">
                         @csrf
                         <input type="hidden" name="return_to" value="{{ $returnTo }}">
+
+                        @include('components.partials.condition-warning-confirmation', [
+                            'component' => $component,
+                        ])
+                        @include('components.partials.lifecycle-warning-confirmation', [
+                            'component' => $component,
+                        ])
 
                         <div class="form-group {{ $errors->has('asset_id') ? 'has-error' : '' }}">
                             <label for="component_install_asset_id">{{ __('Asset') }}</label>

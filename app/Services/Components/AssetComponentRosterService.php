@@ -16,6 +16,10 @@ class AssetComponentRosterService
             'model.primaryModelNumber',
             'modelNumber.componentTemplates.componentDefinition.category',
             'modelNumber.componentTemplates.componentDefinition.manufacturer',
+            'modelNumber.componentTemplates.componentDefinition.subcomponentTemplates.childComponentDefinition.category',
+            'modelNumber.componentTemplates.componentDefinition.subcomponentTemplates.childComponentDefinition.manufacturer',
+            'modelNumber.componentTemplates.componentDefinition.subcomponentTemplates.childComponentDefinition.attributeContributions.definition.options',
+            'modelNumber.componentTemplates.componentDefinition.subcomponentTemplates.childComponentDefinition.attributeContributions.option',
             'modelNumber.componentTemplates.componentDefinition.attributeContributions.definition.options',
             'modelNumber.componentTemplates.componentDefinition.attributeContributions.option',
             'expectedComponentStates',
@@ -25,8 +29,15 @@ class AssetComponentRosterService
             'sourcedComponents.currentAsset.model',
             'trackedComponents.componentDefinition.category',
             'trackedComponents.componentDefinition.manufacturer',
+            'trackedComponents.componentDefinition.subcomponentTemplates.childComponentDefinition.category',
+            'trackedComponents.componentDefinition.subcomponentTemplates.childComponentDefinition.manufacturer',
+            'trackedComponents.componentDefinition.subcomponentTemplates.childComponentDefinition.attributeContributions.definition.options',
+            'trackedComponents.componentDefinition.subcomponentTemplates.childComponentDefinition.attributeContributions.option',
             'trackedComponents.componentDefinition.attributeContributions.definition.options',
             'trackedComponents.componentDefinition.attributeContributions.option',
+            'trackedComponents.expectedSubcomponentStates',
+            'trackedComponents.instanceAttributes.definition.options',
+            'trackedComponents.instanceAttributes.option',
             'trackedComponents.storageLocation.siteLocation',
             'trackedComponents.heldBy',
             'trackedComponents.createdBy',
@@ -36,19 +47,22 @@ class AssetComponentRosterService
             ?? $asset->modelNumber
             ?? $asset->model?->primaryModelNumber;
 
+        $tracked = $this->attachedTrackedComponents($asset->trackedComponents)
+            ->sortBy(fn (ComponentInstance $component) => [$component->updated_at?->timestamp ?? 0, $component->id])
+            ->values();
+
         if (!$modelNumber) {
-            return new AssetComponentRoster($this->classifyTrackedOnly($asset->trackedComponents), []);
+            return new AssetComponentRoster($this->classifyTrackedOnly($tracked), []);
         }
 
         $templates = $modelNumber->componentTemplates
             ->sortBy(fn (ModelNumberComponentTemplate $template) => [$template->sort_order ?? 0, $template->id ?? 0])
             ->values();
         $stateByTemplate = $asset->expectedComponentStates->keyBy('model_number_component_template_id');
-        $tracked = $asset->trackedComponents
-            ->sortBy(fn (ComponentInstance $component) => [$component->updated_at?->timestamp ?? 0, $component->id])
+        $topLevelTracked = $tracked
+            ->filter(fn (ComponentInstance $component) => !$component->parent_component_instance_id)
             ->values();
-
-        $trackedByDefinition = $tracked
+        $trackedByDefinition = $topLevelTracked
             ->filter(fn (ComponentInstance $component) => $component->component_definition_id)
             ->groupBy('component_definition_id')
             ->map(fn (Collection $group) => $group->values());
@@ -128,6 +142,19 @@ class AssetComponentRosterService
         }
 
         foreach ($tracked as $component) {
+            if ($component->parent_component_instance_id) {
+                $rows->push(new AssetComponentRosterRow(
+                    $component->component_definition_id ? 'extra' : 'custom',
+                    $component->component_definition_id ? __('Extra') : __('Custom'),
+                    $component->display_name,
+                    null,
+                    $component,
+                    $component->installed_as,
+                    true
+                ));
+                continue;
+            }
+
             if (!$component->component_definition_id) {
                 $rows->push(new AssetComponentRosterRow(
                     'custom',
@@ -171,7 +198,7 @@ class AssetComponentRosterService
      */
     private function classifyTrackedOnly(Collection $trackedComponents): Collection
     {
-        return $trackedComponents
+        return $this->attachedTrackedComponents($trackedComponents)
             ->sortBy(fn (ComponentInstance $component) => [$component->updated_at?->timestamp ?? 0, $component->id])
             ->map(function (ComponentInstance $component): AssetComponentRosterRow {
                 return new AssetComponentRosterRow(
@@ -184,6 +211,17 @@ class AssetComponentRosterService
                     true
                 );
             })
+            ->values();
+    }
+
+    /**
+     * @param Collection<int, ComponentInstance> $trackedComponents
+     * @return Collection<int, ComponentInstance>
+     */
+    private function attachedTrackedComponents(Collection $trackedComponents): Collection
+    {
+        return $trackedComponents
+            ->filter(fn (ComponentInstance $component) => $component->effectiveLifecycleStatus() === ComponentInstance::LIFECYCLE_ATTACHED)
             ->values();
     }
 }

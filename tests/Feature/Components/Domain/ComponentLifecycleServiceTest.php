@@ -95,6 +95,7 @@ class ComponentLifecycleServiceTest extends TestCase
 
         $instance->refresh();
         $this->assertSame(ComponentInstance::STATUS_IN_TRANSFER, $instance->status);
+        $this->assertSame(ComponentInstance::LIFECYCLE_IN_TRAY, $instance->lifecycle_status);
         $this->assertNull($instance->current_asset_id);
         $this->assertSame($actor->id, $instance->held_by_user_id);
 
@@ -106,6 +107,7 @@ class ComponentLifecycleServiceTest extends TestCase
 
         $instance->refresh();
         $this->assertSame(ComponentInstance::STATUS_INSTALLED, $instance->status);
+        $this->assertSame(ComponentInstance::LIFECYCLE_ATTACHED, $instance->lifecycle_status);
         $this->assertSame($targetAsset->id, $instance->current_asset_id);
         $this->assertSame('RAM Slot 1', $instance->installed_as);
         $this->assertNull($instance->held_by_user_id);
@@ -145,7 +147,9 @@ class ComponentLifecycleServiceTest extends TestCase
         ]);
 
         $instance->refresh();
-        $this->assertSame(ComponentInstance::STATUS_NEEDS_VERIFICATION, $instance->status);
+        $this->assertSame(ComponentInstance::STATUS_IN_STOCK, $instance->status);
+        $this->assertSame(ComponentInstance::LIFECYCLE_IN_STOCK, $instance->lifecycle_status);
+        $this->assertSame(ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION, $instance->condition_status);
         $this->assertSame($verification->id, $instance->storage_location_id);
 
         $aged = ComponentInstance::factory()->inTray($actor)->create([
@@ -156,12 +160,14 @@ class ComponentLifecycleServiceTest extends TestCase
         Artisan::call('components:age-tray');
 
         $aged->refresh();
-        $this->assertSame(ComponentInstance::STATUS_NEEDS_VERIFICATION, $aged->status);
+        $this->assertSame(ComponentInstance::STATUS_IN_TRANSFER, $aged->status);
+        $this->assertSame(ComponentInstance::LIFECYCLE_IN_TRAY, $aged->lifecycle_status);
+        $this->assertSame(ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION, $aged->condition_status);
         $this->assertNotNull($aged->needs_verification_at);
         $this->assertDatabaseHas('component_events', [
             'component_instance_id' => $aged->id,
             'event_type' => 'flagged_needs_verification',
-            'to_status' => ComponentInstance::STATUS_NEEDS_VERIFICATION,
+            'to_status' => ComponentInstance::STATUS_IN_TRANSFER,
         ]);
     }
 }

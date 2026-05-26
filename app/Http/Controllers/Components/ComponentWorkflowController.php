@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Components;
 
+use App\Exceptions\ComponentConditionWarningException;
+use App\Exceptions\ComponentLifecycleWarningException;
 use App\Http\Controllers\Concerns\BuildsComponentWorkflowOptions;
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
@@ -51,7 +53,7 @@ class ComponentWorkflowController extends Controller
     {
         $this->authorize('move', $component_id);
 
-        abort_unless($component_id->status === ComponentInstance::STATUS_INSTALLED, 404);
+        abort_unless($component_id->effectiveLifecycleStatus() === ComponentInstance::LIFECYCLE_ATTACHED, 404);
 
         return view('components.workflows.remove-to-tray', [
             'component' => $component_id->loadMissing(['currentAsset.model']),
@@ -82,11 +84,10 @@ class ComponentWorkflowController extends Controller
     {
         $this->authorize('install', $component_id);
 
-        abort_if(in_array($component_id->status, [
-            ComponentInstance::STATUS_INSTALLED,
-            ComponentInstance::STATUS_DESTROYED_RECYCLED,
-            ComponentInstance::STATUS_DESTRUCTION_PENDING,
-            ComponentInstance::STATUS_DEFECTIVE,
+        abort_if(in_array($component_id->effectiveLifecycleStatus(), [
+            ComponentInstance::LIFECYCLE_ATTACHED,
+            ComponentInstance::LIFECYCLE_DESTROYED,
+            ComponentInstance::LIFECYCLE_DESTRUCTION_PENDING,
         ], true), 404);
 
         return view('components.workflows.install', [
@@ -102,6 +103,8 @@ class ComponentWorkflowController extends Controller
 
         $data = $request->validate([
             'asset_id' => ['required', 'integer', 'exists:assets,id'],
+            'condition_warning_confirmed' => ['nullable', 'boolean'],
+            'lifecycle_warning_confirmed' => ['nullable', 'boolean'],
             'note' => ['nullable', 'string'],
         ]);
 
@@ -109,8 +112,14 @@ class ComponentWorkflowController extends Controller
             $asset = Asset::findOrFail($data['asset_id']);
             $this->lifecycle->installIntoAsset($component_id, $asset, [
                 'performed_by' => $request->user(),
+                'condition_warning_confirmed' => $request->boolean('condition_warning_confirmed'),
+                'lifecycle_warning_confirmed' => $request->boolean('lifecycle_warning_confirmed'),
                 'note' => $data['note'] ?? null,
             ]);
+        } catch (ComponentLifecycleWarningException $exception) {
+            return redirect()->back()->withInput()->with('warning', $exception->getMessage());
+        } catch (ComponentConditionWarningException $exception) {
+            return redirect()->back()->withInput()->with('warning', $exception->getMessage());
         } catch (InvalidArgumentException $exception) {
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
@@ -122,10 +131,11 @@ class ComponentWorkflowController extends Controller
     {
         $this->authorize('move', $component_id);
 
-        abort_if(in_array($component_id->status, [
-            ComponentInstance::STATUS_INSTALLED,
-            ComponentInstance::STATUS_DESTROYED_RECYCLED,
-            ComponentInstance::STATUS_DESTRUCTION_PENDING,
+        abort_if(in_array($component_id->effectiveLifecycleStatus(), [
+            ComponentInstance::LIFECYCLE_ATTACHED,
+            ComponentInstance::LIFECYCLE_DESTROYED,
+            ComponentInstance::LIFECYCLE_SOLD_RETURNED,
+            ComponentInstance::LIFECYCLE_DESTRUCTION_PENDING,
         ], true), 404);
 
         return view('components.workflows.storage', [
@@ -170,10 +180,9 @@ class ComponentWorkflowController extends Controller
     {
         $this->authorize('verify', $component_id);
 
-        abort_if(in_array($component_id->status, [
-            ComponentInstance::STATUS_INSTALLED,
-            ComponentInstance::STATUS_DESTROYED_RECYCLED,
-            ComponentInstance::STATUS_DESTRUCTION_PENDING,
+        abort_if(in_array($component_id->effectiveLifecycleStatus(), [
+            ComponentInstance::LIFECYCLE_DESTROYED,
+            ComponentInstance::LIFECYCLE_SOLD_RETURNED,
         ], true), 404);
 
         $locations = $this->storageLocationsByType();
@@ -217,7 +226,7 @@ class ComponentWorkflowController extends Controller
     {
         $this->authorize('verify', $component_id);
 
-        abort_unless($component_id->status === ComponentInstance::STATUS_NEEDS_VERIFICATION, 404);
+        abort_unless($component_id->effectiveConditionStatus() === ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION, 404);
 
         $locations = $this->storageLocationsByType();
 
@@ -259,10 +268,11 @@ class ComponentWorkflowController extends Controller
     {
         $this->authorize('move', $component_id);
 
-        abort_if(in_array($component_id->status, [
-            ComponentInstance::STATUS_INSTALLED,
-            ComponentInstance::STATUS_DESTROYED_RECYCLED,
-            ComponentInstance::STATUS_DESTRUCTION_PENDING,
+        abort_if(in_array($component_id->effectiveLifecycleStatus(), [
+            ComponentInstance::LIFECYCLE_ATTACHED,
+            ComponentInstance::LIFECYCLE_DESTROYED,
+            ComponentInstance::LIFECYCLE_SOLD_RETURNED,
+            ComponentInstance::LIFECYCLE_DESTRUCTION_PENDING,
         ], true), 404);
 
         $locations = $this->storageLocationsByType();
@@ -304,7 +314,7 @@ class ComponentWorkflowController extends Controller
     {
         $this->authorize('move', $component_id);
 
-        abort_unless($component_id->status === ComponentInstance::STATUS_DESTRUCTION_PENDING, 404);
+        abort_unless($component_id->effectiveLifecycleStatus() === ComponentInstance::LIFECYCLE_DESTRUCTION_PENDING, 404);
 
         return view('components.workflows.destruction', [
             'component' => $component_id->loadMissing(['storageLocation.siteLocation', 'currentAsset.model', 'heldBy']),
@@ -351,7 +361,7 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component marked defective.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component marked damaged.'));
     }
 
     private function installableAssets()

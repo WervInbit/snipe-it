@@ -54,6 +54,12 @@ Route::group([
 
     Route::post('{component_id}/mark-destroyed', [Components\ComponentWorkflowController::class, 'markDestroyed'])
         ->name('components.mark_destroyed');
+
+    Route::post('{component_id}/expected-subcomponents/{template}/materialize', [Components\ComponentsController::class, 'materializeExpectedSubcomponent'])
+        ->name('components.expected_subcomponents.materialize');
+
+    Route::post('{component_id}/children', [Components\ComponentsController::class, 'storeChild'])
+        ->name('components.children.store');
 });
 
 Route::resource('components', Components\ComponentsController::class, [

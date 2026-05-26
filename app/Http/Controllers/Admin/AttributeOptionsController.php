@@ -8,6 +8,7 @@ use App\Models\AttributeDefinition;
 use App\Models\AttributeOption;
 use App\Models\AssetAttributeOverride;
 use App\Models\ComponentDefinitionAttribute;
+use App\Models\ComponentInstanceAttribute;
 use App\Models\ModelNumberAttribute;
 use Illuminate\Http\RedirectResponse;
 
@@ -108,6 +109,13 @@ class AttributeOptionsController extends Controller
             ]);
 
         ComponentDefinitionAttribute::query()
+            ->where('attribute_option_id', $option->id)
+            ->update([
+                'value' => $option->value,
+                'raw_value' => $option->value,
+            ]);
+
+        ComponentInstanceAttribute::query()
             ->where('attribute_option_id', $option->id)
             ->update([
                 'value' => $option->value,

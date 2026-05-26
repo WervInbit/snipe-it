@@ -40,6 +40,8 @@ class EffectiveAttributeResolver
             'attributes.option',
             'componentTemplates.componentDefinition.attributeContributions.definition.options',
             'componentTemplates.componentDefinition.attributeContributions.option',
+            'componentTemplates.componentDefinition.subcomponentTemplates.childComponentDefinition.attributeContributions.definition.options',
+            'componentTemplates.componentDefinition.subcomponentTemplates.childComponentDefinition.attributeContributions.option',
         ]);
 
         $manualAssignments = $modelNumber->attributes->keyBy('attribute_definition_id');
@@ -75,10 +77,16 @@ class EffectiveAttributeResolver
             'model.primaryModelNumber',
             'modelNumber.componentTemplates.componentDefinition.attributeContributions.definition.options',
             'modelNumber.componentTemplates.componentDefinition.attributeContributions.option',
+            'modelNumber.componentTemplates.componentDefinition.subcomponentTemplates.childComponentDefinition.attributeContributions.definition.options',
+            'modelNumber.componentTemplates.componentDefinition.subcomponentTemplates.childComponentDefinition.attributeContributions.option',
             'attributeOverrides.definition.options',
             'attributeOverrides.option',
             'trackedComponents.componentDefinition.attributeContributions.definition.options',
             'trackedComponents.componentDefinition.attributeContributions.option',
+            'trackedComponents.componentDefinition.subcomponentTemplates.childComponentDefinition.attributeContributions.definition.options',
+            'trackedComponents.componentDefinition.subcomponentTemplates.childComponentDefinition.attributeContributions.option',
+            'trackedComponents.instanceAttributes.definition.options',
+            'trackedComponents.instanceAttributes.option',
             'expectedComponentStates',
         ]);
 
@@ -317,12 +325,12 @@ class EffectiveAttributeResolver
             $rawValue = $calculated->rawValue;
             $option = $calculated->option;
             $baselineValue = $baseline?->value ?? $modelResolved?->value;
-            $meta = [
+            $meta = array_merge($calculated->meta, [
                 'expected_component_baseline_value' => $baselineValue,
                 'current_component_value' => $calculated->value,
                 'reduced_expected_baseline' => $baselineValue !== null
                     && $this->numericStringToFloat($calculated->value) < $this->numericStringToFloat($baselineValue),
-            ];
+            ]);
         } elseif ($override && $definition->allow_asset_override) {
             $source = 'override';
             $value = $override->value;

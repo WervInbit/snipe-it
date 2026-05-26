@@ -179,6 +179,7 @@
         $assignedDefinitionIds = $selectedDefinitionIds ?? [];
         $componentDefinitions = $componentDefinitions ?? collect();
         $componentDefinitionsById = $componentDefinitions->keyBy('id');
+        $componentDefinitionOverlapWarnings = collect($componentDefinitionOverlapWarnings ?? []);
     @endphp
     @php
         $attributeErrorItems = collect();
@@ -470,6 +471,24 @@
                                             </div>
                                         @elseif($selectedComponentDefinition)
                                             <div class="text-muted small">{{ __('This definition does not contribute any shared attributes yet.') }}</div>
+                                        @endif
+
+                                        @if($selectedComponentDefinition)
+                                            <div class="text-muted small">
+                                                @can('update', $selectedComponentDefinition)
+                                                    <a href="{{ route('settings.component_definitions.edit', $selectedComponentDefinition) }}">{{ __('Edit component definition') }}</a>
+                                                @else
+                                                    {{ __('Component definition') }}: {{ $selectedComponentDefinition->name }}
+                                                @endcan
+                                            </div>
+
+                                            @include('models.model_numbers.partials.component-template-child-preview', [
+                                                'componentDefinition' => $selectedComponentDefinition,
+                                            ])
+
+                                            @include('settings.component_definitions.partials.hierarchy-overlap-warnings', [
+                                                'warnings' => $componentDefinitionOverlapWarnings->get($selectedComponentDefinition->id, collect()),
+                                            ])
                                         @endif
                                     </div>
                                 </div>

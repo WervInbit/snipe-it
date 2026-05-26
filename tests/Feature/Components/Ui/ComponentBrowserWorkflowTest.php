@@ -4,6 +4,7 @@ namespace Tests\Feature\Components\Ui;
 
 use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\Asset;
+use App\Models\ComponentDefinition;
 use App\Models\ComponentInstance;
 use App\Models\ComponentStorageLocation;
 use App\Models\User;
@@ -88,6 +89,104 @@ class ComponentBrowserWorkflowTest extends TestCase
             ->assertSeeText('Installed');
     }
 
+    public function testAssetAddPageCanCreateDefinitionBackedComponentWithoutCustomName(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create();
+        $definition = ComponentDefinition::factory()->create([
+            'name' => 'Webcam Module',
+            'is_active' => true,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('hardware.components.register', $asset), [
+                'creation_mode' => 'definition',
+                'component_definition_id' => $definition->id,
+                'serial' => 'CAM-123',
+                'condition_warning_confirmed' => 1,
+                'note' => 'Installed from asset add form.',
+            ])
+            ->assertRedirect(route('hardware.show', $asset))
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('success', 'Component created and installed.');
+
+        $this->assertDatabaseHas('component_instances', [
+            'component_definition_id' => $definition->id,
+            'current_asset_id' => $asset->id,
+            'display_name' => 'Webcam Module',
+            'serial' => 'CAM-123',
+            'status' => ComponentInstance::STATUS_INSTALLED,
+        ]);
+    }
+
+    public function testAssetInstallRequiresWarningConfirmationForDamagedComponent(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create();
+        $component = ComponentInstance::factory()->create([
+            'display_name' => 'Damaged Fan',
+            'condition_code' => ComponentInstance::CONDITION_BROKEN,
+            'condition_status' => ComponentInstance::CONDITION_STATUS_DAMAGED,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('hardware.components.install', $asset), [
+                'component_id' => $component->id,
+            ])
+            ->assertSessionHas('warning');
+
+        $component->refresh();
+        $this->assertNull($component->current_asset_id);
+        $this->assertSame(ComponentInstance::LIFECYCLE_IN_STOCK, $component->lifecycle_status);
+
+        $this->actingAs($user)
+            ->post(route('hardware.components.install', $asset), [
+                'component_id' => $component->id,
+                'condition_warning_confirmed' => 1,
+            ])
+            ->assertRedirect(route('hardware.show', $asset))
+            ->assertSessionHas('success', 'Component installed.');
+
+        $component->refresh();
+        $this->assertSame($asset->id, $component->current_asset_id);
+        $this->assertSame(ComponentInstance::CONDITION_STATUS_DAMAGED, $component->condition_status);
+    }
+
+    public function testAssetInstallAllowsSoldReturnedComponentAfterLifecycleWarningConfirmation(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create();
+        $component = ComponentInstance::factory()->create([
+            'display_name' => 'Sold Returned Adapter',
+            'status' => ComponentInstance::STATUS_SOLD_RETURNED,
+            'lifecycle_status' => ComponentInstance::LIFECYCLE_SOLD_RETURNED,
+            'storage_location_id' => null,
+            'current_asset_id' => null,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('hardware.components.install', $asset), [
+                'component_id' => $component->id,
+            ])
+            ->assertSessionHas('warning');
+
+        $component->refresh();
+        $this->assertNull($component->current_asset_id);
+        $this->assertSame(ComponentInstance::LIFECYCLE_SOLD_RETURNED, $component->lifecycle_status);
+
+        $this->actingAs($user)
+            ->post(route('hardware.components.install', $asset), [
+                'component_id' => $component->id,
+                'lifecycle_warning_confirmed' => 1,
+            ])
+            ->assertRedirect(route('hardware.show', $asset))
+            ->assertSessionHas('success', 'Component installed.');
+
+        $component->refresh();
+        $this->assertSame($asset->id, $component->current_asset_id);
+        $this->assertSame(ComponentInstance::LIFECYCLE_ATTACHED, $component->lifecycle_status);
+    }
+
     public function testLooseComponentCanMoveThroughStockVerificationAndDestructionStates(): void
     {
         $user = User::factory()->superuser()->create();
@@ -106,7 +205,9 @@ class ComponentBrowserWorkflowTest extends TestCase
             ->assertSessionHas('success');
 
         $component->refresh();
-        $this->assertSame(ComponentInstance::STATUS_NEEDS_VERIFICATION, $component->status);
+        $this->assertSame(ComponentInstance::STATUS_IN_STOCK, $component->status);
+        $this->assertSame(ComponentInstance::LIFECYCLE_IN_STOCK, $component->lifecycle_status);
+        $this->assertSame(ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION, $component->condition_status);
         $this->assertSame($verification->id, $component->storage_location_id);
 
         $this->actingAs($user)
@@ -183,17 +284,19 @@ class ComponentBrowserWorkflowTest extends TestCase
             ->post(route('components.mark_defective', $component), [
                 'note' => 'Failed inspection',
             ])
-            ->assertSessionHas('success', 'Component marked defective.');
+            ->assertSessionHas('success', 'Component marked damaged.');
 
         $component->refresh();
-        $this->assertSame(ComponentInstance::STATUS_DEFECTIVE, $component->status);
+        $this->assertSame(ComponentInstance::STATUS_IN_TRANSFER, $component->status);
+        $this->assertSame(ComponentInstance::LIFECYCLE_IN_TRAY, $component->lifecycle_status);
+        $this->assertSame(ComponentInstance::CONDITION_STATUS_DAMAGED, $component->condition_status);
         $this->assertNull($component->current_asset_id);
-        $this->assertNull($component->held_by_user_id);
+        $this->assertSame($user->id, $component->held_by_user_id);
 
         $this->actingAs($user)
             ->get(route('components.show', $component))
             ->assertOk()
-            ->assertSeeText('Defective');
+            ->assertSeeText('Damaged');
     }
 
     public function testWebTrayInstallRejectsComponentsHeldByAnotherUser(): void

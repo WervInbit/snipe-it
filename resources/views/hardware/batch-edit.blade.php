@@ -12,6 +12,9 @@
             @if (session('requires_ack_failed_tests'))
                 <input type="hidden" name="ack_failed_tests" value="1">
             @endif
+            @if (session('requires_ack_component_issues'))
+                <input type="hidden" name="ack_component_issues" value="1">
+            @endif
             @foreach($assets as $asset_id)
                 <input type="hidden" name="ids[]" value="{{ $asset_id }}">
             @endforeach
@@ -21,6 +24,18 @@
                     <div class="form-group {{ $errors->has('status_id') ? ' has-error' : '' }}">
                         <label for="status_id" class="col-md-3 control-label">{{ trans('admin/hardware/form.status') }}</label>
                         <div class="col-md-7">
+                            @if (session('requires_ack_component_issues'))
+                                <div class="alert alert-warning" role="alert" style="margin-bottom:10px;">
+                                    <p class="mb-2">{{ __('Attached damaged or needs-attention components remain on selected assets. Submit again to confirm the selling-state change.') }}</p>
+                                    @if (session('component_issue_details'))
+                                        <ul class="mb-0">
+                                            @foreach ((array) session('component_issue_details') as $detail)
+                                                <li>{{ $detail }}</li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                </div>
+                            @endif
                             <x-input.select
                                 name="status_id"
                                 :options="$statuslabel_list"

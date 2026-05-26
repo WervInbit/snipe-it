@@ -6,6 +6,7 @@ use App\Models\AssetModel;
 use App\Models\AttributeDefinition;
 use App\Models\ComponentDefinition;
 use App\Models\ComponentDefinitionAttribute;
+use App\Models\ComponentDefinitionSubcomponentTemplate;
 use App\Models\ModelNumberAttribute;
 use App\Models\ModelNumberComponentTemplate;
 use App\Models\User;
@@ -45,6 +46,70 @@ class ModelSpecificationComponentPreviewTest extends TestCase
             ->assertDontSee('name="component_templates[0][is_required]"', false)
             ->assertDontSee('name="component_templates[0][slot_name]"', false)
             ->assertDontSee('name="component_templates[0][notes]"', false);
+    }
+
+    public function test_specification_page_shows_expected_component_child_preview_and_overlap_warning(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $usbPorts = AttributeDefinition::create([
+            'key' => 'usb_port_count',
+            'label' => 'USB Port Count',
+            'datatype' => AttributeDefinition::DATATYPE_INT,
+            'allow_asset_override' => true,
+        ]);
+        $parentDefinition = ComponentDefinition::factory()->create([
+            'name' => 'Motherboard Assembly',
+        ]);
+        $childDefinition = ComponentDefinition::factory()->create([
+            'name' => 'USB-C Port Board',
+            'part_code' => 'USB-C-PORT',
+            'is_active' => true,
+        ]);
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $parentDefinition->id,
+            'attribute_definition_id' => $usbPorts->id,
+            'value' => '4',
+            'raw_value' => '4',
+            'resolves_to_spec' => true,
+        ]);
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $childDefinition->id,
+            'attribute_definition_id' => $usbPorts->id,
+            'value' => '1',
+            'raw_value' => '1',
+            'resolves_to_spec' => true,
+        ]);
+        ComponentDefinitionSubcomponentTemplate::factory()->create([
+            'parent_component_definition_id' => $parentDefinition->id,
+            'child_component_definition_id' => $childDefinition->id,
+            'expected_name' => 'Left USB-C Port Board',
+            'expected_qty' => 2,
+        ]);
+        ModelNumberComponentTemplate::create([
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $parentDefinition->id,
+            'expected_name' => 'Motherboard Assembly',
+            'expected_qty' => 1,
+            'is_required' => true,
+            'sort_order' => 0,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('models.numbers.spec.edit', [$model, $modelNumber]))
+            ->assertOk()
+            ->assertSee('data-testid="model-number-expected-child-preview"', false)
+            ->assertSeeText('Expected child structure')
+            ->assertSeeText('Left USB-C Port Board')
+            ->assertSeeText('USB-C-PORT')
+            ->assertSeeText('x2')
+            ->assertSee(route('settings.component_definitions.edit', $parentDefinition), false)
+            ->assertSee(route('settings.component_definitions.edit', $childDefinition), false)
+            ->assertSee('data-testid="component-definition-hierarchy-overlap-warning"', false)
+            ->assertSeeText('Hierarchy overlap warning')
+            ->assertSeeText('USB Port Count')
+            ->assertDontSee('name="expected_subcomponents[0][expected_name]"', false);
     }
 
     public function test_specification_page_does_not_show_preview_or_manual_override_copy(): void

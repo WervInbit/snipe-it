@@ -121,6 +121,45 @@ class ResolvedAttribute
         return (bool) ($this->meta['reduced_expected_baseline'] ?? false);
     }
 
+    public function hasHierarchyOverlapWarnings(): bool
+    {
+        return !empty($this->meta['hierarchy_overlap_warnings']);
+    }
+
+    public function hierarchyOverlapSummary(): ?string
+    {
+        $warnings = collect($this->meta['hierarchy_overlap_warnings'] ?? [])
+            ->filter(fn ($warning) => is_array($warning))
+            ->values();
+
+        if ($warnings->isEmpty()) {
+            return null;
+        }
+
+        return $warnings
+            ->map(function (array $warning): string {
+                $parentLabel = trim((string) ($warning['label'] ?? '')) ?: __('Parent component');
+                $childLabels = collect($warning['suppressed_by'] ?? [])
+                    ->filter(fn ($child) => is_array($child))
+                    ->map(fn (array $child) => trim((string) ($child['label'] ?? '')))
+                    ->filter()
+                    ->unique(fn (string $label) => mb_strtolower($label))
+                    ->values();
+
+                if ($childLabels->isEmpty()) {
+                    return __(':parent ignored because an attached child contributes this attribute.', [
+                        'parent' => $parentLabel,
+                    ]);
+                }
+
+                return __(':parent ignored; child value used from :children.', [
+                    'parent' => $parentLabel,
+                    'children' => $childLabels->implode(', '),
+                ]);
+            })
+            ->implode(' ');
+    }
+
     private function contributorSummaryForClassifications(string $source, array $classifications): ?string
     {
         return $this->summarizeContributorCollection(

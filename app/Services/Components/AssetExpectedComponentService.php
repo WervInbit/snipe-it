@@ -55,6 +55,8 @@ class AssetExpectedComponentService
             return $this->lifecycle->installIntoAsset($instance, $destinationAsset, [
                 'performed_by' => $performedBy,
                 'installed_as' => $context['installed_as'] ?? null,
+                'condition_warning_confirmed' => $context['condition_warning_confirmed'] ?? false,
+                'lifecycle_warning_confirmed' => $context['lifecycle_warning_confirmed'] ?? false,
                 'note' => $context['note'] ?? null,
             ]);
         });
@@ -66,6 +68,10 @@ class AssetExpectedComponentService
 
         if (!$template->component_definition_id) {
             throw new InvalidArgumentException('Expected components must have a catalog definition before they can be moved.');
+        }
+
+        if ($template->componentDefinition && !$template->componentDefinition->canBeInstalledOnAsset()) {
+            throw new InvalidArgumentException('This component definition is restricted to subcomponent placement and cannot be expected directly on an asset.');
         }
 
         return DB::transaction(function () use ($asset, $template, $performedBy, $context): ComponentInstance {
@@ -95,6 +101,7 @@ class AssetExpectedComponentService
                 'source_asset_id' => $asset->id,
                 'current_asset_id' => $asset->id,
                 'status' => ComponentInstance::STATUS_INSTALLED,
+                'lifecycle_status' => ComponentInstance::LIFECYCLE_ATTACHED,
                 'condition_code' => ComponentInstance::CONDITION_UNKNOWN,
                 'display_name' => $template->componentDefinition?->name ?: $template->expected_name ?: 'Expected component',
                 'serial' => null,

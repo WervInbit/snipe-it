@@ -19,7 +19,7 @@
 @section('inputFields')
     @if($isEdit && ($usageSummary['total'] ?? 0) > 0)
         <div class="alert alert-warning">
-            {{ __('This attribute is already in use. Editing it updates current model specs, asset overrides, component definitions, and future test expectations that rely on this definition.') }}
+            {{ __('This attribute is already in use. Editing it updates current model specs, asset overrides, component definitions, component instances, and future test expectations that rely on this definition.') }}
             <ul style="margin:8px 0 0 16px;">
                 @if(($usageSummary['model_values'] ?? 0) > 0)
                     <li>{{ __('Model-number values: :count', ['count' => $usageSummary['model_values']]) }}</li>
@@ -29,6 +29,9 @@
                 @endif
                 @if(($usageSummary['component_definitions'] ?? 0) > 0)
                     <li>{{ __('Component definitions: :count', ['count' => $usageSummary['component_definitions']]) }}</li>
+                @endif
+                @if(($usageSummary['component_instances'] ?? 0) > 0)
+                    <li>{{ __('Component instances: :count', ['count' => $usageSummary['component_instances']]) }}</li>
                 @endif
                 @if(($usageSummary['tests'] ?? 0) > 0)
                     <li>{{ __('Test types: :count', ['count' => $usageSummary['tests']]) }}</li>

@@ -9,6 +9,8 @@ use App\Models\AssetModel;
 use App\Models\AttributeDefinition;
 use App\Models\ComponentDefinition;
 use App\Models\ComponentDefinitionAttribute;
+use App\Models\ComponentInstance;
+use App\Models\ComponentInstanceAttribute;
 use App\Models\ModelNumberAttribute;
 use App\Models\TestResult;
 use App\Models\User;
@@ -206,6 +208,15 @@ class AttributeDefinitionLifecycleTest extends TestCase
             'raw_value' => 'DDR4',
             'sort_order' => 0,
         ]);
+        $component = ComponentInstance::factory()->create();
+        ComponentInstanceAttribute::create([
+            'component_instance_id' => $component->id,
+            'attribute_definition_id' => $attribute->id,
+            'attribute_option_id' => $option->id,
+            'value' => 'DDR4',
+            'raw_value' => 'DDR4',
+            'sort_order' => 0,
+        ]);
 
         $historicalResult = TestResult::factory()->create([
             'attribute_definition_id' => $attribute->id,
@@ -249,6 +260,13 @@ class AttributeDefinitionLifecycleTest extends TestCase
         ]);
         $this->assertDatabaseHas('component_definition_attributes', [
             'component_definition_id' => $componentDefinition->id,
+            'attribute_definition_id' => $attribute->id,
+            'attribute_option_id' => $option->id,
+            'value' => 'DDR5',
+            'raw_value' => 'DDR5',
+        ]);
+        $this->assertDatabaseHas('component_instance_attributes', [
+            'component_instance_id' => $component->id,
             'attribute_definition_id' => $attribute->id,
             'attribute_option_id' => $option->id,
             'value' => 'DDR5',
@@ -305,6 +323,29 @@ class AttributeDefinitionLifecycleTest extends TestCase
             'model_number_id' => $modelNumber->id,
             'attribute_definition_id' => $attribute->id,
             'display_order' => 0,
+        ]);
+
+        $this->actingAs($user)
+            ->delete(route('attributes.destroy', $attribute))
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('attribute_definitions', [
+            'id' => $attribute->id,
+            'deleted_at' => null,
+        ]);
+    }
+
+    public function test_cannot_delete_attribute_used_by_component_instance(): void
+    {
+        $user = $this->makeSuperUser();
+        $attribute = $this->makeAttribute();
+        $component = ComponentInstance::factory()->create();
+
+        ComponentInstanceAttribute::create([
+            'component_instance_id' => $component->id,
+            'attribute_definition_id' => $attribute->id,
+            'value' => 'Observed value',
+            'raw_value' => 'Observed value',
         ]);
 
         $this->actingAs($user)

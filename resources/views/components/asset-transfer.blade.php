@@ -107,6 +107,20 @@
 
                     <form method="POST" action="{{ $postRoute }}">
                         @csrf
+                        @include('components.partials.condition-warning-confirmation', [
+                            'component' => $isExpected ? null : $component,
+                            'conditionStatus' => $isExpected ? \App\Models\ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION : null,
+                            'show' => $isExpected || (!$isExpected && $component->requiresConditionWarningForAttachment()),
+                            'message' => $isExpected
+                                ? __('This expected component will be tracked as Needs Attention until it is verified. Confirm the warning before moving it.')
+                                : null,
+                            'checkboxLabel' => __('I understand this condition warning and want to move it.'),
+                        ])
+                        @include('components.partials.lifecycle-warning-confirmation', [
+                            'component' => $isExpected ? null : $component,
+                            'show' => !$isExpected && $component->requiresLifecycleWarningForAttachment(),
+                            'checkboxLabel' => __('I understand this lifecycle warning and want to move it.'),
+                        ])
                         <div class="form-group {{ $errors->has('destination_asset_id') ? 'has-error' : '' }}">
                             <label for="asset_component_destination">{{ __('Destination Asset') }}</label>
                             <select class="js-data-ajax select2"

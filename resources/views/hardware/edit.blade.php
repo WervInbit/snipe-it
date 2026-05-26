@@ -53,6 +53,9 @@
     @if (session('requires_ack_failed_tests'))
         <input type="hidden" name="ack_failed_tests" value="1">
     @endif
+    @if (session('requires_ack_component_issues'))
+        <input type="hidden" name="ack_component_issues" value="1">
+    @endif
 
     {{-- Company selection hidden while the refurb fork runs single-company flows --}}
     @includeWhen(false, 'partials.forms.edit.company-select', ['translated_name' => trans('general.company'), 'fieldname' => 'company_id'])
