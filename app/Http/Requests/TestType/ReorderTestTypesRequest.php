@@ -17,8 +17,7 @@ class ReorderTestTypesRequest extends Request
     {
         return [
             'order' => ['required', 'array'],
-            'order.*' => ['integer', 'exists:test_types,id'],
+            'order.*' => ['integer', 'exists:workflow_items,id'],
         ];
     }
 }
-

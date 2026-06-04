@@ -11,21 +11,24 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use App\Models\ModelNumber;
 
 /**
- * Represents a collection of tests executed on an asset.
+ * Represents a workflow execution on an asset.
  *
- * A test run belongs to an asset and the user who performed it and contains
- * many individual test results and audit records.
+ * A workflow run belongs to an asset and the user who performed it and
+ * contains many individual workflow results and audit records.
  */
 class TestRun extends SnipeModel
 {
     use HasFactory;
     use TestAuditable;
 
-    protected $table = 'test_runs';
+    protected $table = 'workflow_runs';
 
     protected $fillable = [
         'asset_id',
         'model_number_id',
+        'workflow_profile_id',
+        'profile_name_snapshot',
+        'profile_slug_snapshot',
         'user_id',
         'started_at',
         'finished_at',
@@ -34,6 +37,9 @@ class TestRun extends SnipeModel
     protected array $auditFields = [
         'asset_id',
         'model_number_id',
+        'workflow_profile_id',
+        'profile_name_snapshot',
+        'profile_slug_snapshot',
         'user_id',
         'started_at',
         'finished_at',
@@ -68,13 +74,18 @@ class TestRun extends SnipeModel
         return $this->belongsTo(ModelNumber::class, 'model_number_id');
     }
 
+    public function profile(): BelongsTo
+    {
+        return $this->belongsTo(WorkflowProfile::class, 'workflow_profile_id');
+    }
+
     /**
      * Individual results captured during the run.
      */
     public function results(): HasMany
     {
-        return $this->hasMany(TestResult::class, 'test_run_id')
-            ->orderByRaw('(select display_order from test_types where test_types.id = test_results.test_type_id)')
+        return $this->hasMany(TestResult::class, 'workflow_run_id')
+            ->orderBy('sort_order')
             ->orderBy('id');
     }
 

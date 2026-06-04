@@ -16,6 +16,7 @@ use App\Models\TestResult;
 use App\Models\TestRun;
 use App\Models\TestType;
 use App\Models\User;
+use App\Models\WorkflowProfile;
 use App\Services\ModelAttributes\AttributeValueService;
 use App\Services\QrLabelService;
 use Carbon\CarbonImmutable;
@@ -57,9 +58,10 @@ class DemoAssetsSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
 
         foreach ([
-            'test_results',
-            'test_runs',
-            'test_audits',
+            'workflow_result_photos',
+            'workflow_results',
+            'workflow_runs',
+            'workflow_audits',
             'asset_tests',
             'asset_logs',
             'asset_images',
@@ -356,6 +358,11 @@ class DemoAssetsSeeder extends Seeder
     {
         $testTypes = TestType::query()->pluck('id', 'slug');
         $qaUser = User::where('username', 'qa_manager')->first();
+        $standardProfile = WorkflowProfile::query()
+            ->where('slug', 'standard-diagnostics')
+            ->with('items')
+            ->first();
+        $profileItems = $standardProfile?->items->keyBy('workflow_item_id') ?? collect();
 
         $fixtures = [
             'DEMO-001' => [
@@ -426,6 +433,9 @@ class DemoAssetsSeeder extends Seeder
             $run = TestRun::create([
                 'asset_id' => $asset->id,
                 'model_number_id' => $asset->model_number_id,
+                'workflow_profile_id' => $standardProfile?->id,
+                'profile_name_snapshot' => $standardProfile?->name ?? 'Standard Diagnostics',
+                'profile_slug_snapshot' => $standardProfile?->slug ?? 'standard-diagnostics',
                 'user_id' => $qaUser?->id ?? $asset->created_by,
                 'started_at' => CarbonImmutable::now()->subDays(2),
                 'finished_at' => CarbonImmutable::now()->subDay(),
@@ -438,11 +448,17 @@ class DemoAssetsSeeder extends Seeder
                     continue;
                 }
 
+                $profileItem = $profileItems->get($testTypeId);
+
                 TestResult::create([
-                    'test_run_id' => $run->id,
-                    'test_type_id' => $testTypeId,
+                    'workflow_run_id' => $run->id,
+                    'workflow_item_id' => $testTypeId,
+                    'workflow_profile_item_id' => $profileItem?->id,
                     'status' => $result['status'],
                     'note' => $result['note'],
+                    'is_required' => $profileItem?->is_required ?? true,
+                    'result_label_mode' => $profileItem?->result_label_mode ?? 'pass_fail',
+                    'sort_order' => $profileItem?->sort_order ?? 0,
                 ]);
             }
 

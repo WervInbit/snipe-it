@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use App\Models\AttributeDefinition;
 use App\Models\TestResultPhoto;
+use App\Models\WorkflowProfile;
+use App\Models\WorkflowProfileItem;
 
 class TestResultController extends Controller
 {
@@ -27,11 +29,19 @@ class TestResultController extends Controller
                 'results' => function ($query) {
                     $query
                         ->with(['type', 'attributeDefinition', 'photos'])
-                        ->orderByRaw('(select display_order from test_types where test_types.id = test_results.test_type_id)')
+                        ->orderBy('sort_order')
                         ->orderBy('id');
                 },
+                'profile',
                 'user',
             ]);
+        $workflowProfiles = WorkflowProfile::query()
+            ->active()
+            ->forAsset($asset)
+            ->whereHas('items')
+            ->withCount('items')
+            ->ordered()
+            ->get();
 
         if ($requestedRunId) {
             $run = $runsQuery->whereKey($requestedRunId)->first();
@@ -62,13 +72,15 @@ class TestResultController extends Controller
                 'canUpdate' => $canUpdateResults,
                 'canStartRun' => Gate::allows('tests.execute') && Gate::allows('update', $asset),
                 'canViewAudit' => Gate::allows('audits.view'),
+                'workflowProfiles' => $workflowProfiles,
             ]);
         }
 
         $results = $run->results->map(function (TestResult $result) {
             $definition = $result->attributeDefinition;
             $type = $result->type;
-            $isRequired = $type?->is_required ?? true;
+            $isRequired = $result->is_required;
+            $labelMode = $result->result_label_mode ?: WorkflowProfileItem::LABEL_MODE_PASS_FAIL;
 
             $label = $definition?->label ?? $type?->name ?? trans('general.unknown');
             $slug = $type?->slug ?? Str::slug($label ?? 'result');
@@ -105,6 +117,13 @@ class TestResultController extends Controller
                 'note_saved_at' => $result->updated_at?->timezone(config('app.timezone'))?->format('Y-m-d H:i'),
                 'photos' => $photos,
                 'is_required' => $isRequired,
+                'result_label_mode' => $labelMode,
+                'pass_label' => $labelMode === WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE
+                    ? trans('tests.status_done')
+                    : trans('tests.status_pass'),
+                'fail_label' => $labelMode === WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE
+                    ? trans('tests.status_not_done')
+                    : trans('tests.status_fail'),
             ];
         })->values();
 
@@ -137,6 +156,7 @@ class TestResultController extends Controller
             'canUpdate' => $canUpdateResults,
             'canStartRun' => Gate::allows('tests.execute') && Gate::allows('update', $asset),
             'canViewAudit' => Gate::allows('audits.view'),
+            'workflowProfiles' => $workflowProfiles,
         ]);
     }
 
@@ -193,8 +213,8 @@ class TestResultController extends Controller
         $this->authorize('update', $testRun);
         abort_unless(
             $testRun->asset_id === $asset->id &&
-            $result->test_run_id === $testRun->id &&
-            $photo->test_result_id === $result->id,
+            $result->workflow_run_id === $testRun->id &&
+            $photo->workflow_result_id === $result->id,
             404
         );
 
@@ -267,7 +287,7 @@ class TestResultController extends Controller
     {
         $this->authorize('update', $testRun);
         abort_unless(
-            $testRun->asset_id === $asset->id && $result->test_run_id === $testRun->id,
+            $testRun->asset_id === $asset->id && $result->workflow_run_id === $testRun->id,
             404
         );
 

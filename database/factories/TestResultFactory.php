@@ -14,10 +14,13 @@ class TestResultFactory extends Factory
     public function definition()
     {
         return [
-            'test_run_id' => TestRun::factory(),
-            'test_type_id' => TestType::factory(),
-            'status' => $this->faker->randomElement(['pass', 'fail', 'skip']),
+            'workflow_run_id' => TestRun::factory(),
+            'workflow_item_id' => TestType::factory(),
+            'status' => $this->faker->randomElement(['pass', 'fail', 'nvt']),
             'note' => $this->faker->sentence(),
+            'is_required' => true,
+            'result_label_mode' => 'pass_fail',
+            'sort_order' => 0,
         ];
     }
 }

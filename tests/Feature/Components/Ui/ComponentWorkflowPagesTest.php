@@ -73,8 +73,63 @@ class ComponentWorkflowPagesTest extends TestCase
             ->assertSeeText('To Storage')
             ->assertSee('id="assetComponentStorageModal"', false)
             ->assertSee(route('hardware.components.storage.store', [$asset, $installedComponent]), false)
+            ->assertSee(route('hardware.components.reparent.create', [$asset, $installedComponent]), false)
+            ->assertSeeText('Move Within Device')
             ->assertSeeText('Move To Other Device')
             ->assertSeeText('Open');
+    }
+
+    public function testAssetComponentCanBeMovedUnderAnotherComponentAndBackToAssetRoot(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create();
+        $parent = ComponentInstance::factory()->installed($asset->id)->create([
+            'display_name' => 'Motherboard Assembly',
+        ]);
+        $child = ComponentInstance::factory()->installed($asset->id)->create([
+            'display_name' => 'Webcam Module',
+        ]);
+        $token = 'asset-component-reparent-token';
+
+        $this->actingAs($user)
+            ->get(route('hardware.components.reparent.create', [$asset, $child]))
+            ->assertOk()
+            ->assertSeeText('Move Component Within Device')
+            ->assertSeeText('Motherboard Assembly')
+            ->assertSeeText('Asset root');
+
+        $this->actingAs($user)
+            ->withSession(['_token' => $token])
+            ->post(route('hardware.components.reparent.store', [$asset, $child]), [
+                '_token' => $token,
+                'parent_component_instance_id' => $parent->id,
+                'note' => 'Corrected from top-level asset row.',
+            ])
+            ->assertRedirect(route('hardware.show', $asset))
+            ->assertSessionHas('success', 'Component hierarchy updated.');
+
+        $child->refresh();
+        $this->assertSame($parent->id, $child->parent_component_instance_id);
+        $this->assertSame($asset->id, $child->root_asset_id);
+        $this->assertDatabaseHas('component_events', [
+            'component_instance_id' => $child->id,
+            'event_type' => 'reparented',
+            'note' => 'Corrected from top-level asset row.',
+        ]);
+
+        $this->actingAs($user)
+            ->withSession(['_token' => $token])
+            ->post(route('hardware.components.reparent.store', [$asset, $child]), [
+                '_token' => $token,
+                'parent_component_instance_id' => null,
+                'note' => 'Moved back to asset root.',
+            ])
+            ->assertRedirect(route('hardware.show', $asset))
+            ->assertSessionHas('success', 'Component hierarchy updated.');
+
+        $child->refresh();
+        $this->assertNull($child->parent_component_instance_id);
+        $this->assertSame($asset->id, $child->root_asset_id);
     }
 
     public function testAssetAddPageShowsDefinitionCustomToggleForNewComponents(): void

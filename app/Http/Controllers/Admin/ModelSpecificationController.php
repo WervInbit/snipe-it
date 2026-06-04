@@ -74,7 +74,7 @@ class ModelSpecificationController extends Controller
             'componentTemplates.componentDefinition.attributeContributions.definition.options',
             'componentTemplates.componentDefinition.attributeContributions.option',
         ]);
-        $lockedDefinitionIds = $this->attributeManager->componentResolvedNumericDefinitionIds($modelNumber);
+        $lockedDefinitionIds = $this->attributeManager->componentResolvedSpecDefinitionIds($modelNumber);
 
         $assignedDefinitionIds = $modelNumber->attributes
             ->pluck('attribute_definition_id')
@@ -167,7 +167,7 @@ class ModelSpecificationController extends Controller
         DB::transaction(function () use ($modelNumber, $attributeOrder, $attributeValues, $componentTemplates) {
             $this->syncComponentTemplates($modelNumber, $componentTemplates);
             $modelNumber->unsetRelation('componentTemplates');
-            $lockedDefinitionIds = $this->attributeManager->componentResolvedNumericDefinitionIds($modelNumber);
+            $lockedDefinitionIds = $this->attributeManager->componentResolvedSpecDefinitionIds($modelNumber);
             $filteredOrder = collect($attributeOrder)
                 ->map(fn ($id) => (int) $id)
                 ->reject(fn (int $id) => in_array($id, $lockedDefinitionIds, true))

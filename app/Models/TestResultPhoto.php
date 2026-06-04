@@ -10,13 +10,15 @@ class TestResultPhoto extends Model
 {
     use HasFactory;
 
+    protected $table = 'workflow_result_photos';
+
     protected $fillable = [
-        'test_result_id',
+        'workflow_result_id',
         'path',
     ];
 
     public function testResult(): BelongsTo
     {
-        return $this->belongsTo(TestResult::class);
+        return $this->belongsTo(TestResult::class, 'workflow_result_id');
     }
 }

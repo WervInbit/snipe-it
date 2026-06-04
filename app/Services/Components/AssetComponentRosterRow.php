@@ -15,6 +15,7 @@ class AssetComponentRosterRow
         public readonly ?ComponentInstance $component = null,
         public readonly ?string $installedAs = null,
         public readonly bool $tracked = false,
+        public readonly int $quantity = 1,
     ) {
     }
 
@@ -41,5 +42,16 @@ class AssetComponentRosterRow
     public function isRemoved(): bool
     {
         return $this->classification === 'removed';
+    }
+
+    public function displayName(): string
+    {
+        $quantity = max(1, $this->quantity);
+
+        if ($quantity === 1) {
+            return $this->name;
+        }
+
+        return $this->name . ' x' . $quantity;
     }
 }

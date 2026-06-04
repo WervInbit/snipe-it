@@ -1,3 +1,89 @@
+# Session Progress (2026-06-04)
+
+## Addendum (2026-06-04 Codex)
+- Session kickoff: re-read `AGENTS.md`, recent `PROGRESS.md`, `docs/fork-notes.md`, `docs/agents/agents-addendum-2026-06-02-session-init.md`, `docs/agents/agents-addendum-2026-05-28-session-init.md`, `docs/agents/session-handoff-2026-05-28.md`, `docs/plans/catalog-clean-start-mapping-2026-05-28.md`, and `docs/plans/catalog-removed-attributes-2026-06-02.md`; created `docs/agents/agents-addendum-2026-06-04-session-init.md`.
+- Current task focus: reinitialize after the workflow applicability/component reparenting implementation block and report current status for user testing/planning.
+- Current non-destructive environment check: Docker app/db/web services are up; app config reports `APP_ENV=local`, `DB_CONNECTION=mysql`, `DB_DATABASE=snipeit_prod_work`; workflow migrations `2026_05_26_120000_rename_tests_to_workflows_and_add_profiles` and `2026_06_02_120000_add_workflow_item_applicability_rules` are both marked ran.
+- Current work DB counts checked: `workflow_profiles=4`, `workflow_items=29`, `workflow_runs=25`, `component_definitions=63`, `model_number_component_templates=146`.
+- Asset detail Tests / Workflows tab now exposes a workflow profile selector before starting a run; the mobile floating action scrolls/focuses that selector instead of submitting an implicit default run. Backend workflow-run creation now requires `workflow_profile_id`, and focused tests passed: `tests/Feature/Assets/Ui/ShowAssetTest.php`, `tests/Feature/Assets/StartNewTestRunTest.php`, and `tests/Feature/AttributeTestRunGenerationTest.php` (`20` tests, `106` assertions).
+- Investigated model number spec duplication on asset `INBIT-QI0001` / `HP ProBook 450 G8 - i5-1135G7 - 8GB - 256GB`: RAM size and storage capacity resolve from expected components, but stale manual DB rows remain; display size, resolution, panel type, refresh rate, RAM type, storage type, and keyboard layout are still manual model attributes even though expected component rows also display matching component contributions.
+- Investigated the local work DB cleanup scope for a production-like testing baseline. Current target is `APP_ENV=local`, `DB_CONNECTION=mysql`, `DB_DATABASE=snipeit_prod_work`; runtime/test residue includes 8 assets, 26 workflow runs, 397 workflow results, 9 workflow photos, 3,458 workflow audits, 1 tracked component instance, 1 legacy component row, 5 asset attribute overrides, 10 asset status events, 2 asset images, 2 test licenses, one manually added Vaio model/model-number, and upload artifacts under `public/uploads/assets`, `public/uploads/test_images`, and `public/uploads/labels`. Seed/config rows such as users, settings, categories, statuses, component catalog definitions, model-number templates, workflow profiles/items, and component storage locations should be preserved or reseeded rather than treated as runtime data.
+- Cleaned the local work DB in-place after creating `prodbak/db-snapshots/snipeit_prod_work_pre_clean_20260604_114229.sql`. Cleared asset/runtime rows, workflow execution rows, local test component instances, legacy Snipe component/test license rows, generated model-number image references, the ad-hoc Vaio model/model-number, and old ad-hoc component definitions; also purged hidden/deprecated legacy attribute definitions from this work DB. Removed 951 generated files from `public/uploads/assets`, `public/uploads/test_images`, `public/uploads/labels`, and `storage/app/codex-screenshots`, plus `storage/tmp-testtypes-reorder.js`.
+- Reran `DeviceAttributeSeeder`, `DevicePresetSeeder`, `DeviceComponentCatalogSeeder`, and `AttributeTestSeeder`, then cleared caches. Post-clean counts: `assets=0`, `workflow_runs=0`, `workflow_results=0`, `workflow_audits=0`, `component_instances=0`, `components=0`, `licenses=0`, `model_number_images=0`, `users=18`, `models=11`, `model_numbers=11`, `attribute_definitions=37`, `component_definitions=60`, `workflow_profiles=4`, `workflow_items=29`, `workflow_profile_items=28`; hidden/deprecated attributes, old component definitions, Vaio rows, and legacy workflow item slugs all verified at `0`.
+- Verification after cleanup: `php artisan view:cache` passed and was cleared; logged-in browser smoke loaded dashboard, hardware list, hardware create, Workflow Items, Workflow Profiles, Workflow Profile Items, and models pages without server-error text. A direct browser navigation to the hardware API hit the app/browser redirect handling, so the empty asset list was verified from DB counts rather than that API URL.
+- Created a post-clean baseline SQL backup at `prodbak/db-snapshots/snipeit_prod_work_clean_baseline_20260604_115225.sql` for the current `snipeit_prod_work` database.
+- Tightened model-number specification behavior so any component definition attribute marked `resolves_to_spec` is treated as component-backed, including text/enum/bool fields such as RAM type, storage type, display resolution, keyboard layout, camera role, and structured port capabilities.
+- Updated component-definition and component-instance attribute managers so non-numeric component values can resolve to shared model/asset specs; numeric reduced-baseline comparison remains limited to numeric values.
+- Updated clean-start catalog seeding so RAM, storage, display, battery, keyboard, camera, and port component definitions provide the relevant model specs directly, and `DevicePresetSeeder`/`DeviceComponentCatalogSeeder` remove stale manual `model_number_attributes` for those component-backed spec keys.
+- Created `prodbak/db-snapshots/snipeit_prod_work_pre_component_spec_cleanup_20260604_120653.sql`, reseeded `DeviceComponentCatalogSeeder`, `DevicePresetSeeder`, `DeviceComponentCatalogSeeder`, and `AttributeTestSeeder`, then verified exact overlap checks return no manual selected model-number attributes that are backed by expected-component spec values.
+- Post-cleanup DB check: `model_number_attributes` dropped to `84`; the only remaining `keyboard_layout` manual rows are Surface Pro model numbers where keyboard covers are intentionally treated as sale accessories rather than expected components.
+- Focused verification passed: PHP syntax checks for touched spec/attribute services, seeders, and tests; `php artisan test tests/Feature/ComponentDerivedAttributeResolutionTest.php tests/Unit/Services/ModelAttributeManagerTest.php --env=testing` passed with `21` tests and `68` assertions; `php artisan view:cache` passed and was cleared; browser smoke loaded `https://dev.inbit/models/1/model-numbers/1/spec` without console errors and showed only manual product attributes in Selected Attributes.
+- Investigated motherboard/logic-board modeling. Current catalog has no motherboard definitions and no seeded expected subcomponent templates; all component definitions remain `placement_mode=either`. Existing hierarchy support can already express motherboard expected subcomponents and suppress overlapping parent/child spec contributions. Current CPU/GPU specs are manual model-number attributes, while RAM/storage/display/battery/keyboard/camera/ports are component-derived. Recommended next catalog split: add model-specific motherboard definitions carrying CPU/core/GPU specs; move soldered/onboard items such as LPDDR RAM, UFS storage, wireless modules, fixed ports, and phone/tablet camera/display assemblies under motherboard/logic board where appropriate; keep removable SO-DIMM RAM, M.2/SATA storage, batteries, displays, keyboards/touchpads, webcams, speakers, and microphones as asset-level components unless they are intentionally board-integrated.
+- Follow-up motherboard investigation: `component_definition_subcomponent_templates` is currently empty, and expected subcomponents are tied to the parent component definition rather than individual model-number templates, so motherboard definitions should be model-number-specific to avoid sharing the wrong port/subcomponent set across different models. Workflow applicability already includes expected child component definitions, so port/camera/storage/RAM tests should still resolve if those definitions move under a motherboard. Implementation needs a new component category such as `Logic Board`, motherboard definitions for each preserved model number, seeder support for component-definition subcomponent templates, and removal of moved children from the flat `model_number_component_templates` list.
+- Implemented the logic-board catalog split. `DeviceAttributeSeeder` now seeds a `Logic Board` component category, and `DeviceComponentCatalogSeeder` now seeds model-number-specific motherboard/logic-board definitions plus expected child subcomponent templates. HP laptop boards carry CPU/core/GPU attributes and own physical ports; Surface logic boards additionally own LPDDR RAM and wireless; phone logic boards own LPDDR RAM, UFS storage, wireless, and charge/data ports. Removable laptop RAM/storage, displays, batteries, keyboards/touchpads, webcams, speakers, and microphones remain top-level expected components.
+- Added focused coverage for the new catalog shape: `DeviceComponentCatalogSeederTest` verifies the HP ProBook 450 G8 motherboard, child USB template, CPU component attribute, and pruned manual CPU model-number row; `TestTypeForAssetTest` now verifies component-category workflow items still apply through expected subcomponents.
+- Created `prodbak/db-snapshots/snipeit_prod_work_pre_logic_board_catalog_20260604_124522.sql`, then reseeded `DeviceAttributeSeeder`, `DevicePresetSeeder`, `DeviceComponentCatalogSeeder`, and `AttributeTestSeeder` against `snipeit_prod_work`.
+- Post-reseed DB verification: `component_definitions=71`, `logic_board_definitions=11`, `component_definition_subcomponent_templates=54`, `model_number_component_templates=103`, `model_number_attributes=60`; exact overlap checks returned no manual selected attributes that are component-backed, and CPU/core/GPU manual model-number rows are gone.
+- Browser smoke loaded `https://dev.inbit/models/1/model-numbers/1/spec`; Selected Attributes now show only release year, weight, OS, OS version, and color for HP ProBook 450 G8, while the expected motherboard row shows CPU/GPU derived attributes and child USB/HDMI/audio-port rows without console errors.
+- Focused verification passed after test DB preflight (`APP_ENV=testing`, `DB_CONNECTION=sqlite`, `DB_DATABASE=/var/www/html/database/database.sqlite`): `php artisan test tests/Feature/DeviceComponentCatalogSeederTest.php tests/Unit/Models/TestTypeForAssetTest.php tests/Feature/ComponentDerivedAttributeResolutionTest.php tests/Unit/Services/ModelAttributeManagerTest.php --env=testing` passed with `28` tests and `85` assertions; `php artisan view:cache` passed and was cleared.
+- Component Definition settings index now progressively filters while typing. The existing GET search remains as the full server-side search, while JavaScript filters the current rows immediately and submits the search after a short debounce. Focused verification passed: `ComponentDefinitionSettingsTest` (`15` tests, `74` assertions), `php artisan view:cache`, and browser smoke on `https://dev.inbit/admin/settings/component-definitions` including a `Motherboard` live-search interaction with no console errors.
+- Refined the Component Definition live search loading state: when the current page has no matching rows but the debounced server search is still pending, the table now shows a spinner row instead of the empty/no-results row. Focused verification passed: `ComponentDefinitionSettingsTest` (`15` tests, `76` assertions), `php artisan view:cache`, and browser smoke for typing `mother`, which showed the spinner while pending and then returned motherboard rows with no console errors.
+- Investigated the expected-subcomponent picker and processor location. Expected subcomponents currently use a long native `<select>` of subcomponent-capable component definitions, unlike Attribute Contributions which already use a typeahead result list. Processor was not seeded as a component or freeform subcomponent; it is stored as `cpu_model`, `cpu_core_count`, and `gpu_model` attribute contributions on motherboard/logic-board component definitions, marked `resolves_to_spec`. The expected-subcomponent picker currently has 61 subcomponent-capable component definitions; 11 logic-board definitions are `asset_only` and intentionally excluded from child selection.
+- Refined 3.5mm audio port cataloging: `port_connector_type=audio_3_5mm` now represents only the physical 3.5mm connector, while new port attributes `audio_port_role` and `audio_jack_standard` capture headset combo, headphone out, microphone in, line in, line out, and TRS/TRRS details. Clean laptop/tablet motherboard templates now use `3.5mm Port - Headset Combo`, and the obsolete `3.5mm Audio Jack` definition is remapped from old expected-subcomponent templates before being soft-deleted when no tracked component instances depend on it.
+- Created `prodbak/db-snapshots/snipeit_prod_work_pre_audio_port_roles_20260604_143553.sql`, reseeded `DeviceAttributeSeeder` and `DeviceComponentCatalogSeeder`, and verified the local work DB has five active role-specific 3.5mm port definitions with the old generic row soft-deleted. Focused verification passed: PHP syntax checks, `DeviceComponentCatalogSeederTest`, `ComponentDerivedAttributeResolutionTest`, and `TestTypeForAssetTest` (`21` tests, `75` assertions); `php artisan view:cache` passed and caches were cleared afterward.
+- Component Definition expected-subcomponent rows now use a searchable component-definition picker instead of a long native select. The picker searches definition name, part code, model number, category, and manufacturer, while preserving the same hidden `child_component_definition_id` save payload and freeform expected-name behavior.
+- Expected-subcomponent notes in the Component Definition editor now live behind a per-row Bootstrap collapse button. Rows with existing notes or validation errors open the notes panel by default; empty rows stay compact.
+- Focused verification for the expected-subcomponent UI passed: PHP syntax checks for touched Blade/test files, `ComponentDefinitionSettingsTest` (`15` tests, `86` assertions), `php artisan view:cache`, and browser smoke on `https://dev.inbit/admin/settings/component-definitions/64/edit`. Browser smoke confirmed five searchable child rows, no native child-definition selects, search results for `HDMI`, selection updating the hidden component ID, notes collapse opening, and no console errors.
+- Attribute Definition settings now use the same live-search behavior as Component Definitions. The attribute index filters currently loaded rows immediately while typing, shows a spinner/no-match state while debounced paginated results load, and still submits the existing GET search so full result sets remain searchable.
+- Broadened attribute index server-side search from label/key only to label, key, datatype, unit, and category name, matching the visible row metadata more closely.
+- Focused verification for attribute live search passed: PHP syntax checks, `AttributeDefinitionLifecycleTest` (`13` tests, `44` assertions), `php artisan view:cache`, and browser smoke on `https://dev.inbit/attributes` typing `RAM`, which navigated to `?search=RAM`, narrowed results, and produced no console errors. Caches were cleared afterward.
+
+# Session Progress (2026-06-02)
+
+## Addendum (2026-06-02 Codex)
+- Session kickoff: re-read `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, `docs/agents/session-handoff-2026-05-28.md`, and `docs/plans/catalog-clean-start-mapping-2026-05-28.md`; created `docs/agents/agents-addendum-2026-06-02-session-init.md`.
+- Implemented the clean-start catalog seed foundation without mutating the live/dev MySQL database.
+- `DeviceAttributeSeeder` now seeds component-oriented attribute categories, adds structured RAM speed, battery capacity, camera, and port capability attributes, and hides/deprecates removed legacy catalog keys instead of hard-deleting them.
+- Added `docs/plans/catalog-removed-attributes-2026-06-02.md` as the explicit audit trail for removed keys and their replacement paths.
+- Added `DeviceComponentCatalogSeeder` to seed generic Memory, Storage, Display, Battery, Port, Camera, Audio, Input, Network, and Power component definitions plus expected component templates for the 11 real model numbers.
+- Updated the model-number catalog seed to prefer the live `SM-A520F` Samsung code, add Google as Pixel 8 Pro manufacturer, filter removed attributes out of model-number attributes, and keep demo assets out of the default `DatabaseSeeder`.
+- Updated workflow item/profile seeding so diagnostics and operational tasks no longer depend on removed present-style product attributes.
+- Expected component quantities now group into one asset component row with `xN` display, while derived numeric specs still multiply by quantity.
+- Validation completed in Docker after `php artisan optimize:clear` and testing DB preflight (`APP_ENV=testing`, `DB_CONNECTION=sqlite`, `DB_DATABASE=/var/www/html/database/database.sqlite`):
+- `docker compose exec -T app php -l` passed for touched PHP seeders/services and the updated component-derived attribute test.
+- `docker compose exec -T app php artisan test tests/Feature/ComponentDerivedAttributeResolutionTest.php --env=testing` passed: `13` tests, `49` assertions.
+- `docker compose exec -T app php artisan test tests/Feature/Assets/Ui/ComponentHistoryTest.php --env=testing` passed: `8` tests, `43` assertions.
+- `docker compose exec -T app php artisan view:cache` passed.
+- Browser smoke reached `https://dev.inbit/login`; authenticated asset component roster pages were not checked because no browser login session was available.
+- Follow-up authenticated browser check after user logged in: dashboard and hardware list load, but Workflow Settings errors on missing `workflow_profiles`, and asset detail errors on missing `workflow_runs`; the local MySQL database still has `2026_05_26_120000_rename_tests_to_workflows_and_add_profiles` pending.
+- Backup comparison check: `snipeit_prod_raw` remains present alongside `snipeit_prod_work`, and file backup material exists under `prodbak/snipe-it-prod-export-20260428`. Compared with raw, the work DB has 10 extra local migrations through component instance attributes, 14 additional structural tables, 3 example component definitions, 1 attached example component instance, 1 extra test run with 18 results and 135 audit rows, and 8 extra login attempts. Core counts for assets, users, models, model numbers, and attribute definitions match raw.
+- Individual seed smoke checks passed on testing SQLite for `DeviceAttributeSeeder`, `DevicePresetSeeder`, `DeviceComponentCatalogSeeder`, and `AttributeTestSeeder` after applying the pending workflow migration to the testing SQLite database.
+- Full `DatabaseSeeder` smoke on SQLite is still blocked by the existing `UserSeeder` MySQL-only `SET FOREIGN_KEY_CHECKS=0` statement before it reaches the new catalog seeders.
+- Earlier settings write-test redirects were narrowed during the workflow applicability block; `ManageTestTypesTest` now disables CSRF like the workflow profile settings tests and passes in the focused suite.
+- `git diff --check` passed for touched tracked files with line-ending warnings only.
+- Implemented workflow item applicability sources for the clean workflow foundation:
+- `workflow_items.applies_to_all` marks intentional always-on tasks, while `component_category_workflow_item` and `component_definition_workflow_item` attach workflow items to expected or installed hardware.
+- `TestType::forAsset()` now considers model-number expected components, expected child definitions, and attached tracked components; asset categories narrow specific sources and remain a standalone source only when no attribute/component/always source is selected.
+- Workflow item settings and workflow profile settings now show/edit applicability sources across attributes, asset categories, component categories, component definitions, and always-on items.
+- Clean `AttributeTestSeeder` now moves HDMI/VGA/SD/webcam/USB/ports and similar checks to component-backed sources, keeps face-unlock out of the standard profile until a real source exists, marks operational tasks as always-on, and explicitly prunes the old `install-update-windows` and `wipen` workflow item slugs.
+- Added a per-run extra workflow item picker on the asset workflow start page for one-off checks that still use the same workflow result/note/photo path.
+- Added same-asset component hierarchy correction from the asset Components tab: tracked components can be moved under another attached top-level component or back to the asset root, with lifecycle-service validation and a `reparented` component event.
+- Work DB backup before applying the new migration/seed:
+- SQL dump: `prodbak/db-snapshots/snipeit_prod_work_pre_workflow_applicability_20260602_114937.sql`.
+- Clone schema: `snipeit_prod_work_pre_workflow_applicability_20260602_114937`.
+- Applied `2026_06_02_120000_add_workflow_item_applicability_rules` to `snipeit_prod_work`, reran `DeviceComponentCatalogSeeder` and `AttributeTestSeeder`, and cleared Laravel caches.
+- Work DB verification after seed: old `install-update-windows` and `wipen` items are removed; asset `INBIT-QI0001` Standard Diagnostics resolves to 15 checks and excludes VGA, Ethernet, and SD reader for model number `2E9F8EA#ABH`.
+- Browser smoke while logged into `https://dev.inbit/`:
+- `https://dev.inbit/hardware/1/tests` loads with Standard Diagnostics, Pre-Sale Check, Cleaning, Shipping Laptop, plus the extra item picker.
+- Started Standard Diagnostics run `#24`; active page loads without errors and includes HDMI/USB/Webcam while excluding VGA/Ethernet/SD reader.
+- `https://dev.inbit/admin/testtypes` loads without errors, shows applicability source summaries, and no longer shows the old install/wipe items.
+- `https://dev.inbit/hardware/1` exposes the new Move Within Device action; `https://dev.inbit/hardware/1/components/1/reparent` loads without errors and correctly reports no alternate parent candidates because asset 1 currently has only one tracked component.
+- Browser screenshots saved under `storage/app/codex-screenshots/`: `workflow-start-extra-items-20260602.png`, `workflow-standard-active-20260602.png`, `workflow-item-applicability-settings-20260602.png`, and `component-reparent-empty-candidates-20260602.png`.
+- Focused verification passed after `php artisan optimize:clear` and testing DB preflight (`APP_ENV=testing`, `DB_CONNECTION=sqlite`, `DB_DATABASE=/var/www/html/database/database.sqlite`):
+- PHP syntax checks passed for the touched workflow/component controllers, model, service, migration, seeder, and tests.
+- `docker compose exec -T app php artisan test tests/Unit/Models/TestTypeForAssetTest.php tests/Feature/Assets/StartNewTestRunTest.php tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php tests/Feature/Settings/ManageTestTypesTest.php --env=testing` passed: `22` tests, `127` assertions.
+- `docker compose exec -T app php artisan view:cache` passed.
+
 # Session Progress (2026-05-26)
 
 ## Addendum (2026-05-26 Codex)
@@ -27,6 +113,24 @@
 - `docker compose run --rm --no-deps -e APP_ENV=testing app sh -lc 'php artisan optimize:clear && echo Test_DB_preflight && grep APP_ENV .env.testing && grep DB_CONNECTION .env.testing && grep DB_DATABASE .env.testing && ./vendor/bin/phpunit --filter AssetAddPage tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php'`
 - result: `1` test passed, `13` assertions.
 - A route-list diagnostic was attempted after cache clear, but the local non-testing route bootstrap hit a pre-existing missing settings row (`Attempt to read property "saml_enabled" on null`); the browser tests still resolved the new child route successfully.
+- Workflow/test implementation block 1 started after the product-attribute planning discussion:
+- added workflow-named tables and profile support through `2026_05_26_120000_rename_tests_to_workflows_and_add_profiles`, copying existing test types/runs/results/photos/audits into `workflow_*` tables and retaining rollback back to legacy `test_*` tables.
+- added `WorkflowProfile` and `WorkflowProfileItem` models/factories while keeping existing `TestRun`, `TestResult`, `TestType`, `TestResultPhoto`, and `TestAudit` PHP class names as compatibility wrappers over the new workflow tables.
+- asset workflow start screens now choose an active workflow profile, persist profile snapshots on runs, and create result rows from ordered profile items with required/label-mode snapshots.
+- active workflow cards keep the same two-button, note, and photo flow; done/not-done profile items display `Done` / `Not Done` labels while reusing the existing pass/fail statuses internally.
+- agent report ingestion now accepts both `test_results` and `workflow_results`, stores workflow run/profile metadata, and returns `workflow_run_id` plus the legacy `test_run_id` field for compatibility.
+- cleaned and expanded the workflow seed foundation: standard diagnostics, pre-sale check, cleaning, and shipping-laptop profiles are seeded; operational task items use done/not-done labels where appropriate.
+- updated test assertions and affected workflow/audit/photo relationships to use the workflow table and column names; retained user-facing compatibility names where the API/list columns still expect them.
+- fixed the promoted-test-photo source foreign key retargeting so `asset_images.source_photo_id` points at `workflow_result_photos` after the table rename, including the SQLite migration path used by PHPUnit.
+- No live dev/prod-clone database migration was run in this block; code was verified only against the isolated SQLite testing database.
+- Focused workflow/profile verification passed after Docker cache clear and testing DB preflight (`APP_ENV=testing`, `DB_CONNECTION=sqlite`, `DB_DATABASE=/var/www/html/database/database.sqlite`):
+- `docker compose run --rm --no-deps -e APP_ENV=testing app sh -lc "php artisan optimize:clear && echo Test_DB_preflight && grep '^APP_ENV=' .env.testing && grep '^DB_CONNECTION=' .env.testing && grep '^DB_DATABASE=' .env.testing && ./vendor/bin/phpunit tests/Feature/Assets/StartNewTestRunTest.php tests/Feature/AgentAttributeReportTest.php tests/Feature/AttributeTestRunGenerationTest.php tests/Feature/Settings/ManageTestTypesTest.php"`
+- result: `12` tests passed, `61` assertions.
+- Broader workflow/audit/photo/status regression passed with the same cache-clear/test-DB preflight:
+- `docker compose run --rm --no-deps -e APP_ENV=testing app sh -lc "php artisan optimize:clear && echo Test_DB_preflight && grep '^APP_ENV=' .env.testing && grep '^DB_CONNECTION=' .env.testing && grep '^DB_DATABASE=' .env.testing && ./vendor/bin/phpunit tests/Feature/Assets/Api/AgentTestResultsTest.php tests/Feature/Assets/PartialUpdateTestResultTest.php tests/Feature/Assets/PromoteTestResultPhotoToAssetImageTest.php tests/Feature/Assets/Ui/AllTestsPassedIndicatorTest.php tests/Feature/Assets/Ui/ReadyForSaleWarningTest.php tests/Feature/Assets/TestAuditLoggingTest.php tests/Unit/TestAuditLogsTest.php tests/Unit/TestRelationshipsTest.php"`
+- result: `25` tests passed, `113` assertions.
+- PHP syntax checks passed for the changed workflow controllers/models/migration/seeders/factories and focused tests.
+- `git diff --check` passed with line-ending warnings only.
 
 # Session Progress (2026-05-19)
 
@@ -2338,5 +2442,127 @@ there are multiple duplicate functions that still need to be removed, sku will b
 - Active clone state after the swap:
 - `DB_DATABASE=snipeit_prod_work`
 - active `.env` now uses the production app key from the bundle
+
+### 2026-05-26
+- Continued the workflow/profile implementation after the initial database/model/run-flow slice.
+- Added a dedicated Workflow Profiles settings page under `admin/workflow-profiles`:
+- admins can create/edit/delete profiles, scope profiles to asset categories, mark active/default/sale-blocking flags, and configure which workflow items belong to each profile
+- profile item configuration stores per-profile order, requiredness, and pass/fail versus done/not-done label mode
+- the main settings card and admin navigation now lead to Workflow Profiles, with a cross-link back to Workflow Items
+- Sale-readiness checks now honor active applicable profiles with `blocks_sale_readiness=1`: every blocking profile needs a latest clean run before `tests_completed_ok` becomes true or Ready for Sale/Sold can proceed without warning.
+- Existing Ready for Sale warning locations continue to use the same acknowledgment flow, with missing blocking profile runs called out by profile name.
+- Verification against `.env.testing` SQLite after Docker `php artisan optimize:clear`:
+- workflow/settings/status focused set: `11` tests, `53` assertions
+- broader workflow/profile regression set: `42` tests, `197` assertions
+- `ManageWorkflowProfilesTest`: `4` tests, `16` assertions
+- Page-oriented smoke tests still have two stale `ShowAssetTest` assertions unrelated to HTTP 500s: one QR-label copy expectation and one old run-row expectation on an asset with no run.
+- No live dev/prod-clone DB migration was run; local dev `snipeit_prod_work` still needs backup and migration before browser testing the current workflow code against that database.
+
+### 2026-05-28
+- Session reinitialized after a one-day pause.
+- Reviewed `AGENTS.md`, recent `PROGRESS.md`, `docs/fork-notes.md`, the 2026-05-26 addendum, git state, local DB migration status, and remaining present/summary-style seed references.
+- Current branch at reinit: `codex/component-hierarchy-sprints` on commit `e72fc14b3`.
+- Working tree remains dirty with the workflow/profile implementation plus pre-existing local environment/upload artifacts.
+- Local dev DB preflight still reports `APP_ENV=local`, `DB_CONNECTION=mysql`, `DB_DATABASE=snipeit_prod_work`; workflow migration `2026_05_26_120000_rename_tests_to_workflows_and_add_profiles` is still pending.
+- Confirmed remaining implementation blocks before continuing:
+- present/summary-style catalog attribute cleanup
+- structured ports foundation
+- component-vs-attribute decisions for webcam/battery/ports
+- workflow seed refinement
+- stale page test cleanup
+- backup/migrate/browser-smoke of the local production clone
+- Investigated component hierarchy correction support:
+- asset-level arbitrary component creation is exposed through `hardware.components.register`
+- child component creation is exposed through `components.children.store`
+- parent moves already cascade attached child components
+- existing lifecycle flows clear parent linkage when installing/removing/moving to stock
+- no UI/service endpoint currently re-parents an already-installed asset-level component under another installed parent component
+- Refined structured ports direction:
+- ports should be seeded as component definitions/instances usable at asset, component, and subcomponent levels
+- USB-C capability should be modeled with separate attributes such as USB standard, connector type, DisplayPort alt-mode, Power Delivery, Thunderbolt support/version, and optional PD wattage/DP version
+- Wi-Fi should be either a component when a physical/replaceable module is tracked, or a capability/spec attribute when integrated; functional Wi-Fi verification remains a workflow item
+- Captured follow-up decisions:
+- seed common component/attribute definitions and preserve the current model/model-number catalog as seedable data
+- current work-copy data has 11 asset models, 11 model numbers, 411 model-number attributes, 18 users, and 7 assets
+- current component catalog data is not a useful seed source yet: 3 component definitions, 0 model-number component templates, 1 subcomponent template
+- component reparenting correction should stay within the same asset
+- expected-template matching can be deferred; first-pass reparenting can attach a manual child without trying to satisfy an expected slot
+- product attributes should not be created just so workflow items/tests can attach to them
+- future production cleanup should migrate users, but not old workflow/test runs/photos; assets will be manually recreated against the new catalog foundation
+- Investigated current live component definitions in `snipeit_prod_work`:
+- `Werckermann`: RAM category, Microsoft manufacturer, 16GB DDR4 attributes, no instances/templates
+- `Test main component 1`: RAM category, model `modelnumber123`, part `12345`, DDR4 + 4GB attributes, one installed instance on asset `INBIT-QI0001`, one freeform expected child template named `Test subcomponent 1`
+- `samsungh powerram 3000`: RAM category, 8GB LPDDR4X attributes, no instances/templates
+- Conclusion: current component-definition rows are ad hoc/test data, not enough to use as the main seed source. Seed work should create a clean common component catalog and optionally preserve any rows only if the user explicitly wants them.
+- User confirmed the current component-definition rows are examples/tests and should not be migrated into the clean seed/catalog.
+- Created the clean-start catalog mapping investigation at `docs/plans/catalog-clean-start-mapping-2026-05-28.md`.
+- The mapping preserves the 11 current real models/model numbers, excludes current example component definitions, maps present/test booleans and summary dropdowns out of the product attribute catalog, and proposes generic component definitions/templates for RAM, storage, displays, batteries, cameras, ports, audio, input, and network capability.
+- Important implementation caveat captured: current component attribute aggregation only rolls up numeric `resolves_to_spec` values into the effective attribute list. Non-numeric component details such as RAM type, storage type, display resolution, USB standard, and port connector type need either manual model-number attributes or a resolver/display enhancement.
+- Browser smoke check reached the local app at `https://dev.inbit` and confirmed the login page loads. Protected asset/internal pages require an authenticated session; no browser verification of component/workflow pages was completed because no test credentials/session were available and no database mutation was made.
+- Resolved follow-up catalog decisions in the mapping doc: Surface Type Cover is a sale accessory/workflow item, Pixel 8 Pro manufacturer should seed as Google, phone cameras should be generic multi-camera components with position/role/megapixel attributes, and HP ProBook 430 G3 battery capacity is deferred until actual scan/health handling.
+- Created next-session handoff at `docs/agents/session-handoff-2026-05-28.md`.
+
+### 2026-06-02
+- Session reinitialized after the 2026-05-28 handoff.
+- Reviewed `AGENTS.md`, recent `PROGRESS.md`, `docs/fork-notes.md`, `docs/agents/session-handoff-2026-05-28.md`, and `docs/plans/catalog-clean-start-mapping-2026-05-28.md`.
+- Current branch at reinit: `codex/component-hierarchy-sprints` on commit `e72fc14b3`.
+- Working tree remains dirty with the workflow/profile implementation, clean-start mapping docs, local environment artifacts, Docker/upload placeholder changes, and untracked workflow files.
+- Docker Desktop was not reachable during reinit, so local migration status and app/browser checks could not be refreshed. Last known DB state from the handoff: `DB_DATABASE=snipeit_prod_work` with workflow migration `2026_05_26_120000_rename_tests_to_workflows_and_add_profiles` pending.
+- Immediate continuation target remains the seed/data foundation: clean attributes, component catalog, model-number expected component templates, and workflow seed cleanup.
+- User resolved `warranty_months`: it belongs to sale/policy handling and should not be seeded as a device attribute.
+- User wants repeated port expectations grouped by quantity, for example `USB-A Port - USB 3.1 Gen1 x3`, instead of showing several identical expected rows when the repetition is just quantity.
+- Live work DB rehearsal completed against `snipeit_prod_work` after a fresh backup:
+- SQL dump: `prodbak/db-snapshots/snipeit_prod_work_pre_workflow_catalog_20260602_102947.sql`
+- clone schema: `snipeit_prod_work_pre_workflow_catalog_20260602_102947`
+- DB preflight before migration: `APP_ENV=local`, `DB_CONNECTION=mysql`, `DB_DATABASE=snipeit_prod_work`
+- Ran pending workflow migration `2026_05_26_120000_rename_tests_to_workflows_and_add_profiles`.
+- Reran focused seeders: `DeviceAttributeSeeder`, `DevicePresetSeeder`, `DeviceComponentCatalogSeeder`, and `AttributeTestSeeder`.
+- Adjusted `AttributeTestSeeder` so seeded workflow profiles sync/remediate stale profile item assignments from copied databases; Standard Diagnostics now contains only diagnostic checks, while Pre-Sale, Cleaning, and Shipping remain separate profiles.
+- Browser smoke while logged in at `https://dev.inbit`:
+- asset `INBIT-QI0001` loads without SQL/page errors after disabling local debugbar via `.env` `APP_DEBUG=false`
+- asset component tab shows the expected component roster with grouped quantities and component-derived specs including `RAM 8GB DDR4`, `Storage 256GB NVMe`, `USB-A Port`, `Assumed x2`, and `Calculated from components`
+- workflow history page lists `Standard Diagnostics`, `Pre-Sale Check`, `Cleaning`, and `Shipping Laptop` as selectable profiles
+- started `Cleaning #23`, verified the active workflow created 2 ordered done/not-done results, marked the first task done, and saved a note through the browser
+- ready/attention warning still appears on the asset page when the latest blocking workflow state needs attention
+- Fixed missing localization keys found during browser smoke: `tests.failure_count`, `general.progress`, and `general.total`.
+- Added CSRF middleware disabling to the workflow feature tests, matching other web-form tests in the repo.
+- Focused validation passed after `php artisan optimize:clear` and testing DB preflight (`testing|sqlite|/var/www/html/database/database.sqlite`):
+- `ManageWorkflowProfilesTest`
+- `StartNewTestRunTest`
+- `AttributeTestRunGenerationTest`
+- `ComponentDerivedAttributeResolutionTest`
+- combined result: 22 tests, 97 assertions.
+- Current remaining caveat: copied legacy workflow item rows such as `install-update-windows` and `wipen` still exist in `workflow_items` and are visible as available settings items, but are no longer assigned to the seeded Standard profile. Decide whether future seeders should prune unseeded legacy workflow items from copied databases; deleting them would affect old migrated workflow result references.
+
+### 2026-06-04
+- Split Workflow Profiles item management into per-profile subpages instead of rendering every profile's item matrix on the index page.
+- `admin/workflow-profiles` now stays compact with profile metadata, counts, flags, and an `Items` action for each profile.
+- Each profile item page shows separate `Included Items` and `Available Items` tables; included items now support drag-and-drop ordering backed by the profile-item reorder endpoint, while the form still saves enabled/required/result-label settings together.
+- Focused validation passed after `php artisan optimize:clear` and testing DB preflight (`APP_ENV=testing`, `DB_CONNECTION=sqlite`, `DB_DATABASE=/var/www/html/database/database.sqlite`):
+- `tests/Feature/Settings/ManageWorkflowProfilesTest.php`
+- `tests/Feature/Settings/ManageTestTypesTest.php`
+- result: 11 tests, 49 assertions.
+- Additional sanity checks passed: `php artisan view:cache` and `git diff --check` (line-ending normalization warnings only).
+- Browser smoke while logged in at `https://dev.inbit`: `admin/workflow-profiles` renders compact profile rows with item subpage links, and `admin/workflow-profiles/1/items` renders Included/Available sections with drag handles and no console warnings.
+- Split workflow configuration responsibilities further:
+- `Workflow Items` now has its own settings card and settings side-menu entry instead of being discoverable only through Workflow Profiles.
+- workflow items now store a default `result_label_mode` so reusable items decide whether they use `Pass / Fail` or `Done / Not Done`; run creation and agent ingestion now prefer the workflow item defaults for requiredness/button mode, including one-off extra items.
+- workflow profile item pages now behave as composition pages: included rows show read-only item defaults plus explicit `Remove`, available rows use explicit `Add`, item order remains draggable, and the old inline `Use`/`Required`/result-button controls are no longer front-and-center.
+- Added and applied migration `2026_06_04_120000_add_result_label_mode_to_workflow_items`; the dev `snipeit_prod_work` migration backfilled item button modes from existing profile item assignments.
+- Focused validation passed after testing DB preflight and migrations:
+- `tests/Feature/Settings/ManageWorkflowProfilesTest.php`
+- `tests/Feature/Settings/ManageTestTypesTest.php`
+- `tests/Feature/Assets/StartNewTestRunTest.php`
+- result: 19 tests, 79 assertions.
+- Browser smoke while logged in at `https://dev.inbit`: settings index shows separate Workflow Profiles and Workflow Items cards, `admin/testtypes` renders the Result Buttons field/options, and `admin/workflow-profiles/1/items` renders Add/Remove controls with no `Use` header or profile-level result-button selects.
+- Fixed existing enum attribute option editing: edit pages now render the pending-option row hooks used by the `Add to list` button, preserve unsaved new options after validation errors, and clarify that adding a new option only makes it available for future selections while renaming/removing existing options can affect current rows.
+- Browser smoke on `https://dev.inbit/attributes/63/edit` (`port_connector_type`) confirmed the attribute is in use by 24 component definitions, the contextual options warning renders near the options section, and adding an unsaved `eSATA` row now creates `options[new][0]` inputs without saving.
+- Focused validation passed after testing DB preflight (`APP_ENV=testing`, `DB_CONNECTION=sqlite`, `DB_DATABASE=/var/www/html/database/database.sqlite`): `tests/Feature/AttributeDefinitionLifecycleTest.php` result: 15 tests, 56 assertions.
+- Implemented speed-specific RJ45 port cataloging. `port_connector_type` remains the physical connector and now includes seeded `esata`/`eSATA`; new `ethernet_speed_max` enum options seed `1GbE`, `2.5GbE`, `5GbE`, and `10GbE`. Component definitions now include `RJ-45 Ethernet Port - 1GbE`, `2.5GbE`, `5GbE`, and `10GbE`, with the HP ProBook RJ45 motherboard templates moved to the 1GbE definition.
+- Created `prodbak/db-snapshots/snipeit_prod_work_pre_rj45_speeds_20260604_155034.sql`, then reran `DeviceAttributeSeeder` and `DeviceComponentCatalogSeeder` against `snipeit_prod_work`.
+- Post-reseed DB verification confirmed active `rj45` and `esata` connector options, active Ethernet speed options, the old generic `RJ-45 Ethernet Port` soft-deleted, `RJ-45 Ethernet Port - 1GbE` carrying `port_connector_type=rj45` and `ethernet_speed_max=1gbe`, and the HP ProBook 430 G6 motherboard owning the 1GbE RJ45 child template.
+- Focused validation passed: PHP syntax checks, `DeviceComponentCatalogSeederTest`, `ComponentDerivedAttributeResolutionTest`, and `TestTypeForAssetTest` (`21` tests, `82` assertions); `php artisan view:cache` passed and caches were cleared afterward. Browser smoke on `https://dev.inbit/admin/settings/component-definitions?search=RJ-45` showed all four speed-specific RJ45 definitions without server errors.
+- TODO for next session: add quick-entry generic fallback component definitions for partially known hardware, especially `Wireless Module`, `USB-A Port`, `USB-C Port`, and possibly an explicit `RJ-45 Ethernet Port - Unknown Speed` rather than reusing the retired generic RJ45 name. These should set only known physical/capability data, leave version attributes blank/unknown, and allow later refinement by swapping the expected component definition or adding component attributes.
+- Created handoff for continuing on a new device: `docs/agents/session-handoff-2026-06-04.md`.
 
 

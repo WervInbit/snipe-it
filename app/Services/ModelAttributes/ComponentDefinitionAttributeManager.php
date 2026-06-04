@@ -81,12 +81,6 @@ class ComponentDefinitionAttributeManager
                     ]);
                 }
 
-                if ($resolvesToSpec && !$definition->isNumericDatatype()) {
-                    throw ValidationException::withMessages([
-                        'attribute_contributions.' . $index . '.resolves_to_spec' => [__('Only numeric attributes can replace calculated specification values right now.')],
-                    ]);
-                }
-
                 try {
                     $normalized = $this->valueService->validateAndNormalize($definition, $value, 'attribute_contributions');
                 } catch (ValidationException $exception) {
@@ -112,7 +106,7 @@ class ComponentDefinitionAttributeManager
                         'value' => $normalized->value,
                         'raw_value' => $normalized->rawValue,
                         'attribute_option_id' => $normalized->attributeOptionId,
-                        'resolves_to_spec' => $definition->isNumericDatatype() ? $resolvesToSpec : false,
+                        'resolves_to_spec' => $resolvesToSpec,
                         'sort_order' => $index,
                     ]
                 );

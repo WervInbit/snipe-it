@@ -118,7 +118,7 @@
                 {{ __('Use for calculated specification') }}
             </label>
         </div>
-        <p class="help-block text-muted" style="margin-bottom:0;">{{ __('Only numeric contributions can replace calculated specification values.') }}</p>
+        <p class="help-block text-muted" style="margin-bottom:0;">{{ __('Use this component value as the model or asset specification instead of a manual attribute value.') }}</p>
     @endif
 @else
     <input type="text"

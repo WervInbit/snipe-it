@@ -6,6 +6,7 @@ use App\Models\AssetModel;
 use App\Models\AttributeDefinition;
 use App\Models\ModelNumberAttribute;
 use App\Services\ModelAttributes\AttributeValueService;
+use App\Services\ModelAttributes\ModelAttributeManager;
 use Database\Seeders\Concerns\ProvidesDeviceCatalogData;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -71,12 +72,19 @@ class DevicePresetSeeder extends Seeder
 
             $assignedDefinitionIds = [];
             $position = 0;
+            $modelNumber->unsetRelation('componentTemplates');
+            $componentBackedDefinitionIds = app(ModelAttributeManager::class)
+                ->componentResolvedSpecDefinitionIds($modelNumber);
 
             foreach ($config['attributes'] as $key => $value) {
                 /** @var AttributeDefinition|null $definition */
                 $definition = $definitions->get($key);
 
                 if (!$definition) {
+                    continue;
+                }
+
+                if (in_array((int) $definition->id, $componentBackedDefinitionIds, true)) {
                     continue;
                 }
 
@@ -101,12 +109,14 @@ class DevicePresetSeeder extends Seeder
                 $position++;
             }
 
+            $staleAssignments = ModelNumberAttribute::query()
+                ->where('model_number_id', $modelNumber->id);
+
             if (!empty($assignedDefinitionIds)) {
-                ModelNumberAttribute::query()
-                    ->where('model_number_id', $modelNumber->id)
-                    ->whereNotIn('attribute_definition_id', $assignedDefinitionIds)
-                    ->delete();
+                $staleAssignments->whereNotIn('attribute_definition_id', $assignedDefinitionIds);
             }
+
+            $staleAssignments->delete();
         }
     }
 }

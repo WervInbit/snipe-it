@@ -140,7 +140,7 @@ class ComponentAttributeAggregator
                     'value' => $contribution['value'],
                     'raw_value' => $contribution['raw_value'],
                     'option' => $contribution['option'],
-                    'quantity' => 1,
+                    'quantity' => $row->component ? 1 : max(1, $row->quantity),
                     'label' => $row->name,
                     'component_definition_id' => $row->component?->component_definition_id ?? $row->template?->component_definition_id,
                     'component_instance_id' => $row->component?->id,
@@ -249,8 +249,7 @@ class ComponentAttributeAggregator
             return true;
         }
 
-        return $contribution->resolves_to_spec
-            && $contribution->definition->isNumericDatatype();
+        return (bool) $contribution->resolves_to_spec;
     }
 
     private function effectiveContributionValues(ComponentInstance $component, bool $specOnly): Collection

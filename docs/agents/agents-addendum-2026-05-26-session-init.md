@@ -56,3 +56,34 @@
 - `docker compose run --rm --no-deps -e APP_ENV=testing app sh -lc 'php artisan optimize:clear && echo Test_DB_preflight && grep APP_ENV .env.testing && grep DB_CONNECTION .env.testing && grep DB_DATABASE .env.testing && ./vendor/bin/phpunit --filter AssetAddPage tests/Feature/Components/Ui/ComponentWorkflowPagesTest.php'`
 - result: `1` test passed, `13` assertions.
 - A route-list diagnostic was attempted but did not complete because non-testing route bootstrap hit the existing missing settings row around SAML settings; no route-cache file exists in `bootstrap/cache`.
+
+## Workflow Implementation Block 1
+- Added the first workflow/profile implementation slice after the attribute/component planning discussion.
+- New workflow-named tables are introduced through `database/migrations/2026_05_26_120000_rename_tests_to_workflows_and_add_profiles.php`, with migration copy paths from legacy `test_*` tables and rollback copy paths back to legacy names.
+- Added `WorkflowProfile` and `WorkflowProfileItem` models/factories. Existing `TestRun`, `TestResult`, `TestType`, `TestResultPhoto`, and `TestAudit` classes now point at workflow tables to keep the first slice smaller and preserve controller/API compatibility.
+- Asset workflow starts now require/select an active workflow profile, snapshot profile identity on runs, and create ordered results from profile items with `is_required`, `result_label_mode`, and `sort_order` snapshots.
+- Active workflow cards still use the existing two-button, notes, and photos interaction model. Task-style profile items can display `Done` / `Not Done` labels while reusing pass/fail values internally.
+- Seed foundation now creates standard diagnostics, pre-sale check, cleaning, and shipping-laptop workflow profiles, with operational task items separated from diagnostic tests.
+- Agent reports accept `test_results` and `workflow_results`, write workflow run/profile metadata, and return `workflow_run_id` plus legacy `test_run_id`.
+- Retargeted `asset_images.source_photo_id` from legacy result photos to `workflow_result_photos`; SQLite PHPUnit exposed and verified this migration edge.
+- No live dev/prod-clone DB migration was run in this block.
+- Verification passed against `.env.testing` SQLite after Docker `php artisan optimize:clear` and test DB preflight:
+- workflow/profile focused set: `12` tests, `61` assertions.
+- agent/photo/audit/status/relationship regression set: `25` tests, `113` assertions.
+- changed-file PHP syntax checks passed.
+- `git diff --check` passed with line-ending warnings only.
+
+## Workflow Profiles UI And Readiness Block
+- Added `Admin\WorkflowProfileController`, `settings.workflow-profiles.*` routes, and the `settings/workflow-profiles` Blade page.
+- Workflow Profiles can now be created, edited, deleted, category-scoped, marked active/default, marked as sale-readiness blocking, and assigned ordered workflow items.
+- Per-profile item settings now expose `sort_order`, `is_required`, and `result_label_mode`, so diagnostic checks can keep Pass/Fail labels while operational task lists can show Done/Not Done labels.
+- The Settings index and admin nav now point to Workflow Profiles; Workflow Items remain available as the reusable item vocabulary from a cross-link.
+- `Asset::latestTestIssueSummary()` and `refreshTestCompletionFlag()` now evaluate every active applicable profile with `blocks_sale_readiness=true`; legacy latest-run behavior remains the fallback when no blocking profiles are configured.
+- Asset update/status and bulk status warnings continue to use the same Ready for Sale/Sold acknowledgment locations, now including named missing workflow profile runs.
+- Added feature coverage in `ManageWorkflowProfilesTest` and expanded Ready for Sale warning coverage for missing blocking profile runs.
+- Verification passed against `.env.testing` SQLite after Docker cache clear:
+- `ManageWorkflowProfilesTest`: `4` tests, `16` assertions.
+- workflow/settings/status focused set: `11` tests, `53` assertions.
+- broader workflow/profile regression set: `42` tests, `197` assertions.
+- Page-oriented smoke still reports two stale `ShowAssetTest` expectations, not workflow HTTP failures: old QR-label copy and an old run-row assertion for an asset without a run.
+- Live dev database migration/browser testing remains intentionally pending until `snipeit_prod_work` is backed up and migrated.

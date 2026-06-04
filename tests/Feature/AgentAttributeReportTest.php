@@ -9,6 +9,8 @@ use App\Models\Category;
 use App\Models\ModelNumberAttribute;
 use App\Models\TestResult;
 use App\Models\TestRun;
+use App\Models\WorkflowProfile;
+use App\Models\WorkflowProfileItem;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -40,6 +42,12 @@ class AgentAttributeReportTest extends TestCase
         $testType = \App\Models\TestType::factory()->create([
             'attribute_definition_id' => $definition->id,
             'slug' => 'ram-capacity-test',
+        ]);
+        $profile = WorkflowProfile::factory()->create(['is_default' => true]);
+        WorkflowProfileItem::factory()->create([
+            'workflow_profile_id' => $profile->id,
+            'workflow_item_id' => $testType->id,
+            'sort_order' => 0,
         ]);
 
         $model = AssetModel::factory()->create([
@@ -77,7 +85,7 @@ class AgentAttributeReportTest extends TestCase
         ]);
 
         $response->assertOk();
-        $response->assertJson(['message' => 'Test results recorded']);
+        $response->assertJson(['message' => 'Workflow results recorded']);
 
         $run = TestRun::first();
         $this->assertNotNull($run, 'Test run was not created');

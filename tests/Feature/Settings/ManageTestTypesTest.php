@@ -2,12 +2,23 @@
 
 namespace Tests\Feature\Settings;
 
+use App\Http\Middleware\VerifyCsrfToken;
+use App\Models\Category;
+use App\Models\ComponentDefinition;
 use App\Models\TestType;
 use App\Models\User;
+use App\Models\WorkflowProfileItem;
 use Tests\TestCase;
 
 class ManageTestTypesTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->withoutMiddleware(VerifyCsrfToken::class);
+    }
+
     public function test_admin_can_create_test_type_with_slug_generated_from_name(): void
     {
         $user = User::factory()->superuser()->create();
@@ -17,13 +28,44 @@ class ManageTestTypesTest extends TestCase
                 'name' => 'Battery / Health',
                 'tooltip' => 'Checks battery condition',
                 'is_required' => 1,
+                'result_label_mode' => WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE,
             ]);
 
         $response->assertRedirect(route('settings.testtypes.index'));
-        $this->assertDatabaseHas('test_types', [
+        $this->assertDatabaseHas('workflow_items', [
             'name' => 'Battery / Health',
             'slug' => 'battery-health',
+            'result_label_mode' => WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE,
         ]);
+    }
+
+    public function test_admin_can_create_workflow_item_with_component_applicability(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $assetCategory = Category::factory()->assetLaptopCategory()->create();
+        $componentCategory = Category::factory()->forComponents()->create(['name' => 'Ports']);
+        $definition = ComponentDefinition::factory()->create([
+            'category_id' => $componentCategory->id,
+            'name' => 'USB-C Port',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post(route('settings.testtypes.store'), [
+                'name' => 'USB Ports',
+                'category_ids' => [$assetCategory->id],
+                'component_category_ids' => [$componentCategory->id],
+                'component_definition_ids' => [$definition->id],
+                'applies_to_all' => 1,
+                'is_required' => 1,
+            ]);
+
+        $response->assertRedirect(route('settings.testtypes.index'));
+
+        $item = TestType::query()->where('slug', 'usb-ports')->firstOrFail();
+        $this->assertTrue((bool) $item->applies_to_all);
+        $this->assertSame([$assetCategory->id], $item->categories()->pluck('categories.id')->all());
+        $this->assertSame([$componentCategory->id], $item->componentCategories()->pluck('categories.id')->all());
+        $this->assertSame([$definition->id], $item->componentDefinitions()->pluck('component_definitions.id')->all());
     }
 
     public function test_admin_create_suffixes_generated_slug_when_name_collides(): void
@@ -41,7 +83,7 @@ class ManageTestTypesTest extends TestCase
             ]);
 
         $response->assertRedirect(route('settings.testtypes.index'));
-        $this->assertDatabaseHas('test_types', [
+        $this->assertDatabaseHas('workflow_items', [
             'name' => 'Battery Health',
             'slug' => 'battery-health-2',
         ]);
@@ -58,12 +100,14 @@ class ManageTestTypesTest extends TestCase
                 'slug' => $type->slug,
                 'tooltip' => 'New tip',
                 'is_required' => 1,
+                'result_label_mode' => WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE,
             ]);
 
         $response->assertRedirect(route('settings.testtypes.index'));
-        $this->assertDatabaseHas('test_types', [
+        $this->assertDatabaseHas('workflow_items', [
             'id' => $type->id,
             'tooltip' => 'New tip',
+            'result_label_mode' => WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE,
         ]);
     }
 
@@ -84,7 +128,7 @@ class ManageTestTypesTest extends TestCase
             ]);
 
         $response->assertRedirect(route('settings.testtypes.index'));
-        $this->assertDatabaseHas('test_types', [
+        $this->assertDatabaseHas('workflow_items', [
             'id' => $type->id,
             'name' => 'Battery / Health',
             'slug' => 'battery-health',
@@ -113,7 +157,7 @@ class ManageTestTypesTest extends TestCase
             ]);
 
         $response->assertRedirect(route('settings.testtypes.index'));
-        $this->assertDatabaseHas('test_types', [
+        $this->assertDatabaseHas('workflow_items', [
             'id' => $type->id,
             'slug' => 'battery-health-2',
         ]);
@@ -141,15 +185,15 @@ class ManageTestTypesTest extends TestCase
 
         $response->assertOk()->assertJson(['status' => 'ok']);
 
-        $this->assertDatabaseHas('test_types', [
+        $this->assertDatabaseHas('workflow_items', [
             'id' => $third->id,
             'display_order' => 0,
         ]);
-        $this->assertDatabaseHas('test_types', [
+        $this->assertDatabaseHas('workflow_items', [
             'id' => $first->id,
             'display_order' => 1,
         ]);
-        $this->assertDatabaseHas('test_types', [
+        $this->assertDatabaseHas('workflow_items', [
             'id' => $second->id,
             'display_order' => 2,
         ]);

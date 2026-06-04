@@ -1,7 +1,7 @@
 @extends('layouts/default')
 
 @section('title')
-    {{ trans('tests.tests') }}
+    {{ trans('tests.workflows') }}
 @endsection
 
 @push('css')
@@ -181,6 +181,29 @@
               class="mb-3"
               data-testid="tests-index-start-run-form">
             @csrf
+            <div class="form-group">
+                <label for="workflow_profile_id">{{ trans('tests.workflow_profile') }}</label>
+                <select id="workflow_profile_id" name="workflow_profile_id" class="form-control" required>
+                    @foreach(($workflowProfiles ?? collect()) as $profile)
+                        <option value="{{ $profile->id }}" @selected($profile->is_default)>
+                            {{ $profile->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+            @if(($manualWorkflowItems ?? collect())->isNotEmpty())
+                <div class="form-group">
+                    <label for="extra_workflow_item_ids">{{ __('Extra workflow items') }}</label>
+                    <select id="extra_workflow_item_ids" name="extra_workflow_item_ids[]" class="form-control" multiple>
+                        @foreach($manualWorkflowItems as $item)
+                            <option value="{{ $item->id }}" @selected(in_array($item->id, (array) old('extra_workflow_item_ids', [])))>
+                                {{ $item->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <span class="help-block">{{ __('Use this for one-off checks on this run. These items are added after the selected profile items.') }}</span>
+                </div>
+            @endif
             <button type="submit" class="btn btn-primary btn-lg btn-block">{{ trans('tests.start_new_run') }}</button>
         </form>
     @endcan
@@ -205,7 +228,7 @@
                             aria-controls="{{ $detailId }}">
                         <span class="test-run-row__summary-main">
                             <span class="test-run-row__primary">
-                                {{ trans('tests.test_run') }} #{{ $run->id }} &middot; {{ optional($run->created_at)->format('Y-m-d H:i') }} &middot; {{ optional($run->user)->name }}
+                                {{ $run->profile_name_snapshot ?: optional($run->profile)->name ?: trans('tests.workflow_run') }} #{{ $run->id }} &middot; {{ optional($run->created_at)->format('Y-m-d H:i') }} &middot; {{ optional($run->user)->name }}
                             </span>
                         </span>
                         <span class="test-run-row__stats">

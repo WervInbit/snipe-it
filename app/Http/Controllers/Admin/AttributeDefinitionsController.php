@@ -30,7 +30,10 @@ class AttributeDefinitionsController extends Controller
                 $like = '%' . $search . '%';
                 $query->where(function ($inner) use ($like) {
                     $inner->where('label', 'like', $like)
-                        ->orWhere('key', 'like', $like);
+                        ->orWhere('key', 'like', $like)
+                        ->orWhere('datatype', 'like', $like)
+                        ->orWhere('unit', 'like', $like)
+                        ->orWhereHas('categories', fn ($categoryQuery) => $categoryQuery->where('name', 'like', $like));
                 });
             })
             ->orderBy('label')

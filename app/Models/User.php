@@ -603,7 +603,7 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
             \App\Models\TestResult::class,
             \App\Models\TestRun::class,
             'user_id',
-            'test_run_id'
+            'workflow_run_id'
         );
     }
 

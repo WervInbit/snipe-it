@@ -42,7 +42,7 @@ class PromoteTestResultPhotoToAssetImageTest extends TestCase
         $uploaded->move($destination, $filename);
 
         $photo = TestResultPhoto::create([
-            'test_result_id' => $result->id,
+            'workflow_result_id' => $result->id,
             'path' => 'uploads/test_images/'.$filename,
         ]);
 

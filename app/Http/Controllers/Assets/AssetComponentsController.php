@@ -160,6 +160,52 @@ class AssetComponentsController extends Controller
         return redirect()->route('hardware.show', $asset)->with('success', __('Component created and installed.'));
     }
 
+    public function createReparent(Asset $asset, ComponentInstance $component): View
+    {
+        $this->authorize('view', $asset);
+        $this->authorize('move', $component);
+        $component = $this->ensureTrackedComponentOnAsset($asset, $component);
+
+        return view('components.asset-reparent', [
+            'asset' => $asset,
+            'component' => $component->loadMissing('parentComponent', 'componentDefinition'),
+            'parentCandidates' => $this->reparentCandidates($asset, $component),
+        ]);
+    }
+
+    public function storeReparent(Request $request, Asset $asset, ComponentInstance $component): RedirectResponse
+    {
+        $this->authorize('view', $asset);
+        $this->authorize('move', $component);
+        $component = $this->ensureTrackedComponentOnAsset($asset, $component);
+
+        $data = $request->validate([
+            'parent_component_instance_id' => ['nullable', 'integer', 'exists:component_instances,id'],
+            'note' => ['nullable', 'string'],
+        ]);
+
+        $parent = null;
+        if (!empty($data['parent_component_instance_id'])) {
+            $parent = ComponentInstance::query()->findOrFail($data['parent_component_instance_id']);
+            $parent = $this->ensureTrackedComponentOnAsset($asset, $parent);
+
+            if ($parent->parent_component_instance_id) {
+                return redirect()->back()->withInput()->with('error', __('Choose a top-level component as the parent.'));
+            }
+        }
+
+        try {
+            $this->lifecycle->reparentWithinAsset($component, $parent, [
+                'performed_by' => $request->user(),
+                'note' => $data['note'] ?? null,
+            ]);
+        } catch (InvalidArgumentException $exception) {
+            return redirect()->back()->withInput()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('hardware.show', $asset)->with('success', __('Component hierarchy updated.'));
+    }
+
     public function expectedToTray(Request $request, Asset $asset, ModelNumberComponentTemplate $template): RedirectResponse
     {
         $this->authorize('view', $asset);
@@ -408,6 +454,19 @@ class AssetComponentsController extends Controller
         }
 
         return $component;
+    }
+
+    private function reparentCandidates(Asset $asset, ComponentInstance $component)
+    {
+        return ComponentInstance::query()
+            ->with(['componentDefinition.category'])
+            ->where('current_asset_id', $asset->id)
+            ->where('lifecycle_status', ComponentInstance::LIFECYCLE_ATTACHED)
+            ->whereNull('parent_component_instance_id')
+            ->whereKeyNot($component->id)
+            ->orderBy('display_name')
+            ->orderBy('component_tag')
+            ->get();
     }
 
     private function ensureTemplateBelongsToAsset(Asset $asset, ModelNumberComponentTemplate $template): void

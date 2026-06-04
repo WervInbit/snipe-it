@@ -149,7 +149,7 @@ class PartialUpdateTestResultTest extends TestCase
         $photoId = $payload['photo']['id'];
 
         $result->refresh();
-        $photoRecord = TestResultPhoto::where('test_result_id', $result->id)->first();
+        $photoRecord = TestResultPhoto::where('workflow_result_id', $result->id)->first();
         $this->assertNotNull($photoRecord);
         $this->assertSame($photoId, $photoRecord->id);
         $this->assertTrue(File::exists(public_path($photoRecord->path)));
@@ -238,7 +238,7 @@ class PartialUpdateTestResultTest extends TestCase
         $this->assertFalse(File::exists($firstPath));
 
         // Clean up remaining photo
-        foreach (TestResultPhoto::where('test_result_id', $result->id)->get() as $photo) {
+        foreach (TestResultPhoto::where('workflow_result_id', $result->id)->get() as $photo) {
             File::delete(public_path($photo->path));
             $photo->delete();
         }

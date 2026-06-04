@@ -15,15 +15,25 @@
                 <div class="box-header with-border">
                     <h2 class="box-title">{{ __('Attribute Definitions') }}</h2>
                     <div class="box-tools pull-right">
-                        <form method="GET" action="{{ route('attributes.index') }}" class="form-inline" id="attributes-search-form" style="margin-right:10px;">
-                            <div class="form-group">
-                                <input type="text"
-                                       name="search"
-                                       value="{{ $search ?? '' }}"
-                                       class="form-control input-sm"
-                                       placeholder="{{ __('Search attributes...') }}"
-                                       autocomplete="off"
-                                       aria-label="{{ __('Search attributes') }}">
+                        <form method="GET" action="{{ route('attributes.index') }}" class="form-inline" id="attributes-search-form" style="display:inline-block; margin-right:10px;">
+                            <div class="input-group input-group-sm">
+                                <input
+                                    type="search"
+                                    name="search"
+                                    value="{{ $search ?? '' }}"
+                                    class="form-control"
+                                    placeholder="{{ __('Search attributes...') }}"
+                                    autocomplete="off"
+                                    aria-label="{{ __('Search attributes') }}"
+                                    data-attribute-live-search
+                                >
+                                <span class="input-group-addon" data-attribute-search-loading style="display:none;" aria-live="polite">
+                                    <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
+                                    <span class="sr-only">{{ __('Searching...') }}</span>
+                                </span>
+                                <span class="input-group-btn">
+                                    <button type="submit" class="btn btn-default">{{ __('Search') }}</button>
+                                </span>
                             </div>
                         </form>
                         <a href="{{ route('attributes.create') }}" class="btn btn-primary btn-sm">{{ __('New Attribute') }}</a>
@@ -46,7 +56,17 @@
                         </thead>
                         <tbody>
                         @forelse($definitions as $definition)
-                            <tr>
+                            <tr data-attribute-row data-search-text="{{ \Illuminate\Support\Str::lower(implode(' ', array_filter([
+                                $definition->label,
+                                $definition->key,
+                                $definition->datatype,
+                                $definition->unit,
+                                $definition->isDeprecated() ? __('Deprecated') : __('Active'),
+                                $definition->isHidden() ? __('Hidden') : null,
+                                $definition->categories->isEmpty() ? __('All') : $definition->categories->pluck('name')->implode(' '),
+                                $definition->required_for_category ? __('Required') : null,
+                                $definition->allow_asset_override ? __('Asset Overrides') : null,
+                            ]))) }}">
                                 <td>{{ $definition->label }}</td>
                                 <td><code>{{ $definition->key }}</code></td>
                                 <td>{{ ucfirst($definition->datatype) }}</td>
@@ -92,6 +112,15 @@
                                 <td colspan="9" class="text-center text-muted">{{ __('No attributes defined yet.') }}</td>
                             </tr>
                         @endforelse
+                        <tr data-attribute-loading style="display:none;">
+                            <td colspan="9" class="text-center text-muted">
+                                <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
+                                <span class="sr-only">{{ __('Searching...') }}</span>
+                            </td>
+                        </tr>
+                        <tr data-attribute-no-matches style="display:none;">
+                            <td colspan="9" class="text-center text-muted">{{ __('No attributes defined yet.') }}</td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
@@ -103,25 +132,82 @@
     </div>
 @endsection
 
-@push('scripts')
+@push('js')
 <script nonce="{{ csrf_token() }}">
 (function () {
     var form = document.getElementById('attributes-search-form');
     if (!form) return;
-    var input = form.querySelector('input[name="search"]');
+    var input = form.querySelector('[data-attribute-live-search]');
     if (!input) return;
 
+    var rows = Array.prototype.slice.call(document.querySelectorAll('[data-attribute-row]'));
+    var loadingIndicator = document.querySelector('[data-attribute-search-loading]');
+    var loadingRow = document.querySelector('[data-attribute-loading]');
+    var noMatchesRow = document.querySelector('[data-attribute-no-matches]');
     var timer = null;
-    var submit = function () {
-        form.submit();
-    };
+    var loadedSearch = input.value.trim();
+
+    function isServerSearchPending() {
+        return input.value.trim() !== loadedSearch;
+    }
+
+    function setLoading(isLoading) {
+        if (loadingIndicator) {
+            loadingIndicator.style.display = isLoading ? '' : 'none';
+        }
+    }
+
+    function filterVisibleRows() {
+        var query = input.value.trim().toLowerCase();
+        var visibleRows = 0;
+        var isLoading = isServerSearchPending();
+
+        rows.forEach(function (row) {
+            var haystack = row.getAttribute('data-search-text') || '';
+            var isMatch = query === '' || haystack.indexOf(query) !== -1;
+
+            row.style.display = isMatch ? '' : 'none';
+
+            if (isMatch) {
+                visibleRows++;
+            }
+        });
+
+        setLoading(isLoading);
+
+        if (loadingRow) {
+            loadingRow.style.display = rows.length > 0 && visibleRows === 0 && isLoading ? '' : 'none';
+        }
+
+        if (noMatchesRow) {
+            noMatchesRow.style.display = rows.length > 0 && visibleRows === 0 && !isLoading ? '' : 'none';
+        }
+    }
 
     input.addEventListener('input', function () {
-        if (timer) {
-            clearTimeout(timer);
-        }
-        timer = setTimeout(submit, 300);
+        filterVisibleRows();
+        window.clearTimeout(timer);
+
+        timer = window.setTimeout(function () {
+            var currentSearch = input.value.trim();
+
+            if (currentSearch === loadedSearch) {
+                setLoading(false);
+                return;
+            }
+
+            setLoading(true);
+            form.submit();
+        }, 600);
     });
+
+    form.addEventListener('submit', function () {
+        if (input.value.trim() !== loadedSearch) {
+            setLoading(true);
+        }
+    });
+
+    filterVisibleRows();
 })();
 </script>
 @endpush

@@ -112,12 +112,6 @@ class ComponentInstanceAttributeManager
                     $resolvesToSpec = (bool) ($definitionContributions->get($definition->id)?->resolves_to_spec ?? false);
                 }
 
-                if ($resolvesToSpec && !$definition->isNumericDatatype()) {
-                    throw ValidationException::withMessages([
-                        'instance_attributes.' . $index . '.resolves_to_spec' => [__('Only numeric attributes can replace calculated specification values right now.')],
-                    ]);
-                }
-
                 try {
                     $normalized = $this->valueService->validateAndNormalize($definition, $value, 'instance_attributes');
                 } catch (ValidationException $exception) {
@@ -143,7 +137,7 @@ class ComponentInstanceAttributeManager
                         'value' => $normalized->value,
                         'raw_value' => $normalized->rawValue,
                         'attribute_option_id' => $normalized->attributeOptionId,
-                        'resolves_to_spec' => $definition->isNumericDatatype() ? $resolvesToSpec : false,
+                        'resolves_to_spec' => $resolvesToSpec,
                         'sort_order' => $index,
                     ]
                 );

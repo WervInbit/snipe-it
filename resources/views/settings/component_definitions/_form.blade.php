@@ -8,6 +8,32 @@
     $attributeDefinitionsById = $attributeDefinitions->keyBy('id');
     $componentDefinitionOptions = ($componentDefinitions ?? collect())->sortBy('name')->values();
     $hierarchyOverlapWarnings = collect($hierarchyOverlapWarnings ?? []);
+    $componentDefinitionPayload = $componentDefinitionOptions->map(function ($definition) {
+        $meta = collect([
+            $definition->part_code ? __('Part Code') . ': ' . $definition->part_code : null,
+            $definition->model_number ? __('Model Number') . ': ' . $definition->model_number : null,
+            $definition->category?->name,
+            $definition->manufacturer?->name,
+        ])->filter()->values();
+
+        return [
+            'id' => $definition->id,
+            'name' => $definition->name,
+            'part_code' => $definition->part_code,
+            'model_number' => $definition->model_number,
+            'category' => $definition->category?->name,
+            'manufacturer' => $definition->manufacturer?->name,
+            'display' => $definition->name . ($definition->part_code ? ' (' . $definition->part_code . ')' : ''),
+            'meta' => $meta->implode(' - '),
+            'search_text' => strtolower(implode(' ', array_filter([
+                $definition->name,
+                $definition->part_code,
+                $definition->model_number,
+                $definition->category?->name,
+                $definition->manufacturer?->name,
+            ]))),
+        ];
+    })->values();
     $attributeDefinitionPayload = $attributeDefinitions->map(function ($definition) {
         return [
             'id' => $definition->id,
@@ -48,7 +74,11 @@
         'selectAttributeFirst' => __('Select an attribute first'),
         'noMatchingAttributes' => __('No matching attributes.'),
         'resolveToSpec' => __('Use for calculated specification'),
-        'resolveToSpecHelp' => __('Only numeric contributions can replace calculated specification values.'),
+        'resolveToSpecHelp' => __('When checked, this component value is used as the model or asset specification instead of a manual attribute value.'),
+    ];
+    $subcomponentPickerText = [
+        'noMatchingDefinitions' => __('No matching component definitions.'),
+        'freeformExpectedSubcomponent' => __('Freeform expected subcomponent'),
     ];
     $contributionRows = collect(old('attribute_contributions', []));
 
@@ -113,6 +143,13 @@
                 margin-bottom: 0;
             }
 
+            .component-definition-picker-results {
+                max-height: 220px;
+                overflow-y: auto;
+                margin-top: 6px;
+                margin-bottom: 0;
+            }
+
             .component-definition-attribute-result {
                 width: 100%;
                 text-align: left;
@@ -120,9 +157,22 @@
                 background: transparent;
             }
 
+            .component-definition-picker-result {
+                width: 100%;
+                text-align: left;
+                border: 0;
+                background: transparent;
+            }
+
             .component-definition-attribute-result strong,
-            .component-definition-attribute-result span {
+            .component-definition-attribute-result span,
+            .component-definition-picker-result strong,
+            .component-definition-picker-result span {
                 pointer-events: none;
+            }
+
+            .component-definition-subcomponent-notes {
+                margin-top: 10px;
             }
         </style>
     @endpush
@@ -286,8 +336,149 @@
     @push('js')
         <script nonce="{{ csrf_token() }}">
             (function () {
+                var definitions = @json($componentDefinitionPayload);
+                var definitionMap = {};
+                var currentDefinitionId = @json((int) ($item->id ?? 0));
+                var text = @json($subcomponentPickerText);
+
+                definitions.forEach(function (definition) {
+                    definitionMap[String(definition.id)] = definition;
+                });
+
                 function wrapper() {
                     return document.querySelector('[data-subcomponent-template-rows]');
+                }
+
+                function escapeHtml(value) {
+                    return String(value === null || value === undefined ? '' : value)
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#039;');
+                }
+
+                function normalize(value) {
+                    return String(value || '').trim().toLowerCase();
+                }
+
+                function canUseDefinition(definition) {
+                    return !currentDefinitionId || String(definition.id) !== String(currentDefinitionId);
+                }
+
+                function matchingDefinitions(term) {
+                    var query = normalize(term);
+                    var matches = definitions.filter(function (definition) {
+                        if (!canUseDefinition(definition)) {
+                            return false;
+                        }
+
+                        if (query === '') {
+                            return true;
+                        }
+
+                        return definition.search_text.indexOf(query) !== -1;
+                    });
+
+                    return matches.slice(0, 8);
+                }
+
+                function exactMatchDefinition(term) {
+                    var query = normalize(term);
+
+                    if (query === '') {
+                        return null;
+                    }
+
+                    return definitions.find(function (definition) {
+                        if (!canUseDefinition(definition)) {
+                            return false;
+                        }
+
+                        return [definition.display, definition.name, definition.part_code, definition.model_number].some(function (candidate) {
+                            return normalize(candidate) === query;
+                        });
+                    }) || null;
+                }
+
+                function hideAllSearchResults(exceptRow) {
+                    document.querySelectorAll('[data-subcomponent-search-results]').forEach(function (results) {
+                        if (exceptRow && exceptRow.contains(results)) {
+                            return;
+                        }
+
+                        results.hidden = true;
+                        results.innerHTML = '';
+                    });
+                }
+
+                function renderSearchResults(row) {
+                    var searchInput = row ? row.querySelector('[data-subcomponent-definition-search]') : null;
+                    var results = row ? row.querySelector('[data-subcomponent-search-results]') : null;
+
+                    if (!searchInput || !results) {
+                        return;
+                    }
+
+                    var matches = matchingDefinitions(searchInput.value);
+
+                    if (matches.length === 0) {
+                        results.innerHTML = '<div class="list-group-item text-muted">' + escapeHtml(text.noMatchingDefinitions) + '</div>';
+                        results.hidden = false;
+                        return;
+                    }
+
+                    results.innerHTML = matches.map(function (definition) {
+                        var meta = definition.meta
+                            ? '<span class="text-muted small">' + escapeHtml(definition.meta) + '</span>'
+                            : '';
+
+                        return '<button type="button" class="list-group-item component-definition-picker-result" data-subcomponent-select-definition="' + escapeHtml(definition.id) + '">' +
+                            '<strong>' + escapeHtml(definition.name) + '</strong>' +
+                            (meta ? '<br>' + meta : '') +
+                        '</button>';
+                    }).join('');
+                    results.hidden = false;
+                }
+
+                function applyDefinitionToRow(row, definition) {
+                    var hiddenInput = row ? row.querySelector('[data-subcomponent-definition-id]') : null;
+                    var searchInput = row ? row.querySelector('[data-subcomponent-definition-search]') : null;
+
+                    if (!hiddenInput || !searchInput) {
+                        return;
+                    }
+
+                    if (!definition) {
+                        hiddenInput.value = '';
+                        return;
+                    }
+
+                    hiddenInput.value = String(definition.id);
+                    searchInput.value = definition.display;
+                    hideAllSearchResults();
+                }
+
+                function selectDefinitionFromButton(button) {
+                    var row = button ? button.closest('[data-subcomponent-template-row]') : null;
+                    var definition = definitionMap[String(button ? (button.getAttribute('data-subcomponent-select-definition') || '') : '')];
+
+                    if (!row || !definition) {
+                        return;
+                    }
+
+                    applyDefinitionToRow(row, definition);
+
+                    var expectedNameInput = row.querySelector('input[name$="[expected_name]"]');
+                    if (expectedNameInput) {
+                        expectedNameInput.focus();
+                    }
+                }
+
+                function selectedMatchesInput(definition, value) {
+                    return [definition.display, definition.name, definition.part_code, definition.model_number].some(function (candidate) {
+                        return normalize(candidate) === normalize(value);
+                    });
                 }
 
                 function wireRow(row) {
@@ -296,6 +487,78 @@
                     }
 
                     row.dataset.subcomponentTemplateReady = '1';
+
+                    var hiddenInput = row.querySelector('[data-subcomponent-definition-id]');
+                    var searchInput = row.querySelector('[data-subcomponent-definition-search]');
+                    var selectedDefinition = hiddenInput ? definitionMap[String(hiddenInput.value || '')] : null;
+
+                    if (selectedDefinition && searchInput && normalize(searchInput.value) === '') {
+                        searchInput.value = selectedDefinition.display;
+                    }
+
+                    if (!hiddenInput || !searchInput) {
+                        return;
+                    }
+
+                    searchInput.addEventListener('focus', function () {
+                        hideAllSearchResults(row);
+                        renderSearchResults(row);
+                    });
+
+                    searchInput.addEventListener('input', function () {
+                        if (normalize(searchInput.value) === '') {
+                            applyDefinitionToRow(row, null);
+                        }
+
+                        renderSearchResults(row);
+                    });
+
+                    searchInput.addEventListener('search', function () {
+                        if (normalize(searchInput.value) === '') {
+                            applyDefinitionToRow(row, null);
+                        }
+
+                        renderSearchResults(row);
+                    });
+
+                    searchInput.addEventListener('keydown', function (event) {
+                        if (event.key !== 'Enter') {
+                            return;
+                        }
+
+                        var firstResult = row.querySelector('[data-subcomponent-select-definition]');
+                        if (!firstResult) {
+                            return;
+                        }
+
+                        event.preventDefault();
+                        firstResult.click();
+                    });
+
+                    searchInput.addEventListener('blur', function () {
+                        window.setTimeout(function () {
+                            var matched = exactMatchDefinition(searchInput.value);
+                            if (matched) {
+                                applyDefinitionToRow(row, matched);
+                                return;
+                            }
+
+                            var selected = definitionMap[String(hiddenInput.value || '')];
+                            if (selected && selectedMatchesInput(selected, searchInput.value)) {
+                                searchInput.value = selected.display;
+                                hideAllSearchResults();
+                                return;
+                            }
+
+                            if (normalize(searchInput.value) === '') {
+                                applyDefinitionToRow(row, null);
+                            } else {
+                                hiddenInput.value = '';
+                            }
+
+                            hideAllSearchResults();
+                        }, 150);
+                    });
                 }
 
                 function ensureOneRow(container) {
@@ -316,7 +579,24 @@
 
                 document.querySelectorAll('[data-subcomponent-template-row]').forEach(wireRow);
 
+                document.addEventListener('mousedown', function (event) {
+                    var definitionButton = event.target.closest('[data-subcomponent-select-definition]');
+                    if (!definitionButton) {
+                        return;
+                    }
+
+                    event.preventDefault();
+                    selectDefinitionFromButton(definitionButton);
+                });
+
                 document.addEventListener('click', function (event) {
+                    var definitionButton = event.target.closest('[data-subcomponent-select-definition]');
+                    if (definitionButton) {
+                        event.preventDefault();
+                        selectDefinitionFromButton(definitionButton);
+                        return;
+                    }
+
                     var addButton = event.target.closest('[data-add-subcomponent-template]');
                     if (addButton) {
                         var container = wrapper();
@@ -348,6 +628,9 @@
 
                     var moveButton = event.target.closest('[data-move-subcomponent-template]');
                     if (!moveButton) {
+                        if (!event.target.closest('[data-subcomponent-template-row]')) {
+                            hideAllSearchResults();
+                        }
                         return;
                     }
 

@@ -73,6 +73,52 @@ class ComponentDerivedAttributeResolutionTest extends TestCase
         $this->assertSame('Memory Module x2', $resolved['ram_capacity_gb']->contributorSummary('calculated_components'));
     }
 
+    public function test_expected_components_drive_text_model_values_when_resolved_to_spec(): void
+    {
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $resolution = AttributeDefinition::create([
+            'key' => 'display_resolution',
+            'label' => 'Display Resolution',
+            'datatype' => AttributeDefinition::DATATYPE_TEXT,
+        ]);
+
+        $componentDefinition = ComponentDefinition::factory()->create([
+            'name' => 'Display 15.6 FHD',
+        ]);
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $componentDefinition->id,
+            'attribute_definition_id' => $resolution->id,
+            'value' => '1920 x 1080',
+            'raw_value' => '1920 x 1080',
+            'sort_order' => 0,
+            'resolves_to_spec' => true,
+        ]);
+
+        ModelNumberComponentTemplate::create([
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $componentDefinition->id,
+            'expected_name' => 'Display 15.6 FHD',
+            'expected_qty' => 1,
+            'is_required' => true,
+            'sort_order' => 0,
+        ]);
+        ModelNumberAttribute::create([
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $resolution->id,
+            'value' => '1366 x 768',
+            'raw_value' => '1366 x 768',
+            'display_order' => 0,
+        ]);
+
+        $resolved = app(EffectiveAttributeResolver::class)->resolveForModelNumber($modelNumber)->keyBy(fn ($attribute) => $attribute->definition->key);
+
+        $this->assertSame('1920 x 1080', $resolved['display_resolution']->value);
+        $this->assertSame('calculated_components', $resolved['display_resolution']->source);
+        $this->assertSame('1366 x 768', $resolved['display_resolution']->manualModelValue);
+        $this->assertSame('Display 15.6 FHD', $resolved['display_resolution']->contributorSummary('calculated_components'));
+    }
+
     public function test_installed_components_drive_numeric_asset_values_even_with_asset_override(): void
     {
         $capacity = AttributeDefinition::create([
@@ -533,7 +579,10 @@ class ComponentDerivedAttributeResolutionTest extends TestCase
         $this->assertSame('16', $resolved['ram_capacity_gb']->formattedCalculatedExtraSubtotal());
         $this->assertSame('RAM STICK 4000 x2', $resolved['ram_capacity_gb']->calculatedExpectedContributorSummary());
         $this->assertSame('RAM STICK 4000', $resolved['ram_capacity_gb']->calculatedExtraContributorSummary());
-        $this->assertCount(2, $roster->rows->filter(fn ($row) => $row->classification === 'expected'));
+        $expectedRows = $roster->rows->filter(fn ($row) => $row->classification === 'expected')->values();
+
+        $this->assertCount(1, $expectedRows);
+        $this->assertSame(2, $expectedRows->first()->quantity);
         $this->assertCount(1, $roster->rows->filter(fn ($row) => $row->classification === 'extra'));
         $this->assertCount(0, $roster->rows->filter(fn ($row) => $row->classification === 'expected_tracked'));
     }

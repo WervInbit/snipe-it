@@ -13,7 +13,7 @@ class TestAudit extends SnipeModel
 
     public $timestamps = false;
 
-    protected $table = 'test_audits';
+    protected $table = 'workflow_audits';
 
     protected $fillable = [
         'auditable_type',

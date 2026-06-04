@@ -254,14 +254,12 @@ class EffectiveAttributeResolver
         $manualValue = $manualAssignment?->value;
         $manualRaw = $manualAssignment?->raw_value;
         $manualOption = $manualAssignment?->option;
-        $isCalculatedNumeric = $derived
-            && $definition->isNumericDatatype()
-            && ($derived->meta['resolves_to_spec'] ?? false);
+        $isComponentResolvedSpec = $derived && ($derived->meta['resolves_to_spec'] ?? false);
 
-        $effectiveValue = $isCalculatedNumeric ? $derived->value : ($manualValue ?? $derived?->value);
-        $effectiveRaw = $isCalculatedNumeric ? $derived->rawValue : ($manualRaw ?? $derived?->rawValue);
-        $effectiveOption = $isCalculatedNumeric ? $derived->option : ($manualOption ?? $derived?->option);
-        $source = $isCalculatedNumeric
+        $effectiveValue = $isComponentResolvedSpec ? $derived->value : ($manualValue ?? $derived?->value);
+        $effectiveRaw = $isComponentResolvedSpec ? $derived->rawValue : ($manualRaw ?? $derived?->rawValue);
+        $effectiveOption = $isComponentResolvedSpec ? $derived->option : ($manualOption ?? $derived?->option);
+        $source = $isComponentResolvedSpec
             ? 'calculated_components'
             : ($manualValue !== null
                 ? 'model'
@@ -288,7 +286,7 @@ class EffectiveAttributeResolver
                     ]],
                 ]] : [],
                 $derived ? [[
-                    'source' => $isCalculatedNumeric ? 'calculated_components' : 'expected_components',
+                    'source' => $isComponentResolvedSpec ? 'calculated_components' : 'expected_components',
                     'contributors' => $derived->contributors,
                 ]] : []
             ),
@@ -319,17 +317,23 @@ class EffectiveAttributeResolver
         $isOverride = false;
         $meta = [];
 
-        if ($calculated && $definition->isNumericDatatype()) {
+        if ($calculated && ($calculated->meta['resolves_to_spec'] ?? false)) {
             $source = 'calculated_components';
             $value = $calculated->value;
             $rawValue = $calculated->rawValue;
             $option = $calculated->option;
             $baselineValue = $baseline?->value ?? $modelResolved?->value;
+            $reducedExpectedBaseline = false;
+
+            if ($definition->isNumericDatatype()) {
+                $reducedExpectedBaseline = $baselineValue !== null
+                    && $this->numericStringToFloat($calculated->value) < $this->numericStringToFloat($baselineValue);
+            }
+
             $meta = array_merge($calculated->meta, [
                 'expected_component_baseline_value' => $baselineValue,
                 'current_component_value' => $calculated->value,
-                'reduced_expected_baseline' => $baselineValue !== null
-                    && $this->numericStringToFloat($calculated->value) < $this->numericStringToFloat($baselineValue),
+                'reduced_expected_baseline' => $reducedExpectedBaseline,
             ]);
         } elseif ($override && $definition->allow_asset_override) {
             $source = 'override';

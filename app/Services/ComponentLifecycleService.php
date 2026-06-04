@@ -207,6 +207,75 @@ class ComponentLifecycleService
         });
     }
 
+    public function reparentWithinAsset(
+        ComponentInstance $instance,
+        ?ComponentInstance $parent = null,
+        array $context = [],
+    ): ComponentInstance {
+        $this->assertNotTerminal($instance);
+
+        if (!$instance->current_asset_id || $instance->effectiveLifecycleStatus() !== ComponentInstance::LIFECYCLE_ATTACHED) {
+            throw new InvalidArgumentException('Only attached components can be moved within an asset.');
+        }
+
+        if ($parent) {
+            $this->assertNotTerminal($parent);
+
+            if ((int) $parent->id === (int) $instance->id) {
+                throw new InvalidArgumentException('A component cannot be attached to itself.');
+            }
+
+            if ((int) $parent->current_asset_id !== (int) $instance->current_asset_id) {
+                throw new InvalidArgumentException('The parent component must be attached to the same asset.');
+            }
+
+            if ($parent->parent_component_instance_id) {
+                throw new InvalidArgumentException('Component hierarchy is limited to one subcomponent level.');
+            }
+
+            if ($parent->effectiveLifecycleStatus() !== ComponentInstance::LIFECYCLE_ATTACHED) {
+                throw new InvalidArgumentException('The parent component must be attached to the asset.');
+            }
+
+            if ($instance->componentDefinition && !$instance->componentDefinition->canBeUsedAsSubcomponent()) {
+                throw new InvalidArgumentException('This component definition is restricted to direct asset placement and cannot be used as a subcomponent.');
+            }
+        } elseif ($instance->componentDefinition && !$instance->componentDefinition->canBeInstalledOnAsset()) {
+            throw new InvalidArgumentException('This component definition is restricted to subcomponent placement and cannot be installed directly on an asset.');
+        }
+
+        $targetParentId = $parent?->id;
+        if ((int) ($instance->parent_component_instance_id ?? 0) === (int) ($targetParentId ?? 0)) {
+            return $instance->fresh();
+        }
+
+        return DB::transaction(function () use ($instance, $parent, $context, $targetParentId): ComponentInstance {
+            $fromParentId = $instance->parent_component_instance_id;
+            $assetId = (int) $instance->current_asset_id;
+
+            $instance->forceFill([
+                'parent_component_instance_id' => $targetParentId,
+                'root_asset_id' => $parent ? ($parent->root_asset_id ?: $parent->current_asset_id) : $assetId,
+                'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
+            ])->save();
+
+            $this->events->write($instance, 'reparented', [
+                'performed_by' => $context['performed_by'] ?? null,
+                'from_status' => $instance->status,
+                'to_status' => $instance->status,
+                'from_asset_id' => $assetId,
+                'to_asset_id' => $assetId,
+                'note' => $context['note'] ?? null,
+                'payload_json' => [
+                    'from_parent_component_instance_id' => $fromParentId,
+                    'to_parent_component_instance_id' => $targetParentId,
+                ],
+            ]);
+
+            return $instance->fresh();
+        });
+    }
+
     public function moveToStock(
         ComponentInstance $instance,
         ?ComponentStorageLocation $location = null,

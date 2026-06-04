@@ -7,6 +7,8 @@
     $photos = $result['photos'] ?? [];
     $hasPhoto = !empty($photos);
     $isRequired = $result['is_required'] ?? true;
+    $passLabel = $result['pass_label'] ?? trans('tests.status_pass');
+    $failLabel = $result['fail_label'] ?? trans('tests.status_fail');
 @endphp
 
 <article class="testing-card"
@@ -17,8 +19,8 @@
          data-current-status="{{ $status }}"
          data-initial-status="{{ $status }}"
          data-is-required="{{ $isRequired ? '1' : '0' }}"
-         data-status-pass-label="{{ trans('tests.status_pass') }}"
-         data-status-fail-label="{{ trans('tests.status_fail') }}"
+         data-status-pass-label="{{ $passLabel }}"
+         data-status-fail-label="{{ $failLabel }}"
          data-status-nvt-label="{{ trans('tests.status_nvt') }}">
     <div class="testing-card__body">
         <div class="testing-card__head">
@@ -50,14 +52,14 @@
                     data-action="set-pass"
                     aria-pressed="{{ $status === TestResult::STATUS_PASS ? 'true' : 'false' }}"
                     {{ ($canUpdate ?? false) ? '' : 'disabled' }}>
-                <i class="fas fa-check me-1" aria-hidden="true"></i>{{ trans('tests.status_pass') }}
+                <i class="fas fa-check me-1" aria-hidden="true"></i>{{ $passLabel }}
             </button>
             <button type="button"
                     class="btn btn-outline-danger"
                     data-action="set-fail"
                     aria-pressed="{{ $status === TestResult::STATUS_FAIL ? 'true' : 'false' }}"
                     {{ ($canUpdate ?? false) ? '' : 'disabled' }}>
-                <i class="fas fa-xmark me-1" aria-hidden="true"></i>{{ trans('tests.status_fail') }}
+                <i class="fas fa-xmark me-1" aria-hidden="true"></i>{{ $failLabel }}
             </button>
         </div>
     </div>

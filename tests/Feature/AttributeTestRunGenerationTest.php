@@ -15,6 +15,8 @@ use App\Models\ModelNumberAttribute;
 use App\Models\TestResult;
 use App\Models\TestRun;
 use App\Models\User;
+use App\Models\WorkflowProfile;
+use App\Models\WorkflowProfileItem;
 use App\Services\ModelAttributes\EffectiveAttributeResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
@@ -46,6 +48,12 @@ class AttributeTestRunGenerationTest extends TestCase
             'attribute_definition_id' => $definition->id,
             'slug' => 'storage-capacity',
         ]);
+        $profile = WorkflowProfile::factory()->create(['is_default' => true]);
+        WorkflowProfileItem::factory()->create([
+            'workflow_profile_id' => $profile->id,
+            'workflow_item_id' => $testType->id,
+            'sort_order' => 0,
+        ]);
 
         $model = AssetModel::factory()->create([
             'category_id' => $category->id,
@@ -71,7 +79,9 @@ class AttributeTestRunGenerationTest extends TestCase
         ]);
 
         $controller = app(TestRunController::class);
-        $request = Request::create('/hardware/'.$asset->id.'/tests', 'POST');
+        $request = Request::create('/hardware/'.$asset->id.'/tests', 'POST', [
+            'workflow_profile_id' => $profile->id,
+        ]);
         $request->setUserResolver(fn () => $user);
 
         $response = $controller->store($request, $asset, app(EffectiveAttributeResolver::class));
@@ -79,12 +89,12 @@ class AttributeTestRunGenerationTest extends TestCase
         $run = TestRun::first();
         $this->assertNotNull($run, 'Test run was not created');
         $this->assertEquals(302, $response->getStatusCode());
-        $this->assertSame(route('test-results.active', [$asset->id]), $response->getTargetUrl());
+        $this->assertSame(route('test-results.active', ['asset' => $asset->id, 'run' => $run->id]), $response->getTargetUrl());
 
         $result = $run->results()->first();
         $this->assertNotNull($result, 'Test result was not created');
         $this->assertSame($definition->id, $result->attribute_definition_id);
-        $this->assertSame($testType->id, $result->test_type_id);
+        $this->assertSame($testType->id, $result->workflow_item_id);
         $this->assertSame(TestResult::STATUS_NVT, $result->status);
         $this->assertSame('0', $result->expected_value);
         $this->assertNull($result->expected_raw_value);
@@ -109,6 +119,12 @@ class AttributeTestRunGenerationTest extends TestCase
             'attribute_definition_id' => $definition->id,
             'slug' => 'ram-capacity',
         ]);
+        $profile = WorkflowProfile::factory()->create(['is_default' => true]);
+        WorkflowProfileItem::factory()->create([
+            'workflow_profile_id' => $profile->id,
+            'workflow_item_id' => $testType->id,
+            'sort_order' => 0,
+        ]);
 
         $model = AssetModel::factory()->create();
         $modelNumber = $model->ensurePrimaryModelNumber();
@@ -125,6 +141,7 @@ class AttributeTestRunGenerationTest extends TestCase
             'attribute_definition_id' => $definition->id,
             'value' => '8',
             'raw_value' => '8',
+            'resolves_to_spec' => true,
             'sort_order' => 0,
         ]);
 
@@ -133,7 +150,9 @@ class AttributeTestRunGenerationTest extends TestCase
         ]);
 
         $controller = app(TestRunController::class);
-        $request = Request::create('/hardware/'.$asset->id.'/tests', 'POST');
+        $request = Request::create('/hardware/'.$asset->id.'/tests', 'POST', [
+            'workflow_profile_id' => $profile->id,
+        ]);
         $request->setUserResolver(fn () => $user);
 
         $response = $controller->store($request, $asset, app(EffectiveAttributeResolver::class));
@@ -141,12 +160,12 @@ class AttributeTestRunGenerationTest extends TestCase
         $run = TestRun::latest('id')->first();
         $this->assertNotNull($run, 'Test run was not created');
         $this->assertEquals(302, $response->getStatusCode());
-        $this->assertSame(route('test-results.active', [$asset->id]), $response->getTargetUrl());
+        $this->assertSame(route('test-results.active', ['asset' => $asset->id, 'run' => $run->id]), $response->getTargetUrl());
 
         $result = $run->results()->first();
         $this->assertNotNull($result, 'Test result was not created');
         $this->assertSame($definition->id, $result->attribute_definition_id);
-        $this->assertSame($testType->id, $result->test_type_id);
+        $this->assertSame($testType->id, $result->workflow_item_id);
         $this->assertSame('8', $result->expected_value);
     }
 }

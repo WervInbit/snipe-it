@@ -164,14 +164,14 @@ class AssetsController extends Controller
             'latest_test_run_id' => $latestRunIdSub,
             'latest_tests_total' => TestResult::query()
                 ->selectRaw('count(*)')
-                ->where('test_run_id', clone $latestRunIdSub),
+                ->where('workflow_run_id', clone $latestRunIdSub),
             'latest_tests_completed' => TestResult::query()
                 ->selectRaw('count(*)')
-                ->where('test_run_id', clone $latestRunIdSub)
+                ->where('workflow_run_id', clone $latestRunIdSub)
                 ->where('status', '!=', TestResult::STATUS_NVT),
             'latest_tests_failed' => TestResult::query()
                 ->selectRaw('count(*)')
-                ->where('test_run_id', clone $latestRunIdSub)
+                ->where('workflow_run_id', clone $latestRunIdSub)
                 ->where('status', TestResult::STATUS_FAIL),
         ]);
 
@@ -501,9 +501,10 @@ class AssetsController extends Controller
         $run = $asset->tests()
             ->select('id', 'asset_id', 'created_at', 'finished_at')
             ->with(['results' => function ($query) {
-                $query->select('id', 'test_run_id', 'test_type_id', 'attribute_definition_id', 'status', 'note', 'photo_path')
+                $query->select('id', 'workflow_run_id', 'workflow_item_id', 'attribute_definition_id', 'status', 'note', 'photo_path', 'sort_order')
                     ->withCount('photos')
                     ->with(['type:id,name', 'attributeDefinition:id,label'])
+                    ->orderBy('sort_order')
                     ->orderBy('id');
             }])
             ->first();

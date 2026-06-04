@@ -34,7 +34,7 @@ class TestAuditLoggingTest extends TestCase
 
         $run->refresh();
 
-        $this->assertDatabaseHas('test_audits', [
+        $this->assertDatabaseHas('workflow_audits', [
             'auditable_type' => TestResult::class,
             'auditable_id' => $result->id,
             'field' => 'status',
@@ -42,14 +42,14 @@ class TestAuditLoggingTest extends TestCase
             'after' => TestResult::STATUS_PASS,
         ]);
 
-        $this->assertDatabaseHas('test_audits', [
+        $this->assertDatabaseHas('workflow_audits', [
             'auditable_type' => TestResult::class,
             'auditable_id' => $result->id,
             'field' => 'note',
             'after' => 'fixed',
         ]);
 
-        $this->assertDatabaseHas('test_audits', [
+        $this->assertDatabaseHas('workflow_audits', [
             'auditable_type' => TestRun::class,
             'auditable_id' => $run->id,
             'field' => 'finished_at',

@@ -12,9 +12,9 @@ use App\Models\AttributeDefinition;
 use App\Models\TestResultPhoto;
 
 /**
- * Stores the outcome of a single test within a run.
+ * Stores the outcome of a single workflow item within a run.
  *
- * Each result belongs to a specific test run and test type and may have
+ * Each result belongs to a specific workflow run and workflow item and may have
  * multiple audit records.
  *
  * @property string|null $note Note captured during the test run.
@@ -37,32 +37,45 @@ class TestResult extends SnipeModel
         self::STATUS_NVT,
     ];
 
-    protected $table = 'test_results';
+    protected $table = 'workflow_results';
 
     protected $fillable = [
-        'test_run_id',
-        'test_type_id',
+        'workflow_run_id',
+        'workflow_item_id',
+        'workflow_profile_item_id',
         'attribute_definition_id',
         'status',
         'note',
         'photo_path',
         'expected_value',
         'expected_raw_value',
+        'is_required',
+        'result_label_mode',
+        'sort_order',
     ];
 
     protected array $auditFields = [
-        'test_run_id',
-        'test_type_id',
+        'workflow_run_id',
+        'workflow_item_id',
+        'workflow_profile_item_id',
         'status',
         'note',
         'attribute_definition_id',
         'expected_value',
         'expected_raw_value',
+        'is_required',
+        'result_label_mode',
+        'sort_order',
+    ];
+
+    protected $casts = [
+        'is_required' => 'bool',
+        'sort_order' => 'int',
     ];
 
     public function testRun(): BelongsTo
     {
-        return $this->belongsTo(TestRun::class, 'test_run_id');
+        return $this->belongsTo(TestRun::class, 'workflow_run_id');
     }
 
     public function attributeDefinition(): BelongsTo
@@ -72,7 +85,12 @@ class TestResult extends SnipeModel
 
     public function type(): BelongsTo
     {
-        return $this->belongsTo(TestType::class, 'test_type_id');
+        return $this->belongsTo(TestType::class, 'workflow_item_id');
+    }
+
+    public function profileItem(): BelongsTo
+    {
+        return $this->belongsTo(WorkflowProfileItem::class, 'workflow_profile_item_id');
     }
 
     /**
@@ -85,6 +103,6 @@ class TestResult extends SnipeModel
 
     public function photos(): HasMany
     {
-        return $this->hasMany(TestResultPhoto::class);
+        return $this->hasMany(TestResultPhoto::class, 'workflow_result_id');
     }
 }

@@ -4,6 +4,31 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-06-04
+- Component-backed model-number specs now cover all attribute datatypes marked `resolves_to_spec`, not only numeric totals, so seeded RAM/storage/display/battery/keyboard/camera/port values stay on expected components instead of being duplicated as manual selected attributes.
+- Clean-start device seeding prunes stale manual model-number attribute rows whenever an expected component already supplies that spec, while leaving intentionally manual policy/product fields such as CPU, OS, release year, color, and Surface keyboard-layout entries intact.
+- Clean-start component seeding now includes model-number-specific motherboard/logic-board definitions with expected child subcomponents. HP laptop boards carry CPU/core/GPU specs and own physical ports, Surface boards additionally own soldered LPDDR memory and wireless, and phone boards own LPDDR memory, UFS storage, wireless, and charge/data ports while removable/serviceable parts remain top-level expected components.
+- The 3.5mm audio connector catalog is now split into physical connector and role data: `port_connector_type=audio_3_5mm` captures the jack itself, while `audio_port_role` and `audio_jack_standard` distinguish headset combo, headphone out, microphone in, line in, line out, and TRS/TRRS variants on the port component.
+- Workflow item applicability still follows components moved under boards because expected subcomponent definitions are included when resolving which workflow items apply to an asset.
+- Component Definition settings search now filters as the user types, shows a spinner while debounced paginated results are loading, and still falls back to the existing server-side GET search for full result sets.
+- Component Definition expected-subcomponent editing is more compact: child definitions are selected through a searchable picker, and row notes are hidden behind a per-row collapse control unless notes or validation errors are present.
+- Attribute Definition settings search now follows the same live-search pattern as Component Definitions, with immediate row filtering, loading/no-match feedback, and broader paginated GET search across label, key, datatype, unit, and category.
+
+### 2026-06-02
+- Clean-start catalog seeding now separates reusable product attributes from expected hardware components: removed present-style booleans and old summary attributes are hidden/deprecated, while structured RAM speed, battery capacity, camera, and port capability attributes are seeded for component use.
+- Added a component catalog seeder for generic memory, storage, display, battery, port, camera, audio, input, network, and power definitions, plus expected component templates for the real preserved model-number catalog.
+- Repeated expected components now display as grouped rows such as `USB-A Port - USB 3.1 Gen1 x3` while still contributing the correct quantity to numeric calculated specs.
+- Default seeding no longer calls demo asset creation; demo inventory remains available only through the dedicated demo seeder.
+- Removed catalog attributes are tracked in `docs/plans/catalog-removed-attributes-2026-06-02.md` so future reliance can be audited and restored or replaced intentionally.
+- Workflow item applicability now supports explicit always-on tasks, component categories, and component definitions, so standard diagnostics can be filtered by the actual expected/attached hardware instead of broad present-style booleans or laptop/mobile category shortcuts.
+- Asset workflow start screens can add per-run extra workflow items for one-off checks, while same-asset component hierarchy corrections can move tracked components under another top-level component or back to the asset root.
+
+### 2026-05-26
+- Began the test-to-workflow foundation: legacy test tables are migrated into workflow-named tables with workflow profiles, ordered profile items, run/profile snapshots, required-item snapshots, and result label modes for pass/fail versus done/not-done task flows.
+- Asset workflow start screens now expose profile selection, and active workflow result cards keep the existing two-button, note, and photo workflow while broadening the labels for task-style profiles.
+- Seeded workflow profiles now separate standard diagnostics from pre-sale, cleaning, and shipping-laptop task lists, keeping task-style operational steps out of the standard diagnostic set.
+- Agent report ingestion accepts both `test_results` and `workflow_results`, stores workflow run/profile metadata, and returns both `workflow_run_id` and the legacy `test_run_id` field for compatibility.
+
 ### 2026-05-19
 - Asset selling-state web flows now warn before proceeding when attached damaged or needs-attention components remain on the asset. The warning covers hardware detail status changes, hardware edit status changes, bulk status changes, and the explicit available-for-sale toggle; confirmed actions proceed, while detached parts do not trigger the warning.
 - Component instances now support structured instance-level attributes through service/API sync. Instance attributes override component-definition attributes for the same component row during calculated component-derived spec resolution, while definition attributes remain the fallback when no instance override exists. Attribute option propagation and usage/delete safeguards include these instance rows.
@@ -212,5 +237,18 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 - On the asset Components tab, tracked component names and tags now link directly to the component detail page when the viewer has access, including greyed `Removed` rows.
 - On the asset Components tab, expected/default row names now link to the component-definition editor when they are backed by a catalog definition and the viewer has rights to manage that definition.
 - On the component detail history, `From asset:` and `To asset:` entries now link to the corresponding hardware detail pages when the viewer can access those assets.
+
+### 2026-05-26
+- Workflow execution is being broadened from single standard test runs into selectable workflow profiles.
+- The first workflow slice introduces workflow-named tables, profile/profile-item models, migration copy paths from legacy `test_*` data, profile selection when starting an asset workflow, and profile item snapshots for requiredness/order/button labels.
+- Admin settings now include a Workflow Profiles page where profiles can be category-scoped, sorted, sale-readiness-blocking, and assigned ordered workflow items.
+- Ready for Sale/Sold warnings now evaluate every active applicable profile marked as sale-readiness blocking, while retaining the same acknowledgment flow and legacy latest-run fallback when no blocking profiles are configured.
+- Workflow Items remain the reusable vocabulary of checks/tasks and keep compatibility through the existing TestType-backed admin surface for now.
+
+### 2026-06-04
+- Workflow Profiles settings now use per-profile item subpages: the index stays compact, each profile has an `Items` action, and included profile items can be reordered with drag-and-drop instead of manual order fields.
+- Workflow Items now have their own Settings entry and own the default result button mode (`Pass / Fail` vs `Done / Not Done`); Workflow Profile item pages now focus on adding, removing, and ordering reusable items instead of exposing `Use`/`Required`/button-mode toggles inline.
+- Existing enum attribute edit pages now support adding new option values in place, retain pending new options on validation errors, and show clearer in-use warning copy so new values such as `eSATA` are distinguished from edits that update existing model/component rows.
+- RJ45 ports are now modeled like other structured ports: `port_connector_type` stays `RJ-45`, `ethernet_speed_max` stores 1GbE/2.5GbE/5GbE/10GbE capability, and seeded RJ45 component definitions are speed-specific while the old generic row is retired.
 
 

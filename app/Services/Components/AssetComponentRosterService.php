@@ -108,7 +108,7 @@ class AssetComponentRosterService
                 $trackedByDefinition->put($template->component_definition_id, $pool->values());
             }
 
-            for ($i = 0; $i < $assumedQty; $i++) {
+            if ($assumedQty > 0) {
                 $rows->push(new AssetComponentRosterRow(
                     'expected',
                     __('Expected'),
@@ -116,7 +116,8 @@ class AssetComponentRosterService
                     $template,
                     null,
                     null,
-                    false
+                    false,
+                    $assumedQty
                 ));
             }
 

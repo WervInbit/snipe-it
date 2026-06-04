@@ -1,7 +1,7 @@
 @extends('layouts/default')
 
 @section('title')
-    {{ trans('admin/settings/general.test_settings_title') }}
+    {{ __('Workflow Items') }}
 @parent
 @stop
 
@@ -54,6 +54,9 @@
 @endpush
 
 @section('header_right')
+    <a href="{{ route('settings.workflow-profiles.index') }}" class="btn btn-default">
+        <x-icon type="tasks" /> {{ __('Workflow Profiles') }}
+    </a>
     @can('create', \App\Models\TestType::class)
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#create-testtype-modal">
             <x-icon type="plus" /> {{ trans('admin/testtypes/general.create_title') }}
@@ -75,9 +78,9 @@
                                 <th class="testtype-reorder-col">{{ trans('general.order') }}</th>
                                 <th>{{ trans('admin/testtypes/general.name') }}</th>
                                 <th>{{ trans('admin/testtypes/general.slug') }}</th>
-                                <th>{{ trans('admin/testtypes/general.attribute') }}</th>
-                                <th>{{ trans('admin/testtypes/general.categories') }}</th>
+                                <th>{{ trans('admin/testtypes/general.applicability') }}</th>
                                 <th>{{ trans('admin/testtypes/general.required') }}</th>
+                                <th>{{ trans('admin/testtypes/general.result_buttons') }}</th>
                                 <th>{{ trans('admin/testtypes/general.instructions') }}</th>
                                 <th>{{ trans('admin/testtypes/general.tooltip') }}</th>
                                 <th class="text-right">{{ trans('button.actions') }}</th>
@@ -91,9 +94,14 @@
                                     $isEditContext = old('modal') === 'edit-testtype-' . $type->id . '-modal';
                                     $instructionPreview = $type->instructions ? \Illuminate\Support\Str::limit(strip_tags($type->instructions), 80) : trans('general.none');
                                     $tooltipPreview = $type->tooltip ?: trans('general.none');
-                                    $categoryNames = $type->categories->pluck('name')->implode(', ');
-                                    $categoryPreview = $categoryNames
-                                        ?: ($type->attribute_definition_id ? trans('general.all') : trans('general.none'));
+                                    $labelMode = $type->result_label_mode ?? \App\Models\WorkflowProfileItem::LABEL_MODE_PASS_FAIL;
+                                    $sourceParts = collect([
+                                        $type->applies_to_all ? trans('admin/testtypes/general.always_apply_badge') : null,
+                                        optional($type->attributeDefinition)->label,
+                                        $type->categories->isNotEmpty() ? trans('admin/testtypes/general.asset_categories_prefix', ['list' => $type->categories->pluck('name')->implode(', ')]) : null,
+                                        $type->componentCategories->isNotEmpty() ? trans('admin/testtypes/general.component_categories_prefix', ['list' => $type->componentCategories->pluck('name')->implode(', ')]) : null,
+                                        $type->componentDefinitions->isNotEmpty() ? trans('admin/testtypes/general.component_definitions_prefix', ['list' => $type->componentDefinitions->pluck('name')->implode(', ')]) : null,
+                                    ])->filter()->implode(' / ');
                                 @endphp
                                 <tr class="testtype-reorder-row" data-testtype-id="{{ $type->id }}">
                                     <td class="text-center">
@@ -107,9 +115,11 @@
                                     </td>
                                     <td>{{ $type->name }}</td>
                                     <td class="monospace text-muted">{{ $type->slug }}</td>
-                                    <td>{{ optional($type->attributeDefinition)->label ?? trans('general.none') }}</td>
-                                    <td>{{ $categoryPreview }}</td>
+                                    <td>{{ $sourceParts ?: trans('general.none') }}</td>
                                     <td>{!! $type->is_required ? '<i class="fas fa-check text-success"></i>' : '<span class="text-muted">--</span>' !!}</td>
+                                    <td>
+                                        {{ $labelMode === \App\Models\WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE ? __('Done / Not Done') : __('Pass / Fail') }}
+                                    </td>
                                     <td title="{{ $type->instructions ?? '' }}">{{ $instructionPreview }}</td>
                                     <td title="{{ $type->tooltip ?? '' }}">{{ $tooltipPreview }}</td>
                                     <td class="text-right">
@@ -221,8 +231,19 @@
                                     <span class="help-block">{{ $errors->first('attribute_definition_id') }}</span>
                                 @endif
                             </div>
+                            <div class="form-group{{ $createContext && $errors->has('applies_to_all') ? ' has-error' : '' }}">
+                                <label class="control-label">{{ trans('admin/testtypes/general.always_apply') }}</label>
+                                <input type="hidden" name="applies_to_all" value="0">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" name="applies_to_all" value="1" {{ $createContext && old('applies_to_all') ? 'checked' : '' }}>
+                                        {{ trans('admin/testtypes/general.always_apply_label') }}
+                                    </label>
+                                </div>
+                                <span class="help-block">{{ trans('admin/testtypes/general.always_apply_help') }}</span>
+                            </div>
                             <div class="form-group{{ $createContext && $errors->has('category_ids') ? ' has-error' : '' }}">
-                                <label for="create-categories">{{ trans('admin/testtypes/general.categories') }}</label>
+                                <label for="create-categories">{{ trans('admin/testtypes/general.asset_categories') }}</label>
                                 <select name="category_ids[]"
                                         id="create-categories"
                                         class="form-control js-test-category"
@@ -239,6 +260,42 @@
                                     <span class="help-block">{{ $errors->first('category_ids') }}</span>
                                 @endif
                             </div>
+                            <div class="form-group{{ $createContext && $errors->has('component_category_ids') ? ' has-error' : '' }}">
+                                <label for="create-component-categories">{{ trans('admin/testtypes/general.component_categories') }}</label>
+                                <select name="component_category_ids[]"
+                                        id="create-component-categories"
+                                        class="form-control js-test-category"
+                                        data-placeholder="{{ trans('admin/testtypes/general.component_category_placeholder') }}"
+                                        multiple>
+                                    @foreach($componentCategories as $category)
+                                        <option value="{{ $category->id }}"{{ $createContext && in_array($category->id, (array) old('component_category_ids', [])) ? ' selected' : '' }}>
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <span class="help-block">{{ trans('admin/testtypes/general.component_category_help') }}</span>
+                                @if($createContext && $errors->has('component_category_ids'))
+                                    <span class="help-block">{{ $errors->first('component_category_ids') }}</span>
+                                @endif
+                            </div>
+                            <div class="form-group{{ $createContext && $errors->has('component_definition_ids') ? ' has-error' : '' }}">
+                                <label for="create-component-definitions">{{ trans('admin/testtypes/general.component_definitions') }}</label>
+                                <select name="component_definition_ids[]"
+                                        id="create-component-definitions"
+                                        class="form-control js-test-category"
+                                        data-placeholder="{{ trans('admin/testtypes/general.component_definition_placeholder') }}"
+                                        multiple>
+                                    @foreach($componentDefinitions as $definition)
+                                        <option value="{{ $definition->id }}"{{ $createContext && in_array($definition->id, (array) old('component_definition_ids', [])) ? ' selected' : '' }}>
+                                            {{ $definition->name }}{{ $definition->category ? ' - '.$definition->category->name : '' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <span class="help-block">{{ trans('admin/testtypes/general.component_definition_help') }}</span>
+                                @if($createContext && $errors->has('component_definition_ids'))
+                                    <span class="help-block">{{ $errors->first('component_definition_ids') }}</span>
+                                @endif
+                            </div>
                             <div class="form-group{{ $createContext && $errors->has('is_required') ? ' has-error' : '' }}">
                                 <label class="control-label">{{ trans('admin/testtypes/general.required') }}</label>
                                 <input type="hidden" name="is_required" value="0">
@@ -249,6 +306,26 @@
                                     </label>
                                 </div>
                                 <span class="help-block">{{ trans('admin/testtypes/general.required_help') }}</span>
+                            </div>
+                            <div class="form-group{{ $createContext && $errors->has('result_label_mode') ? ' has-error' : '' }}">
+                                <label for="create-result-label-mode">{{ trans('admin/testtypes/general.result_buttons') }}</label>
+                                @php
+                                    $createResultLabelMode = $createContext
+                                        ? old('result_label_mode', \App\Models\WorkflowProfileItem::LABEL_MODE_PASS_FAIL)
+                                        : \App\Models\WorkflowProfileItem::LABEL_MODE_PASS_FAIL;
+                                @endphp
+                                <select name="result_label_mode" id="create-result-label-mode" class="form-control">
+                                    <option value="{{ \App\Models\WorkflowProfileItem::LABEL_MODE_PASS_FAIL }}" @selected($createResultLabelMode === \App\Models\WorkflowProfileItem::LABEL_MODE_PASS_FAIL)>
+                                        {{ __('Pass / Fail') }}
+                                    </option>
+                                    <option value="{{ \App\Models\WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE }}" @selected($createResultLabelMode === \App\Models\WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE)>
+                                        {{ __('Done / Not Done') }}
+                                    </option>
+                                </select>
+                                <span class="help-block">{{ trans('admin/testtypes/general.result_buttons_help') }}</span>
+                                @if($createContext && $errors->has('result_label_mode'))
+                                    <span class="help-block">{{ $errors->first('result_label_mode') }}</span>
+                                @endif
                             </div>
                             <div class="form-group{{ $createContext && $errors->has('instructions') ? ' has-error' : '' }}">
                                 <label for="create-instructions">{{ trans('admin/testtypes/general.instructions') }}</label>
@@ -370,8 +447,19 @@
                                         @enderror
                                     @endif
                                 </div>
+                                <div class="form-group{{ $isEditContext && $errors->has('applies_to_all') ? ' has-error' : '' }}">
+                                    <label class="control-label">{{ trans('admin/testtypes/general.always_apply') }}</label>
+                                    <input type="hidden" name="applies_to_all" value="0">
+                                    <div class="checkbox">
+                                        <label>
+                                            <input type="checkbox" name="applies_to_all" value="1" {{ $isEditContext ? (old('applies_to_all', $type->applies_to_all) ? 'checked' : '') : ($type->applies_to_all ? 'checked' : '') }}>
+                                            {{ trans('admin/testtypes/general.always_apply_label') }}
+                                        </label>
+                                    </div>
+                                    <span class="help-block">{{ trans('admin/testtypes/general.always_apply_help') }}</span>
+                                </div>
                                 <div class="form-group{{ $isEditContext && $errors->has('category_ids') ? ' has-error' : '' }}">
-                                    <label for="edit-categories-{{ $type->id }}">{{ trans('admin/testtypes/general.categories') }}</label>
+                                    <label for="edit-categories-{{ $type->id }}">{{ trans('admin/testtypes/general.asset_categories') }}</label>
                                     @php
                                         $selectedCategories = $isEditContext
                                             ? (array) old('category_ids', $type->categories->pluck('id')->toArray())
@@ -395,6 +483,56 @@
                                         @enderror
                                     @endif
                                 </div>
+                                <div class="form-group{{ $isEditContext && $errors->has('component_category_ids') ? ' has-error' : '' }}">
+                                    <label for="edit-component-categories-{{ $type->id }}">{{ trans('admin/testtypes/general.component_categories') }}</label>
+                                    @php
+                                        $selectedComponentCategories = $isEditContext
+                                            ? (array) old('component_category_ids', $type->componentCategories->pluck('id')->toArray())
+                                            : $type->componentCategories->pluck('id')->toArray();
+                                    @endphp
+                                    <select name="component_category_ids[]"
+                                            id="edit-component-categories-{{ $type->id }}"
+                                            class="form-control js-test-category"
+                                            data-placeholder="{{ trans('admin/testtypes/general.component_category_placeholder') }}"
+                                            multiple>
+                                        @foreach($componentCategories as $category)
+                                            <option value="{{ $category->id }}"{{ in_array($category->id, $selectedComponentCategories) ? ' selected' : '' }}>
+                                                {{ $category->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <span class="help-block">{{ trans('admin/testtypes/general.component_category_help') }}</span>
+                                    @if($isEditContext)
+                                        @error('component_category_ids')
+                                            <span class="help-block">{{ $message }}</span>
+                                        @enderror
+                                    @endif
+                                </div>
+                                <div class="form-group{{ $isEditContext && $errors->has('component_definition_ids') ? ' has-error' : '' }}">
+                                    <label for="edit-component-definitions-{{ $type->id }}">{{ trans('admin/testtypes/general.component_definitions') }}</label>
+                                    @php
+                                        $selectedComponentDefinitions = $isEditContext
+                                            ? (array) old('component_definition_ids', $type->componentDefinitions->pluck('id')->toArray())
+                                            : $type->componentDefinitions->pluck('id')->toArray();
+                                    @endphp
+                                    <select name="component_definition_ids[]"
+                                            id="edit-component-definitions-{{ $type->id }}"
+                                            class="form-control js-test-category"
+                                            data-placeholder="{{ trans('admin/testtypes/general.component_definition_placeholder') }}"
+                                            multiple>
+                                        @foreach($componentDefinitions as $definition)
+                                            <option value="{{ $definition->id }}"{{ in_array($definition->id, $selectedComponentDefinitions) ? ' selected' : '' }}>
+                                                {{ $definition->name }}{{ $definition->category ? ' - '.$definition->category->name : '' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <span class="help-block">{{ trans('admin/testtypes/general.component_definition_help') }}</span>
+                                    @if($isEditContext)
+                                        @error('component_definition_ids')
+                                            <span class="help-block">{{ $message }}</span>
+                                        @enderror
+                                    @endif
+                                </div>
                                 <div class="form-group{{ $isEditContext && $errors->has('is_required') ? ' has-error' : '' }}">
                                     <label class="control-label">{{ trans('admin/testtypes/general.required') }}</label>
                                     <input type="hidden" name="is_required" value="0">
@@ -405,6 +543,28 @@
                                         </label>
                                     </div>
                                     <span class="help-block">{{ trans('admin/testtypes/general.required_help') }}</span>
+                                </div>
+                                <div class="form-group{{ $isEditContext && $errors->has('result_label_mode') ? ' has-error' : '' }}">
+                                    <label for="edit-result-label-mode-{{ $type->id }}">{{ trans('admin/testtypes/general.result_buttons') }}</label>
+                                    @php
+                                        $editResultLabelMode = $isEditContext
+                                            ? old('result_label_mode', $type->result_label_mode)
+                                            : ($type->result_label_mode ?? \App\Models\WorkflowProfileItem::LABEL_MODE_PASS_FAIL);
+                                    @endphp
+                                    <select name="result_label_mode" id="edit-result-label-mode-{{ $type->id }}" class="form-control">
+                                        <option value="{{ \App\Models\WorkflowProfileItem::LABEL_MODE_PASS_FAIL }}" @selected($editResultLabelMode === \App\Models\WorkflowProfileItem::LABEL_MODE_PASS_FAIL)>
+                                            {{ __('Pass / Fail') }}
+                                        </option>
+                                        <option value="{{ \App\Models\WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE }}" @selected($editResultLabelMode === \App\Models\WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE)>
+                                            {{ __('Done / Not Done') }}
+                                        </option>
+                                    </select>
+                                    <span class="help-block">{{ trans('admin/testtypes/general.result_buttons_help') }}</span>
+                                    @if($isEditContext)
+                                        @error('result_label_mode')
+                                            <span class="help-block">{{ $message }}</span>
+                                        @enderror
+                                    @endif
                                 </div>
                                 <div class="form-group{{ $isEditContext && $errors->has('instructions') ? ' has-error' : '' }}">
                                     <label for="edit-instructions-{{ $type->id }}">{{ trans('admin/testtypes/general.instructions') }}</label>

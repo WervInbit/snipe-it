@@ -22,6 +22,7 @@ use App\Models\CustomField;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Collection;
 
 class BulkAssetsController extends Controller
 {
@@ -272,17 +273,7 @@ class BulkAssetsController extends Controller
             if ($status && $this->statusRequiresTestAck($status->name)) {
                 $warnings = [];
                 foreach ($assets as $asset) {
-                    $summary = $asset->latestTestIssueSummary();
-                    $issues = collect();
-                    if ($summary['missing_run']) {
-                        $issues->push(trans('tests.no_test_run_recorded'));
-                    }
-                    if ($summary['failed']->isNotEmpty()) {
-                        $issues->push(trans('tests.failed_list', ['tests' => $summary['failed']->implode(', ')]));
-                    }
-                    if ($summary['incomplete']->isNotEmpty()) {
-                        $issues->push(trans('tests.incomplete_list', ['tests' => $summary['incomplete']->implode(', ')]));
-                    }
+                    $issues = $this->testIssueLines($asset);
                     if ($issues->isNotEmpty()) {
                         $warnings[] = $asset->asset_tag . ': ' . $issues->implode(' ');
                     }
@@ -754,6 +745,31 @@ class BulkAssetsController extends Controller
         }
 
         return false;
+    }
+
+    private function testIssueLines(Asset $asset): Collection
+    {
+        $summary = $asset->latestTestIssueSummary();
+        $issues = collect();
+        $missingProfiles = $summary['missing_profiles'] ?? collect();
+
+        if ($missingProfiles->isNotEmpty()) {
+            $issues->push(trans('tests.missing_workflow_profiles', [
+                'profiles' => $missingProfiles->implode(', '),
+            ]));
+        } elseif ($summary['missing_run']) {
+            $issues->push(trans('tests.no_test_run_recorded'));
+        }
+
+        if ($summary['failed']->isNotEmpty()) {
+            $issues->push(trans('tests.failed_list', ['tests' => $summary['failed']->implode(', ')]));
+        }
+
+        if ($summary['incomplete']->isNotEmpty()) {
+            $issues->push(trans('tests.incomplete_list', ['tests' => $summary['incomplete']->implode(', ')]));
+        }
+
+        return $issues;
     }
 
     public function bulkEditForm(): View|RedirectResponse

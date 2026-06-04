@@ -22,7 +22,7 @@ class TestAuditLogsTest extends TestCase
             'user_id' => $user->id,
         ]);
 
-        $this->assertDatabaseHas('test_audits', [
+        $this->assertDatabaseHas('workflow_audits', [
             'auditable_type' => TestRun::class,
             'auditable_id' => $run->id,
             'user_id' => $user->id,
@@ -35,7 +35,7 @@ class TestAuditLogsTest extends TestCase
         $newFinish = now()->addHour();
         $run->update(['finished_at' => $newFinish]);
 
-        $this->assertDatabaseHas('test_audits', [
+        $this->assertDatabaseHas('workflow_audits', [
             'auditable_type' => TestRun::class,
             'auditable_id' => $run->id,
             'user_id' => $user->id,
@@ -48,7 +48,7 @@ class TestAuditLogsTest extends TestCase
         $assetId = $asset->id;
         $run->delete();
 
-        $this->assertDatabaseHas('test_audits', [
+        $this->assertDatabaseHas('workflow_audits', [
             'auditable_type' => TestRun::class,
             'auditable_id' => $runId,
             'field' => 'asset_id',
@@ -69,14 +69,14 @@ class TestAuditLogsTest extends TestCase
         ]);
         $type = TestType::factory()->create();
         $result = TestResult::factory()->create([
-            'test_run_id' => $run->id,
-            'test_type_id' => $type->id,
+            'workflow_run_id' => $run->id,
+            'workflow_item_id' => $type->id,
             'note' => null,
         ]);
 
         $result->update(['note' => 'Checked']);
 
-        $this->assertDatabaseHas('test_audits', [
+        $this->assertDatabaseHas('workflow_audits', [
             'auditable_type' => TestResult::class,
             'auditable_id' => $result->id,
             'user_id' => $user->id,

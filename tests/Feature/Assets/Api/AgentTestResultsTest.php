@@ -4,7 +4,9 @@ namespace Tests\Feature\Assets\Api;
 
 use App\Models\Asset;
 use App\Models\AttributeDefinition;
+use App\Models\ModelNumberAttribute;
 use App\Models\TestResult;
+use App\Models\TestType;
 use App\Models\TestRun;
 use Database\Seeders\DeviceAttributeSeeder;
 use Database\Seeders\DevicePresetSeeder;
@@ -42,6 +44,7 @@ class AgentTestResultsTest extends TestCase
         \App\Models\User::factory()->create();
         $agent = \App\Models\User::factory()->create();
         $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAG123']);
+        $this->assignWorkflowAttributesToAsset($asset, [$this->keyboardSlug, $this->wifiSlug]);
 
         $payload = [
             'type' => 'test_results',
@@ -71,9 +74,9 @@ class AgentTestResultsTest extends TestCase
         $this->assertNotNull($run);
         $this->assertEquals($agent->id, $run->user_id);
 
-        $this->assertDatabaseHas('test_results', [
-            'test_run_id' => $run->id,
-            'test_type_id' => $run->results()->whereHas('type', fn ($query) => $query->where('slug', $this->keyboardSlug))->value('test_type_id'),
+        $this->assertDatabaseHas('workflow_results', [
+            'workflow_run_id' => $run->id,
+            'workflow_item_id' => $run->results()->whereHas('type', fn ($query) => $query->where('slug', $this->keyboardSlug))->value('workflow_item_id'),
             'status' => TestResult::STATUS_PASS,
             'note' => 'All good',
         ]);
@@ -84,25 +87,25 @@ class AgentTestResultsTest extends TestCase
         $this->assertEquals(TestResult::STATUS_NVT, $wifiResult->status);
         $this->assertEquals('Not tested by agent', $wifiResult->note);
 
-        $this->assertDatabaseHas('test_results', [
-            'test_run_id' => $run->id,
-            'test_type_id' => $wifiResult->test_type_id,
+        $this->assertDatabaseHas('workflow_results', [
+            'workflow_run_id' => $run->id,
+            'workflow_item_id' => $wifiResult->workflow_item_id,
             'status' => TestResult::STATUS_NVT,
         ]);
 
         $asset->refresh();
-        $this->assertTrue((bool) $asset->tests_completed_ok);
+        $this->assertFalse((bool) $asset->tests_completed_ok);
 
-        $this->assertDatabaseHas('test_audits', [
+        $this->assertDatabaseHas('workflow_audits', [
             'auditable_type' => TestRun::class,
             'auditable_id' => $run->id,
             'user_id' => $agent->id,
         ]);
 
-        $keyboardResult = TestResult::where('test_run_id', $run->id)
+        $keyboardResult = TestResult::where('workflow_run_id', $run->id)
             ->whereHas('type', fn ($query) => $query->where('slug', $this->keyboardSlug))
             ->first();
-        $this->assertDatabaseHas('test_audits', [
+        $this->assertDatabaseHas('workflow_audits', [
             'auditable_type' => TestResult::class,
             'auditable_id' => $keyboardResult->id,
             'user_id' => $agent->id,
@@ -140,6 +143,7 @@ class AgentTestResultsTest extends TestCase
     {
         \App\Models\User::factory()->create();
         $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAG999']);
+        $this->assignWorkflowAttributesToAsset($asset, [$this->keyboardSlug]);
 
         $payload = [
             'type' => 'test_results',
@@ -164,6 +168,7 @@ class AgentTestResultsTest extends TestCase
     {
         \App\Models\User::factory()->create();
         $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAGIP1']);
+        $this->assignWorkflowAttributesToAsset($asset, [$this->keyboardSlug]);
 
         $payload = [
             'type' => 'test_results',
@@ -183,6 +188,32 @@ class AgentTestResultsTest extends TestCase
             'Authorization' => 'Bearer secrettoken',
         ])->assertStatus(401)
             ->assertJson(['message' => 'Unauthorized']);
+    }
+
+    private function assignWorkflowAttributesToAsset(Asset $asset, array $slugs): void
+    {
+        $types = TestType::query()
+            ->with('attributeDefinition')
+            ->whereIn('slug', $slugs)
+            ->get();
+
+        foreach ($types as $type) {
+            if (!$type->attribute_definition_id || !$asset->model_number_id) {
+                continue;
+            }
+
+            ModelNumberAttribute::updateOrCreate(
+                [
+                    'model_number_id' => $asset->model_number_id,
+                    'attribute_definition_id' => $type->attribute_definition_id,
+                ],
+                [
+                    'value' => '1',
+                    'raw_value' => '1',
+                    'display_order' => 0,
+                ]
+            );
+        }
     }
 }
 

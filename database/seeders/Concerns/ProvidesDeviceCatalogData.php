@@ -16,7 +16,7 @@ trait ProvidesDeviceCatalogData
      */
     protected function attributeBlueprints(): array
     {
-        return [
+        $blueprints = [
             'release_year' => [
                 'label' => 'Introductiejaar',
                 'datatype' => AttributeDefinition::DATATYPE_INT,
@@ -144,6 +144,8 @@ trait ProvidesDeviceCatalogData
                     ['value' => 'us', 'label' => 'US (ANSI)'],
                     ['value' => 'uk', 'label' => 'UK'],
                     ['value' => 'iso', 'label' => 'EU (ISO)'],
+                    ['value' => 'qwerty', 'label' => 'QWERTY'],
+                    ['value' => 'qwerty_us_intl', 'label' => 'QWERTY US International'],
                 ],
             ],
             'webcam_present' => [
@@ -279,6 +281,180 @@ trait ProvidesDeviceCatalogData
                     ['value' => 'ip54', 'label' => 'IP54'],
                 ],
             ],
+            'ram_speed_mhz' => [
+                'label' => 'Geheugensnelheid (MHz)',
+                'datatype' => AttributeDefinition::DATATYPE_INT,
+                'unit' => 'MHz',
+                'categories' => ['Memory'],
+                'constraints' => ['min' => 400, 'max' => 10000, 'step' => 1],
+            ],
+            'battery_capacity_wh' => [
+                'label' => 'Batterijcapaciteit (Wh)',
+                'datatype' => AttributeDefinition::DATATYPE_DECIMAL,
+                'unit' => 'Wh',
+                'categories' => ['Battery'],
+                'constraints' => ['min' => 1, 'max' => 200, 'step' => 0.1],
+                'allow_asset_override' => true,
+            ],
+            'battery_capacity_mah' => [
+                'label' => 'Batterijcapaciteit (mAh)',
+                'datatype' => AttributeDefinition::DATATYPE_INT,
+                'unit' => 'mAh',
+                'categories' => ['Battery'],
+                'constraints' => ['min' => 100, 'max' => 20000, 'step' => 1],
+                'allow_asset_override' => true,
+            ],
+            'camera_position' => [
+                'label' => 'Camerapositie',
+                'datatype' => AttributeDefinition::DATATYPE_ENUM,
+                'categories' => ['Camera'],
+                'options' => [
+                    ['value' => 'front', 'label' => 'Front'],
+                    ['value' => 'rear', 'label' => 'Rear'],
+                    ['value' => 'webcam', 'label' => 'Webcam'],
+                ],
+            ],
+            'camera_role' => [
+                'label' => 'Camerarol',
+                'datatype' => AttributeDefinition::DATATYPE_ENUM,
+                'categories' => ['Camera'],
+                'options' => [
+                    ['value' => 'selfie', 'label' => 'Selfie'],
+                    ['value' => 'main', 'label' => 'Main'],
+                    ['value' => 'wide', 'label' => 'Wide'],
+                    ['value' => 'ultrawide', 'label' => 'Ultrawide'],
+                    ['value' => 'telephoto', 'label' => 'Telephoto'],
+                    ['value' => 'macro', 'label' => 'Macro'],
+                    ['value' => 'depth', 'label' => 'Depth'],
+                ],
+            ],
+            'camera_megapixels' => [
+                'label' => 'Camera (MP)',
+                'datatype' => AttributeDefinition::DATATYPE_DECIMAL,
+                'unit' => 'MP',
+                'categories' => ['Camera'],
+                'constraints' => ['min' => 0.1, 'max' => 250, 'step' => 0.1],
+            ],
+            'port_connector_type' => [
+                'label' => 'Poortconnector',
+                'datatype' => AttributeDefinition::DATATYPE_ENUM,
+                'categories' => ['Ports'],
+                'options' => [
+                    ['value' => 'usb_a', 'label' => 'USB-A'],
+                    ['value' => 'usb_c', 'label' => 'USB-C'],
+                    ['value' => 'hdmi', 'label' => 'HDMI'],
+                    ['value' => 'displayport', 'label' => 'DisplayPort'],
+                    ['value' => 'mini_displayport', 'label' => 'Mini DisplayPort'],
+                    ['value' => 'vga', 'label' => 'VGA'],
+                    ['value' => 'rj45', 'label' => 'RJ-45'],
+                    ['value' => 'esata', 'label' => 'eSATA'],
+                    ['value' => 'sd_card', 'label' => 'SD Card'],
+                    ['value' => 'audio_3_5mm', 'label' => '3.5mm'],
+                    ['value' => 'surface_connect', 'label' => 'Surface Connect'],
+                    ['value' => 'lightning', 'label' => 'Lightning'],
+                ],
+            ],
+            'audio_port_role' => [
+                'label' => 'Audiopoortfunctie',
+                'datatype' => AttributeDefinition::DATATYPE_ENUM,
+                'categories' => ['Ports'],
+                'options' => [
+                    ['value' => 'headset_combo', 'label' => 'Headset combo'],
+                    ['value' => 'headphone_out', 'label' => 'Hoofdtelefoon uitgang'],
+                    ['value' => 'microphone_in', 'label' => 'Microfoon ingang'],
+                    ['value' => 'line_in', 'label' => 'Line in'],
+                    ['value' => 'line_out', 'label' => 'Line out'],
+                ],
+                'allow_custom_values' => true,
+            ],
+            'audio_jack_standard' => [
+                'label' => 'Audiojack-standaard',
+                'datatype' => AttributeDefinition::DATATYPE_ENUM,
+                'categories' => ['Ports'],
+                'options' => [
+                    ['value' => 'trs', 'label' => 'TRS'],
+                    ['value' => 'trrs_ctia', 'label' => 'TRRS (CTIA)'],
+                    ['value' => 'trrs_omtp', 'label' => 'TRRS (OMTP)'],
+                ],
+                'allow_custom_values' => true,
+            ],
+            'usb_standard' => [
+                'label' => 'USB-standaard',
+                'datatype' => AttributeDefinition::DATATYPE_ENUM,
+                'categories' => ['Ports'],
+                'options' => [
+                    ['value' => 'usb_2_0', 'label' => 'USB 2.0'],
+                    ['value' => 'usb_3_0', 'label' => 'USB 3.0'],
+                    ['value' => 'usb_3_1_gen1', 'label' => 'USB 3.1 Gen 1'],
+                    ['value' => 'usb_3_1_gen2', 'label' => 'USB 3.1 Gen 2'],
+                    ['value' => 'usb_3_2_gen1', 'label' => 'USB 3.2 Gen 1'],
+                    ['value' => 'usb4', 'label' => 'USB4'],
+                ],
+                'allow_custom_values' => true,
+            ],
+            'displayport_alt_mode' => [
+                'label' => 'DisplayPort alt-mode',
+                'datatype' => AttributeDefinition::DATATYPE_BOOL,
+                'categories' => ['Ports'],
+            ],
+            'displayport_version' => [
+                'label' => 'DisplayPort-versie',
+                'datatype' => AttributeDefinition::DATATYPE_TEXT,
+                'categories' => ['Ports'],
+                'allow_custom_values' => true,
+            ],
+            'power_delivery' => [
+                'label' => 'USB Power Delivery',
+                'datatype' => AttributeDefinition::DATATYPE_BOOL,
+                'categories' => ['Ports'],
+            ],
+            'power_delivery_watts' => [
+                'label' => 'USB Power Delivery (W)',
+                'datatype' => AttributeDefinition::DATATYPE_INT,
+                'unit' => 'W',
+                'categories' => ['Ports'],
+                'constraints' => ['min' => 1, 'max' => 240, 'step' => 1],
+            ],
+            'thunderbolt' => [
+                'label' => 'Thunderbolt',
+                'datatype' => AttributeDefinition::DATATYPE_BOOL,
+                'categories' => ['Ports'],
+            ],
+            'thunderbolt_version' => [
+                'label' => 'Thunderbolt-versie',
+                'datatype' => AttributeDefinition::DATATYPE_ENUM,
+                'categories' => ['Ports'],
+                'options' => [
+                    ['value' => '1', 'label' => 'Thunderbolt 1'],
+                    ['value' => '2', 'label' => 'Thunderbolt 2'],
+                    ['value' => '3', 'label' => 'Thunderbolt 3'],
+                    ['value' => '4', 'label' => 'Thunderbolt 4'],
+                    ['value' => '5', 'label' => 'Thunderbolt 5'],
+                ],
+            ],
+            'hdmi_version' => [
+                'label' => 'HDMI-versie',
+                'datatype' => AttributeDefinition::DATATYPE_TEXT,
+                'categories' => ['Ports'],
+                'allow_custom_values' => true,
+            ],
+            'ethernet_speed_max' => [
+                'label' => 'Ethernet max snelheid',
+                'datatype' => AttributeDefinition::DATATYPE_ENUM,
+                'categories' => ['Ports'],
+                'options' => [
+                    ['value' => '1gbe', 'label' => '1GbE'],
+                    ['value' => '2_5gbe', 'label' => '2.5GbE'],
+                    ['value' => '5gbe', 'label' => '5GbE'],
+                    ['value' => '10gbe', 'label' => '10GbE'],
+                ],
+                'allow_custom_values' => true,
+            ],
+            'sleep_and_charge' => [
+                'label' => 'Sleep-and-charge',
+                'datatype' => AttributeDefinition::DATATYPE_BOOL,
+                'categories' => ['Ports'],
+            ],
             // Capability attributes (formerly *_test)
             'wifi' => [
                 'label' => 'Wifi',
@@ -401,6 +577,8 @@ trait ProvidesDeviceCatalogData
                 'allow_asset_override' => false,
             ],
         ];
+
+        return array_diff_key($blueprints, array_flip($this->removedAttributeKeys()));
     }
 
     /**
@@ -432,13 +610,61 @@ trait ProvidesDeviceCatalogData
     }
 
     /**
+     * Catalog attribute keys intentionally removed from the clean-start seed.
+     *
+     * Keep this list explicit so future reliance on an old key can be audited
+     * and either restored intentionally or replaced with a workflow/component
+     * concept.
+     *
+     * @return array<int,string>
+     */
+    protected function removedAttributeKeys(): array
+    {
+        return [
+            'audio_connectors_summary',
+            'battery',
+            'battery_capacity',
+            'battery_health_percent',
+            'bluetooth',
+            'charger_included',
+            'charging_port_type',
+            'condition_grade',
+            'cpu',
+            'display',
+            'ethernet',
+            'face_unlock',
+            'front_camera',
+            'front_camera_megapixels',
+            'hdmi',
+            'included_accessories',
+            'keyboard',
+            'microphone',
+            'ram',
+            'rear_camera',
+            'rear_camera_megapixels',
+            'sd_card_reader',
+            'speaker',
+            'storage',
+            'touchpad',
+            'usb_ports',
+            'usb_ports_summary',
+            'vga',
+            'video_outputs_summary',
+            'warranty_months',
+            'webcam',
+            'webcam_present',
+            'wifi',
+        ];
+    }
+
+    /**
      * Reference device presets for demo/catalog purposes.
      *
      * @return array<string,array<string,mixed>>
      */
     protected function modelBlueprints(): array
     {
-        return [
+        $blueprints = [
             'HP ProBook 450 G8' => [
                 'factory' => fn () => AssetModel::factory()->create([
                     'name' => 'HP ProBook 450 G8',
@@ -785,7 +1011,7 @@ trait ProvidesDeviceCatalogData
                         ?? Manufacturer::factory()->samsung()->create()->id,
                     'eol' => '18',
                 ]),
-                'code' => 'SM-A520-32-BLACK',
+                'code' => 'SM-A520F',
                 'label' => 'Samsung Galaxy A5 (2017) - 32GB - Zwart',
                 'attributes' => [
                     'release_year' => 2017,
@@ -977,6 +1203,8 @@ trait ProvidesDeviceCatalogData
                     'name' => 'Pixel 8 Pro',
                     'category_id' => Category::where('name', 'Mobile Phones')->value('id')
                         ?? Category::factory()->assetMobileCategory()->create()->id,
+                    'manufacturer_id' => Manufacturer::where('name', 'Google')->value('id')
+                        ?? Manufacturer::factory()->google()->create()->id,
                 ]),
                 'code' => 'PIXEL8PRO-256-OBSIDIAN',
                 'label' => 'Pixel 8 Pro – 256GB – Obsidian',
@@ -1015,6 +1243,14 @@ trait ProvidesDeviceCatalogData
                 ],
             ],
         ];
+
+        $removed = array_flip($this->removedAttributeKeys());
+
+        foreach ($blueprints as $modelName => $config) {
+            $blueprints[$modelName]['attributes'] = array_diff_key($config['attributes'] ?? [], $removed);
+        }
+
+        return $blueprints;
     }
 }
 

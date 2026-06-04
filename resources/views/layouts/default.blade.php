@@ -210,8 +210,8 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                 </li>
                             @endcan
                             @can('index', \App\Models\TestType::class)
-                                <li aria-hidden="true"{!! (request()->is('settings/testtypes*') ? ' class="active"' : '') !!}>
-                                    <a href="{{ route('settings.testtypes.index') }}" tabindex="-1" data-tooltip="true" data-placement="bottom" data-title="{{ trans('admin/settings/general.test_settings_title') }}">
+                                  <li aria-hidden="true"{!! (request()->is('admin/testtypes*') || request()->is('admin/workflow-profiles*') ? ' class="active"' : '') !!}>
+                                      <a href="{{ route('settings.workflow-profiles.index') }}" tabindex="-1" data-tooltip="true" data-placement="bottom" data-title="{{ trans('admin/settings/general.test_settings_title') }}">
                                         <x-icon type="tests" class="fa-fw" />
                                         <span class="sr-only">{{ trans('admin/settings/general.test_settings_title') }}</span>
                                     </a>
@@ -751,10 +751,15 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                         </li>
                                     @endcan
 
-                                    @can('index', \App\Models\TestType::class)
-                                        <li {!! (request()->is('settings/testtypes*') ? ' class="active"' : '') !!}>
-                                            <a href="{{ route('settings.testtypes.index') }}">
-                                                {{ trans('admin/settings/general.test_settings_title') }}
+                                      @can('index', \App\Models\TestType::class)
+                                          <li {!! (request()->is('admin/workflow-profiles*') ? ' class="active"' : '') !!}>
+                                              <a href="{{ route('settings.workflow-profiles.index') }}">
+                                                {{ __('Workflow Profiles') }}
+                                            </a>
+                                        </li>
+                                          <li {!! (request()->is('admin/testtypes*') ? ' class="active"' : '') !!}>
+                                             <a href="{{ route('settings.testtypes.index') }}">
+                                                {{ __('Workflow Items') }}
                                             </a>
                                         </li>
                                     @endcan

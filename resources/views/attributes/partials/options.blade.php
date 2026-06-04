@@ -2,6 +2,8 @@
     use App\Models\AttributeDefinition;
 
     $isEdit = $definition->exists;
+    $usageSummary = $usageSummary ?? [];
+    $isInUse = $isEdit && (($usageSummary['total'] ?? 0) > 0);
     $existingOptions = $definition->relationLoaded('options') ? $definition->options : $definition->options;
     $pendingOptions = collect(old('options.new', []))
         ->filter(fn ($option) => is_array($option) && ($option['value'] ?? '') !== '' && ($option['label'] ?? '') !== '');
@@ -11,12 +13,22 @@
 @endphp
 
 @if($isEdit)
-    <div class="form-group" data-attribute-options-wrapper style="{{ $definition->isEnum() ? '' : 'display:none;' }}">
+    <div
+        class="form-group"
+        data-attribute-options-wrapper
+        style="{{ $definition->isEnum() ? '' : 'display:none;' }}"
+        data-next-index="{{ $nextIndex }}"
+    >
         <label class="col-md-3 control-label">{{ __('Options') }}</label>
         <div class="col-md-9" style="border-top: 1px solid #f4f4f4; padding-top: 15px; margin-top: 10px;">
             <p class="help-block">
-                {{ __('Enum options are editable in place. Changing an option value updates current model specs, asset overrides, and component definition contributions that reference it.') }}
+                {{ __('Enum options are editable in place. Changing an existing option value updates current rows that reference it.') }}
             </p>
+            @if($definition->isEnum() && $isInUse)
+                <div class="alert alert-info" data-option-usage-warning>
+                    {{ __('Adding a new option only makes it available for future selections. Renaming or removing an existing option can update current records already using that value.') }}
+                </div>
+            @endif
 
             @if($definition->isEnum())
                 <table class="table table-condensed">
@@ -29,8 +41,13 @@
                         <th>{{ __('Remove') }}</th>
                     </tr>
                     </thead>
-                    <tbody>
-                    @forelse($existingOptions as $option)
+                    <tbody data-option-rows>
+                    @if($existingOptions->isEmpty() && $pendingOptions->isEmpty())
+                        <tr data-empty-row>
+                            <td colspan="5" class="text-muted">{{ __('No options yet.') }}</td>
+                        </tr>
+                    @else
+                    @foreach($existingOptions as $option)
                         <tr>
                             <td>
                                 <input type="text" name="options[existing][{{ $option->id }}][value]" class="form-control input-sm" value="{{ $option->value }}" required>
@@ -54,11 +71,30 @@
                                 </label>
                             </td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="text-muted">{{ __('No options yet.') }}</td>
+                    @endforeach
+                    @foreach($pendingOptions as $index => $option)
+                        <tr data-pending-row>
+                            <td>
+                                <input type="text" name="options[new][{{ $index }}][value]" value="{{ $option['value'] ?? '' }}" class="form-control input-sm" required>
+                            </td>
+                            <td>
+                                <input type="text" name="options[new][{{ $index }}][label]" value="{{ $option['label'] ?? '' }}" class="form-control input-sm" required>
+                            </td>
+                            <td style="width:90px;">
+                                <input type="number" name="options[new][{{ $index }}][sort_order]" value="{{ $option['sort_order'] ?? $loop->index }}" class="form-control input-sm" min="0">
+                            </td>
+                            <td style="width:90px;">
+                                <label class="checkbox-inline" style="margin:0;">
+                                    <input type="hidden" name="options[new][{{ $index }}][active]" value="0">
+                                    <input type="checkbox" name="options[new][{{ $index }}][active]" value="1" {{ !array_key_exists('active', $option) || $option['active'] ? 'checked' : '' }}>
+                                </label>
+                            </td>
+                            <td class="text-right">
+                                <button type="button" class="btn btn-xs btn-link text-danger" data-option-remove>{{ __('Remove') }}</button>
+                            </td>
                         </tr>
-                    @endforelse
+                    @endforeach
+                    @endif
                     </tbody>
                 </table>
 
@@ -264,13 +300,20 @@
                     var index = parseInt(wrapper.dataset.nextIndex || '0', 10);
                     wrapper.dataset.nextIndex = String(index + 1);
                     var sortValue = sortField && sortField.value !== '' ? sortField.value : String(index);
+                    var escapeAttribute = function (text) {
+                        return text
+                            .replace(/&/g, '&amp;')
+                            .replace(/"/g, '&quot;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;');
+                    };
 
                     var row = document.createElement('tr');
                     row.setAttribute('data-pending-row', '');
                     row.innerHTML =
-                        '<td><input type="text" name="options[new][' + index + '][value]" value="' + value.replace(/"/g, '&quot;') + '" class="form-control input-sm" required></td>' +
-                        '<td><input type="text" name="options[new][' + index + '][label]" value="' + label.replace(/"/g, '&quot;') + '" class="form-control input-sm" required></td>' +
-                        '<td style="width:90px;"><input type="number" name="options[new][' + index + '][sort_order]" value="' + sortValue + '" class="form-control input-sm" min="0"></td>' +
+                        '<td><input type="text" name="options[new][' + index + '][value]" value="' + escapeAttribute(value) + '" class="form-control input-sm" required></td>' +
+                        '<td><input type="text" name="options[new][' + index + '][label]" value="' + escapeAttribute(label) + '" class="form-control input-sm" required></td>' +
+                        '<td style="width:90px;"><input type="number" name="options[new][' + index + '][sort_order]" value="' + escapeAttribute(sortValue) + '" class="form-control input-sm" min="0"></td>' +
                         '<td style="width:90px;"><label class="checkbox-inline" style="margin:0;"><input type="hidden" name="options[new][' + index + '][active]" value="0"><input type="checkbox" name="options[new][' + index + '][active]" value="1"' + (activeField && activeField.checked ? ' checked' : '') + '></label></td>' +
                         '<td class="text-right"><button type="button" class="btn btn-xs btn-link text-danger" data-option-remove>{{ __('Remove') }}</button></td>';
 

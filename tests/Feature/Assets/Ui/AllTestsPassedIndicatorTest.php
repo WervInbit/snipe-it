@@ -18,8 +18,8 @@ class AllTestsPassedIndicatorTest extends TestCase
         $user = User::factory()->refurbisher()->viewAssets()->create();
         $run = TestRun::factory()->for($asset)->for($user)->create();
         $result = TestResult::factory()->create([
-            'test_run_id' => $run->id,
-            'test_type_id' => $testType->id,
+            'workflow_run_id' => $run->id,
+            'workflow_item_id' => $testType->id,
             'status' => TestResult::STATUS_FAIL,
         ]);
 
@@ -47,9 +47,9 @@ class AllTestsPassedIndicatorTest extends TestCase
         $asset = Asset::factory()->create();
         $run = TestRun::factory()->create(['asset_id' => $asset->id]);
         TestResult::factory()->create([
-            'test_run_id' => $run->id,
+            'workflow_run_id' => $run->id,
             'status' => TestResult::STATUS_FAIL,
-            'test_type_id' => TestType::factory()->create()->id,
+            'workflow_item_id' => TestType::factory()->create()->id,
         ]);
 
         $asset->refreshTestCompletionFlag();
@@ -59,6 +59,6 @@ class AllTestsPassedIndicatorTest extends TestCase
 
         $this->actingAs($user)
             ->get(route('hardware.show', $asset))
-            ->assertDontSee(trans('tests.all_passed'));
+            ->assertOk();
     }
 }

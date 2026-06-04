@@ -7,8 +7,11 @@ use App\Models\AssetAttributeOverride;
 use App\Models\AssetModel;
 use App\Models\AttributeDefinition;
 use App\Models\Category;
+use App\Models\ComponentDefinition;
+use App\Models\ComponentDefinitionAttribute;
 use App\Models\ModelNumber;
 use App\Models\ModelNumberAttribute;
+use App\Models\ModelNumberComponentTemplate;
 use App\Services\ModelAttributes\ModelAttributeManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
@@ -119,7 +122,7 @@ class ModelAttributeManagerTest extends TestCase
         $this->assertSame('0', $override->raw_value);
     }
 
-    public function test_save_asset_overrides_ignores_when_not_allowed(): void
+    public function test_save_asset_overrides_rejects_when_not_allowed(): void
     {
         $category = Category::factory()->create();
         $definition = $this->makeAttributeDefinition($category, [
@@ -136,13 +139,10 @@ class ModelAttributeManagerTest extends TestCase
         /** @var ModelAttributeManager $manager */
         $manager = app(ModelAttributeManager::class);
 
+        $this->expectException(ValidationException::class);
+
         $manager->saveAssetOverrides($asset, [
             $definition->id => '1',
-        ]);
-
-        $this->assertDatabaseMissing('asset_attribute_overrides', [
-            'asset_id' => $asset->id,
-            'attribute_definition_id' => $definition->id,
         ]);
     }
 
@@ -218,6 +218,60 @@ class ModelAttributeManagerTest extends TestCase
         $this->assertDatabaseMissing('asset_attribute_overrides', [
             'asset_id' => $asset->id,
             'attribute_definition_id' => $second->id,
+        ]);
+    }
+
+    public function test_sync_model_number_assignments_removes_component_backed_spec_attributes(): void
+    {
+        $category = Category::factory()->create();
+        $definition = $this->makeAttributeDefinition($category, [
+            'key' => 'display_resolution',
+            'label' => 'Display Resolution',
+            'datatype' => AttributeDefinition::DATATYPE_TEXT,
+        ]);
+        $model = AssetModel::factory()->create(['category_id' => $category->id]);
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $componentDefinition = ComponentDefinition::factory()->create();
+
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $componentDefinition->id,
+            'attribute_definition_id' => $definition->id,
+            'value' => '1920 x 1080',
+            'raw_value' => '1920 x 1080',
+            'resolves_to_spec' => true,
+        ]);
+        ModelNumberComponentTemplate::create([
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $componentDefinition->id,
+            'expected_name' => 'Display',
+            'expected_qty' => 1,
+            'is_required' => true,
+            'sort_order' => 0,
+        ]);
+        $this->assignAttribute($modelNumber, $definition, [
+            'value' => '1366 x 768',
+            'raw_value' => '1366 x 768',
+        ]);
+        $asset = Asset::factory()->create([
+            'model_id' => $model->id,
+            'model_number_id' => $modelNumber->id,
+        ]);
+        AssetAttributeOverride::create([
+            'asset_id' => $asset->id,
+            'attribute_definition_id' => $definition->id,
+            'value' => '1280 x 720',
+            'raw_value' => '1280 x 720',
+        ]);
+
+        app(ModelAttributeManager::class)->syncModelNumberAssignments($modelNumber, [$definition->id]);
+
+        $this->assertDatabaseMissing('model_number_attributes', [
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $definition->id,
+        ]);
+        $this->assertDatabaseMissing('asset_attribute_overrides', [
+            'asset_id' => $asset->id,
+            'attribute_definition_id' => $definition->id,
         ]);
     }
 }

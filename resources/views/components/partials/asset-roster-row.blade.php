@@ -10,6 +10,7 @@
     $definitionDetailUrl = $definition ? route('settings.component_definitions.edit', $definition) : null;
     $canViewDefinition = $definition && auth()->user()?->can('update', $definition);
     $conditionStatus = $component?->effectiveConditionStatus();
+    $rowDisplayName = $row->displayName();
     $issueLabelClass = match ($conditionStatus) {
         \App\Models\ComponentInstance::CONDITION_STATUS_DAMAGED => 'label-danger',
         \App\Models\ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION => 'label-warning',
@@ -28,11 +29,11 @@
     </td>
     <td @class([$mutedCellClass]) @if($nameCellStyle) style="{{ $nameCellStyle }}" @endif>
         @if($component && $canViewComponent)
-            <a href="{{ $componentDetailUrl }}">{{ $row->name }}</a>
+            <a href="{{ $componentDetailUrl }}">{{ $rowDisplayName }}</a>
         @elseif(!$component && $definition && $canViewDefinition)
-            <a href="{{ $definitionDetailUrl }}">{{ $row->name }}</a>
+            <a href="{{ $definitionDetailUrl }}">{{ $rowDisplayName }}</a>
         @else
-            {{ $row->name }}
+            {{ $rowDisplayName }}
         @endif
         @if($issueLabelClass)
             <span class="label {{ $issueLabelClass }}">{{ \App\Models\ComponentInstance::conditionStatusLabel($conditionStatus) }}</span>
@@ -51,7 +52,7 @@
                 {{ $component->component_tag }}
             @endif
         @else
-            <span class="text-muted">{{ __('Assumed') }}</span>
+            <span class="text-muted">{{ $row->quantity > 1 ? __('Assumed x:count', ['count' => $row->quantity]) : __('Assumed') }}</span>
         @endif
     </td>
     <td @class([$mutedCellClass])>{{ $component?->serial ?: trans('general.none') }}</td>
@@ -78,6 +79,9 @@
                         {{ __('To Storage') }}
                     </button>
                 @endcan
+                @can('move', $component)
+                    <a href="{{ route('hardware.components.reparent.create', [$asset, $component]) }}" class="btn btn-xs btn-default">{{ __('Move Within Device') }}</a>
+                @endcan
                 @can('install', $component)
                     <a href="{{ route('hardware.components.transfer.create', [$asset, $component]) }}" class="btn btn-xs btn-primary">{{ __('Move To Other Device') }}</a>
                 @endcan
@@ -97,7 +101,7 @@
                     data-toggle="modal"
                     data-target="#assetComponentStorageModal"
                     data-storage-action="{{ route('hardware.components.expected.storage.store', [$asset, $template]) }}"
-                    data-storage-name="{{ $template->expected_name ?: ($template->componentDefinition?->name ?? __('Expected component')) }}"
+                    data-storage-name="{{ $rowDisplayName }}"
                 >
                     {{ __('To Storage') }}
                 </button>

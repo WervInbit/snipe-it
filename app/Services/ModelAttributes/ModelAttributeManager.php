@@ -29,6 +29,8 @@ class ModelAttributeManager
             return;
         }
 
+        $lockedDefinitionIds = $this->componentResolvedSpecDefinitionIds($modelNumber);
+
         $definitionIds = collect($orderedDefinitionIds)
             ->map(function ($value) {
                 if (is_int($value)) {
@@ -42,12 +44,11 @@ class ModelAttributeManager
                 return null;
             })
             ->filter(fn ($value) => $value !== null)
+            ->reject(fn (int $value) => in_array($value, $lockedDefinitionIds, true))
             ->unique()
             ->values();
 
-        $lockedDefinitionIds = $this->componentResolvedNumericDefinitionIds($modelNumber);
-
-        DB::transaction(function () use ($modelNumber, $definitionIds, $model, $lockedDefinitionIds) {
+        DB::transaction(function () use ($modelNumber, $definitionIds, $model) {
             $existingAssignments = ModelNumberAttribute::query()
                 ->where('model_number_id', $modelNumber->id)
                 ->get()
@@ -86,8 +87,6 @@ class ModelAttributeManager
 
                 $retainedDefinitionIds[] = $definitionId;
             }
-
-            $retainedDefinitionIds = array_values(array_unique(array_merge($retainedDefinitionIds, $lockedDefinitionIds)));
 
             $assignmentsToRemoveQuery = ModelNumberAttribute::query()
                 ->where('model_number_id', $modelNumber->id);
@@ -130,7 +129,7 @@ class ModelAttributeManager
             ]);
         }
 
-        $lockedDefinitionIds = $this->componentResolvedNumericDefinitionIds($modelNumber);
+        $lockedDefinitionIds = $this->componentResolvedSpecDefinitionIds($modelNumber);
         $assignments = $this->fetchAssignments($modelNumber);
 
         DB::transaction(function () use ($modelNumber, $payload, $assignments, $lockedDefinitionIds) {
@@ -196,7 +195,7 @@ class ModelAttributeManager
             return;
         }
 
-        $lockedDefinitionIds = $this->componentResolvedNumericDefinitionIds($modelNumber);
+        $lockedDefinitionIds = $this->componentResolvedSpecDefinitionIds($modelNumber);
         $assignments = $this->fetchAssignments($modelNumber, $keys)->keyBy('attribute_definition_id');
 
         if ($assignments->isEmpty()) {
@@ -365,14 +364,52 @@ class ModelAttributeManager
     /**
      * @return array<int, int>
      */
+    public function componentResolvedSpecDefinitionIds(ModelNumber $modelNumber): array
+    {
+        $modelNumber->loadMissing([
+            'componentTemplates.componentDefinition.attributeContributions.definition',
+            'componentTemplates.componentDefinition.subcomponentTemplates.childComponentDefinition.attributeContributions.definition',
+        ]);
+
+        return $modelNumber->componentTemplates
+            ->flatMap(function ($template) {
+                $attributes = collect($template->componentDefinition?->attributeContributions ?? []);
+
+                foreach ($template->componentDefinition?->subcomponentTemplates ?? [] as $subcomponentTemplate) {
+                    $attributes = $attributes->merge(
+                        $subcomponentTemplate->childComponentDefinition?->attributeContributions ?? collect()
+                    );
+                }
+
+                return $attributes;
+            })
+            ->filter(fn ($contribution) => $contribution->definition && $contribution->resolves_to_spec)
+            ->pluck('attribute_definition_id')
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+    }
+
     public function componentResolvedNumericDefinitionIds(ModelNumber $modelNumber): array
     {
         $modelNumber->loadMissing([
             'componentTemplates.componentDefinition.attributeContributions.definition',
+            'componentTemplates.componentDefinition.subcomponentTemplates.childComponentDefinition.attributeContributions.definition',
         ]);
 
-        return $modelNumber->componentTemplates
-            ->flatMap(fn ($template) => $template->componentDefinition?->attributeContributions ?? collect())
+        $numericIds = $modelNumber->componentTemplates
+            ->flatMap(function ($template) {
+                $attributes = collect($template->componentDefinition?->attributeContributions ?? []);
+
+                foreach ($template->componentDefinition?->subcomponentTemplates ?? [] as $subcomponentTemplate) {
+                    $attributes = $attributes->merge(
+                        $subcomponentTemplate->childComponentDefinition?->attributeContributions ?? collect()
+                    );
+                }
+
+                return $attributes;
+            })
             ->filter(fn ($contribution) => $contribution->definition
                 && $contribution->definition->isNumericDatatype()
                 && $contribution->resolves_to_spec)
@@ -381,6 +418,8 @@ class ModelAttributeManager
             ->unique()
             ->values()
             ->all();
+
+        return $numericIds;
     }
 }
 

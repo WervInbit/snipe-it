@@ -313,6 +313,8 @@ return [
     'status_labels'			=> 'Statuslabels',
     'status_label'			=> 'Status label',
     'status'    			=> 'Status',
+    'progress'              => 'Voortgang',
+    'total'                 => 'Totaal',
     'status_history'        => 'Statusgeschiedenis',
     'accept_eula'           => 'Aanvaarding overeenkomst',
     'eula'                  => 'EULAs',

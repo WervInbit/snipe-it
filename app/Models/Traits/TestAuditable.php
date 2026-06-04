@@ -50,9 +50,9 @@ trait TestAuditable
             return self::$testAuditUserColumn;
         }
         // Prefer 'user_id' if present; otherwise use 'created_by' when available
-        if (Schema::hasColumn('test_audits', 'user_id')) {
+        if (Schema::hasColumn('workflow_audits', 'user_id')) {
             self::$testAuditUserColumn = 'user_id';
-        } elseif (Schema::hasColumn('test_audits', 'created_by')) {
+        } elseif (Schema::hasColumn('workflow_audits', 'created_by')) {
             self::$testAuditUserColumn = 'created_by';
         } else {
             self::$testAuditUserColumn = null;

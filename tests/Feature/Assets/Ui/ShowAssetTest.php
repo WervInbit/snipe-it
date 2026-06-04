@@ -4,7 +4,12 @@ namespace Tests\Feature\Assets\Ui;
 
 use App\Models\Asset;
 use App\Models\Setting;
+use App\Models\TestResult;
+use App\Models\TestRun;
+use App\Models\TestType;
 use App\Models\User;
+use App\Models\WorkflowProfile;
+use App\Models\WorkflowProfileItem;
 use Tests\TestCase;
 
 class ShowAssetTest extends TestCase
@@ -40,8 +45,8 @@ class ShowAssetTest extends TestCase
 
         $response->assertOk();
         $response->assertDontSee(trans('admin/hardware/form.checkedout_to'));
-        $response->assertDontSee(trans('admin/hardware/table.checkout_date'));
-        $response->assertDontSee(trans('general.deployed'));
+        $response->assertDontSee('name="checkout_at"', false);
+        $response->assertDontSee('id="checkout_at"', false);
         $response->assertDontSee(trans('general.checkin_and_delete'));
         $response->assertDontSee(trans('general.print_pdf'));
         $response->assertDontSee('Download QR code');
@@ -137,15 +142,42 @@ class ShowAssetTest extends TestCase
     public function testDetailPageRendersResponsiveTestsStartRunActions(): void
     {
         $asset = Asset::factory()->create();
+        $diagnostics = WorkflowProfile::factory()->create([
+            'name' => 'Standard Diagnostics',
+            'is_default' => true,
+            'display_order' => 0,
+        ]);
+        $shipping = WorkflowProfile::factory()->create([
+            'name' => 'Shipping Laptop',
+            'is_default' => false,
+            'display_order' => 1,
+        ]);
+        WorkflowProfileItem::factory()->create([
+            'workflow_profile_id' => $diagnostics->id,
+            'workflow_item_id' => TestType::factory()->create()->id,
+        ]);
+        WorkflowProfileItem::factory()->create([
+            'workflow_profile_id' => $shipping->id,
+            'workflow_item_id' => TestType::factory()->create()->id,
+        ]);
 
         $response = $this->actingAs(User::factory()->superuser()->create())
             ->get(route('hardware.show', $asset));
 
         $response->assertOk();
         $response->assertSee('data-testid="hardware-tests-tab-actions"', false);
+        $response->assertSee(trans('tests.tests_workflows'));
+        $response->assertSee('data-testid="hardware-tests-start-form"', false);
+        $response->assertSee('data-testid="hardware-tests-workflow-profile"', false);
+        $response->assertSee('name="workflow_profile_id"', false);
+        $response->assertSee('Standard Diagnostics');
+        $response->assertSee('Shipping Laptop');
+        $response->assertSee(trans('tests.view_all_workflows'));
         $response->assertSee('data-testid="hardware-tests-tab-fab"', false);
         $response->assertSee('data-testid="hardware-tests-tab-fab-label"', false);
         $response->assertSee(route('test-runs.store', $asset), false);
+        $response->assertDontSee('data-testid="hardware-tests-start-form-desktop"', false);
+        $response->assertDontSee('data-testid="hardware-tests-tab-fab-form"', false);
         $response->assertDontSee('class="mb-3 text-right"', false);
     }
 
@@ -179,6 +211,32 @@ class ShowAssetTest extends TestCase
     public function testTestsIndexUsesStructuredResultRows(): void
     {
         $asset = Asset::factory()->create();
+        $user = User::factory()->create();
+        $profile = WorkflowProfile::factory()->create([
+            'name' => 'Standard Diagnostics',
+            'is_default' => true,
+        ]);
+        $item = TestType::factory()->create([
+            'name' => 'Keyboard',
+            'slug' => 'keyboard',
+        ]);
+        WorkflowProfileItem::factory()->create([
+            'workflow_profile_id' => $profile->id,
+            'workflow_item_id' => $item->id,
+        ]);
+        $run = TestRun::factory()->create([
+            'asset_id' => $asset->id,
+            'user_id' => $user->id,
+            'workflow_profile_id' => $profile->id,
+            'profile_name_snapshot' => $profile->name,
+            'profile_slug_snapshot' => $profile->slug,
+        ]);
+        TestResult::factory()->create([
+            'workflow_run_id' => $run->id,
+            'workflow_item_id' => $item->id,
+            'status' => TestResult::STATUS_PASS,
+            'note' => 'Keyboard responds',
+        ]);
 
         $response = $this->actingAs(User::factory()->superuser()->create())
             ->get(route('test-runs.index', $asset));

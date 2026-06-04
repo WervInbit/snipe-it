@@ -6,7 +6,11 @@ use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\AttributeDefinition;
 use App\Models\Category;
+use App\Models\ComponentDefinition;
+use App\Models\ComponentDefinitionSubcomponentTemplate;
+use App\Models\ComponentInstance;
 use App\Models\ModelNumberAttribute;
+use App\Models\ModelNumberComponentTemplate;
 use App\Models\TestType;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -69,5 +73,119 @@ class TestTypeForAssetTest extends TestCase
         TestType::factory()->create();
 
         $this->assertCount(0, TestType::forAsset($asset)->get());
+    }
+
+    public function test_returns_component_category_items_for_expected_components(): void
+    {
+        $assetCategory = Category::factory()->assetLaptopCategory()->create();
+        $componentCategory = Category::factory()->forComponents()->create(['name' => 'Ports']);
+        $definition = ComponentDefinition::factory()->create([
+            'category_id' => $componentCategory->id,
+            'name' => 'HDMI Port - 1.4b',
+        ]);
+        $model = AssetModel::factory()->create(['category_id' => $assetCategory->id]);
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        ModelNumberComponentTemplate::factory()->create([
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $definition->id,
+        ]);
+        $asset = Asset::factory()->create([
+            'model_id' => $model->id,
+            'model_number_id' => $modelNumber->id,
+        ]);
+
+        $testType = TestType::factory()->create(['slug' => 'port-check']);
+        $testType->componentCategories()->sync([$componentCategory->id]);
+
+        $types = TestType::forAsset($asset)->get();
+
+        $this->assertCount(1, $types);
+        $this->assertSame($testType->id, $types->first()->id);
+    }
+
+    public function test_returns_component_category_items_for_expected_subcomponents(): void
+    {
+        $assetCategory = Category::factory()->assetLaptopCategory()->create();
+        $boardCategory = Category::factory()->forComponents()->create(['name' => 'Logic Board']);
+        $portCategory = Category::factory()->forComponents()->create(['name' => 'Ports']);
+        $boardDefinition = ComponentDefinition::factory()->create([
+            'category_id' => $boardCategory->id,
+            'name' => 'Motherboard',
+        ]);
+        $portDefinition = ComponentDefinition::factory()->create([
+            'category_id' => $portCategory->id,
+            'name' => 'USB-C Port',
+        ]);
+        ComponentDefinitionSubcomponentTemplate::create([
+            'parent_component_definition_id' => $boardDefinition->id,
+            'child_component_definition_id' => $portDefinition->id,
+            'expected_name' => 'USB-C Port',
+            'expected_qty' => 1,
+            'is_required' => true,
+            'sort_order' => 0,
+        ]);
+        $model = AssetModel::factory()->create(['category_id' => $assetCategory->id]);
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        ModelNumberComponentTemplate::factory()->create([
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $boardDefinition->id,
+        ]);
+        $asset = Asset::factory()->create([
+            'model_id' => $model->id,
+            'model_number_id' => $modelNumber->id,
+        ]);
+
+        $testType = TestType::factory()->create(['slug' => 'port-check']);
+        $testType->componentCategories()->sync([$portCategory->id]);
+
+        $types = TestType::forAsset($asset)->get();
+
+        $this->assertCount(1, $types);
+        $this->assertSame($testType->id, $types->first()->id);
+    }
+
+    public function test_returns_component_definition_items_for_attached_components(): void
+    {
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $asset = Asset::factory()->create([
+            'model_id' => $model->id,
+            'model_number_id' => $modelNumber->id,
+        ]);
+        $definition = ComponentDefinition::factory()->create(['name' => 'Webcam Module']);
+        ComponentInstance::factory()->installed($asset->id)->create([
+            'component_definition_id' => $definition->id,
+        ]);
+
+        $testType = TestType::factory()->create(['slug' => 'webcam']);
+        $testType->componentDefinitions()->sync([$definition->id]);
+
+        $types = TestType::forAsset($asset)->get();
+
+        $this->assertCount(1, $types);
+        $this->assertSame($testType->id, $types->first()->id);
+    }
+
+    public function test_always_apply_items_are_explicitly_global(): void
+    {
+        $category = Category::factory()->create();
+        $model = AssetModel::factory()->create(['category_id' => $category->id]);
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $asset = Asset::factory()->create([
+            'model_id' => $model->id,
+            'model_number_id' => $modelNumber->id,
+        ]);
+
+        $blankItem = TestType::factory()->create(['slug' => 'blank-item']);
+        $alwaysItem = TestType::factory()->create([
+            'slug' => 'always-item',
+            'applies_to_all' => true,
+        ]);
+
+        $types = TestType::forAsset($asset)->get();
+
+        $this->assertCount(1, $types);
+        $this->assertSame($alwaysItem->id, $types->first()->id);
+        $this->assertFalse($types->contains('id', $blankItem->id));
     }
 }

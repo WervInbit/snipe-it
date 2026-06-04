@@ -19,7 +19,10 @@
 @section('inputFields')
     @if($isEdit && ($usageSummary['total'] ?? 0) > 0)
         <div class="alert alert-warning">
-            {{ __('This attribute is already in use. Editing it updates current model specs, asset overrides, component definitions, component instances, and future test expectations that rely on this definition.') }}
+            {{ __('This attribute is already in use. Changes to this definition or existing option values can affect current model specs, asset overrides, component definitions, component instances, and future test expectations that rely on this definition.') }}
+            @if($definition->isEnum())
+                {{ __('Adding a new enum option only makes it available for future selections.') }}
+            @endif
             <ul style="margin:8px 0 0 16px;">
                 @if(($usageSummary['model_values'] ?? 0) > 0)
                     <li>{{ __('Model-number values: :count', ['count' => $usageSummary['model_values']]) }}</li>
@@ -173,7 +176,7 @@
         </div>
     </div>
 
-    @include('attributes.partials.options', ['definition' => $definition])
+    @include('attributes.partials.options', ['definition' => $definition, 'usageSummary' => $usageSummary ?? []])
 @endsection
 
 @push('js')

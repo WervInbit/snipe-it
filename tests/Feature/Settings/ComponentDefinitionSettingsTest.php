@@ -36,6 +36,41 @@ class ComponentDefinitionSettingsTest extends TestCase
             ->assertDontSeeText('Tracking');
     }
 
+    public function testDefinitionsPageExposesLiveSearchHooks(): void
+    {
+        $user = User::factory()->manageComponentDefinitions()->create();
+        $category = Category::factory()->forComponents()->create(['name' => 'Ports']);
+        ComponentDefinition::factory()->create([
+            'name' => 'USB-C Port',
+            'part_code' => 'USB-C-01',
+            'category_id' => $category->id,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('settings.component_definitions.index'))
+            ->assertOk()
+            ->assertSee('id="component-definition-search-form"', false)
+            ->assertSee('data-component-definition-live-search', false)
+            ->assertSee('data-component-definition-search-loading', false)
+            ->assertSee('data-component-definition-row', false)
+            ->assertSee('data-search-text="usb-c port usb-c-01', false)
+            ->assertSee('data-component-definition-loading', false)
+            ->assertSee('data-component-definition-no-matches', false);
+    }
+
+    public function testDefinitionsSearchStillFiltersServerResults(): void
+    {
+        $user = User::factory()->manageComponentDefinitions()->create();
+        ComponentDefinition::factory()->create(['name' => 'USB-C Port']);
+        ComponentDefinition::factory()->create(['name' => 'Battery 45 Wh']);
+
+        $this->actingAs($user)
+            ->get(route('settings.component_definitions.index', ['search' => 'USB-C']))
+            ->assertOk()
+            ->assertSeeText('USB-C Port')
+            ->assertDontSeeText('Battery 45 Wh');
+    }
+
     public function testAuthorizedUserCanCreateDefinition(): void
     {
         $user = User::factory()->manageComponentDefinitions()->create();
@@ -278,13 +313,19 @@ class ComponentDefinitionSettingsTest extends TestCase
         $parentDefinition = ComponentDefinition::factory()->create([
             'name' => 'Main Board Assembly',
         ]);
+        $category = Category::factory()->forComponents()->create(['name' => 'Ports']);
+        $manufacturer = Manufacturer::factory()->create(['name' => 'Inbit Parts']);
         $childDefinition = ComponentDefinition::factory()->create([
             'name' => 'USB-C Port Board',
+            'part_code' => 'USB-C-PORT',
+            'category_id' => $category->id,
+            'manufacturer_id' => $manufacturer->id,
         ]);
         ComponentDefinitionSubcomponentTemplate::factory()->create([
             'parent_component_definition_id' => $parentDefinition->id,
             'child_component_definition_id' => $childDefinition->id,
             'expected_name' => 'USB-C Port Board',
+            'notes' => 'One on each side.',
         ]);
 
         $this->actingAs($user)
@@ -292,7 +333,17 @@ class ComponentDefinitionSettingsTest extends TestCase
             ->assertOk()
             ->assertSeeText('Expected Subcomponents')
             ->assertSee('data-subcomponent-template-row', false)
-            ->assertSeeText('USB-C Port Board')
+            ->assertSee('data-subcomponent-definition-id', false)
+            ->assertSee('data-subcomponent-definition-search', false)
+            ->assertSee('data-subcomponent-search-results', false)
+            ->assertSee('Search component definitions...')
+            ->assertSee('Start typing a component definition name, part code, category, or manufacturer, then pick a match.')
+            ->assertSee('USB-C Port Board (USB-C-PORT)')
+            ->assertSee('data-subcomponent-notes-toggle', false)
+            ->assertSee('data-subcomponent-notes-panel', false)
+            ->assertSee('class="collapse component-definition-subcomponent-notes in"', false)
+            ->assertSeeText('Notes added')
+            ->assertSeeText('One on each side.')
             ->assertSeeText('Add Expected Subcomponent');
     }
 

@@ -7,6 +7,7 @@ use App\Models\Asset;
 use App\Models\AssetAttributeOverride;
 use App\Models\AssetModel;
 use App\Models\AttributeDefinition;
+use App\Models\Category;
 use App\Models\ComponentDefinition;
 use App\Models\ComponentDefinitionAttribute;
 use App\Models\ComponentInstance;
@@ -123,6 +124,145 @@ class AttributeDefinitionLifecycleTest extends TestCase
             ->assertOk()
             ->assertDontSeeText('New Version')
             ->assertDontSeeText('Create Attribute Version');
+    }
+
+    public function test_enum_attribute_edit_supports_pending_options_when_attribute_is_in_use(): void
+    {
+        $user = $this->makeSuperUser();
+        $attribute = $this->makeAttribute([
+            'key' => 'port_connector_type',
+            'label' => 'Port Connector Type',
+            'datatype' => AttributeDefinition::DATATYPE_ENUM,
+        ]);
+        $option = $attribute->options()->create([
+            'value' => 'usb_c',
+            'label' => 'USB-C',
+            'active' => true,
+            'sort_order' => 0,
+        ]);
+
+        $componentDefinition = ComponentDefinition::factory()->create();
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $componentDefinition->id,
+            'attribute_definition_id' => $attribute->id,
+            'attribute_option_id' => $option->id,
+            'value' => 'usb_c',
+            'raw_value' => 'usb_c',
+            'sort_order' => 0,
+        ]);
+
+        $this->actingAs($user)
+            ->withSession([
+                '_old_input' => [
+                    'options' => [
+                        'new' => [
+                            2 => [
+                                'value' => 'eSATA',
+                                'label' => 'eSATA',
+                                'sort_order' => 2,
+                                'active' => 1,
+                            ],
+                        ],
+                    ],
+                ],
+            ])
+            ->get(route('attributes.edit', $attribute))
+            ->assertOk()
+            ->assertSee('data-option-rows', false)
+            ->assertSee('data-next-index="3"', false)
+            ->assertSee('data-option-usage-warning', false)
+            ->assertSee('name="options[new][2][value]"', false)
+            ->assertSee('value="eSATA"', false)
+            ->assertSeeText('Component definitions: 1')
+            ->assertSeeText('Adding a new option only makes it available for future selections.')
+            ->assertSeeText('Renaming or removing an existing option can update current records already using that value.');
+    }
+
+    public function test_update_can_add_new_option_to_existing_enum_attribute(): void
+    {
+        $user = $this->makeSuperUser();
+        $attribute = $this->makeAttribute([
+            'key' => 'port_connector_type',
+            'label' => 'Port Connector Type',
+            'datatype' => AttributeDefinition::DATATYPE_ENUM,
+        ]);
+
+        $this->actingAs($user)
+            ->put(route('attributes.update', $attribute), [
+                'label' => 'Port Connector Type',
+                'key' => 'port_connector_type',
+                'datatype' => AttributeDefinition::DATATYPE_ENUM,
+                'allow_asset_override' => 1,
+                'options' => [
+                    'new' => [
+                        [
+                            'value' => 'eSATA',
+                            'label' => 'eSATA',
+                            'sort_order' => 0,
+                            'active' => 1,
+                        ],
+                    ],
+                ],
+            ])
+            ->assertRedirect(route('attributes.edit', $attribute));
+
+        $this->assertDatabaseHas('attribute_options', [
+            'attribute_definition_id' => $attribute->id,
+            'value' => 'eSATA',
+            'label' => 'eSATA',
+            'sort_order' => 0,
+            'active' => true,
+            'deleted_at' => null,
+        ]);
+    }
+
+    public function test_attribute_index_exposes_live_search_hooks(): void
+    {
+        $user = $this->makeSuperUser();
+        $category = Category::factory()->forComponents()->create(['name' => 'Memory']);
+        $attribute = $this->makeAttribute([
+            'key' => 'ram_speed_mhz',
+            'label' => 'RAM Speed',
+            'datatype' => AttributeDefinition::DATATYPE_INT,
+            'unit' => 'MHz',
+            'required_for_category' => true,
+            'allow_asset_override' => true,
+        ]);
+        $attribute->categories()->attach($category->id);
+
+        $this->actingAs($user)
+            ->get(route('attributes.index'))
+            ->assertOk()
+            ->assertSee('id="attributes-search-form"', false)
+            ->assertSee('data-attribute-live-search', false)
+            ->assertSee('data-attribute-search-loading', false)
+            ->assertSee('data-attribute-row', false)
+            ->assertSee('data-search-text="ram speed ram_speed_mhz int mhz active memory', false)
+            ->assertSee('data-attribute-loading', false)
+            ->assertSee('data-attribute-no-matches', false);
+    }
+
+    public function test_attribute_index_search_filters_server_results_by_category(): void
+    {
+        $user = $this->makeSuperUser();
+        $memory = Category::factory()->forComponents()->create(['name' => 'Memory']);
+        $display = Category::factory()->forComponents()->create(['name' => 'Display']);
+        $speed = $this->makeAttribute([
+            'key' => 'speed_value',
+            'label' => 'Speed Value',
+        ]);
+        $resolution = $this->makeAttribute([
+            'key' => 'resolution_value',
+            'label' => 'Resolution Value',
+        ]);
+        $speed->categories()->attach($memory->id);
+        $resolution->categories()->attach($display->id);
+
+        $this->actingAs($user)
+            ->get(route('attributes.index', ['search' => 'Memory']))
+            ->assertOk()
+            ->assertSeeText('Speed Value')
+            ->assertDontSeeText('Resolution Value');
     }
 
     public function test_cannot_change_datatype_in_place(): void

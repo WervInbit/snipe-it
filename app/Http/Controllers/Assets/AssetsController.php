@@ -24,6 +24,7 @@ use App\Models\Location;
 use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\User;
+use App\Models\WorkflowProfile;
 use App\View\Label;
 use App\Services\QrLabelService;
 use App\Services\Components\AttachedComponentIssueService;
@@ -503,6 +504,13 @@ class AssetsController extends Controller
                 ->get()
                 ->groupBy('ancestry_parent_component_instance_id');
             $testSummary = $asset->latestTestIssueSummary();
+            $workflowProfiles = WorkflowProfile::query()
+                ->active()
+                ->forAsset($asset)
+                ->whereHas('items')
+                ->withCount('items')
+                ->ordered()
+                ->get();
             $componentLocations = $this->storageLocationsByType();
             $currentUserTrayComponents = ComponentInstance::query()
                 ->with(['componentDefinition.category', 'componentDefinition.manufacturer', 'sourceAsset.model'])
@@ -518,6 +526,7 @@ class AssetsController extends Controller
                 ->with('use_currency', $use_currency)
                 ->with('audit_log', $audit_log)
                 ->with('testSummary', $testSummary)
+                ->with('workflowProfiles', $workflowProfiles)
                 ->with('componentHistory', $componentHistory)
                 ->with('componentDefinitions', $this->activeComponentDefinitions())
                 ->with('componentConditionOptions', $this->conditionOptions())
@@ -556,20 +565,7 @@ class AssetsController extends Controller
         $status = Statuslabel::find($validated['status_id']);
 
         if ($status && $this->statusRequiresTestAck($status->name)) {
-            $testSummary = $asset->latestTestIssueSummary();
-            $issueLines = collect();
-
-            if ($testSummary['missing_run']) {
-                $issueLines->push(trans('tests.no_test_run_recorded'));
-            }
-
-            if ($testSummary['failed']->isNotEmpty()) {
-                $issueLines->push(trans('tests.failed_list', ['tests' => $testSummary['failed']->implode(', ')]));
-            }
-
-            if ($testSummary['incomplete']->isNotEmpty()) {
-                $issueLines->push(trans('tests.incomplete_list', ['tests' => $testSummary['incomplete']->implode(', ')]));
-            }
+            $issueLines = $this->testIssueLines($asset);
 
             if ($issueLines->isNotEmpty() && !$request->boolean('ack_failed_tests')) {
                 return redirect()->back()
@@ -711,20 +707,7 @@ class AssetsController extends Controller
         $status = Statuslabel::find($request->input('status_id'));
 
         if ($status && $this->statusRequiresTestAck($status->name)) {
-            $testSummary = $asset->latestTestIssueSummary();
-            $issueLines = collect();
-
-            if ($testSummary['missing_run']) {
-                $issueLines->push(trans('tests.no_test_run_recorded'));
-            }
-
-            if ($testSummary['failed']->isNotEmpty()) {
-                $issueLines->push(trans('tests.failed_list', ['tests' => $testSummary['failed']->implode(', ')]));
-            }
-
-            if ($testSummary['incomplete']->isNotEmpty()) {
-                $issueLines->push(trans('tests.incomplete_list', ['tests' => $testSummary['incomplete']->implode(', ')]));
-            }
+            $issueLines = $this->testIssueLines($asset);
 
             if ($issueLines->isNotEmpty() && !$request->boolean('ack_failed_tests')) {
                 return redirect()->back()
@@ -966,6 +949,31 @@ class AssetsController extends Controller
             || str_contains($name, 'selling')
             || $name === 'sold'
             || str_starts_with($name, 'sold ');
+    }
+
+    private function testIssueLines(Asset $asset): Collection
+    {
+        $testSummary = $asset->latestTestIssueSummary();
+        $issueLines = collect();
+        $missingProfiles = $testSummary['missing_profiles'] ?? collect();
+
+        if ($missingProfiles->isNotEmpty()) {
+            $issueLines->push(trans('tests.missing_workflow_profiles', [
+                'profiles' => $missingProfiles->implode(', '),
+            ]));
+        } elseif ($testSummary['missing_run']) {
+            $issueLines->push(trans('tests.no_test_run_recorded'));
+        }
+
+        if ($testSummary['failed']->isNotEmpty()) {
+            $issueLines->push(trans('tests.failed_list', ['tests' => $testSummary['failed']->implode(', ')]));
+        }
+
+        if ($testSummary['incomplete']->isNotEmpty()) {
+            $issueLines->push(trans('tests.incomplete_list', ['tests' => $testSummary['incomplete']->implode(', ')]));
+        }
+
+        return $issueLines;
     }
 
     private function componentIssueWarningRedirect(Request $request, Asset $asset): ?RedirectResponse

@@ -5,7 +5,7 @@
 @endphp
 
 @section('title')
-    {{ trans('tests.tests') }}
+    {{ trans('tests.workflows') }}
 @endsection
 
 @push('css')
@@ -362,6 +362,16 @@
                           action="{{ route('test-runs.store', $asset->id) }}"
                           data-testid="tests-empty-start-run-form">
                         @csrf
+                        <div class="form-group text-start mb-3">
+                            <label for="empty_workflow_profile_id">{{ trans('tests.workflow_profile') }}</label>
+                            <select id="empty_workflow_profile_id" name="workflow_profile_id" class="form-control" required>
+                                @foreach(($workflowProfiles ?? collect()) as $profile)
+                                    <option value="{{ $profile->id }}" @selected($profile->is_default)>
+                                        {{ $profile->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
                         <button type="submit" class="btn btn-primary btn-lg w-100">
                             <i class="fas fa-play me-2" aria-hidden="true"></i>{{ trans('tests.start_new_run') }}
                         </button>
@@ -390,6 +400,9 @@
                             <i class="fas fa-triangle-exclamation d-none" data-state="error" aria-hidden="true"></i>
                             <span class="small">{{ trans('general.status') }}</span>
                         </span>
+                        <div class="testing-progress-chip">
+                            {{ optional($run)->profile_name_snapshot ?: optional(optional($run)->profile)->name ?: trans('tests.workflow_run') }}
+                        </div>
                         <div class="testing-progress-chip"
                              data-progress-completed
                              data-template="{{ trans('tests.completed_count', ['completed' => ':completed', 'total' => ':total']) }}">
@@ -433,6 +446,13 @@
                                       action="{{ route('test-runs.store', $asset->id) }}"
                                       data-testid="tests-start-new-run-form">
                                     @csrf
+                                    <select name="workflow_profile_id" class="form-control input-sm" required style="min-width: 180px;">
+                                        @foreach(($workflowProfiles ?? collect()) as $profile)
+                                            <option value="{{ $profile->id }}" @selected($profile->is_default)>
+                                                {{ $profile->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                     <button type="submit" class="btn btn-outline-light btn-sm" data-testid="tests-start-new-run-btn">
                                         <i class="fas fa-redo me-1" aria-hidden="true"></i>{{ trans('tests.start_new_run') }}
                                     </button>

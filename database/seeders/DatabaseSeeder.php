@@ -34,9 +34,10 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             DepreciationSeeder::class,
             DeviceAttributeSeeder::class,
+            DevicePresetSeeder::class,
+            DeviceComponentCatalogSeeder::class,
             AttributeTestSeeder::class,
             RolePermissionSeeder::class,
-            DemoAssetsSeeder::class,
         ]);
 
         Group::updateOrCreate(

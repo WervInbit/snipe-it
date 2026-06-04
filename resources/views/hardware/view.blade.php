@@ -73,10 +73,27 @@
     margin-bottom: 15px;
     text-align: left;
 }
+.hardware-tests-tab-actions__form {
+    margin: 0;
+}
+.hardware-tests-tab-actions__controls {
+    display: flex;
+    align-items: end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.hardware-tests-tab-actions__profile {
+    flex: 1 1 260px;
+    max-width: 420px;
+}
 .hardware-tests-tab-actions__button {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+}
+.hardware-tests-tab-actions__link {
+    display: inline-block;
+    margin-top: 8px;
 }
 .hardware-tests-run-list {
     display: flex;
@@ -249,6 +266,16 @@
     }
     .hardware-tests-tab-actions {
         margin-bottom: 10px;
+    }
+    .hardware-tests-tab-actions__controls {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .hardware-tests-tab-actions__profile {
+        max-width: none;
+    }
+    .hardware-tests-tab-actions__button {
+        justify-content: center;
     }
     .hardware-test-run-row__summary {
         grid-template-columns: minmax(0, 1fr) auto auto;
@@ -511,7 +538,7 @@
                           <span class="hidden-lg hidden-md">
                               <x-icon type="audit" class="fa-2x" />
                           </span>
-                            <span class="hidden-xs hidden-sm">{{ trans('tests.tests') }}
+                            <span class="hidden-xs hidden-sm">{{ trans('tests.tests_workflows') }}
                                 {!! ($asset->tests()->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($asset->tests()->count()).'</span>' : '' !!}
                           </span>
                         </a>
@@ -1774,15 +1801,48 @@
                 @endcan
 
                     <div class="tab-pane fade" id="tests">
-                        <div class="hardware-tests-tab-actions hidden-xs hidden-sm" data-testid="hardware-tests-tab-actions">
+                        <div class="hardware-tests-tab-actions" data-testid="hardware-tests-tab-actions">
                             @can('tests.execute')
-                                <form method="POST" action="{{ route('test-runs.store', $asset->id) }}" style="display:inline" data-testid="hardware-tests-start-form-desktop">
-                                    @csrf
-                                    <button type="submit" class="btn btn-primary hardware-tests-tab-actions__button">
-                                        <x-icon type="plus" />
-                                        {{ trans('tests.start_new_run') }}
-                                    </button>
-                                </form>
+                                @php
+                                    $hardwareWorkflowProfiles = $workflowProfiles ?? collect();
+                                    $selectedWorkflowProfile = $hardwareWorkflowProfiles->firstWhere('is_default', true) ?? $hardwareWorkflowProfiles->first();
+                                    $selectedWorkflowProfileId = old('workflow_profile_id', optional($selectedWorkflowProfile)->id);
+                                @endphp
+                                @if($hardwareWorkflowProfiles->isNotEmpty())
+                                    <form method="POST"
+                                          action="{{ route('test-runs.store', $asset->id) }}"
+                                          class="hardware-tests-tab-actions__form"
+                                          data-testid="hardware-tests-start-form">
+                                        @csrf
+                                        <div class="hardware-tests-tab-actions__controls">
+                                            <div class="form-group hardware-tests-tab-actions__profile">
+                                                <label for="hardware_workflow_profile_id">{{ trans('tests.workflow_profile') }}</label>
+                                                <select id="hardware_workflow_profile_id"
+                                                        name="workflow_profile_id"
+                                                        class="form-control"
+                                                        data-testid="hardware-tests-workflow-profile"
+                                                        required>
+                                                    @foreach($hardwareWorkflowProfiles as $profile)
+                                                        <option value="{{ $profile->id }}" @selected((int) $selectedWorkflowProfileId === (int) $profile->id)>
+                                                            {{ $profile->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary hardware-tests-tab-actions__button" data-testid="hardware-tests-start-selected-workflow">
+                                                <x-icon type="plus" />
+                                                {{ trans('tests.start_new_run') }}
+                                            </button>
+                                        </div>
+                                        <a href="{{ route('test-runs.index', $asset->id) }}" class="hardware-tests-tab-actions__link">
+                                            {{ trans('tests.view_all_workflows') }}
+                                        </a>
+                                    </form>
+                                @else
+                                    <div class="alert alert-warning mb-0" data-testid="hardware-tests-no-workflow-profiles">
+                                        {{ trans('tests.no_workflow_profiles_available') }}
+                                    </div>
+                                @endif
                             @endcan
                         </div>
                         <div class="row">
@@ -2085,20 +2145,15 @@
                     @endif
             </div><!-- /.tab-content -->
             @can('tests.execute')
-                <form method="POST"
-                      action="{{ route('test-runs.store', $asset->id) }}"
-                      class="hardware-tests-tab-fab hidden-md hidden-lg"
-                      data-testid="hardware-tests-tab-fab-form"
-                      aria-hidden="true">
-                    @csrf
-                    <button type="submit"
+                <div class="hardware-tests-tab-fab hidden-md hidden-lg" aria-hidden="true">
+                    <button type="button"
                             class="btn btn-primary hardware-tests-tab-fab__button"
                             data-testid="hardware-tests-tab-fab"
-                            aria-label="{{ trans('tests.start_new_run') }}">
+                            aria-label="{{ trans('tests.choose_workflow') }}">
                         <x-icon type="plus" />
                         <span class="hardware-tests-tab-fab__label" data-testid="hardware-tests-tab-fab-label">{{ trans('tests.start_new_run') }}</span>
                     </button>
-                </form>
+                </div>
             @endcan
         </div><!-- nav-tabs-custom -->
     </div>
@@ -2197,6 +2252,8 @@
         (function () {
             var fab = document.querySelector('.hardware-tests-tab-fab');
             var testsPane = document.getElementById('tests');
+            var workflowChooser = document.querySelector('[data-testid="hardware-tests-start-form"]');
+            var workflowProfile = document.getElementById('hardware_workflow_profile_id');
             var $ = window.jQuery || window.$;
 
             if (!fab || !testsPane || !$ || !$.fn || !$.fn.tab) {
@@ -2226,6 +2283,18 @@
 
                 syncTestsFabVisibility();
             }
+
+            fab.addEventListener('click', function () {
+                if (workflowChooser) {
+                    workflowChooser.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+
+                if (workflowProfile) {
+                    window.setTimeout(function () {
+                        workflowProfile.focus();
+                    }, 150);
+                }
+            });
 
             $tabLinks.on('shown.bs.tab', syncTestsFabVisibility);
             $(window).on('hashchange', showTabFromHash);

@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\TestType;
+use App\Models\WorkflowProfileItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -22,7 +23,9 @@ class TestTypeFactory extends Factory
             'instructions' => $this->faker->paragraph(),
             'attribute_definition_id' => null,
             'category' => null,
+            'applies_to_all' => false,
             'is_required' => true,
+            'result_label_mode' => WorkflowProfileItem::LABEL_MODE_PASS_FAIL,
         ];
     }
 }

@@ -22,7 +22,7 @@ class TestRelationshipsTest extends TestCase
     {
         $run = TestRun::factory()->create();
         $result = TestResult::factory()->create([
-            'test_run_id' => $run->id,
+            'workflow_run_id' => $run->id,
             'status' => TestResult::STATUS_PASS,
         ]);
 
@@ -33,7 +33,7 @@ class TestRelationshipsTest extends TestCase
     {
         $run = TestRun::factory()->create();
         $result = TestResult::factory()->create([
-            'test_run_id' => $run->id,
+            'workflow_run_id' => $run->id,
             'status' => TestResult::STATUS_PASS,
         ]);
 
@@ -44,7 +44,7 @@ class TestRelationshipsTest extends TestCase
     {
         $type = TestType::factory()->create();
         $result = TestResult::factory()->create([
-            'test_type_id' => $type->id,
+            'workflow_item_id' => $type->id,
             'status' => TestResult::STATUS_PASS,
         ]);
 
@@ -55,7 +55,7 @@ class TestRelationshipsTest extends TestCase
     {
         $type = TestType::factory()->create();
         $result = TestResult::factory()->create([
-            'test_type_id' => $type->id,
+            'workflow_item_id' => $type->id,
             'status' => TestResult::STATUS_PASS,
         ]);
 

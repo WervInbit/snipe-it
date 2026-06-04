@@ -40,6 +40,7 @@ use App\Http\Controllers\Admin\ModelNumberComponentTemplateController;
 use App\Http\Controllers\Admin\ModelNumberSettingsController;
 use App\Http\Controllers\Admin\ModelNumberAttributeController;
 use App\Http\Controllers\Admin\ModelSpecificationController;
+use App\Http\Controllers\Admin\WorkflowProfileController as AdminWorkflowProfileController;
 use App\Livewire\Importer;
 use App\Models\ReportTemplate;
 use App\Models\WorkOrder;
@@ -407,7 +408,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
         ->name('settings.testtypes.index')
         ->breadcrumbs(fn (Trail $trail) =>
         $trail->parent('settings.index')
-            ->push(trans('admin/settings/general.test_settings_title'), route('settings.testtypes.index')));
+            ->push(__('Workflow Items'), route('settings.testtypes.index')));
 
     Route::post('testtypes', [AdminTestTypeController::class, 'store'])
         ->name('settings.testtypes.store');
@@ -420,6 +421,33 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
     Route::delete('testtypes/{testtype}', [AdminTestTypeController::class, 'destroy'])
         ->name('settings.testtypes.destroy');
+
+    Route::get('workflow-profiles', [AdminWorkflowProfileController::class, 'index'])
+        ->name('settings.workflow-profiles.index')
+        ->breadcrumbs(fn (Trail $trail) =>
+        $trail->parent('settings.index')
+            ->push(__('Workflow Profiles'), route('settings.workflow-profiles.index')));
+
+    Route::post('workflow-profiles', [AdminWorkflowProfileController::class, 'store'])
+        ->name('settings.workflow-profiles.store');
+
+    Route::get('workflow-profiles/{workflowProfile}/items', [AdminWorkflowProfileController::class, 'editItems'])
+        ->name('settings.workflow-profiles.items.edit')
+        ->breadcrumbs(fn (Trail $trail, $workflowProfile) =>
+        $trail->parent('settings.workflow-profiles.index')
+            ->push(__('Workflow Profile Items'), route('settings.workflow-profiles.items.edit', $workflowProfile)));
+
+    Route::put('workflow-profiles/{workflowProfile}', [AdminWorkflowProfileController::class, 'update'])
+        ->name('settings.workflow-profiles.update');
+
+    Route::delete('workflow-profiles/{workflowProfile}', [AdminWorkflowProfileController::class, 'destroy'])
+        ->name('settings.workflow-profiles.destroy');
+
+    Route::put('workflow-profiles/{workflowProfile}/items', [AdminWorkflowProfileController::class, 'updateItems'])
+        ->name('settings.workflow-profiles.items.update');
+
+    Route::patch('workflow-profiles/{workflowProfile}/items/reorder', [AdminWorkflowProfileController::class, 'reorderItems'])
+        ->name('settings.workflow-profiles.items.reorder');
 
     Route::get('ldap', [SettingsController::class, 'getLdapSettings'])
         ->name('settings.ldap.index')

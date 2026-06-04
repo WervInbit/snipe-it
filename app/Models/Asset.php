@@ -1310,7 +1310,7 @@ class Asset extends Depreciable
             \App\Models\TestResult::class,
             \App\Models\TestRun::class,
             'asset_id',
-            'test_run_id'
+            'workflow_run_id'
         );
     }
 
@@ -1337,11 +1337,89 @@ class Asset extends Depreciable
     }
 
     /**
-     * Summary of failed or incomplete required tests for the latest run.
+     * Summary of failed or incomplete required workflow items.
      *
-     * @return array{run: ?TestRun, failed: Collection, incomplete: Collection, missing_run: bool}
+     * @return array{run: mixed, runs: Collection, failed: Collection, incomplete: Collection, missing_run: bool, missing_profiles: Collection}
      */
     public function latestTestIssueSummary(): array
+    {
+        $blockingProfiles = $this->blockingSaleReadinessProfiles();
+
+        if ($blockingProfiles->isEmpty()) {
+            return $this->latestSingleRunIssueSummary();
+        }
+
+        $runs = collect();
+        $failed = collect();
+        $incomplete = collect();
+        $missingProfiles = collect();
+
+        foreach ($blockingProfiles as $profile) {
+            $run = $this->tests()
+                ->where('workflow_profile_id', $profile->id)
+                ->with(['results.type', 'results.attributeDefinition'])
+                ->first();
+
+            if (!$run) {
+                $missingProfiles->push($profile->name);
+                continue;
+            }
+
+            $runs->push($run);
+            $requiredResults = $run->results->filter(fn (TestResult $result) => $result->is_required);
+            $labelFor = function (TestResult $result) use ($profile): string {
+                $label = $result->attributeDefinition?->label ?? (string) optional($result->type)->name;
+
+                return $profile->name . ': ' . $label;
+            };
+
+            $failed = $failed->merge($requiredResults
+                ->filter(fn (TestResult $result) => $result->status === TestResult::STATUS_FAIL)
+                ->map($labelFor)
+                ->values());
+
+            $incomplete = $incomplete->merge($requiredResults
+                ->filter(fn (TestResult $result) => $result->status !== TestResult::STATUS_PASS && $result->status !== TestResult::STATUS_FAIL)
+                ->map($labelFor)
+                ->values());
+        }
+
+        return [
+            'run' => $runs->sortByDesc(fn ($run) => $run->finished_at ?? $run->created_at)->first(),
+            'runs' => $runs,
+            'failed' => $failed->values(),
+            'incomplete' => $incomplete->values(),
+            'missing_run' => $missingProfiles->isNotEmpty(),
+            'missing_profiles' => $missingProfiles->values(),
+        ];
+    }
+
+    /**
+     * Recalculate the "all tests passed" flag based on sale-blocking workflows.
+     */
+    public function refreshTestCompletionFlag(): void
+    {
+        $summary = $this->latestTestIssueSummary();
+
+        $this->tests_completed_ok = !$summary['missing_run']
+            && $summary['failed']->isEmpty()
+            && $summary['incomplete']->isEmpty();
+
+        $this->save();
+    }
+
+    private function blockingSaleReadinessProfiles(): Collection
+    {
+        return WorkflowProfile::query()
+            ->active()
+            ->forAsset($this)
+            ->where('blocks_sale_readiness', true)
+            ->whereHas('items')
+            ->ordered()
+            ->get();
+    }
+
+    private function latestSingleRunIssueSummary(): array
     {
         $latestRun = $this->tests()
             ->with(['results.type', 'results.attributeDefinition'])
@@ -1350,15 +1428,15 @@ class Asset extends Depreciable
         if (!$latestRun) {
             return [
                 'run' => null,
+                'runs' => collect(),
                 'failed' => collect(),
                 'incomplete' => collect(),
                 'missing_run' => true,
+                'missing_profiles' => collect(),
             ];
         }
 
-        $requiredResults = $latestRun->results->filter(function (TestResult $result) {
-            return $result->type?->is_required ?? true;
-        });
+        $requiredResults = $latestRun->results->filter(fn (TestResult $result) => $result->is_required);
 
         $labelFor = function (TestResult $result): string {
             return $result->attributeDefinition?->label ?? (string) optional($result->type)->name;
@@ -1376,34 +1454,12 @@ class Asset extends Depreciable
 
         return [
             'run' => $latestRun,
+            'runs' => collect([$latestRun]),
             'failed' => $failed,
             'incomplete' => $incomplete,
             'missing_run' => false,
+            'missing_profiles' => collect(),
         ];
-    }
-
-    /**
-     * Recalculate the "all tests passed" flag based on the latest run.
-     */
-    public function refreshTestCompletionFlag(): void
-    {
-        $latestRun = $this->tests()->with(['results.type'])->first();
-
-        if (!$latestRun) {
-            $this->tests_completed_ok = false;
-            $this->save();
-            return;
-        }
-
-        $required = $latestRun->results->filter(function (TestResult $result) {
-            return $result->type?->is_required ?? true;
-        });
-
-        $this->tests_completed_ok = $required->isEmpty()
-            ? true
-            : $required->every(fn (TestResult $result) => $result->status === TestResult::STATUS_PASS);
-
-        $this->save();
     }
 
     /**

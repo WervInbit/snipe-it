@@ -7,6 +7,23 @@
     $nameErrorKey = 'expected_subcomponents.' . $index . '.expected_name';
     $qtyErrorKey = 'expected_subcomponents.' . $index . '.expected_qty';
     $notesErrorKey = 'expected_subcomponents.' . $index . '.notes';
+    $selectedChildDefinition = $componentDefinitionOptions
+        ->first(fn ($definition) => (string) ($definition->id ?? '') === $selectedChildDefinitionId);
+    $pickerValue = trim((string) ($row['child_component_definition_search'] ?? ''));
+
+    if ($pickerValue === '' && $selectedChildDefinition) {
+        $pickerValue = $selectedChildDefinition->name;
+
+        if ($selectedChildDefinition->part_code) {
+            $pickerValue .= ' (' . $selectedChildDefinition->part_code . ')';
+        }
+    }
+
+    $notesValue = (string) ($row['notes'] ?? '');
+    $hasNotes = trim($notesValue) !== '';
+    $notesHasError = $showErrors && $errors->has($notesErrorKey);
+    $notesExpanded = $hasNotes || $notesHasError;
+    $notesCollapseId = 'expected-subcomponent-notes-' . $index;
 @endphp
 
 <div class="panel panel-default" data-subcomponent-template-row>
@@ -16,18 +33,21 @@
         <div class="row">
             <div class="col-md-4 form-group {{ $showErrors && ($errors->has($idErrorKey) || $errors->has($childErrorKey)) ? 'has-error' : '' }}">
                 <label>{{ __('Component Definition') }}</label>
-                <select class="form-control" name="expected_subcomponents[{{ $index }}][child_component_definition_id]">
-                    <option value="">{{ __('Freeform expected subcomponent') }}</option>
-                    @foreach ($componentDefinitionOptions as $definition)
-                        @continue((int) ($definition->id ?? 0) === (int) ($currentDefinitionId ?? 0))
-                        <option value="{{ $definition->id }}" @selected($selectedChildDefinitionId === (string) $definition->id)>
-                            {{ $definition->name }}
-                            @if ($definition->part_code)
-                                ({{ $definition->part_code }})
-                            @endif
-                        </option>
-                    @endforeach
-                </select>
+                <input type="hidden"
+                       name="expected_subcomponents[{{ $index }}][child_component_definition_id]"
+                       value="{{ $selectedChildDefinitionId }}"
+                       data-subcomponent-definition-id>
+                <input type="search"
+                       class="form-control"
+                       name="expected_subcomponents[{{ $index }}][child_component_definition_search]"
+                       value="{{ $pickerValue }}"
+                       placeholder="{{ __('Search component definitions...') }}"
+                       autocomplete="off"
+                       data-subcomponent-definition-search>
+                <div class="list-group component-definition-picker-results" data-subcomponent-search-results hidden></div>
+                <p class="help-block text-muted">
+                    {{ __('Start typing a component definition name, part code, category, or manufacturer, then pick a match.') }}
+                </p>
                 @if($showErrors)
                     {!! $errors->first($idErrorKey, '<span class="help-block">:message</span>') !!}
                     {!! $errors->first($childErrorKey, '<span class="help-block">:message</span>') !!}
@@ -76,15 +96,30 @@
                     <a href="#" class="btn btn-default" data-move-subcomponent-template="down">{{ __('Down') }}</a>
                 </div>
                 <button type="button" class="btn btn-default btn-block btn-sm" style="margin-top:6px;" data-remove-subcomponent-template>{{ __('Remove') }}</button>
+                <button type="button"
+                        class="btn btn-default btn-block btn-sm"
+                        style="margin-top:6px;"
+                        data-toggle="collapse"
+                        data-target="#{{ $notesCollapseId }}"
+                        aria-expanded="{{ $notesExpanded ? 'true' : 'false' }}"
+                        aria-controls="{{ $notesCollapseId }}"
+                        data-subcomponent-notes-toggle>
+                    {{ $hasNotes ? __('Notes added') : __('Notes') }}
+                    <i class="fas fa-chevron-down pull-right" aria-hidden="true"></i>
+                </button>
             </div>
         </div>
 
-        <div class="form-group {{ $showErrors && $errors->has($notesErrorKey) ? 'has-error' : '' }}">
-            <label>{{ __('Notes') }}</label>
-            <textarea class="form-control" name="expected_subcomponents[{{ $index }}][notes]" rows="2">{{ $row['notes'] ?? '' }}</textarea>
-            @if($showErrors)
-                {!! $errors->first($notesErrorKey, '<span class="help-block">:message</span>') !!}
-            @endif
+        <div id="{{ $notesCollapseId }}"
+             class="collapse component-definition-subcomponent-notes{{ $notesExpanded ? ' in' : '' }}"
+             data-subcomponent-notes-panel>
+            <div class="form-group {{ $notesHasError ? 'has-error' : '' }}">
+                <label>{{ __('Notes') }}</label>
+                <textarea class="form-control" name="expected_subcomponents[{{ $index }}][notes]" rows="2">{{ $notesValue }}</textarea>
+                @if($showErrors)
+                    {!! $errors->first($notesErrorKey, '<span class="help-block">:message</span>') !!}
+                @endif
+            </div>
         </div>
     </div>
 </div>

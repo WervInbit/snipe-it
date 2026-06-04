@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\AttributeDefinition;
 use App\Models\Category;
+use App\Models\ComponentDefinition;
 use App\Models\SnipeModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,16 +16,16 @@ use App\Services\ModelAttributes\EffectiveAttributeResolver;
 use Illuminate\Support\Str;
 
 /**
- * Defines a kind of diagnostic test that can be executed.
+ * Defines a workflow item that can be executed.
  *
- * Test types describe how a test should be interpreted and are referenced by
- * many test results.
+ * Workflow items describe reusable checks/tasks and are referenced by
+ * many workflow results.
  */
 class TestType extends SnipeModel
 {
     use HasFactory;
 
-    protected $table = 'test_types';
+    protected $table = 'workflow_items';
 
     protected $fillable = [
         'name',
@@ -34,12 +35,15 @@ class TestType extends SnipeModel
         'tooltip',
         'instructions',
         'category',
+        'applies_to_all',
         'is_required',
+        'result_label_mode',
     ];
 
     protected $casts = [
         'display_order' => 'int',
         'attribute_definition_id' => 'int',
+        'applies_to_all' => 'bool',
         'is_required' => 'bool',
     ];
 
@@ -47,7 +51,7 @@ class TestType extends SnipeModel
     {
         $slug = Str::slug((string) $value);
 
-        return $slug !== '' ? $slug : 'test-type';
+        return $slug !== '' ? $slug : 'workflow-item';
     }
 
     public static function generateUniqueSlug(?string $value, ?int $ignoreId = null): string
@@ -110,7 +114,7 @@ class TestType extends SnipeModel
      */
     public function results(): HasMany
     {
-        return $this->hasMany(TestResult::class, 'test_type_id');
+        return $this->hasMany(TestResult::class, 'workflow_item_id');
     }
 
     /**
@@ -118,7 +122,28 @@ class TestType extends SnipeModel
      */
     public function categories(): BelongsToMany
     {
-        return $this->belongsToMany(Category::class, 'category_test_type');
+        return $this->belongsToMany(Category::class, 'category_workflow_item', 'workflow_item_id', 'category_id');
+    }
+
+    /**
+     * Component categories this item applies to.
+     */
+    public function componentCategories(): BelongsToMany
+    {
+        return $this->belongsToMany(Category::class, 'component_category_workflow_item', 'workflow_item_id', 'category_id');
+    }
+
+    /**
+     * Component definitions this item applies to.
+     */
+    public function componentDefinitions(): BelongsToMany
+    {
+        return $this->belongsToMany(ComponentDefinition::class, 'component_definition_workflow_item', 'workflow_item_id', 'component_definition_id');
+    }
+
+    public function profileItems(): HasMany
+    {
+        return $this->hasMany(WorkflowProfileItem::class, 'workflow_item_id');
     }
 
     /**
@@ -130,7 +155,12 @@ class TestType extends SnipeModel
      */
     public function scopeForAsset(Builder $query, Asset $asset): Builder
     {
-        $asset->loadMissing('model.category', 'modelNumber');
+        $asset->loadMissing([
+            'model.category',
+            'modelNumber.componentTemplates.componentDefinition.category',
+            'modelNumber.componentTemplates.componentDefinition.subcomponentTemplates.childComponentDefinition.category',
+            'trackedComponents.componentDefinition.category',
+        ]);
         $resolver = app(EffectiveAttributeResolver::class);
         $resolved = $resolver->resolveForAsset($asset);
 
@@ -145,13 +175,26 @@ class TestType extends SnipeModel
         $categoryName = $category?->name;
         $categorySlug = $categoryName ? Str::slug($categoryName) : null;
         $categoryType = $category?->category_type;
+        [$componentDefinitionIds, $componentCategoryIds] = $this->componentApplicabilityIdsForAsset($asset);
 
         $matchingIds = static::query()
-            ->with('categories')
+            ->with(['categories', 'componentDefinitions', 'componentCategories'])
             ->get()
-            ->filter(function (TestType $type) use ($attributeIds, $categoryId, $categoryName, $categorySlug, $categoryType) {
+            ->filter(function (TestType $type) use (
+                $attributeIds,
+                $categoryId,
+                $categoryName,
+                $categorySlug,
+                $categoryType,
+                $componentDefinitionIds,
+                $componentCategoryIds
+            ) {
                 $hasAttribute = $type->attribute_definition_id !== null
                     && in_array($type->attribute_definition_id, $attributeIds, true);
+                $hasComponentDefinition = $type->componentDefinitions->isNotEmpty()
+                    && $type->componentDefinitions->pluck('id')->intersect($componentDefinitionIds)->isNotEmpty();
+                $hasComponentCategory = $type->componentCategories->isNotEmpty()
+                    && $type->componentCategories->pluck('id')->intersect($componentCategoryIds)->isNotEmpty();
 
                 $categoryMatches = false;
 
@@ -171,19 +214,29 @@ class TestType extends SnipeModel
                         || ($categoryType && strtolower((string) $categoryType) === $categoryValue);
                 }
 
-                if ($type->attribute_definition_id !== null) {
-                    if (!$hasAttribute) {
+                $hasAssetCategoryScope = $type->categories->isNotEmpty() || $categoryValue;
+                $hasSpecificSource = $type->applies_to_all
+                    || $type->attribute_definition_id !== null
+                    || $type->componentDefinitions->isNotEmpty()
+                    || $type->componentCategories->isNotEmpty();
+                $matchesSpecificSource = $type->applies_to_all
+                    || $hasAttribute
+                    || $hasComponentDefinition
+                    || $hasComponentCategory;
+
+                if ($hasSpecificSource) {
+                    if (!$matchesSpecificSource) {
                         return false;
                     }
 
-                    if ($type->categories->isNotEmpty() || $categoryValue) {
+                    if ($hasAssetCategoryScope) {
                         return $categoryMatches;
                     }
 
                     return true;
                 }
 
-                return $categoryMatches;
+                return $hasAssetCategoryScope && $categoryMatches;
             })
             ->pluck('id')
             ->all();
@@ -201,5 +254,38 @@ class TestType extends SnipeModel
             ->orderBy('display_order')
             ->orderBy('name')
             ->orderBy('id');
+    }
+
+    /**
+     * @return array{0: array<int>, 1: array<int>}
+     */
+    private function componentApplicabilityIdsForAsset(Asset $asset): array
+    {
+        $definitions = collect();
+
+        if ($asset->modelNumber) {
+            foreach ($asset->modelNumber->componentTemplates as $template) {
+                if ($template->componentDefinition) {
+                    $definitions->push($template->componentDefinition);
+
+                    foreach ($template->componentDefinition->subcomponentTemplates as $subcomponentTemplate) {
+                        if ($subcomponentTemplate->childComponentDefinition) {
+                            $definitions->push($subcomponentTemplate->childComponentDefinition);
+                        }
+                    }
+                }
+            }
+        }
+
+        foreach ($asset->trackedComponents as $component) {
+            if ($component->componentDefinition) {
+                $definitions->push($component->componentDefinition);
+            }
+        }
+
+        return [
+            $definitions->pluck('id')->filter()->unique()->values()->all(),
+            $definitions->pluck('category_id')->filter()->unique()->values()->all(),
+        ];
     }
 }

@@ -338,6 +338,8 @@ return [
     'status_labels'			=> 'Status Labels',
     'status_label'			=> 'Status Label',
     'status'    			=> 'Status',
+    'progress'              => 'Progress',
+    'total'                 => 'Total',
     'status_history'        => 'Status History',
     'accept_eula'           => 'Acceptance Agreement',
     'eula'                  => 'EULAs',
