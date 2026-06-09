@@ -42,7 +42,7 @@ trait ProvidesDeviceCatalogData
                 'categories' => ['Laptops'],
             ],
             'ram_size_gb' => [
-                'label' => 'Werkgeheugen (GB)',
+                'label' => 'Werkgeheugen',
                 'datatype' => AttributeDefinition::DATATYPE_INT,
                 'unit' => 'GB',
                 'categories' => ['Laptops', 'Mobile Phones'],
@@ -64,7 +64,7 @@ trait ProvidesDeviceCatalogData
                 ],
             ],
             'storage_capacity_gb' => [
-                'label' => 'Opslagcapaciteit (GB)',
+                'label' => 'Opslagcapaciteit',
                 'datatype' => AttributeDefinition::DATATYPE_INT,
                 'unit' => 'GB',
                 'categories' => ['Laptops', 'Mobile Phones'],
@@ -84,7 +84,7 @@ trait ProvidesDeviceCatalogData
                 ],
             ],
             'display_size_inches' => [
-                'label' => 'Schermgrootte (inch)',
+                'label' => 'Schermgrootte',
                 'datatype' => AttributeDefinition::DATATYPE_DECIMAL,
                 'unit' => 'in',
                 'categories' => ['Laptops', 'Mobile Phones'],
@@ -107,14 +107,14 @@ trait ProvidesDeviceCatalogData
                 ],
             ],
             'display_refresh_rate_hz' => [
-                'label' => 'Verversingssnelheid (Hz)',
+                'label' => 'Verversingssnelheid',
                 'datatype' => AttributeDefinition::DATATYPE_INT,
                 'unit' => 'Hz',
                 'categories' => ['Laptops', 'Mobile Phones'],
                 'constraints' => ['min' => 30, 'max' => 240, 'step' => 1],
             ],
             'weight_kg' => [
-                'label' => 'Gewicht (kg)',
+                'label' => 'Gewicht',
                 'datatype' => AttributeDefinition::DATATYPE_DECIMAL,
                 'unit' => 'kg',
                 'categories' => ['Laptops'],
@@ -129,7 +129,7 @@ trait ProvidesDeviceCatalogData
                 'required' => true,
             ],
             'battery_health_percent' => [
-                'label' => 'Batterijgezondheid (%)',
+                'label' => 'Batterijgezondheid',
                 'datatype' => AttributeDefinition::DATATYPE_INT,
                 'unit' => '%',
                 'categories' => ['Laptops', 'Mobile Phones'],
@@ -159,14 +159,14 @@ trait ProvidesDeviceCatalogData
                 'categories' => ['Mobile Phones'],
             ],
             'rear_camera_megapixels' => [
-                'label' => 'Hoofdcamera (MP)',
+                'label' => 'Hoofdcamera',
                 'datatype' => AttributeDefinition::DATATYPE_INT,
                 'unit' => 'MP',
                 'categories' => ['Mobile Phones'],
                 'constraints' => ['min' => 2, 'max' => 200, 'step' => 1],
             ],
             'front_camera_megapixels' => [
-                'label' => 'Selfiecamera (MP)',
+                'label' => 'Selfiecamera',
                 'datatype' => AttributeDefinition::DATATYPE_INT,
                 'unit' => 'MP',
                 'categories' => ['Mobile Phones'],
@@ -192,7 +192,7 @@ trait ProvidesDeviceCatalogData
                 'allow_asset_override' => true,
             ],
             'warranty_months' => [
-                'label' => 'Garantie (maanden)',
+                'label' => 'Garantie',
                 'datatype' => AttributeDefinition::DATATYPE_INT,
                 'unit' => 'maanden',
                 'categories' => ['Laptops', 'Mobile Phones'],
@@ -282,14 +282,14 @@ trait ProvidesDeviceCatalogData
                 ],
             ],
             'ram_speed_mhz' => [
-                'label' => 'Geheugensnelheid (MHz)',
+                'label' => 'Geheugensnelheid',
                 'datatype' => AttributeDefinition::DATATYPE_INT,
                 'unit' => 'MHz',
                 'categories' => ['Memory'],
                 'constraints' => ['min' => 400, 'max' => 10000, 'step' => 1],
             ],
             'battery_capacity_wh' => [
-                'label' => 'Batterijcapaciteit (Wh)',
+                'label' => 'Batterijcapaciteit',
                 'datatype' => AttributeDefinition::DATATYPE_DECIMAL,
                 'unit' => 'Wh',
                 'categories' => ['Battery'],
@@ -297,7 +297,7 @@ trait ProvidesDeviceCatalogData
                 'allow_asset_override' => true,
             ],
             'battery_capacity_mah' => [
-                'label' => 'Batterijcapaciteit (mAh)',
+                'label' => 'Batterijcapaciteit',
                 'datatype' => AttributeDefinition::DATATYPE_INT,
                 'unit' => 'mAh',
                 'categories' => ['Battery'],
@@ -329,7 +329,7 @@ trait ProvidesDeviceCatalogData
                 ],
             ],
             'camera_megapixels' => [
-                'label' => 'Camera (MP)',
+                'label' => 'Camera',
                 'datatype' => AttributeDefinition::DATATYPE_DECIMAL,
                 'unit' => 'MP',
                 'categories' => ['Camera'],
@@ -338,6 +338,7 @@ trait ProvidesDeviceCatalogData
             'port_connector_type' => [
                 'label' => 'Poortconnector',
                 'datatype' => AttributeDefinition::DATATYPE_ENUM,
+                'component_spec_display_mode' => AttributeDefinition::COMPONENT_SPEC_DISPLAY_COMPONENT_LABELS,
                 'categories' => ['Ports'],
                 'options' => [
                     ['value' => 'usb_a', 'label' => 'USB-A'],
@@ -409,7 +410,7 @@ trait ProvidesDeviceCatalogData
                 'categories' => ['Ports'],
             ],
             'power_delivery_watts' => [
-                'label' => 'USB Power Delivery (W)',
+                'label' => 'USB Power Delivery',
                 'datatype' => AttributeDefinition::DATATYPE_INT,
                 'unit' => 'W',
                 'categories' => ['Ports'],
@@ -657,8 +658,102 @@ trait ProvidesDeviceCatalogData
         ];
     }
 
+    private function catalogAssetModel(string $name, string $categoryName, string $manufacturerName, ?string $eol = null): AssetModel
+    {
+        /** @var AssetModel $model */
+        $model = AssetModel::withTrashed()->firstOrNew(['name' => $name]);
+        $model->fill([
+            'category_id' => $this->catalogCategoryId($categoryName, 'asset'),
+            'manufacturer_id' => $this->catalogManufacturerId($manufacturerName),
+            'eol' => $eol,
+        ]);
+
+        if ($model->trashed()) {
+            $model->restore();
+        }
+
+        $model->save();
+
+        return $model;
+    }
+
+    private function catalogCategoryId(string $name, string $categoryType): int
+    {
+        /** @var Category $category */
+        $category = Category::withTrashed()->firstOrNew([
+            'name' => $name,
+            'category_type' => $categoryType,
+        ]);
+
+        if (! $category->exists) {
+            $category->created_by = null;
+        }
+
+        if ($category->trashed()) {
+            $category->restore();
+        }
+
+        $category->save();
+
+        return $category->id;
+    }
+
+    private function catalogManufacturerId(string $name): int
+    {
+        /** @var Manufacturer $manufacturer */
+        $manufacturer = Manufacturer::withTrashed()->firstOrNew(['name' => $name]);
+
+        if (! $manufacturer->exists) {
+            $manufacturer->fill($this->catalogManufacturerDefaults($name));
+        }
+
+        if ($manufacturer->trashed()) {
+            $manufacturer->restore();
+        }
+
+        $manufacturer->save();
+
+        return $manufacturer->id;
+    }
+
     /**
-     * Reference device presets for demo/catalog purposes.
+     * @return array<string,string|null>
+     */
+    private function catalogManufacturerDefaults(string $name): array
+    {
+        return match ($name) {
+            'Apple' => [
+                'url' => 'https://apple.com',
+                'support_url' => 'https://support.apple.com',
+                'warranty_lookup_url' => 'https://checkcoverage.apple.com',
+                'image' => 'apple.jpg',
+            ],
+            'Google' => [
+                'url' => 'https://www.google.com',
+                'image' => 'google.webp',
+            ],
+            'HP' => [
+                'url' => 'https://hp.com',
+                'support_url' => 'https://support.hp.com',
+                'image' => 'hp.png',
+            ],
+            'Microsoft' => [
+                'url' => 'https://microsoft.com',
+                'support_url' => 'https://support.microsoft.com',
+                'warranty_lookup_url' => 'https://account.microsoft.com/devices',
+                'image' => 'microsoft.png',
+            ],
+            'Samsung' => [
+                'url' => 'https://www.samsung.com',
+                'support_url' => 'https://www.samsung.com/support/',
+                'image' => 'samsung.png',
+            ],
+            default => [],
+        };
+    }
+
+    /**
+     * Reference device presets for the production catalog foundation.
      *
      * @return array<string,array<string,mixed>>
      */
@@ -666,14 +761,7 @@ trait ProvidesDeviceCatalogData
     {
         $blueprints = [
             'HP ProBook 450 G8' => [
-                'factory' => fn () => AssetModel::factory()->create([
-                    'name' => 'HP ProBook 450 G8',
-                    'category_id' => Category::where('name', 'Laptops')->value('id')
-                        ?? Category::factory()->assetLaptopCategory()->create()->id,
-                    'manufacturer_id' => Manufacturer::where('name', 'HP')->value('id')
-                        ?? Manufacturer::factory()->hp()->create()->id,
-                    'eol' => '36',
-                ]),
+                'factory' => fn () => $this->catalogAssetModel('HP ProBook 450 G8', 'Laptops', 'HP', '36'),
                 'code' => '2E9F8EA#ABH',
                 'label' => 'HP ProBook 450 G8 - i5-1135G7 - 8GB - 256GB',
                 'attributes' => [
@@ -722,14 +810,7 @@ trait ProvidesDeviceCatalogData
                 ],
             ],
             'HP ProBook 450 G7' => [
-                'factory' => fn () => AssetModel::factory()->create([
-                    'name' => 'HP ProBook 450 G7',
-                    'category_id' => Category::where('name', 'Laptops')->value('id')
-                        ?? Category::factory()->assetLaptopCategory()->create()->id,
-                    'manufacturer_id' => Manufacturer::where('name', 'HP')->value('id')
-                        ?? Manufacturer::factory()->hp()->create()->id,
-                    'eol' => '36',
-                ]),
+                'factory' => fn () => $this->catalogAssetModel('HP ProBook 450 G7', 'Laptops', 'HP', '36'),
                 'code' => '8VU81EA#ABH',
                 'label' => 'HP ProBook 450 G7 - i5-10210U - 8GB - 256GB',
                 'attributes' => [
@@ -778,14 +859,7 @@ trait ProvidesDeviceCatalogData
                 ],
             ],
             'HP ProBook 450 G6' => [
-                'factory' => fn () => AssetModel::factory()->create([
-                    'name' => 'HP ProBook 450 G6',
-                    'category_id' => Category::where('name', 'Laptops')->value('id')
-                        ?? Category::factory()->assetLaptopCategory()->create()->id,
-                    'manufacturer_id' => Manufacturer::where('name', 'HP')->value('id')
-                        ?? Manufacturer::factory()->hp()->create()->id,
-                    'eol' => '36',
-                ]),
+                'factory' => fn () => $this->catalogAssetModel('HP ProBook 450 G6', 'Laptops', 'HP', '36'),
                 'code' => '5PP65EA#ABH',
                 'label' => 'HP ProBook 450 G6 - i5-8265U - 8GB - 256GB',
                 'attributes' => [
@@ -835,14 +909,7 @@ trait ProvidesDeviceCatalogData
                 ],
             ],
             'HP ProBook 430 G7' => [
-                'factory' => fn () => AssetModel::factory()->create([
-                    'name' => 'HP ProBook 430 G7',
-                    'category_id' => Category::where('name', 'Laptops')->value('id')
-                        ?? Category::factory()->assetLaptopCategory()->create()->id,
-                    'manufacturer_id' => Manufacturer::where('name', 'HP')->value('id')
-                        ?? Manufacturer::factory()->hp()->create()->id,
-                    'eol' => '36',
-                ]),
+                'factory' => fn () => $this->catalogAssetModel('HP ProBook 430 G7', 'Laptops', 'HP', '36'),
                 'code' => '8VT42EA#ABH',
                 'label' => 'HP ProBook 430 G7 - i5-10210U - 8GB - 256GB',
                 'attributes' => [
@@ -891,14 +958,7 @@ trait ProvidesDeviceCatalogData
                 ],
             ],
             'HP ProBook 430 G6' => [
-                'factory' => fn () => AssetModel::factory()->create([
-                    'name' => 'HP ProBook 430 G6',
-                    'category_id' => Category::where('name', 'Laptops')->value('id')
-                        ?? Category::factory()->assetLaptopCategory()->create()->id,
-                    'manufacturer_id' => Manufacturer::where('name', 'HP')->value('id')
-                        ?? Manufacturer::factory()->hp()->create()->id,
-                    'eol' => '36',
-                ]),
+                'factory' => fn () => $this->catalogAssetModel('HP ProBook 430 G6', 'Laptops', 'HP', '36'),
                 'code' => '5TK76EA#ABH',
                 'label' => 'HP ProBook 430 G6 - i5 - 8GB - 128GB',
                 'attributes' => [
@@ -947,14 +1007,7 @@ trait ProvidesDeviceCatalogData
                 ],
             ],
             'HP ProBook 430 G3' => [
-                'factory' => fn () => AssetModel::factory()->create([
-                    'name' => 'HP ProBook 430 G3',
-                    'category_id' => Category::where('name', 'Laptops')->value('id')
-                        ?? Category::factory()->assetLaptopCategory()->create()->id,
-                    'manufacturer_id' => Manufacturer::where('name', 'HP')->value('id')
-                        ?? Manufacturer::factory()->hp()->create()->id,
-                    'eol' => '24',
-                ]),
+                'factory' => fn () => $this->catalogAssetModel('HP ProBook 430 G3', 'Laptops', 'HP', '24'),
                 'code' => 'HP-430G3-I3-4-128',
                 'label' => 'HP ProBook 430 G3 - i3 - 4GB - 128GB',
                 'attributes' => [
@@ -1003,14 +1056,7 @@ trait ProvidesDeviceCatalogData
                 ],
             ],
             'Samsung Galaxy A5' => [
-                'factory' => fn () => AssetModel::factory()->create([
-                    'name' => 'Samsung Galaxy A5',
-                    'category_id' => Category::where('name', 'Mobile Phones')->value('id')
-                        ?? Category::factory()->assetMobileCategory()->create()->id,
-                    'manufacturer_id' => Manufacturer::where('name', 'Samsung')->value('id')
-                        ?? Manufacturer::factory()->samsung()->create()->id,
-                    'eol' => '18',
-                ]),
+                'factory' => fn () => $this->catalogAssetModel('Samsung Galaxy A5', 'Mobile Phones', 'Samsung', '18'),
                 'code' => 'SM-A520F',
                 'label' => 'Samsung Galaxy A5 (2017) - 32GB - Zwart',
                 'attributes' => [
@@ -1048,14 +1094,7 @@ trait ProvidesDeviceCatalogData
                 ],
             ],
             'Microsoft Surface Pro 4' => [
-                'factory' => fn () => AssetModel::factory()->create([
-                    'name' => 'Microsoft Surface Pro 4',
-                    'category_id' => Category::where('name', 'Laptops')->value('id')
-                        ?? Category::factory()->assetLaptopCategory()->create()->id,
-                    'manufacturer_id' => Manufacturer::where('name', 'Microsoft')->value('id')
-                        ?? Manufacturer::factory()->microsoft()->create()->id,
-                    'eol' => '30',
-                ]),
+                'factory' => fn () => $this->catalogAssetModel('Microsoft Surface Pro 4', 'Laptops', 'Microsoft', '30'),
                 'code' => 'MS-SURFPRO4-I5-4-128',
                 'label' => 'Microsoft Surface Pro 4 - i5 - 4GB - 128GB',
                 'attributes' => [
@@ -1104,14 +1143,7 @@ trait ProvidesDeviceCatalogData
                 ],
             ],
             'Microsoft Surface Pro 5' => [
-                'factory' => fn () => AssetModel::factory()->create([
-                    'name' => 'Microsoft Surface Pro 5',
-                    'category_id' => Category::where('name', 'Laptops')->value('id')
-                        ?? Category::factory()->assetLaptopCategory()->create()->id,
-                    'manufacturer_id' => Manufacturer::where('name', 'Microsoft')->value('id')
-                        ?? Manufacturer::factory()->microsoft()->create()->id,
-                    'eol' => '30',
-                ]),
+                'factory' => fn () => $this->catalogAssetModel('Microsoft Surface Pro 5', 'Laptops', 'Microsoft', '30'),
                 'code' => 'MS-SURFPRO5-I5-4-128',
                 'label' => 'Microsoft Surface Pro 5 - i5 - 4GB - 128GB',
                 'attributes' => [
@@ -1160,7 +1192,7 @@ trait ProvidesDeviceCatalogData
                 ],
             ],
             'iPhone 12' => [
-                'factory' => fn () => AssetModel::factory()->iphone12Model()->create(),
+                'factory' => fn () => $this->catalogAssetModel('iPhone 12', 'Mobile Phones', 'Apple', '12'),
                 'code' => 'IP12-128-BLUE',
                 'label' => 'iPhone 12 – 128GB – Simlockvrij',
                 'attributes' => [
@@ -1199,13 +1231,7 @@ trait ProvidesDeviceCatalogData
                 ],
             ],
             'Pixel 8 Pro' => [
-                'factory' => fn () => AssetModel::factory()->create([
-                    'name' => 'Pixel 8 Pro',
-                    'category_id' => Category::where('name', 'Mobile Phones')->value('id')
-                        ?? Category::factory()->assetMobileCategory()->create()->id,
-                    'manufacturer_id' => Manufacturer::where('name', 'Google')->value('id')
-                        ?? Manufacturer::factory()->google()->create()->id,
-                ]),
+                'factory' => fn () => $this->catalogAssetModel('Pixel 8 Pro', 'Mobile Phones', 'Google'),
                 'code' => 'PIXEL8PRO-256-OBSIDIAN',
                 'label' => 'Pixel 8 Pro – 256GB – Obsidian',
                 'attributes' => [

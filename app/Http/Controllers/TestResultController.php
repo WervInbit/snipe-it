@@ -56,6 +56,8 @@ class TestResultController extends Controller
             $canUpdateResults = $canUpdateResults || Gate::allows('update', $run);
         }
 
+        $canStartRun = Gate::allows('tests.execute') && Gate::allows('view', $asset);
+
         if (!$run) {
             return view('tests.active', [
                 'asset' => $asset,
@@ -70,7 +72,7 @@ class TestResultController extends Controller
                 ],
                 'failingLabels' => collect(),
                 'canUpdate' => $canUpdateResults,
-                'canStartRun' => Gate::allows('tests.execute') && Gate::allows('update', $asset),
+                'canStartRun' => $canStartRun,
                 'canViewAudit' => Gate::allows('audits.view'),
                 'workflowProfiles' => $workflowProfiles,
             ]);
@@ -154,7 +156,7 @@ class TestResultController extends Controller
             'progress' => $progress,
             'failingLabels' => $failingLabels,
             'canUpdate' => $canUpdateResults,
-            'canStartRun' => Gate::allows('tests.execute') && Gate::allows('update', $asset),
+            'canStartRun' => $canStartRun,
             'canViewAudit' => Gate::allows('audits.view'),
             'workflowProfiles' => $workflowProfiles,
         ]);

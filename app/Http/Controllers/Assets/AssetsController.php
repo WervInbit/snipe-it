@@ -552,8 +552,6 @@ class AssetsController extends Controller
      */
     public function updateStatus(Request $request, Asset $asset) : RedirectResponse
     {
-        $this->authorize($asset);
-
         $validated = $request->validate([
             'status_id' => ['required', 'integer', 'exists:status_labels,id'],
             'status_change_note' => ['nullable', 'string', 'max:65535'],
@@ -563,8 +561,20 @@ class AssetsController extends Controller
         ]);
 
         $status = Statuslabel::find($validated['status_id']);
+        $canUpdateAsset = Gate::allows('update', $asset);
 
-        if ($status && $this->statusRequiresTestAck($status->name)) {
+        if ($status && (Asset::isPreSaleStatus($status) || Asset::isSoldStatus($status))) {
+            Gate::authorize('assets.sale_transition');
+            $this->authorize('view', $asset);
+        } else {
+            $this->authorize('update', $asset);
+        }
+
+        if (array_key_exists('quality_grade', $validated) && !$canUpdateAsset) {
+            abort(403);
+        }
+
+        if ($status && $this->statusRequiresTestAck($status)) {
             $issueLines = $this->testIssueLines($asset);
 
             if ($issueLines->isNotEmpty() && !$request->boolean('ack_failed_tests')) {
@@ -576,7 +586,7 @@ class AssetsController extends Controller
             }
         }
 
-        if ($status && $this->statusRequiresComponentIssueAck($status->name)) {
+        if ($status && $this->statusRequiresComponentIssueAck($status)) {
             $warningRedirect = $this->componentIssueWarningRedirect($request, $asset);
             if ($warningRedirect) {
                 return $warningRedirect;
@@ -584,7 +594,9 @@ class AssetsController extends Controller
         }
 
         $asset->status_id = $validated['status_id'];
-        $asset->quality_grade = $validated['quality_grade'] ?? null;
+        if (array_key_exists('quality_grade', $validated)) {
+            $asset->quality_grade = $validated['quality_grade'];
+        }
         $asset->withStatusChangeNote($validated['status_change_note'] ?? null);
 
         if ($status && ($status->getStatuslabelType() != 'pending') && ($status->getStatuslabelType() != 'deployable') && ($target = $asset->assignedTo)) {
@@ -706,7 +718,7 @@ class AssetsController extends Controller
 
         $status = Statuslabel::find($request->input('status_id'));
 
-        if ($status && $this->statusRequiresTestAck($status->name)) {
+        if ($status && $this->statusRequiresTestAck($status)) {
             $issueLines = $this->testIssueLines($asset);
 
             if ($issueLines->isNotEmpty() && !$request->boolean('ack_failed_tests')) {
@@ -718,7 +730,7 @@ class AssetsController extends Controller
             }
         }
 
-        if ($status && $this->statusRequiresComponentIssueAck($status->name)) {
+        if ($status && $this->statusRequiresComponentIssueAck($status)) {
             $warningRedirect = $this->componentIssueWarningRedirect($request, $asset);
             if ($warningRedirect) {
                 return $warningRedirect;
@@ -916,39 +928,24 @@ class AssetsController extends Controller
         return redirect()->route('hardware.show', $asset->id)->with('topsearch', $topsearch);
     }
 
-    private function statusRequiresTestAck(?string $statusName): bool
+    private function statusRequiresTestAck(?Statuslabel $status): bool
     {
-        if (!$statusName) {
-            return false;
-        }
-
-        $name = strtolower(trim($statusName));
-
-        if (str_contains($name, 'ready for sale')) {
-            return true;
-        }
-
-        if ($name === 'sold' || str_starts_with($name, 'sold ')) {
-            return true;
-        }
-
-        return false;
+        return Asset::statusRequiresTestAck($status);
     }
 
-    private function statusRequiresComponentIssueAck(?string $statusName): bool
+    private function statusRequiresComponentIssueAck(?Statuslabel $status): bool
     {
-        if (!$statusName) {
+        if (!$status) {
             return false;
         }
 
-        $name = strtolower(trim($statusName));
+        $name = strtolower(trim((string) $status->name));
 
-        return str_contains($name, 'ready for sale')
+        return Asset::isPreSaleStatus($status)
             || $name === 'for sale'
             || str_starts_with($name, 'for sale ')
             || str_contains($name, 'selling')
-            || $name === 'sold'
-            || str_starts_with($name, 'sold ');
+            || Asset::isSoldStatus($status);
     }
 
     private function testIssueLines(Asset $asset): Collection

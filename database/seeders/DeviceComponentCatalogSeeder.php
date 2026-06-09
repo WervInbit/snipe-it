@@ -10,7 +10,6 @@ use App\Models\ComponentDefinitionSubcomponentTemplate;
 use App\Models\ModelNumber;
 use App\Models\ModelNumberAttribute;
 use App\Models\ModelNumberComponentTemplate;
-use App\Models\User;
 use App\Services\ModelAttributes\AttributeValueService;
 use App\Services\ModelAttributes\ModelAttributeManager;
 use Illuminate\Database\Seeder;
@@ -25,11 +24,8 @@ class DeviceComponentCatalogSeeder extends Seeder
             return;
         }
 
-        $admin = User::where('permissions->superuser', '1')->first()
-            ?? User::factory()->firstAdmin()->create();
-
-        DB::transaction(function () use ($admin): void {
-            $definitions = $this->seedComponentDefinitions($admin);
+        DB::transaction(function (): void {
+            $definitions = $this->seedComponentDefinitions();
             $this->seedModelNumberTemplates($definitions);
         });
     }
@@ -37,7 +33,7 @@ class DeviceComponentCatalogSeeder extends Seeder
     /**
      * @return array<string,ComponentDefinition>
      */
-    private function seedComponentDefinitions(User $admin): array
+    private function seedComponentDefinitions(): array
     {
         $categories = Category::query()
             ->where('category_type', 'component')
@@ -60,11 +56,14 @@ class DeviceComponentCatalogSeeder extends Seeder
                 'model_number' => null,
                 'part_code' => null,
                 'spec_summary' => $config['summary'] ?? null,
+                'spec_display_label' => array_key_exists('spec_display_label', $config)
+                    ? $config['spec_display_label']
+                    : $definition->spec_display_label,
                 'serial_tracking_mode' => $config['serial_tracking_mode'] ?? 'optional',
                 'placement_mode' => $config['placement_mode'] ?? ComponentDefinition::PLACEMENT_EITHER,
                 'is_active' => true,
-                'created_by' => $definition->exists ? $definition->created_by : $admin->id,
-                'updated_by' => $admin->id,
+                'created_by' => $definition->exists ? $definition->created_by : null,
+                'updated_by' => null,
             ]);
 
             if ($definition->trashed()) {
@@ -97,6 +96,7 @@ class DeviceComponentCatalogSeeder extends Seeder
                         'raw_value' => $tuple->rawValue,
                         'attribute_option_id' => $tuple->attributeOptionId,
                         'resolves_to_spec' => (bool) ($attributeConfig['resolves_to_spec'] ?? false),
+                        'include_in_component_label' => (bool) ($attributeConfig['include_in_component_label'] ?? false),
                         'sort_order' => count($assignedAttributeIds),
                     ]
                 );
@@ -297,6 +297,7 @@ class DeviceComponentCatalogSeeder extends Seeder
             'RAM 4GB LPDDR4X' => $this->memory(4, 'lpddr4x'),
             'RAM 8GB DDR4' => $this->memory(8, 'ddr4'),
             'RAM 12GB LPDDR5X' => $this->memory(12, 'lpddr5x'),
+            'RAM - Generic' => ['category' => 'Memory'],
 
             'Storage 32GB UFS' => $this->storage(32, 'ufs'),
             'Storage 128GB SATA SSD' => $this->storage(128, 'ssd'),
@@ -304,6 +305,8 @@ class DeviceComponentCatalogSeeder extends Seeder
             'Storage 128GB UFS' => $this->storage(128, 'ufs'),
             'Storage 256GB NVMe' => $this->storage(256, 'nvme'),
             'Storage 256GB UFS' => $this->storage(256, 'ufs'),
+            'SSD - Generic' => $this->storageType('ssd'),
+            'HDD - Generic' => $this->storageType('hdd'),
 
             'Display 15.6 FHD IPS 60Hz' => $this->display(15.6, '1920 x 1080', 'ips', 60),
             'Display 13.3 FHD IPS 60Hz' => $this->display(13.3, '1920 x 1080', 'ips', 60),
@@ -318,12 +321,15 @@ class DeviceComponentCatalogSeeder extends Seeder
             'Battery 3000 mAh' => $this->batteryMah(3000),
             'Battery 2815 mAh' => $this->batteryMah(2815),
             'Battery 5050 mAh' => $this->batteryMah(5050),
+            'Battery - Generic' => ['category' => 'Battery'],
 
             'Keyboard US' => $this->keyboard('us'),
             'Keyboard QWERTY' => $this->keyboard('qwerty'),
             'Keyboard US International' => $this->keyboard('qwerty_us_intl'),
+            'Keyboard - Generic' => ['category' => 'Input'],
             'Touchpad' => ['category' => 'Input'],
 
+            'Camera - Generic' => ['category' => 'Camera'],
             'Webcam Module' => $this->camera('webcam', 'selfie', null),
             'Camera - Selfie - 10MP' => $this->camera('front', 'selfie', 10),
             'Camera - Selfie - 12MP' => $this->camera('front', 'selfie', 12),
@@ -343,7 +349,10 @@ class DeviceComponentCatalogSeeder extends Seeder
             '3.5mm Port - Line In' => $this->audioPort('line_in', 'trs'),
             '3.5mm Port - Line Out' => $this->audioPort('line_out', 'trs'),
             'Wireless Module' => ['category' => 'Network'],
+            'Wireless - Generic' => ['category' => 'Network'],
+            'Bluetooth - Generic' => ['category' => 'Network'],
 
+            'USB-A Port - Generic' => $this->port('usb_a'),
             'USB-A Port - USB 2.0' => $this->port('usb_a', ['usb_standard' => 'usb_2_0']),
             'USB-A Port - USB 3.0' => $this->port('usb_a', ['usb_standard' => 'usb_3_0']),
             'USB-A Port - USB 3.1 Gen1' => $this->port('usb_a', ['usb_standard' => 'usb_3_1_gen1']),
@@ -372,7 +381,9 @@ class DeviceComponentCatalogSeeder extends Seeder
                 'usb_standard' => 'usb_3_1_gen1',
                 'displayport_alt_mode' => true,
             ]),
+            'USB-C Port - Generic' => $this->port('usb_c'),
             'USB-C Charging/Data Port' => $this->port('usb_c'),
+            'HDMI Port' => $this->port('hdmi'),
             'HDMI Port - 1.4' => $this->port('hdmi', ['hdmi_version' => '1.4']),
             'HDMI Port - 1.4b' => $this->port('hdmi', ['hdmi_version' => '1.4b']),
             'VGA Port' => $this->port('vga'),
@@ -381,9 +392,11 @@ class DeviceComponentCatalogSeeder extends Seeder
             'RJ-45 Ethernet Port - 5GbE' => $this->ethernetPort('5gbe'),
             'RJ-45 Ethernet Port - 10GbE' => $this->ethernetPort('10gbe'),
             'SD Card Reader' => $this->port('sd_card'),
+            'DisplayPort' => $this->port('displayport'),
             'Mini DisplayPort' => $this->port('mini_displayport'),
             'Surface Connect Port' => $this->port('surface_connect'),
             'Lightning Port' => $this->port('lightning'),
+            'eSATA Port' => $this->port('esata'),
         ];
     }
 
@@ -579,6 +592,19 @@ class DeviceComponentCatalogSeeder extends Seeder
     /**
      * @return array<string,mixed>
      */
+    private function storageType(string $type): array
+    {
+        return [
+            'category' => 'Storage',
+            'attributes' => [
+                'storage_type' => ['value' => $type, 'resolves_to_spec' => true],
+            ],
+        ];
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
     private function display(float $size, string $resolution, string $panelType, int $refreshRate): array
     {
         return [
@@ -637,8 +663,8 @@ class DeviceComponentCatalogSeeder extends Seeder
     private function camera(string $position, string $role, ?float $megapixels): array
     {
         $attributes = [
-            'camera_position' => ['value' => $position, 'resolves_to_spec' => true],
-            'camera_role' => ['value' => $role, 'resolves_to_spec' => true],
+            'camera_position' => ['value' => $position],
+            'camera_role' => ['value' => $role],
         ];
 
         if ($megapixels !== null) {
@@ -658,17 +684,170 @@ class DeviceComponentCatalogSeeder extends Seeder
     private function port(string $connectorType, array $attributes = []): array
     {
         $portAttributes = [
-            'port_connector_type' => ['value' => $connectorType, 'resolves_to_spec' => true],
+            'port_connector_type' => [
+                'value' => $connectorType,
+                'resolves_to_spec' => true,
+                'include_in_component_label' => true,
+            ],
         ];
 
         foreach ($attributes as $key => $value) {
-            $portAttributes[$key] = ['value' => $value, 'resolves_to_spec' => true];
+            $portAttributes[$key] = [
+                'value' => $value,
+                'resolves_to_spec' => false,
+                'include_in_component_label' => $this->portAttributeContributesToLabel($key, $value),
+            ];
         }
 
         return [
             'category' => 'Ports',
+            'spec_display_label' => $this->portSpecDisplayLabel($connectorType, $attributes),
             'attributes' => $portAttributes,
         ];
+    }
+
+    private function portAttributeContributesToLabel(string $key, mixed $value): bool
+    {
+        if ($value === false || $value === null || $value === '') {
+            return false;
+        }
+
+        return in_array($key, [
+            'usb_standard',
+            'displayport_alt_mode',
+            'displayport_version',
+            'power_delivery',
+            'power_delivery_watts',
+            'thunderbolt',
+            'thunderbolt_version',
+            'hdmi_version',
+            'ethernet_speed_max',
+            'sleep_and_charge',
+            'audio_port_role',
+        ], true);
+    }
+
+    /**
+     * @param array<string,mixed> $attributes
+     */
+    private function portSpecDisplayLabel(string $connectorType, array $attributes): string
+    {
+        $label = $this->connectorLabel($connectorType);
+        $inline = [];
+        $capabilities = [];
+
+        if (!empty($attributes['usb_standard'])) {
+            $inline[] = $this->usbStandardLabel((string) $attributes['usb_standard']);
+        }
+
+        if (!empty($attributes['hdmi_version'])) {
+            $inline[] = (string) $attributes['hdmi_version'];
+        }
+
+        if (!empty($attributes['ethernet_speed_max'])) {
+            $inline[] = $this->ethernetSpeedLabel((string) $attributes['ethernet_speed_max']);
+        }
+
+        if (!empty($attributes['audio_port_role'])) {
+            $inline[] = $this->audioRoleLabel((string) $attributes['audio_port_role']);
+        }
+
+        if (!empty($attributes['thunderbolt_version'])) {
+            $capabilities[] = $this->thunderboltVersionLabel((string) $attributes['thunderbolt_version']);
+        } elseif (!empty($attributes['thunderbolt'])) {
+            $capabilities[] = 'Thunderbolt';
+        }
+
+        if (!empty($attributes['displayport_alt_mode'])) {
+            $capabilities[] = !empty($attributes['displayport_version'])
+                ? 'DP ' . $attributes['displayport_version'] . ' Alt'
+                : 'DP Alt';
+        }
+
+        if (!empty($attributes['power_delivery'])) {
+            $capabilities[] = !empty($attributes['power_delivery_watts'])
+                ? 'PD ' . $attributes['power_delivery_watts'] . ' W'
+                : 'PD';
+        }
+
+        if (!empty($attributes['sleep_and_charge'])) {
+            $capabilities[] = 'Sleep/Charge';
+        }
+
+        $display = trim($label . ' ' . implode(' ', array_filter($inline)));
+
+        if ($capabilities !== []) {
+            $display .= ' (' . implode(', ', $capabilities) . ')';
+        }
+
+        return $display;
+    }
+
+    private function connectorLabel(string $value): string
+    {
+        return match ($value) {
+            'usb_a' => 'USB-A',
+            'usb_c' => 'USB-C',
+            'hdmi' => 'HDMI',
+            'displayport' => 'DisplayPort',
+            'mini_displayport' => 'Mini DisplayPort',
+            'vga' => 'VGA',
+            'rj45' => 'RJ-45',
+            'esata' => 'eSATA',
+            'sd_card' => 'SD Card',
+            'audio_3_5mm' => '3.5mm',
+            'surface_connect' => 'Surface Connect',
+            'lightning' => 'Lightning',
+            default => $value,
+        };
+    }
+
+    private function usbStandardLabel(string $value): string
+    {
+        return match ($value) {
+            'usb_2_0' => 'USB 2.0',
+            'usb_3_0' => 'USB 3.0',
+            'usb_3_1_gen1' => 'USB 3.1 Gen 1',
+            'usb_3_1_gen2' => 'USB 3.1 Gen 2',
+            'usb_3_2_gen1' => 'USB 3.2 Gen 1',
+            'usb4' => 'USB4',
+            default => $value,
+        };
+    }
+
+    private function ethernetSpeedLabel(string $value): string
+    {
+        return match ($value) {
+            '1gbe' => '1GbE',
+            '2_5gbe' => '2.5GbE',
+            '5gbe' => '5GbE',
+            '10gbe' => '10GbE',
+            default => $value,
+        };
+    }
+
+    private function audioRoleLabel(string $value): string
+    {
+        return match ($value) {
+            'headset_combo' => 'headset combo',
+            'headphone_out' => 'headphone out',
+            'microphone_in' => 'microphone in',
+            'line_in' => 'line in',
+            'line_out' => 'line out',
+            default => $value,
+        };
+    }
+
+    private function thunderboltVersionLabel(string $value): string
+    {
+        return match ($value) {
+            '1' => 'Thunderbolt 1',
+            '2' => 'Thunderbolt 2',
+            '3' => 'Thunderbolt 3',
+            '4' => 'Thunderbolt 4',
+            '5' => 'Thunderbolt 5',
+            default => $value,
+        };
     }
 
     /**

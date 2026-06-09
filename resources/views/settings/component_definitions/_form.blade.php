@@ -39,6 +39,7 @@
             'id' => $definition->id,
             'label' => $definition->label,
             'key' => $definition->key,
+            'edit_url' => auth()->user()?->can('update', $definition) ? route('attributes.edit', $definition) : null,
             'display' => $definition->label . ' (' . $definition->key . ')',
             'search_text' => strtolower($definition->label . ' ' . $definition->key),
             'datatype' => $definition->datatype,
@@ -73,8 +74,11 @@
         'strictEnumHelp' => __('Use one of the defined options.'),
         'selectAttributeFirst' => __('Select an attribute first'),
         'noMatchingAttributes' => __('No matching attributes.'),
-        'resolveToSpec' => __('Use for calculated specification'),
-        'resolveToSpecHelp' => __('When checked, this component value is used as the model or asset specification instead of a manual attribute value.'),
+        'resolveToSpec' => __('Show as asset spec'),
+        'resolveToSpecHelp' => __('When checked, this component value contributes to model and asset specifications.'),
+        'includeInComponentLabel' => __('Use in component label'),
+        'includeInComponentLabelHelp' => __('Used when an asset specification displays component labels.'),
+        'editAttribute' => __('Edit attribute'),
     ];
     $subcomponentPickerText = [
         'noMatchingDefinitions' => __('No matching component definitions.'),
@@ -92,6 +96,7 @@
                     : '',
                 'value' => $contribution->raw_value ?? $contribution->value,
                 'resolves_to_spec' => (bool) $contribution->resolves_to_spec,
+                'include_in_component_label' => (bool) $contribution->include_in_component_label,
             ];
         });
     }
@@ -102,6 +107,7 @@
             'attribute_search' => '',
             'value' => '',
             'resolves_to_spec' => false,
+            'include_in_component_label' => false,
         ]]);
     }
 
@@ -243,6 +249,13 @@
             {!! $errors->first('spec_summary', '<span class="help-block">:message</span>') !!}
         </div>
 
+        <div class="form-group {{ $errors->has('spec_display_label') ? 'has-error' : '' }}">
+            <label for="spec_display_label">{{ __('Spec Display Label') }}</label>
+            <input type="text" class="form-control" id="spec_display_label" name="spec_display_label" value="{{ old('spec_display_label', $item->spec_display_label) }}">
+            <p class="help-block">{{ __('Optional. Used instead of the generated component label when asset specifications display component labels.') }}</p>
+            {!! $errors->first('spec_display_label', '<span class="help-block">:message</span>') !!}
+        </div>
+
         <hr>
 
         <div class="form-group{{ $errors->has('expected_subcomponents') ? ' has-error' : '' }}" id="expected-subcomponents">
@@ -315,6 +328,7 @@
                         'attribute_search' => '',
                         'value' => '',
                         'resolves_to_spec' => false,
+                        'include_in_component_label' => false,
                     ],
                     'selectedDefinition' => null,
                     'attributeDefinitionsById' => $attributeDefinitionsById,
@@ -696,6 +710,16 @@
                     return field ? (field.dataset.currentValue || '') : '';
                 }
 
+                function readCurrentCheckbox(row, selector, dataKey) {
+                    var input = row ? row.querySelector(selector) : null;
+                    if (input) {
+                        return input.checked;
+                    }
+
+                    var field = row ? row.querySelector('[data-contribution-value-field]') : null;
+                    return field ? field.dataset[dataKey] === '1' : false;
+                }
+
                 function buildConstraintSummary(definition) {
                     var constraints = definition && definition.constraints ? definition.constraints : {};
                     var hints = [];
@@ -729,13 +753,16 @@
                     var fieldName = 'attribute_contributions[' + index + '][value]';
                     var fieldId = 'attribute_contributions_' + index + '_value';
                     var resolveFieldName = 'attribute_contributions[' + index + '][resolves_to_spec]';
+                    var componentLabelFieldName = 'attribute_contributions[' + index + '][include_in_component_label]';
                     var value = String(currentValue || '');
-                    var resolveChecked = field.dataset.currentResolves === '1';
+                    var resolveChecked = readCurrentCheckbox(row, '[data-contribution-resolves-input]', 'currentResolves');
+                    var componentLabelChecked = readCurrentCheckbox(row, '[data-contribution-component-label-input]', 'currentComponentLabel');
                     var html = '';
 
                     if (!definition) {
                         field.dataset.currentValue = '';
                         field.dataset.currentResolves = '0';
+                        field.dataset.currentComponentLabel = '0';
                         field.innerHTML =
                             '<input type="text" class="form-control" id="' + escapeHtml(fieldId) + '" name="' + escapeHtml(fieldName) + '" value="" placeholder="' + escapeHtml(text.selectAttributeFirst) + '" disabled data-contribution-value-input>';
                         return;
@@ -800,17 +827,23 @@
                     }
                     summary = summary.concat(buildConstraintSummary(definition));
 
-                    if (definition.is_numeric) {
-                        html += '<div class="checkbox" style="margin-top:10px; margin-bottom:6px;">';
-                        html += '<label><input type="checkbox" name="' + escapeHtml(resolveFieldName) + '" value="1"' + (resolveChecked ? ' checked' : '') + '> ' + escapeHtml(text.resolveToSpec) + '</label>';
-                        html += '</div>';
-                        html += '<p class="help-block text-muted" style="margin-top:0;">' + escapeHtml(text.resolveToSpecHelp) + '</p>';
+                    html += '<div class="checkbox" style="margin-top:10px; margin-bottom:0;">';
+                    html += '<label><input type="checkbox" name="' + escapeHtml(resolveFieldName) + '" value="1" data-contribution-resolves-input' + (resolveChecked ? ' checked' : '') + '> ' + escapeHtml(text.resolveToSpec) + '</label>';
+                    html += '</div>';
+                    html += '<div class="checkbox" style="margin-top:6px; margin-bottom:0;">';
+                    html += '<label><input type="checkbox" name="' + escapeHtml(componentLabelFieldName) + '" value="1" data-contribution-component-label-input' + (componentLabelChecked ? ' checked' : '') + '> ' + escapeHtml(text.includeInComponentLabel) + '</label>';
+                    html += '</div>';
+                    html += '<p class="help-block text-muted" style="margin-bottom:0;">' + escapeHtml(text.includeInComponentLabelHelp);
+                    if (definition.edit_url) {
+                        html += ' <a href="' + escapeHtml(definition.edit_url) + '">' + escapeHtml(text.editAttribute) + '</a>';
                     }
+                    html += '</p>';
 
                     html += '<p class="help-block text-muted" style="margin-bottom:0;">' + escapeHtml(summary.join(' - ')) + '</p>';
 
                     field.dataset.currentValue = value;
-                    field.dataset.currentResolves = definition.is_numeric && resolveChecked ? '1' : '0';
+                    field.dataset.currentResolves = resolveChecked ? '1' : '0';
+                    field.dataset.currentComponentLabel = componentLabelChecked ? '1' : '0';
                     field.innerHTML = html;
                 }
 
@@ -901,6 +934,7 @@
                     if (!definition) {
                         hiddenInput.value = '';
                         field.dataset.currentResolves = '0';
+                        field.dataset.currentComponentLabel = '0';
                         renderValueField(row, null, '');
                         return;
                     }
@@ -909,6 +943,7 @@
                     searchInput.value = definition.display;
                     if (!preserveCurrentValue || previousId !== String(definition.id)) {
                         field.dataset.currentResolves = '0';
+                        field.dataset.currentComponentLabel = '0';
                     }
                     renderValueField(row, definition, preserveCurrentValue && previousId === String(definition.id) ? currentValue : '');
                     hideAllSearchResults();
@@ -950,6 +985,21 @@
                     searchInput.addEventListener('focus', function () {
                         hideAllSearchResults(row);
                         renderSearchResults(row);
+                    });
+
+                    row.addEventListener('change', function (event) {
+                        var field = row.querySelector('[data-contribution-value-field]');
+                        if (!field) {
+                            return;
+                        }
+
+                        if (event.target.matches('[data-contribution-resolves-input]')) {
+                            field.dataset.currentResolves = event.target.checked ? '1' : '0';
+                        }
+
+                        if (event.target.matches('[data-contribution-component-label-input]')) {
+                            field.dataset.currentComponentLabel = event.target.checked ? '1' : '0';
+                        }
                     });
 
                     searchInput.addEventListener('input', function () {

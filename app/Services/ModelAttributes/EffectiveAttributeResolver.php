@@ -265,6 +265,13 @@ class EffectiveAttributeResolver
                 ? 'model'
                 : ($derived ? 'expected_components' : 'missing'));
 
+        $meta = array_merge($derived?->meta ?? [], [
+            'expected_component_baseline_value' => $derived?->value,
+            'expected_component_baseline_display_value' => $derived?->meta['display_value'] ?? null,
+            'current_component_value' => $derived?->value,
+            'reduced_expected_baseline' => false,
+        ]);
+
         return new ResolvedAttribute(
             $definition,
             $effectiveValue,
@@ -290,11 +297,7 @@ class EffectiveAttributeResolver
                     'contributors' => $derived->contributors,
                 ]] : []
             ),
-            [
-                'expected_component_baseline_value' => $derived?->value,
-                'current_component_value' => $derived?->value,
-                'reduced_expected_baseline' => false,
-            ]
+            $meta
         );
     }
 
@@ -332,6 +335,7 @@ class EffectiveAttributeResolver
 
             $meta = array_merge($calculated->meta, [
                 'expected_component_baseline_value' => $baselineValue,
+                'expected_component_baseline_display_value' => $baseline?->meta['display_value'] ?? $modelResolved?->meta['display_value'] ?? null,
                 'current_component_value' => $calculated->value,
                 'reduced_expected_baseline' => $reducedExpectedBaseline,
             ]);
@@ -347,6 +351,10 @@ class EffectiveAttributeResolver
             $rawValue = $modelResolved->rawValue;
             $option = $modelResolved->option;
             $meta = $modelResolved->meta;
+        }
+
+        if (($modelResolved?->meta['display_value'] ?? null) !== null) {
+            $meta['model_display_value'] = $modelResolved->meta['display_value'];
         }
 
         return new ResolvedAttribute(

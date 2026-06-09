@@ -18,6 +18,7 @@ class ComponentDefinitionAttribute extends SnipeModel
         'raw_value',
         'attribute_option_id',
         'resolves_to_spec',
+        'include_in_component_label',
         'sort_order',
     ];
 
@@ -26,6 +27,7 @@ class ComponentDefinitionAttribute extends SnipeModel
         'attribute_definition_id' => 'int',
         'attribute_option_id' => 'int',
         'resolves_to_spec' => 'bool',
+        'include_in_component_label' => 'bool',
         'sort_order' => 'int',
     ];
 

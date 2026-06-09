@@ -4,6 +4,7 @@
     $attributeErrorKey = 'attribute_contributions.' . $index . '.attribute_definition_id';
     $valueErrorKey = 'attribute_contributions.' . $index . '.value';
     $resolveErrorKey = 'attribute_contributions.' . $index . '.resolves_to_spec';
+    $componentLabelErrorKey = 'attribute_contributions.' . $index . '.include_in_component_label';
     $pickerValue = trim((string) ($row['attribute_search'] ?? ''));
 
     if ($pickerValue === '' && $selectedDefinition) {
@@ -41,7 +42,8 @@
                 <div data-contribution-value-field
                      data-contribution-index="{{ $index }}"
                      data-current-value="{{ $row['value'] ?? '' }}"
-                     data-current-resolves="{{ !empty($row['resolves_to_spec']) ? '1' : '0' }}">
+                     data-current-resolves="{{ !empty($row['resolves_to_spec']) ? '1' : '0' }}"
+                     data-current-component-label="{{ !empty($row['include_in_component_label']) ? '1' : '0' }}">
                     @include('settings.component_definitions.partials.contribution-value-field', [
                         'index' => $index,
                         'row' => $row,
@@ -51,6 +53,7 @@
                 @if($showErrors)
                     {!! $errors->first($valueErrorKey, '<span class="help-block">:message</span>') !!}
                     {!! $errors->first($resolveErrorKey, '<span class="help-block">:message</span>') !!}
+                    {!! $errors->first($componentLabelErrorKey, '<span class="help-block">:message</span>') !!}
                 @endif
             </div>
 

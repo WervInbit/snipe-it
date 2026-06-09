@@ -407,30 +407,31 @@ class Asset extends Depreciable
                     return;
                 }
 
-                $name = strtolower((string) $newStatus->name);
-                $oldId = $asset->getOriginal('status_id');
-                $old = $oldId ? Statuslabel::find($oldId) : null;
-                $oldName = strtolower((string) ($old?->name ?? ''));
-
-                // Ready for Sale/Sold requires tests OK (can be confirmed) and supervisor/admin role
-                if (str_contains($name, 'ready for sale') || $name === 'sold' || str_starts_with($name, 'sold ')) {
+                $name = self::normalizedStatusName($newStatus->name);
+                // Sale lifecycle transitions require tests OK and explicit sale-transition permission.
+                if (self::isPreSaleStatus($newStatus) || self::isSoldStatus($newStatus)) {
                     $user = auth()->user();
-                    $isAdmin = $user && method_exists($user, 'isAdmin') ? $user->isAdmin() : false;
-                    $isSuper = $user && method_exists($user, 'isSuperUser') ? $user->isSuperUser() : false;
-                    if (!($isAdmin || $isSuper)) {
-                        throw new \DomainException('requires_supervisor_role');
-                    }
-                    if (empty($asset->tests_completed_ok)) {
-                        if (!request()->boolean('ack_failed_tests')) {
-                            throw new \DomainException('requires_ack_failed_tests');
+                    if ($user) {
+                        if (!Gate::allows('assets.sale_transition')) {
+                            throw new \DomainException('requires_sale_transition_permission');
+                        }
+
+                        if (empty($asset->tests_completed_ok)) {
+                            if (!request()->boolean('ack_failed_tests')) {
+                                throw new \DomainException('requires_ack_failed_tests');
+                            }
                         }
                     }
                 }
 
                 // Sold → archive asset record for active lists
-                if (str_contains($name, 'sold')) {
+                if (self::statusForcesUnsellable($newStatus)) {
+                    $asset->is_sellable = 0;
+                }
+
+                if (self::isSoldStatus($newStatus) || (int) $newStatus->archived === 1) {
                     $asset->archived = 1;
-                    Log::info('Asset marked sold; archiving', ['asset_id' => $asset->id]);
+                    Log::info('Asset moved into archived lifecycle status', ['asset_id' => $asset->id]);
                 }
 
                 // Returned → restore from archived so it re-enters workflow
@@ -442,8 +443,7 @@ class Asset extends Depreciable
                 // Broken/For Parts → unsellable and not requestable, add delist note
                 if (str_contains($name, 'broken') || str_contains($name, 'parts')) {
                     $asset->is_sellable = 0;
-                    $asset->requestable = 0;
-                    Log::info('Asset set to Broken/For Parts; disabling sellable/requestable', ['asset_id' => $asset->id]);
+                    Log::info('Asset set to Broken/For Parts; disabling sellable', ['asset_id' => $asset->id]);
                     try {
                         \App\Models\Actionlog::create([
                             'item_type' => self::class,
@@ -458,6 +458,51 @@ class Asset extends Depreciable
                 // No maintenance record creation on diagnostics/QA statuses per requirements
             }
         });
+    }
+
+    public static function isPreSaleStatus(?Statuslabel $status): bool
+    {
+        return $status !== null
+            && (int) $status->deployable === 1
+            && (int) $status->pending === 0
+            && (int) $status->archived === 0;
+    }
+
+    public static function isSoldStatus(?Statuslabel $status): bool
+    {
+        return self::isSoldStatusName($status?->name);
+    }
+
+    public static function isSoldStatusName(?string $statusName): bool
+    {
+        $name = self::normalizedStatusName($statusName);
+
+        return $name === 'sold' || str_starts_with($name, 'sold ');
+    }
+
+    public static function statusRequiresTestAck(?Statuslabel $status): bool
+    {
+        return self::isPreSaleStatus($status) || self::isSoldStatus($status);
+    }
+
+    public static function statusForcesUnsellable(?Statuslabel $status): bool
+    {
+        if (!$status) {
+            return false;
+        }
+
+        $name = self::normalizedStatusName($status->name);
+
+        return (int) $status->archived === 1
+            || self::isSoldStatus($status)
+            || str_contains($name, 'broken')
+            || str_contains($name, 'parts')
+            || str_contains($name, 'destroy');
+    }
+
+    private static function normalizedStatusName(?string $statusName): string
+    {
+        return strtolower(trim((string) $statusName));
     }
 
     // To properly set the expected checkin as Y-m-d

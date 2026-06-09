@@ -29,6 +29,7 @@ class AttributeDefinitionVersionRequest extends Request
             'required_for_category' => ['sometimes', 'boolean'],
             'allow_custom_values' => ['sometimes', 'boolean'],
             'allow_asset_override' => ['sometimes', 'boolean'],
+            'component_spec_display_mode' => ['nullable', 'string', Rule::in(AttributeDefinition::COMPONENT_SPEC_DISPLAY_MODES)],
             'constraints' => ['nullable', 'array'],
             'constraints.min' => ['nullable', 'numeric'],
             'constraints.max' => ['nullable', 'numeric'],

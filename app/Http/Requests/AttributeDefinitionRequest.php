@@ -91,6 +91,7 @@ class AttributeDefinitionRequest extends Request
             'required_for_category' => ['sometimes', 'boolean'],
             'allow_custom_values' => ['sometimes', 'boolean'],
             'allow_asset_override' => ['sometimes', 'boolean'],
+            'component_spec_display_mode' => ['nullable', 'string', Rule::in(AttributeDefinition::COMPONENT_SPEC_DISPLAY_MODES)],
             'manual_key_override' => ['sometimes', 'boolean'],
             'category_ids' => ['nullable', 'array'],
             'category_ids.*' => ['integer', 'exists:categories,id'],

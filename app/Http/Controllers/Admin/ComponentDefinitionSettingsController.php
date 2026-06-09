@@ -149,13 +149,14 @@ class ComponentDefinitionSettingsController extends Controller
 
     protected function validatedData(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'manufacturer_id' => ['nullable', 'integer', 'exists:manufacturers,id'],
             'model_number' => ['nullable', 'string', 'max:255'],
             'part_code' => ['nullable', 'string', 'max:255'],
             'spec_summary' => ['nullable', 'string'],
+            'spec_display_label' => ['nullable', 'string', 'max:255'],
             'serial_tracking_mode' => ['nullable', Rule::in(['optional', 'required', 'not_tracked'])],
             'placement_mode' => ['nullable', Rule::in(ComponentDefinition::placementModes())],
             'is_active' => ['sometimes', 'boolean'],
@@ -186,10 +187,15 @@ class ComponentDefinitionSettingsController extends Controller
             'attribute_contributions.*.attribute_search' => ['nullable', 'string', 'max:255'],
             'attribute_contributions.*.value' => ['nullable'],
             'attribute_contributions.*.resolves_to_spec' => ['nullable', 'boolean'],
+            'attribute_contributions.*.include_in_component_label' => ['nullable', 'boolean'],
         ]) + [
             'serial_tracking_mode' => $request->input('serial_tracking_mode', 'optional'),
             'placement_mode' => $request->input('placement_mode', ComponentDefinition::PLACEMENT_EITHER),
         ];
+
+        $data['spec_display_label'] = trim((string) ($data['spec_display_label'] ?? '')) ?: null;
+
+        return $data;
     }
 
     protected function formOptions(): array

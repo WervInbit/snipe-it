@@ -3,6 +3,9 @@
 namespace Tests\Feature\Assets\Ui;
 
 use App\Models\Asset;
+use App\Models\AssetModel;
+use App\Models\AttributeDefinition;
+use App\Models\ModelNumberAttribute;
 use App\Models\Setting;
 use App\Models\TestResult;
 use App\Models\TestRun;
@@ -71,6 +74,65 @@ class ShowAssetTest extends TestCase
         $response->assertSee('asset-printer-picker', false);
         $response->assertSee('box-sizing: border-box;', false);
         $response->assertSee('width: 100%;', false);
+    }
+
+    public function testDetailPageKeepsCalculatedSpecMetadataInBlockLayout(): void
+    {
+        $asset = Asset::factory()->create();
+
+        $response = $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('hardware.show', $asset));
+
+        $response->assertOk();
+        $response->assertSee('.spec-detail-meta {', false);
+        $response->assertSee('display: block !important;', false);
+        $response->assertSee('word-break: normal;', false);
+        $response->assertSee('.spec-source-indicator {', false);
+        $response->assertSee('display: inline-flex !important;', false);
+    }
+
+    public function testDetailPageDisplaysUnitsForNumericSpecificationValues(): void
+    {
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $asset = Asset::factory()->for($model, 'model')->create([
+            'model_number_id' => $modelNumber->id,
+        ]);
+        $storage = AttributeDefinition::create([
+            'key' => 'storage_capacity_gb',
+            'label' => 'Storage Capacity',
+            'datatype' => AttributeDefinition::DATATYPE_INT,
+            'unit' => 'GB',
+        ]);
+        $screen = AttributeDefinition::create([
+            'key' => 'display_size_inches',
+            'label' => 'Screen Size',
+            'datatype' => AttributeDefinition::DATATYPE_DECIMAL,
+            'unit' => 'in',
+        ]);
+
+        ModelNumberAttribute::create([
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $storage->id,
+            'value' => '256',
+            'raw_value' => '256',
+            'display_order' => 0,
+        ]);
+        ModelNumberAttribute::create([
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $screen->id,
+            'value' => '15.6',
+            'raw_value' => '15.6',
+            'display_order' => 1,
+        ]);
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('hardware.show', $asset))
+            ->assertOk()
+            ->assertSeeText('Storage Capacity')
+            ->assertSeeText('256 GB')
+            ->assertSeeText('Screen Size')
+            ->assertSeeText('15.6"');
     }
 
     public function testDetailPageRendersQrPanelBelowPrimaryActionButtons(): void

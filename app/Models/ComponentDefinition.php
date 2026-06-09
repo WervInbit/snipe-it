@@ -28,6 +28,7 @@ class ComponentDefinition extends SnipeModel
         'model_number',
         'part_code',
         'spec_summary',
+        'spec_display_label',
         'metadata_json',
         'serial_tracking_mode',
         'placement_mode',

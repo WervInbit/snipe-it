@@ -30,6 +30,8 @@ class TestRunPolicy
 
     public function delete(User $user, TestRun $testRun): bool
     {
-        return $user->hasAccess('supervisor') || $user->hasAccess('admin');
+        return $user->hasAccess('tests.delete')
+            || $user->hasAccess('supervisor')
+            || $user->hasAccess('admin');
     }
 }

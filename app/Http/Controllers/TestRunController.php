@@ -39,7 +39,7 @@ class TestRunController extends Controller
     public function store(Request $request, Asset $asset, EffectiveAttributeResolver $resolver): RedirectResponse
     {
         Gate::authorize('tests.execute');
-        $this->authorize('update', $asset);
+        $this->authorize('view', $asset);
 
         $data = $request->validate([
             'workflow_profile_id' => ['required', 'integer', 'exists:workflow_profiles,id'],

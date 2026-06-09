@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\AttributeDefinition;
 use App\Models\Category;
-use App\Models\User;
 use Database\Seeders\Concerns\ProvidesDeviceCatalogData;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Seeder;
@@ -16,10 +15,7 @@ class DeviceAttributeSeeder extends Seeder
 
     public function run(): void
     {
-        $admin = User::where('permissions->superuser', '1')->first()
-            ?? User::factory()->firstAdmin()->create();
-
-        $categories = $this->resolveCatalogCategories($admin);
+        $categories = $this->resolveCatalogCategories();
 
         DB::transaction(function () use ($categories) {
             $this->seedDefinitions($categories);
@@ -46,6 +42,7 @@ class DeviceAttributeSeeder extends Seeder
                 'required_for_category' => $config['required'] ?? false,
                 'allow_custom_values' => $config['allow_custom_values'] ?? ($config['datatype'] === AttributeDefinition::DATATYPE_TEXT),
                 'allow_asset_override' => $config['allow_asset_override'] ?? false,
+                'component_spec_display_mode' => $config['component_spec_display_mode'] ?? AttributeDefinition::COMPONENT_SPEC_DISPLAY_VALUE_LABELS,
                 'constraints' => $config['constraints'] ?? [],
             ]);
 
@@ -75,46 +72,46 @@ class DeviceAttributeSeeder extends Seeder
         return new EloquentCollection($definitions->values());
     }
 
-    private function resolveCategory(string $name, callable $fallback, ?string $categoryType = null): Category
+    private function resolveCategory(string $name, string $categoryType): Category
     {
-        $existing = Category::query()
-            ->where('name', $name)
-            ->when($categoryType, fn ($query) => $query->where('category_type', $categoryType))
-            ->first();
+        /** @var Category $category */
+        $category = Category::withTrashed()->firstOrNew([
+            'name' => $name,
+            'category_type' => $categoryType,
+        ]);
 
-        if ($existing) {
-            return $existing;
+        if (! $category->exists) {
+            $category->created_by = null;
         }
 
-        return $fallback();
+        if ($category->trashed()) {
+            $category->restore();
+        }
+
+        $category->save();
+
+        return $category;
     }
 
     /**
      * @return array<string,Category>
      */
-    private function resolveCatalogCategories(User $admin): array
+    private function resolveCatalogCategories(): array
     {
-        $componentCategory = fn (string $name) => \Database\Factories\CategoryFactory::new()
-            ->forComponents()
-            ->create([
-                'created_by' => $admin->id,
-                'name' => $name,
-            ]);
-
         return [
-            'Laptops' => $this->resolveCategory('Laptops', fn () => \Database\Factories\CategoryFactory::new()->assetLaptopCategory()->create(['created_by' => $admin->id]), 'asset'),
-            'Mobile Phones' => $this->resolveCategory('Mobile Phones', fn () => \Database\Factories\CategoryFactory::new()->assetMobileCategory()->create(['created_by' => $admin->id]), 'asset'),
-            'Memory' => $this->resolveCategory('Memory', fn () => $componentCategory('Memory'), 'component'),
-            'Storage' => $this->resolveCategory('Storage', fn () => $componentCategory('Storage'), 'component'),
-            'Display' => $this->resolveCategory('Display', fn () => $componentCategory('Display'), 'component'),
-            'Battery' => $this->resolveCategory('Battery', fn () => $componentCategory('Battery'), 'component'),
-            'Logic Board' => $this->resolveCategory('Logic Board', fn () => $componentCategory('Logic Board'), 'component'),
-            'Ports' => $this->resolveCategory('Ports', fn () => $componentCategory('Ports'), 'component'),
-            'Camera' => $this->resolveCategory('Camera', fn () => $componentCategory('Camera'), 'component'),
-            'Audio' => $this->resolveCategory('Audio', fn () => $componentCategory('Audio'), 'component'),
-            'Input' => $this->resolveCategory('Input', fn () => $componentCategory('Input'), 'component'),
-            'Network' => $this->resolveCategory('Network', fn () => $componentCategory('Network'), 'component'),
-            'Power' => $this->resolveCategory('Power', fn () => $componentCategory('Power'), 'component'),
+            'Laptops' => $this->resolveCategory('Laptops', 'asset'),
+            'Mobile Phones' => $this->resolveCategory('Mobile Phones', 'asset'),
+            'Memory' => $this->resolveCategory('Memory', 'component'),
+            'Storage' => $this->resolveCategory('Storage', 'component'),
+            'Display' => $this->resolveCategory('Display', 'component'),
+            'Battery' => $this->resolveCategory('Battery', 'component'),
+            'Logic Board' => $this->resolveCategory('Logic Board', 'component'),
+            'Ports' => $this->resolveCategory('Ports', 'component'),
+            'Camera' => $this->resolveCategory('Camera', 'component'),
+            'Audio' => $this->resolveCategory('Audio', 'component'),
+            'Input' => $this->resolveCategory('Input', 'component'),
+            'Network' => $this->resolveCategory('Network', 'component'),
+            'Power' => $this->resolveCategory('Power', 'component'),
         ];
     }
 

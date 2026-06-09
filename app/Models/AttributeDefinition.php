@@ -27,12 +27,20 @@ class AttributeDefinition extends SnipeModel
     public const DATATYPE_TEXT = 'text';
     public const DATATYPE_BOOL = 'bool';
 
+    public const COMPONENT_SPEC_DISPLAY_VALUE_LABELS = 'value_labels';
+    public const COMPONENT_SPEC_DISPLAY_COMPONENT_LABELS = 'component_labels';
+
     public const DATATYPES = [
         self::DATATYPE_ENUM,
         self::DATATYPE_INT,
         self::DATATYPE_DECIMAL,
         self::DATATYPE_TEXT,
         self::DATATYPE_BOOL,
+    ];
+
+    public const COMPONENT_SPEC_DISPLAY_MODES = [
+        self::COMPONENT_SPEC_DISPLAY_VALUE_LABELS,
+        self::COMPONENT_SPEC_DISPLAY_COMPONENT_LABELS,
     ];
 
     protected $table = 'attribute_definitions';
@@ -45,6 +53,7 @@ class AttributeDefinition extends SnipeModel
         'required_for_category',
         'allow_custom_values',
         'allow_asset_override',
+        'component_spec_display_mode',
         'constraints',
         'hidden_at',
         'deprecated_at',
@@ -66,10 +75,12 @@ class AttributeDefinition extends SnipeModel
         'required_for_category' => 'boolean',
         'allow_custom_values' => 'boolean',
         'allow_asset_override' => 'boolean',
+        'component_spec_display_mode' => 'required|string|in:value_labels,component_labels',
     ];
 
     protected $attributes = [
         'version' => 1,
+        'component_spec_display_mode' => self::COMPONENT_SPEC_DISPLAY_VALUE_LABELS,
     ];
 
     public function categories(): BelongsToMany
@@ -257,6 +268,22 @@ class AttributeDefinition extends SnipeModel
             self::DATATYPE_INT,
             self::DATATYPE_DECIMAL,
         ], true);
+    }
+
+    public function usesComponentLabelsForSpecDisplay(): bool
+    {
+        return $this->component_spec_display_mode === self::COMPONENT_SPEC_DISPLAY_COMPONENT_LABELS;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function componentSpecDisplayModeOptions(): array
+    {
+        return [
+            self::COMPONENT_SPEC_DISPLAY_VALUE_LABELS => __('Value labels'),
+            self::COMPONENT_SPEC_DISPLAY_COMPONENT_LABELS => __('Component labels'),
+        ];
     }
 
     public function allowsAssetOverride(): bool

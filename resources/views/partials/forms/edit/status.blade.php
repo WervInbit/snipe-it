@@ -4,15 +4,29 @@
     <div class="col-md-7 col-sm-12">
         @php
             $__status_options = $statuslabel_list;
-            $user = auth()->user();
-            $isAdmin = $user && method_exists($user, 'isAdmin') ? $user->isAdmin() : false;
-            $isSuper = $user && method_exists($user, 'isSuperUser') ? $user->isSuperUser() : false;
-            if (!($isAdmin || $isSuper)) {
-                // Hide Ready for Sale for non-admin/supervisor users
-                $__status_options = collect($__status_options)
-                    ->reject(function($label){ return stripos($label, 'Ready for Sale') !== false; })
-                    ->all();
-            }
+            $selectedStatus = old('status_id', $item->status_id);
+            $canMoveSaleLifecycle = Gate::allows('assets.sale_transition');
+            $statusLabelsById = \App\Models\Statuslabel::query()
+                ->whereIn('id', array_keys($__status_options))
+                ->get()
+                ->keyBy('id');
+            $__status_options = collect($__status_options)
+                ->filter(function ($label, $id) use ($selectedStatus, $statusLabelsById, $canMoveSaleLifecycle) {
+                    if ((string) $selectedStatus === (string) $id) {
+                        return true;
+                    }
+
+                    $statusLabel = $statusLabelsById->get((int) $id);
+                    $isPreSale = \App\Models\Asset::isPreSaleStatus($statusLabel);
+                    $isSold = \App\Models\Asset::isSoldStatus($statusLabel);
+
+                    if (($isPreSale || $isSold) && !$canMoveSaleLifecycle) {
+                        return false;
+                    }
+
+                    return true;
+                })
+                ->all();
         @endphp
 
         @if (session('requires_ack_failed_tests'))
@@ -41,9 +55,6 @@
             </div>
         @endif
 
-        @php
-            $selectedStatus = old('status_id', $item->status_id);
-        @endphp
         <select
             name="status_id"
             id="status_select_id"

@@ -6,18 +6,18 @@ use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Schema;
 
 class SettingsSeeder extends Seeder
 {
     public function run()
     {
-        Schema::disableForeignKeyConstraints();
-        Setting::truncate();
-        Schema::enableForeignKeyConstraints();
+        if (Setting::query()->exists()) {
+            return;
+        }
+
         $settings = new Setting;
         $settings->per_page = 20;
-        $settings->site_name = 'Snipe-IT Demo';
+        $settings->site_name = 'Snipe-IT';
         $settings->auto_increment_assets = 1;
         $settings->logo = 'snipe-logo.png';
         $settings->alert_email = 'service@snipe-it.io';
@@ -27,7 +27,6 @@ class SettingsSeeder extends Seeder
         $settings->brand = 3;
         $settings->ldap_enabled = 0;
         $settings->full_multiple_companies_support = 0;
-        // Disable location scoping by company for testing/demo
         $settings->scope_locations_fmcs = 0;
         $settings->label2_1d_type = 'C128';
         // Enable QR code generation and display in UI

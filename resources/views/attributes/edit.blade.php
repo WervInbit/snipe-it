@@ -147,6 +147,21 @@
         </div>
     </div>
 
+    <div class="form-group{{ $errors->has('component_spec_display_mode') ? ' has-error' : '' }}">
+        <label for="component_spec_display_mode" class="col-md-3 control-label">{{ __('Component Spec Display') }}</label>
+        <div class="col-md-4">
+            <select name="component_spec_display_mode" id="component_spec_display_mode" class="form-control">
+                @foreach(\App\Models\AttributeDefinition::componentSpecDisplayModeOptions() as $mode => $label)
+                    <option value="{{ $mode }}" {{ old('component_spec_display_mode', $definition->component_spec_display_mode ?: \App\Models\AttributeDefinition::COMPONENT_SPEC_DISPLAY_VALUE_LABELS) === $mode ? 'selected' : '' }}>
+                        {{ $label }}
+                    </option>
+                @endforeach
+            </select>
+            <span class="help-block">{{ __('Choose how component-derived values are displayed in asset specifications.') }}</span>
+            {!! $errors->first('component_spec_display_mode', '<span class="alert-msg">:message</span>') !!}
+        </div>
+    </div>
+
     <hr>
 
     <div class="form-group">

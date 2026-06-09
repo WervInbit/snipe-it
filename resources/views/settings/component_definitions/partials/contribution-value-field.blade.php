@@ -3,8 +3,10 @@
     $fieldName = 'attribute_contributions[' . $index . '][value]';
     $fieldId = 'attribute_contributions_' . $index . '_value';
     $resolveFieldName = 'attribute_contributions[' . $index . '][resolves_to_spec]';
+    $componentLabelFieldName = 'attribute_contributions[' . $index . '][include_in_component_label]';
     $currentValue = (string) ($row['value'] ?? '');
     $resolveChecked = !empty($row['resolves_to_spec']);
+    $componentLabelChecked = !empty($row['include_in_component_label']);
     $constraints = $definition?->constraints ?? [];
     $activeOptions = $definition?->options?->filter(fn ($option) => (bool) $option->active)->values() ?? collect();
     $constraintHints = collect();
@@ -111,15 +113,24 @@
         @endif
     </p>
 
-    @if($definition->isNumericDatatype())
-        <div class="checkbox" style="margin-top:10px; margin-bottom:0;">
-            <label>
-                <input type="checkbox" name="{{ $resolveFieldName }}" value="1" @checked($resolveChecked)>
-                {{ __('Use for calculated specification') }}
-            </label>
-        </div>
-        <p class="help-block text-muted" style="margin-bottom:0;">{{ __('Use this component value as the model or asset specification instead of a manual attribute value.') }}</p>
-    @endif
+    <div class="checkbox" style="margin-top:10px; margin-bottom:0;">
+        <label>
+            <input type="checkbox" name="{{ $resolveFieldName }}" value="1" @checked($resolveChecked) data-contribution-resolves-input>
+            {{ __('Show as asset spec') }}
+        </label>
+    </div>
+    <div class="checkbox" style="margin-top:6px; margin-bottom:0;">
+        <label>
+            <input type="checkbox" name="{{ $componentLabelFieldName }}" value="1" @checked($componentLabelChecked) data-contribution-component-label-input>
+            {{ __('Use in component label') }}
+        </label>
+    </div>
+    <p class="help-block text-muted" style="margin-bottom:0;">
+        {{ __('Used when an asset specification displays component labels.') }}
+        @can('update', $definition)
+            <a href="{{ route('attributes.edit', $definition) }}">{{ __('Edit attribute') }}</a>
+        @endcan
+    </p>
 @else
     <input type="text"
            class="form-control"

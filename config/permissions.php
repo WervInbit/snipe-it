@@ -91,6 +91,13 @@ return [
             'display'    => true,
         ],
 
+        [
+            'permission' => 'assets.sale_transition',
+            'label'      => 'Move Ready/Sold',
+            'note'       => 'Allows the user to move assets into ready-for-sale and sold lifecycle statuses.',
+            'display'    => true,
+        ],
+
 
         [
             'permission' => 'assets.view.requestable',

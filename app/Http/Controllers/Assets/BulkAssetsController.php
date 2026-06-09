@@ -270,7 +270,7 @@ class BulkAssetsController extends Controller
 
         if ($request->filled('status_id')) {
             $status = Statuslabel::find($request->input('status_id'));
-            if ($status && $this->statusRequiresTestAck($status->name)) {
+            if ($status && $this->statusRequiresTestAck($status)) {
                 $warnings = [];
                 foreach ($assets as $asset) {
                     $issues = $this->testIssueLines($asset);
@@ -287,7 +287,7 @@ class BulkAssetsController extends Controller
                 }
             }
 
-            if ($status && $this->statusRequiresComponentIssueAck($status->name) && !$request->boolean('ack_component_issues')) {
+            if ($status && $this->statusRequiresComponentIssueAck($status) && !$request->boolean('ack_component_issues')) {
                 $warnings = [];
                 $issueService = app(AttachedComponentIssueService::class);
 
@@ -712,39 +712,24 @@ class BulkAssetsController extends Controller
         return false;
     }
 
-    private function statusRequiresComponentIssueAck(?string $statusName): bool
+    private function statusRequiresComponentIssueAck(?Statuslabel $status): bool
     {
-        if (!$statusName) {
+        if (!$status) {
             return false;
         }
 
-        $name = strtolower(trim($statusName));
+        $name = strtolower(trim((string) $status->name));
 
-        return str_contains($name, 'ready for sale')
+        return Asset::isPreSaleStatus($status)
             || $name === 'for sale'
             || str_starts_with($name, 'for sale ')
             || str_contains($name, 'selling')
-            || $name === 'sold'
-            || str_starts_with($name, 'sold ');
+            || Asset::isSoldStatus($status);
     }
 
-    private function statusRequiresTestAck(?string $statusName): bool
+    private function statusRequiresTestAck(?Statuslabel $status): bool
     {
-        if (!$statusName) {
-            return false;
-        }
-
-        $name = strtolower(trim($statusName));
-
-        if (str_contains($name, 'ready for sale')) {
-            return true;
-        }
-
-        if ($name === 'sold' || str_starts_with($name, 'sold ')) {
-            return true;
-        }
-
-        return false;
+        return Asset::statusRequiresTestAck($status);
     }
 
     private function testIssueLines(Asset $asset): Collection

@@ -18,8 +18,9 @@
 }
 .spec-detail-row .col-md-3,
 .spec-detail-row .col-md-9 {
+    border-top: 0 !important;
     overflow-wrap: break-word;
-    word-break: break-word;
+    word-break: normal;
 }
 .spec-detail-row--override {
     background-color: #eef5ff;
@@ -29,7 +30,23 @@
     font-weight: 600;
 }
 .spec-detail-meta {
+    display: block !important;
+    border-top: 0 !important;
     margin-top: 6px;
+    padding: 0 !important;
+    overflow-wrap: anywhere;
+    word-break: normal;
+}
+.spec-source-indicator {
+    display: inline-flex !important;
+    align-items: center;
+    margin-left: 6px;
+    color: #6b7280;
+    cursor: help;
+    vertical-align: middle;
+}
+.spec-source-indicator .fas {
+    font-size: 0.9em;
 }
 .test-photo-strip {
     display: flex;
@@ -767,15 +784,35 @@
                                     @if ($asset->assetstatus)
                                         @php
                                             $__status_options = $statuslabel_list;
-                                            $user = auth()->user();
-                                            $isAdmin = $user && method_exists($user, 'isAdmin') ? $user->isAdmin() : false;
-                                            $isSuper = $user && method_exists($user, 'isSuperUser') ? $user->isSuperUser() : false;
-                                            if (!($isAdmin || $isSuper)) {
-                                                $__status_options = collect($__status_options)
-                                                    ->reject(function($label){ return stripos($label, 'Ready for Sale') !== false; })
-                                                    ->all();
-                                            }
                                             $selectedStatus = old('status_id', $asset->status_id);
+                                            $canUpdateStatus = Gate::allows('update', $asset);
+                                            $canMoveSaleLifecycle = Gate::allows('assets.sale_transition');
+                                            $canUseDetailStatusForm = $canUpdateStatus || $canMoveSaleLifecycle;
+                                            $statusLabelsById = \App\Models\Statuslabel::query()
+                                                ->whereIn('id', array_keys($__status_options))
+                                                ->get()
+                                                ->keyBy('id');
+                                            $__status_options = collect($__status_options)
+                                                ->filter(function ($label, $id) use ($selectedStatus, $statusLabelsById, $canUpdateStatus, $canMoveSaleLifecycle) {
+                                                    if ((string) $selectedStatus === (string) $id) {
+                                                        return true;
+                                                    }
+
+                                                    $statusLabel = $statusLabelsById->get((int) $id);
+                                                    $isPreSale = \App\Models\Asset::isPreSaleStatus($statusLabel);
+                                                    $isSold = \App\Models\Asset::isSoldStatus($statusLabel);
+
+                                                    if (!$canUpdateStatus) {
+                                                        return ($isPreSale || $isSold) && $canMoveSaleLifecycle;
+                                                    }
+
+                                                    if (($isPreSale || $isSold) && !$canMoveSaleLifecycle) {
+                                                        return false;
+                                                    }
+
+                                                    return true;
+                                                })
+                                                ->all();
                                             $selectedQualityGrade = old('quality_grade', $asset->quality_grade);
                                             $qualityOptions = \App\Models\Asset::qualityGradeOptions();
                                             $statusType = $asset->assetstatus->getStatuslabelType();
@@ -784,7 +821,7 @@
                                         @php
                                             $detailStatusFormId = 'asset-detail-status-form-'.$asset->id;
                                         @endphp
-                                        @can('update', $asset)
+                                        @if ($canUseDetailStatusForm)
                                             <form id="{{ $detailStatusFormId }}" method="POST" action="{{ route('hardware.status.update', $asset) }}" style="display:none;">
                                                 @csrf
                                                 @method('PATCH')
@@ -795,7 +832,7 @@
                                                     <input type="hidden" name="ack_component_issues" value="1">
                                                 @endif
                                             </form>
-                                        @endcan
+                                        @endif
 
                                         <div class="row asset-detail-edit-row" id="asset-status-row">
                                             <div class="col-md-3">
@@ -816,7 +853,7 @@
                                                     <label class="label label-default">{{ $statusType }}</label>
                                                     </div>
 
-                                                    @can('update', $asset)
+                                                    @if ($canUseDetailStatusForm)
                                                         @if (session('requires_ack_failed_tests'))
                                                             <div class="alert alert-warning asset-detail-control" role="alert">
                                                                 <p class="mb-2">{{ trans('tests.status_change_prompt') }}</p>
@@ -860,7 +897,7 @@
                                                             </select>
                                                             {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                                                         </div>
-                                                    @endcan
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -985,6 +1022,10 @@
                                                 $displayValue = $attribute->formattedValue();
                                                 $modelDisplay = $attribute->formattedModelValue();
                                                 $manualModelDisplay = $attribute->formattedManualModelValue();
+                                                $modelSourceLabel = $attribute->modelSourceLabel();
+                                                if ($modelSourceLabel === __('Calculated from components')) {
+                                                    $modelSourceLabel = __('Component defaults');
+                                                }
                                                 $isOverride = $attribute->isOverride;
                                                 $sourceLabel = $attribute->sourceLabel();
                                                 $sourceSummary = $attribute->contributorSummary($attribute->source);
@@ -996,6 +1037,31 @@
                                                 $calculatedExpectedSummary = $attribute->calculatedExpectedContributorSummary();
                                                 $calculatedExtraSummary = $attribute->calculatedExtraContributorSummary();
                                                 $hierarchyOverlapSummary = $attribute->hierarchyOverlapSummary();
+                                                $isCalculatedFromComponents = $attribute->isCalculatedFromComponents();
+                                                $calculatedExpectedSubtotalText = ($calculatedExpectedSubtotal !== null && $calculatedExpectedSubtotal !== '')
+                                                    ? __('Default subtotal: :value', ['value' => $calculatedExpectedSubtotal])
+                                                    : null;
+                                                $calculatedExpectedSummaryText = ($calculatedExpectedSummary !== null && $calculatedExpectedSummary !== '')
+                                                    ? __('Default parts: :value', ['value' => $calculatedExpectedSummary])
+                                                    : null;
+                                                $calculatedExtraSubtotalText = ($calculatedExtraSubtotal !== null && $calculatedExtraSubtotal !== '')
+                                                    ? __('Extras/custom subtotal: :value', ['value' => $calculatedExtraSubtotal])
+                                                    : null;
+                                                $calculatedExtraSummaryText = ($calculatedExtraSummary !== null && $calculatedExtraSummary !== '')
+                                                    ? __('Extras/custom on top: :value', ['value' => $calculatedExtraSummary])
+                                                    : null;
+                                                $hasCalculatedException = $isCalculatedFromComponents && (
+                                                    $isOverride
+                                                    || $calculatedExtraSubtotalText
+                                                    || $calculatedExtraSummaryText
+                                                    || $attribute->hasReducedExpectedBaseline()
+                                                    || $hierarchyOverlapSummary
+                                                );
+                                                $compactCalculatedSource = $isCalculatedFromComponents && ! $hasCalculatedException;
+                                                $calculatedSourceTooltip = ($calculatedExpectedSummary !== null && $calculatedExpectedSummary !== '')
+                                                    ? __('Parts: :value', ['value' => $calculatedExpectedSummary])
+                                                    : __('Parts used for this value');
+                                                $compactCalculatedAriaLabel = __('Parts used for this value');
                                             @endphp
                                             <div class="row spec-detail-row {{ $isOverride ? 'spec-detail-row--override' : '' }}">
                                                 <div class="col-md-3">
@@ -1007,10 +1073,15 @@
                                                     @else
                                                         {{ __('Not specified') }}
                                                     @endif
+                                                    @if($compactCalculatedSource)
+                                                        <span class="spec-source-indicator" data-tooltip="true" data-placement="top" title="{{ $calculatedSourceTooltip }}" aria-label="{{ $compactCalculatedAriaLabel }}">
+                                                            <i class="fas fa-cubes" aria-hidden="true"></i>
+                                                        </span>
+                                                    @endif
 
-                                                    @if(($showSourceLabel && $sourceLabel) || $isOverride)
+                                                    @if((!$compactCalculatedSource && !$isCalculatedFromComponents && $showSourceLabel && $sourceLabel) || $isOverride)
                                                         <div class="spec-detail-meta">
-                                                            @if($showSourceLabel && $sourceLabel)
+                                                            @if(!$compactCalculatedSource && !$isCalculatedFromComponents && $showSourceLabel && $sourceLabel)
                                                                 <span class="label label-default">{{ $sourceLabel }}</span>
                                                             @endif
                                                             @if($isOverride)
@@ -1019,37 +1090,37 @@
                                                         </div>
                                                     @endif
 
-                                                    @if($attribute->source === 'calculated_components')
-                                                        @if($calculatedExpectedSubtotal)
+                                                    @if($isCalculatedFromComponents && ! $compactCalculatedSource)
+                                                        @if($calculatedExpectedSubtotalText)
                                                             <div class="spec-detail-meta text-muted">
-                                                                {{ __('Expected/default subtotal: :value', ['value' => $calculatedExpectedSubtotal]) }}
+                                                                {{ $calculatedExpectedSubtotalText }}
                                                             </div>
                                                         @endif
 
-                                                        @if($calculatedExpectedSummary)
+                                                        @if($calculatedExpectedSummaryText)
                                                             <div class="spec-detail-meta text-muted">
-                                                                {{ __('Expected/default parts: :value', ['value' => $calculatedExpectedSummary]) }}
+                                                                {{ $calculatedExpectedSummaryText }}
                                                             </div>
                                                         @endif
 
-                                                        @if($calculatedExtraSubtotal)
+                                                        @if($calculatedExtraSubtotalText)
                                                             <div class="spec-detail-meta text-muted">
-                                                                {{ __('Extras/custom subtotal: :value', ['value' => $calculatedExtraSubtotal]) }}
+                                                                {{ $calculatedExtraSubtotalText }}
                                                             </div>
                                                         @endif
 
-                                                        @if($calculatedExtraSummary)
+                                                        @if($calculatedExtraSummaryText)
                                                             <div class="spec-detail-meta text-muted">
-                                                                {{ __('Extras/custom on top: :value', ['value' => $calculatedExtraSummary]) }}
+                                                                {{ $calculatedExtraSummaryText }}
                                                             </div>
                                                         @endif
-                                                    @elseif($showContributorSummary && $sourceSummary)
+                                                    @elseif(!$isCalculatedFromComponents && $showContributorSummary && $sourceSummary)
                                                         <div class="spec-detail-meta text-muted">{{ __('Contributors: :value', ['value' => $sourceSummary]) }}</div>
                                                     @endif
 
                                                     @if($isOverride && $modelDisplay)
                                                         <div class="spec-detail-meta text-muted">
-                                                            {{ __('Inherited (:source): :value', ['source' => $attribute->modelSourceLabel(), 'value' => $modelDisplay]) }}
+                                                            {{ __('Inherited (:source): :value', ['source' => $modelSourceLabel, 'value' => $modelDisplay]) }}
                                                         </div>
                                                     @elseif(
                                                         !$isOverride
@@ -1058,17 +1129,17 @@
                                                         && $calculatedBaselineTargetDisplay
                                                     )
                                                         <div class="spec-detail-meta text-muted">
-                                                            {{ __('Expected baseline target: :value', ['value' => $calculatedBaselineTargetDisplay]) }}
+                                                            {{ __('Default baseline target: :value', ['value' => $calculatedBaselineTargetDisplay]) }}
                                                         </div>
                                                     @elseif(!$isOverride && $attribute->source === 'installed_components' && $modelDisplay)
                                                         <div class="spec-detail-meta text-muted">
-                                                            {{ __('Model baseline (:source): :value', ['source' => $attribute->modelSourceLabel(), 'value' => $modelDisplay]) }}
+                                                            {{ __('Model baseline (:source): :value', ['source' => $modelSourceLabel, 'value' => $modelDisplay]) }}
                                                         </div>
                                                     @endif
 
                                                     @if($attribute->hasReducedExpectedBaseline())
                                                         <div class="spec-detail-meta text-warning">
-                                                            {{ __('Current calculated value is below the expected baseline because expected components were removed.') }}
+                                                            {{ __('Current value is below the default baseline because default parts were removed.') }}
                                                         </div>
                                                     @endif
 

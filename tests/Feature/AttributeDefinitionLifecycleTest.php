@@ -85,6 +85,37 @@ class AttributeDefinitionLifecycleTest extends TestCase
         ]);
     }
 
+    public function test_component_spec_display_mode_can_be_configured(): void
+    {
+        $user = $this->makeSuperUser();
+
+        $this->actingAs($user)
+            ->post(route('attributes.store'), [
+                'label' => 'Port Connector',
+                'datatype' => AttributeDefinition::DATATYPE_ENUM,
+                'component_spec_display_mode' => AttributeDefinition::COMPONENT_SPEC_DISPLAY_COMPONENT_LABELS,
+            ])
+            ->assertRedirect();
+
+        $attribute = AttributeDefinition::query()->where('key', 'port_connector')->firstOrFail();
+
+        $this->assertSame(AttributeDefinition::COMPONENT_SPEC_DISPLAY_COMPONENT_LABELS, $attribute->component_spec_display_mode);
+
+        $this->actingAs($user)
+            ->put(route('attributes.update', $attribute), [
+                'label' => 'Port Connector',
+                'key' => $attribute->key,
+                'datatype' => $attribute->datatype,
+                'component_spec_display_mode' => AttributeDefinition::COMPONENT_SPEC_DISPLAY_VALUE_LABELS,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('attribute_definitions', [
+            'id' => $attribute->id,
+            'component_spec_display_mode' => AttributeDefinition::COMPONENT_SPEC_DISPLAY_VALUE_LABELS,
+        ]);
+    }
+
     public function test_create_manual_override_sanitizes_key_and_applies_suffix_on_collision(): void
     {
         $user = $this->makeSuperUser();

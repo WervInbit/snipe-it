@@ -53,9 +53,10 @@ class ComponentDefinitionAttributeManager
                 $attributeSearch = trim((string) ($row['attribute_search'] ?? ''));
                 $value = $row['value'] ?? null;
                 $resolvesToSpec = filter_var($row['resolves_to_spec'] ?? false, FILTER_VALIDATE_BOOL);
+                $includeInComponentLabel = filter_var($row['include_in_component_label'] ?? false, FILTER_VALIDATE_BOOL);
 
                 if (!$definitionId) {
-                    if ($attributeSearch !== '' || ($value !== null && $value !== '') || $resolvesToSpec) {
+                    if ($attributeSearch !== '' || ($value !== null && $value !== '') || $resolvesToSpec || $includeInComponentLabel) {
                         throw ValidationException::withMessages([
                             'attribute_contributions.' . $index . '.attribute_definition_id' => [__('Select a valid attribute.')],
                         ]);
@@ -107,6 +108,7 @@ class ComponentDefinitionAttributeManager
                         'raw_value' => $normalized->rawValue,
                         'attribute_option_id' => $normalized->attributeOptionId,
                         'resolves_to_spec' => $resolvesToSpec,
+                        'include_in_component_label' => $includeInComponentLabel,
                         'sort_order' => $index,
                     ]
                 );

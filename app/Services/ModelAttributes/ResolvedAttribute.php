@@ -31,12 +31,12 @@ class ResolvedAttribute
 
     public function formattedValue(): ?string
     {
-        return $this->formatValue($this->value);
+        return $this->formatValue($this->meta['display_value'] ?? $this->value, $this->option);
     }
 
     public function formattedModelValue(): ?string
     {
-        return $this->formatValue($this->modelValue);
+        return $this->formatValue($this->meta['model_display_value'] ?? $this->modelValue);
     }
 
     public function formattedManualModelValue(): ?string
@@ -46,7 +46,7 @@ class ResolvedAttribute
 
     public function formattedCalculatedBaselineValue(): ?string
     {
-        return $this->formatValue($this->meta['expected_component_baseline_value'] ?? null);
+        return $this->formatValue($this->meta['expected_component_baseline_display_value'] ?? $this->meta['expected_component_baseline_value'] ?? null);
     }
 
     public function formattedCalculatedExpectedSubtotal(): ?string
@@ -269,7 +269,7 @@ class ResolvedAttribute
         return $hasValue ? $this->trimTrailingZeros($sum) : null;
     }
 
-    private function formatValue(?string $value): ?string
+    private function formatValue(?string $value, ?AttributeOption $option = null): ?string
     {
         if ($value === null) {
             return null;
@@ -277,7 +277,34 @@ class ResolvedAttribute
 
         return match ($this->definition->datatype) {
             AttributeDefinition::DATATYPE_BOOL => $value === '1' ? __('Yes') : __('No'),
+            AttributeDefinition::DATATYPE_ENUM => $option && $value === $option->value ? $option->label : $value,
+            AttributeDefinition::DATATYPE_INT,
+            AttributeDefinition::DATATYPE_DECIMAL => $this->formatNumericValue($value),
             default => $value,
+        };
+    }
+
+    private function formatNumericValue(string $value): string
+    {
+        $unit = trim((string) $this->definition->unit);
+
+        if ($unit === '' || !is_numeric($value)) {
+            return $value;
+        }
+
+        $displayUnit = $this->displayUnit($unit);
+        $separator = in_array($displayUnit, ['"', '%'], true) ? '' : ' ';
+
+        return $value . $separator . $displayUnit;
+    }
+
+    private function displayUnit(string $unit): string
+    {
+        return match (strtolower($unit)) {
+            'in',
+            'inch',
+            'inches' => '"',
+            default => $unit,
         };
     }
 

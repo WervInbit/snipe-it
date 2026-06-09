@@ -82,7 +82,7 @@ class AttributeTestSeeder extends Seeder
             ],
             'bluetooth' => [
                 'name' => 'Bluetooth',
-                'component_definitions' => ['Wireless Module'],
+                'component_definitions' => ['Wireless Module', 'Wireless - Generic', 'Bluetooth - Generic'],
                 'instructions' => 'Pair een bluetooth apparaat.',
             ],
             'cpu' => [
@@ -107,7 +107,7 @@ class AttributeTestSeeder extends Seeder
             ],
             'ethernet' => [
                 'name' => 'Ethernet',
-                'component_definitions' => ['RJ-45 Ethernet Port'],
+                'component_definition_prefixes' => ['RJ-45 Ethernet Port'],
                 'instructions' => 'Verbind een ethernet kabel en zorg dat het internet nog werkt zonder wifi.',
             ],
             'face_unlock' => [
@@ -172,7 +172,7 @@ class AttributeTestSeeder extends Seeder
             ],
             'wifi' => [
                 'name' => 'Wifi',
-                'component_definitions' => ['Wireless Module'],
+                'component_definitions' => ['Wireless Module', 'Wireless - Generic'],
                 'instructions' => 'Connect to the designated Wi-Fi network and confirm internet access.',
             ],
             'igpu' => [

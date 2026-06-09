@@ -4,6 +4,7 @@ namespace App\Services\ModelAttributes;
 
 use App\Models\AttributeDefinition;
 use App\Models\AttributeOption;
+use App\Models\ComponentDefinition;
 use App\Models\ComponentDefinitionAttribute;
 use App\Models\ComponentDefinitionSubcomponentTemplate;
 use App\Models\ComponentInstance;
@@ -35,6 +36,10 @@ class ComponentAttributeAggregator
             }
 
             $parentKey = 'model_template:' . $template->id;
+            $componentLabel = $this->componentSpecLabelForDefinition(
+                $template->componentDefinition,
+                $template->expected_name ?: $template->componentDefinition->name
+            );
 
             foreach ($template->componentDefinition->attributeContributions as $contribution) {
                 if (!$this->shouldAggregateContribution($contribution, $specOnly)) {
@@ -48,6 +53,7 @@ class ComponentAttributeAggregator
                     'option' => $contribution->option,
                     'quantity' => max(1, (int) $template->expected_qty),
                     'label' => $template->expected_name,
+                    'component_label' => $componentLabel,
                     'component_definition_id' => $template->component_definition_id,
                     'model_number_component_template_id' => $template->id,
                     'slot_name' => $template->slot_name,
@@ -91,6 +97,8 @@ class ComponentAttributeAggregator
                 continue;
             }
 
+            $componentLabel = $this->componentSpecLabelForComponent($component);
+
             foreach ($this->effectiveContributionValues($component, $specOnly) as $contribution) {
                 $records->push([
                     'definition' => $contribution['definition'],
@@ -99,6 +107,7 @@ class ComponentAttributeAggregator
                     'option' => $contribution['option'],
                     'quantity' => 1,
                     'label' => $component->display_name ?: $component->component_tag,
+                    'component_label' => $componentLabel,
                     'component_definition_id' => $component->component_definition_id,
                     'component_instance_id' => $component->id,
                     'parent_component_instance_id' => $component->parent_component_instance_id,
@@ -133,6 +142,9 @@ class ComponentAttributeAggregator
             $contributions = $row->component
                 ? $this->effectiveContributionValues($row->component, true)
                 : $this->definitionContributionValues($row->template?->componentDefinition?->attributeContributions ?? collect(), true);
+            $componentLabel = $row->component
+                ? $this->componentSpecLabelForComponent($row->component)
+                : $this->componentSpecLabelForDefinition($row->template?->componentDefinition, $row->name);
 
             foreach ($contributions as $contribution) {
                 $records->push([
@@ -142,6 +154,7 @@ class ComponentAttributeAggregator
                     'option' => $contribution['option'],
                     'quantity' => $row->component ? 1 : max(1, $row->quantity),
                     'label' => $row->name,
+                    'component_label' => $componentLabel,
                     'component_definition_id' => $row->component?->component_definition_id ?? $row->template?->component_definition_id,
                     'component_instance_id' => $row->component?->id,
                     'parent_component_instance_id' => $row->component?->parent_component_instance_id,
@@ -190,17 +203,21 @@ class ComponentAttributeAggregator
                     return null;
                 }
 
-                [$value, $rawValue, $option] = match ($definition->datatype) {
-                    AttributeDefinition::DATATYPE_INT => $this->aggregateInteger($group),
-                    AttributeDefinition::DATATYPE_DECIMAL => $this->aggregateDecimal($group),
-                    AttributeDefinition::DATATYPE_BOOL => $this->aggregateBoolean($group),
+                [$value, $rawValue, $option, $displayValue] = match ($definition->datatype) {
+                    AttributeDefinition::DATATYPE_INT => [...$this->aggregateInteger($group), null],
+                    AttributeDefinition::DATATYPE_DECIMAL => [...$this->aggregateDecimal($group), null],
+                    AttributeDefinition::DATATYPE_BOOL => [...$this->aggregateBoolean($group), null],
                     AttributeDefinition::DATATYPE_ENUM,
                     AttributeDefinition::DATATYPE_TEXT => $this->aggregateDistinctStrings($group),
-                    default => [null, null, null],
+                    default => [null, null, null, null],
                 };
 
                 if ($value === null) {
                     return null;
+                }
+
+                if ($definition->usesComponentLabelsForSpecDisplay()) {
+                    $displayValue = $this->aggregateComponentLabels($group);
                 }
 
                 $suppressedRecords = $suppressedRecordsByDefinition->get($definition->id, collect());
@@ -214,6 +231,7 @@ class ComponentAttributeAggregator
                     $group->map(function (array $record): array {
                         return [
                             'label' => $record['label'] ?? null,
+                            'component_label' => $record['component_label'] ?? null,
                             'value' => $record['value'] ?? null,
                             'raw_value' => $record['raw_value'] ?? null,
                             'quantity' => $record['quantity'] ?? 1,
@@ -231,6 +249,7 @@ class ComponentAttributeAggregator
                     })->values()->all(),
                     [
                         'resolves_to_spec' => $group->contains(fn (array $record) => !empty($record['resolves_to_spec'])),
+                        'display_value' => $displayValue,
                         'hierarchy_overlap_warnings' => $this->hierarchyOverlapWarnings($suppressedRecords),
                     ]
                 );
@@ -290,6 +309,7 @@ class ComponentAttributeAggregator
                     'raw_value' => $contribution->raw_value,
                     'option' => $contribution->option,
                     'resolves_to_spec' => (bool) $contribution->resolves_to_spec,
+                    'include_in_component_label' => (bool) ($definitionContribution?->include_in_component_label ?? false),
                     'source' => $instanceAttribute ? 'instance' : 'definition',
                 ];
             })
@@ -475,6 +495,10 @@ class ComponentAttributeAggregator
             $recordQuantity = $quantityIsFinal
                 ? max(1, $quantity)
                 : max(1, $quantity) * max(1, (int) $template->expected_qty);
+            $componentLabel = $this->componentSpecLabelForDefinition(
+                $childDefinition,
+                $template->expected_name ?: $childDefinition->name
+            );
 
             foreach ($this->definitionContributionValues($childDefinition->attributeContributions ?? collect(), true) as $contribution) {
                 $records->push([
@@ -484,6 +508,7 @@ class ComponentAttributeAggregator
                     'option' => $contribution['option'],
                     'quantity' => $recordQuantity,
                     'label' => $template->expected_name ?: $childDefinition->name,
+                    'component_label' => $componentLabel,
                     'component_definition_id' => $childDefinition->id,
                     'component_instance_id' => null,
                     'parent_component_instance_id' => $parentComponentInstanceId,
@@ -510,9 +535,141 @@ class ComponentAttributeAggregator
                 'raw_value' => $contribution->raw_value,
                 'option' => $contribution->option,
                 'resolves_to_spec' => (bool) $contribution->resolves_to_spec,
+                'include_in_component_label' => (bool) $contribution->include_in_component_label,
                 'source' => 'definition',
             ])
             ->values();
+    }
+
+    private function componentSpecLabelForComponent(ComponentInstance $component): string
+    {
+        $definition = $component->componentDefinition;
+        $component->loadMissing([
+            'componentDefinition.attributeContributions',
+            'instanceAttributes',
+        ]);
+
+        if ($definition && trim((string) $definition->spec_display_label) !== '' && !$this->hasLabelContributorInstanceOverride($component)) {
+            return trim((string) $definition->spec_display_label);
+        }
+
+        return $this->buildComponentSpecLabel(
+            $this->effectiveContributionValues($component, false),
+            $component->display_name ?: ($component->component_tag ?: $definition?->name)
+        );
+    }
+
+    private function hasLabelContributorInstanceOverride(ComponentInstance $component): bool
+    {
+        $labelDefinitionIds = collect($component->componentDefinition?->attributeContributions ?? [])
+            ->filter(fn (ComponentDefinitionAttribute $contribution) => (bool) $contribution->include_in_component_label)
+            ->pluck('attribute_definition_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        if ($labelDefinitionIds === []) {
+            return false;
+        }
+
+        return collect($component->instanceAttributes ?? [])
+            ->contains(fn (ComponentInstanceAttribute $attribute) => in_array((int) $attribute->attribute_definition_id, $labelDefinitionIds, true));
+    }
+
+    private function componentSpecLabelForDefinition(?ComponentDefinition $definition, ?string $fallback = null): string
+    {
+        if (!$definition) {
+            return trim((string) $fallback);
+        }
+
+        if (trim((string) $definition->spec_display_label) !== '') {
+            return trim((string) $definition->spec_display_label);
+        }
+
+        $definition->loadMissing([
+            'attributeContributions.definition.options',
+            'attributeContributions.option',
+        ]);
+
+        return $this->buildComponentSpecLabel(
+            $this->definitionContributionValues($definition->attributeContributions ?? collect(), false),
+            $fallback ?: $definition->name
+        );
+    }
+
+    private function buildComponentSpecLabel(Collection $contributions, ?string $fallback): string
+    {
+        $fragments = $contributions
+            ->filter(fn (array $contribution) => !empty($contribution['include_in_component_label']))
+            ->map(fn (array $contribution) => $this->displayValueForContribution($contribution, includeUnits: true))
+            ->filter(fn (?string $value) => $value !== null && trim($value) !== '')
+            ->values();
+
+        if ($fragments->isEmpty()) {
+            return trim((string) $fallback);
+        }
+
+        return $fragments->implode(' ');
+    }
+
+    private function displayValueForContribution(array $contribution, bool $includeUnits = false): ?string
+    {
+        $definition = $contribution['definition'] ?? null;
+        $value = trim((string) ($contribution['value'] ?? ''));
+
+        if ($value === '') {
+            return null;
+        }
+
+        if (($contribution['option'] ?? null) instanceof AttributeOption) {
+            return $contribution['option']->label ?: $value;
+        }
+
+        if ($definition instanceof AttributeDefinition && $definition->datatype === AttributeDefinition::DATATYPE_BOOL) {
+            return $value === '1' ? $definition->label : null;
+        }
+
+        if ($includeUnits && $definition instanceof AttributeDefinition && $definition->unit && $definition->isNumericDatatype()) {
+            return trim($value . ' ' . $definition->unit);
+        }
+
+        return $value;
+    }
+
+    private function aggregateComponentLabels(Collection $group): ?string
+    {
+        $labels = [];
+
+        foreach ($group as $record) {
+            $label = trim((string) ($record['component_label'] ?? ''));
+            if ($label === '') {
+                continue;
+            }
+
+            $key = mb_strtolower($label);
+            if (!isset($labels[$key])) {
+                $labels[$key] = [
+                    'label' => $label,
+                    'quantity' => 0,
+                ];
+            }
+
+            $labels[$key]['quantity'] += max(1, (int) ($record['quantity'] ?? 1));
+        }
+
+        if ($labels === []) {
+            return null;
+        }
+
+        return collect($labels)
+            ->map(function (array $item): string {
+                $quantity = max(1, (int) $item['quantity']);
+
+                return $quantity > 1
+                    ? __(':countx :label', ['count' => $quantity, 'label' => $item['label']])
+                    : $item['label'];
+            })
+            ->values()
+            ->implode(', ');
     }
 
     /**
@@ -571,11 +728,12 @@ class ComponentAttributeAggregator
     }
 
     /**
-     * @return array{0: ?string, 1: ?string, 2: ?AttributeOption}
+     * @return array{0: ?string, 1: ?string, 2: ?AttributeOption, 3: ?string}
      */
     private function aggregateDistinctStrings(Collection $group): array
     {
         $distinctValues = [];
+        $displayValues = [];
         $optionsByKey = [];
 
         foreach ($group as $record) {
@@ -590,19 +748,21 @@ class ComponentAttributeAggregator
             }
 
             $distinctValues[$key] = $value;
+            $displayValues[$key] = $this->displayValueForContribution($record) ?? $value;
             $optionsByKey[$key] = $record['option'] instanceof AttributeOption ? $record['option'] : null;
         }
 
         if ($distinctValues === []) {
-            return [null, null, null];
+            return [null, null, null, null];
         }
 
         $values = array_values($distinctValues);
         $value = count($values) === 1 ? $values[0] : implode(', ', $values);
+        $display = implode(', ', array_values($displayValues));
         $firstKey = array_key_first($distinctValues);
         $option = count($values) === 1 ? ($optionsByKey[$firstKey] ?? null) : null;
 
-        return [$value, $value, $option];
+        return [$value, $value, $option, $display !== $value ? $display : null];
     }
 
     private function trimTrailingZeros(float $value): string

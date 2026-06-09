@@ -292,6 +292,7 @@ class ComponentHistoryTest extends TestCase
             'key' => 'ram_capacity_gb',
             'label' => 'RAM Capacity',
             'datatype' => AttributeDefinition::DATATYPE_INT,
+            'unit' => 'GB',
             'allow_asset_override' => true,
         ]);
         $definition = ComponentDefinition::factory()->create([
@@ -321,9 +322,58 @@ class ComponentHistoryTest extends TestCase
         $this->actingAs($actor)
             ->get(route('hardware.show', $asset))
             ->assertOk()
-            ->assertSeeText('Expected/default subtotal: 32')
-            ->assertSeeText('Expected/default parts: Standard Memory x2')
-            ->assertSeeText('Extras/custom subtotal: 16')
-            ->assertSeeText('Extras/custom on top: Expansion Memory');
+            ->assertSeeText('48 GB')
+            ->assertSeeText('Default subtotal: 32 GB')
+            ->assertSeeText('Default parts: Standard Memory x2')
+            ->assertSeeText('Extras/custom subtotal: 16 GB')
+            ->assertSeeText('Extras/custom on top: Expansion Memory')
+            ->assertDontSeeText('Calculated from components');
+    }
+
+    public function testHardwareDetailsCompactRoutineCalculatedComponentBreakdown(): void
+    {
+        $actor = User::factory()->superuser()->create();
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $asset = Asset::factory()->for($model, 'model')->create([
+            'model_number_id' => $modelNumber->id,
+        ]);
+        $capacity = AttributeDefinition::create([
+            'key' => 'ram_capacity_gb',
+            'label' => 'RAM Capacity',
+            'datatype' => AttributeDefinition::DATATYPE_INT,
+            'unit' => 'GB',
+            'allow_asset_override' => true,
+        ]);
+        $definition = ComponentDefinition::factory()->create([
+            'name' => 'Standard Memory',
+        ]);
+
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $definition->id,
+            'attribute_definition_id' => $capacity->id,
+            'value' => '16',
+            'raw_value' => '16',
+            'sort_order' => 0,
+            'resolves_to_spec' => true,
+        ]);
+
+        ModelNumberComponentTemplate::factory()->for($modelNumber)->create([
+            'component_definition_id' => $definition->id,
+            'expected_name' => 'Standard Memory',
+            'expected_qty' => 2,
+        ]);
+
+        $this->actingAs($actor)
+            ->get(route('hardware.show', $asset))
+            ->assertOk()
+            ->assertSeeText('32 GB')
+            ->assertSee('class="spec-source-indicator"', false)
+            ->assertSee('data-tooltip="true"', false)
+            ->assertSee('title="Parts: Standard Memory x2"', false)
+            ->assertDontSeeText('Calculated from components')
+            ->assertDontSeeText('Default subtotal: 32 GB')
+            ->assertDontSeeText('Default parts: Standard Memory x2')
+            ->assertDontSee('Expected/default', false);
     }
 }

@@ -119,6 +119,194 @@ class ComponentDerivedAttributeResolutionTest extends TestCase
         $this->assertSame('Display 15.6 FHD', $resolved['display_resolution']->contributorSummary('calculated_components'));
     }
 
+    public function test_component_label_display_mode_groups_and_counts_generated_labels(): void
+    {
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $portConnector = AttributeDefinition::create([
+            'key' => 'port_connector_type',
+            'label' => 'Port Connector',
+            'datatype' => AttributeDefinition::DATATYPE_ENUM,
+            'component_spec_display_mode' => AttributeDefinition::COMPONENT_SPEC_DISPLAY_COMPONENT_LABELS,
+        ]);
+        $usbAOption = $portConnector->options()->create([
+            'value' => 'usb_a',
+            'label' => 'USB-A',
+            'active' => true,
+            'sort_order' => 0,
+        ]);
+        $usbCOption = $portConnector->options()->create([
+            'value' => 'usb_c',
+            'label' => 'USB-C',
+            'active' => true,
+            'sort_order' => 1,
+        ]);
+        $usbStandard = AttributeDefinition::create([
+            'key' => 'usb_standard',
+            'label' => 'USB Standard',
+            'datatype' => AttributeDefinition::DATATYPE_ENUM,
+        ]);
+        $usb30Option = $usbStandard->options()->create([
+            'value' => 'usb_3_0',
+            'label' => 'USB 3.0',
+            'active' => true,
+            'sort_order' => 0,
+        ]);
+        $usb31Gen2Option = $usbStandard->options()->create([
+            'value' => 'usb_3_1_gen2',
+            'label' => 'USB 3.1 Gen 2',
+            'active' => true,
+            'sort_order' => 1,
+        ]);
+
+        $usbADefinition = ComponentDefinition::factory()->create(['name' => 'USB-A Port']);
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $usbADefinition->id,
+            'attribute_definition_id' => $portConnector->id,
+            'attribute_option_id' => $usbAOption->id,
+            'value' => 'usb_a',
+            'raw_value' => 'usb_a',
+            'resolves_to_spec' => true,
+            'include_in_component_label' => true,
+            'sort_order' => 0,
+        ]);
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $usbADefinition->id,
+            'attribute_definition_id' => $usbStandard->id,
+            'attribute_option_id' => $usb30Option->id,
+            'value' => 'usb_3_0',
+            'raw_value' => 'usb_3_0',
+            'resolves_to_spec' => false,
+            'include_in_component_label' => true,
+            'sort_order' => 1,
+        ]);
+
+        $usbCDefinition = ComponentDefinition::factory()->create([
+            'name' => 'USB-C Port',
+            'spec_display_label' => 'USB-C USB 3.1 Gen 2 (DP Alt, PD)',
+        ]);
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $usbCDefinition->id,
+            'attribute_definition_id' => $portConnector->id,
+            'attribute_option_id' => $usbCOption->id,
+            'value' => 'usb_c',
+            'raw_value' => 'usb_c',
+            'resolves_to_spec' => true,
+            'include_in_component_label' => true,
+            'sort_order' => 0,
+        ]);
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $usbCDefinition->id,
+            'attribute_definition_id' => $usbStandard->id,
+            'attribute_option_id' => $usb31Gen2Option->id,
+            'value' => 'usb_3_1_gen2',
+            'raw_value' => 'usb_3_1_gen2',
+            'include_in_component_label' => true,
+            'sort_order' => 1,
+        ]);
+
+        ModelNumberComponentTemplate::create([
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $usbADefinition->id,
+            'expected_name' => 'Left USB-A',
+            'expected_qty' => 2,
+            'is_required' => true,
+            'sort_order' => 0,
+        ]);
+        ModelNumberComponentTemplate::create([
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $usbCDefinition->id,
+            'expected_name' => 'USB-C',
+            'expected_qty' => 1,
+            'is_required' => true,
+            'sort_order' => 1,
+        ]);
+
+        $resolved = app(EffectiveAttributeResolver::class)->resolveForModelNumber($modelNumber)->keyBy(fn ($attribute) => $attribute->definition->key);
+
+        $this->assertSame('usb_a, usb_c', $resolved['port_connector_type']->value);
+        $this->assertSame('2x USB-A USB 3.0, USB-C USB 3.1 Gen 2 (DP Alt, PD)', $resolved['port_connector_type']->formattedValue());
+        $this->assertArrayNotHasKey('usb_standard', $resolved->all());
+    }
+
+    public function test_component_label_display_uses_instance_attribute_overrides(): void
+    {
+        $asset = Asset::factory()->create();
+        $portConnector = AttributeDefinition::create([
+            'key' => 'port_connector_type',
+            'label' => 'Port Connector',
+            'datatype' => AttributeDefinition::DATATYPE_ENUM,
+            'component_spec_display_mode' => AttributeDefinition::COMPONENT_SPEC_DISPLAY_COMPONENT_LABELS,
+        ]);
+        $usbCOption = $portConnector->options()->create([
+            'value' => 'usb_c',
+            'label' => 'USB-C',
+            'active' => true,
+            'sort_order' => 0,
+        ]);
+        $usbStandard = AttributeDefinition::create([
+            'key' => 'usb_standard',
+            'label' => 'USB Standard',
+            'datatype' => AttributeDefinition::DATATYPE_ENUM,
+        ]);
+        $usb31Gen1Option = $usbStandard->options()->create([
+            'value' => 'usb_3_1_gen1',
+            'label' => 'USB 3.1 Gen 1',
+            'active' => true,
+            'sort_order' => 0,
+        ]);
+        $usb31Gen2Option = $usbStandard->options()->create([
+            'value' => 'usb_3_1_gen2',
+            'label' => 'USB 3.1 Gen 2',
+            'active' => true,
+            'sort_order' => 1,
+        ]);
+        $definition = ComponentDefinition::factory()->create([
+            'name' => 'USB-C Port',
+            'spec_display_label' => 'USB-C USB 3.1 Gen 1',
+        ]);
+
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $definition->id,
+            'attribute_definition_id' => $portConnector->id,
+            'attribute_option_id' => $usbCOption->id,
+            'value' => 'usb_c',
+            'raw_value' => 'usb_c',
+            'resolves_to_spec' => true,
+            'include_in_component_label' => true,
+            'sort_order' => 0,
+        ]);
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $definition->id,
+            'attribute_definition_id' => $usbStandard->id,
+            'attribute_option_id' => $usb31Gen1Option->id,
+            'value' => 'usb_3_1_gen1',
+            'raw_value' => 'usb_3_1_gen1',
+            'include_in_component_label' => true,
+            'sort_order' => 1,
+        ]);
+
+        $component = ComponentInstance::factory()->installed($asset->id)->create([
+            'component_definition_id' => $definition->id,
+            'display_name' => 'Physical USB-C Port',
+        ]);
+
+        app(ComponentInstanceAttributeManager::class)->sync($component, [[
+            'attribute_definition_id' => $usbStandard->id,
+            'value' => 'usb_3_1_gen2',
+        ]]);
+
+        $resolved = app(EffectiveAttributeResolver::class)->resolveForAsset($asset)->keyBy(fn ($attribute) => $attribute->definition->key);
+
+        $this->assertSame('usb_c', $resolved['port_connector_type']->value);
+        $this->assertSame('USB-C USB 3.1 Gen 2', $resolved['port_connector_type']->formattedValue());
+        $this->assertDatabaseHas('component_instance_attributes', [
+            'component_instance_id' => $component->id,
+            'attribute_definition_id' => $usbStandard->id,
+            'attribute_option_id' => $usb31Gen2Option->id,
+        ]);
+    }
+
     public function test_installed_components_drive_numeric_asset_values_even_with_asset_override(): void
     {
         $capacity = AttributeDefinition::create([

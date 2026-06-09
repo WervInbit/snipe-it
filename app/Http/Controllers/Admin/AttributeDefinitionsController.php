@@ -168,6 +168,7 @@ class AttributeDefinitionsController extends Controller
             'required_for_category' => $request->boolean('required_for_category'),
             'allow_custom_values' => $request->boolean('allow_custom_values') && $currentDatatype === AttributeDefinition::DATATYPE_ENUM,
             'allow_asset_override' => $request->boolean('allow_asset_override'),
+            'component_spec_display_mode' => $data['component_spec_display_mode'] ?? AttributeDefinition::COMPONENT_SPEC_DISPLAY_VALUE_LABELS,
             'constraints' => $this->filterConstraints($data['constraints'] ?? []),
         ];
 

@@ -75,6 +75,41 @@ class StartNewTestRunTest extends TestCase
         $this->assertNull(TestRun::query()->where('asset_id', $asset->id)->latest()->first());
     }
 
+    public function test_user_with_asset_view_and_test_execute_can_start_new_run_without_asset_edit(): void
+    {
+        $asset = Asset::factory()->laptopMbp()->create();
+        $categoryId = $asset->model?->category_id;
+        $profile = WorkflowProfile::factory()->create(['is_default' => true]);
+        $type = TestType::factory()->create(['name' => 'Visual Check']);
+
+        if ($categoryId) {
+            $type->categories()->sync([$categoryId]);
+        }
+
+        WorkflowProfileItem::factory()->create([
+            'workflow_profile_id' => $profile->id,
+            'workflow_item_id' => $type->id,
+        ]);
+
+        $user = User::factory()->create([
+            'permissions' => json_encode([
+                'assets.view' => '1',
+                'tests.execute' => '1',
+            ]),
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('test-runs.store', $asset->id), [
+                'workflow_profile_id' => $profile->id,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('workflow_runs', [
+            'asset_id' => $asset->id,
+            'workflow_profile_id' => $profile->id,
+        ]);
+    }
+
     public function test_category_scoped_tests_skip_other_categories(): void
     {
         $category = Category::factory()->assetMobileCategory()->create();

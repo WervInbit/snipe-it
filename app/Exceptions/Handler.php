@@ -96,12 +96,12 @@ class Handler extends ExceptionHandler
                 ->with('warning', 'This asset has not passed all tests. Submit again to confirm Ready for Sale.');
         }
 
-        // Enforce supervisor/admin role for Ready for Sale (non-API)
+        // Enforce lifecycle transition permissions (non-API)
         if (!($request->ajax() || $request->wantsJson())) {
-            if ($e instanceof \DomainException && $e->getMessage() === 'requires_supervisor_role') {
+            if ($e instanceof \DomainException && $e->getMessage() === 'requires_sale_transition_permission') {
                 return redirect()->back()
                     ->withInput()
-                    ->with('error', 'Only supervisors or admins can mark an asset as Ready for Sale.');
+                    ->with('error', 'Only users with sale-transition permission can move an asset into Ready for Sale or Sold.');
             }
         }
 

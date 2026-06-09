@@ -125,9 +125,30 @@
               {{ trans('admin/hardware/form.status') }}
             </label>
             <div class="col-md-7">
+              @php
+                  $bulkStatusOptions = collect($statuslabel_list);
+                  $canMoveSaleLifecycle = Gate::allows('assets.sale_transition');
+                  $statusLabelsById = \App\Models\Statuslabel::query()
+                      ->whereIn('id', array_keys($statuslabel_list))
+                      ->get()
+                      ->keyBy('id');
+                  $bulkStatusOptions = $bulkStatusOptions
+                      ->filter(function ($label, $id) use ($statusLabelsById, $canMoveSaleLifecycle) {
+                          $statusLabel = $statusLabelsById->get((int) $id);
+                          $isPreSale = \App\Models\Asset::isPreSaleStatus($statusLabel);
+                          $isSold = \App\Models\Asset::isSoldStatus($statusLabel);
+
+                          if (($isPreSale || $isSold) && !$canMoveSaleLifecycle) {
+                              return false;
+                          }
+
+                          return true;
+                      })
+                      ->all();
+              @endphp
               <x-input.select
                   name="status_id"
-                  :options="$statuslabel_list"
+                  :options="$bulkStatusOptions"
                   :selected="old('status_id')"
                   style="width: 100%"
                   aria-label="status_id"

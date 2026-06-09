@@ -4,6 +4,22 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-06-09
+- Added `assets.sale_transition` for Ready for Sale and Sold lifecycle transitions. Production Supervisors receive this permission without the broad legacy `supervisor` override; production Admins receive the actual `admin` permission. The same permission can be granted to experienced refurbishers without making them broad admins.
+- Asset status changes now keep sale listing separate from lifecycle state: pre-sale/Ready for Sale does not automatically set `is_sellable`, while Sold, archived, broken/parts, and destroy-style statuses force `is_sellable=0`.
+- Asset detail, edit, and bulk status controls now filter Ready/Sold options by the sale-transition permission boundary, and workflow runs can be started with `assets.view` plus `tests.execute` without requiring asset edit rights.
+
+### 2026-06-07
+- Default seeding is now production-foundation oriented: `DatabaseSeeder` seeds the device catalog, expected component catalog, workflow item/profile catalog, and permission groups without calling demo/destructive seeders for users, companies, locations, departments, suppliers, status labels, depreciation, or demo assets.
+- `SettingsSeeder` now only creates settings when none exist and uses the neutral `Snipe-IT` site name instead of `Snipe-IT Demo`.
+- Numeric device attribute labels no longer include parenthesized units; units live on the attribute `unit` column and are rendered with numeric values in resolved specs, for example `Werkgeheugen: 8 GB`, `Opslagcapaciteit: 256 GB`, `Schermgrootte: 15.6"`, and `Verversingssnelheid: 60 Hz`.
+- Catalog seed helpers avoid factory side effects and restore matching soft-deleted foundation categories, manufacturers, and asset models instead of creating duplicate catalog rows on reseed.
+
+### 2026-06-06
+- Clean-start component seeding now includes manually selectable generic fallback definitions for vague or one-off hardware: `USB-A Port - Generic`, `USB-C Port - Generic`, broad HDMI/DisplayPort/eSATA connector entries, RAM, SSD, HDD, battery, camera, keyboard, wireless, and Bluetooth. These are catalog options only and are not automatically assigned to seeded model-number expected components.
+- Generic SSD/HDD definitions contribute only storage type, while generic ports contribute only connector type. Version/capability details remain blank until operators refine the expected component or replace it with a more specific definition.
+- The Docker app image now normalizes the copied PHP-FPM entrypoint line endings during build so Windows checkouts do not produce a `bash\r` startup failure.
+
 ### 2026-06-04
 - Component-backed model-number specs now cover all attribute datatypes marked `resolves_to_spec`, not only numeric totals, so seeded RAM/storage/display/battery/keyboard/camera/port values stay on expected components instead of being duplicated as manual selected attributes.
 - Clean-start device seeding prunes stale manual model-number attribute rows whenever an expected component already supplies that spec, while leaving intentionally manual policy/product fields such as CPU, OS, release year, color, and Surface keyboard-layout entries intact.
@@ -251,4 +267,17 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 - Existing enum attribute edit pages now support adding new option values in place, retain pending new options on validation errors, and show clearer in-use warning copy so new values such as `eSATA` are distinguished from edits that update existing model/component rows.
 - RJ45 ports are now modeled like other structured ports: `port_connector_type` stays `RJ-45`, `ethernet_speed_max` stores 1GbE/2.5GbE/5GbE/10GbE capability, and seeded RJ45 component definitions are speed-specific while the old generic row is retired.
 
+### 2026-06-06
+- Generic fallback component definitions now support quick catalog entries for vague or partially known hardware without automatically adding those fallbacks to seeded model-number expected templates.
+- Asset detail pages now collapse routine component-derived provenance into a compact tooltip icon beside the resolved value. Routine tooltips show only the contributing parts, while inline expanded detail is reserved for exception cases such as extras/custom components, reduced default baselines, hierarchy overlap warnings, and overrides.
+- Component-derived specs now have a configurable display mode per attribute: admins can keep the old distinct value labels or display grouped component labels for overview attributes such as `port_connector_type`.
+- Component definitions now support an editable spec display label, and individual component-definition attributes can be marked for generated label composition in their configured order. This keeps USB/HDMI/audio port summaries maintainable through seed data and settings UI instead of hardcoded asset-page formatting.
+- Port catalog seeding now uses the component-label display path for `Poortconnector`: USB-A/USB-C labels include USB standard, DP alt-mode, Power Delivery, Thunderbolt, and sleep/charge details when configured; HDMI includes its version; headset-combo audio is represented from the port role while the lower-level audio jack standard stays out of asset specs.
+- Camera position and camera role are no longer seeded as top-level asset specs, leaving camera overview output closer to practical asset-view needs while still allowing detailed component data where needed.
 
+### 2026-06-07
+- Asset and model specification readouts now append configured units for numeric attributes while preserving numeric stored values for calculation and comparison. Inch values display with the `"` suffix; other units such as `GB`, `Hz`, and `kg` display beside the value.
+
+### 2026-06-08
+- Default seeding now uses an explicit `ProductionFoundationSeeder` for first production setup. It seeds settings, permission groups, status labels, attribute definitions, model-number presets, component definitions, and workflow catalog data without destructive truncation or demo user/company creation.
+- Production status labels and permission groups are idempotent foundation rows. Production suppliers have their own seeder, but it is intentionally empty until real supplier names are provided; the old demo `SupplierSeeder` remains separate and is not part of the production foundation path.

@@ -336,6 +336,10 @@ class AuthServiceProvider extends ServiceProvider
             return $user->hasAccess('assets.create');
         });
 
+        Gate::define('assets.sale_transition', function ($user) {
+            return $user->hasAccess('assets.sale_transition') || $user->hasAccess('admin');
+        });
+
         Gate::define('audits.view', function ($user) {
             return $user->hasAccess('audits.view');
         });

@@ -1,3 +1,39 @@
+# Session Progress (2026-06-09)
+
+## Addendum (2026-06-09 Codex)
+- Recovered cleanly from a rejected patch hunk: `app/Models/Asset.php` was unchanged by the failed patch, and the successful edits were limited to the intended permission/config seed path before continuing.
+- Added `assets.sale_transition` and seeded it for production `Supervisor` and `Admin` groups; `Admin` now also receives the real `admin` permission while `Supervisor` intentionally does not receive the broad legacy `supervisor` permission.
+- Updated asset lifecycle guards so authenticated users need `assets.sale_transition` to move assets into deployable pre-sale or Sold statuses. Moving to Sold, archived, broken/parts, or destroyed-style statuses forces `is_sellable=0`; Ready for Sale/pre-sale does not automatically set `is_sellable=1`.
+- Updated asset detail, full edit, and bulk edit status dropdowns to hide Ready/Sold lifecycle statuses from users without `assets.sale_transition`. Detail status updates now preserve `quality_grade` unless it is explicitly submitted, and sale-transition-only users cannot alter quality grade through the status endpoint.
+- Kept workflow execution decoupled from asset editing: users with `assets.view` plus `tests.execute` can start workflow runs without requiring `assets.edit`.
+- Verification in Docker passed after test preflight (`APP_ENV=testing`, `DB_CONNECTION=sqlite`, `DB_DATABASE=:memory:`) and cache clear: `php artisan test tests/Feature/Assets/Ui/PreSalePermissionTest.php tests/Feature/Assets/StartNewTestRunTest.php tests/Feature/DeviceComponentCatalogSeederTest.php --env=testing` passed with `17` tests and `117` assertions.
+
+# Session Progress (2026-06-06)
+
+## Addendum (2026-06-06 Codex)
+- Session kickoff: resumed on `codex/component-hierarchy-sprints` after the 2026-06-05 branch sync/reinitialization; reviewed current `PROGRESS.md` and `docs/fork-notes.md` context before catalog inventory work.
+- Current user focus: understand which seeded component definitions/port variants already exist and where generic quick-entry fallback definitions are still needed for vague device specifications.
+- Added clean-start generic fallback component definitions as catalog-only options, not automatic model-number expected components: `USB-A Port - Generic`, `USB-C Port - Generic`, broad HDMI/DisplayPort/eSATA connector entries, RAM, SSD, HDD, battery, camera, keyboard, wireless, and Bluetooth.
+- Kept existing `Wireless Module` because it is currently referenced by seeded model templates and workflow applicability; added the new wireless/Bluetooth generic definitions as manual fallback options.
+- Verification: PHP syntax checks passed for `DeviceComponentCatalogSeeder`, `AttributeTestSeeder`, and `DeviceComponentCatalogSeederTest`; `git diff --check` passed with line-ending warnings only.
+- Docker Desktop was available, but the Snipe-IT app container initially failed on a CRLF entrypoint (`bash\r`). Hardened the app Dockerfile to normalize the entrypoint during image build, rebuilt `snipeit-app`, and confirmed the app container now stays up.
+- Cleaned the local Docker MySQL database after preflight (`APP_ENV=local`, `DB_CONNECTION=mysql`, `DB_DATABASE=snipeit`) by running `php artisan migrate:fresh --seed --force`; snapshot saved first at `prodbak/db-snapshots/snipeit_docker_pre_clean_20260606_011032.sql`.
+- Post-clean Docker DB verification: all migrations ran, runtime/demo tables are empty (`assets=0`, `components=0`, `component_instances=0`, `workflow_runs=0`), production seed rows exist (`users=22`, `models=11`, `model_numbers=11`, `workflow_items=29`), and the generic fallback component definitions exist without automatic model-number template assignments.
+- Reran `DeviceComponentCatalogSeeder` and `AttributeTestSeeder` idempotently against the cleaned Docker DB; `component_definitions=91`, `generic_fallback_definitions=13`, and `generic_auto_templates=0`.
+- Added a localhost compose override that keeps the cleaned `snipeit` database volume while serving the app through `docker/nginx.local.conf`; verified `http://127.0.0.1:18080/login` returns HTTP 200.
+- Fixed the asset detail specification metadata layout regression where `Calculated from components` and `Expected/default parts` inherited `row-new-striped` table-cell styling and forced long vertical wrapping. The spec metadata rows now explicitly render as block-level metadata, with browser verification on `http://127.0.0.1:18080/hardware/1`.
+
+# Session Progress (2026-06-05)
+
+## Addendum (2026-06-05 Codex)
+- Session kickoff: reviewed the agent handbook provided for this workspace, recent `PROGRESS.md`, and `docs/fork-notes.md` before continuing Snipe-IT work.
+- Synced remotes and confirmed the previous `codex/components-traceability-foundation` branch was even with its tracking branch but behind newer component hierarchy work.
+- Fast-forwarded local `master` to `origin/master` and created local tracking branch `codex/component-hierarchy-sprints` from `origin/codex/component-hierarchy-sprints`.
+- Current branch for upcoming work: `codex/component-hierarchy-sprints`, even with its upstream and 2 commits ahead of `origin/master`.
+- Existing untracked local file remains untouched: `storage/debug-workorder.php`.
+- Reinitialized on the repo `AGENTS.md`, `docs/agents/session-handoff-2026-06-04.md`, recent 2026-06-04/06-02/05-28 session files, `docs/plans/component-hierarchy-sprint-implementation-plan.md`, `docs/plans/component-hierarchy-subcomponents-plan.md`, clean catalog mapping/removal docs, and `docs/component-hierarchy-operations.md`.
+- Current handoff direction: either implement generic quick-entry fallback component definitions (`Wireless Module`, generic USB-A/USB-C, possibly unknown-speed RJ45) or start user testing against the cleaned `snipeit_prod_work` work DB.
+
 # Session Progress (2026-06-04)
 
 ## Addendum (2026-06-04 Codex)
@@ -2565,4 +2601,38 @@ there are multiple duplicate functions that still need to be removed, sku will b
 - TODO for next session: add quick-entry generic fallback component definitions for partially known hardware, especially `Wireless Module`, `USB-A Port`, `USB-C Port`, and possibly an explicit `RJ-45 Ethernet Port - Unknown Speed` rather than reusing the retired generic RJ45 name. These should set only known physical/capability data, leave version attributes blank/unknown, and allow later refinement by swapping the expected component definition or adding component attributes.
 - Created handoff for continuing on a new device: `docs/agents/session-handoff-2026-06-04.md`.
 
+### 2026-06-06
+- Added catalog-only generic fallback component definitions for partially known hardware, including generic USB-A/USB-C, memory, SSD/HDD, battery, camera, keyboard, wireless, and Bluetooth entries. These are intentionally not seeded into model-number expected templates so one-off or end-of-life assets can stay lightweight until more detail is known.
+- Local Docker cleanup was completed against the isolated local `snipeit` database after the required DB preflight and backup snapshot, and the app is being served through the localhost override at `http://127.0.0.1:18080`.
+- Asset detail specification rows now keep component-derived metadata compact for routine rows: the repeated calculated-source label and default breakdown are collapsed into a small tooltip icon next to the value, and routine tooltips show only `Parts: ...` instead of provenance or subtotal copy. Expanded inline detail remains visible for exceptions such as extras/custom components, reduced default baselines, hierarchy overlap warnings, and overrides.
+- Browser verification on `http://127.0.0.1:18080/hardware/1` confirmed 29 spec rows, 24 compact indicators, `Parts: 3.5mm Port - Headset Combo` as the first runtime tooltip, zero visible calculated-source text, and zero visible `Expected/default` text.
+- Added configurable component-label display for component-derived specs: attribute definitions choose between raw value labels and component labels, component definitions can store an editable spec display label, and component-definition attributes can opt into generated labels based on their display order.
+- Seeded `port_connector_type` to use component-label display and updated port catalog data so USB/HDMI/audio capability details appear in the asset overview through editable component labels instead of hardcoded view logic. Audio jack standard no longer resolves to asset specs, audio role is label-only, and camera position/role details no longer resolve as top-level specs.
+- Applied the additive local Docker migration `2026_06_06_120000_add_component_spec_display_settings`, then reran `DeviceAttributeSeeder` and `DeviceComponentCatalogSeeder` against the local `snipeit` database so browser testing reflects the new production seed behavior.
+- Validation passed after repairing the Docker vendor dev dependencies with `composer install --no-interaction --prefer-dist`: testing preflight confirmed `APP_ENV=testing`, `DB_CONNECTION=sqlite`, `DB_DATABASE=:memory:`; targeted PHPUnit passed for attribute lifecycle, component-definition settings, component-derived resolution, device component catalog seeding, asset detail UI, and component history UI (`71` tests, `384` assertions). `git diff --check` passed with line-ending warnings only.
 
+### 2026-06-07
+- Session restarted after a Windows reboot. Docker Desktop initially had running UI/backend processes but the Docker engine API calls hung; stopped stale `docker.exe`/`docker-compose.exe` clients, restarted Docker Desktop, and waited for the engine to answer.
+- Restarted the local stack with `docker compose -f docker-compose.yml -f docker-compose.localhost.yml up -d`; `snipeit_db` recovered and became healthy, then `snipeit_app` and `snipeit_web` started on `127.0.0.1:18080`.
+- Verified the local app setup: `http://127.0.0.1:18080` returns HTTP 200 with title `Snipe-IT Demo`, Laravel preflight reports `APP_ENV=local`, `DB_CONNECTION=mysql`, `DB_DATABASE=snipeit`, the component-label display columns exist, and `php artisan migrate:status --pending` reports no pending migrations.
+- MariaDB logs show crash recovery after the reboot and leftover ignored `#sql-alter` temp tablespace notices, but the current schema check and migration status passed. No destructive database command was run.
+- Asset specification display now appends units for numeric attributes through the central resolved-attribute formatter, so hardware detail values render as `256 GB`, `15.6"`, `60 Hz`, `8 GB`, and `1.74 kg` while raw stored values remain numeric for calculations and tests.
+- Focused validation passed after Docker testing preflight (`APP_ENV=testing`, `DB_CONNECTION=sqlite`, `DB_DATABASE=:memory:`): `ShowAssetTest`, `ComponentHistoryTest`, and `ComponentDerivedAttributeResolutionTest` passed (`39` tests, `193` assertions). Browser verification on `http://127.0.0.1:18080/hardware/1` confirmed the seeded asset spec rows show the expected units.
+- Tightened production seed behavior: default `DatabaseSeeder` now seeds the catalog/workflow foundation and permission groups without calling destructive/demo-oriented seeders for users, locations, departments, suppliers, status labels, depreciation, or role mutation. `SettingsSeeder` now creates default settings only when missing and uses `Snipe-IT` instead of `Snipe-IT Demo`.
+- Hardware attribute labels no longer repeat units already shown in values. Seeded labels now read like `Werkgeheugen`, `Opslagcapaciteit`, `Schermgrootte`, `Verversingssnelheid`, and `Gewicht`, while their `unit` columns drive value display such as `8 GB`, `256 GB`, `15.6"`, `60 Hz`, and `1.74 kg`.
+- Catalog seed helpers now avoid factory side effects and restore matching soft-deleted catalog categories, manufacturers, and asset models instead of creating duplicate foundation rows. Local Docker DB was reseeded with `DeviceAttributeSeeder` only, after preflight (`APP_ENV=local`, `DB_CONNECTION=mysql`, `DB_DATABASE=snipeit`), so `hardware/1` reflects the cleaner labels.
+- Validation passed after Docker testing preflight (`APP_ENV=testing`, `DB_CONNECTION=sqlite`, `DB_DATABASE=:memory:`): focused catalog/unit/component/UI/workflow batch passed (`91` tests, `488` assertions). Browser verification on `http://127.0.0.1:18080/hardware/1` confirmed labels now show units on values rather than in labels. `git diff --check` passed with line-ending warnings only.
+
+### 2026-06-08
+- Split the default seed path into an explicit `ProductionFoundationSeeder`. `DatabaseSeeder` now delegates to that production entry point instead of carrying inline orchestration.
+- Added production-safe seeders for permission groups, status labels, and suppliers. They avoid truncation and factories, update/restore known foundation rows, and do not create demo users, demo companies, or fake suppliers.
+- `ProductionSupplierSeeder` is wired but intentionally empty until real production supplier names are provided. The existing demo `SupplierSeeder` still contains sample suppliers and is not called by the production foundation path.
+- Added tests proving the production foundation creates settings, status labels, permission groups, attributes, model presets, component definitions, and workflow catalog data without demo users/companies/suppliers, and that rerunning the production foundation does not duplicate those foundation rows.
+- Validation passed after Docker testing preflight (`APP_ENV=testing`, `DB_CONNECTION=sqlite`, `DB_DATABASE=:memory:`): focused catalog/unit/component/UI/workflow batch passed (`92` tests, `498` assertions). PHP syntax checks passed for the changed seeders and catalog seeder test. `git diff --check` passed with line-ending warnings only.
+- Completed the local Docker end-to-end rehearsal after preflight and snapshot `prodbak/db-snapshots/snipeit_pre_e2e_rehearsal_20260608_222456.sql`; the final evidence note is `docs/agents/e2e-rehearsal-2026-06-08.md`.
+- Rehearsal setup was performed through the UI after the production foundation reset: created `Lenovo`, `ThinkPad T480 Rehearsal`, model number `20L6-SAMPLE`, model specs, expected generic components, asset `E2E-OLD-LAPTOP-001`, and operational/supervisor users.
+- QR simulation passed for the asset tag as both bootstrap superuser and `rhea-refurb`; component QR simulation was not applicable because expected components did not create tracked component instances.
+- Confirmed a production permission blocker: `rhea-refurb` can scan/view the asset but receives `403 Forbidden` when starting a workflow or editing the asset because seeded operational groups do not grant `assets.edit`.
+- Bootstrap superuser completed both sale-readiness-blocking workflows (`Standard Diagnostics` and `Pre-Sale Check`), which set `tests_completed_ok=1`; Ready for Sale and Sold transitions then saved successfully.
+- Lifecycle caveats found: Ready for Sale does not automatically set `is_sellable=1`; Sold archives via `assets.archived=1` rather than soft delete; action-log update notes are generic/null.
+- Additional UX/data issues found: asset create spec panel did not recognize the selected model number, `Being Refurbished` was unavailable on asset create, optional `Opslagtype` failed to persist with an enum validation hint, and the spec page briefly showed a stale `No expected components added yet` message after expected components saved.

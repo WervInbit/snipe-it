@@ -127,15 +127,19 @@ class ComponentDefinitionSettingsTest extends TestCase
                 'name' => '8GB DDR4 SODIMM',
                 'category_id' => $category->id,
                 'manufacturer_id' => $manufacturer->id,
+                'spec_display_label' => '8GB DDR4',
                 'is_active' => '1',
                 'attribute_contributions' => [
                     [
                         'attribute_definition_id' => $capacity->id,
                         'value' => '8',
+                        'resolves_to_spec' => '1',
                     ],
                     [
                         'attribute_definition_id' => $memoryType->id,
                         'value' => 'DDR4',
+                        'resolves_to_spec' => '1',
+                        'include_in_component_label' => '1',
                     ],
                 ],
             ]);
@@ -145,11 +149,16 @@ class ComponentDefinitionSettingsTest extends TestCase
         $response->assertRedirect(route('settings.component_definitions.edit', $definition))
             ->assertSessionHasNoErrors();
 
+        $this->assertDatabaseHas('component_definitions', [
+            'id' => $definition->id,
+            'spec_display_label' => '8GB DDR4',
+        ]);
         $this->assertDatabaseHas('component_definition_attributes', [
             'component_definition_id' => $definition->id,
             'attribute_definition_id' => $capacity->id,
             'value' => '8',
             'raw_value' => '8',
+            'resolves_to_spec' => true,
         ]);
         $this->assertDatabaseHas('component_definition_attributes', [
             'component_definition_id' => $definition->id,
@@ -157,6 +166,8 @@ class ComponentDefinitionSettingsTest extends TestCase
             'attribute_option_id' => $memoryTypeOption->id,
             'value' => 'DDR4',
             'raw_value' => 'DDR4',
+            'resolves_to_spec' => true,
+            'include_in_component_label' => true,
         ]);
     }
 
