@@ -119,6 +119,80 @@ class ComponentDerivedAttributeResolutionTest extends TestCase
         $this->assertSame('Display 15.6 FHD', $resolved['display_resolution']->contributorSummary('calculated_components'));
     }
 
+    public function test_component_resolved_enum_conflicts_warn_with_option_labels(): void
+    {
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $storageType = AttributeDefinition::create([
+            'key' => 'storage_type',
+            'label' => 'Opslagtype',
+            'datatype' => AttributeDefinition::DATATYPE_ENUM,
+            'allow_custom_values' => false,
+            'allow_asset_override' => true,
+        ]);
+        $nvmeOption = $storageType->options()->create([
+            'value' => 'nvme',
+            'label' => 'NVMe-SSD',
+            'active' => true,
+            'sort_order' => 0,
+        ]);
+        $ssdOption = $storageType->options()->create([
+            'value' => 'ssd',
+            'label' => 'SATA-SSD',
+            'active' => true,
+            'sort_order' => 1,
+        ]);
+        $componentDefinition = ComponentDefinition::factory()->create([
+            'name' => 'Storage 128GB SATA SSD',
+        ]);
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $componentDefinition->id,
+            'attribute_definition_id' => $storageType->id,
+            'attribute_option_id' => $ssdOption->id,
+            'value' => 'ssd',
+            'raw_value' => 'ssd',
+            'sort_order' => 0,
+            'resolves_to_spec' => true,
+        ]);
+        ModelNumberComponentTemplate::create([
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $componentDefinition->id,
+            'expected_name' => 'Storage Device',
+            'expected_qty' => 1,
+            'is_required' => true,
+            'sort_order' => 0,
+        ]);
+        ModelNumberAttribute::create([
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $storageType->id,
+            'attribute_option_id' => $nvmeOption->id,
+            'value' => 'nvme',
+            'raw_value' => 'nvme',
+            'display_order' => 0,
+        ]);
+
+        $resolved = app(EffectiveAttributeResolver::class)
+            ->resolveForModelNumber($modelNumber)
+            ->keyBy(fn ($attribute) => $attribute->definition->key);
+
+        $this->assertSame('ssd', $resolved['storage_type']->value);
+        $this->assertSame('SATA-SSD', $resolved['storage_type']->formattedValue());
+        $this->assertSame('NVMe-SSD', $resolved['storage_type']->formattedManualModelValue());
+        $this->assertTrue($resolved['storage_type']->hasManualModelComponentConflict());
+        $this->assertStringContainsString('NVMe-SSD', $resolved['storage_type']->manualModelComponentConflictMessage());
+        $this->assertStringContainsString('SATA-SSD', $resolved['storage_type']->manualModelComponentConflictMessage());
+
+        $asset = Asset::factory()->for($model, 'model')->create([
+            'model_number_id' => $modelNumber->id,
+        ]);
+        $assetResolved = app(EffectiveAttributeResolver::class)
+            ->resolveForAsset($asset)
+            ->keyBy(fn ($attribute) => $attribute->definition->key);
+
+        $this->assertSame('SATA-SSD', $assetResolved['storage_type']->formattedValue());
+        $this->assertTrue($assetResolved['storage_type']->hasManualModelComponentConflict());
+    }
+
     public function test_component_label_display_mode_groups_and_counts_generated_labels(): void
     {
         $model = AssetModel::factory()->create();

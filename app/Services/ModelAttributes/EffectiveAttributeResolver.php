@@ -269,6 +269,10 @@ class EffectiveAttributeResolver
             'expected_component_baseline_value' => $derived?->value,
             'expected_component_baseline_display_value' => $derived?->meta['display_value'] ?? null,
             'current_component_value' => $derived?->value,
+            'current_component_display_value' => $derived?->meta['display_value'] ?? null,
+            'component_resolved_model_value' => $isComponentResolvedSpec ? $derived?->value : null,
+            'component_resolved_model_display_value' => $isComponentResolvedSpec ? ($derived?->meta['display_value'] ?? null) : null,
+            'manual_model_display_value' => $manualOption?->label,
             'reduced_expected_baseline' => false,
         ]);
 
@@ -337,6 +341,7 @@ class EffectiveAttributeResolver
                 'expected_component_baseline_value' => $baselineValue,
                 'expected_component_baseline_display_value' => $baseline?->meta['display_value'] ?? $modelResolved?->meta['display_value'] ?? null,
                 'current_component_value' => $calculated->value,
+                'current_component_display_value' => $calculated->meta['display_value'] ?? null,
                 'reduced_expected_baseline' => $reducedExpectedBaseline,
             ]);
         } elseif ($override && $definition->allow_asset_override) {
@@ -355,6 +360,16 @@ class EffectiveAttributeResolver
 
         if (($modelResolved?->meta['display_value'] ?? null) !== null) {
             $meta['model_display_value'] = $modelResolved->meta['display_value'];
+        }
+
+        foreach ([
+            'component_resolved_model_value',
+            'component_resolved_model_display_value',
+            'manual_model_display_value',
+        ] as $modelMetaKey) {
+            if (!array_key_exists($modelMetaKey, $meta) && array_key_exists($modelMetaKey, $modelResolved?->meta ?? [])) {
+                $meta[$modelMetaKey] = $modelResolved->meta[$modelMetaKey];
+            }
         }
 
         return new ResolvedAttribute(

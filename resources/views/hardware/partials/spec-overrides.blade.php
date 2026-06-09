@@ -69,6 +69,7 @@
         @php($calculatedExpectedSummary = method_exists($attribute, 'calculatedExpectedContributorSummary') ? $attribute->calculatedExpectedContributorSummary() : null)
         @php($calculatedExtraSummary = method_exists($attribute, 'calculatedExtraContributorSummary') ? $attribute->calculatedExtraContributorSummary() : null)
         @php($hierarchyOverlapSummary = method_exists($attribute, 'hierarchyOverlapSummary') ? $attribute->hierarchyOverlapSummary() : null)
+        @php($manualComponentConflictMessage = method_exists($attribute, 'manualModelComponentConflictMessage') ? $attribute->manualModelComponentConflictMessage() : null)
         <div class="form-group{{ $errors->has($fieldKey) ? ' has-error' : '' }}">
             <label class="col-md-3 control-label" for="attribute_override_{{ $definition->id }}">
                 {{ $definition->label }}
@@ -103,11 +104,17 @@
                     @if($hierarchyOverlapSummary)
                         <p class="help-block text-warning">{{ __('Parent/child overlap: :value', ['value' => $hierarchyOverlapSummary]) }}</p>
                     @endif
+                    @if($manualComponentConflictMessage)
+                        <p class="help-block text-warning" data-testid="asset-spec-manual-component-conflict">{{ $manualComponentConflictMessage }}</p>
+                    @endif
                 @elseif(!$definition->allow_asset_override)
                     <p class="form-control-static">
                         {{ $baseDisplay ?? __('Not specified') }}
                     </p>
                     <p class="help-block text-muted">{{ __('Overrides are disabled for this attribute.') }}</p>
+                    @if($manualComponentConflictMessage)
+                        <p class="help-block text-warning" data-testid="asset-spec-manual-component-conflict">{{ $manualComponentConflictMessage }}</p>
+                    @endif
                 @else
                     @switch($definition->datatype)
                         @case(\App\Models\AttributeDefinition::DATATYPE_BOOL)
@@ -156,6 +163,9 @@
 
                     {!! $errors->first($fieldKey, '<span class="alert-msg">:message</span>') !!}
                     <p class="help-block text-muted">{{ __('Model spec (:source): :value', ['source' => $modelSourceLabel, 'value' => $modelDisplay ?? __('Not specified')]) }}</p>
+                    @if($manualComponentConflictMessage)
+                        <p class="help-block text-warning" data-testid="asset-spec-manual-component-conflict">{{ $manualComponentConflictMessage }}</p>
+                    @endif
                 @endif
             </div>
        </div>

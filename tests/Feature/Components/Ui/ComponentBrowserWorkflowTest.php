@@ -94,7 +94,7 @@ class ComponentBrowserWorkflowTest extends TestCase
         $user = User::factory()->superuser()->create();
         $asset = Asset::factory()->create();
         $definition = ComponentDefinition::factory()->create([
-            'name' => 'Webcam Module',
+            'name' => 'Webcam',
             'is_active' => true,
         ]);
 
@@ -113,7 +113,7 @@ class ComponentBrowserWorkflowTest extends TestCase
         $this->assertDatabaseHas('component_instances', [
             'component_definition_id' => $definition->id,
             'current_asset_id' => $asset->id,
-            'display_name' => 'Webcam Module',
+            'display_name' => 'Webcam',
             'serial' => 'CAM-123',
             'status' => ComponentInstance::STATUS_INSTALLED,
         ]);

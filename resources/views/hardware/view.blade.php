@@ -1038,6 +1038,9 @@
                                                 $calculatedExtraSummary = $attribute->calculatedExtraContributorSummary();
                                                 $hierarchyOverlapSummary = $attribute->hierarchyOverlapSummary();
                                                 $isCalculatedFromComponents = $attribute->isCalculatedFromComponents();
+                                                $manualComponentConflictMessage = method_exists($attribute, 'manualModelComponentConflictMessage')
+                                                    ? $attribute->manualModelComponentConflictMessage()
+                                                    : null;
                                                 $calculatedExpectedSubtotalText = ($calculatedExpectedSubtotal !== null && $calculatedExpectedSubtotal !== '')
                                                     ? __('Default subtotal: :value', ['value' => $calculatedExpectedSubtotal])
                                                     : null;
@@ -1134,6 +1137,12 @@
                                                     @elseif(!$isOverride && $attribute->source === 'installed_components' && $modelDisplay)
                                                         <div class="spec-detail-meta text-muted">
                                                             {{ __('Model baseline (:source): :value', ['source' => $modelSourceLabel, 'value' => $modelDisplay]) }}
+                                                        </div>
+                                                    @endif
+
+                                                    @if($manualComponentConflictMessage)
+                                                        <div class="spec-detail-meta text-warning" data-testid="asset-spec-manual-component-conflict">
+                                                            {{ $manualComponentConflictMessage }}
                                                         </div>
                                                     @endif
 

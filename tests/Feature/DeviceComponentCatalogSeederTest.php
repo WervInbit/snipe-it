@@ -91,6 +91,31 @@ class DeviceComponentCatalogSeederTest extends TestCase
         ])->count());
     }
 
+    public function test_component_catalog_renames_legacy_webcam_and_wireless_component_definitions(): void
+    {
+        $this->seed(DeviceAttributeSeeder::class);
+
+        $legacyWebcam = ComponentDefinition::factory()->create(['name' => 'Webcam Module']);
+        $legacyWireless = ComponentDefinition::factory()->create(['name' => 'Wireless Module']);
+
+        $this->seed(DeviceComponentCatalogSeeder::class);
+
+        $this->assertDatabaseHas('component_definitions', [
+            'id' => $legacyWebcam->id,
+            'name' => 'Webcam',
+        ]);
+        $this->assertDatabaseHas('component_definitions', [
+            'id' => $legacyWireless->id,
+            'name' => 'Wireless',
+        ]);
+        $this->assertDatabaseMissing('component_definitions', [
+            'name' => 'Webcam Module',
+        ]);
+        $this->assertDatabaseMissing('component_definitions', [
+            'name' => 'Wireless Module',
+        ]);
+    }
+
     public function test_device_attribute_seeder_places_units_on_unit_column_not_labels(): void
     {
         $this->seed(DeviceAttributeSeeder::class);

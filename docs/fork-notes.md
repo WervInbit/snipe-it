@@ -8,6 +8,7 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 - Added `assets.sale_transition` for Ready for Sale and Sold lifecycle transitions. Production Supervisors receive this permission without the broad legacy `supervisor` override; production Admins receive the actual `admin` permission. The same permission can be granted to experienced refurbishers without making them broad admins.
 - Asset status changes now keep sale listing separate from lifecycle state: pre-sale/Ready for Sale does not automatically set `is_sellable`, while Sold, archived, broken/parts, and destroy-style statuses force `is_sellable=0`.
 - Asset detail, edit, and bulk status controls now filter Ready/Sold options by the sale-transition permission boundary, and workflow runs can be started with `assets.view` plus `tests.execute` without requiring asset edit rights.
+- Component catalog naming now uses `Webcam` and `Wireless` instead of `Webcam Module` and `Wireless Module`; the production foundation seeder renames existing legacy component definition rows before reseeding expected templates and workflow applicability.
 
 ### 2026-06-07
 - Default seeding is now production-foundation oriented: `DatabaseSeeder` seeds the device catalog, expected component catalog, workflow item/profile catalog, and permission groups without calling demo/destructive seeders for users, companies, locations, departments, suppliers, status labels, depreciation, or demo assets.

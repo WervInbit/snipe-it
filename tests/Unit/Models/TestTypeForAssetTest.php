@@ -152,7 +152,7 @@ class TestTypeForAssetTest extends TestCase
             'model_id' => $model->id,
             'model_number_id' => $modelNumber->id,
         ]);
-        $definition = ComponentDefinition::factory()->create(['name' => 'Webcam Module']);
+        $definition = ComponentDefinition::factory()->create(['name' => 'Webcam']);
         ComponentInstance::factory()->installed($asset->id)->create([
             'component_definition_id' => $definition->id,
         ]);

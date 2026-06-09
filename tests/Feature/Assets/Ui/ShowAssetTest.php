@@ -5,7 +5,10 @@ namespace Tests\Feature\Assets\Ui;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\AttributeDefinition;
+use App\Models\ComponentDefinition;
+use App\Models\ComponentDefinitionAttribute;
 use App\Models\ModelNumberAttribute;
+use App\Models\ModelNumberComponentTemplate;
 use App\Models\Setting;
 use App\Models\TestResult;
 use App\Models\TestRun;
@@ -133,6 +136,70 @@ class ShowAssetTest extends TestCase
             ->assertSeeText('256 GB')
             ->assertSeeText('Screen Size')
             ->assertSeeText('15.6"');
+    }
+
+    public function testDetailPageWarnsWhenManualModelValueConflictsWithComponentSpec(): void
+    {
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $asset = Asset::factory()->for($model, 'model')->create([
+            'model_number_id' => $modelNumber->id,
+        ]);
+        $storageType = AttributeDefinition::create([
+            'key' => 'storage_type',
+            'label' => 'Opslagtype',
+            'datatype' => AttributeDefinition::DATATYPE_ENUM,
+            'allow_custom_values' => false,
+        ]);
+        $nvmeOption = $storageType->options()->create([
+            'value' => 'nvme',
+            'label' => 'NVMe-SSD',
+            'active' => true,
+            'sort_order' => 0,
+        ]);
+        $ssdOption = $storageType->options()->create([
+            'value' => 'ssd',
+            'label' => 'SATA-SSD',
+            'active' => true,
+            'sort_order' => 1,
+        ]);
+        $componentDefinition = ComponentDefinition::factory()->create([
+            'name' => 'Storage 128GB SATA SSD',
+        ]);
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $componentDefinition->id,
+            'attribute_definition_id' => $storageType->id,
+            'attribute_option_id' => $ssdOption->id,
+            'value' => 'ssd',
+            'raw_value' => 'ssd',
+            'sort_order' => 0,
+            'resolves_to_spec' => true,
+        ]);
+        ModelNumberComponentTemplate::create([
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $componentDefinition->id,
+            'expected_name' => 'Storage Device',
+            'expected_qty' => 1,
+            'is_required' => true,
+            'sort_order' => 0,
+        ]);
+        ModelNumberAttribute::create([
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $storageType->id,
+            'attribute_option_id' => $nvmeOption->id,
+            'value' => 'nvme',
+            'raw_value' => 'nvme',
+            'display_order' => 0,
+        ]);
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('hardware.show', $asset))
+            ->assertOk()
+            ->assertSee('data-testid="asset-spec-manual-component-conflict"', false)
+            ->assertSeeText('Opslagtype')
+            ->assertSeeText('SATA-SSD')
+            ->assertSeeText('NVMe-SSD')
+            ->assertSeeText('Component value is being used.');
     }
 
     public function testDetailPageRendersQrPanelBelowPrimaryActionButtons(): void

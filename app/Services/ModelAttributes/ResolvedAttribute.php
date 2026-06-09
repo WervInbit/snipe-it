@@ -41,7 +41,53 @@ class ResolvedAttribute
 
     public function formattedManualModelValue(): ?string
     {
-        return $this->formatValue($this->manualModelValue);
+        return $this->formatValue(
+            $this->meta['manual_model_display_value'] ?? $this->manualModelValue,
+            $this->optionForValue($this->manualModelValue)
+        );
+    }
+
+    public function formattedComponentValueForManualConflict(): ?string
+    {
+        $displayValue = $this->meta['component_resolved_model_display_value']
+            ?? $this->meta['current_component_display_value']
+            ?? $this->meta['expected_component_baseline_display_value']
+            ?? null;
+
+        if ($displayValue !== null) {
+            return $this->formatValue((string) $displayValue);
+        }
+
+        $componentValue = $this->componentValueForManualConflict();
+
+        return $this->formatValue($componentValue, $this->optionForValue($componentValue));
+    }
+
+    public function hasManualModelComponentConflict(): bool
+    {
+        if (!$this->hasComparableValue($this->manualModelValue) || !$this->componentValueTakesPrecedence()) {
+            return false;
+        }
+
+        $componentValue = $this->componentValueForManualConflict();
+
+        if (!$this->hasComparableValue($componentValue)) {
+            return false;
+        }
+
+        return $this->normalizeComparableValue($this->manualModelValue) !== $this->normalizeComparableValue($componentValue);
+    }
+
+    public function manualModelComponentConflictMessage(): ?string
+    {
+        if (!$this->hasManualModelComponentConflict()) {
+            return null;
+        }
+
+        return __('Manual model value :manual differs from component value :component. Component value is being used.', [
+            'manual' => $this->formattedManualModelValue() ?? __('Not specified'),
+            'component' => $this->formattedComponentValueForManualConflict() ?? __('Not specified'),
+        ]);
     }
 
     public function formattedCalculatedBaselineValue(): ?string
@@ -282,6 +328,54 @@ class ResolvedAttribute
             AttributeDefinition::DATATYPE_DECIMAL => $this->formatNumericValue($value),
             default => $value,
         };
+    }
+
+    private function componentValueTakesPrecedence(): bool
+    {
+        if ($this->hasComparableValue($this->meta['component_resolved_model_value'] ?? null)) {
+            return true;
+        }
+
+        return in_array($this->source, ['calculated_components', 'installed_components'], true)
+            && $this->hasComparableValue($this->meta['current_component_value'] ?? $this->value);
+    }
+
+    private function componentValueForManualConflict(): ?string
+    {
+        return $this->meta['component_resolved_model_value']
+            ?? $this->meta['current_component_value']
+            ?? $this->meta['expected_component_baseline_value']
+            ?? $this->value;
+    }
+
+    private function hasComparableValue(?string $value): bool
+    {
+        return $value !== null && trim($value) !== '';
+    }
+
+    private function normalizeComparableValue(?string $value): string
+    {
+        $value = trim((string) $value);
+
+        if ($this->definition->isNumericDatatype() && is_numeric($value)) {
+            return $this->trimTrailingZeros((float) $value);
+        }
+
+        if ($this->definition->datatype === AttributeDefinition::DATATYPE_BOOL) {
+            return in_array(mb_strtolower($value), ['1', 'true', 'yes'], true) ? '1' : '0';
+        }
+
+        return mb_strtolower($value);
+    }
+
+    private function optionForValue(?string $value): ?AttributeOption
+    {
+        if ($value === null || !$this->definition->relationLoaded('options')) {
+            return null;
+        }
+
+        return $this->definition->options
+            ->first(fn (AttributeOption $option) => (string) $option->value === (string) $value);
     }
 
     private function formatNumericValue(string $value): string

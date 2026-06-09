@@ -180,6 +180,9 @@
         $componentDefinitions = $componentDefinitions ?? collect();
         $componentDefinitionsById = $componentDefinitions->keyBy('id');
         $componentDefinitionOverlapWarnings = collect($componentDefinitionOverlapWarnings ?? []);
+        $manualComponentConflicts = collect($resolvedPreviewAttributes ?? [])
+            ->filter(fn ($attribute) => method_exists($attribute, 'hasManualModelComponentConflict') && $attribute->hasManualModelComponentConflict())
+            ->values();
     @endphp
     @php
         $attributeErrorItems = collect();
@@ -305,6 +308,22 @@
                             @endforeach
                         </ul>
                     @endif
+                </div>
+            </div>
+        @endif
+
+        @if($manualComponentConflicts->isNotEmpty())
+            <div class="col-md-12">
+                <div class="alert alert-warning" data-testid="model-spec-component-conflict-warning">
+                    <strong>{{ __('Component specification conflict') }}</strong>
+                    <ul class="mb-0">
+                        @foreach($manualComponentConflicts as $attribute)
+                            <li>
+                                <strong>{{ $attribute->definition->label }}</strong>:
+                                {{ $attribute->manualModelComponentConflictMessage() }}
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
             </div>
         @endif

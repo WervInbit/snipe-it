@@ -18,6 +18,11 @@ use Illuminate\Support\Facades\Schema;
 
 class DeviceComponentCatalogSeeder extends Seeder
 {
+    private const COMPONENT_DEFINITION_RENAMES = [
+        'Webcam Module' => 'Webcam',
+        'Wireless Module' => 'Wireless',
+    ];
+
     public function run(): void
     {
         if (!Schema::hasTable('component_definitions') || !Schema::hasTable('model_number_component_templates')) {
@@ -46,6 +51,8 @@ class DeviceComponentCatalogSeeder extends Seeder
             ->keyBy('key');
         $valueService = app(AttributeValueService::class);
         $seeded = [];
+
+        $this->renameLegacyComponentDefinitions();
 
         foreach ($this->componentDefinitions() as $name => $config) {
             /** @var ComponentDefinition $definition */
@@ -157,6 +164,26 @@ class DeviceComponentCatalogSeeder extends Seeder
         return $seeded;
     }
 
+    private function renameLegacyComponentDefinitions(): void
+    {
+        foreach (self::COMPONENT_DEFINITION_RENAMES as $legacyName => $currentName) {
+            $legacy = ComponentDefinition::withTrashed()->where('name', $legacyName)->first();
+
+            if (!$legacy) {
+                continue;
+            }
+
+            $current = ComponentDefinition::withTrashed()->where('name', $currentName)->first();
+
+            if ($current && $current->id !== $legacy->id) {
+                continue;
+            }
+
+            $legacy->name = $currentName;
+            $legacy->save();
+        }
+    }
+
     /**
      * @param array<string,ComponentDefinition> $definitions
      */
@@ -258,7 +285,7 @@ class DeviceComponentCatalogSeeder extends Seeder
             ]),
             'Logic Board - Surface Pro 4 - i5-6300U' => $this->logicBoard('Intel Core i5-6300U', 2, 'Intel HD Graphics 520', [
                 $this->subcomponent('RAM 4GB LPDDR3'),
-                $this->subcomponent('Wireless Module'),
+                $this->subcomponent('Wireless'),
                 $this->subcomponent('USB-A Port - USB 3.0'),
                 $this->subcomponent('Mini DisplayPort'),
                 $this->subcomponent('Surface Connect Port'),
@@ -266,7 +293,7 @@ class DeviceComponentCatalogSeeder extends Seeder
             ]),
             'Logic Board - Surface Pro 5 - i5-7300U' => $this->logicBoard('Intel Core i5-7300U', 2, 'Intel HD Graphics 620', [
                 $this->subcomponent('RAM 4GB LPDDR3'),
-                $this->subcomponent('Wireless Module'),
+                $this->subcomponent('Wireless'),
                 $this->subcomponent('USB-A Port - USB 3.0'),
                 $this->subcomponent('Mini DisplayPort'),
                 $this->subcomponent('Surface Connect Port'),
@@ -275,19 +302,19 @@ class DeviceComponentCatalogSeeder extends Seeder
             'Logic Board - Samsung Galaxy A5 SM-A520F' => $this->logicBoard(null, null, null, [
                 $this->subcomponent('RAM 3GB LPDDR4X'),
                 $this->subcomponent('Storage 32GB UFS'),
-                $this->subcomponent('Wireless Module'),
+                $this->subcomponent('Wireless'),
                 $this->subcomponent('USB-C Charging/Data Port'),
             ]),
             'Logic Board - iPhone 12' => $this->logicBoard(null, null, null, [
                 $this->subcomponent('RAM 4GB LPDDR4X'),
                 $this->subcomponent('Storage 128GB UFS'),
-                $this->subcomponent('Wireless Module'),
+                $this->subcomponent('Wireless'),
                 $this->subcomponent('Lightning Port'),
             ]),
             'Logic Board - Pixel 8 Pro' => $this->logicBoard(null, null, null, [
                 $this->subcomponent('RAM 12GB LPDDR5X'),
                 $this->subcomponent('Storage 256GB UFS'),
-                $this->subcomponent('Wireless Module'),
+                $this->subcomponent('Wireless'),
                 $this->subcomponent('USB-C Charging/Data Port'),
             ]),
 
@@ -330,7 +357,7 @@ class DeviceComponentCatalogSeeder extends Seeder
             'Touchpad' => ['category' => 'Input'],
 
             'Camera - Generic' => ['category' => 'Camera'],
-            'Webcam Module' => $this->camera('webcam', 'selfie', null),
+            'Webcam' => $this->camera('webcam', 'selfie', null),
             'Camera - Selfie - 10MP' => $this->camera('front', 'selfie', 10),
             'Camera - Selfie - 12MP' => $this->camera('front', 'selfie', 12),
             'Camera - Selfie - 16MP' => $this->camera('front', 'selfie', 16),
@@ -348,7 +375,7 @@ class DeviceComponentCatalogSeeder extends Seeder
             '3.5mm Port - Microphone In' => $this->audioPort('microphone_in', 'trs'),
             '3.5mm Port - Line In' => $this->audioPort('line_in', 'trs'),
             '3.5mm Port - Line Out' => $this->audioPort('line_out', 'trs'),
-            'Wireless Module' => ['category' => 'Network'],
+            'Wireless' => ['category' => 'Network'],
             'Wireless - Generic' => ['category' => 'Network'],
             'Bluetooth - Generic' => ['category' => 'Network'],
 
@@ -414,10 +441,10 @@ class DeviceComponentCatalogSeeder extends Seeder
                 $this->template('Battery 45 Wh'),
                 $this->template('Keyboard US'),
                 $this->template('Touchpad'),
-                $this->template('Webcam Module'),
+                $this->template('Webcam'),
                 $this->template('Speaker'),
                 $this->template('Microphone'),
-                $this->template('Wireless Module'),
+                $this->template('Wireless'),
             ],
             '8VU81EA#ABH' => [
                 $this->template('Motherboard - HP ProBook 450 G7 - i5-10210U'),
@@ -427,10 +454,10 @@ class DeviceComponentCatalogSeeder extends Seeder
                 $this->template('Battery 45 Wh'),
                 $this->template('Keyboard US'),
                 $this->template('Touchpad'),
-                $this->template('Webcam Module'),
+                $this->template('Webcam'),
                 $this->template('Speaker'),
                 $this->template('Microphone'),
-                $this->template('Wireless Module'),
+                $this->template('Wireless'),
             ],
             '5PP65EA#ABH' => [
                 $this->template('Motherboard - HP ProBook 450 G6 - i5-8265U'),
@@ -440,10 +467,10 @@ class DeviceComponentCatalogSeeder extends Seeder
                 $this->template('Battery 45 Wh'),
                 $this->template('Keyboard US'),
                 $this->template('Touchpad'),
-                $this->template('Webcam Module'),
+                $this->template('Webcam'),
                 $this->template('Speaker'),
                 $this->template('Microphone'),
-                $this->template('Wireless Module'),
+                $this->template('Wireless'),
             ],
             '8VT42EA#ABH' => [
                 $this->template('Motherboard - HP ProBook 430 G7 - i5-10210U'),
@@ -453,10 +480,10 @@ class DeviceComponentCatalogSeeder extends Seeder
                 $this->template('Battery 45 Wh'),
                 $this->template('Keyboard US'),
                 $this->template('Touchpad'),
-                $this->template('Webcam Module'),
+                $this->template('Webcam'),
                 $this->template('Speaker'),
                 $this->template('Microphone'),
-                $this->template('Wireless Module'),
+                $this->template('Wireless'),
             ],
             '5TK76EA#ABH' => [
                 $this->template('Motherboard - HP ProBook 430 G6 - i5-8265U'),
@@ -466,10 +493,10 @@ class DeviceComponentCatalogSeeder extends Seeder
                 $this->template('Battery 45 Wh'),
                 $this->template('Keyboard QWERTY'),
                 $this->template('Touchpad'),
-                $this->template('Webcam Module'),
+                $this->template('Webcam'),
                 $this->template('Speaker'),
                 $this->template('Microphone'),
-                $this->template('Wireless Module'),
+                $this->template('Wireless'),
             ],
             'HP-430G3-I3-4-128' => [
                 $this->template('Motherboard - HP ProBook 430 G3 - i3-6100U'),
@@ -478,17 +505,17 @@ class DeviceComponentCatalogSeeder extends Seeder
                 $this->template('Display 13.3 HD TN 60Hz'),
                 $this->template('Keyboard US International'),
                 $this->template('Touchpad'),
-                $this->template('Webcam Module'),
+                $this->template('Webcam'),
                 $this->template('Speaker'),
                 $this->template('Microphone'),
-                $this->template('Wireless Module'),
+                $this->template('Wireless'),
             ],
             'MS-SURFPRO4-I5-4-128' => [
                 $this->template('Logic Board - Surface Pro 4 - i5-6300U'),
                 $this->template('Storage 128GB NVMe'),
                 $this->template('Display 12.3 2736x1824 IPS 60Hz'),
                 $this->template('Battery 38 Wh'),
-                $this->template('Webcam Module'),
+                $this->template('Webcam'),
                 $this->template('Speaker'),
                 $this->template('Microphone'),
             ],
@@ -497,7 +524,7 @@ class DeviceComponentCatalogSeeder extends Seeder
                 $this->template('Storage 128GB NVMe'),
                 $this->template('Display 12.3 2736x1824 IPS 60Hz'),
                 $this->template('Battery 45 Wh'),
-                $this->template('Webcam Module'),
+                $this->template('Webcam'),
                 $this->template('Speaker'),
                 $this->template('Microphone'),
             ],

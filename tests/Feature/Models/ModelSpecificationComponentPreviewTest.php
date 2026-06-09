@@ -157,6 +157,69 @@ class ModelSpecificationComponentPreviewTest extends TestCase
             ->assertDontSeeText('Manual model value currently overrides the derived component total.');
     }
 
+    public function test_specification_page_warns_when_manual_value_conflicts_with_component_spec(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $storageType = AttributeDefinition::create([
+            'key' => 'storage_type',
+            'label' => 'Opslagtype',
+            'datatype' => AttributeDefinition::DATATYPE_ENUM,
+            'allow_custom_values' => false,
+        ]);
+        $nvmeOption = $storageType->options()->create([
+            'value' => 'nvme',
+            'label' => 'NVMe-SSD',
+            'active' => true,
+            'sort_order' => 0,
+        ]);
+        $ssdOption = $storageType->options()->create([
+            'value' => 'ssd',
+            'label' => 'SATA-SSD',
+            'active' => true,
+            'sort_order' => 1,
+        ]);
+        $componentDefinition = ComponentDefinition::factory()->create([
+            'name' => 'Storage 128GB SATA SSD',
+        ]);
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $componentDefinition->id,
+            'attribute_definition_id' => $storageType->id,
+            'attribute_option_id' => $ssdOption->id,
+            'value' => 'ssd',
+            'raw_value' => 'ssd',
+            'sort_order' => 0,
+            'resolves_to_spec' => true,
+        ]);
+        ModelNumberComponentTemplate::create([
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $componentDefinition->id,
+            'expected_name' => 'Storage Device',
+            'expected_qty' => 1,
+            'is_required' => true,
+            'sort_order' => 0,
+        ]);
+        ModelNumberAttribute::create([
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $storageType->id,
+            'attribute_option_id' => $nvmeOption->id,
+            'value' => 'nvme',
+            'raw_value' => 'nvme',
+            'display_order' => 0,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('models.numbers.spec.edit', [$model, $modelNumber]))
+            ->assertOk()
+            ->assertSee('data-testid="model-spec-component-conflict-warning"', false)
+            ->assertSeeText('Component specification conflict')
+            ->assertSeeText('Opslagtype')
+            ->assertSeeText('NVMe-SSD')
+            ->assertSeeText('SATA-SSD')
+            ->assertSeeText('Component value is being used.');
+    }
+
     public function test_specification_page_does_not_seed_blank_expected_component_row(): void
     {
         $user = User::factory()->superuser()->create();

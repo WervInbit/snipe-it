@@ -87,7 +87,7 @@ class ComponentWorkflowPagesTest extends TestCase
             'display_name' => 'Motherboard Assembly',
         ]);
         $child = ComponentInstance::factory()->installed($asset->id)->create([
-            'display_name' => 'Webcam Module',
+            'display_name' => 'Webcam',
         ]);
         $token = 'asset-component-reparent-token';
 

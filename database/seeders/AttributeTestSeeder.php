@@ -82,7 +82,7 @@ class AttributeTestSeeder extends Seeder
             ],
             'bluetooth' => [
                 'name' => 'Bluetooth',
-                'component_definitions' => ['Wireless Module', 'Wireless - Generic', 'Bluetooth - Generic'],
+                'component_definitions' => ['Wireless', 'Wireless - Generic', 'Bluetooth - Generic'],
                 'instructions' => 'Pair een bluetooth apparaat.',
             ],
             'cpu' => [
@@ -167,12 +167,12 @@ class AttributeTestSeeder extends Seeder
             ],
             'webcam' => [
                 'name' => 'Webcam',
-                'component_definitions' => ['Webcam Module'],
+                'component_definitions' => ['Webcam'],
                 'instructions' => 'Open the camera application to verify the webcam feed and focus.',
             ],
             'wifi' => [
                 'name' => 'Wifi',
-                'component_definitions' => ['Wireless Module', 'Wireless - Generic'],
+                'component_definitions' => ['Wireless', 'Wireless - Generic'],
                 'instructions' => 'Connect to the designated Wi-Fi network and confirm internet access.',
             ],
             'igpu' => [

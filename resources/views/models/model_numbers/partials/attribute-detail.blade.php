@@ -6,6 +6,7 @@
 @php($isRequired = (bool) $definition->required_for_category)
 @php($searchText = strtolower($definition->label.' '.$definition->key))
 @php($hasFieldError = $errors->has($fieldKey))
+@php($manualComponentConflictMessage = method_exists($resolved, 'manualModelComponentConflictMessage') ? $resolved->manualModelComponentConflictMessage() : null)
 <div class="attribute-detail-panel{{ $hasFieldError ? ' attribute-detail-panel--error' : '' }}"
      data-attribute-id="{{ $definition->id }}"
      data-search-text="{{ $searchText }}"
@@ -93,6 +94,12 @@
             <span class="help-block text-warning">{{ __('This attribute has no saved value yet.') }}</span>
         @elseif($resolved->manualModelRawValue && $resolved->manualModelRawValue !== $resolved->manualModelValue)
             <span class="help-block text-muted">{{ __('Original input: :value', ['value' => $resolved->manualModelRawValue]) }}</span>
+        @endif
+
+        @if($manualComponentConflictMessage)
+            <span class="help-block text-warning" data-testid="model-spec-manual-component-conflict">
+                {{ $manualComponentConflictMessage }}
+            </span>
         @endif
     </div>
 </div>
