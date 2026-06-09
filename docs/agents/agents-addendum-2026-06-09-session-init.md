@@ -47,6 +47,11 @@
 - Reran `ProductionFoundationSeeder` against local Docker after preflight (`APP_ENV=local`, `DB_CONNECTION=mysql`, `DB_DATABASE=snipeit_prod_work`) so `dev.inbit` now uses the shorter names. Verification showed only `Webcam|Wireless` among the old/new names, expected templates count `14|0` for new versus old labels, and workflow applicability maps `webcam -> Webcam`, `wifi -> Wireless, Wireless - Generic`, and `bluetooth -> Bluetooth - Generic, Wireless, Wireless - Generic`.
 - Focused validation passed after `php artisan optimize:clear` and testing preflight: `DeviceComponentCatalogSeederTest`, `ManageWorkflowProfilesTest`, `TestTypeForAssetTest`, `ComponentBrowserWorkflowTest`, and `ComponentWorkflowPagesTest` passed (`31` tests, `269` assertions).
 
+## Next Session TODOs
+- QR printing is currently not available for a moved component. Investigate component action availability after component transfer/reparent/move workflows and restore a print/download QR path for the moved component.
+- The asset detail Components tab is poor on mobile. Redesign the tab rows/actions for small screens so component status, hierarchy, and actions remain scannable without horizontal crowding.
+- Asset test history entries currently all show the generic label `Testronde`; change history display to show each entry's actual workflow/profile name.
+
 ## Handoff Before Workspace Move
 - Commit scope should include the production foundation seeding work, component/spec display controls, asset-spec display cleanup, sale-transition permission behavior, workflow-start authorization change, Docker localhost support, focused tests, and docs/progress notes.
 - Do not include local SQL snapshots under `prodbak/` or the local debug helper `storage/debug-workorder.php`.
