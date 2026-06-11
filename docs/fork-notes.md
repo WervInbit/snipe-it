@@ -4,6 +4,13 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-06-11
+- Component catalog seeding now includes structured wireless/network attributes for reusable device research: max Wi-Fi standard using IEEE identifiers (`802.11n`, `802.11ac`, `802.11ax`, `802.11be`), 2.4/5/6 GHz band flags, Bluetooth version, NFC, and max cellular generation.
+- Seeded wireless component definitions now include standard-specific selectable entries (`Wireless - 802.11n`, `Wireless - 802.11ac`, `Wireless - 802.11ax`, `Wireless - 802.11be`) while leaving device/region-specific band and cellular details explicit on attributes.
+- Camera component seeding now includes optional aperture, autofocus, and OIS attributes plus more phone-oriented camera definitions such as 64MP main, 8MP ultrawide, 5MP macro/depth, 20MP selfie, and 10.5MP selfie. Camera megapixel specs now display grouped component labels instead of relying only on a summed numeric value.
+- Wi-Fi and Bluetooth workflow applicability now follows all `Wireless*` component definitions, and rear-camera workflow applicability includes macro and depth camera definitions.
+- Added a Samsung Galaxy A51 `SM-A515F/DSN-4GB-128GB` catalog preset with expected display, battery, logic-board, wireless, audio-port, camera, speaker, and microphone components. Shared camera definitions now stay role/megapixel focused so model-specific aperture differences do not leak across reused camera components.
+
 ### 2026-06-09
 - Added `assets.sale_transition` for Ready for Sale and Sold lifecycle transitions. Production Supervisors receive this permission without the broad legacy `supervisor` override; production Admins receive the actual `admin` permission. The same permission can be granted to experienced refurbishers without making them broad admins.
 - Asset status changes now keep sale listing separate from lifecycle state: pre-sale/Ready for Sale does not automatically set `is_sellable`, while Sold, archived, broken/parts, and destroy-style statuses force `is_sellable=0`.

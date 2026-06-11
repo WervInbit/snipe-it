@@ -360,6 +360,127 @@ class DeviceComponentCatalogSeederTest extends TestCase
         ]);
     }
 
+    public function test_catalog_seeds_structured_wireless_and_camera_details(): void
+    {
+        $this->seed(DeviceAttributeSeeder::class);
+        $this->seed(DevicePresetSeeder::class);
+        $this->seed(DeviceComponentCatalogSeeder::class);
+
+        $wifiStandard = AttributeDefinition::query()->where('key', 'wifi_standard_max')->firstOrFail();
+        $bluetoothVersion = AttributeDefinition::query()->where('key', 'bluetooth_version')->firstOrFail();
+        $cellularGeneration = AttributeDefinition::query()->where('key', 'cellular_generation_max')->firstOrFail();
+        $cameraMegapixels = AttributeDefinition::query()->where('key', 'camera_megapixels')->firstOrFail();
+        $this->assertNotNull(AttributeDefinition::query()->where('key', 'camera_aperture')->first());
+        $this->assertNotNull(AttributeDefinition::query()->where('key', 'camera_autofocus')->first());
+        $this->assertNotNull(AttributeDefinition::query()->where('key', 'camera_ois')->first());
+        $wirelessAc = ComponentDefinition::query()->where('name', 'Wireless - 802.11ac')->firstOrFail();
+        $wirelessAx = ComponentDefinition::query()->where('name', 'Wireless - 802.11ax')->firstOrFail();
+        $main64 = ComponentDefinition::query()->where('name', 'Camera - Main - 64MP')->firstOrFail();
+        $depth5 = ComponentDefinition::query()->where('name', 'Camera - Depth - 5MP')->firstOrFail();
+        $pixelSelfie = ComponentDefinition::query()->where('name', 'Camera - Selfie - 10.5MP')->firstOrFail();
+        $pixelModelNumber = ModelNumber::query()->where('code', 'PIXEL8PRO-256-OBSIDIAN')->firstOrFail();
+
+        $this->assertSame(AttributeDefinition::COMPONENT_SPEC_DISPLAY_COMPONENT_LABELS, $cameraMegapixels->component_spec_display_mode);
+        $this->assertSame('802.11ac', $wirelessAc->spec_display_label);
+        $this->assertSame('802.11ax', $wirelessAx->spec_display_label);
+        $this->assertSame('Main 64MP', $main64->spec_display_label);
+        $this->assertSame('Depth 5MP', $depth5->spec_display_label);
+        $this->assertSame('Selfie 10.5MP', $pixelSelfie->spec_display_label);
+
+        $this->assertDatabaseHas('attribute_options', [
+            'attribute_definition_id' => $wifiStandard->id,
+            'value' => '802.11be',
+            'label' => '802.11be',
+            'active' => true,
+        ]);
+        $this->assertDatabaseHas('attribute_options', [
+            'attribute_definition_id' => $bluetoothVersion->id,
+            'value' => '6.1',
+            'label' => 'Bluetooth 6.1',
+            'active' => true,
+        ]);
+        $this->assertDatabaseHas('attribute_options', [
+            'attribute_definition_id' => $cellularGeneration->id,
+            'value' => '4g_lte',
+            'label' => '4G LTE',
+            'active' => true,
+        ]);
+        $this->assertDatabaseHas('component_definition_attributes', [
+            'component_definition_id' => $wirelessAc->id,
+            'attribute_definition_id' => $wifiStandard->id,
+            'value' => '802.11ac',
+            'resolves_to_spec' => true,
+            'include_in_component_label' => true,
+        ]);
+        $this->assertDatabaseHas('component_definition_attributes', [
+            'component_definition_id' => $main64->id,
+            'attribute_definition_id' => $cameraMegapixels->id,
+            'value' => '64',
+            'resolves_to_spec' => true,
+            'include_in_component_label' => true,
+        ]);
+        $this->assertDatabaseHas('model_number_component_templates', [
+            'model_number_id' => $pixelModelNumber->id,
+            'component_definition_id' => $pixelSelfie->id,
+        ]);
+    }
+
+    public function test_catalog_seeds_galaxy_a51_128gb_expected_components(): void
+    {
+        $this->seed(DeviceAttributeSeeder::class);
+        $this->seed(DevicePresetSeeder::class);
+        $this->seed(DeviceComponentCatalogSeeder::class);
+
+        $modelNumber = ModelNumber::query()->where('code', 'SM-A515F/DSN-4GB-128GB')->firstOrFail();
+        $logicBoard = ComponentDefinition::query()
+            ->where('name', 'Logic Board - Samsung Galaxy A51 SM-A515F/DSN')
+            ->firstOrFail();
+        $wirelessAc = ComponentDefinition::query()->where('name', 'Wireless - 802.11ac')->firstOrFail();
+        $selfie32 = ComponentDefinition::query()->where('name', 'Camera - Selfie - 32MP')->firstOrFail();
+        $main48 = ComponentDefinition::query()->where('name', 'Camera - Main - 48MP')->firstOrFail();
+        $display = ComponentDefinition::query()
+            ->where('name', 'Display 6.5 1080x2400 Super AMOLED 60Hz')
+            ->firstOrFail();
+        $battery = ComponentDefinition::query()->where('name', 'Battery 4000 mAh')->firstOrFail();
+        $bluetoothVersion = AttributeDefinition::query()->where('key', 'bluetooth_version')->firstOrFail();
+        $cellularGeneration = AttributeDefinition::query()->where('key', 'cellular_generation_max')->firstOrFail();
+        $nfc = AttributeDefinition::query()->where('key', 'nfc')->firstOrFail();
+
+        foreach ([
+            $logicBoard,
+            $display,
+            $battery,
+            $selfie32,
+            $main48,
+        ] as $definition) {
+            $this->assertDatabaseHas('model_number_component_templates', [
+                'model_number_id' => $modelNumber->id,
+                'component_definition_id' => $definition->id,
+            ]);
+        }
+
+        $this->assertDatabaseHas('component_definition_subcomponent_templates', [
+            'parent_component_definition_id' => $logicBoard->id,
+            'child_component_definition_id' => $wirelessAc->id,
+            'expected_qty' => 1,
+        ]);
+        $this->assertDatabaseHas('model_number_attributes', [
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $bluetoothVersion->id,
+            'value' => '5.0',
+        ]);
+        $this->assertDatabaseHas('model_number_attributes', [
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $cellularGeneration->id,
+            'value' => '4g_lte',
+        ]);
+        $this->assertDatabaseHas('model_number_attributes', [
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $nfc->id,
+            'value' => '1',
+        ]);
+    }
+
     /**
      * @return array<string,int>
      */

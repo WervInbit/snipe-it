@@ -305,6 +305,13 @@ class DeviceComponentCatalogSeeder extends Seeder
                 $this->subcomponent('Wireless'),
                 $this->subcomponent('USB-C Charging/Data Port'),
             ]),
+            'Logic Board - Samsung Galaxy A51 SM-A515F/DSN' => $this->logicBoard(null, null, null, [
+                $this->subcomponent('RAM 4GB LPDDR4X'),
+                $this->subcomponent('Storage 128GB UFS'),
+                $this->subcomponent('Wireless - 802.11ac'),
+                $this->subcomponent('USB-C Charging/Data Port'),
+                $this->subcomponent('3.5mm Port - Headset Combo'),
+            ]),
             'Logic Board - iPhone 12' => $this->logicBoard(null, null, null, [
                 $this->subcomponent('RAM 4GB LPDDR4X'),
                 $this->subcomponent('Storage 128GB UFS'),
@@ -340,12 +347,14 @@ class DeviceComponentCatalogSeeder extends Seeder
             'Display 13.3 HD TN 60Hz' => $this->display(13.3, '1366 x 768', 'tn', 60),
             'Display 12.3 2736x1824 IPS 60Hz' => $this->display(12.3, '2736 x 1824', 'ips', 60),
             'Display 5.2 FHD AMOLED 60Hz' => $this->display(5.2, '1920 x 1080', 'amoled', 60),
+            'Display 6.5 1080x2400 Super AMOLED 60Hz' => $this->display(6.5, '1080 x 2400', 'amoled', 60),
             'Display 6.1 2532x1170 OLED 60Hz' => $this->display(6.1, '2532 x 1170', 'oled', 60),
             'Display 6.7 2992x1344 OLED 120Hz' => $this->display(6.7, '2992 x 1344', 'oled', 120),
 
             'Battery 45 Wh' => $this->batteryWh(45),
             'Battery 38 Wh' => $this->batteryWh(38),
             'Battery 3000 mAh' => $this->batteryMah(3000),
+            'Battery 4000 mAh' => $this->batteryMah(4000),
             'Battery 2815 mAh' => $this->batteryMah(2815),
             'Battery 5050 mAh' => $this->batteryMah(5050),
             'Battery - Generic' => ['category' => 'Battery'],
@@ -359,14 +368,22 @@ class DeviceComponentCatalogSeeder extends Seeder
             'Camera - Generic' => ['category' => 'Camera'],
             'Webcam' => $this->camera('webcam', 'selfie', null),
             'Camera - Selfie - 10MP' => $this->camera('front', 'selfie', 10),
+            'Camera - Selfie - 10.5MP' => $this->camera('front', 'selfie', 10.5),
             'Camera - Selfie - 12MP' => $this->camera('front', 'selfie', 12),
             'Camera - Selfie - 16MP' => $this->camera('front', 'selfie', 16),
+            'Camera - Selfie - 20MP' => $this->camera('front', 'selfie', 20),
+            'Camera - Selfie - 32MP' => $this->camera('front', 'selfie', 32),
             'Camera - Main - 12MP' => $this->camera('rear', 'main', 12),
             'Camera - Main - 16MP' => $this->camera('rear', 'main', 16),
+            'Camera - Main - 48MP' => $this->camera('rear', 'main', 48),
             'Camera - Main - 50MP' => $this->camera('rear', 'main', 50),
+            'Camera - Main - 64MP' => $this->camera('rear', 'main', 64),
+            'Camera - Ultrawide - 8MP' => $this->camera('rear', 'ultrawide', 8),
             'Camera - Ultrawide - 12MP' => $this->camera('rear', 'ultrawide', 12),
             'Camera - Ultrawide - 48MP' => $this->camera('rear', 'ultrawide', 48),
             'Camera - Telephoto - 48MP' => $this->camera('rear', 'telephoto', 48),
+            'Camera - Macro - 5MP' => $this->camera('rear', 'macro', 5),
+            'Camera - Depth - 5MP' => $this->camera('rear', 'depth', 5),
 
             'Speaker' => ['category' => 'Audio'],
             'Microphone' => ['category' => 'Audio'],
@@ -377,6 +394,10 @@ class DeviceComponentCatalogSeeder extends Seeder
             '3.5mm Port - Line Out' => $this->audioPort('line_out', 'trs'),
             'Wireless' => ['category' => 'Network'],
             'Wireless - Generic' => ['category' => 'Network'],
+            'Wireless - 802.11n' => $this->wireless('802.11n'),
+            'Wireless - 802.11ac' => $this->wireless('802.11ac'),
+            'Wireless - 802.11ax' => $this->wireless('802.11ax'),
+            'Wireless - 802.11be' => $this->wireless('802.11be'),
             'Bluetooth - Generic' => ['category' => 'Network'],
 
             'USB-A Port - Generic' => $this->port('usb_a'),
@@ -537,6 +558,18 @@ class DeviceComponentCatalogSeeder extends Seeder
                 $this->template('Speaker'),
                 $this->template('Microphone'),
             ],
+            'SM-A515F/DSN-4GB-128GB' => [
+                $this->template('Logic Board - Samsung Galaxy A51 SM-A515F/DSN'),
+                $this->template('Display 6.5 1080x2400 Super AMOLED 60Hz'),
+                $this->template('Battery 4000 mAh'),
+                $this->template('Camera - Selfie - 32MP'),
+                $this->template('Camera - Main - 48MP'),
+                $this->template('Camera - Ultrawide - 12MP'),
+                $this->template('Camera - Macro - 5MP'),
+                $this->template('Camera - Depth - 5MP'),
+                $this->template('Speaker'),
+                $this->template('Microphone'),
+            ],
             'IP12-128-BLUE' => [
                 $this->template('Logic Board - iPhone 12'),
                 $this->template('Display 6.1 2532x1170 OLED 60Hz'),
@@ -551,7 +584,7 @@ class DeviceComponentCatalogSeeder extends Seeder
                 $this->template('Logic Board - Pixel 8 Pro'),
                 $this->template('Display 6.7 2992x1344 OLED 120Hz'),
                 $this->template('Battery 5050 mAh'),
-                $this->template('Camera - Selfie - 10MP'),
+                $this->template('Camera - Selfie - 10.5MP'),
                 $this->template('Camera - Main - 50MP'),
                 $this->template('Camera - Ultrawide - 48MP'),
                 $this->template('Camera - Telephoto - 48MP'),
@@ -687,19 +720,98 @@ class DeviceComponentCatalogSeeder extends Seeder
     /**
      * @return array<string,mixed>
      */
-    private function camera(string $position, string $role, ?float $megapixels): array
+    private function camera(string $position, string $role, ?float $megapixels, array $details = []): array
     {
         $attributes = [
             'camera_position' => ['value' => $position],
-            'camera_role' => ['value' => $role],
+            'camera_role' => [
+                'value' => $role,
+                'include_in_component_label' => true,
+            ],
         ];
 
         if ($megapixels !== null) {
-            $attributes['camera_megapixels'] = ['value' => $megapixels, 'resolves_to_spec' => true];
+            $attributes['camera_megapixels'] = [
+                'value' => $megapixels,
+                'resolves_to_spec' => true,
+                'include_in_component_label' => true,
+            ];
+        }
+
+        foreach ($details as $key => $value) {
+            if ($value === null || $value === '') {
+                continue;
+            }
+
+            $attributes[$key] = ['value' => $value];
         }
 
         return [
             'category' => 'Camera',
+            'spec_display_label' => $this->cameraSpecDisplayLabel($role, $megapixels),
+            'attributes' => $attributes,
+        ];
+    }
+
+    private function cameraSpecDisplayLabel(string $role, ?float $megapixels): ?string
+    {
+        if ($megapixels === null) {
+            return null;
+        }
+
+        $roleLabel = match ($role) {
+            'selfie' => 'Selfie',
+            'main' => 'Main',
+            'wide' => 'Wide',
+            'ultrawide' => 'Ultrawide',
+            'telephoto' => 'Telephoto',
+            'macro' => 'Macro',
+            'depth' => 'Depth',
+            default => ucfirst($role),
+        };
+
+        $mpLabel = rtrim(rtrim(number_format($megapixels, 1, '.', ''), '0'), '.');
+
+        return $roleLabel . ' ' . $mpLabel . 'MP';
+    }
+
+    /**
+     * @return array<string,mixed>
+     */
+    private function wireless(?string $wifiStandard = null, array $details = []): array
+    {
+        $attributes = [];
+
+        if ($wifiStandard !== null) {
+            $attributes['wifi_standard_max'] = [
+                'value' => $wifiStandard,
+                'resolves_to_spec' => true,
+                'include_in_component_label' => true,
+            ];
+        }
+
+        foreach ($details as $key => $value) {
+            if ($value === null || $value === '') {
+                continue;
+            }
+
+            $attributes[$key] = [
+                'value' => $value,
+                'resolves_to_spec' => true,
+                'include_in_component_label' => in_array($key, [
+                    'wifi_band_2_4ghz',
+                    'wifi_band_5ghz',
+                    'wifi_band_6ghz',
+                    'bluetooth_version',
+                    'cellular_generation_max',
+                    'nfc',
+                ], true),
+            ];
+        }
+
+        return [
+            'category' => 'Network',
+            'spec_display_label' => $wifiStandard,
             'attributes' => $attributes,
         ];
     }

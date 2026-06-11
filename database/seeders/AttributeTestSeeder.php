@@ -82,7 +82,8 @@ class AttributeTestSeeder extends Seeder
             ],
             'bluetooth' => [
                 'name' => 'Bluetooth',
-                'component_definitions' => ['Wireless', 'Wireless - Generic', 'Bluetooth - Generic'],
+                'component_definitions' => ['Bluetooth - Generic'],
+                'component_definition_prefixes' => ['Wireless'],
                 'instructions' => 'Pair een bluetooth apparaat.',
             ],
             'cpu' => [
@@ -97,7 +98,7 @@ class AttributeTestSeeder extends Seeder
             ],
             'rear_camera' => [
                 'name' => 'Hoofdcamera',
-                'component_definition_prefixes' => ['Camera - Main', 'Camera - Ultrawide', 'Camera - Telephoto'],
+                'component_definition_prefixes' => ['Camera - Main', 'Camera - Ultrawide', 'Camera - Telephoto', 'Camera - Macro', 'Camera - Depth'],
                 'instructions' => 'Maak meerdere foto\'s met de hoofdcamera en controleer scherpstelling en flitser.',
             ],
             'display' => [
@@ -172,7 +173,7 @@ class AttributeTestSeeder extends Seeder
             ],
             'wifi' => [
                 'name' => 'Wifi',
-                'component_definitions' => ['Wireless', 'Wireless - Generic'],
+                'component_definition_prefixes' => ['Wireless'],
                 'instructions' => 'Connect to the designated Wi-Fi network and confirm internet access.',
             ],
             'igpu' => [
