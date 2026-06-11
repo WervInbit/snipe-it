@@ -510,7 +510,6 @@ class ComponentsController extends Controller
             'condition_code' => ['nullable', Rule::in([
                 ComponentInstance::CONDITION_UNKNOWN,
                 ComponentInstance::CONDITION_GOOD,
-                ComponentInstance::CONDITION_FAIR,
                 ComponentInstance::CONDITION_POOR,
                 ComponentInstance::CONDITION_BROKEN,
             ])],

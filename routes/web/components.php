@@ -7,6 +7,12 @@ Route::group([
     'prefix' => 'components',
     'middleware' => ['auth'],
 ], function (): void {
+    Route::get('{component_id}/qr-label', [Components\ComponentLabelController::class, 'download'])
+        ->name('components.qr-label.download');
+
+    Route::post('{component_id}/print-label', [Components\ComponentLabelController::class, 'store'])
+        ->name('components.print-label');
+
     Route::get('tray', [Components\ComponentWorkflowController::class, 'tray'])
         ->name('components.tray');
 

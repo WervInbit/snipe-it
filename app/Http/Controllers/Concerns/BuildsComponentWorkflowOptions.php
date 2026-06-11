@@ -60,13 +60,7 @@ trait BuildsComponentWorkflowOptions
 
     protected function conditionOptions(): array
     {
-        return [
-            ComponentInstance::CONDITION_UNKNOWN => __('Unknown'),
-            ComponentInstance::CONDITION_GOOD => __('Good'),
-            ComponentInstance::CONDITION_FAIR => __('Fair'),
-            ComponentInstance::CONDITION_POOR => __('Poor'),
-            ComponentInstance::CONDITION_BROKEN => __('Broken'),
-        ];
+        return ComponentInstance::conditionCodeOptions();
     }
 
     protected function trayWarningState(?CarbonInterface $startedAt): array

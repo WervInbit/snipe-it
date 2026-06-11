@@ -177,6 +177,22 @@ class ComponentLifecycleConditionSplitTest extends TestCase
         $this->assertSame(ComponentInstance::CONDITION_STATUS_DAMAGED, $damaged->condition_status);
     }
 
+    public function testMissingAndUnknownConditionCodesNormalizeToNeedsAttention(): void
+    {
+        $missingCondition = ComponentInstance::factory()->create([
+            'condition_code' => null,
+            'condition_status' => null,
+        ]);
+        $unknownCondition = ComponentInstance::factory()->create([
+            'condition_code' => ComponentInstance::CONDITION_UNKNOWN,
+            'condition_status' => null,
+        ]);
+
+        $this->assertSame(ComponentInstance::CONDITION_UNKNOWN, $missingCondition->condition_code);
+        $this->assertSame(ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION, $missingCondition->condition_status);
+        $this->assertSame(ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION, $unknownCondition->condition_status);
+    }
+
     public function testNewLifecycleAndConditionFieldsPopulateLegacyCompatibilityFields(): void
     {
         $actor = User::factory()->superuser()->create();

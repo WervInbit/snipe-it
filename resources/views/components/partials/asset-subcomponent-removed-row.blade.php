@@ -2,12 +2,8 @@
     $definition = $child->componentDefinition;
     $depth = (int) ($depth ?? 1);
     $nameCellStyle = 'padding-left: '.(20 + ($depth * 18)).'px;';
-    $conditionStatus = $child->effectiveConditionStatus();
-    $issueLabelClass = match ($conditionStatus) {
-        \App\Models\ComponentInstance::CONDITION_STATUS_DAMAGED => 'label-danger',
-        \App\Models\ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION => 'label-warning',
-        default => null,
-    };
+    $conditionBadgeClass = $child->conditionBadgeClass();
+    $conditionBadgeLabel = $child->conditionBadgeLabel();
 @endphp
 
 <tr data-testid="asset-component-removed-child-row" data-component-depth="{{ $depth }}">
@@ -21,8 +17,8 @@
         @else
             {{ $child->display_name }}
         @endcan
-        @if($issueLabelClass)
-            <span class="label {{ $issueLabelClass }}">{{ \App\Models\ComponentInstance::conditionStatusLabel($conditionStatus) }}</span>
+        @if($conditionBadgeClass && $conditionBadgeLabel)
+            <span class="label {{ $conditionBadgeClass }}">{{ $conditionBadgeLabel }}</span>
         @endif
         @if($definition)
             <div class="text-muted small">{{ $definition->name }}</div>

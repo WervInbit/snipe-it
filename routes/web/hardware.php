@@ -148,6 +148,8 @@ Route::group(
             ->name('hardware.components.install-existing');
         Route::post('{asset}/components/register', [AssetComponentsController::class, 'register'])
             ->name('hardware.components.register');
+        Route::post('{asset}/components/{component}/condition', [AssetComponentsController::class, 'updateCondition'])
+            ->name('hardware.components.condition.update');
         Route::get('{asset}/components/{component}/reparent', [AssetComponentsController::class, 'createReparent'])
             ->name('hardware.components.reparent.create');
         Route::post('{asset}/components/{component}/reparent', [AssetComponentsController::class, 'storeReparent'])

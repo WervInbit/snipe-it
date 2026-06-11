@@ -42,6 +42,8 @@ class ModelSpecificationComponentPreviewTest extends TestCase
             ->assertDontSeeText('Effective Specification Preview')
             ->assertSeeText('8GB DDR4 SODIMM')
             ->assertSee('data-component-template-drag-handle', false)
+            ->assertSee('js-component-template-definition-select', false)
+            ->assertSee('select2', false)
             ->assertDontSee('name="component_templates[0][expected_name]"', false)
             ->assertDontSee('name="component_templates[0][is_required]"', false)
             ->assertDontSee('name="component_templates[0][slot_name]"', false)

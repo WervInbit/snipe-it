@@ -25,7 +25,7 @@ class ComponentConditionWarningException extends InvalidArgumentException
         return new self(
             $component->display_name,
             $conditionStatus,
-            ComponentInstance::conditionStatusLabel($conditionStatus) ?? $conditionStatus,
+            $component->conditionBadgeLabel() ?? $component->displayConditionLabel(),
         );
     }
 

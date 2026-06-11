@@ -39,7 +39,7 @@
                     @if($rosterRows->isEmpty())
                         <p class="text-muted">{{ __('No current components are shown for this asset.') }}</p>
                     @else
-                        <div class="table-responsive">
+                        <div class="table-responsive asset-components-desktop hidden-xs hidden-sm" data-testid="asset-components-desktop-table">
                             <table class="table table-striped">
                                 <thead>
                                 <tr>
@@ -83,6 +83,34 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        <div class="asset-components-mobile hidden-md hidden-lg" data-testid="asset-components-mobile-list">
+                            @foreach($priorityRows as $row)
+                                @include('components.partials.asset-roster-card', ['row' => $row, 'asset' => $asset, 'depth' => 0])
+                                @include('components.partials.asset-subcomponent-cards', [
+                                    'parentRow' => $row,
+                                    'asset' => $asset,
+                                    'childRowsByParentId' => $childRowsByParentId,
+                                    'removedExpectedSubcomponentsByParent' => $removedExpectedSubcomponentsByParent,
+                                ])
+                            @endforeach
+
+                            @if($priorityRows->isNotEmpty() && $baselineRows->isNotEmpty())
+                                <div class="asset-components-mobile__section-label" data-testid="asset-component-mobile-baseline-separator">
+                                    {{ __('Model baseline') }}
+                                </div>
+                            @endif
+
+                            @foreach($baselineRows as $row)
+                                @include('components.partials.asset-roster-card', ['row' => $row, 'asset' => $asset, 'depth' => 0])
+                                @include('components.partials.asset-subcomponent-cards', [
+                                    'parentRow' => $row,
+                                    'asset' => $asset,
+                                    'childRowsByParentId' => $childRowsByParentId,
+                                    'removedExpectedSubcomponentsByParent' => $removedExpectedSubcomponentsByParent,
+                                ])
+                            @endforeach
+                        </div>
                     @endif
                 </div>
             </div>
@@ -93,7 +121,7 @@
                     @if ($componentHistory->isEmpty())
                         <p class="text-muted">{{ trans('general.none') }}</p>
                     @else
-                        <div class="table-responsive">
+                        <div class="table-responsive asset-components-history-desktop hidden-xs hidden-sm" data-testid="asset-components-history-desktop-table">
                             <table class="table table-striped">
                                 <thead>
                                 <tr>
@@ -128,6 +156,40 @@
                                 @endforeach
                                 </tbody>
                             </table>
+                        </div>
+
+                        <div class="asset-component-history-mobile hidden-md hidden-lg" data-testid="asset-components-history-mobile-list">
+                            @foreach ($componentHistory as $event)
+                                @php($component = $event->componentInstance)
+                                <article class="asset-component-history-card" data-testid="asset-component-history-card">
+                                    <time class="asset-component-history-card__date">
+                                        {{ Helper::getFormattedDateObject($event->created_at, 'datetime', false) }}
+                                    </time>
+                                    <div class="asset-component-history-card__title">
+                                        @if ($component && !$component->trashed())
+                                            <a href="{{ route('components.show', $component) }}">{{ $component->component_tag }}</a>
+                                        @elseif ($component)
+                                            {{ $component->component_tag }}
+                                            <span class="text-muted small">{{ __('Deleted') }}</span>
+                                        @else
+                                            {{ trans('general.none') }}
+                                        @endif
+                                    </div>
+                                    <div class="asset-component-history-card__meta">
+                                        {{ $event->actionLabel() }}
+                                        @php($historyLocation = $event->toStorageLocation?->name ?: $event->fromStorageLocation?->name)
+                                        @if($historyLocation)
+                                            | {{ $historyLocation }}
+                                        @endif
+                                    </div>
+                                    <div class="asset-component-history-card__meta">
+                                        {{ __('By') }}: {{ $event->performedBy ? $event->performedBy->present()->fullName() : trans('general.system') }}
+                                    </div>
+                                    @if($event->note)
+                                        <div class="asset-component-history-card__note">{{ $event->note }}</div>
+                                    @endif
+                                </article>
+                            @endforeach
                         </div>
                     @endif
                 </div>

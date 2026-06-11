@@ -51,8 +51,8 @@ class AttachedComponentIssueService
     {
         return $this->issueComponentsForAsset($asset)
             ->map(function (ComponentInstance $component): string {
-                $condition = ComponentInstance::conditionStatusLabel($component->effectiveConditionStatus())
-                    ?? __('Needs Attention');
+                $condition = $component->conditionBadgeLabel()
+                    ?? $component->displayConditionLabel();
 
                 return $component->display_name . ' - ' . $condition;
             })

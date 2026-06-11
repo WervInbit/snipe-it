@@ -39,6 +39,7 @@ class AssetComponentsController extends Controller
             'trayComponents' => $this->trayComponents($request),
             'stockComponents' => $this->stockInstallableComponents(),
             'componentDefinitions' => $this->activeComponentDefinitions(),
+            'conditionOptions' => $this->conditionOptions(),
         ]);
     }
 
@@ -120,6 +121,7 @@ class AssetComponentsController extends Controller
                 Rule::requiredIf(fn () => $request->input('creation_mode') === 'custom'),
             ],
             'serial' => ['nullable', 'string', 'max:255'],
+            'condition_code' => ['required', Rule::in(array_keys($this->conditionOptions()))],
             'condition_warning_confirmed' => ['nullable', 'boolean'],
             'lifecycle_warning_confirmed' => ['nullable', 'boolean'],
             'note' => ['nullable', 'string'],
@@ -136,7 +138,7 @@ class AssetComponentsController extends Controller
                     'display_name' => $data['display_name'] ?? null,
                     'serial' => $data['serial'] ?? null,
                     'status' => ComponentInstance::STATUS_IN_STOCK,
-                    'condition_code' => ComponentInstance::CONDITION_UNKNOWN,
+                    'condition_code' => $data['condition_code'],
                     'source_type' => ComponentInstance::SOURCE_MANUAL,
                     'company_id' => $asset->company_id,
                     'notes' => $data['note'] ?? null,
@@ -158,6 +160,29 @@ class AssetComponentsController extends Controller
         }
 
         return redirect()->route('hardware.show', $asset)->with('success', __('Component created and installed.'));
+    }
+
+    public function updateCondition(Request $request, Asset $asset, ComponentInstance $component): RedirectResponse
+    {
+        $this->authorize('view', $asset);
+        $this->authorize('update', $component);
+        $component = $this->ensureTrackedComponentOnAsset($asset, $component);
+
+        $data = $request->validate([
+            'condition_code' => ['required', Rule::in(array_keys($this->conditionOptions()))],
+            'note' => ['nullable', 'string'],
+        ]);
+
+        try {
+            $this->lifecycle->updateCondition($component, $data['condition_code'], [
+                'performed_by' => $request->user(),
+                'note' => $data['note'] ?? null,
+            ]);
+        } catch (InvalidArgumentException $exception) {
+            return redirect()->back()->withInput()->with('error', $exception->getMessage());
+        }
+
+        return redirect()->route('hardware.show', $asset)->with('success', __('Component condition updated.'));
     }
 
     public function createReparent(Asset $asset, ComponentInstance $component): View

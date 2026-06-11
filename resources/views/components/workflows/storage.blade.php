@@ -24,7 +24,7 @@
                     <div class="alert alert-info">
                         <strong>{{ __('Component') }}:</strong> {{ $component->display_name }}
                         <br><strong>{{ trans('general.status') }}:</strong> {{ \App\Models\ComponentInstance::lifecycleStatusLabel($component->effectiveLifecycleStatus()) ?? $component->effectiveLifecycleStatus() }}
-                        <br><strong>{{ trans('general.condition') }}:</strong> {{ \App\Models\ComponentInstance::conditionStatusLabel($component->effectiveConditionStatus()) ?? $component->effectiveConditionStatus() }}
+                        <br><strong>{{ trans('general.condition') }}:</strong> {{ $component->displayConditionLabel() }}
                     </div>
 
                     <form method="POST" action="{{ route('components.move_to_stock', $component) }}">

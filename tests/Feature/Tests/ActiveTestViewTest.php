@@ -14,7 +14,7 @@ class ActiveTestViewTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_active_view_removes_top_header_and_keeps_summary_in_bottom_bar(): void
+    public function test_active_view_shows_test_blocks_without_bottom_workflow_bar(): void
     {
         $user = User::factory()->superuser()->create();
         $asset = Asset::factory()->create(['asset_tag' => 'TAG-001']);
@@ -52,11 +52,14 @@ class ActiveTestViewTest extends TestCase
             ->assertSee('data-action="set-fail"', false)
             ->assertSee('data-testid="test-item-', false)
             ->assertDontSee('class="testing-header"', false)
-            ->assertSee('data-testid="tests-active-summary"', false)
-            ->assertSee('data-testid="testing-save-indicator"', false)
-            ->assertSee('data-testid="tests-view-history-btn"', false)
-            ->assertSee('data-testid="tests-start-new-run-form"', false)
-            ->assertSee('data-testid="tests-start-new-run-btn"', false)
+            ->assertDontSee('testing-floating-bar', false)
+            ->assertDontSee('data-testid="tests-active-summary"', false)
+            ->assertDontSee('data-testid="testing-save-indicator"', false)
+            ->assertDontSee('data-testid="tests-view-history-btn"', false)
+            ->assertDontSee('data-testid="tests-start-new-run-form"', false)
+            ->assertDontSee('data-testid="tests-start-new-run-btn"', false)
+            ->assertDontSee('data-testid="tests-complete-btn"', false)
+            ->assertDontSee('testsCompleteConfirmModal', false)
             ->assertSee("layoutKey: 'tests.layout.active.oneCol'", false)
             ->assertDontSee(trans('tests.two_column_toggle'));
     }

@@ -37,7 +37,6 @@ class ComponentInstance extends SnipeModel
 
     public const CONDITION_UNKNOWN = 'unknown';
     public const CONDITION_GOOD = 'good';
-    public const CONDITION_FAIR = 'fair';
     public const CONDITION_POOR = 'poor';
     public const CONDITION_BROKEN = 'broken';
 
@@ -138,6 +137,77 @@ class ComponentInstance extends SnipeModel
         return self::conditionStatusOptions()[$status] ?? Str::headline($status);
     }
 
+    public static function conditionCodeOptions(): array
+    {
+        return [
+            self::CONDITION_UNKNOWN => __('Unknown'),
+            self::CONDITION_GOOD => __('Good'),
+            self::CONDITION_POOR => __('Poor'),
+            self::CONDITION_BROKEN => __('Broken'),
+        ];
+    }
+
+    public static function conditionCodeLabel(?string $conditionCode): ?string
+    {
+        if ($conditionCode === null || $conditionCode === '') {
+            return null;
+        }
+
+        return self::conditionCodeOptions()[$conditionCode] ?? null;
+    }
+
+    public static function conditionStatusForConditionCode(?string $conditionCode): string
+    {
+        if ($conditionCode === null || $conditionCode === '') {
+            return self::CONDITION_STATUS_NEEDS_ATTENTION;
+        }
+
+        return match ($conditionCode) {
+            self::CONDITION_POOR, self::CONDITION_BROKEN => self::CONDITION_STATUS_DAMAGED,
+            self::CONDITION_GOOD => self::CONDITION_STATUS_GOOD,
+            self::CONDITION_UNKNOWN => self::CONDITION_STATUS_NEEDS_ATTENTION,
+            default => self::CONDITION_STATUS_NEEDS_ATTENTION,
+        };
+    }
+
+    public function displayConditionLabel(): string
+    {
+        if ($this->condition_code === null || $this->condition_code === '') {
+            return self::conditionStatusLabel($this->effectiveConditionStatus()) ?? __('Needs Attention');
+        }
+
+        return self::conditionCodeLabel($this->condition_code)
+            ?? self::conditionStatusLabel(self::CONDITION_STATUS_NEEDS_ATTENTION);
+    }
+
+    public function conditionBadgeLabel(): ?string
+    {
+        if ($this->condition_code === null || $this->condition_code === '') {
+            return self::conditionStatusLabel(self::CONDITION_STATUS_NEEDS_ATTENTION);
+        }
+
+        return match ($this->condition_code) {
+            self::CONDITION_UNKNOWN => self::conditionStatusLabel(self::CONDITION_STATUS_NEEDS_ATTENTION),
+            self::CONDITION_POOR, self::CONDITION_BROKEN => self::conditionCodeLabel($this->condition_code),
+            self::CONDITION_GOOD => null,
+            default => self::conditionStatusLabel(self::CONDITION_STATUS_NEEDS_ATTENTION),
+        };
+    }
+
+    public function conditionBadgeClass(): ?string
+    {
+        if ($this->condition_code === null || $this->condition_code === '') {
+            return 'label-warning';
+        }
+
+        return match ($this->condition_code) {
+            self::CONDITION_UNKNOWN => 'label-warning',
+            self::CONDITION_POOR, self::CONDITION_BROKEN => 'label-danger',
+            self::CONDITION_GOOD => null,
+            default => 'label-warning',
+        };
+    }
+
     public static function attachmentWarningConditionStatuses(): array
     {
         return [
@@ -175,11 +245,7 @@ class ComponentInstance extends SnipeModel
             return self::CONDITION_STATUS_DAMAGED;
         }
 
-        return match ($conditionCode) {
-            self::CONDITION_POOR, self::CONDITION_BROKEN => self::CONDITION_STATUS_DAMAGED,
-            self::CONDITION_UNKNOWN => self::CONDITION_STATUS_NEEDS_ATTENTION,
-            default => self::CONDITION_STATUS_GOOD,
-        };
+        return self::conditionStatusForConditionCode($conditionCode);
     }
 
     public static function legacyStatusForLifecycleStatus(?string $status): string

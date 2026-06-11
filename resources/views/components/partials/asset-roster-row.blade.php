@@ -9,13 +9,10 @@
     $canViewComponent = $component && auth()->user()?->can('view', $component);
     $definitionDetailUrl = $definition ? route('settings.component_definitions.edit', $definition) : null;
     $canViewDefinition = $definition && auth()->user()?->can('update', $definition);
-    $conditionStatus = $component?->effectiveConditionStatus();
+    $conditionOptions = $componentConditionOptions ?? \App\Models\ComponentInstance::conditionCodeOptions();
     $rowDisplayName = $row->displayName();
-    $issueLabelClass = match ($conditionStatus) {
-        \App\Models\ComponentInstance::CONDITION_STATUS_DAMAGED => 'label-danger',
-        \App\Models\ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION => 'label-warning',
-        default => null,
-    };
+    $conditionBadgeClass = $component?->conditionBadgeClass();
+    $conditionBadgeLabel = $component?->conditionBadgeLabel();
 @endphp
 
 <tr data-testid="asset-component-row" data-component-classification="{{ $row->classification }}" data-component-depth="{{ $depth }}">
@@ -35,13 +32,22 @@
         @else
             {{ $rowDisplayName }}
         @endif
-        @if($issueLabelClass)
-            <span class="label {{ $issueLabelClass }}">{{ \App\Models\ComponentInstance::conditionStatusLabel($conditionStatus) }}</span>
+        @if($conditionBadgeClass && $conditionBadgeLabel)
+            <span class="label {{ $conditionBadgeClass }}">{{ $conditionBadgeLabel }}</span>
         @endif
         @if($row->isRemoved())
             <div class="small">{{ __('Removed from this asset') }}</div>
         @elseif($row->tracked)
             <div class="text-muted small">{{ __('Tracked') }}</div>
+        @endif
+        @if($component && !$row->isRemoved())
+            @include('components.partials.asset-component-condition-control', [
+                'component' => $component,
+                'asset' => $asset,
+                'conditionOptions' => $conditionOptions,
+                'context' => 'table',
+                'variant' => 'table',
+            ])
         @endif
     </td>
     <td @class([$mutedCellClass])>
@@ -59,56 +65,13 @@
     <td @class([$mutedCellClass])>{{ $definition?->category?->name ?: trans('general.none') }}</td>
     <td @class([$mutedCellClass])>{{ $definition?->manufacturer?->name ?: trans('general.none') }}</td>
     <td class="text-nowrap">
-        @if($component)
-            @unless($row->isRemoved())
-                @can('move', $component)
-                    <form method="POST" action="{{ route('components.remove_to_tray', $component) }}" style="display:inline;">
-                        @csrf
-                        <button type="submit" class="btn btn-xs btn-warning">{{ __('To Tray') }}</button>
-                    </form>
-                @endcan
-                @can('move', $component)
-                    <button
-                        type="button"
-                        class="btn btn-xs btn-default"
-                        data-toggle="modal"
-                        data-target="#assetComponentStorageModal"
-                        data-storage-action="{{ route('hardware.components.storage.store', [$asset, $component]) }}"
-                        data-storage-name="{{ $component->display_name }}"
-                    >
-                        {{ __('To Storage') }}
-                    </button>
-                @endcan
-                @can('move', $component)
-                    <a href="{{ route('hardware.components.reparent.create', [$asset, $component]) }}" class="btn btn-xs btn-default">{{ __('Move Within Device') }}</a>
-                @endcan
-                @can('install', $component)
-                    <a href="{{ route('hardware.components.transfer.create', [$asset, $component]) }}" class="btn btn-xs btn-primary">{{ __('Move To Other Device') }}</a>
-                @endcan
-            @endunless
-            <a href="{{ route('components.show', $component) }}" class="btn btn-xs btn-default">{{ __('Open') }}</a>
-        @elseif($template)
-            @can('move', new \App\Models\ComponentInstance())
-                <form method="POST" action="{{ route('hardware.components.expected.tray', [$asset, $template]) }}" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="btn btn-xs btn-warning">{{ __('To Tray') }}</button>
-                </form>
-            @endcan
-            @can('move', new \App\Models\ComponentInstance())
-                <button
-                    type="button"
-                    class="btn btn-xs btn-default"
-                    data-toggle="modal"
-                    data-target="#assetComponentStorageModal"
-                    data-storage-action="{{ route('hardware.components.expected.storage.store', [$asset, $template]) }}"
-                    data-storage-name="{{ $rowDisplayName }}"
-                >
-                    {{ __('To Storage') }}
-                </button>
-            @endcan
-            @can('install', new \App\Models\ComponentInstance())
-                <a href="{{ route('hardware.components.expected.transfer.create', [$asset, $template]) }}" class="btn btn-xs btn-primary">{{ __('Move To Other Device') }}</a>
-            @endcan
-        @endif
+        @include('components.partials.asset-component-actions', [
+            'row' => $row,
+            'asset' => $asset,
+            'component' => $component,
+            'template' => $template,
+            'rowDisplayName' => $rowDisplayName,
+            'variant' => 'table',
+        ])
     </td>
 </tr>

@@ -103,7 +103,7 @@ class ComponentBrowserWorkflowTest extends TestCase
                 'creation_mode' => 'definition',
                 'component_definition_id' => $definition->id,
                 'serial' => 'CAM-123',
-                'condition_warning_confirmed' => 1,
+                'condition_code' => ComponentInstance::CONDITION_GOOD,
                 'note' => 'Installed from asset add form.',
             ])
             ->assertRedirect(route('hardware.show', $asset))
@@ -296,7 +296,7 @@ class ComponentBrowserWorkflowTest extends TestCase
         $this->actingAs($user)
             ->get(route('components.show', $component))
             ->assertOk()
-            ->assertSeeText('Damaged');
+            ->assertSeeText('Broken');
     }
 
     public function testWebTrayInstallRejectsComponentsHeldByAnotherUser(): void

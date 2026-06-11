@@ -20,6 +20,118 @@ use Tests\TestCase;
 
 class ComponentHistoryTest extends TestCase
 {
+    public function testAssetAddComponentFormUsesConcreteConditionChoices(): void
+    {
+        $actor = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create();
+
+        $this->actingAs($actor)
+            ->get(route('hardware.components.add', $asset))
+            ->assertOk()
+            ->assertSee('name="condition_code"', false)
+            ->assertSee('value="'.ComponentInstance::CONDITION_UNKNOWN.'"', false)
+            ->assertSee('value="'.ComponentInstance::CONDITION_GOOD.'"', false)
+            ->assertSee('value="'.ComponentInstance::CONDITION_POOR.'"', false)
+            ->assertSee('value="'.ComponentInstance::CONDITION_BROKEN.'"', false)
+            ->assertDontSee('value="fair"', false);
+    }
+
+    public function testAssetComponentConditionCanBeUpdatedFromAssetPage(): void
+    {
+        $actor = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create();
+        $component = ComponentInstance::factory()->installed($asset->id)->create([
+            'display_name' => 'USB-C Port Board',
+            'condition_code' => ComponentInstance::CONDITION_BROKEN,
+            'condition_status' => ComponentInstance::CONDITION_STATUS_DAMAGED,
+        ]);
+
+        $this->actingAs($actor)
+            ->get(route('hardware.show', $asset))
+            ->assertOk()
+            ->assertSeeText('USB-C Port Board')
+            ->assertSeeText('Broken')
+            ->assertSee(route('hardware.components.condition.update', [$asset, $component]), false)
+            ->assertSee('name="condition_code"', false)
+            ->assertDontSee('value="fair"', false);
+
+        $token = 'asset-component-condition-token';
+
+        $this->actingAs($actor)
+            ->withSession(['_token' => $token])
+            ->post(route('hardware.components.condition.update', [$asset, $component]), [
+                '_token' => $token,
+                'condition_code' => ComponentInstance::CONDITION_POOR,
+            ])
+            ->assertRedirect(route('hardware.show', $asset))
+            ->assertSessionHasNoErrors()
+            ->assertSessionMissing('error');
+
+        $component->refresh();
+
+        $this->assertSame(ComponentInstance::CONDITION_POOR, $component->condition_code);
+        $this->assertSame(ComponentInstance::CONDITION_STATUS_DAMAGED, $component->condition_status);
+        $this->assertDatabaseHas('component_events', [
+            'component_instance_id' => $component->id,
+            'event_type' => 'condition_updated',
+            'performed_by' => $actor->id,
+        ]);
+
+        $this->actingAs($actor)
+            ->get(route('hardware.show', $asset))
+            ->assertOk()
+            ->assertSeeText('Poor');
+    }
+
+    public function testAssetComponentsTabRendersMobileCardsWithoutDuplicateConditionIds(): void
+    {
+        $actor = User::factory()->superuser()->create();
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $asset = Asset::factory()->for($model, 'model')->create([
+            'model_number_id' => $modelNumber->id,
+        ]);
+        $expectedDefinition = ComponentDefinition::factory()->create([
+            'name' => 'Battery Pack',
+        ]);
+        $extraDefinition = ComponentDefinition::factory()->create([
+            'name' => 'Expansion SSD',
+        ]);
+
+        ModelNumberComponentTemplate::factory()->for($modelNumber)->create([
+            'component_definition_id' => $expectedDefinition->id,
+            'expected_name' => 'Battery Pack',
+        ]);
+
+        $component = ComponentInstance::factory()->installed($asset->id)->create([
+            'component_definition_id' => $extraDefinition->id,
+            'display_name' => 'Expansion SSD',
+            'condition_code' => ComponentInstance::CONDITION_POOR,
+            'condition_status' => ComponentInstance::CONDITION_STATUS_DAMAGED,
+        ]);
+
+        $response = $this->actingAs($actor)
+            ->get(route('hardware.show', $asset))
+            ->assertOk()
+            ->assertSee('data-testid="asset-components-desktop-table"', false)
+            ->assertSee('data-testid="asset-components-mobile-list"', false)
+            ->assertSee('data-testid="asset-component-card"', false)
+            ->assertSee('data-component-card-badge="tracked"', false)
+            ->assertSee('data-component-card-badge="condition"', false)
+            ->assertDontSee('data-component-card-badge="expected"', false)
+            ->assertSee('data-testid="asset-component-card-default-action"', false)
+            ->assertSee('data-testid="asset-component-card-more"', false)
+            ->assertSee(route('hardware.components.storage.store', [$asset, $component]), false)
+            ->assertSee(route('hardware.components.transfer.create', [$asset, $component]), false)
+            ->assertSeeText('Model baseline');
+
+        $content = $response->getContent();
+
+        $this->assertSame(1, substr_count($content, 'id="asset_component_condition_table_'.$component->id.'"'));
+        $this->assertSame(1, substr_count($content, 'id="asset_component_condition_mobile_'.$component->id.'"'));
+        $this->assertSame(0, substr_count($content, 'id="asset_component_condition_'.$component->id.'"'));
+    }
+
     public function testAssetHistoryShowsInstalledRemovedAndPostRemovalEventsForDeletedComponents(): void
     {
         $actor = User::factory()->superuser()->create();
@@ -51,6 +163,8 @@ class ComponentHistoryTest extends TestCase
 
         $response->assertOk();
         $response->assertSee($component->component_tag);
+        $response->assertSee('data-testid="asset-components-history-mobile-list"', false);
+        $response->assertSee('data-testid="asset-component-history-card"', false);
         $response->assertSee('Installed');
         $response->assertSee('Removed To Tray');
         $response->assertSee('Moved To Stock');
@@ -265,13 +379,19 @@ class ComponentHistoryTest extends TestCase
             ->assertSee('data-testid="asset-component-row" data-component-classification="extra" data-component-depth="1"', false)
             ->assertSee('data-testid="asset-component-expected-child-row"', false)
             ->assertSee('data-testid="asset-component-removed-child-row"', false)
+            ->assertSee('data-testid="asset-component-card"', false)
+            ->assertSee('data-component-classification="expected_tracked"', false)
+            ->assertSee('data-component-classification="extra"', false)
+            ->assertSee('data-component-depth="1"', false)
+            ->assertSee('data-testid="asset-component-expected-child-card"', false)
+            ->assertSee('data-testid="asset-component-removed-child-card"', false)
             ->assertSeeText('Installed Motherboard')
             ->assertSeeText('Damaged USB-C Port Board')
             ->assertSeeText('Removed USB-C Port Board')
             ->assertSeeText('USB-C-PORT')
             ->assertSeeText('Remaining: 1')
             ->assertSeeText('Removed from this parent component')
-            ->assertSeeText('Damaged')
+            ->assertSeeText('Broken')
             ->assertSeeInOrder([
                 'Installed Motherboard',
                 'Damaged USB-C Port Board',

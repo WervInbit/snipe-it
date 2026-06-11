@@ -267,6 +267,153 @@
     font-size: 1.6rem;
     font-weight: 600;
 }
+#components .asset-components-mobile,
+#components .asset-component-history-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#components .asset-components-mobile__section-label {
+    color: #6b7280;
+    font-size: 12px;
+    font-weight: 700;
+    margin: 6px 0 0;
+    text-transform: uppercase;
+}
+#components .asset-component-card,
+#components .asset-component-history-card {
+    background: #fff;
+    border: 1px solid #d9e2ec;
+    border-radius: 6px;
+    box-shadow: 0 6px 18px rgba(15, 35, 55, 0.08);
+    overflow: visible;
+}
+#components .asset-component-card--child {
+    border-left: 4px solid #b8c7d6;
+    box-shadow: none;
+    margin-left: 16px;
+}
+#components .asset-component-card--removed {
+    opacity: 0.95;
+}
+#components .asset-component-card__body,
+#components .asset-component-history-card {
+    padding: 12px;
+}
+#components .asset-component-card__badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 8px;
+}
+#components .asset-component-card__badges .label {
+    display: inline-block;
+    line-height: 1.1;
+}
+#components .asset-component-card__name {
+    color: #1f2937;
+    font-size: 15px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+#components .asset-component-card__name a {
+    color: #236184;
+}
+#components .asset-component-card__subtitle,
+#components .asset-component-card__note,
+#components .asset-component-card__baseline-note,
+#components .asset-component-history-card__date,
+#components .asset-component-history-card__meta,
+#components .asset-component-history-card__note {
+    color: #66788a;
+    font-size: 12px;
+}
+#components .asset-component-card__subtitle,
+#components .asset-component-card__note,
+#components .asset-component-card__baseline-note {
+    margin-top: 6px;
+}
+#components .asset-component-card__baseline-note {
+    background: #f4f7fb;
+    border: 1px solid #dde7f0;
+    border-radius: 4px;
+    padding: 8px;
+}
+#components .asset-component-card__meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px 10px;
+    margin: 10px 0 0;
+}
+#components .asset-component-card__meta div,
+#components .asset-component-card__meta dd {
+    min-width: 0;
+}
+#components .asset-component-card__meta dt {
+    color: #1f2937;
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+#components .asset-component-card__meta dd {
+    color: #66788a;
+    font-size: 12px;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+#components .asset-component-condition-control--mobile {
+    border-top: 1px solid #d9e2ec;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+    margin-top: 12px;
+    padding-top: 12px;
+}
+#components .asset-component-condition-control--mobile .asset-component-condition-control__label {
+    grid-column: 1 / -1;
+    margin: 0;
+}
+#components .asset-component-condition-control--mobile .form-control {
+    max-width: 100%;
+    min-width: 0;
+}
+#components .asset-component-card__actions {
+    align-items: stretch;
+    background: #f8fafc;
+    border-top: 1px solid #d9e2ec;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding: 10px;
+}
+#components .asset-component-card__actions--single {
+    grid-template-columns: minmax(0, 1fr);
+}
+#components .asset-component-card__default-action {
+    margin: 0;
+}
+#components .asset-component-card__more > .btn {
+    min-height: 34px;
+    min-width: 76px;
+}
+#components .asset-component-card__more .dropdown-menu {
+    left: auto;
+    min-width: 210px;
+    right: 0;
+}
+#components .asset-component-history-card__date {
+    display: block;
+    margin-bottom: 4px;
+}
+#components .asset-component-history-card__title {
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+#components .asset-component-history-card__meta,
+#components .asset-component-history-card__note {
+    margin-top: 4px;
+}
 @media (max-width: 991px) {
     .info-stack-container {
         display: flex;
@@ -324,6 +471,13 @@
     }
     .hardware-test-result-status {
         white-space: normal;
+    }
+    #components .clearfix .btn {
+        float: none !important;
+        width: 100%;
+    }
+    #components .panel-body {
+        padding: 10px;
     }
 }
 .asset-tests-attention {

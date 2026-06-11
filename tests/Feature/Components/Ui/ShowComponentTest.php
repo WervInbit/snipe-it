@@ -290,6 +290,7 @@ class ShowComponentTest extends TestCase
                 'creation_mode' => 'custom',
                 'display_name' => 'Replacement Thermal Pad',
                 'serial' => 'THERM-123',
+                'condition_code' => ComponentInstance::CONDITION_UNKNOWN,
                 'note' => 'Specific thickness captured in the note.',
             ])
             ->assertRedirect(route('components.show', $parent))
@@ -307,6 +308,7 @@ class ShowComponentTest extends TestCase
                 'creation_mode' => 'custom',
                 'display_name' => 'Replacement Thermal Pad',
                 'serial' => 'THERM-123',
+                'condition_code' => ComponentInstance::CONDITION_UNKNOWN,
                 'condition_warning_confirmed' => 1,
                 'note' => 'Specific thickness captured in the note.',
             ])
@@ -355,7 +357,7 @@ class ShowComponentTest extends TestCase
                 '_token' => $token,
                 'creation_mode' => 'definition',
                 'component_definition_id' => $childDefinition->id,
-                'condition_warning_confirmed' => 1,
+                'condition_code' => ComponentInstance::CONDITION_GOOD,
                 'note' => 'Tracked from repair bench.',
             ])
             ->assertRedirect(route('components.show', $parent))
@@ -394,7 +396,7 @@ class ShowComponentTest extends TestCase
                 '_token' => $token,
                 'creation_mode' => 'definition',
                 'component_definition_id' => $assetOnlyDefinition->id,
-                'condition_warning_confirmed' => 1,
+                'condition_code' => ComponentInstance::CONDITION_GOOD,
             ])
             ->assertRedirect()
             ->assertSessionHasErrors('component_definition_id');

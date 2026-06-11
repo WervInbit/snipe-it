@@ -17,6 +17,7 @@
             || $errors->has('component_definition_id')
             || $errors->has('display_name')
             || $errors->has('serial')
+            || $errors->has('condition_code')
             || $errors->has('note')
             || old('creation_mode');
         $hasConditionWarningInstallOptions = $trayComponents
@@ -62,7 +63,7 @@
                                         <optgroup label="{{ __('My Tray') }}">
                                             @foreach($trayComponents as $trayComponent)
                                                 <option value="{{ $trayComponent->id }}" @selected((string) old('component_id') === (string) $trayComponent->id)>
-                                                    [{{ __('Tray') }}] {{ $trayComponent->component_tag }} - {{ $trayComponent->display_name }}@if($trayComponent->requiresConditionWarningForAttachment()) ({{ \App\Models\ComponentInstance::conditionStatusLabel($trayComponent->effectiveConditionStatus()) }})@endif
+                                                    [{{ __('Tray') }}] {{ $trayComponent->component_tag }} - {{ $trayComponent->display_name }}@if($trayComponent->requiresConditionWarningForAttachment()) ({{ $trayComponent->displayConditionLabel() }})@endif
                                                 </option>
                                             @endforeach
                                         </optgroup>
@@ -72,7 +73,7 @@
                                             @foreach($stockComponents as $stockComponent)
                                                 @php($sourceLabel = $stockComponent->effectiveLifecycleStatus() === \App\Models\ComponentInstance::LIFECYCLE_SOLD_RETURNED ? __('Sold / Returned') : __('Storage'))
                                                 <option value="{{ $stockComponent->id }}" @selected((string) old('component_id') === (string) $stockComponent->id)>
-                                                    [{{ $sourceLabel }}] {{ $stockComponent->component_tag }} - {{ $stockComponent->display_name }}@if($stockComponent->effectiveConditionStatus() !== \App\Models\ComponentInstance::CONDITION_STATUS_GOOD) ({{ \App\Models\ComponentInstance::conditionStatusLabel($stockComponent->effectiveConditionStatus()) }})@endif
+                                                    [{{ $sourceLabel }}] {{ $stockComponent->component_tag }} - {{ $stockComponent->display_name }}@if($stockComponent->effectiveConditionStatus() !== \App\Models\ComponentInstance::CONDITION_STATUS_GOOD) ({{ $stockComponent->displayConditionLabel() }})@endif
                                                 </option>
                                             @endforeach
                                         </optgroup>
@@ -83,7 +84,7 @@
                             </div>
                             @include('components.partials.condition-warning-confirmation', [
                                 'show' => $hasConditionWarningInstallOptions,
-                                'message' => __('Some available components are marked Damaged or Needs Attention. If you select one of those parts, confirm the warning before installing it.'),
+                                'message' => __('Some available components have Unknown, Poor, or Broken condition. If you select one of those parts, confirm the warning before installing it.'),
                                 'checkboxLabel' => __('I understand the selected component condition and want to install it.'),
                             ])
                             @include('components.partials.lifecycle-warning-confirmation', [
@@ -128,13 +129,14 @@
                     <form method="POST" action="{{ route('hardware.components.register', $asset) }}">
                         @csrf
                         <p class="text-muted">
-                            {{ __('Create a new tracked component and install it immediately. Source type is manual by default, and condition or slot details are not required here.') }}
+                            {{ __('Create a new tracked component and install it immediately. Source type is manual by default.') }}
                         </p>
                         @include('components.partials.manual-fields', [
                             'componentDefinitions' => $componentDefinitions,
+                            'conditionOptions' => $conditionOptions,
                             'notesField' => 'note',
                             'showSourceType' => false,
-                            'showCondition' => false,
+                            'showCondition' => true,
                             'showStorageLocation' => false,
                             'showInstalledAs' => false,
                             'showCreationModeToggle' => true,
@@ -142,8 +144,8 @@
                         ])
                         @include('components.partials.condition-warning-confirmation', [
                             'conditionStatus' => \App\Models\ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION,
-                            'message' => __('New components created here start as Needs Attention until they are verified. Confirm the warning before installing this new component.'),
-                            'checkboxLabel' => __('I understand this new component starts as Needs Attention and want to install it.'),
+                            'message' => __('If the new component condition is Unknown, Poor, or Broken, confirm the warning before installing it.'),
+                            'checkboxLabel' => __('I understand the selected component condition and want to install it.'),
                         ])
                         <button type="submit" class="btn btn-success">{{ __('Create And Install') }}</button>
                     </form>

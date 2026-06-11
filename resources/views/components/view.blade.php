@@ -19,6 +19,8 @@
 </a>
 @stop
 
+@inject('qrLabels', 'App\\Services\\QrLabelService')
+
 @section('content')
 @php
     $lifecycleStatus = $component->effectiveLifecycleStatus();
@@ -87,6 +89,20 @@
         && filled($component->current_asset_id);
     $expectedSubcomponentStates = ($component->expectedSubcomponentStates ?? collect())
         ->keyBy('component_definition_subcomponent_template_id');
+    $qrFormats = collect(explode(',', $snipeSettings->qr_formats ?? 'png,pdf,qr'))
+        ->map(fn ($format) => strtolower(trim($format)))
+        ->filter()
+        ->values()
+        ->all();
+    $selectedTemplate = request('template', $snipeSettings->qr_label_template ?? config('qr_templates.default'));
+    $qrTemplates = config('qr_templates.templates');
+    $componentQrDownloadUrl = in_array('png', $qrFormats, true)
+        ? route('components.qr-label.download', ['component_id' => $component, 'template' => $selectedTemplate])
+        : null;
+    $componentQrPreview = null;
+    if (config('qr_templates.enable_ui', true) && ($componentQrDownloadUrl || in_array('pdf', $qrFormats, true))) {
+        $componentQrPreview = $qrLabels->previewDataFor($component, $selectedTemplate);
+    }
 @endphp
 
 <div class="row">
@@ -110,7 +126,7 @@
                     <dd>{{ \App\Models\ComponentInstance::sourceTypeLabel($component->source_type) ?? $component->source_type }}</dd>
 
                     <dt>{{ trans('general.condition') }}</dt>
-                    <dd>{{ \App\Models\ComponentInstance::conditionStatusLabel($conditionStatus) ?? $conditionStatus }}</dd>
+                    <dd>{{ $component->displayConditionLabel() }}</dd>
 
                     @if($component->serial)
                     <dt>{{ trans('admin/hardware/form.serial') }}</dt>
@@ -182,6 +198,24 @@
                 </dl>
             </div>
         </div>
+
+        @if (config('qr_templates.enable_ui', true) && ($componentQrPreview || $componentQrDownloadUrl))
+            <div data-testid="component-qr-action-panel">
+                @include('hardware.partials.qr-label-widget', [
+                    'qrPng' => null,
+                    'downloadUrl' => $componentQrDownloadUrl,
+                    'qrPreview' => $componentQrPreview,
+                    'qrTemplates' => $qrTemplates,
+                    'selectedTemplate' => $selectedTemplate,
+                    'labelTargetName' => $component->display_name ?: ($component->component_tag ?? $component->id),
+                    'templatePickerId' => 'component-template-picker',
+                    'printerPickerId' => 'component-printer-picker',
+                    'printButtonId' => 'component-qr-server-print-button',
+                    'printUrl' => Route::has('components.print-label') ? route('components.print-label', $component) : null,
+                    'printButtonLabel' => __('Print QR label'),
+                ])
+            </div>
+        @endif
 
         @if(in_array($lifecycleStatus, [
             \App\Models\ComponentInstance::LIFECYCLE_IN_STOCK,
@@ -304,7 +338,7 @@
                                         <a href="{{ route('components.show', $child) }}">{{ $child->component_tag }}</a>
                                     </td>
                                     <td>{{ \App\Models\ComponentInstance::lifecycleStatusLabel($child->effectiveLifecycleStatus()) ?? $child->effectiveLifecycleStatus() }}</td>
-                                    <td>{{ \App\Models\ComponentInstance::conditionStatusLabel($child->effectiveConditionStatus()) ?? $child->effectiveConditionStatus() }}</td>
+                                    <td>{{ $child->displayConditionLabel() }}</td>
                                     <td>
                                         @if($child->currentAsset)
                                             <a href="{{ route('hardware.show', $child->currentAsset) }}">{{ $child->currentAsset->present()->name() }}</a>
@@ -341,9 +375,10 @@
                                 @csrf
                                 @include('components.partials.manual-fields', [
                                     'componentDefinitions' => $childComponentDefinitions,
+                                    'conditionOptions' => $conditionOptions,
                                     'notesField' => 'note',
                                     'showSourceType' => false,
-                                    'showCondition' => false,
+                                    'showCondition' => true,
                                     'showStorageLocation' => false,
                                     'showInstalledAs' => false,
                                     'showCreationModeToggle' => true,
@@ -351,8 +386,8 @@
                                 ])
                                 @include('components.partials.condition-warning-confirmation', [
                                     'conditionStatus' => \App\Models\ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION,
-                                    'message' => __('New child components start as Needs Attention until they are verified. Confirm the warning before attaching this child component.'),
-                                    'checkboxLabel' => __('I understand this child component starts as Needs Attention and want to attach it.'),
+                                    'message' => __('If the child component condition is Unknown, Poor, or Broken, confirm the warning before attaching it.'),
+                                    'checkboxLabel' => __('I understand the selected child component condition and want to attach it.'),
                                 ])
                                 <button type="submit" class="btn btn-success">{{ __('Create Child Component') }}</button>
                             </form>

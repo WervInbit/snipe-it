@@ -2,7 +2,15 @@
     $templateName = $qrTemplates[$selectedTemplate]['name'] ?? $selectedTemplate;
     $printQueues = array_values(array_filter(config('qr_templates.queues') ?? []));
     $defaultQueue = config('qr_templates.print_queue') ?? ($printQueues[0] ?? null);
+    $qrPng = $qrPng ?? null;
     $qrPreview = $qrPreview ?? null;
+    $downloadUrl = $downloadUrl ?? ($qrPng ?? null);
+    $labelTargetName = $labelTargetName ?? (isset($asset) ? ($asset->name ?: ($asset->asset_tag ?? $asset->id)) : __('item'));
+    $templatePickerId = $templatePickerId ?? 'asset-template-picker';
+    $printerPickerId = $printerPickerId ?? 'asset-printer-picker';
+    $printButtonId = $printButtonId ?? 'qr-server-print-button';
+    $printButtonLabel = $printButtonLabel ?? __('Print QR label');
+    $printUrl = $printUrl ?? (isset($asset) && Route::has('hardware.print-label') ? route('hardware.print-label', $asset) : null);
 @endphp
 <div class="panel panel-default qr-label-panel">
     <style>
@@ -30,7 +38,7 @@
             max-width: 100%;
             white-space: normal;
         }
-        .qr-label-panel #qr-server-print-button {
+        .qr-label-panel .qr-server-print-button {
             width: 100%;
             max-width: 100%;
             min-width: 0;
@@ -42,9 +50,6 @@
         <span class="text-muted">- {{ $templateName }}</span>
     </div>
     <div class="panel-body text-center">
-        @php
-            $assetLabel = $asset->name ?: ($asset->asset_tag ?? $asset->id);
-        @endphp
         @if ($qrPreview)
             <style>
                 .qr-label-preview {
@@ -63,7 +68,7 @@
                 }
 {!! $qrPreview['styles'] !!}
             </style>
-            <div class="img-thumbnail qr-label-preview" aria-label="{{ trans('general.qr_preview_for', ['asset' => $assetLabel]) }}">
+            <div class="img-thumbnail qr-label-preview" aria-label="{{ trans('general.qr_preview_for', ['asset' => $labelTargetName]) }}">
                 <div
                     class="qr-label-preview-frame"
                     style="width: {{ $qrPreview['preview_width_px'] }}px; height: {{ $qrPreview['preview_height_px'] }}px;"
@@ -81,7 +86,7 @@
                 src="{{ $qrPng }}"
                 class="img-thumbnail"
                 style="height: 150px; width: 150px; margin-bottom: 10px;"
-                alt="{{ trans('general.qr_preview_for', ['asset' => $assetLabel]) }}"
+                alt="{{ trans('general.qr_preview_for', ['asset' => $labelTargetName]) }}"
             >
         @endif
 
@@ -95,10 +100,10 @@
                     <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                 @endif
             @endforeach
-            <label for="asset-template-picker" class="sr-only">{{ trans('admin/settings/general.qr_label_template') }}</label>
+            <label for="{{ $templatePickerId }}" class="control-label">{{ trans('admin/settings/general.qr_label_template') }}</label>
             <select
                 name="template"
-                id="asset-template-picker"
+                id="{{ $templatePickerId }}"
                 class="form-control"
                 onchange="this.form.submit()"
                 aria-label="{{ trans('admin/settings/general.qr_label_template') }}"
@@ -113,9 +118,9 @@
 
         @if (!empty($printQueues))
             <div class="form-group text-left qr-label-printer">
-                <label for="asset-printer-picker" class="control-label">{{ __('Printer location') }}</label>
+                <label for="{{ $printerPickerId }}" class="control-label">{{ __('Printer location') }}</label>
                 <select
-                    id="asset-printer-picker"
+                    id="{{ $printerPickerId }}"
                     class="form-control"
                     aria-label="{{ __('Printer location') }}"
                 >
@@ -127,23 +132,23 @@
         @endif
 
         <div class="btn-group qr-label-actions">
-            @if ($qrPng)
-                <a href="{{ $qrPng }}" download class="btn btn-default">
+            @if ($downloadUrl)
+                <a href="{{ $downloadUrl }}" download class="btn btn-default">
                     <x-icon type="download" /> {{ trans('general.download_qr_label') }}
                 </a>
             @endif
         </div>
 
-        @if (Route::has('hardware.print-label'))
+        @if ($printUrl)
             <button
                 type="button"
-                class="btn btn-success btn-block"
-                id="qr-server-print-button"
-                data-print-url="{{ route('hardware.print-label', $asset) }}"
-                data-template-selector="#asset-template-picker"
-                data-queue-selector="#asset-printer-picker"
+                class="btn btn-success btn-block qr-server-print-button"
+                id="{{ $printButtonId }}"
+                data-print-url="{{ $printUrl }}"
+                data-template-selector="#{{ $templatePickerId }}"
+                data-queue-selector="#{{ $printerPickerId }}"
             >
-                <x-icon type="print" /> {{ __('Print to LabelWriter') }}
+                <x-icon type="print" /> {{ $printButtonLabel }}
             </button>
         @endif
     </div>
@@ -153,58 +158,62 @@
 </div>
 <script>
 (function () {
-    var button = document.getElementById('qr-server-print-button');
-    if (!button) return;
-    var templateSelector = button.getAttribute('data-template-selector');
-    var templateField = document.querySelector(templateSelector);
-    var queueSelector = button.getAttribute('data-queue-selector');
-    var queueField = queueSelector ? document.querySelector(queueSelector) : null;
     var token = document.querySelector('meta[name="csrf-token"]');
     var csrf = token ? token.getAttribute('content') : '';
 
-    button.addEventListener('click', function () {
-        if (!templateField) return;
-        button.disabled = true;
-        button.classList.add('disabled');
-        var queueValue = queueField ? queueField.value : null;
+    document.querySelectorAll('.qr-server-print-button').forEach(function (button) {
+        if (button.getAttribute('data-qr-print-bound') === '1') return;
+        button.setAttribute('data-qr-print-bound', '1');
 
-        fetch(button.getAttribute('data-print-url'), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrf,
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                template: templateField.value,
-                queue: queueValue
+        var templateSelector = button.getAttribute('data-template-selector');
+        var templateField = document.querySelector(templateSelector);
+        var queueSelector = button.getAttribute('data-queue-selector');
+        var queueField = queueSelector ? document.querySelector(queueSelector) : null;
+
+        button.addEventListener('click', function () {
+            if (!templateField) return;
+            button.disabled = true;
+            button.classList.add('disabled');
+            var queueValue = queueField ? queueField.value : null;
+
+            fetch(button.getAttribute('data-print-url'), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrf,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    template: templateField.value,
+                    queue: queueValue
+                })
             })
-        })
-            .then(function (response) {
-                return response.json().then(function (data) {
-                    return { ok: response.ok, data: data };
+                .then(function (response) {
+                    return response.json().then(function (data) {
+                        return { ok: response.ok, data: data };
+                    });
+                })
+                .then(function (payload) {
+                    var msg = payload.data && payload.data.message ? payload.data.message : (payload.ok ? 'Label sent to printer.' : 'Printing failed.');
+                    if (window.toastr) {
+                        payload.ok ? toastr.success(msg) : toastr.error(msg);
+                    } else {
+                        alert(msg);
+                    }
+                })
+                .catch(function () {
+                    var msg = 'Printing failed.';
+                    if (window.toastr) {
+                        toastr.error(msg);
+                    } else {
+                        alert(msg);
+                    }
+                })
+                .then(function () {
+                    button.disabled = false;
+                    button.classList.remove('disabled');
                 });
-            })
-            .then(function (payload) {
-                var msg = payload.data && payload.data.message ? payload.data.message : (payload.ok ? 'Label sent to printer.' : 'Printing failed.');
-                if (window.toastr) {
-                    payload.ok ? toastr.success(msg) : toastr.error(msg);
-                } else {
-                    alert(msg);
-                }
-            })
-            .catch(function () {
-                var msg = 'Printing failed.';
-                if (window.toastr) {
-                    toastr.error(msg);
-                } else {
-                    alert(msg);
-                }
-            })
-            .then(function () {
-                button.disabled = false;
-                button.classList.remove('disabled');
-            });
+        });
     });
 })();
 </script>

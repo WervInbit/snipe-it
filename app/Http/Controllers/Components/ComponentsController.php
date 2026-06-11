@@ -61,7 +61,7 @@ class ComponentsController extends Controller
             'display_name' => ['required_without:component_definition_id', 'nullable', 'string', 'max:255'],
             'serial' => ['nullable', 'string', 'max:255'],
             'source_type' => ['required', 'string', 'max:255'],
-            'condition_code' => ['required', 'string', 'max:255'],
+            'condition_code' => ['required', Rule::in(array_keys($this->conditionOptions()))],
             'storage_location_id' => ['required', 'integer', 'exists:component_storage_locations,id'],
             'notes' => ['nullable', 'string'],
         ]);
@@ -260,6 +260,7 @@ class ComponentsController extends Controller
                 Rule::requiredIf(fn () => $request->input('creation_mode') === 'custom'),
             ],
             'serial' => ['nullable', 'string', 'max:255'],
+            'condition_code' => ['required', Rule::in(array_keys($this->conditionOptions()))],
             'condition_warning_confirmed' => ['nullable', 'boolean'],
             'note' => ['nullable', 'string'],
         ]);
@@ -280,7 +281,7 @@ class ComponentsController extends Controller
             }
 
             $this->lifecycle->assertConditionWarningConfirmedForCondition(
-                ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION,
+                ComponentInstance::conditionStatusForConditionCode($data['condition_code']),
                 ['condition_warning_confirmed' => $request->boolean('condition_warning_confirmed')],
                 $data['display_name'] ?? 'Child component',
             );
@@ -295,7 +296,7 @@ class ComponentsController extends Controller
                 'root_asset_id' => $component_id->root_asset_id ?: $component_id->current_asset_id,
                 'status' => ComponentInstance::STATUS_INSTALLED,
                 'lifecycle_status' => ComponentInstance::LIFECYCLE_ATTACHED,
-                'condition_code' => ComponentInstance::CONDITION_UNKNOWN,
+                'condition_code' => $data['condition_code'],
                 'display_name' => $data['display_name'] ?? null,
                 'serial' => $data['serial'] ?? null,
                 'notes' => $data['note'] ?? null,

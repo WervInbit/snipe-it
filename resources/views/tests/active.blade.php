@@ -21,36 +21,12 @@
         --testing-space-lg: 1.75rem;
         background: radial-gradient(circle at top, #f8fbff 0%, var(--testing-bg) 70%);
         min-height: calc(100vh - 80px);
-        padding-bottom: 7rem;
     }
 
     .testing-shell {
         max-width: 1280px;
         margin: 0 auto;
         padding: var(--testing-space-lg) clamp(0.75rem, 3vw, 1.75rem) 3rem;
-    }
-
-    .testing-save-indicator {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.35rem;
-        font-size: 0.85rem;
-        padding: 0.35rem 0.75rem;
-        border-radius: 999px;
-        background: rgba(14, 165, 233, 0.07);
-        color: #0284c7;
-    }
-
-    .testing-save-indicator [data-state] {
-        font-size: 1rem;
-    }
-
-    .testing-progress-chip {
-        padding: 0.65rem 0.9rem;
-        background: rgba(15, 23, 42, 0.03);
-        border-radius: 12px;
-        border: 1px solid var(--testing-border);
-        font-size: 0.85rem;
     }
 
     .testing-grid {
@@ -231,66 +207,6 @@
         overflow-x: auto;
     }
 
-    .testing-floating-bar {
-        margin-top: 2rem;
-        display: flex;
-        justify-content: center;
-    }
-
-    .testing-floating-bar__inner {
-        width: min(960px, 100%);
-        background: rgba(15, 23, 42, 0.92);
-        border-radius: 999px;
-        padding: 0.75rem 1.5rem;
-        box-shadow: 0 20px 40px rgba(15, 23, 42, 0.25);
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 1rem;
-        pointer-events: all;
-        color: #f1f5f9;
-    }
-
-    .testing-floating-bar__meta {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 0.5rem;
-        flex: 1 1 100%;
-    }
-
-    .testing-floating-bar__meta .testing-progress-chip {
-        color: #e2e8f0;
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.12);
-    }
-
-    .testing-floating-bar__meta .testing-progress-chip.text-danger {
-        color: #fecaca !important;
-    }
-
-    .testing-floating-bar__progress {
-        flex: 1 1 220px;
-    }
-
-    .testing-floating-bar__actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        align-items: center;
-    }
-
-    .testing-floating-bar__secondary-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    .testing-floating-bar .progress {
-        height: 0.35rem;
-        border-radius: 999px;
-    }
-
     @media (max-width: 576px) {
         .testing-shell {
             padding-inline: 1rem;
@@ -334,17 +250,6 @@
 
         .testing-grid.compact-2col {
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        }
-
-        .testing-floating-bar__inner {
-            width: 100%;
-            border-radius: 24px;
-        }
-
-        .testing-floating-bar__meta,
-        .testing-floating-bar__actions,
-        .testing-floating-bar__secondary-actions {
-            width: 100%;
         }
     }
 </style>
@@ -391,112 +296,6 @@
                 </div>
             </main>
 
-            <div class="testing-floating-bar">
-                <div class="testing-floating-bar__inner">
-                    <div class="testing-floating-bar__meta" data-testid="tests-active-summary">
-                        <span id="saveIndicator" class="testing-save-indicator" aria-live="polite" data-testid="testing-save-indicator">
-                            <i class="fas fa-rotate fa-spin d-none" data-state="saving" aria-hidden="true"></i>
-                            <i class="fas fa-check d-none" data-state="clean" aria-hidden="true"></i>
-                            <i class="fas fa-triangle-exclamation d-none" data-state="error" aria-hidden="true"></i>
-                            <span class="small">{{ trans('general.status') }}</span>
-                        </span>
-                        <div class="testing-progress-chip">
-                            {{ optional($run)->profile_name_snapshot ?: optional(optional($run)->profile)->name ?: trans('tests.workflow_run') }}
-                        </div>
-                        <div class="testing-progress-chip"
-                             data-progress-completed
-                             data-template="{{ trans('tests.completed_count', ['completed' => ':completed', 'total' => ':total']) }}">
-                            {{ trans('tests.completed_count', ['completed' => $progress['completed'], 'total' => $progress['total']]) }}
-                        </div>
-                        <div class="testing-progress-chip"
-                             data-progress-remaining
-                             data-template="{{ trans('tests.remaining_count', ['remaining' => ':remaining']) }}">
-                            {{ trans('tests.remaining_count', ['remaining' => $progress['remaining']]) }}
-                        </div>
-                        <div class="testing-progress-chip"
-                             data-progress-failures
-                             data-template="{{ trans('tests.failure_count', ['failures' => ':failures']) }}">
-                            {{ trans('tests.failure_count', ['failures' => $progress['failures']]) }}
-                        </div>
-                    </div>
-                    <div class="testing-floating-bar__progress">
-                        <div class="d-flex justify-content-between align-items-center text-uppercase small fw-semibold mb-2">
-                            <span>{{ trans('general.progress') }}</span>
-                            <span class="text-muted">{{ trans('general.total') }}: {{ $progress['total'] }}</span>
-                        </div>
-                        <div class="progress">
-                            <div class="progress-bar bg-success"
-                                 role="progressbar"
-                                 style="width: {{ $progress['total'] ? ($progress['completed'] / $progress['total']) * 100 : 0 }}%"
-                                 aria-valuenow="{{ $progress['completed'] }}"
-                                 aria-valuemin="0"
-                                 aria-valuemax="{{ $progress['total'] }}"
-                                 data-progress-bar></div>
-                        </div>
-                    </div>
-                    <div class="testing-floating-bar__actions">
-                        <div class="testing-floating-bar__secondary-actions">
-                            @if($canViewAudit ?? false)
-                                <a href="{{ route('test-runs.index', $asset->id) }}" class="btn btn-outline-light btn-sm" data-testid="tests-view-history-btn">
-                                    <i class="fas fa-history me-1" aria-hidden="true"></i>{{ trans('tests.view_history') }}
-                                </a>
-                            @endif
-                            @if($canStartRun ?? false)
-                                <form method="POST"
-                                      action="{{ route('test-runs.store', $asset->id) }}"
-                                      data-testid="tests-start-new-run-form">
-                                    @csrf
-                                    <select name="workflow_profile_id" class="form-control input-sm" required style="min-width: 180px;">
-                                        @foreach(($workflowProfiles ?? collect()) as $profile)
-                                            <option value="{{ $profile->id }}" @selected($profile->is_default)>
-                                                {{ $profile->name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <button type="submit" class="btn btn-outline-light btn-sm" data-testid="tests-start-new-run-btn">
-                                        <i class="fas fa-redo me-1" aria-hidden="true"></i>{{ trans('tests.start_new_run') }}
-                                    </button>
-                                </form>
-                            @endif
-                        </div>
-                        <button type="button"
-                                class="btn btn-success btn-sm"
-                                id="tests-complete-btn"
-                                data-testid="tests-complete-btn">
-                            <i class="fas fa-check me-2" aria-hidden="true"></i>{{ trans('tests.cta_complete_ok') }}
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal fade" id="testsCompleteConfirmModal" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">{{ trans('tests.complete_confirm_title') }}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{{ trans('general.close') }}"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p>{{ trans('tests.complete_confirm_prompt') }}</p>
-                            <div data-tests-complete-summary>
-                                <div class="mb-2" data-tests-complete-failed-block style="display:none;">
-                                    <strong>{{ trans('tests.complete_confirm_failed') }}</strong>
-                                    <ul class="mb-0" data-tests-complete-failed></ul>
-                                </div>
-                                <div class="mb-0" data-tests-complete-incomplete-block style="display:none;">
-                                    <strong>{{ trans('tests.complete_confirm_incomplete') }}</strong>
-                                    <ul class="mb-0" data-tests-complete-incomplete></ul>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ trans('general.cancel') }}</button>
-                            <button type="button" class="btn btn-warning" id="testsCompleteConfirmContinue">{{ trans('tests.complete_confirm_continue') }}</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <div class="modal fade" id="photoDeleteModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content">
@@ -539,18 +338,10 @@
         },
         canUpdate: {{ ($canUpdate ?? false) ? 'true' : 'false' }},
         progress: @json($progress),
-        actions: {
-            completeUrl: '{{ $run ? route('hardware.show', $asset->id) : '' }}',
-        },
         messages: {
             noteSaved: @json(trans('tests.note_saved_at', ['time' => ':time'])),
             photoDrawerEmpty: @json(trans('tests.photo_drawer_empty')),
             removePhoto: @json(trans('tests.remove_photo')),
-            completeConfirmTitle: @json(trans('tests.complete_confirm_title')),
-            completeConfirmPrompt: @json(trans('tests.complete_confirm_prompt')),
-            completeConfirmFailed: @json(trans('tests.complete_confirm_failed')),
-            completeConfirmIncomplete: @json(trans('tests.complete_confirm_incomplete')),
-            completeConfirmContinue: @json(trans('tests.complete_confirm_continue')),
         },
         layoutKey: 'tests.layout.active.oneCol',
     };

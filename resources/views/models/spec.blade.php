@@ -83,6 +83,7 @@
 
         .attribute-detail-panel {
             margin-bottom: 20px;
+            min-width: 0;
         }
 
         .attribute-detail-panel--error {
@@ -90,6 +91,35 @@
             border-radius: 6px;
             padding: 10px;
             background-color: #fff9f9;
+        }
+
+        .model-attributes-builder,
+        .model-attributes-builder .attribute-column,
+        .model-attributes-builder .attribute-detail-container,
+        .model-attributes-builder .form-group,
+        .component-template-row__main,
+        .component-template-row__main > .row {
+            min-width: 0;
+        }
+
+        .model-attributes-builder .form-control,
+        .component-template-row .form-control {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        .model-attributes-builder .form-group,
+        .component-template-row .form-group {
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .model-attributes-builder select.form-control,
+        .component-template-row select.form-control {
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .attribute-detail-empty {
@@ -147,6 +177,10 @@
             display: flex;
             align-items: center;
             gap: 12px;
+        }
+
+        .component-template-row__main > .row {
+            flex: 1 1 auto;
         }
 
         .component-template-row__drag {
@@ -448,7 +482,7 @@
                                             <div class="row" style="flex:1; margin-left:0; margin-right:0;">
                                                 <div class="col-md-8 form-group {{ $errors->has('component_templates.' . $index . '.component_definition_id') ? 'has-error' : '' }}">
                                                     <label>{{ __('Catalog Definition') }}</label>
-                                                    <select name="component_templates[{{ $index }}][component_definition_id]" class="form-control">
+                                                    <select name="component_templates[{{ $index }}][component_definition_id]" class="form-control select2 js-component-template-definition-select" style="width: 100%">
                                                         <option value="">{{ __('Select a component definition') }}</option>
                                                         @foreach($componentDefinitions as $componentDefinition)
                                                             <option value="{{ $componentDefinition->id }}" @selected((string) ($row['component_definition_id'] ?? '') === (string) $componentDefinition->id)>
@@ -527,7 +561,7 @@
                                         <div class="row" style="flex:1; margin-left:0; margin-right:0;">
                                             <div class="col-md-8 form-group">
                                                 <label>{{ __('Catalog Definition') }}</label>
-                                                <select name="component_templates[__INDEX__][component_definition_id]" class="form-control">
+                                                <select name="component_templates[__INDEX__][component_definition_id]" class="form-control select2 js-component-template-definition-select" style="width: 100%">
                                                     <option value="">{{ __('Select a component definition') }}</option>
                                                     @foreach($componentDefinitions as $componentDefinition)
                                                         <option value="{{ $componentDefinition->id }}">
@@ -646,6 +680,16 @@
                 refreshComponentTemplateState();
             }
 
+            function initializeComponentTemplateDefinitionSelects(scope) {
+                if (!window.jQuery || !window.jQuery.fn || !window.jQuery.fn.select2) {
+                    return;
+                }
+
+                window.jQuery(scope || document)
+                    .find('select.js-component-template-definition-select:not(.select2-hidden-accessible)')
+                    .select2();
+            }
+
             function appendBlankComponentTemplateRow() {
                 if (!componentTemplateRoot || !componentTemplateTemplate) {
                     return;
@@ -654,6 +698,7 @@
                 var nextIndex = parseInt(componentTemplateRoot.dataset.nextIndex || '0', 10);
                 componentTemplateRoot.dataset.nextIndex = String(nextIndex + 1);
                 componentTemplateRoot.insertAdjacentHTML('beforeend', componentTemplateTemplate.innerHTML.replace(/__INDEX__/g, String(nextIndex)));
+                initializeComponentTemplateDefinitionSelects(componentTemplateRoot.lastElementChild);
                 refreshComponentTemplateState();
             }
 

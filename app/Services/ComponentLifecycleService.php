@@ -485,6 +485,61 @@ class ComponentLifecycleService
         });
     }
 
+    public function updateCondition(ComponentInstance $instance, string $conditionCode, array $context = []): ComponentInstance
+    {
+        $this->assertNotTerminal($instance);
+
+        if (!array_key_exists($conditionCode, ComponentInstance::conditionCodeOptions())) {
+            throw new InvalidArgumentException('Invalid component condition.');
+        }
+
+        return DB::transaction(function () use ($instance, $conditionCode, $context): ComponentInstance {
+            $fromStatus = $instance->status;
+            $fromConditionCode = $instance->condition_code;
+            $fromConditionStatus = $instance->effectiveConditionStatus();
+            $toConditionStatus = ComponentInstance::conditionStatusForConditionCode($conditionCode);
+            $attributes = [
+                'condition_code' => $conditionCode,
+                'condition_status' => $toConditionStatus,
+                'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
+            ];
+
+            if ($toConditionStatus === ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION) {
+                $attributes['needs_verification_at'] = $context['needs_verification_at'] ?? $instance->needs_verification_at ?? now();
+            } else {
+                $attributes['needs_verification_at'] = null;
+            }
+
+            if (
+                $instance->status === ComponentInstance::STATUS_NEEDS_VERIFICATION
+                && $toConditionStatus !== ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION
+            ) {
+                $attributes['status'] = ComponentInstance::legacyStatusForLifecycleStatus($instance->effectiveLifecycleStatus());
+            }
+
+            $instance->forceFill($attributes)->save();
+
+            $this->events->write($instance, 'condition_updated', [
+                'performed_by' => $context['performed_by'] ?? null,
+                'from_status' => $fromStatus,
+                'to_status' => $instance->status,
+                'from_asset_id' => $instance->current_asset_id,
+                'to_asset_id' => $instance->current_asset_id,
+                'from_storage_location_id' => $instance->storage_location_id,
+                'to_storage_location_id' => $instance->storage_location_id,
+                'note' => $context['note'] ?? null,
+                'payload_json' => [
+                    'from_condition_code' => $fromConditionCode,
+                    'to_condition_code' => $conditionCode,
+                    'from_condition_status' => $fromConditionStatus,
+                    'to_condition_status' => $toConditionStatus,
+                ],
+            ]);
+
+            return $instance->fresh();
+        });
+    }
+
     public function markDefective(ComponentInstance $instance, array $context = []): ComponentInstance
     {
         $this->assertNotTerminal($instance);
