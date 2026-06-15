@@ -59,3 +59,12 @@
 - Latest focused verification remains `php artisan test tests/Feature/Assets/Ui/PreSalePermissionTest.php tests/Feature/Assets/StartNewTestRunTest.php tests/Feature/DeviceComponentCatalogSeederTest.php --env=testing`, passing with `17` tests and `117` assertions.
 - Next manual test pass should rerun the browser E2E rehearsal with Supervisor: create/view asset, start workflows as an operational user, complete sale-blocking workflows, confirm Supervisor can set Ready for Sale and Sold, verify Sold clears `is_sellable`, and verify Ready for Sale does not auto-list the asset.
 - Known follow-ups not finished in this commit: asset-create model-number spec preload, optional enum persistence for `Opslagtype`/fixed enum values, stale expected-component empty-state message after save, and audio/camera catalog wording cleanup.
+
+## Manual Testing Reinit
+- Reinitialized the next detailed manual-testing workspace on `master` at `cc510d859` after fetching `origin`; local `HEAD` and `origin/master` match.
+- Working tree has no tracked application changes from the reinit, aside from this documentation update. Existing local-only untracked material remains `prodbak/` and `storage/debug-workorder.php`.
+- Local Docker is running through `docker-compose.localhost.yml`: `snipeit_db` is healthy, `snipeit_app` is up, and `snipeit_web` publishes `0.0.0.0:18080->80` for LAN testing.
+- Laravel cache was cleared, `http://127.0.0.1:18080/login` returned HTTP 200, and `php artisan migrate:status --pending` reports no pending migrations.
+- This runtime is not the earlier `dev.inbit` production-clone profile: `.env` reports `APP_URL=http://192.168.178.79:18080` and `DB_DATABASE=snipeit`.
+- LAN access was enabled for physical-device testing by setting the compose override `APP_URL` to `http://192.168.178.79:18080` and rebinding nginx from loopback-only to all interfaces. Host verification passed for both `http://127.0.0.1:18080/login` and `http://192.168.178.79:18080/login`.
+- Physical phone camera testing may still need HTTPS/trusted-host setup because browser `getUserMedia` policies often reject camera access on plain LAN HTTP even when the page itself is reachable.

@@ -86,6 +86,28 @@
 .row-new-striped > .row.asset-detail-edit-row .asset-detail-control:last-child {
     margin-bottom: 0;
 }
+@media screen and (max-width: 991px) {
+    #details .row-new-striped,
+    #details .row-new-striped > .row,
+    #details .row-new-striped > .row > div {
+        display: block;
+        width: 100%;
+    }
+    #details .row-new-striped > .row {
+        padding: 6px 0;
+    }
+    #details .row-new-striped > .row > div {
+        border-top: 0;
+        padding: 4px 8px;
+    }
+    #details .row-new-striped > .row > div:first-child {
+        padding-bottom: 0;
+    }
+    #details .spec-detail-row .col-md-9,
+    #details .spec-detail-meta {
+        overflow-wrap: anywhere;
+    }
+}
 .hardware-tests-tab-actions {
     margin-bottom: 15px;
     text-align: left;
@@ -416,15 +438,21 @@
 }
 @media (max-width: 991px) {
     .info-stack-container {
+        clear: both;
         display: flex;
         flex-direction: column;
         gap: 15px;
+        max-width: 100%;
+        min-width: 0;
+        width: 100%;
     }
     .info-stack-container > .info-stack {
+        flex: 0 0 auto;
         width: 100%;
         max-width: 100%;
         float: none;
         left: auto;
+        min-width: 0;
         right: auto;
         margin-top: 0;
     }

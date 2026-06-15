@@ -4,6 +4,12 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-06-15
+- Asset detail Info rows now stack safely on mobile so specification values stay inside the viewport while preserving the wider two-column layout for desktop/tablet widths.
+
+### 2026-06-14
+- Added an opt-in `DevelopmentDeviceScenarioSeeder` for local component-hierarchy development. It seeds `DEV-COMP-*` assets plus tracked parts through the component lifecycle services, covering baseline-only assets, expected-tracked parts, damaged children, removed expected parts, extra/custom components, phone camera cases, tablet edge cases, tray parts, stock parts, and verification states without wiring dev data into production/default seed paths.
+
 ### 2026-06-11
 - Component catalog seeding now includes structured wireless/network attributes for reusable device research: max Wi-Fi standard using IEEE identifiers (`802.11n`, `802.11ac`, `802.11ax`, `802.11be`), 2.4/5/6 GHz band flags, Bluetooth version, NFC, and max cellular generation.
 - Seeded wireless component definitions now include standard-specific selectable entries (`Wireless - 802.11n`, `Wireless - 802.11ac`, `Wireless - 802.11ax`, `Wireless - 802.11be`) while leaving device/region-specific band and cellular details explicit on attributes.
