@@ -18,6 +18,7 @@ class ProductionFoundationSeeder extends Seeder
                 DeviceAttributeSeeder::class,
                 DevicePresetSeeder::class,
                 DeviceComponentCatalogSeeder::class,
+                SamsungGalaxyPhoneCatalogSeeder::class,
                 AttributeTestSeeder::class,
             ]);
         });
