@@ -22,3 +22,10 @@
 ## Commit Scope
 - Include the mobile asset Info tab fix, production demo user seeder, development device scenario seeder/test, and related docs.
 - Keep local runtime artifacts out of the commit: LAN-specific `docker-compose.localhost.yml`, SQL snapshots under `prodbak/`, and `storage/debug-workorder.php`.
+
+## Local Reinitialize After Pull
+- Reinitialized the local workspace on `master` after a few days away.
+- Fetched `origin` and fast-forwarded from `fe5d71faf` to `eaaf32726` (`Add Development Test Seeders And Mobile Asset Fix`).
+- The incoming commit brought in the mobile asset Info-tab layout fix, `ProductionDemoUserSeeder`, opt-in `DevelopmentDeviceScenarioSeeder`, focused seeder test coverage, and updated docs/session notes.
+- Local dirty artifacts remain intentionally untouched: `docker-compose.yml`, `docker/nginx.conf`, upload placeholder `.gitignore` line-ending changes, `.env.before-prodclone.2026-04-30`, `.env.prodclone.prodkey`, `docker/nginx.local.conf`, and `prodbak/`.
+- No Docker, database, browser, or PHPUnit verification was run during this setup-only pull.

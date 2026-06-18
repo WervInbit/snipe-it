@@ -4,6 +4,20 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-06-18
+- Browser sessions now default to a 30-minute idle lifetime with a client-side warning modal and explicit `Stay signed in` keepalive action. Passive AJAX is not treated as user activity.
+- On mobile, the asset Tests / Workflows floating action now starts the currently selected workflow profile instead of only scrolling/focusing the profile selector.
+- The fork-specific scan, component workflow, QR label, serial-change, and Tests / Workflows labels now use locale keys, with a first Dutch pass for operational UI text.
+- Scanner page text is now supplied through `window.scanConfig.text`, preserving current QR behavior while preparing the camera block for later serial OCR modularization.
+
+### 2026-06-16
+- Added a scoped `SamsungGalaxyPhoneCatalogSeeder` for repeatable production-safe Samsung phone catalog additions. It can be run directly for the Samsung phone batch, refreshes workflow component applicability when workflow tables exist, is wired into the production foundation path, and only prunes expected-component templates previously marked as owned by that seeder so manual production additions stay intact.
+- Samsung phone catalog seeding now covers black A32 `SM-A325F/DS-6GB-128GB`, A50 `SM-A505FN/DS-4GB-128GB`, and A51 `SM-A515F/DSN-4GB-128GB` variants with model-number specs and expected logic-board, display, battery, camera, audio, wireless, and port components.
+- Added `eMMC-opslag` as an `Opslagtype` option for lower/midrange phone storage cataloging, used by the Galaxy A32 128GB storage component.
+- Tracked component tags now use an explicit component namespace (`INBIT-C-AB1234` style) instead of looking like asset tags. Existing dev-phase component tags are migrated into the new namespace, generated tags still avoid asset-tag collisions, visible component tags resolve to component detail pages from the scan resolver, and component QR labels say `Component tag` while keeping the stable `CMP:{qr_uid}` QR payload.
+- Component removal-to-tray flows now expose a locked serial field. Users must click `Add serial`/`Change serial` before editing; changing an existing non-empty serial requires confirmation and records the old/new serial in the removal event payload. Expected baseline components moved to tray can capture a serial at materialization time.
+- Moving a component to tray now redirects to the moved component detail page, including expected baseline rows that become tracked components during the move.
+
 ### 2026-06-15
 - Asset detail Info rows now stack safely on mobile so specification values stay inside the viewport while preserving the wider two-column layout for desktop/tablet widths.
 
