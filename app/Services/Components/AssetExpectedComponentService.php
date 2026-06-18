@@ -28,6 +28,7 @@ class AssetExpectedComponentService
                 'note' => $context['note'] ?? null,
                 'payload_json' => array_filter([
                     'materialized_expected_template_id' => $template->id,
+                    'serial_captured_on_removal' => filled($context['serial'] ?? null) ? true : null,
                 ]),
             ]);
         });
@@ -104,7 +105,7 @@ class AssetExpectedComponentService
                 'lifecycle_status' => ComponentInstance::LIFECYCLE_ATTACHED,
                 'condition_code' => ComponentInstance::CONDITION_UNKNOWN,
                 'display_name' => $template->componentDefinition?->name ?: $template->expected_name ?: 'Expected component',
-                'serial' => null,
+                'serial' => $context['serial'] ?? null,
                 'installed_as' => $context['installed_as'] ?? null,
                 'notes' => $context['note'] ?? null,
                 'metadata_json' => array_filter([

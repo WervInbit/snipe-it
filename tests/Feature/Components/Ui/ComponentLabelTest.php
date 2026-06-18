@@ -41,7 +41,7 @@ class ComponentLabelTest extends TestCase
     public function testComponentQrLabelCanBeDownloaded(): void
     {
         $component = ComponentInstance::factory()->create([
-            'component_tag' => 'INBIT-CP0001',
+            'component_tag' => 'INBIT-C-CP0001',
         ]);
         $labels = Mockery::mock(QrLabelService::class);
         $labels->shouldReceive('pngBinaryFor')
@@ -59,7 +59,7 @@ class ComponentLabelTest extends TestCase
         $response->assertOk();
         $response->assertHeader('content-type', 'image/png');
         $this->assertSame('fake-png', $response->getContent());
-        $response->assertHeader('content-disposition', 'attachment; filename="qr-label-inbit-cp0001.png"');
+        $response->assertHeader('content-disposition', 'attachment; filename="qr-label-inbit-c-cp0001.png"');
         Mockery::close();
     }
 

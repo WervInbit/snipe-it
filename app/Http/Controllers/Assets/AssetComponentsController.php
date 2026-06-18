@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Assets;
 use App\Exceptions\ComponentConditionWarningException;
 use App\Exceptions\ComponentLifecycleWarningException;
 use App\Http\Controllers\Concerns\BuildsComponentWorkflowOptions;
+use App\Http\Controllers\Concerns\HandlesComponentSerialChanges;
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\ComponentDefinition;
@@ -23,6 +24,7 @@ use InvalidArgumentException;
 class AssetComponentsController extends Controller
 {
     use BuildsComponentWorkflowOptions;
+    use HandlesComponentSerialChanges;
 
     public function __construct(
         protected ComponentLifecycleService $lifecycle,
@@ -237,16 +239,23 @@ class AssetComponentsController extends Controller
         $this->authorize('move', new ComponentInstance());
         $this->ensureTemplateBelongsToAsset($asset, $template);
 
+        $data = $request->validate(array_merge([
+            'installed_as' => ['nullable', 'string', 'max:255'],
+            'note' => ['nullable', 'string'],
+        ], $this->componentSerialChangeRules()));
+
         try {
-            $this->expectedComponents->materializeToTray($asset, $template, $request->user(), [
-                'installed_as' => $request->input('installed_as'),
-                'note' => $request->input('note'),
-            ]);
+            $component = $this->expectedComponents->materializeToTray($asset, $template, $request->user(), [
+                'installed_as' => $data['installed_as'] ?? null,
+                'note' => $data['note'] ?? null,
+            ] + $this->componentSerialContextFromRequest($request));
         } catch (InvalidArgumentException $exception) {
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->route('hardware.show', $asset)->with('success', __('Expected component moved to tray.'));
+        return redirect()
+            ->route('components.show', $component)
+            ->with('success', __('Expected component moved to tray.'));
     }
 
     public function createTrackedStorage(Asset $asset, ComponentInstance $component): View

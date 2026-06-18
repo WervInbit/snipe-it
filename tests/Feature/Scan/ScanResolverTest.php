@@ -34,6 +34,18 @@ class ScanResolverTest extends TestCase
             ->assertRedirect(route('components.show', $component));
     }
 
+    public function testVisibleComponentTagsResolveToComponentDetails(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $component = ComponentInstance::factory()->create([
+            'component_tag' => 'INBIT-C-ZZ1234',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('scan.resolve', ['code' => $component->component_tag]))
+            ->assertRedirect(route('components.show', $component));
+    }
+
     public function testUnknownComponentQrCodesRedirectBackToScanSafely(): void
     {
         $user = User::factory()->superuser()->create();

@@ -113,7 +113,7 @@
             </div>
             <div class="box-body">
                 <dl class="dl-horizontal">
-                    <dt>{{ trans('general.tag') }}</dt>
+                    <dt>{{ __('Component tag') }}</dt>
                     <dd>{{ $component->component_tag }}</dd>
 
                     <dt>{{ trans('general.name') }}</dt>
@@ -348,11 +348,7 @@
                                     </td>
                                     <td class="text-nowrap">
                                         @can('move', $child)
-                                            <form method="POST" action="{{ route('components.remove_to_tray', $child) }}" style="display:inline;">
-                                                @csrf
-                                                <input type="hidden" name="return_to" value="{{ route('components.show', $component) }}">
-                                                <button type="submit" class="btn btn-xs btn-warning">{{ __('To Tray') }}</button>
-                                            </form>
+                                            <a href="{{ route('components.remove_to_tray.create', [$child, 'return_to' => route('components.show', $component)]) }}" class="btn btn-xs btn-warning">{{ __('To Tray') }}</a>
                                             <form method="POST" action="{{ route('components.move_to_stock', $child) }}" style="display:inline;">
                                                 @csrf
                                                 <input type="hidden" name="return_to" value="{{ route('components.show', $component) }}">
@@ -545,6 +541,10 @@
                                             <br><strong>{{ __('Current Asset') }}:</strong> {{ $component->currentAsset->present()->name() }}
                                         @endif
                                     </div>
+                                    @include('components.partials.serial-change-control', [
+                                        'component' => $component,
+                                        'serialId' => 'component_remove_serial_modal',
+                                    ])
                                     <div class="form-group">
                                         <label for="component_remove_note_modal">{{ trans('general.notes') }}</label>
                                         <textarea class="form-control" id="component_remove_note_modal" name="note" rows="4"></textarea>

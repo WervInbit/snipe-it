@@ -234,6 +234,45 @@
                     </div>
                 </div>
             </div>
+
+            <div class="modal fade" id="assetComponentTrayModal" tabindex="-1" role="dialog" aria-labelledby="assetComponentTrayModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <form method="POST" action="" data-asset-component-tray-form>
+                            @csrf
+                            <input type="hidden" name="return_to" value="{{ route('hardware.show', $asset) }}#components" data-asset-component-tray-return-to>
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="{{ trans('general.close') }}">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <h4 class="modal-title" id="assetComponentTrayModalLabel">{{ __('Move To Tray') }}</h4>
+                            </div>
+                            <div class="modal-body">
+                                <p class="text-muted">{{ __('Remove this component from its current asset and place it in your tray.') }}</p>
+
+                                <div class="alert alert-info">
+                                    <strong>{{ __('Component') }}:</strong>
+                                    <span data-asset-component-tray-name>{{ trans('general.none') }}</span>
+                                </div>
+
+                                @include('components.partials.serial-change-control', [
+                                    'serialId' => 'asset_component_tray_serial',
+                                    'currentSerial' => '',
+                                ])
+
+                                <div class="form-group">
+                                    <label for="asset_component_tray_modal_note">{{ trans('general.notes') }}</label>
+                                    <textarea class="form-control" id="asset_component_tray_modal_note" name="note" rows="4"></textarea>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('general.cancel') }}</button>
+                                <button type="submit" class="btn btn-warning">{{ __('Confirm To Tray') }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

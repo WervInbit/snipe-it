@@ -17,7 +17,7 @@ class QrLabelService
 {
     protected string $directory = 'labels';
     // Increment to invalidate previously generated image filenames
-    protected string $version = 'v13';
+    protected string $version = 'v14';
 
     /**
      * Generate PNG and PDF labels for an asset.
@@ -491,7 +491,7 @@ class QrLabelService
             }
 
             if ($componentTag !== '') {
-                $lines[] = trans('general.tag').': '.Str::limit($componentTag, 48);
+                $lines[] = __('Component tag').': '.Str::limit($componentTag, 48);
             }
 
             if ($serial !== '') {

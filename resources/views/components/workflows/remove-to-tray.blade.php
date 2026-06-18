@@ -32,6 +32,11 @@
                         @csrf
                         <input type="hidden" name="return_to" value="{{ $returnTo }}">
 
+                        @include('components.partials.serial-change-control', [
+                            'component' => $component,
+                            'serialId' => 'component_remove_serial',
+                        ])
+
                         <div class="form-group {{ $errors->has('note') ? 'has-error' : '' }}">
                             <label for="component_remove_note">{{ trans('general.notes') }}</label>
                             <textarea class="form-control" id="component_remove_note" name="note" rows="4">{{ old('note') }}</textarea>

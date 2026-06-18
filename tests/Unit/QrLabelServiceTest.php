@@ -21,8 +21,8 @@ class QrLabelServiceTest extends TestCase
         $asset = new Asset(['asset_tag' => 'My Asset Tag']);
         $service = new QrLabelService();
 
-        $this->assertSame('labels/qr-v13-dymo-89x36-my-asset-tag.png', invade($service)->path($asset, 'png', 'dymo-89x36'));
-        $this->assertSame('labels/qr-v13-dymo-89x36-my-asset-tag.pdf', invade($service)->path($asset, 'pdf', 'dymo-89x36'));
+        $this->assertSame('labels/qr-v14-dymo-89x36-my-asset-tag.png', invade($service)->path($asset, 'png', 'dymo-89x36'));
+        $this->assertSame('labels/qr-v14-dymo-89x36-my-asset-tag.pdf', invade($service)->path($asset, 'pdf', 'dymo-89x36'));
     }
 
     public function test_generate_creates_png_and_pdf_labels(): void
@@ -34,8 +34,8 @@ class QrLabelServiceTest extends TestCase
         $service->generate($asset, 'dymo-89x36');
 
         $slug = Str::slug($asset->asset_tag);
-        Storage::disk('public')->assertExists("labels/qr-v13-dymo-89x36-{$slug}.png");
-        Storage::disk('public')->assertExists("labels/qr-v13-dymo-89x36-{$slug}.pdf");
+        Storage::disk('public')->assertExists("labels/qr-v14-dymo-89x36-{$slug}.png");
+        Storage::disk('public')->assertExists("labels/qr-v14-dymo-89x36-{$slug}.pdf");
     }
 
     public function test_pdf_falls_back_to_print_date_when_name_missing(): void
@@ -67,7 +67,7 @@ class QrLabelServiceTest extends TestCase
         $service->generate($asset, 'dymo-89x36');
 
         $slug = Str::slug($asset->asset_tag);
-        Storage::disk('public')->assertExists("labels/qr-v13-dymo-89x36-{$slug}.pdf");
+        Storage::disk('public')->assertExists("labels/qr-v14-dymo-89x36-{$slug}.pdf");
         Carbon::setTestNow();
         Mockery::close();
     }
@@ -75,7 +75,7 @@ class QrLabelServiceTest extends TestCase
     public function test_component_instance_pdf_uses_stable_component_payload_and_caption(): void
     {
         $component = ComponentInstance::factory()->create([
-            'component_tag' => 'INBIT-CP0001',
+            'component_tag' => 'INBIT-C-CP0001',
             'display_name' => 'Replacement SSD',
             'serial' => 'SN123',
             'qr_uid' => 'component-qr-uid',
@@ -85,7 +85,7 @@ class QrLabelServiceTest extends TestCase
             'top' => [],
             'bottom' => [
                 'Replacement SSD',
-                trans('general.tag').': INBIT-CP0001',
+                __('Component tag').': INBIT-C-CP0001',
                 trans('admin/hardware/form.serial').': SN123',
             ],
         ];

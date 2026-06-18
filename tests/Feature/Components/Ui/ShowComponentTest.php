@@ -54,6 +54,7 @@ class ShowComponentTest extends TestCase
             ->assertOk()
             ->assertSee(route('components.remove_to_tray', $component), false)
             ->assertSee('id="componentToTrayModal"', false)
+            ->assertSee('data-component-serial-control', false)
             ->assertSeeText('Status: Attached')
             ->assertSeeText('In Tray')
             ->assertSeeText('Confirm To Tray');
@@ -181,7 +182,7 @@ class ShowComponentTest extends TestCase
             ->assertSeeText('Child Structure')
             ->assertSeeText('Attached Child Components')
             ->assertSee(route('components.show', $child), false)
-            ->assertSee(route('components.remove_to_tray', $child), false)
+            ->assertSee(route('components.remove_to_tray.create', [$child, 'return_to' => route('components.show', $parent)]), false)
             ->assertSee(route('components.move_to_stock', $child), false)
             ->assertSeeText('Tracked USB-C Port Board')
             ->assertSeeText($child->component_tag)

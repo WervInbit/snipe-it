@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Components;
 use App\Exceptions\ComponentConditionWarningException;
 use App\Exceptions\ComponentLifecycleWarningException;
 use App\Http\Controllers\Concerns\BuildsComponentWorkflowOptions;
+use App\Http\Controllers\Concerns\HandlesComponentSerialChanges;
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\ComponentInstance;
@@ -18,6 +19,7 @@ use InvalidArgumentException;
 class ComponentWorkflowController extends Controller
 {
     use BuildsComponentWorkflowOptions;
+    use HandlesComponentSerialChanges;
 
     public function __construct(
         protected ComponentLifecycleService $lifecycle,
@@ -65,19 +67,21 @@ class ComponentWorkflowController extends Controller
     {
         $this->authorize('move', $component_id);
 
-        $data = $request->validate([
+        $data = $request->validate(array_merge([
             'note' => ['nullable', 'string'],
-        ]);
+        ], $this->componentSerialChangeRules()));
 
         try {
-            $this->lifecycle->removeToTray($component_id, $request->user(), [
+            $this->lifecycle->removeToTray($component_id, $request->user(), array_merge([
                 'note' => $data['note'] ?? null,
-            ]);
+            ], $this->componentSerialContextFromRequest($request, $component_id)));
         } catch (InvalidArgumentException $exception) {
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component moved to tray.'));
+        return redirect()
+            ->route('components.show', $component_id)
+            ->with('success', __('Component moved to tray.'));
     }
 
     public function createInstall(Request $request, ComponentInstance $component_id): View

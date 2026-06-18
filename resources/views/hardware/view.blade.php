@@ -2445,6 +2445,37 @@
                 form[0].reset();
                 modal.find('[data-asset-component-storage-name]').text('{{ trans('general.none') }}');
             });
+
+            $('#assetComponentTrayModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var action = button.data('tray-action') || '';
+                var name = button.data('tray-name') || '{{ trans('general.none') }}';
+                var serial = button.data('tray-serial') || '';
+                var returnTo = button.data('tray-return-to') || '{{ route('hardware.show', $asset) }}#components';
+                var modal = $(this);
+                var control = modal.find('[data-component-serial-control]').get(0);
+
+                modal.find('[data-asset-component-tray-form]').attr('action', action);
+                modal.find('[data-asset-component-tray-name]').text(name);
+                modal.find('[data-asset-component-tray-return-to]').val(returnTo);
+
+                if (window.refreshComponentSerialControl) {
+                    window.refreshComponentSerialControl(control, serial);
+                }
+            }).on('hidden.bs.modal', function () {
+                var modal = $(this);
+                var form = modal.find('[data-asset-component-tray-form]');
+                var control = modal.find('[data-component-serial-control]').get(0);
+
+                form.attr('action', '');
+                form[0].reset();
+                modal.find('[data-asset-component-tray-name]').text('{{ trans('general.none') }}');
+                modal.find('[data-asset-component-tray-return-to]').val('{{ route('hardware.show', $asset) }}#components');
+
+                if (window.refreshComponentSerialControl) {
+                    window.refreshComponentSerialControl(control, '');
+                }
+            });
         })();
     </script>
     <script>

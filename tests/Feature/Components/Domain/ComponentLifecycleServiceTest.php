@@ -33,7 +33,7 @@ class ComponentLifecycleServiceTest extends TestCase
             'updated_by' => $actor->id,
         ], $actor);
 
-        $this->assertMatchesRegularExpression('/^INBIT-[A-Z]{2}\d{4}$/', $instance->component_tag);
+        $this->assertMatchesRegularExpression('/^INBIT-C-[A-Z]{2}\d{4}$/', $instance->component_tag);
         $this->assertNotEmpty($instance->qr_uid);
         $this->assertDatabaseHas('component_events', [
             'component_instance_id' => $instance->id,
@@ -51,11 +51,11 @@ class ComponentLifecycleServiceTest extends TestCase
             'updated_by' => $actor->id,
         ]);
         $location = ComponentStorageLocation::factory()->stock()->create();
-        $asset = Asset::factory()->create(['asset_tag' => 'INBIT-AA0001']);
+        $asset = Asset::factory()->create(['asset_tag' => 'INBIT-C-AA0001']);
 
         app()->instance(ComponentTagGenerator::class, new class extends ComponentTagGenerator
         {
-            private array $candidates = ['INBIT-AA0001', 'INBIT-BB0002'];
+            private array $candidates = ['INBIT-C-AA0001', 'INBIT-C-BB0002'];
 
             protected function nextCandidate(): string
             {
@@ -72,7 +72,7 @@ class ComponentLifecycleServiceTest extends TestCase
             'updated_by' => $actor->id,
         ], $actor);
 
-        $this->assertSame('INBIT-BB0002', $instance->component_tag);
+        $this->assertSame('INBIT-C-BB0002', $instance->component_tag);
         $this->assertNotSame($asset->asset_tag, $instance->component_tag);
     }
 

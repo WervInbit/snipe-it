@@ -25,6 +25,10 @@
     $transferAction = $component
         ? route('hardware.components.transfer.create', [$asset, $component])
         : ($template ? route('hardware.components.expected.transfer.create', [$asset, $template]) : null);
+    $trayAction = $component
+        ? route('components.remove_to_tray', $component)
+        : ($template ? route('hardware.components.expected.tray', [$asset, $template]) : null);
+    $trayReturnTo = route('hardware.show', $asset).'#components';
 @endphp
 
 @if($variant === 'mobile')
@@ -35,23 +39,17 @@
             ])
             data-testid="asset-component-card-actions">
             @if($hasDefaultAction)
-                @if($component)
-                    <form method="POST"
-                          action="{{ route('components.remove_to_tray', $component) }}"
-                          class="asset-component-card__default-action"
-                          data-testid="asset-component-card-default-action">
-                        @csrf
-                        <button type="submit" class="btn btn-warning btn-sm btn-block">{{ __('To Tray') }}</button>
-                    </form>
-                @elseif($template)
-                    <form method="POST"
-                          action="{{ route('hardware.components.expected.tray', [$asset, $template]) }}"
-                          class="asset-component-card__default-action"
-                          data-testid="asset-component-card-default-action">
-                        @csrf
-                        <button type="submit" class="btn btn-warning btn-sm btn-block">{{ __('To Tray') }}</button>
-                    </form>
-                @endif
+                <button type="button"
+                        class="btn btn-warning btn-sm btn-block asset-component-card__default-action"
+                        data-toggle="modal"
+                        data-target="#assetComponentTrayModal"
+                        data-tray-action="{{ $trayAction }}"
+                        data-tray-name="{{ $component?->display_name ?: $rowDisplayName }}"
+                        data-tray-serial="{{ $component?->serial ?? '' }}"
+                        data-tray-return-to="{{ $trayReturnTo }}"
+                        data-testid="asset-component-card-default-action">
+                    {{ __('To Tray') }}
+                </button>
             @endif
 
             @if($hasSecondaryActions)
@@ -150,10 +148,18 @@
     @if($component)
         @unless($isRemoved)
             @if($canMoveComponent)
-                <form method="POST" action="{{ route('components.remove_to_tray', $component) }}" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="btn btn-xs btn-warning">{{ __('To Tray') }}</button>
-                </form>
+                <button
+                    type="button"
+                    class="btn btn-xs btn-warning"
+                    data-toggle="modal"
+                    data-target="#assetComponentTrayModal"
+                    data-tray-action="{{ $trayAction }}"
+                    data-tray-name="{{ $component->display_name }}"
+                    data-tray-serial="{{ $component->serial ?? '' }}"
+                    data-tray-return-to="{{ $trayReturnTo }}"
+                >
+                    {{ __('To Tray') }}
+                </button>
                 <button
                     type="button"
                     class="btn btn-xs btn-default"
@@ -173,10 +179,18 @@
         <a href="{{ route('components.show', $component) }}" class="btn btn-xs btn-default">{{ __('Open') }}</a>
     @elseif($template)
         @if($canMoveTemplate)
-            <form method="POST" action="{{ route('hardware.components.expected.tray', [$asset, $template]) }}" style="display:inline;">
-                @csrf
-                <button type="submit" class="btn btn-xs btn-warning">{{ __('To Tray') }}</button>
-            </form>
+            <button
+                type="button"
+                class="btn btn-xs btn-warning"
+                data-toggle="modal"
+                data-target="#assetComponentTrayModal"
+                data-tray-action="{{ $trayAction }}"
+                data-tray-name="{{ $rowDisplayName }}"
+                data-tray-serial=""
+                data-tray-return-to="{{ $trayReturnTo }}"
+            >
+                {{ __('To Tray') }}
+            </button>
             <button
                 type="button"
                 class="btn btn-xs btn-default"
