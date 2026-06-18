@@ -7,11 +7,11 @@
 
 @section('header_right')
 <a href="{{ route('components.tray') }}" class="btn btn-default">
-    {{ __('My Tray') }}
+    {{ trans('general.my_tray') }}
 </a>
 @can('create', \App\Models\ComponentInstance::class)
 <a href="{{ route('components.create') }}" class="btn btn-primary">
-    {{ __('Register Component') }}
+    {{ trans('general.register_component') }}
 </a>
 @endcan
 <a href="{{ route('components.index') }}" class="btn btn-default">
@@ -113,7 +113,7 @@
             </div>
             <div class="box-body">
                 <dl class="dl-horizontal">
-                    <dt>{{ __('Component tag') }}</dt>
+                    <dt>{{ trans('general.component_tag') }}</dt>
                     <dd>{{ $component->component_tag }}</dd>
 
                     <dt>{{ trans('general.name') }}</dt>
@@ -267,14 +267,14 @@
                 <h3 class="box-title">{{ trans('general.actions') }}</h3>
             </div>
             <div class="box-body">
-                <p class="text-muted">{{ __('Launch the next workflow for this component from the buttons below.') }}</p>
+                <p class="text-muted">{{ trans('general.component_actions_help') }}</p>
 
                 <div class="btn-toolbar" role="toolbar">
                     @if(!empty($statusTransitions))
                         <div class="form-group" style="display:inline-block; min-width:260px; margin-right:10px; margin-bottom:0; vertical-align:top;">
-                            <label class="sr-only" for="component_status_transition">{{ __('Status') }}</label>
+                            <label class="sr-only" for="component_status_transition">{{ trans('general.status') }}</label>
                             <select class="form-control" id="component_status_transition">
-                                <option value="">{{ __('Status') }}: {{ \App\Models\ComponentInstance::lifecycleStatusLabel($lifecycleStatus) ?? $lifecycleStatus }}</option>
+                                <option value="">{{ trans('general.status') }}: {{ \App\Models\ComponentInstance::lifecycleStatusLabel($lifecycleStatus) ?? $lifecycleStatus }}</option>
                                 @foreach($statusTransitions as $transition)
                                     <option value="{{ $transition['target'] }}">{{ $transition['label'] }}</option>
                                 @endforeach
@@ -285,21 +285,21 @@
                     @if ($isInstalled)
                         @can('install', $component)
                             @if($component->currentAsset)
-                                <a href="{{ route('hardware.components.transfer.create', [$component->currentAsset, $component]) }}" class="btn btn-primary">{{ __('Move To Other Device') }}</a>
+                                <a href="{{ route('hardware.components.transfer.create', [$component->currentAsset, $component]) }}" class="btn btn-primary">{{ trans('general.move_to_other_device') }}</a>
                             @endif
                         @endcan
                     @elseif (!$isDestroyed)
                         @can('install', $component)
                             @if(!$isDestructionPending)
-                                <a href="{{ route('components.install.create', [$component, 'return_to' => $returnTo]) }}" class="btn btn-primary">{{ __('Install') }}</a>
+                                <a href="{{ route('components.install.create', [$component, 'return_to' => $returnTo]) }}" class="btn btn-primary">{{ trans('general.install') }}</a>
                             @endif
                         @endcan
                     @endif
 
                     @if($component->currentAsset)
-                        <a href="{{ route('hardware.show', $component->currentAsset) }}" class="btn btn-default">{{ __('Open Asset') }}</a>
+                        <a href="{{ route('hardware.show', $component->currentAsset) }}" class="btn btn-default">{{ trans('general.open_asset') }}</a>
                     @endif
-                    <a href="{{ route('components.tray') }}" class="btn btn-default">{{ __('My Tray') }}</a>
+                    <a href="{{ route('components.tray') }}" class="btn btn-default">{{ trans('general.my_tray') }}</a>
                 </div>
             </div>
         </div>
@@ -348,11 +348,11 @@
                                     </td>
                                     <td class="text-nowrap">
                                         @can('move', $child)
-                                            <a href="{{ route('components.remove_to_tray.create', [$child, 'return_to' => route('components.show', $component)]) }}" class="btn btn-xs btn-warning">{{ __('To Tray') }}</a>
+                                            <a href="{{ route('components.remove_to_tray.create', [$child, 'return_to' => route('components.show', $component)]) }}" class="btn btn-xs btn-warning">{{ trans('general.to_tray') }}</a>
                                             <form method="POST" action="{{ route('components.move_to_stock', $child) }}" style="display:inline;">
                                                 @csrf
                                                 <input type="hidden" name="return_to" value="{{ route('components.show', $component) }}">
-                                                <button type="submit" class="btn btn-xs btn-default">{{ __('To Stock') }}</button>
+                                                <button type="submit" class="btn btn-xs btn-default">{{ trans('general.to_stock') }}</button>
                                             </form>
                                         @endcan
                                     </td>
@@ -423,7 +423,7 @@
                                         @if($child->storageLocation)
                                             {{ $child->storageLocation->name }}
                                         @elseif($child->heldBy)
-                                            {{ __('Tray') }}: {{ $child->heldBy->present()->fullName() }}
+                                            {{ trans('general.tray') }}: {{ $child->heldBy->present()->fullName() }}
                                         @elseif($child->currentAsset)
                                             <a href="{{ route('hardware.show', $child->currentAsset) }}">{{ $child->currentAsset->present()->name() }}</a>
                                         @else
@@ -431,7 +431,7 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('components.show', $child) }}" class="btn btn-xs btn-default">{{ __('Open') }}</a>
+                                        <a href="{{ route('components.show', $child) }}" class="btn btn-xs btn-default">{{ trans('general.open') }}</a>
                                     </td>
                                 </tr>
                             @endforeach
@@ -531,14 +531,14 @@
                                     <button type="button" class="close" data-dismiss="modal" aria-label="{{ trans('general.close') }}">
                                         <span aria-hidden="true">&times;</span>
                                     </button>
-                                    <h4 class="modal-title" id="componentToTrayModalLabel">{{ __('Move To Tray') }}</h4>
+                                    <h4 class="modal-title" id="componentToTrayModalLabel">{{ trans('general.move_to_tray') }}</h4>
                                 </div>
                                 <div class="modal-body">
-                                    <p class="text-muted">{{ __('Remove this component from its current asset and place it in your tray.') }}</p>
+                                    <p class="text-muted">{{ trans('general.remove_component_to_tray_help') }}</p>
                                     <div class="alert alert-info">
-                                        <strong>{{ __('Component') }}:</strong> {{ $component->display_name }}
+                                        <strong>{{ trans('general.component') }}:</strong> {{ $component->display_name }}
                                         @if($component->currentAsset)
-                                            <br><strong>{{ __('Current Asset') }}:</strong> {{ $component->currentAsset->present()->name() }}
+                                            <br><strong>{{ trans('general.current_asset') }}:</strong> {{ $component->currentAsset->present()->name() }}
                                         @endif
                                     </div>
                                     @include('components.partials.serial-change-control', [
@@ -552,7 +552,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('general.cancel') }}</button>
-                                    <button type="submit" class="btn btn-warning">{{ __('Confirm To Tray') }}</button>
+                                    <button type="submit" class="btn btn-warning">{{ trans('general.confirm_to_tray') }}</button>
                                 </div>
                             </form>
                         </div>
@@ -572,10 +572,10 @@
                                 <button type="button" class="close" data-dismiss="modal" aria-label="{{ trans('general.close') }}">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
-                                <h4 class="modal-title" id="componentToStockModalLabel">{{ __('Move To Stock') }}</h4>
+                                <h4 class="modal-title" id="componentToStockModalLabel">{{ trans('general.move_to_stock') }}</h4>
                             </div>
                             <div class="modal-body">
-                                <p class="text-muted">{{ __('Mark this component as in stock. You can assign a specific storage location later on this page.') }}</p>
+                                <p class="text-muted">{{ trans('general.mark_component_in_stock_help') }}</p>
                                 <div class="form-group">
                                     <label for="component_move_to_stock_note_modal">{{ trans('general.notes') }}</label>
                                     <textarea class="form-control" id="component_move_to_stock_note_modal" name="note" rows="4"></textarea>
@@ -583,7 +583,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('general.cancel') }}</button>
-                                <button type="submit" class="btn btn-default">{{ __('Confirm In Stock') }}</button>
+                                <button type="submit" class="btn btn-default">{{ trans('general.confirm_in_stock') }}</button>
                             </div>
                         </form>
                     </div>

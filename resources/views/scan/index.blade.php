@@ -1,7 +1,7 @@
 @extends('layouts/default')
 
 @section('title')
-    {{ __('Scan Asset Or Component') }}
+    {{ trans('general.scan_asset_or_component') }}
     @parent
 @stop
 
@@ -29,9 +29,9 @@
 </style>
 <div class="container-fluid py-3 scan-screen">
     <div class="scan-shell">
-        <h1 class="h4 text-center mb-2">{{ __('Scan Asset Or Component') }}</h1>
+        <h1 class="h4 text-center mb-2">{{ trans('general.scan_asset_or_component') }}</h1>
         <p class="text-center text-muted" style="margin-bottom: 1.5rem;">
-            {{ __('Point the camera at an asset tag or a tracked component QR label to open its detail page.') }}
+            {{ trans('general.scan_asset_or_component_help') }}
         </p>
 
         <div id="scan-permission" class="alert alert-warning d-none" role="alert" data-testid="scan-permission-banner" style="display:none;">
@@ -55,18 +55,18 @@
 
         <div class="scan-actions">
             <button id="scan-switch" type="button" class="btn btn-outline-secondary" data-testid="scan-switch">
-                <i class="fas fa-sync" aria-hidden="true"></i> {{ __('Refresh camera') }}
+                <i class="fas fa-sync" aria-hidden="true"></i> {{ trans('general.scan_refresh_camera') }}
             </button>
             <button id="scan-torch" type="button" class="btn btn-outline-secondary" data-testid="scan-torch" aria-pressed="false">
                 <i class="fas fa-lightbulb" aria-hidden="true"></i> {{ trans('general.scan_torch') }}
             </button>
             <button id="scan-request" type="button" class="btn btn-outline-secondary" data-testid="scan-request">
-                <i class="fas fa-unlock" aria-hidden="true"></i> {{ __('Request camera access') }}
+                <i class="fas fa-unlock" aria-hidden="true"></i> {{ trans('general.scan_request_camera_access') }}
             </button>
             <div class="form-group mb-0">
-                <label class="sr-only" for="scan-camera-select">{{ __('Select camera') }}</label>
-                <select id="scan-camera-select" class="form-control" data-testid="scan-camera-select" aria-label="{{ __('Select camera') }}">
-                    <option value="">{{ __('Select camera') }}</option>
+                <label class="sr-only" for="scan-camera-select">{{ trans('general.scan_select_camera') }}</label>
+                <select id="scan-camera-select" class="form-control" data-testid="scan-camera-select" aria-label="{{ trans('general.scan_select_camera') }}">
+                    <option value="">{{ trans('general.scan_select_camera') }}</option>
                 </select>
             </div>
         </div>
@@ -78,5 +78,15 @@
 @stop
 
 @section('moar_scripts')
+<script nonce="{{ csrf_token() }}">
+    window.scanConfig = Object.assign({}, window.scanConfig || {}, {
+        text: {
+            selectCamera: @json(trans('general.scan_select_camera')),
+            cameraLabel: @json(trans('general.camera')),
+            cameraAccessFailed: @json(trans('general.scan_camera_access_failed')),
+            cameraUnavailable: @json(trans('general.scan_camera_unavailable'))
+        }
+    });
+</script>
 <script src="{{ mix('js/dist/scan.js') }}"></script>
 @stop

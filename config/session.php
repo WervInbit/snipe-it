@@ -37,7 +37,11 @@ return [
     |
     */
 
-    'lifetime' => env('SESSION_LIFETIME', 12000),
+    'lifetime' => env('SESSION_LIFETIME', 30),
+
+    'idle_client_warning' => env('SESSION_IDLE_CLIENT_WARNING', true),
+
+    'idle_warning_seconds' => env('SESSION_IDLE_WARNING_SECONDS', 60),
 
     'expire_on_close' => env('EXPIRE_ON_CLOSE', false),
 

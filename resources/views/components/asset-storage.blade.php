@@ -1,7 +1,7 @@
 @extends('layouts/default')
 
 @section('title')
-    {{ __('Move Component To Stock') }}
+    {{ trans('general.move_component_to_stock') }}
     @parent
 @stop
 
@@ -24,19 +24,19 @@
         <div class="col-md-8 col-md-offset-2">
             <div class="box box-default">
                 <div class="box-header with-border">
-                    <h3 class="box-title">{{ __('Move To Stock') }}</h3>
+                    <h3 class="box-title">{{ trans('general.move_to_stock') }}</h3>
                 </div>
                 <div class="box-body">
                     <p class="text-muted">
                         @if($isExpected)
-                            {{ __('This expected component will be materialized as a tracked part and moved directly into stock. You can assign a specific storage location later from the component detail page.') }}
+                            {{ trans('general.expected_component_stock_help') }}
                         @else
-                            {{ __('Move this tracked component out of the device and into stock. You can assign a specific storage location later from the component detail page.') }}
+                            {{ trans('general.tracked_component_stock_help') }}
                         @endif
                     </p>
 
                     <div class="alert alert-info">
-                        <strong>{{ __('Component') }}:</strong> {{ $itemName }}
+                        <strong>{{ trans('general.component') }}:</strong> {{ $itemName }}
                     </div>
 
                     <form method="POST" action="{{ $postRoute }}">
@@ -44,7 +44,7 @@
                         <div class="checkbox">
                             <label>
                                 <input type="checkbox" name="needs_verification" value="1" @checked(old('needs_verification'))>
-                                {{ __('Mark as needing verification after moving to stock') }}
+                                {{ trans('general.mark_needs_verification_after_stock') }}
                             </label>
                         </div>
 
@@ -54,7 +54,7 @@
                             {!! $errors->first('note', '<span class="help-block">:message</span>') !!}
                         </div>
 
-                        <button type="submit" class="btn btn-warning">{{ __('Confirm Move To Stock') }}</button>
+                        <button type="submit" class="btn btn-warning">{{ trans('general.confirm_move_to_stock') }}</button>
                     </form>
                 </div>
             </div>

@@ -304,6 +304,8 @@ class ShowAssetTest extends TestCase
         $response->assertSee(trans('tests.view_all_workflows'));
         $response->assertSee('data-testid="hardware-tests-tab-fab"', false);
         $response->assertSee('data-testid="hardware-tests-tab-fab-label"', false);
+        $response->assertSee('data-starts-selected-workflow="true"', false);
+        $response->assertSee('workflowChooser.requestSubmit', false);
         $response->assertSee(route('test-runs.store', $asset), false);
         $response->assertDontSee('data-testid="hardware-tests-start-form-desktop"', false);
         $response->assertDontSee('data-testid="hardware-tests-tab-fab-form"', false);

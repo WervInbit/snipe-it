@@ -6,6 +6,7 @@ use App\Http\Controllers\ActionlogController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\Auth\SessionKeepaliveController;
 use App\Http\Controllers\CategoriesController;
 use App\Http\Controllers\CompaniesController;
 use App\Http\Controllers\DashboardController;
@@ -936,6 +937,11 @@ Route::group(['middleware' => 'web'], function () {
 
 
     // need to keep GET /logout for SAML SLO
+    Route::post(
+        'session/keepalive',
+        [SessionKeepaliveController::class, 'store']
+    )->name('session.keepalive')->middleware('auth');
+
     Route::get(
         'logout',
         [LoginController::class, 'logout']

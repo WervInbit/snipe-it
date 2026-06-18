@@ -78,7 +78,7 @@ class ComponentLabelTest extends TestCase
             ])
             ->assertStatus(422)
             ->assertJsonFragment([
-                'message' => 'Label printer queue is not configured. Set LABEL_PRINTER_QUEUE.',
+                'message' => trans('general.label_printer_queue_not_configured'),
             ]);
     }
 }

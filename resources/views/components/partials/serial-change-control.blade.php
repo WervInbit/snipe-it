@@ -21,16 +21,16 @@
             <button type="button"
                     class="btn btn-default"
                     data-component-serial-toggle
-                    data-label-add="{{ __('Add serial') }}"
-                    data-label-change="{{ __('Change serial') }}">
-                {{ $currentSerial !== '' ? __('Change serial') : __('Add serial') }}
+                    data-label-add="{{ trans('general.add_serial') }}"
+                    data-label-change="{{ trans('general.change_serial') }}">
+                {{ $currentSerial !== '' ? trans('general.change_serial') : trans('general.add_serial') }}
             </button>
         </span>
     </div>
     <input type="hidden" name="serial_change_enabled" value="{{ $isEnabled ? '1' : '0' }}" data-component-serial-enabled>
     <input type="hidden" name="serial_change_confirmed" value="0" data-component-serial-confirmed>
     <p class="help-block">
-        {{ __('Serial is locked by default. Use the button to capture or correct the component serial before removing it.') }}
+        {{ trans('general.component_serial_locked_help') }}
     </p>
     {!! $errors->first('serial', '<span class="help-block">:message</span>') !!}
 </div>
@@ -109,7 +109,7 @@
                             return;
                         }
 
-                        if (!window.confirm('{{ __('This component already has a serial number. Are you sure you want to change it?') }}')) {
+                        if (!window.confirm(@json(trans('general.component_serial_change_confirm')))) {
                             event.preventDefault();
                             event.stopImmediatePropagation();
                             if (input) {

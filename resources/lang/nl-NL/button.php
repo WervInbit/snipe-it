@@ -16,6 +16,7 @@ return [
     'select_file'				=> 'Bestand selecteren...',
     'select_files'				=> 'Bestanden selecteren...',
     'generate_labels'           => '{1} Genereer label|[2,*] Genereer labels',
+    'generate_qrs'              => '{1} Genereer QR-code|[2,*] Genereer QR-codes',
     'send_password_link'        => 'Stuur een wachtwoordherstellink',
     'go'                        => 'Gaan',
     'bulk_actions'              => 'Bulk acties',

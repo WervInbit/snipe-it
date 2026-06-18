@@ -75,6 +75,18 @@ return [
     'failed_list' => 'Mislukt: :tests',
     'incomplete_list' => 'Niet uitgevoerd: :tests',
     'status_change_warning' => 'Bevestig statuswijziging',
+    'optional' => 'Optioneel',
+    'latest_run_attention' => 'Laatste tests hebben aandacht nodig.',
+    'latest_run_status' => 'Laatste tests',
+    'latest_run_ok_short' => 'Geslaagd',
+    'latest_run_attention_short' => 'Aandacht nodig',
+    'latest_run_missing_short' => 'Geen run',
+    'status_change_prompt' => 'Sommige verplichte tests zijn niet afgerond of mislukt. Toch doorgaan?',
+    'complete_confirm_title' => 'Tests toch afronden?',
+    'complete_confirm_prompt' => 'Sommige verplichte tests zijn niet afgerond of mislukt. Toch doorgaan?',
+    'complete_confirm_failed' => 'Mislukte tests',
+    'complete_confirm_incomplete' => 'Niet uitgevoerd',
+    'complete_confirm_continue' => 'Doorgaan',
 ];
 
 

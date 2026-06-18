@@ -28,7 +28,7 @@ trait HandlesComponentSerialChanges
 
         if ($currentSerial !== null && $serial !== $currentSerial && !$request->boolean('serial_change_confirmed')) {
             throw ValidationException::withMessages([
-                'serial' => __('Confirm that you want to change the existing serial number.'),
+                'serial' => trans('general.component_serial_change_required'),
             ]);
         }
 

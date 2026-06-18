@@ -2411,6 +2411,7 @@
                     <button type="button"
                             class="btn btn-primary hardware-tests-tab-fab__button"
                             data-testid="hardware-tests-tab-fab"
+                            data-starts-selected-workflow="true"
                             aria-label="{{ trans('tests.choose_workflow') }}">
                         <x-icon type="plus" />
                         <span class="hardware-tests-tab-fab__label" data-testid="hardware-tests-tab-fab-label">{{ trans('tests.start_new_run') }}</span>
@@ -2577,7 +2578,7 @@
                 syncTestsFabVisibility();
             }
 
-            fab.addEventListener('click', function () {
+            function focusWorkflowChooser() {
                 if (workflowChooser) {
                     workflowChooser.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
@@ -2587,6 +2588,28 @@
                         workflowProfile.focus();
                     }, 150);
                 }
+            }
+
+            fab.addEventListener('click', function () {
+                if (!workflowChooser) {
+                    focusWorkflowChooser();
+                    return;
+                }
+
+                if (workflowChooser.checkValidity && !workflowChooser.checkValidity()) {
+                    if (workflowChooser.reportValidity) {
+                        workflowChooser.reportValidity();
+                    }
+                    focusWorkflowChooser();
+                    return;
+                }
+
+                if (workflowChooser.requestSubmit) {
+                    workflowChooser.requestSubmit();
+                    return;
+                }
+
+                workflowChooser.submit();
             });
 
             $tabLinks.on('shown.bs.tab', syncTestsFabVisibility);

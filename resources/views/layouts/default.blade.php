@@ -645,7 +645,7 @@ dir="{{ Helper::determineLanguageDirection() }}">
                             <li id="components-tray-sidenav-option"{!! (request()->is('components/tray') ? ' class="active"' : '') !!}>
                                 <a href="{{ route('components.tray') }}">
                                     <i class="fas fa-inbox fa-fw" aria-hidden="true"></i>
-                                    <span>{{ __('My Tray') }}</span>
+                                    <span>{{ trans('general.my_tray') }}</span>
                                     @if ($componentTrayCount > 0)
                                         <span class="badge badge-secondary">{{ $componentTrayCount }}</span>
                                     @endif
@@ -1116,6 +1116,39 @@ dir="{{ Helper::determineLanguageDirection() }}">
             </div>
         </div>
 
+        @php
+            $sessionLifetimeMinutes = (int) config('session.lifetime', 0);
+            $sessionWarningSeconds = (int) config('session.idle_warning_seconds', 60);
+            $sessionTimeoutEnabled = Auth::check()
+                && (bool) config('session.idle_client_warning', true)
+                && $sessionLifetimeMinutes > 0
+                && $sessionWarningSeconds > 0;
+        @endphp
+
+        @if ($sessionTimeoutEnabled)
+            <div class="modal modal-warning fade" id="session-expiring-modal" tabindex="-1" role="dialog" aria-labelledby="sessionExpiringModalLabel" aria-hidden="true" data-testid="session-expiring-modal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="sessionExpiringModalLabel">{{ trans('general.session_expiring_title') }}</h4>
+                        </div>
+                        <div class="modal-body">
+                            <p>{{ trans('general.session_expiring_body') }}</p>
+                            <p class="text-muted mb-0" id="session-expiring-countdown" data-testid="session-expiring-countdown"></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default pull-left" id="session-timeout-logout" data-testid="session-timeout-logout">
+                                {{ trans('general.logout_now') }}
+                            </button>
+                            <button type="button" class="btn btn-primary" id="session-timeout-keepalive" data-testid="session-timeout-keepalive">
+                                {{ trans('general.stay_signed_in') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
 
 
         {{-- Javascript files --}}
@@ -1127,6 +1160,200 @@ dir="{{ Helper::determineLanguageDirection() }}">
 
         @section('moar_scripts')
         @show
+
+        @if ($sessionTimeoutEnabled)
+            <script nonce="{{ csrf_token() }}">
+                (function () {
+                    var config = {
+                        lifetimeSeconds: {{ $sessionLifetimeMinutes * 60 }},
+                        warningSeconds: {{ min($sessionWarningSeconds, max(1, ($sessionLifetimeMinutes * 60) - 1)) }},
+                        keepaliveUrl: @json(route('session.keepalive')),
+                        logoutUrl: @json(route('logout.get')),
+                        countdownText: @json(trans('general.session_expiring_countdown')),
+                        keepaliveFailedText: @json(trans('general.session_keepalive_failed'))
+                    };
+                    var promptAfterMs = (config.lifetimeSeconds - config.warningSeconds) * 1000;
+                    var modal = document.getElementById('session-expiring-modal');
+                    var keepaliveButton = document.getElementById('session-timeout-keepalive');
+                    var logoutButton = document.getElementById('session-timeout-logout');
+                    var countdown = document.getElementById('session-expiring-countdown');
+                    var token = document.querySelector('meta[name="csrf-token"]');
+                    var csrf = token ? token.getAttribute('content') : '';
+                    var warningTimer = null;
+                    var countdownTimer = null;
+                    var logoutTimer = null;
+                    var warningVisible = false;
+                    var keepaliveInFlight = false;
+                    var lastActivityAt = Date.now();
+                    var activityStorageKey = 'snipeit:last-user-activity';
+
+                    if (!modal || !keepaliveButton || !logoutButton || !countdown || promptAfterMs < 1000) {
+                        return;
+                    }
+
+                    function clearTimers() {
+                        if (warningTimer) {
+                            window.clearTimeout(warningTimer);
+                        }
+                        if (countdownTimer) {
+                            window.clearInterval(countdownTimer);
+                        }
+                        if (logoutTimer) {
+                            window.clearTimeout(logoutTimer);
+                        }
+                        warningTimer = null;
+                        countdownTimer = null;
+                        logoutTimer = null;
+                    }
+
+                    function submitLogout() {
+                        var logoutForm = document.getElementById('logout-form');
+
+                        if (logoutForm) {
+                            logoutForm.submit();
+                            return;
+                        }
+
+                        window.location.href = config.logoutUrl;
+                    }
+
+                    function updateCountdown(seconds) {
+                        countdown.textContent = config.countdownText.replace(':seconds', String(Math.max(0, seconds)));
+                    }
+
+                    function scheduleWarning() {
+                        if (warningVisible) {
+                            return;
+                        }
+
+                        if (warningTimer) {
+                            window.clearTimeout(warningTimer);
+                        }
+
+                        var elapsedMs = Date.now() - lastActivityAt;
+                        var warnInMs = Math.max(0, promptAfterMs - elapsedMs);
+                        warningTimer = window.setTimeout(showWarning, warnInMs);
+                    }
+
+                    function showWarning() {
+                        warningVisible = true;
+                        keepaliveInFlight = false;
+                        keepaliveButton.disabled = false;
+
+                        var warningStartedAt = Date.now();
+                        updateCountdown(config.warningSeconds);
+
+                        if (window.jQuery && window.jQuery.fn && window.jQuery.fn.modal) {
+                            window.jQuery(modal).modal({
+                                backdrop: 'static',
+                                keyboard: false,
+                                show: true
+                            });
+                        } else {
+                            modal.style.display = 'block';
+                        }
+
+                        countdownTimer = window.setInterval(function () {
+                            var elapsedSeconds = Math.floor((Date.now() - warningStartedAt) / 1000);
+                            updateCountdown(config.warningSeconds - elapsedSeconds);
+                        }, 1000);
+                        logoutTimer = window.setTimeout(submitLogout, config.warningSeconds * 1000);
+                    }
+
+                    function markActivity() {
+                        if (warningVisible) {
+                            return;
+                        }
+
+                        lastActivityAt = Date.now();
+
+                        try {
+                            window.localStorage.setItem(activityStorageKey, String(lastActivityAt));
+                        } catch (error) {
+                            // Ignore storage failures; same-tab timeout still works.
+                        }
+
+                        scheduleWarning();
+                    }
+
+                    function finishKeepalive(success) {
+                        keepaliveInFlight = false;
+                        keepaliveButton.disabled = false;
+
+                        if (!success) {
+                            if (window.toastr) {
+                                window.toastr.error(config.keepaliveFailedText);
+                            }
+                            submitLogout();
+                            return;
+                        }
+
+                        warningVisible = false;
+                        clearTimers();
+                        lastActivityAt = Date.now();
+
+                        if (window.jQuery && window.jQuery.fn && window.jQuery.fn.modal) {
+                            window.jQuery(modal).modal('hide');
+                        } else {
+                            modal.style.display = 'none';
+                        }
+
+                        scheduleWarning();
+                    }
+
+                    function keepSessionAlive() {
+                        if (keepaliveInFlight) {
+                            return;
+                        }
+
+                        keepaliveInFlight = true;
+                        keepaliveButton.disabled = true;
+
+                        if (!window.fetch) {
+                            submitLogout();
+                            return;
+                        }
+
+                        window.fetch(config.keepaliveUrl, {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrf
+                            },
+                            body: JSON.stringify({})
+                        })
+                            .then(function (response) {
+                                finishKeepalive(response.ok);
+                            })
+                            .catch(function () {
+                                finishKeepalive(false);
+                            });
+                    }
+
+                    ['click', 'keydown', 'pointerdown', 'touchstart', 'input', 'change'].forEach(function (eventName) {
+                        document.addEventListener(eventName, markActivity, true);
+                    });
+
+                    window.addEventListener('storage', function (event) {
+                        if (event.key !== activityStorageKey || warningVisible) {
+                            return;
+                        }
+
+                        var updatedAt = parseInt(event.newValue || '', 10);
+                        if (!Number.isNaN(updatedAt) && updatedAt > lastActivityAt) {
+                            lastActivityAt = updatedAt;
+                            scheduleWarning();
+                        }
+                    });
+
+                    keepaliveButton.addEventListener('click', keepSessionAlive);
+                    logoutButton.addEventListener('click', submitLogout);
+                    scheduleWarning();
+                })();
+            </script>
+        @endif
 
 
         <script nonce="{{ csrf_token() }}">

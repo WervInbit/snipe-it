@@ -204,20 +204,20 @@
                                 <button type="button" class="close" data-dismiss="modal" aria-label="{{ trans('general.close') }}">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
-                                <h4 class="modal-title" id="assetComponentStorageModalLabel">{{ __('Move To Stock') }}</h4>
+                                <h4 class="modal-title" id="assetComponentStorageModalLabel">{{ trans('general.move_to_stock') }}</h4>
                             </div>
                             <div class="modal-body">
-                                <p class="text-muted">{{ __('Move this component into stock now. You can assign a specific storage location later from the component detail page.') }}</p>
+                                <p class="text-muted">{{ trans('general.move_component_into_stock_help') }}</p>
 
                                 <div class="alert alert-info">
-                                    <strong>{{ __('Component') }}:</strong>
+                                    <strong>{{ trans('general.component') }}:</strong>
                                     <span data-asset-component-storage-name>{{ trans('general.none') }}</span>
                                 </div>
 
                                 <div class="checkbox">
                                     <label>
                                         <input type="checkbox" name="needs_verification" value="1">
-                                        {{ __('Mark as needing verification after moving to stock') }}
+                                        {{ trans('general.mark_needs_verification_after_stock') }}
                                     </label>
                                 </div>
 
@@ -228,7 +228,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('general.cancel') }}</button>
-                                <button type="submit" class="btn btn-warning">{{ __('Confirm Move To Stock') }}</button>
+                                <button type="submit" class="btn btn-warning">{{ trans('general.confirm_move_to_stock') }}</button>
                             </div>
                         </form>
                     </div>
@@ -245,13 +245,13 @@
                                 <button type="button" class="close" data-dismiss="modal" aria-label="{{ trans('general.close') }}">
                                     <span aria-hidden="true">&times;</span>
                                 </button>
-                                <h4 class="modal-title" id="assetComponentTrayModalLabel">{{ __('Move To Tray') }}</h4>
+                                <h4 class="modal-title" id="assetComponentTrayModalLabel">{{ trans('general.move_to_tray') }}</h4>
                             </div>
                             <div class="modal-body">
-                                <p class="text-muted">{{ __('Remove this component from its current asset and place it in your tray.') }}</p>
+                                <p class="text-muted">{{ trans('general.remove_component_to_tray_help') }}</p>
 
                                 <div class="alert alert-info">
-                                    <strong>{{ __('Component') }}:</strong>
+                                    <strong>{{ trans('general.component') }}:</strong>
                                     <span data-asset-component-tray-name>{{ trans('general.none') }}</span>
                                 </div>
 
@@ -267,7 +267,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('general.cancel') }}</button>
-                                <button type="submit" class="btn btn-warning">{{ __('Confirm To Tray') }}</button>
+                                <button type="submit" class="btn btn-warning">{{ trans('general.confirm_to_tray') }}</button>
                             </div>
                         </form>
                     </div>

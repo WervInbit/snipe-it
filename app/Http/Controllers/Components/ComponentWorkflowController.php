@@ -81,7 +81,7 @@ class ComponentWorkflowController extends Controller
 
         return redirect()
             ->route('components.show', $component_id)
-            ->with('success', __('Component moved to tray.'));
+            ->with('success', trans('general.component_moved_to_tray'));
     }
 
     public function createInstall(Request $request, ComponentInstance $component_id): View
@@ -128,7 +128,7 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component installed.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', trans('general.component_installed'));
     }
 
     public function createMoveToStock(Request $request, ComponentInstance $component_id): View
@@ -177,7 +177,7 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component moved to stock.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', trans('general.component_moved_to_stock'));
     }
 
     public function createFlagNeedsVerification(Request $request, ComponentInstance $component_id): View
@@ -223,7 +223,7 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Verification required.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', trans('general.verification_required'));
     }
 
     public function createConfirmVerification(Request $request, ComponentInstance $component_id): View
@@ -265,7 +265,7 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Verification confirmed.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', trans('general.verification_confirmed'));
     }
 
     public function createMarkDestructionPending(Request $request, ComponentInstance $component_id): View
@@ -311,7 +311,7 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component marked for destruction.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', trans('general.component_marked_for_destruction'));
     }
 
     public function createMarkDestroyed(Request $request, ComponentInstance $component_id): View
@@ -345,7 +345,7 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component destroyed.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', trans('general.component_destroyed'));
     }
 
     public function markDefective(Request $request, ComponentInstance $component_id): RedirectResponse
@@ -365,7 +365,7 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component marked damaged.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', trans('general.component_marked_damaged'));
     }
 
     private function installableAssets()

@@ -224,7 +224,7 @@ class ComponentBrowserWorkflowTest extends TestCase
             ])
             ->assertRedirect(route('hardware.show', $asset))
             ->assertSessionHasNoErrors()
-            ->assertSessionHas('success', 'Component created and installed.');
+            ->assertSessionHas('success', trans('general.component_created_and_installed'));
 
         $this->assertDatabaseHas('component_instances', [
             'component_definition_id' => $definition->id,
@@ -261,7 +261,7 @@ class ComponentBrowserWorkflowTest extends TestCase
                 'condition_warning_confirmed' => 1,
             ])
             ->assertRedirect(route('hardware.show', $asset))
-            ->assertSessionHas('success', 'Component installed.');
+            ->assertSessionHas('success', trans('general.component_installed'));
 
         $component->refresh();
         $this->assertSame($asset->id, $component->current_asset_id);
@@ -296,7 +296,7 @@ class ComponentBrowserWorkflowTest extends TestCase
                 'lifecycle_warning_confirmed' => 1,
             ])
             ->assertRedirect(route('hardware.show', $asset))
-            ->assertSessionHas('success', 'Component installed.');
+            ->assertSessionHas('success', trans('general.component_installed'));
 
         $component->refresh();
         $this->assertSame($asset->id, $component->current_asset_id);
@@ -400,7 +400,7 @@ class ComponentBrowserWorkflowTest extends TestCase
             ->post(route('components.mark_defective', $component), [
                 'note' => 'Failed inspection',
             ])
-            ->assertSessionHas('success', 'Component marked damaged.');
+            ->assertSessionHas('success', trans('general.component_marked_damaged'));
 
         $component->refresh();
         $this->assertSame(ComponentInstance::STATUS_IN_TRANSFER, $component->status);

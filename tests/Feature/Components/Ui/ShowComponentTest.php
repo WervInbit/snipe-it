@@ -57,7 +57,7 @@ class ShowComponentTest extends TestCase
             ->assertSee('data-component-serial-control', false)
             ->assertSeeText('Status: Attached')
             ->assertSeeText('In Tray')
-            ->assertSeeText('Confirm To Tray');
+            ->assertSeeText(trans('general.confirm_to_tray'));
     }
 
     public function testHistoryShowsLinkedWorkOrderAndTask(): void

@@ -39,7 +39,7 @@ class AssetLabelPrintController extends Controller
 
         if (! $queue) {
             return response()->json([
-                'message' => 'Label printer queue is not configured. Set LABEL_PRINTER_QUEUE.',
+                'message' => trans('general.label_printer_queue_not_configured'),
             ], 422);
         }
 
@@ -57,7 +57,9 @@ class AssetLabelPrintController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'Printing failed: '.($result['error_output'] ?: $result['output']),
+                'message' => trans('general.printing_failed_with_error', [
+                    'error' => $result['error_output'] ?: $result['output'],
+                ]),
             ], 500);
         }
 
@@ -76,8 +78,8 @@ class AssetLabelPrintController extends Controller
             'queue' => $queue,
             'job_id' => $jobId,
             'message' => $jobId
-                ? "Sent to printer ({$queue}), job {$jobId}."
-                : "Sent to printer ({$queue}).",
+                ? trans('general.sent_to_printer_with_job', ['queue' => $queue, 'job' => $jobId])
+                : trans('general.sent_to_printer', ['queue' => $queue]),
         ]);
     }
 }

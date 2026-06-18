@@ -1,7 +1,7 @@
 @extends('layouts/default')
 
 @section('title')
-    {{ __('Move Component To Tray') }}
+    {{ trans('general.move_component_to_tray') }}
     @parent
 @stop
 
@@ -16,15 +16,15 @@
         <div class="col-md-8 col-md-offset-2">
             <div class="box box-default">
                 <div class="box-header with-border">
-                    <h3 class="box-title">{{ __('To Tray') }}</h3>
+                    <h3 class="box-title">{{ trans('general.to_tray') }}</h3>
                 </div>
                 <div class="box-body">
-                    <p class="text-muted">{{ __('Remove this component from its current asset and place it in your tray.') }}</p>
+                    <p class="text-muted">{{ trans('general.remove_component_to_tray_help') }}</p>
 
                     <div class="alert alert-info">
-                        <strong>{{ __('Component') }}:</strong> {{ $component->display_name }}
+                        <strong>{{ trans('general.component') }}:</strong> {{ $component->display_name }}
                         @if($component->currentAsset)
-                            <br><strong>{{ __('Current Asset') }}:</strong> {{ $component->currentAsset->present()->name() }}
+                            <br><strong>{{ trans('general.current_asset') }}:</strong> {{ $component->currentAsset->present()->name() }}
                         @endif
                     </div>
 
@@ -43,7 +43,7 @@
                             {!! $errors->first('note', '<span class="help-block">:message</span>') !!}
                         </div>
 
-                        <button type="submit" class="btn btn-warning">{{ __('Confirm To Tray') }}</button>
+                        <button type="submit" class="btn btn-warning">{{ trans('general.confirm_to_tray') }}</button>
                     </form>
                 </div>
             </div>
