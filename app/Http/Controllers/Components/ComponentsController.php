@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Components;
 
 use App\Exceptions\ComponentConditionWarningException;
 use App\Http\Controllers\Concerns\BuildsComponentWorkflowOptions;
+use App\Http\Controllers\Concerns\HandlesComponentSerialChanges;
 use App\Http\Controllers\Controller;
 use App\Models\Actionlog;
 use App\Models\Asset;
@@ -15,12 +16,14 @@ use App\Services\ComponentLifecycleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use InvalidArgumentException;
 
 class ComponentsController extends Controller
 {
     use BuildsComponentWorkflowOptions;
+    use HandlesComponentSerialChanges;
 
     public function __construct(
         protected ComponentLifecycleService $lifecycle,
@@ -207,6 +210,38 @@ class ComponentsController extends Controller
         return redirect()
             ->route('components.show', ['component_id' => $component_id])
             ->with('success', __('Component note updated.'));
+    }
+
+    public function updateSerial(Request $request, ComponentInstance $component_id): RedirectResponse
+    {
+        $this->authorize('update', $component_id);
+
+        $data = $request->validate(array_merge([
+            'note' => ['nullable', 'string'],
+        ], $this->componentSerialChangeRules()));
+
+        if (!$request->boolean('serial_change_enabled')) {
+            throw ValidationException::withMessages([
+                'serial' => trans('general.component_serial_unlock_required'),
+            ]);
+        }
+
+        try {
+            $this->lifecycle->updateSerial(
+                $component_id,
+                $this->componentSerialContextFromRequest($request, $component_id)['serial'] ?? null,
+                [
+                    'performed_by' => $request->user(),
+                    'note' => $data['note'] ?? null,
+                ]
+            );
+        } catch (InvalidArgumentException $exception) {
+            return redirect()->back()->withInput()->with('error', $exception->getMessage());
+        }
+
+        return redirect()
+            ->route('components.show', ['component_id' => $component_id])
+            ->with('success', trans('general.component_serial_updated'));
     }
 
     public function materializeExpectedSubcomponent(Request $request, ComponentInstance $component_id, ComponentDefinitionSubcomponentTemplate $template): RedirectResponse

@@ -128,10 +128,20 @@
                     <dt>{{ trans('general.condition') }}</dt>
                     <dd>{{ $component->displayConditionLabel() }}</dd>
 
-                    @if($component->serial)
                     <dt>{{ trans('admin/hardware/form.serial') }}</dt>
-                    <dd>{{ $component->serial }}</dd>
-                    @endif
+                    <dd>
+                        {{ $component->serial ?: trans('general.none') }}
+                        @if($isLifecycleManaged)
+                            @can('update', $component)
+                                <button type="button"
+                                        class="btn btn-xs btn-primary"
+                                        data-toggle="modal"
+                                        data-target="#componentSerialModal">
+                                    {{ $component->serial ? trans('general.change_serial') : trans('general.add_serial') }}
+                                </button>
+                            @endcan
+                        @endif
+                    </dd>
 
                     @if($component->componentDefinition)
                     <dt>{{ trans('general.category') }}</dt>
@@ -153,6 +163,45 @@
                 </dl>
             </div>
         </div>
+
+        @if($isLifecycleManaged)
+            @can('update', $component)
+                <div class="modal fade" id="componentSerialModal" tabindex="-1" role="dialog" aria-labelledby="componentSerialModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <form method="POST" action="{{ route('components.serial.update', $component) }}">
+                                @csrf
+                                @method('PATCH')
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="{{ trans('general.close') }}">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    <h4 class="modal-title" id="componentSerialModalLabel">
+                                        {{ $component->serial ? trans('general.change_serial') : trans('general.add_serial') }}
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                    @include('components.partials.serial-change-control', [
+                                        'component' => $component,
+                                        'serialId' => 'component_detail_serial',
+                                    ])
+
+                                    <div class="form-group {{ $errors->has('note') ? 'has-error' : '' }}">
+                                        <label for="component_serial_note">{{ trans('general.notes') }}</label>
+                                        <textarea class="form-control" id="component_serial_note" name="note" rows="3">{{ old('note') }}</textarea>
+                                        {!! $errors->first('note', '<span class="help-block">:message</span>') !!}
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('general.cancel') }}</button>
+                                    <button type="submit" class="btn btn-primary">{{ trans('general.save_serial') }}</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            @endcan
+        @endif
 
         <div class="box box-default">
             <div class="box-header with-border">

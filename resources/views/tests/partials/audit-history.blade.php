@@ -18,9 +18,9 @@
                 <tr>
                     <td>
                         @if($audit->auditable instanceof \App\Models\TestRun)
-                            {{ trans('tests.workflow_run') }} #{{ $audit->auditable->id }}
+                            {{ $audit->auditable->display_name }} #{{ $audit->auditable->id }}
                         @else
-                            {{ $audit->auditable->type->name }} ({{ trans('tests.workflow_run') }} #{{ $audit->auditable->workflow_run_id }})
+                            {{ $audit->auditable->type->name }} ({{ optional($audit->auditable->testRun)->display_name ?? trans('tests.workflow_run') }} #{{ $audit->auditable->workflow_run_id }})
                         @endif
                     </td>
                     <td>{{ $audit->field }}</td>

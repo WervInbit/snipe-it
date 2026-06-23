@@ -228,7 +228,7 @@
                             aria-controls="{{ $detailId }}">
                         <span class="test-run-row__summary-main">
                             <span class="test-run-row__primary">
-                                {{ $run->profile_name_snapshot ?: optional($run->profile)->name ?: trans('tests.workflow_run') }} #{{ $run->id }} &middot; {{ optional($run->created_at)->format('Y-m-d H:i') }} &middot; {{ optional($run->user)->name }}
+                                {{ $run->display_name }} #{{ $run->id }} &middot; {{ optional($run->created_at)->format('Y-m-d H:i') }} &middot; {{ optional($run->user)->name }}
                             </span>
                         </span>
                         <span class="test-run-row__stats">

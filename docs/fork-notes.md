@@ -4,6 +4,12 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-06-23
+- Component detail pages now support adding or changing a component serial after the part has already been removed to tray or otherwise opened later. The serial row is always visible, the edit modal keeps the field locked until explicitly enabled, changing a non-empty serial still requires confirmation, and changes are recorded as `serial_updated` component events.
+- Asset workflow history now labels runs by their stored workflow profile snapshot instead of a generic test-run label, and asset workflow status surfaces name missing required workflow profiles consistently.
+- The asset table workflow-status tooltip now uses the same per-blocking-workflow readiness summary as asset detail/status changes, so a newer unrelated workflow run does not hide missing or failed required workflows.
+- Asset-page tab cleanup planning is documented in `docs/plans/asset-page-tab-cleanup-2026-06-23.md`: Licenses, Images, Files, and Extra files are marked for later rework/investigation, while Devices, Maintenance, and the Send/Upload paperclip nav action are marked for deprecation/removal planning.
+
 ### 2026-06-18
 - Browser sessions now default to a 30-minute idle lifetime with a client-side warning modal and explicit `Stay signed in` keepalive action. Passive AJAX is not treated as user activity.
 - On mobile, the asset Tests / Workflows floating action now starts the currently selected workflow profile instead of only scrolling/focusing the profile selector.

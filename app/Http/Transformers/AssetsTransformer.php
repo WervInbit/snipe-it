@@ -30,6 +30,11 @@ class AssetsTransformer
         // This uses the getSettings() method so we're pulling from the cache versus querying the settings on single asset
         $setting = Setting::getSettings();
 
+        $testRunsCount = (int) ($asset->test_runs_count ?? 0);
+        $testWorkflowStatus = $testRunsCount === 0
+            ? 'missing'
+            : (($asset->tests_completed_ok) ? 'ok' : 'attention');
+
         $array = [
             'id' => (int) $asset->id,
             'name' => e($asset->model?->name ?? $asset->name),
@@ -43,7 +48,8 @@ class AssetsTransformer
             'requestable' => ($asset->requestable ? true : false),
             'is_sellable' => ($asset->is_sellable ? true : false),
             'tests_completed_ok' => ($asset->tests_completed_ok ? true : false),
-            'test_runs_count' => (int) ($asset->test_runs_count ?? 0),
+            'test_runs_count' => $testRunsCount,
+            'test_workflow_status' => $testWorkflowStatus,
             'latest_test_run_id' => $asset->latest_test_run_id ? (int) $asset->latest_test_run_id : null,
             'latest_tests_total' => (int) ($asset->latest_tests_total ?? 0),
             'latest_tests_completed' => (int) ($asset->latest_tests_completed ?? 0),

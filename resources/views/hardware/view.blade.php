@@ -621,15 +621,7 @@
                     </div>
                     <div class="asset-tests-attention__content">
                         <ul class="mb-0">
-                            @if ($testSummary['missing_run'])
-                                <li>{{ trans('tests.no_test_run_recorded') }}</li>
-                            @endif
-                            @if ($testSummary['failed']->isNotEmpty())
-                                <li>{{ trans('tests.failed_list', ['tests' => $testSummary['failed']->implode(', ')]) }}</li>
-                            @endif
-                            @if ($testSummary['incomplete']->isNotEmpty())
-                                <li>{{ trans('tests.incomplete_list', ['tests' => $testSummary['incomplete']->implode(', ')]) }}</li>
-                            @endif
+                            @include('hardware.partials.test-issue-lines', ['testSummary' => $testSummary])
                         </ul>
                         @if ($testSummary['run'])
                             <small class="text-muted">
@@ -2129,7 +2121,7 @@
                                                         aria-expanded="false"
                                                         aria-controls="{{ $detailId }}">
                                                     <span class="hardware-test-run-row__summary-main">
-                                                        <span class="hardware-test-run-row__primary">{{ trans('tests.test_run') }} #{{ $run->id }} &middot; {{ optional($timestamp)->format('Y-m-d H:i') }} &middot; {{ optional($run->user)->name }}</span>
+                                                        <span class="hardware-test-run-row__primary">{{ $run->display_name }} #{{ $run->id }} &middot; {{ optional($timestamp)->format('Y-m-d H:i') }} &middot; {{ optional($run->user)->name }}</span>
                                                     </span>
                                                     <span class="hardware-test-run-row__stats">
                                                         {{ $passes }} {{ trans('tests.pass') }} &middot;

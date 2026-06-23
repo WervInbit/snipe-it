@@ -458,6 +458,7 @@ class AssetsController extends Controller
 
             $asset->load([
                 'tests.audits.user',
+                'tests.profile',
                 'tests.results.audits.user',
                 'tests.results.type',
                 'tests.results.attributeDefinition',

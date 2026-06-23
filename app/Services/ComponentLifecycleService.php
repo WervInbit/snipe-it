@@ -283,6 +283,37 @@ class ComponentLifecycleService
         });
     }
 
+    public function updateSerial(ComponentInstance $instance, ?string $serial, array $context = []): ComponentInstance
+    {
+        $this->assertNotTerminal($instance);
+
+        return DB::transaction(function () use ($instance, $serial, $context): ComponentInstance {
+            $fromSerial = $this->normalizeComponentSerial($instance->serial);
+            $toSerial = $this->normalizeComponentSerial($serial);
+
+            if ($fromSerial === $toSerial) {
+                return $instance->fresh();
+            }
+
+            $fromStatus = $instance->status;
+
+            $instance->forceFill([
+                'serial' => $toSerial,
+                'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
+            ])->save();
+
+            $this->events->write($instance, 'serial_updated', [
+                'performed_by' => $context['performed_by'] ?? null,
+                'from_status' => $fromStatus,
+                'to_status' => $instance->status,
+                'note' => $context['note'] ?? null,
+                'payload_json' => $this->mergeSerialChangePayload(null, $fromSerial, $toSerial),
+            ]);
+
+            return $instance->fresh();
+        });
+    }
+
     public function moveToStock(
         ComponentInstance $instance,
         ?ComponentStorageLocation $location = null,

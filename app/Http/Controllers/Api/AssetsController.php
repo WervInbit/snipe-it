@@ -498,82 +498,99 @@ class AssetsController extends Controller
     {
         $this->authorize('view', $asset);
 
-        $run = $asset->tests()
-            ->select('id', 'asset_id', 'created_at', 'finished_at')
-            ->with(['results' => function ($query) {
-                $query->select('id', 'workflow_run_id', 'workflow_item_id', 'attribute_definition_id', 'status', 'note', 'photo_path', 'sort_order')
-                    ->withCount('photos')
-                    ->with(['type:id,name', 'attributeDefinition:id,label'])
-                    ->orderBy('sort_order')
-                    ->orderBy('id');
-            }])
-            ->first();
-
-        if (!$run) {
-            return response()->json([
-                'run_id' => null,
-                'total' => 0,
-                'completed' => 0,
-                'failed_count' => 0,
-                'missing_count' => 0,
-                'failed' => [],
-                'missing' => [],
-            ]);
-        }
-
-        $results = $run->results;
-        $total = $results->count();
-        $completed = $results->where('status', '!=', TestResult::STATUS_NVT)->count();
-
-        $labelFor = function (TestResult $result): string {
-            return $result->attributeDefinition?->label
-                ?? $result->type?->name
-                ?? trans('general.unknown');
-        };
-
-        $excerptFor = function (?string $note): ?string {
-            if (!$note) {
-                return null;
-            }
-            $clean = trim(preg_replace('/\\s+/', ' ', strip_tags($note)));
-            if ($clean === '') {
-                return null;
-            }
-            return Str::limit($clean, 120, '...');
-        };
-
-        $failed = $results->where('status', TestResult::STATUS_FAIL);
-        $missing = $results->where('status', TestResult::STATUS_NVT);
-
-        $failedPayload = $failed->map(function (TestResult $result) use ($labelFor, $excerptFor) {
-            $photoCount = (int) ($result->photos_count ?? 0);
-            if ($photoCount === 0 && $result->photo_path) {
-                $photoCount = 1;
-            }
-
-            return [
-                'label' => $labelFor($result),
-                'note_present' => $result->note !== null && $result->note !== '',
-                'note_excerpt' => $excerptFor($result->note),
-                'photo_count' => $photoCount,
-            ];
+        $summary = $asset->latestTestIssueSummary();
+        $runs = collect($summary['runs'] ?? []);
+        $missingProfiles = collect($summary['missing_profiles'] ?? []);
+        $requiredResults = $runs->flatMap(function (TestRun $run) {
+            return $run->results
+                ->filter(fn (TestResult $result) => $result->is_required)
+                ->map(fn (TestResult $result) => [
+                    'run' => $run,
+                    'result' => $result,
+                ]);
         })->values();
 
-        $missingPayload = $missing->map(function (TestResult $result) use ($labelFor) {
-            return [
-                'label' => $labelFor($result),
-            ];
-        })->values();
+        $failedPayload = $requiredResults
+            ->filter(fn (array $item) => $item['result']->status === TestResult::STATUS_FAIL)
+            ->map(fn (array $item) => $this->workflowResultIssuePayload($item['run'], $item['result']))
+            ->values();
+
+        $missingPayload = $missingProfiles
+            ->map(fn (string $profile) => [
+                'label' => $profile,
+                'type' => 'workflow_profile',
+            ])
+            ->merge($requiredResults
+                ->filter(fn (array $item) => $item['result']->status !== TestResult::STATUS_PASS && $item['result']->status !== TestResult::STATUS_FAIL)
+                ->map(fn (array $item) => $this->workflowResultIssuePayload($item['run'], $item['result']))
+                ->values())
+            ->values();
+
+        $run = $summary['run'] ?? null;
 
         return response()->json([
-            'run_id' => (int) $run->id,
-            'total' => $total,
-            'completed' => $completed,
+            'run_id' => $run ? (int) $run->id : null,
+            'run_label' => $run ? $run->display_name : null,
+            'runs' => $runs->map(function (TestRun $run) {
+                return [
+                    'id' => (int) $run->id,
+                    'label' => $run->display_name,
+                    'created_at' => optional($run->created_at)->toIso8601String(),
+                    'finished_at' => optional($run->finished_at)->toIso8601String(),
+                ];
+            })->values(),
+            'total' => $requiredResults->count() + $missingProfiles->count(),
+            'completed' => $requiredResults
+                ->filter(fn (array $item) => $item['result']->status !== TestResult::STATUS_NVT)
+                ->count(),
             'failed_count' => $failedPayload->count(),
             'missing_count' => $missingPayload->count(),
+            'missing_run' => (bool) ($summary['missing_run'] ?? false),
+            'missing_profiles' => $missingProfiles->values(),
             'failed' => $failedPayload,
             'missing' => $missingPayload,
         ]);
+    }
+
+    private function workflowResultIssuePayload(TestRun $run, TestResult $result): array
+    {
+        $photoCount = $result->relationLoaded('photos')
+            ? $result->photos->count()
+            : $result->photos()->count();
+
+        if ($photoCount === 0 && $result->photo_path) {
+            $photoCount = 1;
+        }
+
+        return [
+            'label' => $this->workflowResultLabel($run, $result),
+            'note_present' => $result->note !== null && $result->note !== '',
+            'note_excerpt' => $this->testNoteExcerpt($result->note),
+            'photo_count' => $photoCount,
+        ];
+    }
+
+    private function workflowResultLabel(TestRun $run, TestResult $result): string
+    {
+        $label = $result->attributeDefinition?->label
+            ?? $result->type?->name
+            ?? trans('general.unknown');
+
+        return $run->display_name . ': ' . $label;
+    }
+
+    private function testNoteExcerpt(?string $note): ?string
+    {
+        if (!$note) {
+            return null;
+        }
+
+        $clean = trim(preg_replace('/\s+/', ' ', strip_tags($note)));
+        if ($clean === '') {
+            return null;
+        }
+
+        return Str::limit($clean, 120, '...');
     }
 
     public function serialCheck(Request $request): JsonResponse

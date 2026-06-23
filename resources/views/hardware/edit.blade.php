@@ -310,15 +310,7 @@
                     <div class="modal-body">
                         <p>{{ trans('tests.status_change_prompt') }}</p>
                         <ul>
-                            @if ($testSummary['missing_run'])
-                                <li>{{ trans('tests.no_test_run_recorded') }}</li>
-                            @endif
-                            @if ($testSummary['failed']->isNotEmpty())
-                                <li>{{ trans('tests.failed_list', ['tests' => $testSummary['failed']->implode(', ')]) }}</li>
-                            @endif
-                            @if ($testSummary['incomplete']->isNotEmpty())
-                                <li>{{ trans('tests.incomplete_list', ['tests' => $testSummary['incomplete']->implode(', ')]) }}</li>
-                            @endif
+                            @include('hardware.partials.test-issue-lines', ['testSummary' => $testSummary])
                         </ul>
                     </div>
                     <div class="modal-footer">

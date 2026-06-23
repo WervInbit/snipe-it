@@ -131,6 +131,95 @@ class ShowComponentTest extends TestCase
         ]);
     }
 
+    public function testComponentSerialCanBeAddedFromDetailPage(): void
+    {
+        $actor = User::factory()->superuser()->create();
+        $component = ComponentInstance::factory()->inTray($actor)->create([
+            'serial' => null,
+        ]);
+        $token = 'component-serial-add-token';
+
+        $this->actingAs($actor)
+            ->get(route('components.show', $component))
+            ->assertOk()
+            ->assertSee(route('components.serial.update', $component), false)
+            ->assertSee('id="componentSerialModal"', false)
+            ->assertSeeText(trans('general.add_serial'))
+            ->assertSeeText(trans('general.save_serial'));
+
+        $this->actingAs($actor)
+            ->withSession(['_token' => $token])
+            ->patch(route('components.serial.update', $component), [
+                '_token' => $token,
+                'serial_change_enabled' => 1,
+                'serial' => 'TRAY-SN-001',
+                'note' => 'Captured after removal.',
+            ])
+            ->assertRedirect(route('components.show', $component))
+            ->assertSessionHas('success', trans('general.component_serial_updated'));
+
+        $component->refresh();
+
+        $this->assertSame('TRAY-SN-001', $component->serial);
+        $this->assertSame($actor->id, $component->updated_by);
+
+        $event = ComponentEvent::query()
+            ->where('component_instance_id', $component->id)
+            ->where('event_type', 'serial_updated')
+            ->firstOrFail();
+
+        $this->assertSame('Captured after removal.', $event->note);
+        $this->assertTrue((bool) data_get($event->payload_json, 'serial_changed'));
+        $this->assertNull(data_get($event->payload_json, 'previous_serial'));
+        $this->assertSame('TRAY-SN-001', data_get($event->payload_json, 'new_serial'));
+    }
+
+    public function testChangingExistingComponentSerialRequiresConfirmation(): void
+    {
+        $actor = User::factory()->superuser()->create();
+        $component = ComponentInstance::factory()->inTray($actor)->create([
+            'serial' => 'OLD-SN-001',
+        ]);
+        $token = 'component-serial-change-token';
+
+        $this->actingAs($actor)
+            ->withSession(['_token' => $token])
+            ->patch(route('components.serial.update', $component), [
+                '_token' => $token,
+                'serial_change_enabled' => 1,
+                'serial' => 'NEW-SN-001',
+                'note' => 'Attempt without confirmation.',
+            ])
+            ->assertSessionHasErrors('serial');
+
+        $this->assertSame('OLD-SN-001', $component->fresh()->serial);
+
+        $this->actingAs($actor)
+            ->withSession(['_token' => $token])
+            ->patch(route('components.serial.update', $component), [
+                '_token' => $token,
+                'serial_change_enabled' => 1,
+                'serial_change_confirmed' => 1,
+                'serial' => 'NEW-SN-001',
+                'note' => 'Confirmed correction.',
+            ])
+            ->assertRedirect(route('components.show', $component))
+            ->assertSessionHas('success', trans('general.component_serial_updated'));
+
+        $component->refresh();
+
+        $this->assertSame('NEW-SN-001', $component->serial);
+
+        $event = ComponentEvent::query()
+            ->where('component_instance_id', $component->id)
+            ->where('event_type', 'serial_updated')
+            ->firstOrFail();
+
+        $this->assertSame('Confirmed correction.', $event->note);
+        $this->assertSame('OLD-SN-001', data_get($event->payload_json, 'previous_serial'));
+        $this->assertSame('NEW-SN-001', data_get($event->payload_json, 'new_serial'));
+    }
+
     public function testLooseComponentDetailPageShowsStorageLocationEditor(): void
     {
         $component = ComponentInstance::factory()->create();

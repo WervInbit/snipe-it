@@ -3,6 +3,7 @@
     $currentSerial = (string) ($currentSerial ?? $component?->serial ?? '');
     $isEnabled = old('serial_change_enabled', '0') === '1';
     $serialValue = old('serial', $currentSerial);
+    $serialHelp = $serialHelp ?? trans('general.component_serial_locked_help');
 @endphp
 
 <div class="form-group {{ $errors->has('serial') ? 'has-error' : '' }}"
@@ -30,7 +31,7 @@
     <input type="hidden" name="serial_change_enabled" value="{{ $isEnabled ? '1' : '0' }}" data-component-serial-enabled>
     <input type="hidden" name="serial_change_confirmed" value="0" data-component-serial-confirmed>
     <p class="help-block">
-        {{ trans('general.component_serial_locked_help') }}
+        {{ $serialHelp }}
     </p>
     {!! $errors->first('serial', '<span class="help-block">:message</span>') !!}
 </div>
