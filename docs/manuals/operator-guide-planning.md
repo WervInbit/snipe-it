@@ -1,6 +1,10 @@
 # Operator Guide Planning
 
-This document tracks decisions, draft guide ideas, and open investigation for the laminated operator manuals. It is intentionally a working document: guide scope, names, screenshots, and final wording are not locked yet.
+This document tracks brainstorming, draft guide ideas, tentative decisions, and open investigation for the laminated operator manuals.
+
+Important: almost everything in this document is still open and should not be treated as foundational project truth. Future agents should treat guide codes, color choices, guide names, grouping, wording, and workflow recommendations as brainstorming unless a line is explicitly marked `Final`.
+
+The current status is planning-only: guide scope, names, screenshots, and final wording are not locked yet.
 
 ## Goal
 
@@ -25,7 +29,7 @@ Target format:
 - `PROGRESS.md` and `docs/fork-notes.md`
   - Current fork concepts include workflow profiles/items, component hierarchy, QR labels, component tags, asset lifecycle statuses, sale-transition permission, Dutch operational labels, and work orders.
 
-## Current Design Decisions
+## Current Brainstorming Direction
 
 ### Referencable Guide IDs
 
@@ -152,7 +156,7 @@ These should be separate from the floor guides. They are for people who manage h
 | `CFG-11` | Workflow Applicability | How workflow items apply by asset category, component category, component definition, always-on, or manual extra item. |
 | `CFG-12` | Test a New Catalog Setup | Create/open a sample asset and verify specs, expected components, and workflow items. |
 
-## Important Concept Decisions
+## Tentative Concept Notes
 
 ### Attribute Versus Component Definition
 
@@ -301,6 +305,8 @@ Recommended first pilot set:
 These cover the most common floor flow and expose the biggest layout problems early.
 
 ## Decision Log
+
+Decision statuses matter. `Draft accepted` means "reasonable for now, keep discussing", not final approval. Only entries marked `Final` should be treated as locked.
 
 | Date | Decision | Status |
 | --- | --- | --- |

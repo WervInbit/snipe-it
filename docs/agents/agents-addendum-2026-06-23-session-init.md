@@ -43,3 +43,4 @@
 - Current manual candidates should cover refurbishing existing assets, adding existing/new assets, printing stickers, workflow/testing, user management, attribute/component changes, component lifecycle actions, asset removal, and work order flows.
 - This block is planning/advice only. No code, migrations, Docker, browser, database, or PHPUnit commands were run.
 - Created `docs/manuals/operator-guide-planning.md` as the working decision log and investigation tracker for guide planning.
+- Clarified that the manual planning document is mostly brainstorming; guide codes, colors, names, grouping, wording, and recommendations remain open unless explicitly marked `Final`.
