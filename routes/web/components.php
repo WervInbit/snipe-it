@@ -66,6 +66,9 @@ Route::group([
 
     Route::post('{component_id}/children', [Components\ComponentsController::class, 'storeChild'])
         ->name('components.children.store');
+
+    Route::patch('{component_id}/serial', [Components\ComponentsController::class, 'updateSerial'])
+        ->name('components.serial.update');
 });
 
 Route::resource('components', Components\ComponentsController::class, [

@@ -1,13 +1,13 @@
 @extends('layouts/default')
 
 @section('title')
-{{ __('My Tray') }}
+{{ trans('general.my_tray') }}
 @parent
 @stop
 
 @section('header_right')
 <a href="{{ route('components.create') }}" class="btn btn-primary">
-    {{ __('Register Component') }}
+    {{ trans('general.register_component') }}
 </a>
 <a href="{{ route('components.index') }}" class="btn btn-default">
     {{ trans('general.back') }}
@@ -19,13 +19,13 @@
     <div class="col-md-12">
         <div class="box box-default">
             <div class="box-header with-border">
-                <h3 class="box-title">{{ __('Tray Workspace') }}</h3>
+                <h3 class="box-title">{{ trans('general.tray_workspace') }}</h3>
             </div>
             <div class="box-body">
-                <p class="text-muted">{{ __('Review what is currently in your tray, then launch the next workflow from the row actions.') }}</p>
+                <p class="text-muted">{{ trans('general.tray_workspace_help') }}</p>
 
                 @if ($trayComponents->isEmpty())
-                    <p class="text-muted">{{ __('No components are currently assigned to your tray.') }}</p>
+                    <p class="text-muted">{{ trans('general.no_components_in_tray') }}</p>
                 @else
                     <div class="table-responsive">
                         <table class="table table-striped">
@@ -33,9 +33,9 @@
                             <tr>
                                 <th>{{ trans('general.tag') }}</th>
                                 <th>{{ trans('general.name') }}</th>
-                                <th>{{ __('Source Asset') }}</th>
-                                <th>{{ __('Held Duration') }}</th>
-                                <th>{{ __('Warning') }}</th>
+                                <th>{{ trans('general.source_asset') }}</th>
+                                <th>{{ trans('general.held_duration') }}</th>
+                                <th>{{ trans('general.warning_label') }}</th>
                                 <th>{{ trans('general.actions') }}</th>
                             </tr>
                             </thead>
@@ -65,11 +65,11 @@
                                     <td>{{ $component->transfer_age_human ?? trans('general.none') }}</td>
                                     <td><span class="label {{ $component->tray_warning['class'] ?? 'label-default' }}">{{ $component->tray_warning['label'] ?? trans('general.none') }}</span></td>
                                     <td class="text-nowrap">
-                                        <a href="{{ route('components.install.create', [$component, 'return_to' => $returnTo]) }}" class="btn btn-xs btn-primary">{{ __('Install') }}</a>
-                                        <a href="{{ route('components.move_to_stock.create', [$component, 'return_to' => $returnTo]) }}" class="btn btn-xs btn-default">{{ __('To Storage') }}</a>
-                                        <a href="{{ route('components.flag_needs_verification.create', [$component, 'return_to' => $returnTo]) }}" class="btn btn-xs btn-warning">{{ __('Needs Verification') }}</a>
-                                        <a href="{{ route('components.mark_destruction_pending.create', [$component, 'return_to' => $returnTo]) }}" class="btn btn-xs btn-danger">{{ __('Mark Destruction Pending') }}</a>
-                                        <a href="{{ route('components.show', $component) }}" class="btn btn-xs btn-default">{{ __('Open') }}</a>
+                                        <a href="{{ route('components.install.create', [$component, 'return_to' => $returnTo]) }}" class="btn btn-xs btn-primary">{{ trans('general.install') }}</a>
+                                        <a href="{{ route('components.move_to_stock.create', [$component, 'return_to' => $returnTo]) }}" class="btn btn-xs btn-default">{{ trans('general.to_storage') }}</a>
+                                        <a href="{{ route('components.flag_needs_verification.create', [$component, 'return_to' => $returnTo]) }}" class="btn btn-xs btn-warning">{{ trans('general.needs_verification') }}</a>
+                                        <a href="{{ route('components.mark_destruction_pending.create', [$component, 'return_to' => $returnTo]) }}" class="btn btn-xs btn-danger">{{ trans('general.mark_destruction_pending') }}</a>
+                                        <a href="{{ route('components.show', $component) }}" class="btn btn-xs btn-default">{{ trans('general.open') }}</a>
                                     </td>
                                 </tr>
                             @endforeach

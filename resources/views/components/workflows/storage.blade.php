@@ -1,7 +1,7 @@
 @extends('layouts/default')
 
 @section('title')
-    {{ __('Move Component To Stock') }}
+    {{ trans('general.move_component_to_stock') }}
     @parent
 @stop
 
@@ -16,13 +16,13 @@
         <div class="col-md-8 col-md-offset-2">
             <div class="box box-default">
                 <div class="box-header with-border">
-                    <h3 class="box-title">{{ __('To Storage') }}</h3>
+                    <h3 class="box-title">{{ trans('general.to_storage') }}</h3>
                 </div>
                 <div class="box-body">
-                    <p class="text-muted">{{ __('Move this tracked component into stock. You can assign a specific storage location later on the component detail page.') }}</p>
+                    <p class="text-muted">{{ trans('general.tracked_component_stock_page_help') }}</p>
 
                     <div class="alert alert-info">
-                        <strong>{{ __('Component') }}:</strong> {{ $component->display_name }}
+                        <strong>{{ trans('general.component') }}:</strong> {{ $component->display_name }}
                         <br><strong>{{ trans('general.status') }}:</strong> {{ \App\Models\ComponentInstance::lifecycleStatusLabel($component->effectiveLifecycleStatus()) ?? $component->effectiveLifecycleStatus() }}
                         <br><strong>{{ trans('general.condition') }}:</strong> {{ $component->displayConditionLabel() }}
                     </div>
@@ -35,7 +35,7 @@
                             <label>
                                 <input type="hidden" name="needs_verification" value="0">
                                 <input type="checkbox" name="needs_verification" value="1" @checked(old('needs_verification'))>
-                                {{ __('Mark as needing verification after moving to stock') }}
+                                {{ trans('general.mark_needs_verification_after_stock') }}
                             </label>
                         </div>
 
@@ -45,7 +45,7 @@
                             {!! $errors->first('note', '<span class="help-block">:message</span>') !!}
                         </div>
 
-                        <button type="submit" class="btn btn-warning">{{ __('Confirm To Stock') }}</button>
+                        <button type="submit" class="btn btn-warning">{{ trans('general.confirm_to_stock') }}</button>
                     </form>
                 </div>
             </div>

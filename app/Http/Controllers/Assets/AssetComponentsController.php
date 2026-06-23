@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Assets;
 use App\Exceptions\ComponentConditionWarningException;
 use App\Exceptions\ComponentLifecycleWarningException;
 use App\Http\Controllers\Concerns\BuildsComponentWorkflowOptions;
+use App\Http\Controllers\Concerns\HandlesComponentSerialChanges;
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\ComponentDefinition;
@@ -23,6 +24,7 @@ use InvalidArgumentException;
 class AssetComponentsController extends Controller
 {
     use BuildsComponentWorkflowOptions;
+    use HandlesComponentSerialChanges;
 
     public function __construct(
         protected ComponentLifecycleService $lifecycle,
@@ -80,10 +82,10 @@ class AssetComponentsController extends Controller
                 return redirect()->back()->withInput()->with('error', $exception->getMessage());
             }
 
-            return redirect()->route('hardware.show', $asset)->with('success', __('Component installed.'));
+            return redirect()->route('hardware.show', $asset)->with('success', trans('general.component_installed'));
         }
 
-        return redirect()->back()->withInput()->with('error', __('Only tray or storage components can be installed through this workflow.'));
+        return redirect()->back()->withInput()->with('error', trans('general.only_tray_or_storage_components_installable'));
     }
 
     public function installFromTray(Request $request, Asset $asset): RedirectResponse
@@ -159,7 +161,7 @@ class AssetComponentsController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->route('hardware.show', $asset)->with('success', __('Component created and installed.'));
+        return redirect()->route('hardware.show', $asset)->with('success', trans('general.component_created_and_installed'));
     }
 
     public function updateCondition(Request $request, Asset $asset, ComponentInstance $component): RedirectResponse
@@ -182,7 +184,7 @@ class AssetComponentsController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->route('hardware.show', $asset)->with('success', __('Component condition updated.'));
+        return redirect()->route('hardware.show', $asset)->with('success', trans('general.component_condition_updated'));
     }
 
     public function createReparent(Asset $asset, ComponentInstance $component): View
@@ -215,7 +217,7 @@ class AssetComponentsController extends Controller
             $parent = $this->ensureTrackedComponentOnAsset($asset, $parent);
 
             if ($parent->parent_component_instance_id) {
-                return redirect()->back()->withInput()->with('error', __('Choose a top-level component as the parent.'));
+                return redirect()->back()->withInput()->with('error', trans('general.choose_top_level_component_parent'));
             }
         }
 
@@ -228,7 +230,7 @@ class AssetComponentsController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->route('hardware.show', $asset)->with('success', __('Component hierarchy updated.'));
+        return redirect()->route('hardware.show', $asset)->with('success', trans('general.component_hierarchy_updated'));
     }
 
     public function expectedToTray(Request $request, Asset $asset, ModelNumberComponentTemplate $template): RedirectResponse
@@ -237,16 +239,23 @@ class AssetComponentsController extends Controller
         $this->authorize('move', new ComponentInstance());
         $this->ensureTemplateBelongsToAsset($asset, $template);
 
+        $data = $request->validate(array_merge([
+            'installed_as' => ['nullable', 'string', 'max:255'],
+            'note' => ['nullable', 'string'],
+        ], $this->componentSerialChangeRules()));
+
         try {
-            $this->expectedComponents->materializeToTray($asset, $template, $request->user(), [
-                'installed_as' => $request->input('installed_as'),
-                'note' => $request->input('note'),
-            ]);
+            $component = $this->expectedComponents->materializeToTray($asset, $template, $request->user(), [
+                'installed_as' => $data['installed_as'] ?? null,
+                'note' => $data['note'] ?? null,
+            ] + $this->componentSerialContextFromRequest($request));
         } catch (InvalidArgumentException $exception) {
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->route('hardware.show', $asset)->with('success', __('Expected component moved to tray.'));
+        return redirect()
+            ->route('components.show', $component)
+            ->with('success', trans('general.expected_component_moved_to_tray'));
     }
 
     public function createTrackedStorage(Asset $asset, ComponentInstance $component): View
@@ -293,7 +302,7 @@ class AssetComponentsController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->route('hardware.show', $asset)->with('success', __('Component moved to stock.'));
+        return redirect()->route('hardware.show', $asset)->with('success', trans('general.component_moved_to_stock'));
     }
 
     public function createExpectedStorage(Asset $asset, ModelNumberComponentTemplate $template): View
@@ -339,7 +348,7 @@ class AssetComponentsController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->route('hardware.show', $asset)->with('success', __('Expected component moved to stock.'));
+        return redirect()->route('hardware.show', $asset)->with('success', trans('general.expected_component_moved_to_stock'));
     }
 
     public function createTrackedTransfer(Request $request, Asset $asset, ComponentInstance $component): View
@@ -374,7 +383,7 @@ class AssetComponentsController extends Controller
         $this->authorize('view', $destinationAsset);
 
         if ($destinationAsset->is($asset)) {
-            return redirect()->back()->withInput()->with('error', __('Choose a different destination asset.'));
+            return redirect()->back()->withInput()->with('error', trans('general.choose_different_destination_asset'));
         }
 
         try {
@@ -392,7 +401,7 @@ class AssetComponentsController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->route('hardware.show', $destinationAsset)->with('success', __('Component moved to the destination asset.'));
+        return redirect()->route('hardware.show', $destinationAsset)->with('success', trans('general.component_moved_to_destination_asset'));
     }
 
     public function createExpectedTransfer(Request $request, Asset $asset, ModelNumberComponentTemplate $template): View
@@ -427,7 +436,7 @@ class AssetComponentsController extends Controller
         $this->authorize('view', $destinationAsset);
 
         if ($destinationAsset->is($asset)) {
-            return redirect()->back()->withInput()->with('error', __('Choose a different destination asset.'));
+            return redirect()->back()->withInput()->with('error', trans('general.choose_different_destination_asset'));
         }
 
         try {
@@ -444,7 +453,7 @@ class AssetComponentsController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->route('hardware.show', $destinationAsset)->with('success', __('Expected component moved to the destination asset.'));
+        return redirect()->route('hardware.show', $destinationAsset)->with('success', trans('general.expected_component_moved_to_destination_asset'));
     }
 
     private function trayComponents(Request $request)

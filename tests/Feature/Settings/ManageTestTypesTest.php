@@ -68,6 +68,17 @@ class ManageTestTypesTest extends TestCase
         $this->assertSame([$definition->id], $item->componentDefinitions()->pluck('component_definitions.id')->all());
     }
 
+    public function test_workflow_item_modal_selects_are_full_width(): void
+    {
+        $response = $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('settings.testtypes.index'));
+
+        $response->assertOk();
+        $response->assertSee('#create-testtype-modal .select2-container', false);
+        $response->assertSee('[id^="edit-testtype-"][id$="-modal"] .select2-container', false);
+        $response->assertSee("width: '100%'", false);
+    }
+
     public function test_admin_create_suffixes_generated_slug_when_name_collides(): void
     {
         $user = User::factory()->superuser()->create();

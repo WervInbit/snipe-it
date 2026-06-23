@@ -65,8 +65,19 @@ class AssetIndexTest extends TestCase
                 $json->has('rows.0', fn(AssertableJson $row) =>
                     $row->where('model_number', $expectedModelNumber)
                         ->where('model_number_id', $expectedModelNumberId)
+                        ->etc()
                 )->etc()
             );
+    }
+
+    public function testAssetApiIndexIncludesWorkflowStatus(): void
+    {
+        Asset::factory()->create();
+
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->getJson(route('api.assets.index'))
+            ->assertOk()
+            ->assertJsonPath('rows.0.test_workflow_status', 'missing');
     }
 
     public function testAssetApiIndexReturnsDisplayUpcomingAuditsDue()

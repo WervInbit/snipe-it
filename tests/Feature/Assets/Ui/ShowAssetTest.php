@@ -304,6 +304,8 @@ class ShowAssetTest extends TestCase
         $response->assertSee(trans('tests.view_all_workflows'));
         $response->assertSee('data-testid="hardware-tests-tab-fab"', false);
         $response->assertSee('data-testid="hardware-tests-tab-fab-label"', false);
+        $response->assertSee('data-starts-selected-workflow="true"', false);
+        $response->assertSee('workflowChooser.requestSubmit', false);
         $response->assertSee(route('test-runs.store', $asset), false);
         $response->assertDontSee('data-testid="hardware-tests-start-form-desktop"', false);
         $response->assertDontSee('data-testid="hardware-tests-tab-fab-form"', false);
@@ -323,6 +325,32 @@ class ShowAssetTest extends TestCase
         $response->assertSee('data-testid="hardware-tests-run-list"', false);
     }
 
+    public function testDetailPageLabelsTestHistoryByWorkflowProfile(): void
+    {
+        $asset = Asset::factory()->create();
+        $profile = WorkflowProfile::factory()->create([
+            'name' => 'Standard Diagnostics',
+        ]);
+        $item = TestType::factory()->create(['name' => 'Keyboard']);
+        $run = TestRun::factory()->create([
+            'asset_id' => $asset->id,
+            'workflow_profile_id' => $profile->id,
+            'profile_name_snapshot' => $profile->name,
+        ]);
+        TestResult::factory()->create([
+            'workflow_run_id' => $run->id,
+            'workflow_item_id' => $item->id,
+            'status' => TestResult::STATUS_PASS,
+        ]);
+
+        $response = $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('hardware.show', $asset));
+
+        $response->assertOk();
+        $response->assertSee('Standard Diagnostics #' . $run->id);
+        $response->assertDontSee(trans('tests.test_run') . ' #' . $run->id);
+    }
+
     public function testDetailPageRendersFoldableLatestTestsAttentionBlock(): void
     {
         $asset = Asset::factory()->create();
@@ -335,6 +363,49 @@ class ShowAssetTest extends TestCase
         $response->assertSee('asset-tests-attention__chevron', false);
         $response->assertSee(trans('tests.click_to_unfold'));
         $response->assertSee('aria-expanded="false"', false);
+    }
+
+    public function testDetailPageNamesMissingBlockingWorkflowProfiles(): void
+    {
+        $asset = Asset::factory()->create();
+        $diagnosticItem = TestType::factory()->create(['name' => 'Diagnostic']);
+        $photoItem = TestType::factory()->create(['name' => 'Sale Photos']);
+        $diagnostics = WorkflowProfile::factory()->create([
+            'name' => 'Diagnostics',
+            'blocks_sale_readiness' => true,
+        ]);
+        $salePhotos = WorkflowProfile::factory()->create([
+            'name' => 'Sale Photos',
+            'blocks_sale_readiness' => true,
+        ]);
+        $diagnosticProfileItem = WorkflowProfileItem::factory()->create([
+            'workflow_profile_id' => $diagnostics->id,
+            'workflow_item_id' => $diagnosticItem->id,
+            'is_required' => true,
+        ]);
+        WorkflowProfileItem::factory()->create([
+            'workflow_profile_id' => $salePhotos->id,
+            'workflow_item_id' => $photoItem->id,
+            'is_required' => true,
+        ]);
+        $run = TestRun::factory()->create([
+            'asset_id' => $asset->id,
+            'workflow_profile_id' => $diagnostics->id,
+            'profile_name_snapshot' => $diagnostics->name,
+        ]);
+        TestResult::factory()->create([
+            'workflow_run_id' => $run->id,
+            'workflow_item_id' => $diagnosticItem->id,
+            'workflow_profile_item_id' => $diagnosticProfileItem->id,
+            'status' => TestResult::STATUS_PASS,
+            'is_required' => true,
+        ]);
+
+        $response = $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('hardware.show', $asset));
+
+        $response->assertOk();
+        $response->assertSee(trans('tests.missing_workflow_profiles', ['profiles' => 'Sale Photos']));
     }
 
     public function testTestsIndexUsesStructuredResultRows(): void

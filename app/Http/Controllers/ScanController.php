@@ -59,6 +59,14 @@ class ScanController extends Controller
             return redirect()->route('hardware.show', $asset);
         }
 
+        $component = ComponentInstance::query()
+            ->where('component_tag', $code)
+            ->first();
+
+        if ($component) {
+            return redirect()->route('components.show', $component);
+        }
+
         return redirect()->route('findbytag/hardware', ['any' => $code]);
     }
 

@@ -621,15 +621,7 @@
                     </div>
                     <div class="asset-tests-attention__content">
                         <ul class="mb-0">
-                            @if ($testSummary['missing_run'])
-                                <li>{{ trans('tests.no_test_run_recorded') }}</li>
-                            @endif
-                            @if ($testSummary['failed']->isNotEmpty())
-                                <li>{{ trans('tests.failed_list', ['tests' => $testSummary['failed']->implode(', ')]) }}</li>
-                            @endif
-                            @if ($testSummary['incomplete']->isNotEmpty())
-                                <li>{{ trans('tests.incomplete_list', ['tests' => $testSummary['incomplete']->implode(', ')]) }}</li>
-                            @endif
+                            @include('hardware.partials.test-issue-lines', ['testSummary' => $testSummary])
                         </ul>
                         @if ($testSummary['run'])
                             <small class="text-muted">
@@ -2129,7 +2121,7 @@
                                                         aria-expanded="false"
                                                         aria-controls="{{ $detailId }}">
                                                     <span class="hardware-test-run-row__summary-main">
-                                                        <span class="hardware-test-run-row__primary">{{ trans('tests.test_run') }} #{{ $run->id }} &middot; {{ optional($timestamp)->format('Y-m-d H:i') }} &middot; {{ optional($run->user)->name }}</span>
+                                                        <span class="hardware-test-run-row__primary">{{ $run->display_name }} #{{ $run->id }} &middot; {{ optional($timestamp)->format('Y-m-d H:i') }} &middot; {{ optional($run->user)->name }}</span>
                                                     </span>
                                                     <span class="hardware-test-run-row__stats">
                                                         {{ $passes }} {{ trans('tests.pass') }} &middot;
@@ -2411,6 +2403,7 @@
                     <button type="button"
                             class="btn btn-primary hardware-tests-tab-fab__button"
                             data-testid="hardware-tests-tab-fab"
+                            data-starts-selected-workflow="true"
                             aria-label="{{ trans('tests.choose_workflow') }}">
                         <x-icon type="plus" />
                         <span class="hardware-tests-tab-fab__label" data-testid="hardware-tests-tab-fab-label">{{ trans('tests.start_new_run') }}</span>
@@ -2444,6 +2437,37 @@
                 form.attr('action', '');
                 form[0].reset();
                 modal.find('[data-asset-component-storage-name]').text('{{ trans('general.none') }}');
+            });
+
+            $('#assetComponentTrayModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var action = button.data('tray-action') || '';
+                var name = button.data('tray-name') || '{{ trans('general.none') }}';
+                var serial = button.data('tray-serial') || '';
+                var returnTo = button.data('tray-return-to') || '{{ route('hardware.show', $asset) }}#components';
+                var modal = $(this);
+                var control = modal.find('[data-component-serial-control]').get(0);
+
+                modal.find('[data-asset-component-tray-form]').attr('action', action);
+                modal.find('[data-asset-component-tray-name]').text(name);
+                modal.find('[data-asset-component-tray-return-to]').val(returnTo);
+
+                if (window.refreshComponentSerialControl) {
+                    window.refreshComponentSerialControl(control, serial);
+                }
+            }).on('hidden.bs.modal', function () {
+                var modal = $(this);
+                var form = modal.find('[data-asset-component-tray-form]');
+                var control = modal.find('[data-component-serial-control]').get(0);
+
+                form.attr('action', '');
+                form[0].reset();
+                modal.find('[data-asset-component-tray-name]').text('{{ trans('general.none') }}');
+                modal.find('[data-asset-component-tray-return-to]').val('{{ route('hardware.show', $asset) }}#components');
+
+                if (window.refreshComponentSerialControl) {
+                    window.refreshComponentSerialControl(control, '');
+                }
             });
         })();
     </script>
@@ -2546,7 +2570,7 @@
                 syncTestsFabVisibility();
             }
 
-            fab.addEventListener('click', function () {
+            function focusWorkflowChooser() {
                 if (workflowChooser) {
                     workflowChooser.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
@@ -2556,6 +2580,28 @@
                         workflowProfile.focus();
                     }, 150);
                 }
+            }
+
+            fab.addEventListener('click', function () {
+                if (!workflowChooser) {
+                    focusWorkflowChooser();
+                    return;
+                }
+
+                if (workflowChooser.checkValidity && !workflowChooser.checkValidity()) {
+                    if (workflowChooser.reportValidity) {
+                        workflowChooser.reportValidity();
+                    }
+                    focusWorkflowChooser();
+                    return;
+                }
+
+                if (workflowChooser.requestSubmit) {
+                    workflowChooser.requestSubmit();
+                    return;
+                }
+
+                workflowChooser.submit();
             });
 
             $tabLinks.on('shown.bs.tab', syncTestsFabVisibility);

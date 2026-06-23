@@ -1,13 +1,13 @@
 @extends('layouts/default')
 
 @section('title')
-{{ __('Register Component') }}
+{{ trans('general.register_component') }}
 @parent
 @stop
 
 @section('header_right')
 <a href="{{ route('components.tray') }}" class="btn btn-default">
-    {{ __('My Tray') }}
+    {{ trans('general.my_tray') }}
 </a>
 <a href="{{ route('components.index') }}" class="btn btn-default">
     {{ trans('general.back') }}
@@ -19,13 +19,13 @@
     <div class="col-md-8 col-md-offset-2">
         <div class="box box-default">
             <div class="box-header with-border">
-                <h3 class="box-title">{{ __('Register Loose Component') }}</h3>
+                <h3 class="box-title">{{ trans('general.register_loose_component') }}</h3>
             </div>
             <form method="POST" action="{{ route('components.store') }}">
                 <div class="box-body">
                     @csrf
                     <p class="text-muted">
-                        {{ __('Use this form for manual stock intake only. For removals from an asset, use the asset Components tab.') }}
+                        {{ trans('general.register_loose_component_help') }}
                     </p>
 
                     @include('components.partials.manual-fields', [
@@ -38,8 +38,8 @@
                     ])
                 </div>
                 <div class="box-footer">
-                    <button type="submit" class="btn btn-primary">{{ __('Register Component') }}</button>
-                    <a href="{{ route('components.index') }}" class="btn btn-default">{{ __('Cancel') }}</a>
+                    <button type="submit" class="btn btn-primary">{{ trans('general.register_component') }}</button>
+                    <a href="{{ route('components.index') }}" class="btn btn-default">{{ trans('general.cancel') }}</a>
                 </div>
             </form>
         </div>

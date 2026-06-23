@@ -1,7 +1,7 @@
 @extends('layouts/default')
 
 @section('title')
-    {{ __('Move Component To Other Device') }}
+    {{ trans('general.move_component_to_other_device') }}
     @parent
 @stop
 
@@ -24,6 +24,12 @@
         window.scanConfig = Object.assign({}, window.scanConfig || {}, {
             resolveBasePath: '{{ url('/scan/resolve') }}',
             resolveQuery: @json($scanQuery),
+            text: {
+                selectCamera: @json(trans('general.scan_select_camera')),
+                cameraLabel: @json(trans('general.camera')),
+                cameraAccessFailed: @json(trans('general.scan_camera_access_failed')),
+                cameraUnavailable: @json(trans('general.scan_camera_unavailable'))
+            }
         });
     </script>
     <style nonce="{{ csrf_token() }}">
@@ -41,11 +47,11 @@
         <div class="col-md-7">
             <div class="box box-default">
                 <div class="box-header with-border">
-                    <h3 class="box-title">{{ __('Scan Destination Asset') }}</h3>
+                    <h3 class="box-title">{{ trans('general.scan_destination_asset') }}</h3>
                 </div>
                 <div class="box-body">
                     <p class="text-muted">
-                        {{ __('Scan the destination asset QR label to prefill the move form below. You can also choose the destination manually.') }}
+                        {{ trans('general.scan_destination_asset_help') }}
                     </p>
                     <div id="scan-permission" class="alert alert-warning d-none" role="alert" data-testid="scan-permission-banner" style="display:none;">
                         {{ trans('general.scan_camera_denied') }}
@@ -69,18 +75,18 @@
 
                         <div class="scan-actions">
                             <button id="scan-switch" type="button" class="btn btn-outline-secondary" data-testid="scan-switch">
-                                <i class="fas fa-sync" aria-hidden="true"></i> {{ __('Refresh camera') }}
+                                <i class="fas fa-sync" aria-hidden="true"></i> {{ trans('general.scan_refresh_camera') }}
                             </button>
                             <button id="scan-torch" type="button" class="btn btn-outline-secondary" data-testid="scan-torch" aria-pressed="false">
                                 <i class="fas fa-lightbulb" aria-hidden="true"></i> {{ trans('general.scan_torch') }}
                             </button>
                             <button id="scan-request" type="button" class="btn btn-outline-secondary" data-testid="scan-request">
-                                <i class="fas fa-unlock" aria-hidden="true"></i> {{ __('Request camera access') }}
+                                <i class="fas fa-unlock" aria-hidden="true"></i> {{ trans('general.scan_request_camera_access') }}
                             </button>
                             <div class="form-group mb-0">
-                                <label class="sr-only" for="scan-camera-select">{{ __('Select camera') }}</label>
-                                <select id="scan-camera-select" class="form-control" data-testid="scan-camera-select" aria-label="{{ __('Select camera') }}">
-                                    <option value="">{{ __('Select camera') }}</option>
+                                <label class="sr-only" for="scan-camera-select">{{ trans('general.scan_select_camera') }}</label>
+                                <select id="scan-camera-select" class="form-control" data-testid="scan-camera-select" aria-label="{{ trans('general.scan_select_camera') }}">
+                                    <option value="">{{ trans('general.scan_select_camera') }}</option>
                                 </select>
                             </div>
                         </div>
@@ -94,15 +100,15 @@
         <div class="col-md-5">
             <div class="box box-default">
                 <div class="box-header with-border">
-                    <h3 class="box-title">{{ __('Move To Other Device') }}</h3>
+                    <h3 class="box-title">{{ trans('general.move_to_other_device') }}</h3>
                 </div>
                 <div class="box-body">
                     <div class="alert alert-info">
-                        <strong>{{ __('Component') }}:</strong> {{ $itemName }}
+                        <strong>{{ trans('general.component') }}:</strong> {{ $itemName }}
                     </div>
 
                     @if($isExpected)
-                        <p class="text-muted">{{ __('This expected component will be materialized as a tracked part and moved directly to the destination asset.') }}</p>
+                        <p class="text-muted">{{ trans('general.expected_component_transfer_help') }}</p>
                     @endif
 
                     <form method="POST" action="{{ $postRoute }}">
@@ -112,26 +118,26 @@
                             'conditionStatus' => $isExpected ? \App\Models\ComponentInstance::CONDITION_STATUS_NEEDS_ATTENTION : null,
                             'show' => $isExpected || (!$isExpected && $component->requiresConditionWarningForAttachment()),
                             'message' => $isExpected
-                                ? __('This expected component will be tracked as Needs Attention until it is verified. Confirm the warning before moving it.')
+                                ? trans('general.expected_component_attention_warning')
                                 : null,
-                            'checkboxLabel' => __('I understand this condition warning and want to move it.'),
+                            'checkboxLabel' => trans('general.confirm_condition_warning_move'),
                         ])
                         @include('components.partials.lifecycle-warning-confirmation', [
                             'component' => $isExpected ? null : $component,
                             'show' => !$isExpected && $component->requiresLifecycleWarningForAttachment(),
-                            'checkboxLabel' => __('I understand this lifecycle warning and want to move it.'),
+                            'checkboxLabel' => trans('general.confirm_lifecycle_warning_move'),
                         ])
                         <div class="form-group {{ $errors->has('destination_asset_id') ? 'has-error' : '' }}">
-                            <label for="asset_component_destination">{{ __('Destination Asset') }}</label>
+                            <label for="asset_component_destination">{{ trans('general.destination_asset') }}</label>
                             <select class="js-data-ajax select2"
                                     data-endpoint="hardware"
-                                    data-placeholder="{{ __('Search assets') }}"
+                                    data-placeholder="{{ trans('general.search_assets') }}"
                                     aria-label="destination_asset_id"
                                     name="destination_asset_id"
                                     style="width: 100%"
                                     id="asset_component_destination"
                                     required>
-                                <option value="">{{ __('Search assets') }}</option>
+                                <option value="">{{ trans('general.search_assets') }}</option>
                                 @if($destinationAsset)
                                     <option value="{{ $destinationAsset->id }}" selected="selected">{{ $destinationAsset->present()->fullName }}</option>
                                 @elseif(old('destination_asset_id'))
@@ -150,7 +156,7 @@
                             {!! $errors->first('note', '<span class="help-block">:message</span>') !!}
                         </div>
 
-                        <button type="submit" class="btn btn-primary">{{ __('Move To Other Device') }}</button>
+                        <button type="submit" class="btn btn-primary">{{ trans('general.move_to_other_device') }}</button>
                     </form>
                 </div>
             </div>

@@ -4,9 +4,12 @@ namespace Tests\Feature\Components\Ui;
 
 use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\Asset;
+use App\Models\ComponentEvent;
 use App\Models\ComponentDefinition;
 use App\Models\ComponentInstance;
 use App\Models\ComponentStorageLocation;
+use App\Models\ModelNumber;
+use App\Models\ModelNumberComponentTemplate;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -60,6 +63,7 @@ class ComponentBrowserWorkflowTest extends TestCase
             ->post(route('components.remove_to_tray', $component), [
                 'note' => 'Removed in browser workflow test',
             ])
+            ->assertRedirect(route('components.show', $component))
             ->assertSessionHas('success');
 
         $component->refresh();
@@ -89,6 +93,118 @@ class ComponentBrowserWorkflowTest extends TestCase
             ->assertSeeText('Installed');
     }
 
+    public function testRemoveToTrayCanCaptureMissingSerialWhenUnlocked(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $sourceAsset = Asset::factory()->create();
+        $component = ComponentInstance::factory()->installed($sourceAsset->id)->create([
+            'serial' => null,
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('components.remove_to_tray', $component), [
+                'serial_change_enabled' => 1,
+                'serial' => 'SSD-SN-001',
+                'note' => 'Serial captured while removing.',
+            ])
+            ->assertRedirect(route('components.show', $component))
+            ->assertSessionHas('success');
+
+        $component->refresh();
+        $this->assertSame('SSD-SN-001', $component->serial);
+        $this->assertSame(ComponentInstance::STATUS_IN_TRANSFER, $component->status);
+
+        $event = ComponentEvent::query()
+            ->where('component_instance_id', $component->id)
+            ->where('event_type', 'removed_to_tray')
+            ->firstOrFail();
+
+        $this->assertTrue((bool) data_get($event->payload_json, 'serial_changed'));
+        $this->assertNull(data_get($event->payload_json, 'previous_serial'));
+        $this->assertSame('SSD-SN-001', data_get($event->payload_json, 'new_serial'));
+    }
+
+    public function testRemoveToTrayRequiresConfirmationBeforeChangingExistingSerial(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $sourceAsset = Asset::factory()->create();
+        $component = ComponentInstance::factory()->installed($sourceAsset->id)->create([
+            'serial' => 'OLD-SN-001',
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('components.remove_to_tray', $component), [
+                'serial_change_enabled' => 1,
+                'serial' => 'NEW-SN-001',
+                'note' => 'Attempt without confirmation.',
+            ])
+            ->assertSessionHasErrors('serial');
+
+        $component->refresh();
+        $this->assertSame('OLD-SN-001', $component->serial);
+        $this->assertSame(ComponentInstance::STATUS_INSTALLED, $component->status);
+
+        $this->actingAs($user)
+            ->post(route('components.remove_to_tray', $component), [
+                'serial_change_enabled' => 1,
+                'serial_change_confirmed' => 1,
+                'serial' => 'NEW-SN-001',
+                'note' => 'Confirmed serial correction.',
+            ])
+            ->assertRedirect(route('components.show', $component))
+            ->assertSessionHas('success');
+
+        $component->refresh();
+        $this->assertSame('NEW-SN-001', $component->serial);
+        $this->assertSame(ComponentInstance::STATUS_IN_TRANSFER, $component->status);
+
+        $event = ComponentEvent::query()
+            ->where('component_instance_id', $component->id)
+            ->where('event_type', 'removed_to_tray')
+            ->firstOrFail();
+
+        $this->assertTrue((bool) data_get($event->payload_json, 'serial_changed'));
+        $this->assertSame('OLD-SN-001', data_get($event->payload_json, 'previous_serial'));
+        $this->assertSame('NEW-SN-001', data_get($event->payload_json, 'new_serial'));
+    }
+
+    public function testExpectedComponentToTrayCanCaptureSerial(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create();
+        $modelNumber = ModelNumber::factory()->create();
+        $asset->forceFill(['model_number_id' => $modelNumber->id])->save();
+        $definition = ComponentDefinition::factory()->create(['name' => 'Expected SSD']);
+        $template = ModelNumberComponentTemplate::factory()->create([
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $definition->id,
+            'expected_name' => 'Expected SSD',
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post(route('hardware.components.expected.tray', [$asset, $template]), [
+                'serial_change_enabled' => 1,
+                'serial' => 'EXPECTED-SN-001',
+                'note' => 'Removed expected component with serial.',
+            ])
+            ->assertSessionHas('success');
+
+        $component = ComponentInstance::query()
+            ->where('source_type', ComponentInstance::SOURCE_EXPECTED_BASELINE)
+            ->where('source_asset_id', $asset->id)
+            ->firstOrFail();
+
+        $response->assertRedirect(route('components.show', $component));
+        $this->assertSame('EXPECTED-SN-001', $component->serial);
+
+        $event = ComponentEvent::query()
+            ->where('component_instance_id', $component->id)
+            ->where('event_type', 'removed_to_tray')
+            ->firstOrFail();
+
+        $this->assertTrue((bool) data_get($event->payload_json, 'serial_captured_on_removal'));
+    }
+
     public function testAssetAddPageCanCreateDefinitionBackedComponentWithoutCustomName(): void
     {
         $user = User::factory()->superuser()->create();
@@ -108,7 +224,7 @@ class ComponentBrowserWorkflowTest extends TestCase
             ])
             ->assertRedirect(route('hardware.show', $asset))
             ->assertSessionHasNoErrors()
-            ->assertSessionHas('success', 'Component created and installed.');
+            ->assertSessionHas('success', trans('general.component_created_and_installed'));
 
         $this->assertDatabaseHas('component_instances', [
             'component_definition_id' => $definition->id,
@@ -145,7 +261,7 @@ class ComponentBrowserWorkflowTest extends TestCase
                 'condition_warning_confirmed' => 1,
             ])
             ->assertRedirect(route('hardware.show', $asset))
-            ->assertSessionHas('success', 'Component installed.');
+            ->assertSessionHas('success', trans('general.component_installed'));
 
         $component->refresh();
         $this->assertSame($asset->id, $component->current_asset_id);
@@ -180,7 +296,7 @@ class ComponentBrowserWorkflowTest extends TestCase
                 'lifecycle_warning_confirmed' => 1,
             ])
             ->assertRedirect(route('hardware.show', $asset))
-            ->assertSessionHas('success', 'Component installed.');
+            ->assertSessionHas('success', trans('general.component_installed'));
 
         $component->refresh();
         $this->assertSame($asset->id, $component->current_asset_id);
@@ -284,7 +400,7 @@ class ComponentBrowserWorkflowTest extends TestCase
             ->post(route('components.mark_defective', $component), [
                 'note' => 'Failed inspection',
             ])
-            ->assertSessionHas('success', 'Component marked damaged.');
+            ->assertSessionHas('success', trans('general.component_marked_damaged'));
 
         $component->refresh();
         $this->assertSame(ComponentInstance::STATUS_IN_TRANSFER, $component->status);

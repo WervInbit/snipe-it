@@ -18,7 +18,7 @@ class ComponentTagGenerator
 
     protected function nextCandidate(): string
     {
-        return sprintf('INBIT-%s%04d', $this->randomLetters(2), random_int(0, 9999));
+        return sprintf('INBIT-C-%s%04d', $this->randomLetters(2), random_int(0, 9999));
     }
 
     protected function randomLetters(int $length): string

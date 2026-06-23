@@ -111,6 +111,7 @@ class ComponentLifecycleService
             $fromAssetId = $instance->current_asset_id;
             $fromStatus = $instance->status;
             $fromStorageLocationId = $instance->storage_location_id;
+            $fromSerial = $this->normalizeComponentSerial($instance->serial);
 
             $instance->forceFill(array_merge([
                 'status' => ComponentInstance::STATUS_IN_TRANSFER,
@@ -123,7 +124,13 @@ class ComponentLifecycleService
                 'held_by_user_id' => $holderId,
                 'transfer_started_at' => $context['transfer_started_at'] ?? now(),
                 'updated_by' => $holderId,
-            ], $this->detachedChildInstanceAttributes($detachedChild)))->save();
+            ], $this->serialUpdateAttributes($context), $this->detachedChildInstanceAttributes($detachedChild)))->save();
+
+            $payload = $this->mergeSerialChangePayload(
+                $context['payload_json'] ?? null,
+                $fromSerial,
+                $this->normalizeComponentSerial($instance->serial)
+            );
 
             $event = $this->events->write($instance, 'removed_to_tray', [
                 'performed_by' => $holder,
@@ -137,7 +144,7 @@ class ComponentLifecycleService
                 'note' => $context['note'] ?? null,
                 'payload_json' => $this->mergeAttachedChildMovePayload(
                     $attachedChildren,
-                    $this->mergeDetachedChildPayload($detachedChild, $context['payload_json'] ?? null)
+                    $this->mergeDetachedChildPayload($detachedChild, $payload)
                 ),
             ]);
 
@@ -270,6 +277,37 @@ class ComponentLifecycleService
                     'from_parent_component_instance_id' => $fromParentId,
                     'to_parent_component_instance_id' => $targetParentId,
                 ],
+            ]);
+
+            return $instance->fresh();
+        });
+    }
+
+    public function updateSerial(ComponentInstance $instance, ?string $serial, array $context = []): ComponentInstance
+    {
+        $this->assertNotTerminal($instance);
+
+        return DB::transaction(function () use ($instance, $serial, $context): ComponentInstance {
+            $fromSerial = $this->normalizeComponentSerial($instance->serial);
+            $toSerial = $this->normalizeComponentSerial($serial);
+
+            if ($fromSerial === $toSerial) {
+                return $instance->fresh();
+            }
+
+            $fromStatus = $instance->status;
+
+            $instance->forceFill([
+                'serial' => $toSerial,
+                'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
+            ])->save();
+
+            $this->events->write($instance, 'serial_updated', [
+                'performed_by' => $context['performed_by'] ?? null,
+                'from_status' => $fromStatus,
+                'to_status' => $instance->status,
+                'note' => $context['note'] ?? null,
+                'payload_json' => $this->mergeSerialChangePayload(null, $fromSerial, $toSerial),
             ]);
 
             return $instance->fresh();
@@ -797,6 +835,37 @@ class ComponentLifecycleService
         }
 
         $payload = array_filter($payload, fn ($value) => $value !== null && $value !== '');
+
+        return $payload === [] ? null : $payload;
+    }
+
+    private function serialUpdateAttributes(array $context): array
+    {
+        if (!array_key_exists('serial', $context)) {
+            return [];
+        }
+
+        return [
+            'serial' => $this->normalizeComponentSerial($context['serial']),
+        ];
+    }
+
+    private function normalizeComponentSerial(mixed $serial): ?string
+    {
+        $value = trim((string) ($serial ?? ''));
+
+        return $value !== '' ? $value : null;
+    }
+
+    private function mergeSerialChangePayload(mixed $payload, ?string $fromSerial, ?string $toSerial): ?array
+    {
+        $payload = is_array($payload) ? $payload : [];
+
+        if ($fromSerial !== $toSerial) {
+            $payload['serial_changed'] = true;
+            $payload['previous_serial'] = $fromSerial;
+            $payload['new_serial'] = $toSerial;
+        }
 
         return $payload === [] ? null : $payload;
     }

@@ -14,7 +14,7 @@ services:
       - app_node_modules:/var/www/html/node_modules
     environment:
       - APP_ENV=local
-      - APP_URL=https://dev.snipe.inbit
+      - APP_URL=https://dev.inbit
       - PHP_UPLOAD_LIMIT=6
     depends_on:
       db:

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Components;
 use App\Exceptions\ComponentConditionWarningException;
 use App\Exceptions\ComponentLifecycleWarningException;
 use App\Http\Controllers\Concerns\BuildsComponentWorkflowOptions;
+use App\Http\Controllers\Concerns\HandlesComponentSerialChanges;
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\ComponentInstance;
@@ -18,6 +19,7 @@ use InvalidArgumentException;
 class ComponentWorkflowController extends Controller
 {
     use BuildsComponentWorkflowOptions;
+    use HandlesComponentSerialChanges;
 
     public function __construct(
         protected ComponentLifecycleService $lifecycle,
@@ -65,19 +67,21 @@ class ComponentWorkflowController extends Controller
     {
         $this->authorize('move', $component_id);
 
-        $data = $request->validate([
+        $data = $request->validate(array_merge([
             'note' => ['nullable', 'string'],
-        ]);
+        ], $this->componentSerialChangeRules()));
 
         try {
-            $this->lifecycle->removeToTray($component_id, $request->user(), [
+            $this->lifecycle->removeToTray($component_id, $request->user(), array_merge([
                 'note' => $data['note'] ?? null,
-            ]);
+            ], $this->componentSerialContextFromRequest($request, $component_id)));
         } catch (InvalidArgumentException $exception) {
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component moved to tray.'));
+        return redirect()
+            ->route('components.show', $component_id)
+            ->with('success', trans('general.component_moved_to_tray'));
     }
 
     public function createInstall(Request $request, ComponentInstance $component_id): View
@@ -124,7 +128,7 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component installed.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', trans('general.component_installed'));
     }
 
     public function createMoveToStock(Request $request, ComponentInstance $component_id): View
@@ -173,7 +177,7 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component moved to stock.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', trans('general.component_moved_to_stock'));
     }
 
     public function createFlagNeedsVerification(Request $request, ComponentInstance $component_id): View
@@ -219,7 +223,7 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Verification required.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', trans('general.verification_required'));
     }
 
     public function createConfirmVerification(Request $request, ComponentInstance $component_id): View
@@ -261,7 +265,7 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Verification confirmed.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', trans('general.verification_confirmed'));
     }
 
     public function createMarkDestructionPending(Request $request, ComponentInstance $component_id): View
@@ -307,7 +311,7 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component marked for destruction.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', trans('general.component_marked_for_destruction'));
     }
 
     public function createMarkDestroyed(Request $request, ComponentInstance $component_id): View
@@ -341,7 +345,7 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component destroyed.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', trans('general.component_destroyed'));
     }
 
     public function markDefective(Request $request, ComponentInstance $component_id): RedirectResponse
@@ -361,7 +365,7 @@ class ComponentWorkflowController extends Controller
             return redirect()->back()->withInput()->with('error', $exception->getMessage());
         }
 
-        return redirect()->to($this->returnTo($request, $component_id))->with('success', __('Component marked damaged.'));
+        return redirect()->to($this->returnTo($request, $component_id))->with('success', trans('general.component_marked_damaged'));
     }
 
     private function installableAssets()

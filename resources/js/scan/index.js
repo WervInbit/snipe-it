@@ -12,6 +12,12 @@ const defaults = {
   failBeforeFallback: 4,
 };
 const config = Object.assign({}, defaults, window.scanConfig || {});
+const text = Object.assign({
+  selectCamera: 'Select camera',
+  cameraLabel: 'Camera',
+  cameraAccessFailed: 'Unable to access camera',
+  cameraUnavailable: 'Camera not available',
+}, config.text || {});
 
 const video = document.getElementById('scan-video');
 const overlay = document.getElementById('scan-overlay');
@@ -214,13 +220,13 @@ function renderCameraOptions(selectedId = null) {
   } else {
     const option = document.createElement('option');
     option.value = '';
-    option.textContent = 'Select camera';
+    option.textContent = text.selectCamera;
     cameraSelect.appendChild(option);
   }
   devices.forEach((d, idx) => {
     const option = document.createElement('option');
     option.value = d.deviceId || '';
-    option.textContent = d.label || `Camera ${idx + 1}`;
+    option.textContent = d.label || `${text.cameraLabel} ${idx + 1}`;
     option.selected = !!selectedId && selectedId === (d.deviceId || '');
     cameraSelect.appendChild(option);
   });
@@ -239,7 +245,7 @@ async function requestCameraAccess() {
     renderCameraOptions(currentDeviceId);
   } catch (err) {
     console.error('Camera permission request failed', err);
-    showError('Unable to access camera');
+    showError(text.cameraAccessFailed);
     showPermissionBanner();
   }
 }
@@ -256,7 +262,7 @@ async function start(deviceId = null) {
   scanLocked = false;
 
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    showError('Camera not available');
+    showError(text.cameraUnavailable);
     showPermissionBanner();
     return;
   }
@@ -361,7 +367,7 @@ async function start(deviceId = null) {
     }
   } catch (err) {
     console.error('Unable to access camera', err);
-    showError('Unable to access camera');
+    showError(text.cameraAccessFailed);
     showPermissionBanner();
   }
 }
@@ -499,7 +505,7 @@ if (video) {
 
 init().catch((error) => {
   console.error('Failed to initialise scanner', error);
-  showError('Unable to access camera');
+  showError(text.cameraAccessFailed);
   showPermissionBanner();
 });
 

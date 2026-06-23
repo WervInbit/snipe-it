@@ -5,7 +5,7 @@
     $variant = $variant ?? 'table';
     $component = $component ?? ($row->component ?? null);
     $template = $template ?? ($row->template ?? null);
-    $rowDisplayName = $rowDisplayName ?? ($row?->displayName() ?? $component?->display_name ?? $template?->expected_name ?? __('Component'));
+    $rowDisplayName = $rowDisplayName ?? ($row?->displayName() ?? $component?->display_name ?? $template?->expected_name ?? trans('general.component'));
     $isRemoved = $isRemoved ?? ($row?->isRemoved() ?? false);
     $blankComponent = new ComponentInstance();
     $user = auth()->user();
@@ -25,6 +25,10 @@
     $transferAction = $component
         ? route('hardware.components.transfer.create', [$asset, $component])
         : ($template ? route('hardware.components.expected.transfer.create', [$asset, $template]) : null);
+    $trayAction = $component
+        ? route('components.remove_to_tray', $component)
+        : ($template ? route('hardware.components.expected.tray', [$asset, $template]) : null);
+    $trayReturnTo = route('hardware.show', $asset).'#components';
 @endphp
 
 @if($variant === 'mobile')
@@ -35,23 +39,17 @@
             ])
             data-testid="asset-component-card-actions">
             @if($hasDefaultAction)
-                @if($component)
-                    <form method="POST"
-                          action="{{ route('components.remove_to_tray', $component) }}"
-                          class="asset-component-card__default-action"
-                          data-testid="asset-component-card-default-action">
-                        @csrf
-                        <button type="submit" class="btn btn-warning btn-sm btn-block">{{ __('To Tray') }}</button>
-                    </form>
-                @elseif($template)
-                    <form method="POST"
-                          action="{{ route('hardware.components.expected.tray', [$asset, $template]) }}"
-                          class="asset-component-card__default-action"
-                          data-testid="asset-component-card-default-action">
-                        @csrf
-                        <button type="submit" class="btn btn-warning btn-sm btn-block">{{ __('To Tray') }}</button>
-                    </form>
-                @endif
+                <button type="button"
+                        class="btn btn-warning btn-sm btn-block asset-component-card__default-action"
+                        data-toggle="modal"
+                        data-target="#assetComponentTrayModal"
+                        data-tray-action="{{ $trayAction }}"
+                        data-tray-name="{{ $component?->display_name ?: $rowDisplayName }}"
+                        data-tray-serial="{{ $component?->serial ?? '' }}"
+                        data-tray-return-to="{{ $trayReturnTo }}"
+                        data-testid="asset-component-card-default-action">
+                    {{ trans('general.to_tray') }}
+                </button>
             @endif
 
             @if($hasSecondaryActions)
@@ -63,7 +61,7 @@
                                 aria-haspopup="true"
                                 aria-expanded="false"
                                 data-testid="asset-component-card-more">
-                            {{ __('More') }} <span class="caret"></span>
+                            {{ trans('general.more') }} <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right">
                             @if($hasStorageAction && $storageAction)
@@ -73,28 +71,28 @@
                                        data-target="#assetComponentStorageModal"
                                        data-storage-action="{{ $storageAction }}"
                                        data-storage-name="{{ $component?->display_name ?: $rowDisplayName }}">
-                                        {{ __('To Storage') }}
+                                        {{ trans('general.to_storage') }}
                                     </a>
                                 </li>
                             @endif
                             @if($hasReparentAction)
                                 <li>
                                     <a href="{{ route('hardware.components.reparent.create', [$asset, $component]) }}">
-                                        {{ __('Move Within Device') }}
+                                        {{ trans('general.move_within_device') }}
                                     </a>
                                 </li>
                             @endif
                             @if($hasTransferAction && $transferAction)
                                 <li>
                                     <a href="{{ $transferAction }}">
-                                        {{ __('Move To Other Device') }}
+                                        {{ trans('general.move_to_other_device') }}
                                     </a>
                                 </li>
                             @endif
                             @if($hasOpenAction)
                                 <li>
                                     <a href="{{ route('components.show', $component) }}">
-                                        {{ __('Open') }}
+                                        {{ trans('general.open') }}
                                     </a>
                                 </li>
                             @endif
@@ -108,7 +106,7 @@
                                 aria-haspopup="true"
                                 aria-expanded="false"
                                 data-testid="asset-component-card-more">
-                            {{ __('More') }} <span class="caret"></span>
+                            {{ trans('general.more') }} <span class="caret"></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-right">
                             @if($hasStorageAction && $storageAction)
@@ -118,21 +116,21 @@
                                        data-target="#assetComponentStorageModal"
                                        data-storage-action="{{ $storageAction }}"
                                        data-storage-name="{{ $component?->display_name ?: $rowDisplayName }}">
-                                        {{ __('To Storage') }}
+                                        {{ trans('general.to_storage') }}
                                     </a>
                                 </li>
                             @endif
                             @if($hasReparentAction)
                                 <li>
                                     <a href="{{ route('hardware.components.reparent.create', [$asset, $component]) }}">
-                                        {{ __('Move Within Device') }}
+                                        {{ trans('general.move_within_device') }}
                                     </a>
                                 </li>
                             @endif
                             @if($hasTransferAction && $transferAction)
                                 <li>
                                     <a href="{{ $transferAction }}">
-                                        {{ __('Move To Other Device') }}
+                                        {{ trans('general.move_to_other_device') }}
                                     </a>
                                 </li>
                             @endif
@@ -140,7 +138,7 @@
                     </div>
                 @elseif($hasOpenAction)
                     <a href="{{ route('components.show', $component) }}" class="btn btn-default btn-sm btn-block">
-                        {{ __('Open') }}
+                        {{ trans('general.open') }}
                     </a>
                 @endif
             @endif
@@ -150,10 +148,18 @@
     @if($component)
         @unless($isRemoved)
             @if($canMoveComponent)
-                <form method="POST" action="{{ route('components.remove_to_tray', $component) }}" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="btn btn-xs btn-warning">{{ __('To Tray') }}</button>
-                </form>
+                <button
+                    type="button"
+                    class="btn btn-xs btn-warning"
+                    data-toggle="modal"
+                    data-target="#assetComponentTrayModal"
+                    data-tray-action="{{ $trayAction }}"
+                    data-tray-name="{{ $component->display_name }}"
+                    data-tray-serial="{{ $component->serial ?? '' }}"
+                    data-tray-return-to="{{ $trayReturnTo }}"
+                >
+                    {{ trans('general.to_tray') }}
+                </button>
                 <button
                     type="button"
                     class="btn btn-xs btn-default"
@@ -162,21 +168,29 @@
                     data-storage-action="{{ route('hardware.components.storage.store', [$asset, $component]) }}"
                     data-storage-name="{{ $component->display_name }}"
                 >
-                    {{ __('To Storage') }}
+                    {{ trans('general.to_storage') }}
                 </button>
-                <a href="{{ route('hardware.components.reparent.create', [$asset, $component]) }}" class="btn btn-xs btn-default">{{ __('Move Within Device') }}</a>
+                <a href="{{ route('hardware.components.reparent.create', [$asset, $component]) }}" class="btn btn-xs btn-default">{{ trans('general.move_within_device') }}</a>
             @endif
             @if($canInstallComponent)
-                <a href="{{ route('hardware.components.transfer.create', [$asset, $component]) }}" class="btn btn-xs btn-primary">{{ __('Move To Other Device') }}</a>
+                <a href="{{ route('hardware.components.transfer.create', [$asset, $component]) }}" class="btn btn-xs btn-primary">{{ trans('general.move_to_other_device') }}</a>
             @endif
         @endunless
-        <a href="{{ route('components.show', $component) }}" class="btn btn-xs btn-default">{{ __('Open') }}</a>
+        <a href="{{ route('components.show', $component) }}" class="btn btn-xs btn-default">{{ trans('general.open') }}</a>
     @elseif($template)
         @if($canMoveTemplate)
-            <form method="POST" action="{{ route('hardware.components.expected.tray', [$asset, $template]) }}" style="display:inline;">
-                @csrf
-                <button type="submit" class="btn btn-xs btn-warning">{{ __('To Tray') }}</button>
-            </form>
+            <button
+                type="button"
+                class="btn btn-xs btn-warning"
+                data-toggle="modal"
+                data-target="#assetComponentTrayModal"
+                data-tray-action="{{ $trayAction }}"
+                data-tray-name="{{ $rowDisplayName }}"
+                data-tray-serial=""
+                data-tray-return-to="{{ $trayReturnTo }}"
+            >
+                {{ trans('general.to_tray') }}
+            </button>
             <button
                 type="button"
                 class="btn btn-xs btn-default"
@@ -185,11 +199,11 @@
                 data-storage-action="{{ route('hardware.components.expected.storage.store', [$asset, $template]) }}"
                 data-storage-name="{{ $rowDisplayName }}"
             >
-                {{ __('To Storage') }}
+                {{ trans('general.to_storage') }}
             </button>
         @endif
         @if($canInstallTemplate)
-            <a href="{{ route('hardware.components.expected.transfer.create', [$asset, $template]) }}" class="btn btn-xs btn-primary">{{ __('Move To Other Device') }}</a>
+            <a href="{{ route('hardware.components.expected.transfer.create', [$asset, $template]) }}" class="btn btn-xs btn-primary">{{ trans('general.move_to_other_device') }}</a>
         @endif
     @endif
 @endif

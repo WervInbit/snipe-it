@@ -67,7 +67,7 @@ trait BuildsComponentWorkflowOptions
     {
         if (!$startedAt) {
             return [
-                'label' => __('Unknown'),
+                'label' => trans('general.unknown'),
                 'class' => 'label-default',
             ];
         }
@@ -78,20 +78,20 @@ trait BuildsComponentWorkflowOptions
 
         if ($hours >= $verificationHours) {
             return [
-                'label' => __('Needs Verification'),
+                'label' => trans('general.needs_verification'),
                 'class' => 'label-danger',
             ];
         }
 
         if ($hours >= $reminderHours) {
             return [
-                'label' => __('Aging'),
+                'label' => trans('general.aging'),
                 'class' => 'label-warning',
             ];
         }
 
         return [
-            'label' => __('Fresh'),
+            'label' => trans('general.fresh'),
             'class' => 'label-success',
         ];
     }

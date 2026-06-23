@@ -35,13 +35,13 @@ class ComponentWorkflowPagesTest extends TestCase
             ->assertDontSeeText('Other Tray Part')
             ->assertSee(route('components.show', $myTrayComponent), false)
             ->assertSee(route('components.install.create', [$myTrayComponent, 'return_to' => route('components.tray')]), false)
-            ->assertSeeText('To Storage')
-            ->assertDontSeeText('Move To Stock');
+            ->assertSeeText(trans('general.to_storage'))
+            ->assertDontSeeText(trans('general.move_to_stock'));
 
         $this->actingAs($user)
             ->get(route('components.index'))
             ->assertOk()
-            ->assertSeeText('My Tray');
+            ->assertSeeText(trans('general.my_tray'));
     }
 
     public function testAssetComponentTabShowsOperationalActions(): void
@@ -69,14 +69,17 @@ class ComponentWorkflowPagesTest extends TestCase
             ->assertSeeText('Add / Install Component')
             ->assertSeeText('Current Components')
             ->assertDontSeeText('Installed As')
-            ->assertSeeText('To Tray')
-            ->assertSeeText('To Storage')
+            ->assertSeeText(trans('general.to_tray'))
+            ->assertSeeText(trans('general.to_storage'))
+            ->assertSee('id="assetComponentTrayModal"', false)
+            ->assertSee('data-component-serial-control', false)
             ->assertSee('id="assetComponentStorageModal"', false)
+            ->assertSee('data-tray-action="'.e(route('components.remove_to_tray', $installedComponent)).'"', false)
             ->assertSee(route('hardware.components.storage.store', [$asset, $installedComponent]), false)
             ->assertSee(route('hardware.components.reparent.create', [$asset, $installedComponent]), false)
-            ->assertSeeText('Move Within Device')
-            ->assertSeeText('Move To Other Device')
-            ->assertSeeText('Open');
+            ->assertSeeText(trans('general.move_within_device'))
+            ->assertSeeText(trans('general.move_to_other_device'))
+            ->assertSeeText(trans('general.open'));
     }
 
     public function testAssetComponentCanBeMovedUnderAnotherComponentAndBackToAssetRoot(): void
@@ -106,7 +109,7 @@ class ComponentWorkflowPagesTest extends TestCase
                 'note' => 'Corrected from top-level asset row.',
             ])
             ->assertRedirect(route('hardware.show', $asset))
-            ->assertSessionHas('success', 'Component hierarchy updated.');
+            ->assertSessionHas('success', trans('general.component_hierarchy_updated'));
 
         $child->refresh();
         $this->assertSame($parent->id, $child->parent_component_instance_id);
@@ -125,7 +128,7 @@ class ComponentWorkflowPagesTest extends TestCase
                 'note' => 'Moved back to asset root.',
             ])
             ->assertRedirect(route('hardware.show', $asset))
-            ->assertSessionHas('success', 'Component hierarchy updated.');
+            ->assertSessionHas('success', trans('general.component_hierarchy_updated'));
 
         $child->refresh();
         $this->assertNull($child->parent_component_instance_id);

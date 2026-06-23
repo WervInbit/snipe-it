@@ -50,6 +50,13 @@
         user-select: none;
         cursor: grabbing !important;
     }
+
+    #create-testtype-modal .select2-container,
+    [id^="edit-testtype-"][id$="-modal"] .select2-container {
+        width: 100% !important;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
 </style>
 @endpush
 
@@ -673,6 +680,10 @@
                 var $select = $(this);
 
                 if ($select.hasClass('select2-hidden-accessible')) {
+                    $select.next('.select2-container').css({
+                        width: '100%',
+                        maxWidth: '100%'
+                    });
                     return;
                 }
 
@@ -683,6 +694,7 @@
                     placeholder: function () {
                         return $select.data('placeholder');
                     },
+                    width: '100%',
                     dropdownParent: parent.length ? parent : $(document.body)
                 });
             });
@@ -691,6 +703,10 @@
                 var $select = $(this);
 
                 if ($select.hasClass('select2-hidden-accessible')) {
+                    $select.next('.select2-container').css({
+                        width: '100%',
+                        maxWidth: '100%'
+                    });
                     return;
                 }
 
@@ -700,6 +716,7 @@
                     placeholder: function () {
                         return $select.data('placeholder');
                     },
+                    width: '100%',
                     dropdownParent: parent.length ? parent : $(document.body)
                 });
             });

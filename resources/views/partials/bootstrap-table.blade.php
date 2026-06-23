@@ -965,7 +965,10 @@
         loadError: '{{ trans('general.something_went_wrong') }}',
         noRun: '{{ trans('tests.no_test_run_recorded') }}',
         note: '{{ trans('tests.note_cta') }}',
-        photo: '{{ trans('tests.photo_cta') }}'
+        photo: '{{ trans('tests.photo_cta') }}',
+        workflowOk: '{{ trans('tests.latest_run_ok_short') }}',
+        workflowAttention: '{{ trans('tests.latest_run_attention_short') }}',
+        workflowMissing: '{{ trans('tests.latest_run_missing_short') }}'
     };
 
     var latestTestsSummaryBaseUrl = '/api/v1/hardware/';
@@ -992,6 +995,11 @@
         var html = '';
         var hasFailed = summary.failed && summary.failed.length;
         var hasMissing = summary.missing && summary.missing.length;
+
+        if (summary.missing_run && !hasFailed && !hasMissing) {
+            return latestTestsLabels.noRun;
+        }
+
         if (summary.failed && summary.failed.length) {
             summary.failed.forEach(function (item) {
                 var line = '<div style="margin-bottom:4px;"><span class="label label-danger">' + escapeHtml(latestTestsLabels.failed) + '</span> ' + escapeHtml(item.label || '');
@@ -1061,32 +1069,28 @@
             return '';
         }
 
-        var total = parseInt(row.latest_tests_total || 0, 10);
-        var completed = parseInt(row.latest_tests_completed || 0, 10);
-        var failed = parseInt(row.latest_tests_failed || 0, 10);
+        var runCount = parseInt(row.test_runs_count || 0, 10);
+        var status = row.test_workflow_status || (runCount > 0 ? (row.tests_completed_ok ? 'ok' : 'attention') : 'missing');
         var labelClass = 'label-default';
-        var tooltip = latestTestsLabels.noRun;
+        var labelText = latestTestsLabels.workflowMissing;
+        var tooltip = latestTestsLabels.loading;
 
-        if (total > 0) {
-            if (failed > 0 || completed < total) {
-                labelClass = 'label-warning';
-            } else {
-                labelClass = 'label-success';
-            }
-            tooltip = latestTestsLabels.loading;
+        if (status === 'ok') {
+            labelClass = 'label-success';
+            labelText = latestTestsLabels.workflowOk;
+        } else if (status === 'attention') {
+            labelClass = 'label-warning';
+            labelText = latestTestsLabels.workflowAttention;
         }
 
-        var ratio = completed + '/' + total;
-
-        return '<span class="label ' + labelClass + ' js-latest-tests" data-asset-id="' + row.id + '" data-tests-total="' + total + '" data-tooltip="true" data-html="true" title="' + escapeHtml(tooltip) + '">' + ratio + '</span>';
+        return '<span class="label ' + labelClass + ' js-latest-tests" data-asset-id="' + row.id + '" data-tooltip="true" data-html="true" title="' + escapeHtml(tooltip) + '">' + escapeHtml(labelText) + '</span>';
     }
 
     $(document).on('mouseenter', '.js-latest-tests', function () {
         var $el = $(this);
         var assetId = $el.data('asset-id');
-        var total = parseInt($el.data('tests-total') || 0, 10);
 
-        if (!assetId || total === 0) {
+        if (!assetId) {
             return;
         }
 
@@ -1107,9 +1111,8 @@
     $(document).on('click', '.js-latest-tests', function () {
         var $el = $(this);
         var assetId = $el.data('asset-id');
-        var total = parseInt($el.data('tests-total') || 0, 10);
 
-        if (!assetId || total === 0) {
+        if (!assetId) {
             return;
         }
 

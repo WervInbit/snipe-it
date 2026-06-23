@@ -79,6 +79,21 @@ class TestRun extends SnipeModel
         return $this->belongsTo(WorkflowProfile::class, 'workflow_profile_id');
     }
 
+    public function getDisplayNameAttribute(): string
+    {
+        $snapshot = trim((string) $this->profile_name_snapshot);
+        if ($snapshot !== '') {
+            return $snapshot;
+        }
+
+        $profileName = trim((string) optional($this->profile)->name);
+        if ($profileName !== '') {
+            return $profileName;
+        }
+
+        return trans('tests.workflow_run');
+    }
+
     /**
      * Individual results captured during the run.
      */

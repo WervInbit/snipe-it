@@ -60,7 +60,7 @@
                                 <select class="form-control select2" id="asset_add_component_id" name="component_id" style="width: 100%" required>
                                     <option value="">{{ __('Search tray or storage components') }}</option>
                                     @if($trayComponents->isNotEmpty())
-                                        <optgroup label="{{ __('My Tray') }}">
+                                        <optgroup label="{{ trans('general.my_tray') }}">
                                             @foreach($trayComponents as $trayComponent)
                                                 <option value="{{ $trayComponent->id }}" @selected((string) old('component_id') === (string) $trayComponent->id)>
                                                     [{{ __('Tray') }}] {{ $trayComponent->component_tag }} - {{ $trayComponent->display_name }}@if($trayComponent->requiresConditionWarningForAttachment()) ({{ $trayComponent->displayConditionLabel() }})@endif

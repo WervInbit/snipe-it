@@ -9,11 +9,11 @@
 @section('header_right')
 @can('create', \App\Models\ComponentInstance::class)
 <a href="{{ route('components.create') }}" class="btn btn-primary">
-    {{ __('Register Component') }}
+    {{ trans('general.register_component') }}
 </a>
 @endcan
 <a href="{{ route('components.tray') }}" class="btn btn-default">
-    {{ __('My Tray') }}
+    {{ trans('general.my_tray') }}
 </a>
 @stop
 

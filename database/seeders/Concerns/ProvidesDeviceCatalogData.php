@@ -81,6 +81,7 @@ trait ProvidesDeviceCatalogData
                     ['value' => 'ssd', 'label' => 'SATA-SSD'],
                     ['value' => 'hdd', 'label' => 'Harde schijf'],
                     ['value' => 'ufs', 'label' => 'UFS-opslag'],
+                    ['value' => 'emmc', 'label' => 'eMMC-opslag'],
                 ],
             ],
             'display_size_inches' => [

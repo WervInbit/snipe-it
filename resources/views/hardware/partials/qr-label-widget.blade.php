@@ -118,11 +118,11 @@
 
         @if (!empty($printQueues))
             <div class="form-group text-left qr-label-printer">
-                <label for="{{ $printerPickerId }}" class="control-label">{{ __('Printer location') }}</label>
+                <label for="{{ $printerPickerId }}" class="control-label">{{ trans('general.printer_location') }}</label>
                 <select
                     id="{{ $printerPickerId }}"
                     class="form-control"
-                    aria-label="{{ __('Printer location') }}"
+                    aria-label="{{ trans('general.printer_location') }}"
                 >
                     @foreach($printQueues as $queue)
                         <option value="{{ $queue }}" @selected($queue === $defaultQueue)>{{ $queue }}</option>
@@ -194,7 +194,7 @@
                     });
                 })
                 .then(function (payload) {
-                    var msg = payload.data && payload.data.message ? payload.data.message : (payload.ok ? 'Label sent to printer.' : 'Printing failed.');
+                    var msg = payload.data && payload.data.message ? payload.data.message : (payload.ok ? @json(trans('general.label_sent_to_printer')) : @json(trans('general.printing_failed')));
                     if (window.toastr) {
                         payload.ok ? toastr.success(msg) : toastr.error(msg);
                     } else {
@@ -202,7 +202,7 @@
                     }
                 })
                 .catch(function () {
-                    var msg = 'Printing failed.';
+                    var msg = @json(trans('general.printing_failed'));
                     if (window.toastr) {
                         toastr.error(msg);
                     } else {
