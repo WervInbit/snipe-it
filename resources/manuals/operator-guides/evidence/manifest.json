@@ -1,0 +1,391 @@
+{
+    "schemaVersion":  1,
+    "updatedOn":  "2026-08-13",
+    "source":  "docs/manuals/operator-guides/screenshots.md",
+    "sources":  [
+                    {
+                        "id":  "PHONE-START-01",
+                        "file":  "PHONE-START-01.jpg",
+                        "sha256":  "88487d3a868a3f737a0e86bdee858443745cd9163e55debc6c86ecf3cd506b3a",
+                        "purpose":  "Recognizable phone launcher and Inbit Snipe-IT shortcut",
+                        "uses":  "AC-01 1A",
+                        "captureEnvironment":  "Existing device capture"
+                    },
+                    {
+                        "id":  "DASH-MOBILE-01",
+                        "file":  "DASH-MOBILE-01.jpg",
+                        "sha256":  "26cb6ba96e1243b6b90d0c7be8f7c7b459f561bf56fa65af03a922fc52f8e9bb",
+                        "purpose":  "Mobile dashboard with `Apparaten`, `Scan QR`, and the top-bar camera icon",
+                        "uses":  "AC-01 3A; SC-01 1A and 1B",
+                        "captureEnvironment":  "Existing device capture"
+                    },
+                    {
+                        "id":  "LOGIN-MOBILE-01",
+                        "file":  "LOGIN-MOBILE-01.png",
+                        "sha256":  "132b63bb697b4638b537c88fb5a75f3a903d06fdd2afb34e5257ad6cc78bc24f",
+                        "purpose":  "Mobile login form",
+                        "uses":  "AC-01 2A",
+                        "captureEnvironment":  "Live login page"
+                    },
+                    {
+                        "id":  "SCAN-CAMERA-QR-01",
+                        "file":  "SCAN-CAMERA-QR-01.jpg",
+                        "sha256":  "7e0ef2355954ceaf05b5820bb18103d1893d2b5bf64b7f3142ebb4c3d3cc7d31",
+                        "purpose":  "Mobile scanner view aimed at a physical QR label",
+                        "uses":  "SC-01 2A; AST-03 3A; AST-05 3A",
+                        "captureEnvironment":  "Existing device capture"
+                    },
+                    {
+                        "id":  "SEARCH-FIELD-01",
+                        "file":  "SEARCH-FIELD-01.png",
+                        "sha256":  "5e38908e32272ca2fcf6ded4b5e0bde5bbab16868946be0fc4d2788b03fd61ca",
+                        "purpose":  "Manual asset search field",
+                        "uses":  "SC-01 3A",
+                        "captureEnvironment":  "Existing controlled capture"
+                    },
+                    {
+                        "id":  "SEARCH-RESULT-01",
+                        "file":  "SEARCH-RESULT-01.png",
+                        "sha256":  "c4fb1b24920c66894919be27626c4033556d203165e99c0dbfa367baad2d9656",
+                        "purpose":  "Asset search result",
+                        "uses":  "SC-01 3B",
+                        "captureEnvironment":  "Existing controlled capture"
+                    },
+                    {
+                        "id":  "ASSET-VERIFY-01",
+                        "file":  "ASSET-VERIFY-01.png",
+                        "sha256":  "0255ddc373eea2b7e1c8c92cc315b9eedcdb84f3bed20dc409b08ad570118b2b",
+                        "purpose":  "Opened asset title and identifying details",
+                        "uses":  "SC-01 4A; AST-03 4A/1A; AST-05 1A",
+                        "captureEnvironment":  "Existing controlled capture"
+                    },
+                    {
+                        "id":  "ASSET-DETAIL-02",
+                        "file":  "ASSET-DETAIL-02.png",
+                        "sha256":  "8edb5b931caecdf8985dcbd40ef45aa3b6b8b3386f267bd013e077103ac0ae04",
+                        "purpose":  "Opened asset tag, model, status, and quality details",
+                        "uses":  "SC-01 4B; AST-03 4A; AST-04 3A; AST-05 4A",
+                        "captureEnvironment":  "Existing controlled capture"
+                    },
+                    {
+                        "id":  "ASSET-LABEL-01",
+                        "file":  "ASSET-LABEL-01.png",
+                        "sha256":  "bdcc8a231267378f79bb9ae8b6a90e04bf1d80ddc039a97d44bde93e4a4ab9b8",
+                        "purpose":  "Asset QR label print/template area",
+                        "uses":  "AST-03 2A",
+                        "captureEnvironment":  "Existing controlled capture"
+                    },
+                    {
+                        "id":  "ASSET-INDEX-01",
+                        "file":  "ASSET-INDEX-01.png",
+                        "sha256":  "e07de88d8fbe79eb34ac60471bd33b63ccff98bc9e5375b4eb2d16f961db94c7",
+                        "purpose":  "Hardware index with the new-asset action",
+                        "uses":  "AST-03 1A",
+                        "captureEnvironment":  "Controlled development capture"
+                    },
+                    {
+                        "id":  "WF-RESULTS-01",
+                        "file":  "WF-RESULTS-01.png",
+                        "sha256":  "106a8f2f1c6546112f1e8b3ee5847d2ae1acb679859a501effe2b94f2ad627e5",
+                        "purpose":  "Saved workflow-result rows, upper area",
+                        "uses":  "AST-04 1A",
+                        "captureEnvironment":  "Controlled development capture"
+                    },
+                    {
+                        "id":  "WF-RESULTS-02",
+                        "file":  "WF-RESULTS-02.png",
+                        "sha256":  "77bcd30b475589b02c40faefd6f2db8114374e1af43d1f0432acb315790455a3",
+                        "purpose":  "Saved workflow-result rows, lower area",
+                        "uses":  "AST-05 2A",
+                        "captureEnvironment":  "Controlled development capture"
+                    },
+                    {
+                        "id":  "WF-ENTRY-MOBILE-03",
+                        "file":  "WF-ENTRY-MOBILE-03.png",
+                        "sha256":  "ff4b7c6138df345dc6016c25cadf0e1464e21727e964c943f57e26d306c7a935",
+                        "purpose":  "Current mobile Tests tab, profile selector, new-run action, unfinished run, and completed run",
+                        "uses":  "WF-01 1A, 2A, 3A, 3B; WF-02 6A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-04"
+                    },
+                    {
+                        "id":  "WF-NEUTRAL-MOBILE-03",
+                        "file":  "WF-NEUTRAL-MOBILE-03.png",
+                        "sha256":  "b7d64c185e8bb6ed73f27f5ec80778a00f08ffd0b40e7ad9bcda5cfef447d7f8",
+                        "purpose":  "Blank active workflow with neutral result buttons",
+                        "uses":  "WF-01 4A; WF-02 1A and 3A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-04; WF-02 1A reconstructs the complete anonymized breadcrumb in the generator"
+                    },
+                    {
+                        "id":  "WF-INSTRUCTIONS-MOBILE-03",
+                        "file":  "WF-INSTRUCTIONS-MOBILE-03.png",
+                        "sha256":  "4ca1357a7846b0c29ae95bee2ce2a58b376a6f4eee1d22b52b04026da44cdacc",
+                        "purpose":  "Full blank workflow card with instructions expanded and result buttons still neutral",
+                        "uses":  "WF-02 2A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-04"
+                    },
+                    {
+                        "id":  "WF-NOTE-MOBILE-03",
+                        "file":  "WF-NOTE-MOBILE-03.png",
+                        "sha256":  "9a9751af12aa97983f512fca844c25896001fb23c8c2f3a136d2e7d5ac134812",
+                        "purpose":  "Full blank workflow card with instructions collapsed and note panel open",
+                        "uses":  "WF-02 4A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-04"
+                    },
+                    {
+                        "id":  "WF-PHOTO-MOBILE-03",
+                        "file":  "WF-PHOTO-MOBILE-03.png",
+                        "sha256":  "293e5489f814b38dd78872f8f2a8a3848f9be27a80f39d26f4d2c0b03d1bfec2",
+                        "purpose":  "Full blank workflow card with instructions collapsed and photo panel open",
+                        "uses":  "WF-02 5A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-04"
+                    },
+                    {
+                        "id":  "CMP-INSTALL-ENTRY-MOBILE-02",
+                        "file":  "CMP-INSTALL-ENTRY-MOBILE-02.png",
+                        "sha256":  "2e5ade7e3428cfdabeb0cd62d963a63844e21fcc80411d296b50eb4ad891e609",
+                        "purpose":  "Mobile asset component tab and `Add / Install Component` action",
+                        "uses":  "CMP-01 1A; reusable by CMP-02",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-04; printed crop excludes workflow-attention banner"
+                    },
+                    {
+                        "id":  "CMP-INSTALL-SELECTED-MOBILE-02",
+                        "file":  "CMP-INSTALL-SELECTED-MOBILE-02.png",
+                        "sha256":  "6612b7ebb54815ba8ac2b4767d3d924ca48789e6cc07944031c58c3de3438e30",
+                        "purpose":  "Mobile install form with controlled tray component selected",
+                        "uses":  "CMP-01 2A and 3A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-04; 2A targets identity, 3A targets Install"
+                    },
+                    {
+                        "id":  "CMP-INSTALL-RESULT-MOBILE-02",
+                        "file":  "CMP-INSTALL-RESULT-MOBILE-02.png",
+                        "sha256":  "c434b3147e20f873312c9dd87e26d0827aabfeaa3d8d6e4fafaac3eb78919fd4",
+                        "purpose":  "Mobile tracked component row after installation with matching tag and serial",
+                        "uses":  "CMP-01 4A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-04"
+                    },
+                    {
+                        "id":  "CMP-NEW-ENTRY-MOBILE-03",
+                        "file":  "CMP-NEW-ENTRY-MOBILE-03.jpg",
+                        "sha256":  "4cdb2d03abe3cc06e90c91eb335d1385597adad1a2c3a86554ff923facf9c0fb",
+                        "purpose":  "Mobile new-component entry with `Show New Component Form`",
+                        "uses":  "CMP-02 1B",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-04"
+                    },
+                    {
+                        "id":  "CMP-NEW-DEFINITION-MOBILE-03",
+                        "file":  "CMP-NEW-DEFINITION-MOBILE-03.jpg",
+                        "sha256":  "655236be70e0fa9f34fd813c3bfeca9cacc8e23efcc0ce30e9a5264b4ca8b9bf",
+                        "purpose":  "Definition-backed new-component route with serial, condition, and create/install action",
+                        "uses":  "CMP-02 2A and 3A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-04; 2A targets the route, 3A targets Create And Install"
+                    },
+                    {
+                        "id":  "CMP-NEW-CUSTOM-MOBILE-03",
+                        "file":  "CMP-NEW-CUSTOM-MOBILE-03.jpg",
+                        "sha256":  "d586b7ea8c138293261286cfe5eeba6d5cca45660c10036faeceb3ef10992b33",
+                        "purpose":  "Custom new-component route with custom name, serial, and condition",
+                        "uses":  "CMP-02 2B",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-04; form opened but not submitted"
+                    },
+                    {
+                        "id":  "CMP-NEW-INSTALLED-MOBILE-03",
+                        "file":  "CMP-NEW-INSTALLED-MOBILE-03.jpg",
+                        "sha256":  "8f2d531c904190a3d8b77294069f3b8b67edf44606d55c12cd702ebcbc713156",
+                        "purpose":  "Definition-backed tracked row after create/install",
+                        "uses":  "CMP-02 4A; CMP-04 1A and 1B",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-04; printed crops exclude workflow-attention banner"
+                    },
+                    {
+                        "id":  "CMP-TRAY-CONFIRM-MOBILE-03",
+                        "file":  "CMP-TRAY-CONFIRM-MOBILE-03.jpg",
+                        "sha256":  "9e2087888e239779e0bd49a3927a258d6cebc0254c779edf933ae94f75a8e742",
+                        "purpose":  "Move-to-tray confirmation with locked serial and confirmation action",
+                        "uses":  "CMP-04 2A and 3A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-04"
+                    },
+                    {
+                        "id":  "CMP-TRAY-RESULT-MOBILE-03",
+                        "file":  "CMP-TRAY-RESULT-MOBILE-03.jpg",
+                        "sha256":  "504aec3b50ee468f08b694563b9c4b04ce24e1cb890576a841161c5a8a5114b3",
+                        "purpose":  "Component detail after removal with `In Tray` and no asset attached",
+                        "uses":  "CMP-04 4A and 4B",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-04"
+                    },
+                    {
+                        "id":  "CMP-TAB-WIDE-01",
+                        "file":  "CMP-TAB-WIDE-01.png",
+                        "sha256":  "9fe931ddc5e8a3f3c62be6a00e521c06f1f29093d6c6a093c5ebd12f909fb988",
+                        "purpose":  "Component tab and Add / Install Component action",
+                        "uses":  "CMP-01 1A; CMP-02 1A; CMP-04 1A",
+                        "captureEnvironment":  "Controlled development capture"
+                    },
+                    {
+                        "id":  "CMP-ROWS-01",
+                        "file":  "CMP-ROWS-01.png",
+                        "sha256":  "416bf122683552f49ae175669b80f5644092907b5ce727779b716822eee8f96b",
+                        "purpose":  "Component rows and `Naar tray` action",
+                        "uses":  "AST-04 2A; CMP-01 5A; CMP-02 5A; CMP-04 2A",
+                        "captureEnvironment":  "Controlled development capture"
+                    },
+                    {
+                        "id":  "CMP-LIST-01",
+                        "file":  "CMP-LIST-01.png",
+                        "sha256":  "c1decc4222578a8925ea2e58bb52d1ca04ad0e9bc5755d53319e9cb67039bd2f",
+                        "purpose":  "Tracked component identity list",
+                        "uses":  "CMP-01 3A; CMP-02 4A",
+                        "captureEnvironment":  "Controlled development capture"
+                    },
+                    {
+                        "id":  "CMP-TRAY-LOCKED-01",
+                        "file":  "CMP-TRAY-LOCKED-01.png",
+                        "sha256":  "3eaa041be5dc12c656708b801c764366c879a4cc69cfb4576a1fb33490f354ff",
+                        "purpose":  "`Naar tray` dialog with locked serial field and confirmation",
+                        "uses":  "CMP-04 3A, 4A",
+                        "captureEnvironment":  "Controlled development capture"
+                    },
+                    {
+                        "id":  "CMP-TRAY-UNLOCKED-01",
+                        "file":  "CMP-TRAY-UNLOCKED-01.png",
+                        "sha256":  "00213c822627e535709d97bdb263af95796dd3074e73a5de262435adff844b02",
+                        "purpose":  "`Naar tray` dialog with editable serial field",
+                        "uses":  "CMP-04 3B",
+                        "captureEnvironment":  "Controlled development capture"
+                    },
+                    {
+                        "id":  "USR-DASHBOARD-PEOPLE-NAV-DESKTOP-01",
+                        "file":  "USR-DASHBOARD-PEOPLE-NAV-DESKTOP-01.png",
+                        "sha256":  "bae7f9bc178319e4570d670979ac5721f0d3de78ff3e25fc967239efc79faaab",
+                        "purpose":  "Dutch dashboard with expanded `Personen` navigation and `Toon Alles`",
+                        "uses":  "USR-01 1A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-13"
+                    },
+                    {
+                        "id":  "USR-LIST-DESKTOP-01",
+                        "file":  "USR-LIST-DESKTOP-01.png",
+                        "sha256":  "6dd6034afbd911bc22b62706e3a968e5574aa485b5b28baf21e9ae08a71e3fbd",
+                        "purpose":  "Users list with search and add-user action",
+                        "uses":  "USR-01 1B; USR-02 1A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-11"
+                    },
+                    {
+                        "id":  "USR-CREATE-FORM-DESKTOP-01",
+                        "file":  "USR-CREATE-FORM-DESKTOP-01.png",
+                        "sha256":  "526137dd6953276bae3aee2b263995123cf36a1d87aa150ac7fe3032f1cef1d4",
+                        "purpose":  "Add-user identity, password generator, and login controls",
+                        "uses":  "USR-01 2A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-11"
+                    },
+                    {
+                        "id":  "USR-GROUP-EDIT-DESKTOP-01",
+                        "file":  "USR-GROUP-EDIT-DESKTOP-01.png",
+                        "sha256":  "3e36abee6c86f48d172f549a3599f1a5d4ff1c2c0fbfa83943d84934b4297ce2",
+                        "purpose":  "Editable group selector showing standard operational groups",
+                        "uses":  "USR-01 3A; USR-02 2A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-11"
+                    },
+                    {
+                        "id":  "USR-PERMISSIONS-DESKTOP-01",
+                        "file":  "USR-PERMISSIONS-DESKTOP-01.png",
+                        "sha256":  "afaca82f02f698b5d13c841c05c03feb9e76c6351e400d05eecd1598648fea7f",
+                        "purpose":  "Permissions tab with Toestaan, Weigeren, and Overnemen",
+                        "uses":  "USR-02 3A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-11"
+                    },
+                    {
+                        "id":  "USR-DETAIL-DESKTOP-01",
+                        "file":  "USR-DETAIL-DESKTOP-01.png",
+                        "sha256":  "c829e27f6e54e633888e7e5acf99c640a4e344ca28c2d15d725f3da92cee091d",
+                        "purpose":  "Saved fictional user identity, login state, group, and edit action",
+                        "uses":  "USR-01 4A; USR-02 1B and 4A; USR-03 1A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-11"
+                    },
+                    {
+                        "id":  "USR-RESET-LINK-DESKTOP-01",
+                        "file":  "USR-RESET-LINK-DESKTOP-01.png",
+                        "sha256":  "c829e27f6e54e633888e7e5acf99c640a4e344ca28c2d15d725f3da92cee091d",
+                        "purpose":  "User-detail password-reset-link action",
+                        "uses":  "USR-03 2A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-11"
+                    },
+                    {
+                        "id":  "USR-EDIT-PASSWORD-DESKTOP-01",
+                        "file":  "USR-EDIT-PASSWORD-DESKTOP-01.png",
+                        "sha256":  "52a5b8c80260621bf003b1b4340d53b36e113486d684ac103c0fa8933fbdc6fc",
+                        "purpose":  "Edit-user generated temporary-password route with values hidden",
+                        "uses":  "USR-03 2B",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-11"
+                    },
+                    {
+                        "id":  "AC-ACCOUNT-MENU-DESKTOP-01",
+                        "file":  "AC-ACCOUNT-MENU-DESKTOP-01.png",
+                        "sha256":  "6a322f438da37b7b6c28586b4817437df1b363045db06bd2182588f65311fb32",
+                        "purpose":  "Account menu and self-service password-change action",
+                        "uses":  "USR-03 3A; AC-02 1A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-11"
+                    },
+                    {
+                        "id":  "AC-SELF-PASSWORD-DESKTOP-01",
+                        "file":  "AC-SELF-PASSWORD-DESKTOP-01.png",
+                        "sha256":  "25b07022b372c5e35e3de446c2e67c41761b8a344e20c1afb5fa2adb34500a46",
+                        "purpose":  "Empty self-service password fields and save action",
+                        "uses":  "AC-02 2A and 3A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-11"
+                    },
+                    {
+                        "id":  "USR-ASSIGNMENTS-DESKTOP-01",
+                        "file":  "USR-ASSIGNMENTS-DESKTOP-01.png",
+                        "sha256":  "d614e838b07f35669546ac6bbb030b74974d7894e1d970b9be5555948ac8d1d1",
+                        "purpose":  "User detail with assignment and management tabs",
+                        "uses":  "USR-04 side 1, 1A and 2A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-11"
+                    },
+                    {
+                        "id":  "USR-EDIT-ACTIVATED-DESKTOP-01",
+                        "file":  "USR-EDIT-ACTIVATED-DESKTOP-01.png",
+                        "sha256":  "52a5b8c80260621bf003b1b4340d53b36e113486d684ac103c0fa8933fbdc6fc",
+                        "purpose":  "Edit-user activated checkbox",
+                        "uses":  "USR-04 side 1, 3A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-11"
+                    },
+                    {
+                        "id":  "USR-DEACTIVATED-DESKTOP-01",
+                        "file":  "USR-DEACTIVATED-DESKTOP-01.png",
+                        "sha256":  "d614e838b07f35669546ac6bbb030b74974d7894e1d970b9be5555948ac8d1d1",
+                        "purpose":  "Saved deactivated account state",
+                        "uses":  "USR-04 side 1, 4A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-11"
+                    },
+                    {
+                        "id":  "USR-DELETE-DESKTOP-01",
+                        "file":  "USR-DELETE-DESKTOP-01.png",
+                        "sha256":  "e7a64ab2f860351adb9d82e229ccf12e22cf9f74d181facf205cf9ef5235436c",
+                        "purpose":  "Delete and bulk check-in/delete controls",
+                        "uses":  "USR-04 side 2, 1A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-11"
+                    },
+                    {
+                        "id":  "USR-DELETED-LIST-DESKTOP-01",
+                        "file":  "USR-DELETED-LIST-DESKTOP-01.png",
+                        "sha256":  "93a63409f0c0e5bea1340fe1af515b0ca3df0449bae891e7efcb2fbd84e3ed22",
+                        "purpose":  "Removed-user list containing the fictional identity",
+                        "uses":  "USR-04 side 2, 2A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-11"
+                    },
+                    {
+                        "id":  "USR-RESTORE-DESKTOP-01",
+                        "file":  "USR-RESTORE-DESKTOP-01.png",
+                        "sha256":  "42bd56951a697cfb87f69f89e524fd77fdc64bd070f674131cd60fc46c2fc940",
+                        "purpose":  "Removed-user Restore action",
+                        "uses":  "USR-04 side 2, 3A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-11"
+                    },
+                    {
+                        "id":  "USR-RESTORED-DESKTOP-01",
+                        "file":  "USR-RESTORED-DESKTOP-01.png",
+                        "sha256":  "d614e838b07f35669546ac6bbb030b74974d7894e1d970b9be5555948ac8d1d1",
+                        "purpose":  "Restored identity, group, and login state",
+                        "uses":  "USR-04 side 2, 4A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-11"
+                    }
+                ]
+}

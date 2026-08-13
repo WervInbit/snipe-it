@@ -1,3 +1,37 @@
+# Session Progress (2026-08-13)
+
+## Addendum (2026-08-13 Portable Operator Guide Package)
+- Moved the complete 48-file active canonical evidence set into versioned
+  repository resources with stable source-ID filenames and SHA-256 metadata.
+- Added the eight exact internal-review candidate PDFs, including USR-01 v8
+  and USR-02 v7, plus the locked AC-01/SC-01 SVG baselines and manifests.
+- Added a shared portable path/runtime layer for maintained generators,
+  repository-local Playwright/Sharp dependency metadata, and package checks
+  for hashes, status, pages, A4 dimensions, development URLs, and absolute
+  workstation paths.
+- Isolated four superseded non-portable generators under
+  `scripts/manuals/archive/`; generated proof history remains ignored.
+- Updated the handoff, registry, inventory, screenshot catalog, accepted
+  review records, README, and TODO to use the repository package.
+- Final validation passed: all eight maintained non-capture generator targets
+  rebuilt from committed assets; the nine accepted pages rendered cleanly and
+  pixel-identically; package checks passed for 48 evidence files, eight PDFs,
+  two baselines, A4/page counts, extractable text, and path portability.
+
+## Addendum (2026-08-13 Operator Guide Continuation Handoff)
+- Added `docs/manuals/operator-guides/HANDOFF.md` as the current cross-task and
+  cross-device resume checkpoint for guide creation.
+- Recorded every active guide's current version, creation state, and next
+  action, together with the records that must change during a new version.
+- Documented current Windows paths, intended logical roots, hardcoded Chrome,
+  Poppler, Node, evidence, and output dependencies, existing environment
+  variables, and new-device/before-leaving checklists.
+- Linked the handoff from the project index, system precedence, inventory, and
+  maintenance workflow; added portability and commit-preparation TODO items.
+- Documentation-only work; no guide PDF or generator was changed.
+- Supporting notes:
+  `docs/agents/agents-addendum-2026-08-13-operator-guide-continuation-handoff-session-init.md`.
+
 # Session Progress (2026-06-09)
 
 ## Addendum (2026-06-09 Codex)

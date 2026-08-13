@@ -1,0 +1,78 @@
+{
+    "schemaVersion":  1,
+    "updatedOn":  "2026-08-13",
+    "artifacts":  [
+                      {
+                          "code":  "AC-01",
+                          "version":  6,
+                          "title":  "Login",
+                          "status":  "Internal review candidate",
+                          "pages":  1,
+                          "file":  "AC-01-login-v6.pdf",
+                          "sha256":  "3fcc11fa05e7a27ff1a542191b88d93fcbc68de81248f72ac1e3b40a02eb64b2"
+                      },
+                      {
+                          "code":  "SC-01",
+                          "version":  10,
+                          "title":  "Asset vinden en openen",
+                          "status":  "Internal review candidate",
+                          "pages":  1,
+                          "file":  "SC-01-asset-vinden-en-openen-v10.pdf",
+                          "sha256":  "6eccaf906a36abf49204e8226517777291dfd95e18bfc760c2711e619428dd9b"
+                      },
+                      {
+                          "code":  "AST-02",
+                          "version":  5,
+                          "title":  "Refurbishment route",
+                          "status":  "Internal review candidate",
+                          "pages":  1,
+                          "file":  "AST-02-refurbishment-route-v5.pdf",
+                          "sha256":  "78cd745f055399beeef518517232042ce28c54493b2fec0bc9213f41d4ae49c2"
+                      },
+                      {
+                          "code":  "WF-01",
+                          "version":  9,
+                          "title":  "Workflow starten",
+                          "status":  "Internal review candidate",
+                          "pages":  1,
+                          "file":  "WF-01-workflow-starten-v9.pdf",
+                          "sha256":  "49992c5aeba821d88b457200fe09233ada153ea6cae0f5d21abcdef881b90dda"
+                      },
+                      {
+                          "code":  "WF-02",
+                          "version":  10,
+                          "title":  "Workflow uitvoeren en afronden",
+                          "status":  "Internal review candidate",
+                          "pages":  2,
+                          "file":  "WF-02-workflow-uitvoeren-en-afronden-v10.pdf",
+                          "sha256":  "250651038bdd8703f239df1ab72d24f6bb9e7e7e85a3b6fa75df2e3c571990f5"
+                      },
+                      {
+                          "code":  "CMP-01",
+                          "version":  4,
+                          "title":  "Bestaand component plaatsen",
+                          "status":  "Internal review candidate",
+                          "pages":  1,
+                          "file":  "CMP-01-bestaand-component-plaatsen-v4.pdf",
+                          "sha256":  "cfabd1d519c35f48359e43090749b7f0fc18e677d54cd53fc14171ad896958d0"
+                      },
+                      {
+                          "code":  "USR-01",
+                          "version":  8,
+                          "title":  "Gebruiker toevoegen",
+                          "status":  "Internal review candidate",
+                          "pages":  1,
+                          "file":  "USR-01-gebruiker-toevoegen-v8.pdf",
+                          "sha256":  "9ab0812aec50a76c896dbbdfbb13440a8fc6d2f4ccee32364884bae4af3cfcd6"
+                      },
+                      {
+                          "code":  "USR-02",
+                          "version":  7,
+                          "title":  "Rol en rechten wijzigen",
+                          "status":  "Internal review candidate",
+                          "pages":  1,
+                          "file":  "USR-02-rol-en-rechten-wijzigen-v7.pdf",
+                          "sha256":  "d58022523c04dc0b964e4f9b1e5f2307c50ee153ae2668ff371c204be57e9a5b"
+                      }
+                  ]
+}
