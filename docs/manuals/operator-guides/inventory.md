@@ -32,6 +32,11 @@ Status: current classification. No source has been deleted or moved.
 
 | Folder | Classification | Current artifact |
 | --- | --- | --- |
+| `output/manuals/proofs/2026-08-25-visual-corrections` | Current focused visual-correction proofs | AC-02, USR-01 through USR-04, AST-03 through AST-05, and CMP-02: nine exact drafts across eleven A4 pages, grouped under `user`, `asset`, and `component` |
+| `output/manuals/proofs/2026-08-20-cold-start-rework` | Current 12-guide cold-start rework | User/access, AST lifecycle, component, and catalogue proofs: 12 exact drafts across 21 A4 pages, grouped under `user`, `asset`, `component`, and `catalog` |
+| `output/manuals/proofs/catalog-guide-review` | Superseded catalogue review proofs | CAT-00 v1 four-page reference chapter and CAT-01 v1 five-page creation flow retained as review history |
+| `output/manuals/proofs/2026-08-18-ast-lifecycle-review/ast03-v12` | Superseded focused AST-03 proof | Two-page v12 retained as review history before the v13 minimum-role and unified-identity correction |
+| `output/manuals/proofs/2026-08-18-feedback-review` | Current focused feedback proofs | AC-01 v8, AST-02 v6, CMP-01 v5, USR-01 v9, WF-01 v10, and two-page WF-02 v11; accepted predecessors remain frozen |
 | `layout-proofs/2026-08-13-guide-component-system-v1` | Current component regression proof | Shared family, badge, focus, completion, and five-reference/two-row components plus geometry report |
 | `layout-proofs/2026-08-13-usr01-review-v8` | Current focused user-account proof | USR-01 v8 with expanded `Personen` / `Toon Alles` navigation evidence, SVG/HTML/PDF/PNG, and component geometry report |
 | `layout-proofs/2026-08-13-usr02-review-v7` | Current internally accepted role/rights proof | USR-02 v7 with the fully enclosed USR-05 help handoff and complete 3A focus stroke |
@@ -41,7 +46,7 @@ Status: current classification. No source has been deleted or moved.
 | `layout-proofs/2026-08-13-usr02-review-v3` | Superseded focused role/rights proof | Previous USR-02 wording and single search visual; retained as review history |
 | `layout-proofs/2026-08-13-usr02-review-v2` | Superseded focused role/rights proof | First USR-02 migration to shared components; retained as review history |
 | `layout-proofs/2026-08-13-usr01-review-v7` | Superseded focused user-account proof | First USR-01 version migrated to the shared component layer; retained as review history |
-| `layout-proofs/2026-08-04-component-followup-review-batch-v2` | Current component follow-up review batch | CMP-02 v2, CMP-04 v5, and HELP-01 v6 one-page proofs, source HTML, manifest, summary, rendered PNGs, and three-page combined PDF |
+| `layout-proofs/2026-08-04-component-followup-review-batch-v2` | Superseded component follow-up review batch | CMP-02 v2, CMP-04 v5, and current HELP-01 v6 one-page proofs, source HTML, manifest, summary, rendered PNGs, and three-page combined PDF |
 | `layout-proofs/2026-08-04-component-followup-review-batch-v1` | Superseded component follow-up review batch | CMP-02 v2, CMP-04 v4, and HELP-01 v6 retained as review history |
 | `layout-proofs/2026-08-04-component-review-batch-v1` | Current focused component review proof | CMP-01 v4 one-page proof, source HTML, manifest, summary, and rendered PNG; v2-v3 retained as review history |
 | `layout-proofs/2026-08-04-workflow-review-batch-v8` | Current focused workflow review batch | Internally accepted WF-01 v9 one-page proof, internally accepted WF-02 v10 two-sided proof, source HTML, manifest, and three-page combined review PDF |
@@ -74,7 +79,7 @@ C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs
 
 | Folder/source | Files | Use |
 | --- | ---: | --- |
-| `resources/manuals/operator-guides/evidence` | 48 + manifest | Complete active canonical evidence set for AC, SC, AST, WF, CMP, and USR guides. |
+| `resources/manuals/operator-guides/evidence` | 70 + manifest | Complete active canonical evidence set for AC, SC, AST, WF, CMP, USR, and current CAT guides. |
 | Historical workstation screenshot folders | 80 source files | Retained outside Git as capture history, retries, duplicate states, and superseded evidence. |
 
 Reusable evidence is assigned a stable ID in [screenshots.md](screenshots.md)
@@ -85,10 +90,11 @@ Consult both before adding or recapturing a screenshot.
 
 | Folder | Contents |
 | --- | --- |
-| `resources/manuals/operator-guides/pdf` | Exact PDF copies of all eight current V1 internal review candidates and a SHA-256 manifest. |
+| `resources/manuals/operator-guides/pdf` | Exact PDF copies of all nine current V1 internal review candidates and a SHA-256 manifest. |
+| `resources/manuals/operator-guides/drafts` | Latest PDFs for seventeen unaccepted review versions, explicitly marked unaccepted and protected by a SHA-256 manifest. |
 | Historical workstation package | Older six-guide package and exact script snapshots retained as review history. |
 
-USR-01 v8 and USR-02 v7 are included in the repository package.
+AST-03 v14, USR-01 v8, and USR-02 v7 are included in the repository package.
 
 ## Current Generators
 
@@ -99,13 +105,16 @@ USR-01 v8 and USR-02 v7 are included in the repository package.
 | `scripts/manuals/test-guide-system.mjs` | Shared component contract assertions. |
 | `scripts/manuals/verify-guide-package.mjs` | Checks evidence/baseline/PDF hashes, status, page counts, A4 dimensions, URLs, and active-script portability. |
 | `scripts/manuals/generate-guide-component-proof.mjs` | Current A4 visual regression proof for shared components. |
-| `scripts/manuals/generate-user-account-guide-review.mjs` | Current user-account batch/focused generator; USR-01 v8 and USR-02 v7 use shared components. |
-| `scripts/manuals/generate-component-followup-guides.mjs` | Current generator for CMP-02 v2, CMP-04 v5, and HELP-01 v6; uses source-pixel crops and measured target padding. |
-| `scripts/manuals/generate-component-guide-review.mjs` | Current focused generator for CMP-01 v4; uses exact source-pixel crops and measured targets with symmetric control padding. |
-| `scripts/manuals/generate-revised-guide-set.mjs` | Current data-driven generator for the complete 12-guide/13-page review set. |
-| `scripts/manuals/generate-workflow-guide-review.mjs` | Current focused generator for internal review candidates WF-01 v9 and two-sided WF-02 v10; uses source-pixel SVG crops and measured targets. |
+| `scripts/manuals/generate-catalog-guide-review.mjs` | Current CAT-00/CAT-01 generator with multi-page A4, context-column, title/version, component-bound, and rendered-geometry checks. |
+| `scripts/manuals/capture-catalog-guide-evidence.mjs` | Read-only controlled catalogue capture harness; fills unsaved examples and captures existing records without submitting changes. |
+| `scripts/manuals/generate-user-account-guide-review.mjs` | Current user-account batch/focused generator; defaults to USR-01 v11, USR-02 v9, USR-03 v3, AC-02 v3, and USR-04 v3 while explicit version variables preserve older branches. |
+| `scripts/manuals/generate-component-followup-guides.mjs` | Current generator for CMP-02 v4, CMP-04 v6, and HELP-01 v6; uses source-pixel crops, measured target padding, and full family-styled help references. |
+| `scripts/manuals/generate-component-guide-review.mjs` | Focused CMP-01 generator; accepted v4 remains the default and version 5 applies the Senior Refurbisher role. |
+| `scripts/manuals/generate-revised-guide-set.mjs` | Data-driven complete-set generator with an optional focused guide filter; accepted AST-02 v5 remains reproducible, while AST-03 v14 and AST-04/05 v5 are the current lifecycle defaults with contained captions, reframed handoff evidence, continuous numbering, real placement evidence, and verified automatic status changes. |
+| `scripts/manuals/generate-workflow-guide-review.mjs` | Focused workflow generator; accepted WF-01 v9/WF-02 v10 remain defaults and versions 10/11 apply the role and 3B corrections. |
 | `scripts/manuals/capture-revised-guide-evidence.mjs` | Controlled capture harness retained for later gaps; current workflow evidence was captured through the authenticated browser session. |
-| `scripts/manuals/generate-ac01-snipe-proof.mjs` | Earlier AC-01 baseline generator. |
+| `scripts/manuals/capture-asset-lifecycle-guide-evidence.mjs` | Controlled AST lifecycle capture harness; supports screenshot-only fictional identities, `identity-only`, unsubmitted `ast03-only`, and compact `ast03-saved-check` refresh modes. |
+| `scripts/manuals/generate-ac01-snipe-proof.mjs` | AC-01 baseline generator; accepted v6 remains the default and version 7 applies the corrected required items. |
 | `scripts/manuals/generate-sc01-snipe-proof.mjs` | Earlier SC-01 baseline generator. |
 | `scripts/manuals/archive/` | Historical AST-01, first-batch, initial-batch, and next-draft generators; retained but excluded from the portable build. |
 

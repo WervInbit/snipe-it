@@ -1,0 +1,177 @@
+{
+    "schemaVersion": 1,
+    "updatedOn": "2026-08-25",
+    "statusDefinition": "Unaccepted working draft; retained for review and environment transfer only",
+    "artifacts": [
+        {
+            "code": "AC-01",
+            "version": 8,
+            "title": "Login",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": 6,
+            "pages": 1,
+            "file": "AC-01-login-v8-draft.pdf",
+            "sha256": "cbd9e3a290391effe605a7226c1a9d04129de6e6848fc8c41cbbb432dedefd81"
+        },
+        {
+            "code": "AC-02",
+            "version": 3,
+            "title": "Eigen wachtwoord wijzigen",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": null,
+            "pages": 1,
+            "file": "ac-02-eigen-wachtwoord-wijzigen-v3-draft.pdf",
+            "sha256": "983fe055579a51b9f62a463f04e4f491c7c0afd122cb852731b02ba561477c0e"
+        },
+        {
+            "code": "AST-02",
+            "version": 6,
+            "title": "Refurbishment route",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": 5,
+            "pages": 1,
+            "file": "AST-02-refurbishment-route-v6-draft.pdf",
+            "sha256": "190efcd6f6e74e697b98024ab0033bde642dbce2191488fa9c9943edb642f79c"
+        },
+        {
+            "code": "AST-04",
+            "version": 5,
+            "title": "Werk afronden en overdragen",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": null,
+            "pages": 1,
+            "file": "AST-04-complete-handoff-v5-draft.pdf",
+            "sha256": "f6a24bf06f06534b661cd37eb3756a466fae28c4a871f47f9e57b15bde50e588"
+        },
+        {
+            "code": "AST-05",
+            "version": 5,
+            "title": "Asset beoordelen en vrijgeven",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": null,
+            "pages": 1,
+            "file": "AST-05-review-release-v5-draft.pdf",
+            "sha256": "1d1564a93c2298e8fc707df91df24bd420cd3d47f48fa814e946c63ed8b829c2"
+        },
+        {
+            "code": "WF-01",
+            "version": 10,
+            "title": "Workflow starten",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": 9,
+            "pages": 1,
+            "file": "WF-01-start-workflow-v10-draft.pdf",
+            "sha256": "5955a6984840583684369d7a4f8b5178f3bfe9a1499a25edaf0a93293d8a01f0"
+        },
+        {
+            "code": "WF-02",
+            "version": 11,
+            "title": "Workflow uitvoeren en afronden",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": 10,
+            "pages": 2,
+            "file": "WF-02-complete-workflow-v11-draft.pdf",
+            "sha256": "6ce57d7afc137d93c2a8b699d6d662d5e2b15b108ce41344a48aae52da857224"
+        },
+        {
+            "code": "CMP-01",
+            "version": 5,
+            "title": "Bestaand component plaatsen",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": 4,
+            "pages": 1,
+            "file": "CMP-01-install-existing-v5-draft.pdf",
+            "sha256": "81fa856648067cffc2c1dbf1f199896916f6ae37f75bf59a63d6aedd91a0d0ad"
+        },
+        {
+            "code": "CMP-02",
+            "version": 4,
+            "title": "Nieuw component registreren en plaatsen",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": null,
+            "pages": 1,
+            "file": "CMP-02-register-install-v4-draft.pdf",
+            "sha256": "923bc26714e96b9edc29f8529051dc8a7be57e2a1c59eee3ffb72c6da58b613a"
+        },
+        {
+            "code": "CMP-04",
+            "version": 6,
+            "title": "Component naar tray verplaatsen",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": null,
+            "pages": 1,
+            "file": "CMP-04-component-to-tray-v6-draft.pdf",
+            "sha256": "fe72f79efd24d12730fa1c6bb5e7dcfefbbe28c2179cf8169906bfd7af96cee5"
+        },
+        {
+            "code": "HELP-01",
+            "version": 6,
+            "title": "Problemen en hulp",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": null,
+            "pages": 1,
+            "file": "HELP-01-problems-v6-draft.pdf",
+            "sha256": "02490f9d329c919d617c45e52cdd87bab180a7836df993d9d93ead96d57dff47"
+        },
+        {
+            "code": "USR-01",
+            "version": 11,
+            "title": "Gebruiker toevoegen",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": 8,
+            "pages": 1,
+            "file": "usr-01-gebruiker-toevoegen-v11-draft.pdf",
+            "sha256": "057acc8732f3c06ab5ece3982d90f4505511d15285fa9d8e1956b9d288797f59"
+        },
+        {
+            "code": "USR-02",
+            "version": 9,
+            "title": "Rol en rechten wijzigen",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": 7,
+            "pages": 1,
+            "file": "usr-02-rol-en-rechten-wijzigen-v9-draft.pdf",
+            "sha256": "a0871313aef9ec3538867d7e7e64d71ee9b48d19d8d36e86963b87cf4f920afe"
+        },
+        {
+            "code": "USR-03",
+            "version": 3,
+            "title": "Wachtwoord resetten",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": null,
+            "pages": 1,
+            "file": "usr-03-wachtwoord-resetten-v3-draft.pdf",
+            "sha256": "12587f1e308454d1e607f8ee7020f2caac1e8af25eb2022370ed01445adaa448"
+        },
+        {
+            "code": "USR-04",
+            "version": 3,
+            "title": "Gebruiker uitschakelen of herstellen",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": null,
+            "pages": 2,
+            "file": "usr-04-gebruiker-uitschakelen-v3-draft.pdf",
+            "sha256": "1fc676e5cf48eb9097df231a40e71b9041e2b977a89b587a58ecc40337db14f0"
+        },
+        {
+            "code": "CAT-00",
+            "version": 4,
+            "title": "Catalogus begrijpen",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": null,
+            "pages": 8,
+            "file": "CAT-00-catalogus-begrijpen-v4-draft.pdf",
+            "sha256": "60c113d4f171d038dd409b8bbb62643df93b0944628a310cb99a0297498c025b"
+        },
+        {
+            "code": "CAT-01",
+            "version": 2,
+            "title": "Model en modelnummer aanmaken",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": null,
+            "pages": 5,
+            "file": "CAT-01-model-en-modelnummer-aanmaken-v2-draft.pdf",
+            "sha256": "fdc7ac229d5a0a7adc1f709e78b96e39dd7d854819d526182976bc1aacf9b93d"
+        }
+    ]
+}

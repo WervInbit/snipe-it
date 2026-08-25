@@ -52,6 +52,8 @@ versions according to [maintenance.md](maintenance.md).
 | Detail task | Dense execution with evidence and risky checks | WF-02, CMP-04, AST-03 |
 | Route overview | Points to smaller guides without duplicating them | AST-02 |
 | Troubleshooting | Non-linear problem lookup | HELP-01 |
+| Reference chapter | Explains decisions and relationships before an administrative task | CAT-00 |
+| Extended administration task | Multi-page procedure whose fields require explanation and verification | CAT-01 |
 
 ## Visual Identity
 
@@ -63,6 +65,7 @@ versions according to [maintenance.md](maintenance.md).
 | WF | Workflows | Orange | `WF` plus guide code |
 | CMP | Components | Amber | `CMP` plus guide code |
 | USR | User management | Indigo | `USR` plus guide code |
+| CAT | Catalog management | Violet | `CAT` plus guide code |
 | HELP | Problems/help | Red | `HELP` plus guide code |
 
 Color supports recognition but never replaces the family marker, code, and label.
@@ -127,8 +130,15 @@ Rules:
 
 ## Stop And Help
 
-- Attach a step-specific `STOP` message to the first step where the risk matters.
-- When the warning is the purpose of the step, concise inline red text is preferred over a large warning card.
+- Reserve a red `STOP` message for a genuine halt condition: continuing would
+  create a meaningful safety, identity, irreversible-state, or data-integrity
+  risk and the operator must not continue without correction or escalation.
+- Use an amber inline warning for recoverable validation, duplicate, missing
+  catalog, or incomplete-work conditions. Do not style every correction as a
+  stop merely because the operator must resolve it before saving.
+- Attach a real step-specific `STOP` to the first step where the risk matters.
+- When a stop is the purpose of the step, concise inline red text is preferred
+  over a large warning card.
 - General fallback and recovery information belongs in compact help tiles.
 - Help must not look like another required step.
 - A task guide must not hide a step-specific stop condition in its help row.
@@ -184,7 +194,8 @@ Before a guide can be `Internal review candidate`:
 - no missing-evidence placeholders exist;
 - no stale development URLs appear;
 - steps, screenshot labels, and captions correspond;
-- stop warnings are attached to the relevant steps;
+- genuine stop conditions and recoverable warnings use the correct hierarchy
+  and are attached to the relevant steps;
 - `Klaar als` describes the visible end state;
 - related-guide references point to real or explicitly planned guides;
 - shared component geometry checks report no badge-center or reference-overflow errors;

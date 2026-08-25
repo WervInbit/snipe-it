@@ -2,26 +2,30 @@
 
 | Field | Current value |
 | --- | --- |
-| Status | Internal review candidate for V1 |
+| Status | Working draft v9; visual-correction pass; v7 remains an internal review candidate for V1 |
 | Family | USR |
 | Type | Administration task with an exceptional route |
-| Current version | `usr-02-rol-en-rechten-wijzigen-v7-draft` |
+| Current version | `usr-02-rol-en-rechten-wijzigen-v9-draft` |
 | Page model | One page |
 | Layout recipe | `stacked-step-flow` with `mixed-visual-widths` and `single-visual` |
 | Generator | `scripts/manuals/generate-user-account-guide-review.mjs` |
-| Role | Admin / Superadmin |
+| Role | Admin |
 | Needed | Correct user and the intended access |
-| Prerequisite | User account already exists |
+| Prerequisite | Ingelogd (AC-01 Login); user account already exists |
 
 ## Purpose
 
 Change a user's operational access through group membership and, when needed,
 direct user permissions.
 
+Version 9 adds a separate rectangular focus around the `Machtigingen` tab in
+3A while retaining the existing focus around the effective-rights controls.
+
 ## Steps
 
-1. `Open het juiste account` - search by name or username, open the correct
-   user, and choose `Gebruiker aanpassen` on that user's detail page.
+1. `Open het juiste account` - open `Personen > Toon Alles`, search by name or
+   username, open the correct user, and choose `Gebruiker aanpassen` on that
+   user's detail page.
 2. `Wijzig de standaardrol via Groepen` - only a Superadmin can add groups to
    this user or remove them. On desktop, use `Ctrl+klik` to add another group
    or deselect a selected group. Admin can view group membership but cannot
@@ -61,8 +65,9 @@ reusable group instead of repeating them per user. An unclear right remains on
 
 | Label | Job | Source ID | Status |
 | --- | --- | --- | --- |
-| 1A | User search and recognizable user result | `USR-LIST-DESKTOP-01` | Captured 2026-08-11; search targeted; shared with USR-01 |
-| 1B | Correct user's `Gebruiker aanpassen` action | `USR-DETAIL-DESKTOP-01` | Captured 2026-08-11; edit action targeted |
+| 1A | Expanded Dutch dashboard sidebar with `Personen` and `Toon Alles` | `USR-DASHBOARD-PEOPLE-NAV-DESKTOP-01` | Captured 2026-08-13; canonical navigation reuse |
+| 1B | User search and recognizable user result | `USR-LIST-DESKTOP-01` | Captured 2026-08-11; search targeted; shared with USR-01 |
+| 1C | Correct user's `Gebruiker aanpassen` action | `USR-DETAIL-DESKTOP-01` | Captured 2026-08-11; edit action targeted |
 | 2A | Editable group selector and standard role choices | `USR-GROUP-EDIT-DESKTOP-01` | Captured 2026-08-11 in controlled Superadmin session |
 | 3A | Permissions tab and Toestaan/Weigeren/Overnemen columns | `USR-PERMISSIONS-DESKTOP-01` | Captured 2026-08-11 |
 | 4A | Saved user role and account detail | `USR-DETAIL-DESKTOP-01` | Captured 2026-08-11; shared with USR-01 |
@@ -100,3 +105,5 @@ intended access, without obsolete groups or unexplained direct overrides.
 - v7 shortens the 3A direct-rights focus area to the three permission rows
   actually visible in the screenshot. Its complete lower stroke now remains
   inside the image frame.
+- v8 adds the canonical `Personen > Toon Alles` dashboard navigation before
+  search and edit, without changing the accepted v7 rights semantics.

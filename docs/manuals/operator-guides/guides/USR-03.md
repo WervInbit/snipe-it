@@ -2,65 +2,66 @@
 
 | Field | Current value |
 | --- | --- |
-| Status | Working draft v1 with captured real interface evidence; awaiting review |
+| Status | Working draft v3; visual-correction pass and awaiting exact-version review |
 | Family | USR |
-| Type | Administration task with two alternatives |
-| Current version | `usr-03-wachtwoord-resetten-v1-draft` |
+| Type | Administration task |
+| Current version | `usr-03-wachtwoord-resetten-v3-draft` |
 | Page model | One page |
-| Layout recipe | `stacked-step-flow` with `parallel-visual-choice` |
+| Layout recipe | `stacked-step-flow` with `mixed-visual-widths` |
 | Generator | `scripts/manuals/generate-user-account-guide-review.mjs` |
-| Role | Admin or Superadmin |
-| Needed | Correct active local account and an approved secure handoff route |
-| Prerequisite | User identity verified |
+| Role | Admin |
+| Needed | Correct local account and personal handoff route |
+| Prerequisite | Ingelogd (AC-01 Login) |
 
 ## Purpose
 
 Restore access to the correct local account without learning or retaining the
 user's final private password.
 
+Version 3 shows the unsaved generated temporary value below the password field,
+uses a rectangular focus around `Genereer`, tightens the 3A account-menu focus,
+and presents the AC-02 handoff as a complete guide reference.
+
 ## Steps
 
-1. `Controleer het account` - open the user and verify name, username, active
-   state, email, and whether the account is local or LDAP-managed.
-2. `Kies een resetroute` - for an active local user with a valid email address,
-   choose `Stuur een wachtwoordherstellink`. When that route is unavailable,
-   choose Edit, use `Genereer`, confirm the generated password, and save once.
-   Never reuse a temporary password.
-3. `Draag veilig over` - send the reset link through the system or give the
-   temporary password through the approved secure channel. Do not put it in
-   ordinary email, chat, notes, tickets, screenshots, or the guide.
-   When an administrator set a temporary password, the user follows AC-02
-   immediately. This application has no force-change-at-next-login checkbox,
-   so the handoff must be confirmed by procedure.
+1. `Vind en controleer de gebruiker` - open `Personen > Toon Alles`, search the
+   user, compare name and username, open the correct account, and choose
+   `Gebruiker aanpassen`.
+2. `Maak één tijdelijk wachtwoord` - use `Genereer` once in the password
+   fields, leave `Deze gebruiker kan inloggen` enabled, and choose `Opslaan`
+   once. Do not create or retain a permanent password for the user.
+3. `Draag veilig over` - give the temporary password to the user personally.
+   Do not put it in chat, email, notes, tickets, screenshots, or this guide.
+   The user follows AC-02 immediately and chooses the final private password.
 
 ## Step-Specific Stops
 
-- Step 1: stop when the identity is uncertain or the account is LDAP-managed.
-  LDAP passwords are changed through IT or the directory service.
+- Step 1: stop when the account identity is uncertain.
 - Step 3: stop when no approved secure transfer channel is available. Never
   ask the user to disclose the final password as proof.
 
 ## Compact Help
 
-- `Geen e-mailadres` - use the generated temporary-password route.
-- `Resetlink komt niet aan` - verify the existing address; do not invent or
-  silently replace it.
-- `LDAP-account` - contact IT; do not set a local password.
-- `Tijdelijk wachtwoord gebruikt` - continue with AC-02 immediately.
+- `Account staat uit` - enable login only after verifying the correct user.
+- `Genereer werkt niet` - do not save a partial change; ask system management.
+- `Geen veilig kanaal` - do not transfer the password until personal handoff
+  is arranged.
+- `Wachtwoord gewijzigd` - continue with AC-02 for the private password.
 
 ## Evidence Manifest
 
 | Label | Job | Source ID | Status |
 | --- | --- | --- | --- |
-| 1A | User identity, active state, email, and local/LDAP context | `USR-DETAIL-DESKTOP-01` | Captured 2026-08-11 |
-| 2A | Send-password-link action on the user page | `USR-RESET-LINK-DESKTOP-01` | Captured 2026-08-11; action not submitted |
-| 2B | Edit-user Generate control with password value hidden | `USR-EDIT-PASSWORD-DESKTOP-01` | Captured 2026-08-11 |
+| 1A | Canonical `Personen > Toon Alles` navigation | `USR-DASHBOARD-PEOPLE-NAV-DESKTOP-01` | Captured 2026-08-13 |
+| 1B | User search and correct result | `USR-LIST-DESKTOP-01` | Captured 2026-08-11 |
+| 1C | Correct user's `Gebruiker aanpassen` action | `USR-DETAIL-DESKTOP-01` | Captured 2026-08-11 |
+| 2A | Edit-user `Genereer`, login, and Save controls with password values hidden | `USR-EDIT-PASSWORD-DESKTOP-01` | Captured 2026-08-11 |
 | 3A | AC-02 guide reference and self-change start | `AC-ACCOUNT-MENU-DESKTOP-01` | Captured 2026-08-11; shared with AC-02 |
 
 ## Complete When
 
-The correct user has received a reset link or one generated temporary password,
-and a temporary-password route explicitly continues with AC-02.
+The correct user has received one generated temporary password personally and
+continues immediately with AC-02.
 
 ## Related Guides
 

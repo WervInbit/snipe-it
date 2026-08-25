@@ -9,9 +9,16 @@ import {
 
 const { chromium } = loadGuideDependency('playwright');
 
-const today = '2026-07-21';
+const versionNumber = process.env.SNIPEIT_AC01_VERSION ?? '6';
+const isFeedbackRevision = ['7', '8'].includes(versionNumber);
+const neededLabel = versionNumber === '8'
+  ? 'Inbit-telefoon + account'
+  : versionNumber === '7'
+    ? 'Apparaat + account'
+    : 'Telefoon met Inbit Snipe-IT';
+const today = process.env.SNIPEIT_GUIDE_DATE ?? '2026-07-21';
 const liveUrl = 'https://snipe.inbit/';
-const outDir = process.env.SNIPEIT_GUIDE_OUT_DIR || guideOutputDir('AC-01-v6');
+const outDir = process.env.SNIPEIT_GUIDE_OUT_DIR || guideOutputDir(`AC-01-v${versionNumber}`);
 
 const sourceFiles = {
   phoneStart: evidencePath('PHONE-START-01'),
@@ -20,11 +27,11 @@ const sourceFiles = {
 };
 
 const outputs = {
-  svg: path.join(outDir, 'AC-01-login-snipe-v6.svg'),
-  html: path.join(outDir, 'AC-01-login-snipe-v6.html'),
-  png: path.join(outDir, 'AC-01-login-snipe-v6-proof.png'),
-  pdf: path.join(outDir, 'AC-01-login-snipe-v6-proof.pdf'),
-  summary: path.join(outDir, 'AC-01-login-snipe-v6-summary.md'),
+  svg: path.join(outDir, `AC-01-login-snipe-v${versionNumber}.svg`),
+  html: path.join(outDir, `AC-01-login-snipe-v${versionNumber}.html`),
+  png: path.join(outDir, `AC-01-login-snipe-v${versionNumber}-proof.png`),
+  pdf: path.join(outDir, `AC-01-login-snipe-v${versionNumber}-proof.pdf`),
+  summary: path.join(outDir, `AC-01-login-snipe-v${versionNumber}-summary.md`),
 };
 
 const colors = {
@@ -210,13 +217,13 @@ function buildGuide(images, captureMeta) {
   doc.text(18, 22, 'AC-01 Login', { size: 9.2, weight: 900 });
   doc.text(18, 29, 'Open Snipe-IT en controleer dat het dashboard zichtbaar is', { size: 3.1, fill: colors.muted });
   doc.rect(161, 12, 37, 11, colors.greenSoft, '#86EFAC', 0.45, 2);
-  doc.text(179.5, 18.9, `Draft v6 ${today}`, { size: 2.35, weight: 800, fill: colors.green, anchor: 'middle' });
+  doc.text(179.5, 18.9, `Draft v${versionNumber} ${today}`, { size: 2.35, weight: 800, fill: colors.green, anchor: 'middle' });
 
   doc.rect(12, 39, 186, 18, '#F8FAFC', colors.line, 0.45, 1.6);
   doc.text(17, 47, 'Rol', { size: 2.3, weight: 800, fill: colors.muted });
   doc.text(17, 53, 'Iedereen', { size: 3.05, weight: 800 });
   doc.text(58, 47, 'Nodig', { size: 2.3, weight: 800, fill: colors.muted });
-  doc.text(58, 53, 'Telefoon met Inbit Snipe-IT', { size: 3.05, weight: 800 });
+  doc.text(58, 53, neededLabel, { size: 3.05, weight: 800 });
   doc.text(142, 47, 'Adres', { size: 2.3, weight: 800, fill: colors.muted });
   doc.text(142, 53, liveUrl, { size: 3.05, weight: 800, fill: colors.ac });
 
@@ -342,7 +349,7 @@ async function main() {
   await browser.close();
 
   const summary = [
-    '# AC-01 Login Snipe Proof v6',
+    `# AC-01 Login Snipe Proof v${versionNumber}`,
     '',
     `Generated: ${today}`,
     `Live URL: ${liveUrl}`,
@@ -364,6 +371,8 @@ async function main() {
     '- The main workflow uses one shared frame with three internal steps to reduce the empty-card feeling on this short guide.',
     '- The lower help, done, related-guide, QR, and source areas are anchored near the bottom for consistency with longer guides.',
     '- The first visual uses the phone launcher screenshot and circles the Inbit Snipe-IT shortcut.',
+    ...(versionNumber === '7' ? ['- The required-items strip names a general device and account; the phone item is a browser shortcut, not an installed application requirement.'] : []),
+    ...(versionNumber === '8' ? ['- The required-items strip names an Inbit phone and account; Snipe-IT remains a browser shortcut rather than an installed application requirement.'] : []),
     '- The browser fallback is only shown in the Geen telefoon help tile.',
     '- No development URL source or footer text is used.',
     '- Dashboard source is an existing base-test screenshot; recapture from the live logged-in site if a newer production state is required.',

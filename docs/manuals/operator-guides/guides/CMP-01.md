@@ -2,14 +2,14 @@
 
 | Field | Current value |
 | --- | --- |
-| Status | Internal review candidate for V1 |
+| Status | Working draft; v4 remains an internal review candidate for V1 |
 | Family | CMP |
 | Type | Detail task |
-| Current version | `CMP-01-install-existing-v4-draft` |
+| Current version | `CMP-01-install-existing-v5-draft` |
 | Page model | One page |
 | Layout recipe | `stacked-step-flow` with `single-visual`, `reused-evidence`, and `inline-stop` |
 | Generator | `scripts/manuals/generate-component-guide-review.mjs` |
-| Role | Authorized refurbisher (deployment role to confirm) |
+| Role | Senior refurbisher |
 | Needed | Correct open asset and a physical component with a component tag in tray/storage |
 | Prerequisite | Asset verified (SC-01) |
 
@@ -44,6 +44,11 @@ Version 4 keeps the actual four-step interface flow and aligns every target mark
 ## Complete When
 
 The physical component is installed and the same component tag and serial number appear as a tracked component on the correct asset.
+
+## Version Notes
+
+- v5 assigns component placement to the Senior Refurbisher role. The four
+  steps, canonical evidence, and measured focus targets are unchanged.
 
 ## Related Guides
 

@@ -1,6 +1,6 @@
 {
     "schemaVersion":  1,
-    "updatedOn":  "2026-08-13",
+    "updatedOn":  "2026-08-25",
     "artifacts":  [
                       {
                           "code":  "AC-01",
@@ -28,6 +28,15 @@
                           "pages":  1,
                           "file":  "AST-02-refurbishment-route-v5.pdf",
                           "sha256":  "78cd745f055399beeef518517232042ce28c54493b2fec0bc9213f41d4ae49c2"
+                      },
+                      {
+                          "code":  "AST-03",
+                          "version":  14,
+                          "title":  "Asset registreren en labelen",
+                          "status":  "Internal review candidate",
+                          "pages":  2,
+                          "file":  "AST-03-asset-registreren-en-labelen-v14.pdf",
+                          "sha256":  "e557fc77c7e4b5b2249cdc3b4a9ec2dd3e67a6fcfdea368664d585d7eca74390"
                       },
                       {
                           "code":  "WF-01",

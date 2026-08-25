@@ -17,6 +17,9 @@ export const evidenceRoot = path.resolve(
 export const acceptedPdfRoot = path.resolve(
     process.env.SNIPEIT_GUIDE_PUBLISHED_PDF_ROOT ?? path.join(guideResourceRoot, 'pdf'),
 );
+export const draftPdfRoot = path.resolve(
+    process.env.SNIPEIT_GUIDE_DRAFT_PDF_ROOT ?? path.join(guideResourceRoot, 'drafts'),
+);
 export const baselineRoot = path.resolve(
     process.env.SNIPEIT_GUIDE_BASELINE_ROOT ?? path.join(guideResourceRoot, 'baselines'),
 );
@@ -156,6 +159,7 @@ export function runtimeSummary() {
         guideResourceRoot,
         evidenceRoot,
         acceptedPdfRoot,
+        draftPdfRoot,
         baselineRoot,
         generatedOutputRoot,
         repoPdfOutputRoot,

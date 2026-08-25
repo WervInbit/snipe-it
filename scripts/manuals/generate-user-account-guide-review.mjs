@@ -25,12 +25,22 @@ const { chromium } = loadGuideDependency('playwright');
 const sharp = loadGuideDependency('sharp');
 
 const guideFilter = process.env.SNIPEIT_GUIDE_FILTER?.trim().toUpperCase() || null;
-const generatedOn = process.env.SNIPEIT_GUIDE_DATE ?? (guideFilter ? '2026-08-13' : '2026-08-11');
+const usr01Version = process.env.SNIPEIT_USR01_VERSION ?? '11';
+const usr02Version = process.env.SNIPEIT_USR02_VERSION ?? '9';
+const usr03Version = process.env.SNIPEIT_USR03_VERSION ?? '3';
+const usr04Version = process.env.SNIPEIT_USR04_VERSION ?? '3';
+const ac02Version = process.env.SNIPEIT_AC02_VERSION ?? '3';
+const usr01FeedbackRevision = Number(usr01Version) >= 9;
+const generatedOn = process.env.SNIPEIT_GUIDE_DATE ?? '2026-08-25';
 const sourceDir = evidenceRoot;
 const focusedReviewDirs = {
-    'USR-01': '2026-08-13-usr01-review-v8',
-    'USR-02': '2026-08-13-usr02-review-v7',
+    'USR-01': `2026-08-25-usr01-review-v${usr01Version}`,
+    'USR-02': `2026-08-25-usr02-review-v${usr02Version}`,
+    'USR-03': `2026-08-25-usr03-review-v${usr03Version}`,
+    'USR-04': `2026-08-25-usr04-review-v${usr04Version}`,
+    'AC-02': `2026-08-25-ac02-review-v${ac02Version}`,
 };
+const combinedBatchName = `operator-guides-user-account-review-${generatedOn}`;
 const outDir = process.env.SNIPEIT_GUIDE_OUT_DIR ?? path.join(
     guideOutputDir('user-account-review'),
     guideFilter ? (focusedReviewDirs[guideFilter] ?? `2026-08-13-${guideFilter.toLowerCase()}-review`) : 'batch-v1',
@@ -48,6 +58,7 @@ const sourceFiles = {
     detail: 'USR-DETAIL-DESKTOP-01.png',
     reset: 'USR-RESET-LINK-DESKTOP-01.png',
     editPassword: 'USR-EDIT-PASSWORD-DESKTOP-01.png',
+    editPasswordGenerated: 'USR-EDIT-PASSWORD-GENERATED-DESKTOP-01.png',
     editActivated: 'USR-EDIT-ACTIVATED-DESKTOP-01.png',
     accountMenu: 'AC-ACCOUNT-MENU-DESKTOP-01.png',
     selfPassword: 'AC-SELF-PASSWORD-DESKTOP-01.png',
@@ -62,6 +73,7 @@ const sourceFiles = {
 const preparedCropSpecs = {
     resetAction: { source: 'reset', left: 900, top: 500, width: 345, height: 190 },
     editPasswordAction: { source: 'editPassword', left: 420, top: 300, width: 630, height: 220 },
+    editPasswordGeneratedAction: { source: 'editPasswordGenerated', left: 330, top: 285, width: 650, height: 220 },
     accountMenuAction: { source: 'accountMenu', left: 930, top: 80, width: 310, height: 205 },
     selfPasswordFields: { source: 'selfPassword', left: 55, top: 105, width: 925, height: 295 },
     selfPasswordSave: { source: 'selfPassword', left: 650, top: 250, width: 330, height: 150 },
@@ -113,6 +125,11 @@ function drawStep(doc, step, y, h, color) {
     doc.stepBadge(12, y, step.number, color);
     doc.text(23, y + 7.4, step.title, { size: 3.85, weight: 900 });
     doc.text(23, y + 13.8, step.body, { size: 2.35, fill: colors.muted, lh: 3.15 });
+    if (step.warning) {
+        const bodyLineCount = Array.isArray(step.body) ? step.body.length : 1;
+        const warningY = step.warningY ?? y + 14.6 + bodyLineCount * 3.15;
+        doc.text(23, warningY, step.warning, { size: 2.15, weight: 800, fill: colors.help, lh: 2.8 });
+    }
     if (step.note) {
         doc.text(23, y + (step.noteY ?? 28), step.note, { size: 2.15, weight: 800, fill: colors.ink });
     }
@@ -230,19 +247,19 @@ function buildPage(images, page) {
 }
 
 const commonUsrContext = [
-    { label: 'Rol', value: 'Admin / Superadmin' },
-    { label: 'Nodig', value: 'Goedgekeurde wijziging' },
+    { label: 'Rol', value: 'Admin' },
+    { label: 'Nodig', value: 'Stopbesluit + nieuwe beheerder' },
     { label: 'Vooraf', value: 'Ingelogd (AC-01 Login)', color: colors.ac, guide: guideReference('AC-01') },
 ];
 
 const pages = [
     {
-        guide: 'USR-01', code: 'USR-01', family: 'USR', title: 'Gebruiker toevoegen', version: 'Draft v8',
-        status: GUIDE_STATUSES.INTERNAL_REVIEW,
+        guide: 'USR-01', code: 'USR-01', family: 'USR', title: 'Gebruiker toevoegen', version: `Draft v${usr01Version}`,
+        status: usr01FeedbackRevision ? GUIDE_STATUSES.WORKING_DRAFT : GUIDE_STATUSES.INTERNAL_REVIEW,
         componentSystemVersion: 1,
         purpose: 'Maak een lokaal account met de juiste naam, toegang en standaardrol',
         context: [
-            { label: 'Rol', value: 'Admin / Superadmin' },
+            { label: 'Rol', value: 'Admin' },
             { label: 'Nodig', value: 'Naam, rol en veilige overdracht' },
             { label: 'Vooraf', value: 'Ingelogd (AC-01 Login)', color: colors.ac, guide: guideReference('AC-01') },
         ],
@@ -268,7 +285,7 @@ const pages = [
             },
             {
                 number: '2', title: 'Vul account en wachtwoord in',
-                body: ['Gebruikersnaam: voornaam + initialen achternaam.', 'Tijdelijk wachtwoord: gebruikersnaam + huidig jaar.', 'Voorbeeld: Jandv2026. Zet inloggen aan.'],
+                body: ['Gebruikersnaam: Voornaam + kleine eerste letters van', 'alle achternaamdelen, zonder punten of spaties.', 'Jan de Vries wordt Jandv. Tijdelijk: Jandv2026.', 'Zet Deze gebruiker kan inloggen aan.'],
                 guideReference: {
                     prefix: 'Eerste login: direct naar',
                     reference: guideReference('AC-02'),
@@ -278,8 +295,10 @@ const pages = [
                 visuals: [{ image: 'create', label: '2A', caption: 'Vul account en tijdelijk wachtwoord in; zet inloggen aan.', crop: { x: 250, y: 145, w: 820, h: 390 }, fit: 'contain', marks: [{ shape: 'rect', x: 460, y: 455, w: 230, h: 48 }] }],
             },
             {
-                number: '3', title: 'Kies groep en eventuele rechten',
-                body: ['Onderaan: kies de standaardgroep bij Groepen.', 'Normaal: Refurbisher.', 'Tweede tab bovenaan: Machtigingen.', 'Daar staat Global: Super User (Superadmin).'],
+                number: '3', title: usr01FeedbackRevision ? 'Open Optionele informatie' : 'Kies groep en eventuele rechten',
+                body: usr01FeedbackRevision
+                    ? ['Open onderaan de balk Optionele informatie.', 'Kies daar bij Groepen de standaardgroep.', 'Normaal: Refurbisher.', 'Extra rechten: open bovenaan Machtigingen.']
+                    : ['Onderaan: kies de standaardgroep bij Groepen.', 'Normaal: Refurbisher.', 'Tweede tab bovenaan: Machtigingen.', 'Daar staat Global: Super User (Superadmin).'],
                 note: 'Gebruik altijd de minimaal benodigde rechten.',
                 guideReference: {
                     prefix: 'Groep maken of wijzigen:',
@@ -288,7 +307,7 @@ const pages = [
                     iconX: 59,
                 },
                 visualX: 98, visualW: 91,
-                visuals: [{ image: 'groups', label: '3A', caption: 'Groepen staat onderaan de pagina.', crop: { x: 385, y: 345, w: 680, h: 315 }, marks: [{ shape: 'rect', x: 485, y: 400, w: 350, h: 110 }] }],
+                visuals: [{ image: 'groups', label: '3A', caption: usr01FeedbackRevision ? 'Na openen van Optionele informatie: kies Groepen.' : 'Groepen staat onderaan de pagina.', crop: { x: 385, y: 345, w: 680, h: 315 }, marks: [{ shape: 'rect', x: 485, y: 400, w: 350, h: 110 }] }],
             },
             {
                 number: '4', title: 'Controleer en draag over',
@@ -298,11 +317,12 @@ const pages = [
             },
         ],
         helpLabel: 'Hulp bij toevoegen',
+        helpTileHeight: 19,
         help: [
             { title: 'Naam bestaat', body: ['Herstel of hergebruik', 'het bestaande account.'] },
-            { title: 'Geen e-mail', body: ['Resetlink werkt niet;', 'spreek overdracht af.'] },
+            { title: 'Geen e-mail', body: ['Vul niets verzonnens in;', 'draag tijdelijk persoonlijk over.'] },
             { title: 'Minimale rechten', body: ['Kies de laagste groep', 'die het werk mogelijk maakt.'] },
-            { title: 'Maatwerk nodig', body: ['Gebruik Machtigingen;', 'volg USR-02 Rechten.'] },
+            { title: 'Maatwerk nodig', body: 'Gebruik Machtigingen en volg:', guide: guideReference('USR-02') },
         ],
         complete: 'Het account klopt en de gebruiker gaat direct door met AC-02.',
         related: [
@@ -314,24 +334,25 @@ const pages = [
         ],
     },
     {
-        guide: 'USR-02', code: 'USR-02', family: 'USR', title: 'Rol en rechten wijzigen', version: 'Draft v7',
-        status: GUIDE_STATUSES.INTERNAL_REVIEW,
+        guide: 'USR-02', code: 'USR-02', family: 'USR', title: 'Rol en rechten wijzigen', version: `Draft v${usr02Version}`,
+        status: Number(usr02Version) > 7 ? GUIDE_STATUSES.WORKING_DRAFT : GUIDE_STATUSES.INTERNAL_REVIEW,
         componentSystemVersion: 1,
         purpose: 'Wijzig groepen of pas rechten per gebruiker bewust aan',
         context: [
-            { label: 'Rol', value: 'Admin / Superadmin' },
+            { label: 'Rol', value: 'Admin' },
             { label: 'Nodig', value: 'Juiste gebruiker + gewenste toegang' },
             { label: 'Vooraf', value: 'Ingelogd (AC-01 Login)', color: colors.ac, guide: guideReference('AC-01') },
         ],
         steps: [
             {
                 number: '1', title: 'Open het juiste account',
-                body: ['Zoek op naam of gebruikersnaam.', 'Open de juiste gebruiker.', 'Klik Gebruiker aanpassen.'],
+                body: ['Open links Personen > Toon Alles.', 'Zoek op naam of gebruikersnaam.', 'Open de gebruiker en klik Gebruiker aanpassen.'],
                 height: 32,
-                visualX: 90, visualW: 99, visualWidths: [64, 32],
+                visualX: 80, visualW: 109, visualWidths: [25, 48, 30],
                 visuals: [
-                    { image: 'list', label: '1A', caption: 'Zoek en open de juiste gebruiker.', crop: { x: 55, y: 165, w: 810, h: 230 }, fit: 'contain', marks: [{ shape: 'rect', x: 590, y: 185, w: 230, h: 42, padding: 3, target: 'Zoeken' }] },
-                    { image: 'detail', label: '1B', caption: 'Klik Gebruiker aanpassen.', crop: { x: 950, y: 500, w: 290, h: 70 }, fit: 'contain', marks: [{ shape: 'rect', x: 985, y: 518, w: 240, h: 31, padding: 4, target: 'Gebruiker aanpassen' }] },
+                    { image: 'peopleNav', label: '1A', caption: 'Personen > Toon Alles.', crop: { x: 0, y: 245, w: 330, h: 330 }, marks: [{ shape: 'rect', x: 2, y: 345, w: 220, h: 34, padding: 2, target: 'Personen' }] },
+                    { image: 'list', label: '1B', caption: 'Zoek en open de juiste gebruiker.', crop: { x: 55, y: 165, w: 810, h: 230 }, fit: 'contain', marks: [{ shape: 'rect', x: 590, y: 185, w: 230, h: 42, padding: 3, target: 'Zoeken' }] },
+                    { image: 'detail', label: '1C', caption: 'Klik Gebruiker aanpassen.', crop: { x: 950, y: 500, w: 290, h: 70 }, fit: 'contain', marks: [{ shape: 'rect', x: 985, y: 518, w: 240, h: 31, padding: 4, target: 'Gebruiker aanpassen' }] },
                 ],
             },
             {
@@ -353,7 +374,7 @@ const pages = [
                 ],
                 height: 47,
                 visualX: 111, visualW: 78,
-                visuals: [{ image: 'permissions', label: '3A', caption: 'Overnemen is standaard; leg elke directe afwijking vast.', crop: { x: 260, y: 155, w: 790, h: 480 }, marks: [{ shape: 'rect', x: 665, y: 215, w: 370, h: 265, padding: 2, target: 'Directe rechten' }] }],
+                visuals: [{ image: 'permissions', label: '3A', caption: 'Open Machtigingen; Overnemen is de standaardkeuze.', crop: { x: 260, y: 155, w: 790, h: 480 }, marks: [{ shape: 'rect', x: 360, y: 160, w: 125, h: 49, padding: 2, target: 'Machtigingen' }, { shape: 'rect', x: 665, y: 215, w: 370, h: 265, padding: 2, target: 'Directe rechten' }] }],
             },
             {
                 number: '4', title: 'Sla op en controleer opnieuw',
@@ -380,107 +401,113 @@ const pages = [
         ],
     },
     {
-        guide: 'USR-03', code: 'USR-03', family: 'USR', title: 'Wachtwoord resetten', version: 'Draft v1',
+        guide: 'USR-03', code: 'USR-03', family: 'USR', title: 'Wachtwoord resetten', version: `Draft v${usr03Version}`,
         purpose: 'Herstel toegang zonder het definitieve privéwachtwoord te kennen of bewaren',
         context: [
-            { label: 'Rol', value: 'Admin / Superadmin' },
-            { label: 'Nodig', value: 'Actief lokaal account' },
-            { label: 'Vooraf', value: 'Identiteit gecontroleerd' },
+            { label: 'Rol', value: 'Admin' },
+            { label: 'Nodig', value: 'Lokale gebruiker + overdracht' },
+            { label: 'Vooraf', value: 'Ingelogd (AC-01 Login)', color: colors.ac, guide: guideReference('AC-01') },
         ],
         stepHeight: 50,
         steps: [
             {
-                number: '1', title: 'Controleer het account',
-                body: ['Vergelijk naam en gebruikersnaam.', 'Controleer login, e-mail en LDAP.'],
-                stop: 'STOP bij LDAP: laat IT of de directorybeheerder het wachtwoord wijzigen.',
-                visuals: [{ image: 'detail', label: '1A', caption: 'Controleer identiteit, loginstatus, e-mail en LDAP.', crop: { x: 55, y: 155, w: 1190, h: 505 }, marks: [{ shape: 'rect', x: 75, y: 260, w: 875, h: 405 }] }],
-            },
-            {
-                number: '2', title: 'Kies één resetroute',
-                body: ['2A heeft voorkeur bij een geldig e-mailadres.', '2B gebruikt één willekeurig tijdelijk wachtwoord.'],
+                number: '1', title: 'Vind en controleer de gebruiker',
+                body: ['Open Personen > Toon Alles en zoek de gebruiker.', 'Vergelijk naam en gebruikersnaam.', 'Open het account en kies Gebruiker aanpassen.'],
+                visualX: 74, visualW: 115, visualWidths: [32, 48, 29],
                 visuals: [
-                    { image: 'resetAction', label: '2A', caption: 'Voorkeur: stuur een resetlink.', fit: 'contain', marks: [{ shape: 'rect', x: 70, y: 118, w: 255, h: 36 }] },
-                    { image: 'editPasswordAction', label: '2B', caption: 'Alternatief: gebruik Genereer.', fit: 'contain', marks: [{ shape: 'ellipse', x: 430, y: 45, w: 115, h: 45 }] },
+                    { image: 'peopleNav', label: '1A', caption: 'Open Personen > Toon Alles.', crop: { x: 0, y: 245, w: 330, h: 330 }, marks: [{ shape: 'rect', x: 2, y: 345, w: 220, h: 34, padding: 2, target: 'Personen' }] },
+                    { image: 'list', label: '1B', caption: 'Zoek en open de gebruiker.', crop: { x: 55, y: 165, w: 810, h: 230 }, fit: 'contain', marks: [{ shape: 'rect', x: 590, y: 185, w: 230, h: 42, padding: 3, target: 'Zoeken' }] },
+                    { image: 'detail', label: '1C', caption: 'Kies Gebruiker aanpassen.', crop: { x: 950, y: 500, w: 290, h: 70 }, fit: 'contain', marks: [{ shape: 'rect', x: 985, y: 518, w: 240, h: 31, padding: 4, target: 'Gebruiker aanpassen' }] },
                 ],
             },
             {
+                number: '2', title: 'Maak één tijdelijk wachtwoord',
+                body: ['Kies eenmaal Genereer.', 'Het tijdelijke wachtwoord verschijnt onder het eerste veld.', 'Laat Deze gebruiker kan inloggen aan staan.', 'Kies eenmaal Opslaan.', 'Gebruik geen zelfbedacht vast wachtwoord.'],
+                visuals: [{ image: 'editPasswordGeneratedAction', label: '2A', caption: 'Neem het zichtbare tijdelijke wachtwoord persoonlijk over.', fit: 'contain', marks: [{ shape: 'rect', x: 397, y: 38, w: 90, h: 38, target: 'Genereer' }] }],
+            },
+            {
                 number: '3', title: 'Draag veilig over',
-                body: ['Gebruik het goedgekeurde veilige kanaal.', 'Geen wachtwoord in chat, notities of screenshots.', 'Na een tijdelijk wachtwoord: ga direct naar AC-02.'],
+                body: ['Geef het tijdelijke wachtwoord persoonlijk door.', 'Niet in chat, e-mail, notities of screenshots.', 'Laat de gebruiker direct AC-02 volgen.'],
                 stop: 'Vraag nooit om het definitieve wachtwoord als bewijs.',
-                visuals: [{ image: 'accountMenuAction', label: '3A', caption: 'AC-02 start bij Wachtwoord wijzigen in het accountmenu.', fit: 'contain', marks: [{ shape: 'rect', x: 105, y: 115, w: 190, h: 35 }] }],
+                visuals: [{ image: 'accountMenuAction', label: '3A', caption: 'AC-02 start bij Wachtwoord wijzigen in het accountmenu.', fit: 'contain', marks: [{ shape: 'rect', x: 106, y: 121, w: 188, h: 29, target: 'Wachtwoord wijzigen' }] }],
             },
         ],
         helpLabel: 'Hulp bij resetten',
+        helpTileHeight: 19,
         help: [
-            { title: 'Geen e-mail', body: ['Gebruik één tijdelijk', 'wachtwoord via Genereer.'] },
-            { title: 'Link komt niet aan', body: ['Controleer bestaand adres;', 'verzin geen nieuw adres.'] },
+            { title: 'Account staat uit', body: ['Zet login alleen aan als', 'dit de juiste gebruiker is.'] },
+            { title: 'Genereer werkt niet', body: ['Sla niet half op;', 'vraag systeembeheer.'] },
             { title: 'Geen veilig kanaal', body: ['Niet doorgeven;', 'regel eerst overdracht.'] },
-            { title: 'Wachtwoord gewijzigd', body: ['Ga door met AC-02', 'voor een privéwachtwoord.'] },
+            { title: 'Wachtwoord gewijzigd', body: 'Ga direct door voor een privéwachtwoord:', guide: guideReference('AC-02') },
         ],
         complete: 'De gebruiker heeft één resetroute en kent daarna alleen zelf het privéwachtwoord.',
-        related: [{ label: 'AC-02 Eigen wachtwoord', width: 47 }, { label: 'USR-01 Toevoegen', width: 42 }, { label: 'HELP-01 Hulp', width: 37 }],
+        related: [guideReference('AC-02', { width: 57 }), guideReference('USR-01', { width: 54 }), guideReference('HELP-01', { width: 50, row: 2 })],
     },
     {
-        guide: 'AC-02', code: 'AC-02', family: 'AC', title: 'Eigen wachtwoord wijzigen', version: 'Draft v1', titleSize: 6.65,
+        guide: 'AC-02', code: 'AC-02', family: 'AC', title: 'Eigen wachtwoord wijzigen', version: `Draft v${ac02Version}`, titleSize: 6.65,
         purpose: 'Vervang het huidige of tijdelijke wachtwoord door een privéwachtwoord',
         context: [
             { label: 'Rol', value: 'Iedereen met lokaal account' },
             { label: 'Nodig', value: 'Huidig of tijdelijk wachtwoord' },
-            { label: 'Vooraf', value: 'Ingelogd (AC-01 Login)', color: colors.ac },
+            { label: 'Vooraf', value: 'Ingelogd (AC-01 Login)', color: colors.ac, guide: guideReference('AC-01') },
         ],
         stepHeight: 50,
         steps: [
             {
                 number: '1', title: 'Open Wachtwoord wijzigen',
                 body: ['Open rechtsboven het accountmenu.', 'Kies Wachtwoord wijzigen.'],
-                stop: 'LDAP-account? Vraag IT; gebruik dit lokale formulier niet.',
-                visuals: [{ image: 'accountMenuAction', label: '1A', caption: 'Open het accountmenu en kies Wachtwoord wijzigen.', fit: 'contain', marks: [{ shape: 'rect', x: 105, y: 115, w: 190, h: 35 }] }],
+                visuals: [{ image: 'accountMenuAction', label: '1A', caption: 'Open het accountmenu en kies Wachtwoord wijzigen.', fit: 'contain', marks: [{ shape: 'rect', x: 106, y: 121, w: 188, h: 29, target: 'Wachtwoord wijzigen' }] }],
             },
             {
                 number: '2', title: 'Vul de drie velden in',
                 body: ['Huidig wachtwoord.', 'Nieuw privéwachtwoord, daarna nogmaals hetzelfde.', 'Hergebruik het tijdelijke wachtwoord niet.'],
-                visuals: [{ image: 'selfPasswordFields', label: '2A', caption: 'Vul huidig, nieuw en bevestiging in.', fit: 'contain', marks: [{ shape: 'rect', x: 180, y: 60, w: 370, h: 150 }] }],
+                visuals: [{ image: 'selfPasswordFields', label: '2A', caption: 'Vul huidig, nieuw en bevestiging in.', fit: 'contain' }],
             },
             {
                 number: '3', title: 'Sla het nieuwe wachtwoord op',
                 body: ['Kies Opslaan en lees de melding.', 'Andere aangemelde apparaten worden uitgelogd.'],
-                stop: 'Deel het nieuwe wachtwoord niet met een beheerder of collega.',
-                visuals: [{ image: 'selfPasswordSave', label: '3A', caption: 'Opslaan bevestigt de wijziging en sluit andere sessies.', fit: 'contain', marks: [{ shape: 'ellipse', x: 140, y: 75, w: 165, h: 65 }] }],
+                warning: ['Deel het nieuwe wachtwoord nooit met', 'een beheerder of collega.'],
+                visuals: [{ image: 'selfPasswordSave', label: '3A', caption: 'Opslaan bevestigt de wijziging en sluit andere sessies.', fit: 'contain', marks: [{ shape: 'rect', x: 188, y: 89, w: 105, h: 48, target: 'Opslaan' }] }],
             },
         ],
         helpLabel: 'Hulp bij eigen wachtwoord',
+        helpTileHeight: 19,
         help: [
-            { title: 'Tijdelijk werkt niet', body: ['Vraag beheerder om', 'USR-03 opnieuw te doen.'] },
+            { title: 'Tijdelijk werkt niet', body: 'Vraag een beheerder om een nieuwe reset:', guide: guideReference('USR-03') },
             { title: 'Afgekeurd', body: ['Volg de zichtbare', 'wachtwoordregel.'] },
-            { title: 'LDAP', body: ['Wijzig via IT of', 'de directoryservice.'] },
-            { title: 'Vergeten', body: ['Vraag supervisor om', 'USR-03 te starten.'] },
+            { title: 'Geen huidig wachtwoord', body: 'Vraag een supervisor om:', guide: guideReference('USR-03') },
+            { title: 'Vergeten', body: 'Vraag een supervisor om:', guide: guideReference('USR-03') },
         ],
         complete: 'De wijziging is opgeslagen en alleen de gebruiker kent het nieuwe wachtwoord.',
-        related: [{ label: 'AC-01 Login', width: 34 }, { label: 'USR-03 Reset', width: 38 }, { label: 'HELP-01 Hulp', width: 37 }],
+        related: [guideReference('AC-01', { width: 44 }), guideReference('USR-03', { width: 58 }), guideReference('HELP-01', { width: 50, row: 2 })],
     },
     {
-        guide: 'USR-04', code: 'USR-04', family: 'USR', title: 'Gebruiker uitschakelen', version: 'Draft v1',
+        guide: 'USR-04', code: 'USR-04', family: 'USR', title: 'Gebruiker uitschakelen', version: `Draft v${usr04Version}`,
         purpose: 'Stop toegang veilig en behoud accountgeschiedenis en eigendom',
         pageNumber: 1, pageCount: 2,
         context: commonUsrContext,
         stepHeight: 38,
         steps: [
             {
-                number: '1', title: 'Controleer het account',
-                body: ['Vergelijk naam en gebruikersnaam.', 'Controleer Apparaten, Licenties en beheerrelaties.'],
-                stop: 'STOP als de gebruiker of nieuwe eigenaar niet duidelijk is.',
-                visuals: [{ image: 'assignments', label: '1A', caption: 'Gebruik de tabs om toegewezen en beheerde records te controleren.', crop: { x: 100, y: 150, w: 850, h: 260 }, marks: [{ shape: 'rect', x: 110, y: 155, w: 830, h: 80 }] }],
+                number: '1', title: 'Vind en controleer het account',
+                body: ['Open Personen > Toon Alles en zoek de gebruiker.', 'Vergelijk naam en gebruikersnaam.', 'Open het juiste account.'],
+                warning: ['Account niet zeker? Wijzig niets en', 'controleer de identiteit.'],
+                visualX: 78, visualW: 111, visualWidths: [38, 70],
+                visuals: [
+                    { image: 'peopleNav', label: '1A', caption: 'Open Personen > Toon Alles.', crop: { x: 0, y: 245, w: 330, h: 330 }, marks: [{ shape: 'rect', x: 2, y: 345, w: 220, h: 34, padding: 2, target: 'Personen' }] },
+                    { image: 'list', label: '1B', caption: 'Zoek en open de juiste gebruiker.', crop: { x: 55, y: 165, w: 810, h: 230 }, fit: 'contain', marks: [{ shape: 'rect', x: 590, y: 185, w: 230, h: 42, padding: 3, target: 'Zoeken' }] },
+                ],
             },
             {
                 number: '2', title: 'Verwerk open eigendom',
-                body: ['Check items in of draag ze goedgekeurd over.', 'Wijs beheerde gebruikers en locaties opnieuw toe.'],
-                stop: 'Verwijder geen geschiedenis om de controle te omzeilen.',
+                body: ['Controleer Apparaten, Licenties en beheerrelaties.', 'Check items in of draag ze over aan de afgesproken', 'nieuwe verantwoordelijke voor apparatuur en beheer.'],
+                warning: ['Behoud de geschiedenis; verwerk eerst', 'alle open eigendom.'],
                 visuals: [{ image: 'assignments', label: '2A', caption: 'Controleer elke relevante tab voordat toegang wordt gestopt.', crop: { x: 100, y: 150, w: 850, h: 260 }, marks: [{ shape: 'rect', x: 110, y: 155, w: 830, h: 80 }] }],
             },
             {
                 number: '3', title: 'Schakel inloggen uit',
                 body: ['Kies Gebruiker aanpassen.', 'Haal het vinkje weg bij Deze gebruiker kan inloggen.', 'Sla op.'],
-                visuals: [{ image: 'activatedAction', label: '3A', caption: 'Uitvinken stopt nieuwe logins; het account blijft bestaan.', fit: 'contain', marks: [{ shape: 'ellipse', x: 205, y: 230, w: 260, h: 65 }] }],
+                visuals: [{ image: 'activatedAction', label: '3A', caption: 'Uitvinken stopt nieuwe logins; het account blijft bestaan.', fit: 'contain', marks: [{ shape: 'rect', x: 202, y: 222, w: 266, h: 75, target: 'Deze gebruiker kan inloggen' }] }],
             },
             {
                 number: '4', title: 'Controleer deactivering',
@@ -495,49 +522,54 @@ const pages = [
             { title: 'Account onduidelijk', body: ['Niet wijzigen;', 'controleer identiteit.'] },
             { title: 'Toch verwijderen', body: ['Ga alleen na besluit', 'naar volgende pagina.'] },
         ],
-        complete: 'Login staat uit en alle open eigendom heeft een goedgekeurde eigenaar.',
-        related: [{ label: 'USR-01 Toevoegen', width: 42 }, { label: 'USR-02 Rechten', width: 39 }, { label: 'HELP-01 Hulp', width: 37 }],
+        complete: 'Login staat uit en alle open eigendom heeft een nieuwe verantwoordelijke.',
+        related: [guideReference('USR-01', { width: 54 }), guideReference('USR-02', { width: 59 }), guideReference('HELP-01', { width: 50, row: 2 })],
     },
     {
-        guide: 'USR-04', code: 'USR-04', family: 'USR', title: 'Verwijderen of herstellen', version: 'Draft v1', titleSize: 6.65,
-        purpose: 'Gebruik verwijderen en herstellen alleen na de lifecyclebeslissing',
+        guide: 'USR-04', code: 'USR-04', family: 'USR', title: 'Verwijderen of herstellen', version: `Draft v${usr04Version}`, titleSize: 6.65,
+        purpose: 'Gebruik verwijderen en herstellen alleen na het afgesproken verwijderbesluit',
         pageNumber: 2, pageCount: 2,
-        context: commonUsrContext,
+        context: [
+            { label: 'Rol', value: 'Admin' },
+            { label: 'Nodig', value: 'Afgesproken verwijderbesluit' },
+            { label: 'Vooraf', value: 'USR-04 pagina 1 voltooid', color: colors.usr, guide: guideReference('USR-04') },
+        ],
         stepHeight: 38,
         steps: [
             {
-                number: '1', title: 'Controleer voor verwijderen',
+                number: '5', title: 'Controleer voor verwijderen',
                 body: ['Deactiveren is de normale offboardingroute.', 'Verwijder alleen na controle van alle toewijzingen.'],
-                stop: 'STOP: Check Alles In / Verwijder Gebruiker is geen normale snelkoppeling.',
-                visuals: [{ image: 'deleteAction', label: '1A', caption: 'Gebruik Verwijder pas na de volledige controle.', fit: 'contain', marks: [{ shape: 'rect', x: 80, y: 70, w: 260, h: 48 }, { shape: 'rect', x: 80, y: 115, w: 260, h: 42 }] }],
+                warning: ['Check Alles In / Verwijder Gebruiker', 'is geen normale snelkoppeling.'],
+                visuals: [{ image: 'deleteAction', label: '5A', caption: 'Gebruik Verwijder pas na de volledige controle.', fit: 'contain', marks: [{ shape: 'rect', x: 80, y: 70, w: 260, h: 48 }, { shape: 'rect', x: 80, y: 115, w: 260, h: 42 }] }],
             },
             {
-                number: '2', title: 'Vind het verwijderde account',
+                number: '6', title: 'Vind het verwijderde account',
                 body: ['Open Verwijderde Gebruikers.', 'Zoek op naam en gebruikersnaam.', 'Maak geen duplicaat met dezelfde identiteit.'],
-                visuals: [{ image: 'deletedList', label: '2A', caption: 'De verwijderde identiteit blijft vindbaar.', crop: { x: 55, y: 100, w: 1190, h: 360 }, marks: [{ shape: 'rect', x: 75, y: 285, w: 1160, h: 100 }] }],
+                visuals: [{ image: 'deletedList', label: '6A', caption: 'De verwijderde identiteit blijft vindbaar.', crop: { x: 55, y: 100, w: 1190, h: 360 }, marks: [{ shape: 'rect', x: 75, y: 285, w: 1160, h: 100 }] }],
             },
             {
-                number: '3', title: 'Herstel het bestaande account',
+                number: '7', title: 'Herstel het bestaande account',
                 body: ['Open de verwijderde gebruiker.', 'Kies Herstel.'],
-                stop: 'Herstel activeert login niet automatisch; controleer dit apart.',
-                visuals: [{ image: 'restoreAction', label: '3A', caption: 'De oranje melding en Herstel bevestigen de verwijderde staat.', fit: 'contain', marks: [{ shape: 'ellipse', x: 110, y: 170, w: 270, h: 45 }] }],
+                warning: ['Herstel activeert login niet automatisch;', 'controleer dit apart.'],
+                visuals: [{ image: 'restoreAction', label: '7A', caption: 'De oranje melding en Herstel bevestigen de verwijderde staat.', fit: 'contain', marks: [{ shape: 'rect', x: 105, y: 162, w: 282, h: 58, target: 'Herstel' }] }],
             },
             {
-                number: '4', title: 'Controleer na herstel',
+                number: '8', title: 'Controleer na herstel',
                 body: ['Controleer gebruikersnaam, groep en directe rechten.', 'Bepaal apart of login weer aan mag.'],
-                stop: 'STOP voor reactivatie als de actuele rol niet zeker is.',
-                visuals: [{ image: 'restored', label: '4A', caption: 'Hersteld account: identiteit en groep zichtbaar, login nog uit.', crop: { x: 55, y: 155, w: 1190, h: 505 }, marks: [{ shape: 'rect', x: 75, y: 300, w: 875, h: 320 }] }],
+                warning: ['Rol niet zeker? Laat login uit en', 'controleer eerst de actuele toegang.'],
+                visuals: [{ image: 'restored', label: '8A', caption: 'Hersteld account: identiteit en groep zichtbaar, login nog uit.', crop: { x: 55, y: 155, w: 1190, h: 505 }, marks: [{ shape: 'rect', x: 75, y: 300, w: 875, h: 320 }] }],
             },
         ],
         helpLabel: 'Hulp bij verwijderen en herstellen',
+        helpTileHeight: 19,
         help: [
             { title: 'Verwijderen geblokkeerd', body: ['Controleer resterende', 'toewijzingen en beheer.'] },
             { title: 'Per ongeluk verwijderd', body: ['Herstel het bestaande', 'account.'] },
             { title: 'Dubbel account', body: ['Niet samenvoegen of', 'verwijderen zonder besluit.'] },
-            { title: 'Rol verouderd', body: ['Controleer USR-02', 'voor reactivatie.'] },
+            { title: 'Rol verouderd', body: 'Controleer de toegang voor reactivatie:', guide: guideReference('USR-02') },
         ],
         complete: 'Het bestaande account is hersteld en rol plus login zijn opnieuw beoordeeld.',
-        related: [{ label: 'USR-01 Toevoegen', width: 42 }, { label: 'USR-02 Rechten', width: 39 }, { label: 'HELP-01 Hulp', width: 37 }],
+        related: [guideReference('USR-01', { width: 54 }), guideReference('USR-02', { width: 59 }), guideReference('HELP-01', { width: 50, row: 2 })],
     },
 ];
 
@@ -604,6 +636,7 @@ async function main() {
             componentQa: guidePages.some((item) => item.page.componentSystemVersion),
         });
         if (componentQa) geometryReports.push({ guideCode, ...componentQa });
+        fs.copyFileSync(pdfFile, path.join(repoPdfDir, path.basename(pdfFile)));
         outputs.push(pdfFile);
     }
 
@@ -629,16 +662,16 @@ async function main() {
         return;
     }
 
-    const combinedHtml = path.join(outDir, 'operator-guides-user-account-review-v1.html');
-    const combinedPdf = path.join(outDir, 'operator-guides-user-account-review-v1.pdf');
-    const repoPdf = path.join(repoPdfDir, 'operator-guides-user-account-review-v1.pdf');
+    const combinedHtml = path.join(outDir, `${combinedBatchName}.html`);
+    const combinedPdf = path.join(outDir, `${combinedBatchName}.pdf`);
+    const repoPdf = path.join(repoPdfDir, `${combinedBatchName}.pdf`);
     fs.writeFileSync(combinedHtml, htmlForSvgs(renderedPages.map((item) => item.svg)), 'utf8');
     await renderHtml(browser, combinedHtml, combinedPdf, path.join(outDir, 'operator-guides-user-account-review-v1-proof'));
     fs.copyFileSync(combinedPdf, repoPdf);
     await browser.close();
 
     const summary = [
-        '# User Account Guide Review Batch v1',
+        '# User Account Guide Review Batch',
         '',
         `Generated: ${generatedOn}`,
         '',

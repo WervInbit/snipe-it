@@ -11,7 +11,11 @@ import {
   resolveCommand,
 } from './lib/guide-paths.mjs';
 
-const generatedOn = '2026-08-04';
+const wf01Version = process.env.SNIPEIT_WF01_VERSION ?? '9';
+const wf02Version = process.env.SNIPEIT_WF02_VERSION ?? '10';
+const wf01FeedbackRevision = wf01Version === '10';
+const wf02FeedbackRevision = wf02Version === '11';
+const generatedOn = process.env.SNIPEIT_GUIDE_DATE ?? '2026-08-04';
 const outDir = process.env.SNIPEIT_GUIDE_OUT_DIR || guideOutputDir('workflow-review-v8');
 const repoPdfDir = repoPdfOutputRoot;
 const chromePath = resolveChromeExecutable();
@@ -258,7 +262,9 @@ function wf01Page() {
         label: '3B',
         caption: 'Vergelijk profiel en aantallen; open daarna de juiste run.',
         crop: { x: 16, y: 842, w: 398, h: 142 },
-        mark: { x: 267, y: 882, w: 61, h: 31 },
+        mark: wf01FeedbackRevision
+          ? { x: 264, y: 885, w: 64, h: 36 }
+          : { x: 267, y: 882, w: 61, h: 31 },
       })}
     </div>
   </section>`;
@@ -284,11 +290,11 @@ function wf01Page() {
     code: 'WF-01',
     title: 'Workflow starten',
     subtitle: 'Ga door met de juiste run of start een nieuwe workflow precies eenmaal',
-    version: 'Draft v9',
+    version: `Draft v${wf01Version}`,
     pageLabel: '1 van 1',
     className: 'wf01',
     contextHtml: context({
-      role: 'Senior refurbisher',
+      role: wf01FeedbackRevision ? 'Refurbisher' : 'Senior refurbisher',
       needed: 'Gecontroleerde open asset + workflowrechten',
       prerequisite: chip('SC', 'SC-01', 'Asset geopend'),
     }),
@@ -358,11 +364,11 @@ function wf02Front() {
     code: 'WF-02',
     title: 'Workflow uitvoeren',
     subtitle: 'Lees de controle, voer haar uit en leg het eerlijke resultaat vast',
-    version: 'Draft v10',
+    version: `Draft v${wf02Version}`,
     pageLabel: 'Voorzijde 1 van 2',
     className: 'wf02 wf02-front',
     contextHtml: context({
-      role: 'Senior refurbisher',
+      role: wf02FeedbackRevision ? 'Refurbisher' : 'Senior refurbisher',
       needed: 'Actieve workflow + fysiek apparaat',
       prerequisite: chip('WF', 'WF-01', 'Workflow geopend'),
     }),
@@ -433,11 +439,11 @@ function wf02Back() {
     code: 'WF-02',
     title: 'Bewijs en afronding',
     subtitle: 'Voeg uitleg of beeld toe waar nodig en controleer de opgeslagen uitkomst',
-    version: 'Draft v10',
+    version: `Draft v${wf02Version}`,
     pageLabel: 'Achterzijde 2 van 2',
     className: 'wf02 wf02-back',
     contextHtml: context({
-      role: 'Senior refurbisher',
+      role: wf02FeedbackRevision ? 'Refurbisher' : 'Senior refurbisher',
       needed: 'Dezelfde actieve workflow + apparaat',
       prerequisite: chip('WF', 'WF-02', 'Voorzijde uitgevoerd'),
     }),
@@ -793,12 +799,13 @@ fs.mkdirSync(repoPdfDir, { recursive: true });
 const wf01 = wf01Page();
 const wf02Pages = [wf02Front(), wf02Back()];
 const outputs = [
-  writeGuide('WF-01-start-workflow-v9-draft', [wf01]),
-  writeGuide('WF-02-complete-workflow-v10-draft', wf02Pages),
+  writeGuide(`WF-01-start-workflow-v${wf01Version}-draft`, [wf01]),
+  writeGuide(`WF-02-complete-workflow-v${wf02Version}-draft`, wf02Pages),
 ];
 
-const combinedHtml = path.join(outDir, 'workflow-guides-review-batch-v8-2026-08-04.html');
-const combinedPdf = path.join(outDir, 'workflow-guides-review-batch-v8-2026-08-04.pdf');
+const batchVersion = wf01FeedbackRevision || wf02FeedbackRevision ? 'v9-2026-08-18' : 'v8-2026-08-04';
+const combinedHtml = path.join(outDir, `workflow-guides-review-batch-${batchVersion}.html`);
+const combinedPdf = path.join(outDir, `workflow-guides-review-batch-${batchVersion}.pdf`);
 fs.writeFileSync(combinedHtml, htmlDocument([wf01, ...wf02Pages], 'Workflow guides review batch v8'), 'utf8');
 renderPdf(combinedHtml, combinedPdf);
 const combinedPngs = renderPngs(
@@ -819,6 +826,8 @@ const manifest = {
   reviewNotes: [
     'WF-01 relies on SC-01 for asset validation and uses one clear Tests-tab image in step 1.',
     'The Tests icon, workflow profile, existing-run action, and evidence controls use thin red target marks.',
+    ...(wf01FeedbackRevision ? ['WF-01 3B centers the target on the existing-run Bewerk action.'] : []),
+    ...(wf01FeedbackRevision || wf02FeedbackRevision ? ['WF-01 and WF-02 use the Refurbisher role without a senior-role requirement.'] : []),
     'The orange workflow attention banner is excluded from all instructional crops.',
     'WF-01 presents Doorgaan met bestaande workflow inside step 3 after an OF divider and uses the same heading scale as the primary route.',
     'WF-02 is intentionally two-sided and uses neutral live cards before the result-selection step.',
@@ -835,12 +844,12 @@ const manifest = {
 };
 fs.writeFileSync(path.join(outDir, 'generation-manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
 
-const summary = `# Workflow Guide Review Batch V8
+const summary = `# Workflow Guide Review Batch ${wf01FeedbackRevision || wf02FeedbackRevision ? 'V9' : 'V8'}
 
 Generated: ${generatedOn}
 
-- WF-01: Draft v9, one page.
-- WF-02: Draft v10, intentionally two-sided.
+- WF-01: Draft v${wf01Version}, one page.
+- WF-02: Draft v${wf02Version}, intentionally two-sided.
 - Combined review PDF: ${combinedPdf}
 - Operator-facing URL remains https://snipe.inbit/
 - Captures came from a controlled development environment and contain no development URL.
@@ -859,6 +868,7 @@ Generated: ${generatedOn}
 - Note and photo evidence have separate visual steps.
 - WF-02 4A uses the native yellow Notitie state for the selected section and a red target around the note-entry field.
 - The visible example asset tag is consistently anonymized as \`INBIT-HG0421\`.
+${wf01FeedbackRevision ? '- WF-01 3B centers the focus target on Bewerk.\n- WF-01 uses the Refurbisher role.\n' : ''}${wf02FeedbackRevision ? '- Both WF-02 pages use the Refurbisher role.\n' : ''}
 
 ## Remaining Review Point
 

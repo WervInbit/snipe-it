@@ -2,14 +2,14 @@
 
 | Field | Current value |
 | --- | --- |
-| Status | Working draft; awaiting review |
+| Status | Working draft v6; cold-start pass and awaiting exact-version review |
 | Family | CMP |
 | Type | Detail task |
-| Current version | `CMP-04-component-to-tray-v5-draft` |
+| Current version | `CMP-04-component-to-tray-v6-draft` |
 | Page model | One page |
 | Layout recipe | `stacked-step-flow` with `single-visual`, `reused-evidence`, and `inline-stop` |
 | Generator | `scripts/manuals/generate-component-followup-guides.mjs` |
-| Role | Authorized refurbisher (deployment role to confirm) |
+| Role | Senior Refurbisher |
 | Needed | Correct open asset, identified physical component, intended tray/storage destination |
 | Prerequisite | Asset verified (SC-01) |
 
@@ -41,7 +41,10 @@ Stop in step 1 or 2 when component identity does not match. Do not invent or ove
 
 ## Evidence Note
 
-Version 5 keeps the verified four-step normal route and centers the 1B target on the actual `Naar tray` action. The confirmation keeps the existing serial locked. Controlled component `INBIT-C-HH9376` / `CMP02-RAM-0001` was removed from the asset and now ends in `Status: In Tray` with no asset attached.
+Version 6 keeps the verified v5 four-step route and focus geometry while naming
+the minimum operational role. The confirmation keeps the existing serial
+locked. Controlled component `INBIT-C-HH9376` / `CMP02-RAM-0001` was removed
+from the asset and now ends in `Status: In Tray` with no asset attached.
 
 ## Complete When
 

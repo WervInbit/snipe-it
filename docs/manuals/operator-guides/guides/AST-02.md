@@ -2,14 +2,14 @@
 
 | Field | Current value |
 | --- | --- |
-| Status | Internal review candidate for V1 |
+| Status | Working draft; v5 remains an internal review candidate for V1 |
 | Family | AST |
 | Type | Route overview |
-| Current version | `AST-02-refurbishment-route-v5-draft` |
+| Current version | `AST-02-refurbishment-route-v6-draft` |
 | Page model | One page |
 | Layout recipe | `route-list` with `help-alternative` |
 | Generator | `scripts/manuals/generate-revised-guide-set.mjs` |
-| Role | Refurbisher / senior refurbisher |
+| Role | Refurbisher |
 | Needed | Device, account, and the task guides referenced by the route |
 
 ## Purpose
@@ -43,3 +43,8 @@ All active guides except HELP-01 may appear as route references. HELP-01 remains
 
 - Generate only after the child-guide titles and ownership boundaries are stable.
 - Do not show product statuses or role permissions that are still unresolved.
+
+## Version Notes
+
+- v6 removes the senior-refurbisher role from this general refurbishment
+  route. The route content and accepted compact-list layout remain unchanged.

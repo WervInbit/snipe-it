@@ -6,6 +6,7 @@ import { spawnSync } from 'node:child_process';
 import {
     acceptedPdfRoot,
     baselineRoot,
+    draftPdfRoot,
     evidenceRoot,
     repoRoot,
     resolveCommand,
@@ -35,7 +36,7 @@ function verifyManifestFiles(root, entries, label) {
     }
 
     const unlisted = fs.readdirSync(root, { withFileTypes: true })
-        .filter((entry) => entry.isFile() && entry.name !== 'manifest.json')
+        .filter((entry) => entry.isFile() && !['manifest.json', 'README.md'].includes(entry.name))
         .map((entry) => entry.name)
         .filter((file) => !names.has(file));
     assert.deepEqual(unlisted, [], `${label} has unlisted files`);
@@ -74,8 +75,8 @@ function verifyMarkdownLinks(directory) {
 }
 
 const evidenceManifest = readJson(path.join(evidenceRoot, 'manifest.json'));
-assert.equal(evidenceManifest.sources.length, 48, 'Canonical evidence count changed without review');
-assert.equal(new Set(evidenceManifest.sources.map((entry) => entry.id)).size, 48, 'Duplicate evidence source ID');
+assert.equal(evidenceManifest.sources.length, 72, 'Canonical evidence count changed without review');
+assert.equal(new Set(evidenceManifest.sources.map((entry) => entry.id)).size, 72, 'Duplicate evidence source ID');
 verifyManifestFiles(evidenceRoot, evidenceManifest.sources, 'Evidence manifest');
 
 const screenshotCatalog = fs.readFileSync(
@@ -88,8 +89,8 @@ for (const source of evidenceManifest.sources) {
 }
 
 const pdfManifest = readJson(path.join(acceptedPdfRoot, 'manifest.json'));
-assert.equal(pdfManifest.artifacts.length, 8, 'Accepted PDF count changed without review');
-assert.equal(new Set(pdfManifest.artifacts.map((entry) => entry.code)).size, 8, 'Duplicate accepted guide code');
+assert.equal(pdfManifest.artifacts.length, 9, 'Accepted PDF count changed without review');
+assert.equal(new Set(pdfManifest.artifacts.map((entry) => entry.code)).size, 9, 'Duplicate accepted guide code');
 verifyManifestFiles(acceptedPdfRoot, pdfManifest.artifacts, 'Accepted PDF manifest');
 
 const pdfinfo = resolveCommand('GUIDE_PDFINFO_PATH', 'pdfinfo');
@@ -127,6 +128,49 @@ for (const artifact of pdfManifest.artifacts) {
     }
 }
 
+const draftManifest = readJson(path.join(draftPdfRoot, 'manifest.json'));
+assert.equal(draftManifest.artifacts.length, 17, 'Draft PDF count changed without review');
+assert.equal(new Set(draftManifest.artifacts.map((entry) => entry.code)).size, 17, 'Duplicate draft guide code');
+verifyManifestFiles(draftPdfRoot, draftManifest.artifacts, 'Draft PDF manifest');
+
+for (const artifact of draftManifest.artifacts) {
+    assert.equal(artifact.status, 'Unaccepted working draft', `${artifact.code} draft has an ambiguous status`);
+    assert.equal(GUIDE_REGISTRY[artifact.code]?.title, artifact.title, `${artifact.code} draft title drift`);
+    assert.ok(artifact.file.toLowerCase().includes('draft'), `${artifact.code} unaccepted filename is not marked draft`);
+
+    const accepted = pdfManifest.artifacts.find((entry) => entry.code === artifact.code);
+    if (artifact.acceptedPredecessorVersion === null) {
+        assert.equal(accepted, undefined, `${artifact.code} omits its accepted predecessor`);
+    } else {
+        assert.equal(accepted?.version, artifact.acceptedPredecessorVersion, `${artifact.code} accepted predecessor drift`);
+        assert.ok(artifact.version > accepted.version, `${artifact.code} draft is not newer than its accepted predecessor`);
+    }
+
+    const file = path.join(draftPdfRoot, artifact.file);
+    const info = run(pdfinfo, [file], `${artifact.code} draft pdfinfo`);
+    const pages = Number(info.match(/^Pages:\s+(\d+)/m)?.[1]);
+    assert.equal(pages, artifact.pages, `${artifact.code} draft page count drift`);
+
+    const dimensions = info.match(/^Page size:\s+([\d.]+) x ([\d.]+) pts/m);
+    assert.ok(dimensions, `${artifact.code} draft has no readable page dimensions`);
+    assert.ok(Math.abs(Number(dimensions[1]) - 595.28) < 2, `${artifact.code} draft page width is not A4`);
+    assert.ok(Math.abs(Number(dimensions[2]) - 841.89) < 2, `${artifact.code} draft page height is not A4`);
+
+    let text = null;
+    if (pdftotext) {
+        text = run(pdftotext, [file, '-'], `${artifact.code} draft text extraction`);
+    } else if (python) {
+        text = run(python, [
+            '-c',
+            'import sys; from pypdf import PdfReader; print("\\n".join((p.extract_text() or "") for p in PdfReader(sys.argv[1]).pages))',
+            file,
+        ], `${artifact.code} draft pypdf text extraction`);
+    }
+    if (text !== null) {
+        assert.ok(!text.includes('dev.inbit'), `${artifact.code} draft exposes the development URL`);
+    }
+}
+
 const baselineManifest = readJson(path.join(baselineRoot, 'manifest.json'));
 assert.equal(baselineManifest.baselines.length, 2, 'Locked baseline count changed without review');
 verifyManifestFiles(baselineRoot, baselineManifest.baselines, 'Baseline manifest');
@@ -153,6 +197,8 @@ console.log(JSON.stringify({
     evidence: evidenceManifest.sources.length,
     acceptedPdfs: pdfManifest.artifacts.length,
     acceptedPages: pdfManifest.artifacts.reduce((total, artifact) => total + artifact.pages, 0),
+    unacceptedDraftPdfs: draftManifest.artifacts.length,
+    unacceptedDraftPages: draftManifest.artifacts.reduce((total, artifact) => total + artifact.pages, 0),
     baselines: baselineManifest.baselines.length,
     activeScripts: activeScripts.length,
     runtime: runtimeSummary(),

@@ -50,6 +50,18 @@ A reference normally contains:
 Short labels are allowed only when a guide specification records a genuine
 space constraint and the shortened wording remains unambiguous.
 
+When a context-strip item supplies `guideReference()`, the renderer uses the
+registered full label by default. Free-form context text may add a prefix or
+suffix, but it may not replace the code and registered name. This rule applies
+equally to prerequisites, inline route handoffs, help routes, and footer
+references. Render these through the shared reference component instead of
+manually pairing a family badge with plain text.
+
+Rendered-component QA treats a context reference without its complete
+registered label as an error. Guide-specific validation should also reject
+plain cross-guide codes in operator instructions when the code represents an
+actionable handoff rather than ordinary explanatory text.
+
 ## Centering Contract
 
 Circular labels use their circle center as the text `y` coordinate and SVG
@@ -106,6 +118,11 @@ uses the referenced family's icon, color, code, and name. The prerequisite that
 contains a requirement, such as a phone, owns that requirement; downstream
 guides reference it instead of repeating the complete prerequisite workflow.
 
+Every context label/value pair must stay inside its assigned column. The
+renderer records each column's right boundary and generation fails when either
+the label or value crosses it. Shorten copy or change the deliberate column
+count; do not hide an overflow by shrinking unrelated text.
+
 ### Step And Image Badges
 
 Use `stepBadge()` and `imageBadge()`. Both overlap a corner, but step badges
@@ -129,6 +146,18 @@ for that guide instead of clipping or overlapping the reference.
 
 Use `drawCompletionRow()`. The label and outcome text share one true vertical
 center. The outcome describes a visible or verifiable end state.
+
+### Inline Warning Hierarchy
+
+Use amber inline warning text for recoverable duplicate, validation, missing
+catalog, mismatch, or incomplete-work conditions. Use red `STOP` only when the
+operator must halt because continuing creates a meaningful safety, identity,
+irreversible-state, or data-integrity risk. A warning must not be promoted to a
+stop merely to make it more visible.
+
+Focus rectangles surround the named control with visible padding. Their stroke
+must not cross a dropdown label, result count, icon, or other instructional
+text.
 
 ### QR Area
 
@@ -189,3 +218,9 @@ For every generated page, also run `inspectRenderedGuideComponents()` and fail
 generation on badge-center or reference-text overflow errors. Render the final
 PDF to PNG and inspect it at full page and actual A4 scale; geometry checks do
 not replace visual review.
+
+Multi-page generators must also fail on title/version-panel overlap, context
+column crossing, and any registered component outside the A4 bounds. Check
+every final PDF page after rasterization, including pages that reuse the same
+header and footer, because one longer title or additional reference row can
+break only one page.

@@ -2,14 +2,14 @@
 
 | Field | Current value |
 | --- | --- |
-| Status | Working draft; awaiting review |
+| Status | Working draft v4; visual-correction pass and awaiting exact-version review |
 | Family | CMP |
 | Type | Detail task with alternatives |
-| Current version | `CMP-02-register-install-v2-draft` |
+| Current version | `CMP-02-register-install-v4-draft` |
 | Page model | One page |
-| Layout recipe | `stacked-step-flow` with `parallel-visual-choice`, `reused-evidence`, and `inline-stop` |
+| Layout recipe | `stacked-step-flow` with `parallel-visual-choice`, `reused-evidence`, and targeted `inline-stop` |
 | Generator | `scripts/manuals/generate-component-followup-guides.mjs` |
-| Role | Authorized refurbisher (deployment role to confirm) |
+| Role | Senior Refurbisher |
 | Needed | Correct open asset and the new physical component |
 | Prerequisite | Asset verified (SC-01) |
 
@@ -19,16 +19,23 @@ Register a new physical component using either an approved component definition 
 
 This guide creates a new tracked component record. When the physical component already has a tracked record in tray/storage, use CMP-01 instead.
 
+Version 4 presents the missing-definition handoff as the full CAT-04 guide
+reference and keeps the route text in operator language rather than using an
+unexplained guide code in the step body.
+
 ## Steps
 
 1. `Open Nieuw component` - open Components, choose `Add / Install Component`, then `Show New Component Form`.
-2. `Kies een registratieroute` - use `Use Component Definition` for a known catalog component; use `Custom Component` only for an approved one-off component. Enter the definition/name, serial number, and condition in the selected route.
+2. `Kies een registratieroute` - use `Gebruik definitie` for a known reusable
+   component type. Use `Aangepast` only for one agreed exception that will not
+   be reused. If the reusable type is missing, a supervisor follows CAT-04;
+   do not choose `Aangepast` automatically. Enter the definition/name, serial
+   number, and condition in the selected route.
 3. `Plaats en maak aan` - install the component physically, compare the entered identity, then choose `Create And Install` once.
 4. `Controleer het asset` - verify `Tracked`, the generated component tag, and the entered serial number appear on the correct asset.
 
 ## Stop
 
-- Stop in step 2 when it is unclear whether a catalog definition should exist; ask a supervisor before choosing custom.
 - Stop in step 3 for duplicate feedback or a physical/digital identity mismatch.
 - Stop in step 4 when the resulting tracked record does not match the physical component.
 
@@ -45,7 +52,14 @@ This guide creates a new tracked component record. When the physical component a
 
 ## Evidence Note
 
-Version 2 replaces the placeholder five-step page with the verified four-step interface flow. The controlled definition-backed record `INBIT-C-HH9376` / `CMP02-RAM-0001` was created and installed once. The custom route was opened and filled only for evidence; it was not submitted. CMP-04 capture then moved the controlled record to tray, which is its final development state.
+Version 3 retains the verified four-step interface flow and evidence from v2,
+names the minimum operational role, explains reusable definition versus one-off
+custom in operator language, routes missing definitions to CAT-04, and removes
+the recoverable route-choice STOP. The controlled definition-backed record
+`INBIT-C-HH9376` / `CMP02-RAM-0001` was created and installed once. The custom
+route was opened and filled only for evidence; it was not submitted. CMP-04
+capture then moved the controlled record to tray, which is its final
+development state.
 
 ## Complete When
 
@@ -56,5 +70,4 @@ The physical component is installed and one correctly identified component recor
 - SC-01 Asset vinden en openen
 - CMP-01 Bestaand component plaatsen
 - CMP-04 Component naar tray verplaatsen
-- WF-02 Workflow uitvoeren en afronden
 - HELP-01 Problemen en hulp

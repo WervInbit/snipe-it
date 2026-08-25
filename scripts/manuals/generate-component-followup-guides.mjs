@@ -11,7 +11,10 @@ import {
   resolveCommand,
 } from './lib/guide-paths.mjs';
 
-const generatedOn = '2026-08-04';
+const generatedOn = process.env.SNIPEIT_GUIDE_DATE || '2026-08-25';
+const guideFilter = process.env.SNIPEIT_GUIDE_FILTER?.trim().toUpperCase() || null;
+const cmp02Version = process.env.SNIPEIT_CMP02_VERSION || '4';
+const cmp04Version = process.env.SNIPEIT_CMP04_VERSION || '6';
 const outDir = process.env.SNIPEIT_GUIDE_OUT_DIR || guideOutputDir('component-followup-v2');
 const repoPdfDir = repoPdfOutputRoot;
 const chromePath = resolveChromeExecutable();
@@ -53,6 +56,8 @@ const colors = {
   workflowSoft: '#FFF7ED',
   access: '#2563EB',
   accessSoft: '#EFF6FF',
+  catalog: '#7A4E9D',
+  catalogSoft: '#F7F1FB',
   help: '#E83448',
   helpSoft: '#FFF1F3',
 };
@@ -109,6 +114,8 @@ function chip(family, code, label) {
         ? { color: colors.workflow, fill: colors.workflowSoft }
         : family === 'AC'
           ? { color: colors.access, fill: colors.accessSoft }
+          : family === 'CAT'
+            ? { color: colors.catalog, fill: colors.catalogSoft }
           : { color: colors.help, fill: colors.helpSoft };
   return `<span class="guide-chip" style="--chip:${palette.color};--chip-fill:${palette.fill}">
     <b>${escapeHtml(family)}</b><span>${escapeHtml(code)} ${escapeHtml(label)}</span>
@@ -144,7 +151,10 @@ function context(role, needed, prerequisite) {
 
 function helpStrip(title, items) {
   return `<section class="help"><h2>${escapeHtml(title)}</h2><div class="help-grid help-${items.length}">
-    ${items.map(([itemTitle, body]) => `<div class="help-item"><span class="help-icon">!</span><div><strong>${escapeHtml(itemTitle)}</strong><p>${escapeHtml(body)}</p></div></div>`).join('')}
+    ${items.map((item) => {
+      const normalized = Array.isArray(item) ? { title: item[0], body: item[1] } : item;
+      return `<div class="help-item ${normalized.ref ? 'help-reference' : ''}"><span class="help-icon">!</span><div><strong>${escapeHtml(normalized.title)}</strong><p>${escapeHtml(normalized.body)}</p>${normalized.ref ? chip(normalized.ref.family, normalized.ref.code, normalized.ref.label) : ''}</div></div>`;
+    }).join('')}
   </div></section>`;
 }
 
@@ -194,6 +204,9 @@ const sharedCss = `
   .help-icon { width: 5.5mm; height: 5.5mm; border: .45mm solid #F59E0B; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #B45309; font-size: 2.1mm; font-weight: 900; }
   .help-item strong { display: block; font-size: 2.3mm; line-height: 1.1; }
   .help-item p { margin: 1mm 0 0; color: #334155; font-size: 1.85mm; line-height: 1.18; }
+  .help-item.help-reference { height: 19.5mm; padding: 1.6mm 2mm; }
+  .help-reference .guide-chip { margin-top: .8mm; padding: .45mm 1.2mm .45mm .7mm; font-size: 1.85mm; }
+  .help-reference .guide-chip b { width: 3.8mm; height: 3.8mm; font-size: 1.15mm; }
   .done { display: flex; align-items: center; gap: 6mm; padding: 1.7mm 4mm; border: .4mm solid #6EE7A0; border-radius: 1.8mm; background: ${colors.greenSoft}; color: #047857; }
   .done strong { min-width: 20mm; font-size: 3mm; }
   .done span { font-size: 2.4mm; }
@@ -235,8 +248,9 @@ function buildCmp02() {
       }),
     ].join(''), '', 'two-visuals'),
     step('2', 'Kies een registratieroute', [
-      '<b>Gebruik definitie</b> voor een bekend catalogusonderdeel.',
-      '<b>Aangepast</b> is alleen voor een goedgekeurd eenmalig onderdeel.',
+      '<b>Gebruik definitie</b>: normaal voor een bekend type dat vaker voorkomt.',
+      '<b>Aangepast</b>: alleen voor één afgesproken uitzondering die niet wordt hergebruikt.',
+      'Ontbreekt het type? Gebruik de catalogusgids in Hulp; kies niet automatisch Aangepast.',
     ], [
       visual({
         image: 'definitionForm', label: '2A', caption: 'Normaal: kies een definitie, serienummer en conditie.',
@@ -248,7 +262,7 @@ function buildCmp02() {
         crop: { x: 15, y: 200, w: 450, h: 475 },
         marks: [{ x: 205, y: 313, w: 35, h: 35, shape: 'circle' }],
       }),
-    ].join(''), 'STOP als onduidelijk is welke route hoort.', 'alternatives'),
+    ].join(''), '', 'alternatives'),
     step('3', 'Plaats en maak aan', [
       'Plaats het fysieke onderdeel. Vergelijk definitie of naam, serienummer en conditie.',
       'Tik daarna eenmaal op <b>Create And Install</b>.',
@@ -270,22 +284,22 @@ function buildCmp02() {
   ].join('');
 
   return pageDocument('CMP-02 Nieuw component registreren en plaatsen', 'cmp02', `
-    ${header('CMP-02', 'Nieuw component registreren en plaatsen', 'Registreer een nieuw fysiek onderdeel en koppel het aan het juiste asset', 'Draft v2', colors.component)}
-    ${context('Bevoegde refurbisher', 'Open asset + nieuw fysiek onderdeel', chip('SC', 'SC-01', 'Asset geopend'))}
+    ${header('CMP-02', 'Nieuw component registreren en plaatsen', 'Registreer een nieuw fysiek onderdeel en koppel het aan het juiste asset', `Draft v${cmp02Version}`, colors.component)}
+    ${context('Senior refurbisher', 'Open asset + nieuw fysiek onderdeel', chip('SC', 'SC-01', 'Asset vinden en openen'))}
     <main class="steps">${steps}</main>
     ${helpStrip('Hulp bij nieuw component', [
-      ['Definitie ontbreekt', 'Vraag supervisor; kies Aangepast niet automatisch.'],
+      { title: 'Definitie ontbreekt', body: 'Laat de herbruikbare definitie eerst beheren:', ref: { family: 'CAT', code: 'CAT-04', label: 'Componentdefinities beheren' } },
       ['Dubbele tag/serienummer', 'Stop en zoek het bestaande record.'],
       ['Conditiewaarschuwing', 'Niet bevestigen zonder supervisor.'],
     ])}
     ${done('Een uniek correct componentrecord staat met dezelfde identiteit op het juiste asset.')}
     ${footer([
-      chip('SC', 'SC-01', 'Asset openen'), chip('CMP', 'CMP-01', 'Bestaand plaatsen'),
-      chip('CMP', 'CMP-04', 'Naar tray'), chip('HELP', 'HELP-01', 'Hulp'),
+      chip('SC', 'SC-01', 'Asset vinden en openen'), chip('CMP', 'CMP-01', 'Bestaand component plaatsen'),
+      chip('CMP', 'CMP-04', 'Component naar tray'), chip('HELP', 'HELP-01', 'Problemen en hulp'),
     ])}
   `, `
-    .cmp02 { grid-template-rows: 25mm 14mm 165mm 21mm 11mm 27mm; }
-    .cmp02 .steps { grid-template-rows: 34mm 59mm 31mm 35mm; }
+    .cmp02 { grid-template-rows: 25mm 14mm 162mm 24mm 11mm 27mm; }
+    .cmp02 .steps { grid-template-rows: 34mm 57mm 31mm 34mm; }
     .cmp02 .two-visuals .step-visuals, .cmp02 .alternatives .step-visuals { grid-template-columns: repeat(2,minmax(0,1fr)); }
     .cmp02 .step-1 .shot { height: 23mm; }
     .cmp02 .step-2 .shot { height: 47mm; }
@@ -354,8 +368,8 @@ function buildCmp04() {
   ].join('');
 
   return pageDocument('CMP-04 Component naar tray', 'cmp04', `
-    ${header('CMP-04', 'Component naar tray', 'Verwijder het juiste onderdeel en behoud identiteit en bestemming', 'Draft v5', colors.component)}
-    ${context('Bevoegde refurbisher', 'Open asset + fysiek onderdeel', chip('SC', 'SC-01', 'Asset geopend'))}
+    ${header('CMP-04', 'Component naar tray', 'Verwijder het juiste onderdeel en behoud identiteit en bestemming', `Draft v${cmp04Version}`, colors.component)}
+    ${context('Senior refurbisher', 'Open asset + fysiek onderdeel', chip('SC', 'SC-01', 'Asset vinden en openen'))}
     <main class="steps">${steps}</main>
     ${helpStrip('Hulp bij naar tray', [
       ['Serienummer ontbreekt', 'Verzin geen nummer; vraag supervisor.'],
@@ -364,8 +378,8 @@ function buildCmp04() {
     ])}
     ${done('Het onderdeel ligt in je tray, heeft Status In Tray en is niet meer aan een asset gekoppeld.')}
     ${footer([
-      chip('SC', 'SC-01', 'Asset openen'), chip('CMP', 'CMP-01', 'Bestaand plaatsen'),
-      chip('CMP', 'CMP-02', 'Nieuw plaatsen'), chip('HELP', 'HELP-01', 'Hulp'),
+      chip('SC', 'SC-01', 'Asset vinden en openen'), chip('CMP', 'CMP-01', 'Bestaand component plaatsen'),
+      chip('CMP', 'CMP-02', 'Nieuw component registreren en plaatsen'), chip('HELP', 'HELP-01', 'Problemen en hulp'),
     ])}
   `, `
     .cmp04 { grid-template-rows: 25mm 14mm 165mm 21mm 11mm 27mm; }
@@ -455,13 +469,23 @@ assertInputs();
 fs.mkdirSync(outDir, { recursive: true });
 fs.mkdirSync(repoPdfDir, { recursive: true });
 
-const outputs = [
-  renderGuide('CMP-02-register-install-v2-draft', buildCmp02()),
-  renderGuide('CMP-04-component-to-tray-v5-draft', buildCmp04()),
-  renderGuide('HELP-01-problems-v6-draft', buildHelp01()),
-];
+const guideBuilders = {
+  'CMP-02': { slug: `CMP-02-register-install-v${cmp02Version}-draft`, build: buildCmp02 },
+  'CMP-04': { slug: `CMP-04-component-to-tray-v${cmp04Version}-draft`, build: buildCmp04 },
+  'HELP-01': { slug: 'HELP-01-problems-v6-draft', build: buildHelp01 },
+};
+const selectedGuides = guideFilter ? [guideFilter] : Object.keys(guideBuilders);
+selectedGuides.forEach((code) => {
+  if (!guideBuilders[code]) throw new Error(`Unknown component guide filter: ${code}`);
+});
+const outputs = selectedGuides.map((code) => {
+  const guide = guideBuilders[code];
+  return renderGuide(guide.slug, guide.build());
+});
 
-const combinedPdf = path.join(outDir, 'component-followup-guides-review-batch-v2-2026-08-04.pdf');
+const combinedSuffix = guideFilter ? guideFilter.toLowerCase() : 'batch';
+const combinedName = `component-followup-guides-${combinedSuffix}-${generatedOn}.pdf`;
+const combinedPdf = path.join(outDir, combinedName);
 const mergeCode = [
   'from pypdf import PdfReader, PdfWriter',
   'import sys',
@@ -470,7 +494,7 @@ const mergeCode = [
   'w.write(sys.argv[1])',
 ].join(';');
 run(pythonPath, ['-c', mergeCode, combinedPdf, ...outputs.map((item) => item.pdf)], 'Merge review batch');
-const repoCombined = path.join(repoPdfDir, 'component-followup-guides-review-batch-v2-2026-08-04.pdf');
+const repoCombined = path.join(repoPdfDir, combinedName);
 fs.copyFileSync(combinedPdf, repoCombined);
 
 const manifest = {
@@ -491,6 +515,6 @@ const manifest = {
   ],
 };
 fs.writeFileSync(path.join(outDir, 'generation-manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
-fs.writeFileSync(path.join(outDir, 'review-summary.md'), `# Component Follow-up Review Batch v2\n\n- CMP-02 v2: four-step verified new-component flow.\n- CMP-04 v5: four-step verified move-to-tray flow with the 1B target centered on the action.\n- HELP-01 v6: twelve compact recovery routes.\n- Existing tracked tray/storage records belong to CMP-01; new physical parts based on a catalog definition belong to CMP-02 route 2A.\n- Controlled component INBIT-C-HH9376 / CMP02-RAM-0001 ends in Status In Tray and is not attached to an asset.\n`, 'utf8');
+fs.writeFileSync(path.join(outDir, 'review-summary.md'), `# Component Follow-up Review Batch\n\n- CMP-02 v${cmp02Version}: four-step verified new-component flow with an operator-language definition/custom choice.\n- CMP-04 v${cmp04Version}: four-step verified move-to-tray flow.\n- HELP-01 v6: twelve compact recovery routes.\n- Existing tracked tray/storage records belong to CMP-01; new physical parts based on a catalog definition belong to CMP-02 route 2A.\n- Controlled component INBIT-C-HH9376 / CMP02-RAM-0001 ends in Status In Tray and is not attached to an asset.\n`, 'utf8');
 
 console.log(JSON.stringify({ outDir, outputs, combinedPdf, repoCombined }, null, 2));

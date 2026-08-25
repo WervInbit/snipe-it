@@ -25,6 +25,8 @@ export const GUIDE_TOKENS = Object.freeze({
         cmpSoft: '#FFF8E6',
         usr: '#4F46E5',
         usrSoft: '#EEF2FF',
+        cat: '#7A4E9D',
+        catSoft: '#F7F1FB',
         help: '#E83448',
         helpSoft: '#FFF1F3',
         orange: '#C66A00',
@@ -66,6 +68,7 @@ export const GUIDE_FAMILIES = Object.freeze({
     WF: Object.freeze({ color: colors.wf, fill: colors.wfSoft }),
     CMP: Object.freeze({ color: colors.cmp, fill: colors.cmpSoft }),
     USR: Object.freeze({ color: colors.usr, fill: colors.usrSoft }),
+    CAT: Object.freeze({ color: colors.cat, fill: colors.catSoft }),
     HELP: Object.freeze({ color: colors.help, fill: colors.helpSoft }),
 });
 
@@ -74,7 +77,7 @@ export const GUIDE_REGISTRY = Object.freeze({
     'AC-02': Object.freeze({ family: 'AC', title: 'Eigen wachtwoord wijzigen', status: GUIDE_STATUSES.WORKING_DRAFT }),
     'SC-01': Object.freeze({ family: 'SC', title: 'Asset vinden en openen', status: GUIDE_STATUSES.INTERNAL_REVIEW }),
     'AST-02': Object.freeze({ family: 'AST', title: 'Refurbishment route', status: GUIDE_STATUSES.INTERNAL_REVIEW }),
-    'AST-03': Object.freeze({ family: 'AST', title: 'Asset registreren en labelen', status: GUIDE_STATUSES.WORKING_DRAFT }),
+    'AST-03': Object.freeze({ family: 'AST', title: 'Asset registreren en labelen', status: GUIDE_STATUSES.INTERNAL_REVIEW }),
     'AST-04': Object.freeze({ family: 'AST', title: 'Werk afronden en overdragen', status: GUIDE_STATUSES.WORKING_DRAFT }),
     'AST-05': Object.freeze({ family: 'AST', title: 'Asset beoordelen en vrijgeven', status: GUIDE_STATUSES.WORKING_DRAFT }),
     'WF-01': Object.freeze({ family: 'WF', title: 'Workflow starten', status: GUIDE_STATUSES.INTERNAL_REVIEW }),
@@ -88,6 +91,13 @@ export const GUIDE_REGISTRY = Object.freeze({
     'USR-03': Object.freeze({ family: 'USR', title: 'Wachtwoord resetten', status: GUIDE_STATUSES.WORKING_DRAFT }),
     'USR-04': Object.freeze({ family: 'USR', title: 'Gebruiker uitschakelen of herstellen', status: GUIDE_STATUSES.WORKING_DRAFT }),
     'USR-05': Object.freeze({ family: 'USR', title: 'Groepen beheren', status: GUIDE_STATUSES.WORKING_DRAFT }),
+    'CAT-00': Object.freeze({ family: 'CAT', title: 'Catalogus begrijpen', status: GUIDE_STATUSES.WORKING_DRAFT }),
+    'CAT-01': Object.freeze({ family: 'CAT', title: 'Model en modelnummer aanmaken', status: GUIDE_STATUSES.WORKING_DRAFT }),
+    'CAT-02': Object.freeze({ family: 'CAT', title: 'Modelspecificatie opbouwen', status: GUIDE_STATUSES.WORKING_DRAFT }),
+    'CAT-03': Object.freeze({ family: 'CAT', title: 'Attributen beheren', status: GUIDE_STATUSES.WORKING_DRAFT }),
+    'CAT-04': Object.freeze({ family: 'CAT', title: 'Componentdefinities beheren', status: GUIDE_STATUSES.WORKING_DRAFT }),
+    'CAT-05': Object.freeze({ family: 'CAT', title: 'Varianten en lifecycle beheren', status: GUIDE_STATUSES.WORKING_DRAFT }),
+    'CAT-06': Object.freeze({ family: 'CAT', title: 'Catalogus controleren en bronnen', status: GUIDE_STATUSES.WORKING_DRAFT }),
 });
 
 export function xml(value) {
@@ -332,16 +342,40 @@ export function drawContextStrip(doc, context, options = {}) {
     const colW = (width - 10) / context.length;
     context.forEach((item, index) => {
         const itemX = x + 5 + index * colW;
-        doc.text(itemX, y + 8, item.label, { size: 2.2, weight: 800, fill: colors.muted });
+        const itemRight = itemX + colW - 2;
+        doc.text(itemX, y + 8, item.label, {
+            size: 2.2,
+            weight: 800,
+            fill: colors.muted,
+            data: { component: 'context-label', right: itemRight, index },
+        });
         const valueY = y + 13.15;
         const ref = item.guide
             ?? (item.guideCode ? guideReference(item.guideCode) : null)
             ?? (item.guideFamily ? { family: item.guideFamily } : null);
         if (ref) {
+            const registeredLabel = ref.label ?? item.value;
+            const value = item.value?.includes(registeredLabel)
+                ? item.value
+                : `${item.referencePrefix ?? ''}${registeredLabel}${item.referenceSuffix ?? ''}`;
+            doc.raw(`<g data-component="context-guide-reference" data-guide-code="${xml(ref.code ?? '')}" data-guide-label="${xml(registeredLabel)}">`);
             doc.familyBadge(itemX + 1.85, valueY, ref.family, { radius: 1.85, fontSize: 1.15 });
-            doc.centeredText(itemX + 5, valueY, item.value, { size: 2.75, weight: 800, fill: item.color ?? GUIDE_FAMILIES[ref.family].color, anchor: 'start' });
+            doc.centeredText(itemX + 5, valueY, value, {
+                size: 2.75,
+                weight: 800,
+                fill: item.color ?? GUIDE_FAMILIES[ref.family].color,
+                anchor: 'start',
+                data: { component: 'context-value', right: itemRight, index },
+            });
+            doc.raw('</g>');
         } else {
-            doc.centeredText(itemX, valueY, item.value, { size: 2.75, weight: 800, fill: item.color ?? colors.ink, anchor: 'start' });
+            doc.centeredText(itemX, valueY, item.value, {
+                size: 2.75,
+                weight: 800,
+                fill: item.color ?? colors.ink,
+                anchor: 'start',
+                data: { component: 'context-value', right: itemRight, index },
+            });
         }
     });
 }
@@ -423,6 +457,19 @@ export async function inspectRenderedGuideComponents(page) {
             const family = group.querySelector('[data-role="family-label"]');
             if (Number(circle.getAttribute('cy')) !== Number(family.getAttribute('y'))) {
                 errors.push(`${group.dataset.guideCode} family label is not vertically centered.`);
+            }
+        });
+        [...document.querySelectorAll('[data-component="context-label"], [data-component="context-value"]')].forEach((node) => {
+            const box = node.getBBox();
+            const right = Number(node.dataset.right);
+            if (box.x + box.width > right + 0.01) {
+                errors.push(`${node.dataset.component} ${node.textContent.trim()} crosses its context column by ${(box.x + box.width - right).toFixed(2)} SVG units.`);
+            }
+        });
+        [...document.querySelectorAll('[data-component="context-guide-reference"]')].forEach((group) => {
+            const value = group.querySelector('[data-component="context-value"]')?.textContent.trim() ?? '';
+            if (!value.includes(group.dataset.guideLabel)) {
+                errors.push(`${group.dataset.guideCode} context reference does not use its full registered name.`);
             }
         });
         return { errors, badgeCount: badges.length, chipCount: chips.length, chipMetrics };

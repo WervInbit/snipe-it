@@ -1,6 +1,6 @@
 {
     "schemaVersion":  1,
-    "updatedOn":  "2026-08-13",
+    "updatedOn":  "2026-08-20",
     "source":  "docs/manuals/operator-guides/screenshots.md",
     "sources":  [
                     {
@@ -16,7 +16,7 @@
                         "file":  "DASH-MOBILE-01.jpg",
                         "sha256":  "26cb6ba96e1243b6b90d0c7be8f7c7b459f561bf56fa65af03a922fc52f8e9bb",
                         "purpose":  "Mobile dashboard with `Apparaten`, `Scan QR`, and the top-bar camera icon",
-                        "uses":  "AC-01 3A; SC-01 1A and 1B",
+                         "uses":  "AC-01 3A; SC-01 1A and 1B; AST-03 v7-v13 page 1 1A",
                         "captureEnvironment":  "Existing device capture"
                     },
                     {
@@ -32,8 +32,24 @@
                         "file":  "SCAN-CAMERA-QR-01.jpg",
                         "sha256":  "7e0ef2355954ceaf05b5820bb18103d1893d2b5bf64b7f3142ebb4c3d3cc7d31",
                         "purpose":  "Mobile scanner view aimed at a physical QR label",
-                        "uses":  "SC-01 2A; AST-03 3A; AST-05 3A",
+                        "uses":  "SC-01 2A; AST-03 v2/v3 page 2 3A/3B/4A; AST-03 v4 page 2 4A; AST-05 v2 3A; intentionally not repeated in AST-03 v5-v13",
                         "captureEnvironment":  "Existing device capture"
+                    },
+                    {
+                        "id":  "AST-LABEL-PLACEMENT-GENERATED-01",
+                        "file":  "AST-LABEL-PLACEMENT-GENERATED-01.png",
+                        "sha256":  "f5142afa431e212565ff36159811abb00c8828f2eb6cde2130cf245252ef55d3",
+                        "purpose":  "Full front-facing laptop underside illustrating safe lower-right QR-label placement",
+                        "uses":  "AST-03 v4 page 2 3A",
+                        "captureEnvironment":  "Rejected generated instructional image retained for AST-03 v4 reproducibility; not used by v5-v13"
+                    },
+                    {
+                        "id":  "AST-LABEL-PLACEMENT-PHOTO-01",
+                        "file":  "AST-LABEL-PLACEMENT-PHOTO-01.jpg",
+                        "sha256":  "7ede7ec2dca1f0890c5757a402de2c288f629124257fb75f87542b84e5fb2fd0",
+                        "purpose":  "Real full laptop underside with front edge toward the reader and the Inbit QR label at lower right",
+                        "uses":  "AST-03 v11-v13 page 2 7A; AST-04 v4 2A; AST-05 v4 3A",
+                        "captureEnvironment":  "Owner-supplied practice photo, 2026-08-18"
                     },
                     {
                         "id":  "SEARCH-FIELD-01",
@@ -82,6 +98,102 @@
                         "purpose":  "Hardware index with the new-asset action",
                         "uses":  "AST-03 1A",
                         "captureEnvironment":  "Controlled development capture"
+                    },
+                    {
+                        "id":  "AST-REGISTER-ENTRY-MOBILE-01",
+                        "file":  "AST-REGISTER-ENTRY-MOBILE-01.png",
+                        "sha256":  "ba207608d7ba6f224f99c41f068629f833eb7520fd1d04eb963a2827b33694dc",
+                        "purpose":  "Mobile hardware index with the new-asset entry in surrounding navigation context",
+                         "uses":  "AST-03 v2 1A; AST-03 v3-v6 1A and 1B; AST-03 v7-v13 1B and 1C",
+                        "captureEnvironment":  "Controlled development capture, refreshed 2026-08-20"
+                    },
+                    {
+                        "id":  "AST-REGISTER-IDENTITY-MOBILE-01",
+                        "file":  "AST-REGISTER-IDENTITY-MOBILE-01.png",
+                        "sha256":  "e35fb58eea6ec07d5d4f4d092b28e33026b5e7520a3331d9182df59a6d1e046a",
+                        "purpose":  "Mobile new-asset form with controlled tag, serial number, category, model, and Being Processed status",
+                        "uses":  "AST-03 v2 2A and 4A; AST-03 v3-v13 2A, 3A, and 3B",
+                        "captureEnvironment":  "Controlled development capture, refreshed 2026-08-20; screenshot-only INBIT-HG0421 and S/N 5CD1234ABC; form was not submitted"
+                    },
+                    {
+                        "id":  "AST-REGISTER-STATUS-MOBILE-01",
+                        "file":  "AST-REGISTER-STATUS-MOBILE-01.png",
+                        "sha256":  "e35fb58eea6ec07d5d4f4d092b28e33026b5e7520a3331d9182df59a6d1e046a",
+                        "purpose":  "Mobile new-asset form status control showing Being Processed",
+                        "uses":  "AST-03 v2 3A; AST-03 v3-v13 4A",
+                        "captureEnvironment":  "Controlled development capture, refreshed 2026-08-20; same canonical state as AST-REGISTER-IDENTITY-MOBILE-01"
+                    },
+                    {
+                         "id":  "AST-REGISTER-SAVED-CHECK-01",
+                         "file":  "AST-REGISTER-SAVED-CHECK-01.png",
+                         "sha256":  "db413c36029308d0b1c26499a375bfc76e70ac35a2f3652e94dd4220bbc83715",
+                         "purpose":  "Compact saved-asset verification with asset tag, Being Processed status, asset name/model, and serial number",
+                        "uses":  "AST-03 v6-v13 page 1 4B",
+                        "captureEnvironment":  "Controlled development capture, refreshed 2026-08-20; screenshot-only INBIT-HG0421, HP ProBook 450 G8, and 5CD1234ABC identity substitution; no server record changed; unrelated rows hidden only in capture DOM"
+                    },
+                    {
+                        "id":  "AST-REGISTER-LOCATION-MOBILE-01",
+                        "file":  "AST-REGISTER-LOCATION-MOBILE-01.png",
+                        "sha256":  "4705a431d014a63b2c75884a3fa510a453863e5125a8a8527dac46c727ec7cfb",
+                        "purpose":  "Mobile new-asset form with custom work-location controls",
+                        "uses":  "AST-03 v2 3B",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-18; form was not submitted"
+                    },
+                    {
+                        "id":  "AST-ASSET-SAVED-MOBILE-01",
+                        "file":  "AST-ASSET-SAVED-MOBILE-01.png",
+                        "sha256":  "1b22876a09fc3c406fb92ede6b878c96e7e3e8a0a0b3bcf0cca4f4f7150e107d",
+                        "purpose":  "Mobile saved-asset title, navigation, and actions",
+                        "uses":  "AST-03 v2-v5 page 1 4B; AST-03 v2-v9 page 2 1A/4A; AST-03 v10-v13 page 2 5A/8A; AST-04 v4 1A; AST-05 v4 1A",
+                        "captureEnvironment":  "Controlled development capture, refreshed 2026-08-20; screenshot-only INBIT-HG0421, HP ProBook 450 G8, and 5CD1234ABC identity; no server record changed; workflow-attention banner excluded from printed crops"
+                    },
+                    {
+                        "id":  "AST-LABEL-CONTROL-MOBILE-01",
+                        "file":  "AST-LABEL-CONTROL-MOBILE-01.png",
+                        "sha256":  "b55cb0993929e52630afa068722539a2fdd1cfec9cc72b3323de88cba96e6a2c",
+                        "purpose":  "Mobile QR-label preview, template, printer location, and print action",
+                        "uses":  "AST-03 v2 page 2 2A; AST-03 v3-v9 page 2 2A and 2B; AST-03 v10-v13 page 2 6A and 6B",
+                        "captureEnvironment":  "Controlled development capture, refreshed 2026-08-20; same screenshot-only identity; no server record changed"
+                    },
+                    {
+                        "id":  "AST-WORKFLOW-PASS-MOBILE-01",
+                        "file":  "AST-WORKFLOW-PASS-MOBILE-01.png",
+                        "sha256":  "72e5c56b30e8af2ee7d5af0aea60cb414271bdb3652bd7751b7802fba4736003",
+                        "purpose":  "Mobile completed workflow row showing five passed and zero failed checks",
+                        "uses":  "AST-04 v2/v3 1A/1B and v4 1B; AST-05 v2-v4 2A",
+                        "captureEnvironment":  "Controlled development capture, refreshed 2026-08-20; same screenshot-only identity; workflow-attention banner excluded"
+                    },
+                    {
+                        "id":  "AST-COMPONENT-REVIEW-MOBILE-01",
+                        "file":  "AST-COMPONENT-REVIEW-MOBILE-01.png",
+                        "sha256":  "5dfd05565cfd741a87583408a333f21fa694e29c5f2924291812875b164fc972",
+                        "purpose":  "Mobile current-component list with device-specific component context",
+                        "uses":  "AST-04 v2 2A and v3/v4 2B; AST-05 v2-v4 3B",
+                        "captureEnvironment":  "Controlled development capture, refreshed 2026-08-20; same screenshot-only identity; workflow-attention banner excluded"
+                    },
+                    {
+                        "id":  "AST-QA-HANDOFF-MOBILE-01",
+                        "file":  "AST-QA-HANDOFF-MOBILE-01.png",
+                        "sha256":  "257e2300deb1b1355ba7dc2164bb3e247cb5e07edbb5bd51941c6a6645a135d7",
+                        "purpose":  "Mobile asset status control showing QA Hold",
+                        "uses":  "AST-04 v2-v4 3A; AST-05 v2/v3 1A and v4 1B",
+                        "captureEnvironment":  "Controlled development capture, refreshed 2026-08-20; same screenshot-only identity; no server record changed"
+                    },
+                    {
+                        "id":  "AST-WORKFLOW-ISSUE-MOBILE-01",
+                        "file":  "AST-WORKFLOW-ISSUE-MOBILE-01.png",
+                        "sha256":  "69c778ee8ff941797ef435d4bc9738cc63971fccd154f8102895bea43cbf6ac4",
+                        "purpose":  "Mobile workflow row showing two passed and one failed check",
+                        "uses":  "AST-04 and AST-05 help/return-state reference",
+                        "captureEnvironment":  "Controlled development capture, refreshed 2026-08-20; same screenshot-only identity; workflow-attention banner excluded"
+                    },
+                    {
+                        "id":  "AST-READY-STATUS-MOBILE-01",
+                        "file":  "AST-READY-STATUS-MOBILE-01.png",
+                        "sha256":  "f52cdef6ae0c7b54f8d5e509f509e854d66829b338c6ae43a190ef0a0e2b16a8",
+                        "purpose":  "Mobile asset status control showing Ready for Sale",
+                        "uses":  "AST-05 v2-v4 4A",
+                        "captureEnvironment":  "Controlled development capture, refreshed 2026-08-20; same screenshot-only identity; no server record changed"
                     },
                     {
                         "id":  "WF-RESULTS-01",
@@ -160,7 +272,7 @@
                         "file":  "CMP-INSTALL-RESULT-MOBILE-02.png",
                         "sha256":  "c434b3147e20f873312c9dd87e26d0827aabfeaa3d8d6e4fafaac3eb78919fd4",
                         "purpose":  "Mobile tracked component row after installation with matching tag and serial",
-                        "uses":  "CMP-01 4A",
+                        "uses":  "CAT-00 6A and 6B; CMP-01 4A",
                         "captureEnvironment":  "Controlled development capture, 2026-08-04"
                     },
                     {
@@ -316,6 +428,14 @@
                         "captureEnvironment":  "Controlled development capture, 2026-08-11"
                     },
                     {
+                        "id":  "USR-EDIT-PASSWORD-GENERATED-DESKTOP-01",
+                        "file":  "USR-EDIT-PASSWORD-GENERATED-DESKTOP-01.png",
+                        "sha256":  "f301a08c7306f67f7046c07bcccf9996fcdce4c267508590500274300ae6a7f8",
+                        "purpose":  "Edit-user form after Generate, showing the unsaved temporary password and both masked fields",
+                        "uses":  "USR-03 2A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-25; generated value not saved"
+                    },
+                    {
                         "id":  "AC-ACCOUNT-MENU-DESKTOP-01",
                         "file":  "AC-ACCOUNT-MENU-DESKTOP-01.png",
                         "sha256":  "6a322f438da37b7b6c28586b4817437df1b363045db06bd2182588f65311fb32",
@@ -386,6 +506,78 @@
                         "purpose":  "Restored identity, group, and login state",
                         "uses":  "USR-04 side 2, 4A",
                         "captureEnvironment":  "Controlled development capture, 2026-08-11"
+                    },
+                    {
+                        "id":  "CAT-MODEL-LIST-DESKTOP-01",
+                        "file":  "CAT-MODEL-LIST-DESKTOP-01.png",
+                        "sha256":  "64060324c1b927c7cf8737af7785e1ba459ed94978af73ee1ed9201e994574df",
+                        "purpose":  "Expanded Asset modellen navigation, model search, and create control",
+                        "uses":  "CAT-01 1A, 2A, and 3B",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-18; read-only visual state"
+                    },
+                    {
+                        "id":  "CAT-MODEL-DETAIL-DESKTOP-01",
+                        "file":  "CAT-MODEL-DETAIL-DESKTOP-01.png",
+                        "sha256":  "b20b8013f526921da8fa4671c1247e0b0ed3e6e750f30cb1328b1b715cca1998",
+                        "purpose":  "Model identity, model-number table, primary state, and create action",
+                        "uses":  "CAT-00 2A and 2B; CAT-01 3A, 5A, and 7A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-18; read-only"
+                    },
+                    {
+                        "id":  "CAT-MODEL-CREATE-DESKTOP-01",
+                        "file":  "CAT-MODEL-CREATE-DESKTOP-01.png",
+                        "sha256":  "98dd412f7c7cf7a12b27bc2b4a6d4f4562e828aade0e19071d029b1dae7bff30",
+                        "purpose":  "Unsaved base-model form populated with a realistic example",
+                        "uses":  "CAT-01 4A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-18; form not submitted"
+                    },
+                    {
+                        "id":  "CAT-MODEL-NUMBER-CREATE-DESKTOP-01",
+                        "file":  "CAT-MODEL-NUMBER-CREATE-DESKTOP-01.png",
+                        "sha256":  "ed70a04fc25322456e7f3973fcc969b9f65995b939386477c63fb89454a02ad7",
+                        "purpose":  "Unsaved exact model-number form with code, case, label, and save controls",
+                        "uses":  "CAT-01 6A",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-18; form not submitted"
+                    },
+                    {
+                        "id":  "CAT-MODEL-SPEC-DESKTOP-01",
+                        "file":  "CAT-MODEL-SPEC-DESKTOP-01.png",
+                        "sha256":  "561cb3c86e03bfebe089ba1cd4b4393ec653c3a7be74346065355cd362b704da",
+                        "purpose":  "Model-number specification page with direct attributes and expected components",
+                        "uses":  "CAT-00 3B and 5A; CAT-02 planned evidence",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-18; read-only"
+                    },
+                    {
+                        "id":  "CAT-MODEL-SPEC-COMPONENTS-DESKTOP-01",
+                        "file":  "CAT-MODEL-SPEC-COMPONENTS-DESKTOP-01.png",
+                        "sha256":  "6b4d47f79efe1e631eaa1e38557f88a2b7ca24aaaab8101dd4e038c164adfac8",
+                        "purpose":  "Scrolled model-number specification view with Expected Components and complete component rows",
+                        "uses":  "CAT-00 4B and 5B; CAT-02 planned evidence",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-25; read-only"
+                    },
+                    {
+                        "id":  "CAT-ATTRIBUTE-LIST-DESKTOP-01",
+                        "file":  "CAT-ATTRIBUTE-LIST-DESKTOP-01.png",
+                        "sha256":  "41a99908d2c732c3b01bab218ad3af8404c8519f608f8b3b0445f2377e01de66",
+                        "purpose":  "Attribute-definition list and create control",
+                        "uses":  "CAT-00 3A; CAT-03 planned evidence",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-18; read-only"
+                    },
+                    {
+                        "id":  "CAT-COMPONENT-DEFINITION-LIST-DESKTOP-01",
+                        "file":  "CAT-COMPONENT-DEFINITION-LIST-DESKTOP-01.png",
+                        "sha256":  "44761bec04985ef7a54c7ee37ed7cacea11c9e008d99a0753f360c2421f5441a",
+                        "purpose":  "Component-definition list and create control",
+                        "uses":  "CAT-00 4A; CAT-04 planned evidence",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-18; read-only"
+                    },
+                    {
+                        "id":  "CAT-MODEL-NUMBER-LIFECYCLE-DESKTOP-01",
+                        "file":  "CAT-MODEL-NUMBER-LIFECYCLE-DESKTOP-01.png",
+                        "sha256":  "4eea398b84c430f4306cb2751aae552010ff86c37c28b24d55d1205f5fe4560c",
+                        "purpose":  "Global model-number lifecycle and primary-state controls",
+                        "uses":  "CAT-05 planned evidence",
+                        "captureEnvironment":  "Controlled development capture, 2026-08-18; read-only"
                     }
                 ]
 }

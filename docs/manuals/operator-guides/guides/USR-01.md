@@ -2,21 +2,24 @@
 
 | Field | Current value |
 | --- | --- |
-| Status | Internal review candidate for V1 |
+| Status | Working draft v11; visual-correction pass; v8 remains an internal review candidate for V1 |
 | Family | USR |
 | Type | Administration task |
-| Current version | `usr-01-gebruiker-toevoegen-v8-draft` |
+| Current version | `usr-01-gebruiker-toevoegen-v11-draft` |
 | Page model | One page |
 | Layout recipe | `stacked-step-flow` with `mixed-visual-widths` and `single-visual` |
 | Generator | `scripts/manuals/generate-user-account-guide-review.mjs` |
-| Role | Admin / Superadmin |
+| Role | Admin |
 | Needed | Approved identity, standard role, verified email when available, and a secure handoff route |
-| Prerequisite | Ingelogd (AC-01 Login) with Admin or Superadmin access |
+| Prerequisite | Ingelogd (AC-01 Login) with Admin access |
 
 ## Purpose
 
 Create one active local account, assign its approved standard group, and verify
 the saved identity before giving the user access.
+
+Version 11 preserves the accepted account-creation structure and renders the
+USR-02 help handoff with its family color, symbol, code, and full guide name.
 
 ## Username Convention
 
@@ -49,9 +52,10 @@ private password.
    username, and the existing verified email address. Enter the temporary
    password as username plus current year and select
    `Deze gebruiker kan inloggen`. Do not invent an email address.
-3. `Kies groep en eventuele rechten` - find `Groepen` at the bottom of the
-   Information page and choose the approved standard group. `Refurbisher` is
-   normal. The second tab at the top is `Machtigingen`; it contains direct
+3. `Open Optionele informatie` - remain on the `Informatie` tab,
+   open the collapsed `Optionele informatie` bar near the bottom, then find
+   `Groepen` inside that section and choose the approved standard group.
+   `Refurbisher` is normal. The second tab at the top is `Machtigingen`; it contains direct
    rights including `Global: Super User` for Superadmin. Use the minimum rights
    needed for the person's work. When the standard group is insufficient, add
    only the required user-specific rights; USR-02 documents that route. Use
@@ -89,7 +93,7 @@ user needs.
 | 1A | Expanded Dutch dashboard sidebar with `Personen` and `Toon Alles` visible | `USR-DASHBOARD-PEOPLE-NAV-DESKTOP-01` | Captured 2026-08-13 |
 | 1B | User list with add action; search remains visible as a secondary safeguard | `USR-LIST-DESKTOP-01` | Captured 2026-08-11 |
 | 2A | Create form with identity, password, and login controls; only login is targeted | `USR-CREATE-FORM-DESKTOP-01` | Captured 2026-08-11; no password visible |
-| 3A | Editable group selector with standard operational groups | `USR-GROUP-EDIT-DESKTOP-01` | Captured 2026-08-11 in controlled Superadmin session |
+| 3A | Editable group selector reached after opening `Optionele informatie` | `USR-GROUP-EDIT-DESKTOP-01` | Captured 2026-08-11 in controlled Superadmin session |
 | 4A | Saved fictional user identity and group without an unnecessary focus overlay | `USR-DETAIL-DESKTOP-01` | Captured 2026-08-11 |
 
 ## Complete When
@@ -113,3 +117,9 @@ permissions, and an immediate AC-02 handoff for the temporary password.
   guide references, focus padding, completion alignment, and geometry QA.
 - v8 adds a small expanded-sidebar visual for the route through `Personen` and
   `Toon Alles`, then relabels the existing add-user toolbar visual as `1B`.
+- v9 replaces the ambiguous `Onderaan` direction in step 3 with the complete
+  route through `Informatie` and the collapsed `Optionele informatie` bar
+  before the operator selects `Groepen`.
+- v10 retains that route and makes the capitalization, lowercase surname
+  initials, no-period/no-space username rule and `username + current year`
+  temporary-password example explicit in the page itself.

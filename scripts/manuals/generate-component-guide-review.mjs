@@ -11,13 +11,15 @@ import {
   resolveCommand,
 } from './lib/guide-paths.mjs';
 
-const generatedOn = '2026-08-04';
-const outDir = process.env.SNIPEIT_GUIDE_OUT_DIR || guideOutputDir('CMP-01-v4');
+const versionNumber = process.env.SNIPEIT_CMP01_VERSION ?? '4';
+const isFeedbackRevision = versionNumber === '5';
+const generatedOn = process.env.SNIPEIT_GUIDE_DATE ?? '2026-08-04';
+const outDir = process.env.SNIPEIT_GUIDE_OUT_DIR || guideOutputDir(`CMP-01-v${versionNumber}`);
 const repoPdfDir = repoPdfOutputRoot;
 const chromePath = resolveChromeExecutable();
 const pdftoppmPath = resolveCommand('GUIDE_PDFTOPPM_PATH', 'pdftoppm');
 
-const slug = 'CMP-01-install-existing-v4-draft';
+const slug = `CMP-01-install-existing-v${versionNumber}-draft`;
 const sources = {
   componentTab: evidencePath('CMP-INSTALL-ENTRY-MOBILE-02'),
   componentForm: evidencePath('CMP-INSTALL-SELECTED-MOBILE-02'),
@@ -242,10 +244,10 @@ const html = `<!doctype html>
   <article class="page">
     <header>
       <div class="title"><h1>CMP-01 Bestaand component plaatsen</h1><p class="subtitle">Koppel een gevolgd onderdeel uit tray of opslag aan het juiste asset</p></div>
-      <div class="version">Draft v4<span>${generatedOn}</span><small>1 van 1</small></div>
+      <div class="version">Draft v${versionNumber}<span>${generatedOn}</span><small>1 van 1</small></div>
     </header>
     <section class="context">
-      <div><span class="label">Rol</span><strong>Bevoegde refurbisher</strong></div>
+      <div><span class="label">Rol</span><strong>${isFeedbackRevision ? 'Senior refurbisher' : 'Bevoegde refurbisher'}</strong></div>
       <div><span class="label">Nodig</span><strong>Fysiek onderdeel met componenttag</strong></div>
       <div><span class="label">Vooraf</span>${guideChip('SC', 'SC-01', 'Asset geopend')}</div>
     </section>
@@ -302,7 +304,7 @@ fs.copyFileSync(pdfPath, repoPdfPath);
 const manifest = {
   generatedAt: new Date().toISOString(),
   guide: 'CMP-01',
-  version: 'Draft v4',
+  version: `Draft v${versionNumber}`,
   operatorFacingUrl: 'https://snipe.inbit/',
   captureEnvironment: 'Controlled development environment',
   testRecord: { asset: 'DEMO-001', componentTag: 'INBIT-C-UW4626', serial: 'CMP01-RAM-0001' },
@@ -316,6 +318,6 @@ const manifest = {
   ],
 };
 fs.writeFileSync(path.join(outDir, 'generation-manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
-fs.writeFileSync(path.join(outDir, 'CMP-01-review-summary.md'), `# CMP-01 Review Draft v4\n\n- Four actual steps; no placeholder blocks.\n- Target marks use measured pixel bounds and symmetric control padding.\n- The final identity target sits below the tag and serial-number headings.\n- Controlled component: INBIT-C-UW4626 / CMP01-RAM-0001.\n- The component was installed back into the controlled asset after capture.\n- Exact component role/permissions remain a review point before approval.\n`, 'utf8');
+fs.writeFileSync(path.join(outDir, 'CMP-01-review-summary.md'), `# CMP-01 Review Draft v${versionNumber}\n\n- Four actual steps; no placeholder blocks.\n- Target marks use measured pixel bounds and symmetric control padding.\n- The final identity target sits below the tag and serial-number headings.\n- Controlled component: INBIT-C-UW4626 / CMP01-RAM-0001.\n- The component was installed back into the controlled asset after capture.\n- Role: ${isFeedbackRevision ? 'Senior refurbisher.' : 'exact component role/permissions remain a review point before approval.'}\n`, 'utf8');
 
 console.log(JSON.stringify({ outDir, pdfPath, pngPath, repoPdfPath }, null, 2));

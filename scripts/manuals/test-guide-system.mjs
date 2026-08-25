@@ -3,6 +3,7 @@ import {
     GUIDE_FAMILIES,
     GUIDE_REGISTRY,
     SvgGuideDocument,
+    drawContextStrip,
     guideReference,
     layoutRelatedGuides,
     normalizeFocusBounds,
@@ -22,6 +23,15 @@ doc.guideChip(40, 40, 55, guideReference('USR-02'));
 const markup = doc.render();
 assert.match(markup, /dominant-baseline="central"/);
 assert.doesNotMatch(markup, /y="10\.[1-9]/, 'Family labels must not use guessed baseline offsets.');
+
+const contextDoc = new SvgGuideDocument();
+drawContextStrip(contextDoc, [
+    { label: 'Vooraf', value: 'Afgerond', guide: guideReference('AC-01') },
+]);
+const contextMarkup = contextDoc.render();
+assert.match(contextMarkup, /data-component="context-guide-reference"/);
+assert.match(contextMarkup, />AC-01 Login</);
+assert.doesNotMatch(contextMarkup, />Afgerond</);
 
 const related = [
     guideReference('AC-02', { width: 57 }),

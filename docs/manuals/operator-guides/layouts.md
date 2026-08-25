@@ -30,6 +30,8 @@ guide needs more text or a wider screenshot.
 | `two-column-step-grid` | Two-column step grid | Four or similarly balanced steps where two columns improve visual size and comparison. | WF-01 v9 |
 | `route-list` | Route list | A process overview that points to task guides without repeating their instructions. | AST-02 v5 |
 | `troubleshooting-grid` | Troubleshooting grid | Non-linear problem lookup using compact independent recovery routes. | HELP-01 v6 |
+| `reference-chapter` | Reference chapter | Multi-page explanation using diagrams, decision tables, examples, and selected interface landmarks. | CAT-00 v4 |
+| `extended-admin-flow` | Extended administration flow | A desktop-first procedure that preserves field explanations and recognizable screenshots over several continuously numbered pages. | CAT-01 v2 |
 | `unassigned` | Not yet selected | A planned guide whose real workflow has not been investigated. It may not be generated as a review candidate. | USR-05 |
 
 ## Step Patterns
@@ -45,6 +47,7 @@ it.
 | `mixed-visual-widths` | A step contains visuals with deliberately different widths. | Width follows recognition needs, not equal-card symmetry. | USR-01 step 1 |
 | `reused-evidence` | One canonical source supports multiple labels or guides. | Use different measured crops or targets without duplicating the source file. | CMP-01 2A/3A; AC-01 3A and SC-01 1A |
 | `inline-stop` | A risk is stated in the first relevant step. | Prefer concise red text when the warning is part of the step purpose. | SC-01 step 4 |
+| `inline-warning` | A recoverable validation or correction belongs in its relevant step. | Use amber text and state the corrective action; do not imply an emergency halt. | AST-03 v3/v4 duplicate/model checks |
 | `help-alternative` | An exceptional or recovery route belongs below the main path. | It must not look like a successful final step. | AST-02 unregistered-asset route |
 | `two-sided-continuation` | One task continues on a second A4 side. | Side 1 ends with a visible `volgende pagina` handoff; numbering and context continue on side 2. | WF-02 v10 |
 
@@ -56,9 +59,9 @@ it.
 | AC-02 | `stacked-step-flow` | `single-visual` | One page |
 | SC-01 | `mixed-asymmetric-flow` | `parallel-visual-choice`, `reused-evidence`, `inline-stop` | One page |
 | AST-02 | `route-list` | `help-alternative` | One page |
-| AST-03 | `stacked-step-flow` | `reused-evidence`, `inline-stop`, `two-sided-continuation` | Two-sided |
-| AST-04 | `stacked-step-flow` | `single-visual`, `inline-stop` | One page |
-| AST-05 | `stacked-step-flow` | `single-visual`, `inline-stop` | One page |
+| AST-03 | `stacked-step-flow` | `parallel-visual-choice`, `reused-evidence`, `inline-warning`, `two-sided-continuation` | Two-sided |
+| AST-04 | `stacked-step-flow` | `reused-evidence`, `inline-warning` | One page |
+| AST-05 | `two-column-step-grid` | `reused-evidence`, `inline-warning`, `inline-route-alternative` | One page |
 | WF-01 | `two-column-step-grid` | `inline-route-alternative`, `reused-evidence` | One page |
 | WF-02 | `stacked-step-flow` | `single-visual`, `reused-evidence`, `two-sided-continuation` | Two-sided |
 | CMP-01 | `stacked-step-flow` | `single-visual`, `reused-evidence`, `inline-stop` | One page |
@@ -70,6 +73,13 @@ it.
 | USR-03 | `stacked-step-flow` | `parallel-visual-choice` | One page |
 | USR-04 | `stacked-step-flow` | `single-visual`, `two-sided-continuation` | Two-sided |
 | USR-05 | `unassigned` | To be determined from the verified workflow | Unknown |
+| CAT-00 | `reference-chapter` | `reused-evidence`, `two-sided-continuation` | Eight-page chapter |
+| CAT-01 | `extended-admin-flow` | `single-visual`, `inline-route-alternative`, `inline-warning`, `reused-evidence`, `two-sided-continuation` | Five-page procedure |
+| CAT-02 | `unassigned` | Specification and expected-component workflow | Unknown |
+| CAT-03 | `unassigned` | Attribute-definition workflow | Unknown |
+| CAT-04 | `unassigned` | Component-definition workflow | Unknown |
+| CAT-05 | `unassigned` | Variant and lifecycle workflow | Unknown |
+| CAT-06 | `unassigned` | Verification and source workflow | Unknown |
 
 AST-01 is retired. Its historical layouts are evidence of earlier exploration,
 not an active recipe assignment.
@@ -87,6 +97,12 @@ not an active recipe assignment.
   instructions.
 - Add a second side before reducing screenshots below recognizable context or
   shrinking critical instructions.
+- A reference chapter may use more than two pages when its decisions are reused
+  by several task guides. Keep one question or concept family per page and use
+  continuous page and section numbering.
+- An extended administration task remains one guide when the operator completes
+  one end-to-end outcome. Split supporting definition management into referenced
+  guides instead of hiding it in compressed side notes.
 
 ## Preservation And Migration
 
