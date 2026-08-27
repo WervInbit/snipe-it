@@ -250,7 +250,7 @@ class ProductionContainerConfigurationTest extends TestCase
             'php:8.2-fpm-bookworm@sha256:5623a1f394cfc9ec9710efc975db6d746618f1c3e047649232d5432a0b2f942c',
             'mlocati/php-extension-installer:2@sha256:b6d3fa381b9ba5cf051117c1c601d6a523b590e534bf3d56eb4fbe352949c138',
             'composer:2.8@sha256:5248900ab8b5f7f880c2d62180e40960cd87f60149ec9a1abfd62ac72a02577c',
-            'nginxinc/nginx-unprivileged:1.30-alpine@sha256:44e36330f74d4f3a1d4e222acca9e23b401fb87811a7597024502bb759c4dd49',
+            'nginxinc/nginx-unprivileged:1.30.4-alpine3.24@sha256:93722936b82ec8a1178d48448e619226680d2de3706a1640800e186cd5fa7fd3',
         ] as $pinnedReference) {
             $this->assertStringContainsString($pinnedReference, $dockerfile);
         }
@@ -260,6 +260,9 @@ class ProductionContainerConfigurationTest extends TestCase
             $dockerfile,
             'Every external production build image must include an immutable sha256 digest.',
         );
+
+        $this->assertStringContainsString('libcrypto3=3.5.8-r0', $dockerfile);
+        $this->assertStringContainsString('libssl3=3.5.8-r0', $dockerfile);
     }
 
     public function test_docker_build_context_excludes_runtime_cache_and_session_artifacts(): void

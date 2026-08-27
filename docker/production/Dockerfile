@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7@sha256:a57df69d0ea827fb7266491f2813635de6f17269be881f696fbfdf2d83dda33e
 
-# Multi-platform image indexes resolved 2026-08-13. Keep the readable tags and
+# Multi-platform image indexes resolved 2026-08-27. Keep the readable tags and
 # update the digest deliberately when refreshing the V1 build toolchain.
 FROM node:20-bookworm-slim@sha256:2cf067cfed83d5ea958367df9f966191a942351a2df77d6f0193e162b5febfc0 AS frontend
 
@@ -152,9 +152,13 @@ CMD ["php-fpm", "--nodaemonize"]
 EXPOSE 9000
 
 
-FROM nginxinc/nginx-unprivileged:1.30-alpine@sha256:44e36330f74d4f3a1d4e222acca9e23b401fb87811a7597024502bb759c4dd49 AS web
+FROM nginxinc/nginx-unprivileged:1.30.4-alpine3.24@sha256:93722936b82ec8a1178d48448e619226680d2de3706a1640800e186cd5fa7fd3 AS web
 
 USER root
+
+RUN apk add --no-cache --upgrade \
+        libcrypto3=3.5.8-r0 \
+        libssl3=3.5.8-r0
 
 COPY docker/production/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=application-build /var/www/html/public/ /var/www/html/public/

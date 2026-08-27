@@ -37,6 +37,13 @@ class ProductionDataRehearsalConfigurationTest extends TestCase
         $this->assertStringContainsString('SNIPEIT_REDIS_VOLUME:', $compose);
         $this->assertStringContainsString('SNIPEIT_TLS_VOLUME:', $compose);
         $this->assertStringContainsString('edge_tls_init:', $compose);
+        $this->assertSame(
+            2,
+            substr_count(
+                $compose,
+                'image: ${SNIPEIT_WEB_IMAGE:?Set the web image repository}@${SNIPEIT_WEB_IMAGE_DIGEST:?Set the immutable web image sha256 digest}',
+            ),
+        );
         $this->assertStringContainsString('condition: service_completed_successfully', $compose);
         $this->assertStringContainsString('chmod 0440', $compose);
         $this->assertStringContainsString('source: rehearsal_tls_data', $compose);
