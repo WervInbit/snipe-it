@@ -33,6 +33,25 @@ colors, type sizes, and component dimensions. A guide may choose its own step
 heights and screenshot proportions, but it must not redefine common badge,
 reference, focus, or completion geometry.
 
+### Semantic Object Colors In Reference Diagrams
+
+Guide-family color still owns the document header, section navigation, and
+guide references. A reference diagram may additionally reuse an object
+family's established color when that helps readers follow the same object
+across definitions, baselines, and physical records:
+
+- component definitions, expected components, and placed components use the
+  `CMP` color;
+- asset identity and asset-specific or instantiated state use the `AST` color;
+- catalogue/model and attribute structures retain the `CAT` color unless a
+  narrower object family applies.
+
+Color identifies the object family, not whether a record is reusable or
+physical. Distinguish a definition, expected baseline, and physical instance
+with explicit labels, icons, border weight, or fill treatment. Do not assign a
+different hue to a placed component than to its component definition, or to an
+asset-specific value than to the asset it describes.
+
 ## Guide Registry
 
 `GUIDE_REGISTRY` owns each active guide's code, full Dutch display name,

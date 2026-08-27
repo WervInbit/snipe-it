@@ -1,6 +1,6 @@
 {
     "schemaVersion": 1,
-    "updatedOn": "2026-08-25",
+    "updatedOn": "2026-08-27",
     "statusDefinition": "Unaccepted working draft; retained for review and environment transfer only",
     "artifacts": [
         {
@@ -155,23 +155,23 @@
         },
         {
             "code": "CAT-00",
-            "version": 4,
+            "version": 7,
             "title": "Catalogus begrijpen",
             "status": "Unaccepted working draft",
             "acceptedPredecessorVersion": null,
             "pages": 8,
-            "file": "CAT-00-catalogus-begrijpen-v4-draft.pdf",
-            "sha256": "60c113d4f171d038dd409b8bbb62643df93b0944628a310cb99a0297498c025b"
+            "file": "CAT-00-catalogus-begrijpen-v7-draft.pdf",
+            "sha256": "4db4efcc9931d10b746c85b49a2d5fa651547891a31575bc119f0b8f3370e06c"
         },
         {
             "code": "CAT-01",
-            "version": 2,
+            "version": 3,
             "title": "Model en modelnummer aanmaken",
             "status": "Unaccepted working draft",
             "acceptedPredecessorVersion": null,
             "pages": 5,
-            "file": "CAT-01-model-en-modelnummer-aanmaken-v2-draft.pdf",
-            "sha256": "fdc7ac229d5a0a7adc1f709e78b96e39dd7d854819d526182976bc1aacf9b93d"
+            "file": "CAT-01-model-en-modelnummer-aanmaken-v3-draft.pdf",
+            "sha256": "2a96601b7606792ef2fdd4c3da56e7a4e32eb4dd7ebbe048222731565ef6810a"
         }
     ]
 }

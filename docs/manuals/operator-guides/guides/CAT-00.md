@@ -1,18 +1,21 @@
 # CAT-00 Catalogus begrijpen
 
-Status: Working draft v4; complete mental-model rewrite awaiting exact-version
-review.
+Status: Working draft v7; semantic-color and audit correction pass awaiting
+exact-version review.
 
 ## Maintenance Metadata
 
 - Family: `CAT`.
 - Type: Reference chapter and guide router.
-- Current version: v4 draft.
+- Current version: v7 draft.
 - Page model: Eight-page reference chapter with continuous section numbering.
 - Layout recipe: `reference-chapter` with `reused-evidence` and
   `two-sided-continuation`.
 - Generator: `scripts/manuals/generate-catalog-guide-review.mjs`.
-- Artifact root: `output/manuals/proofs/catalog-guide-review/cat-00-v4/`.
+- Artifact root: `output/manuals/proofs/catalog-guide-review/cat-00-v7/`.
+- Portable review package:
+  `resources/manuals/operator-guides/drafts/CAT-00-catalogus-begrijpen-v7-draft.pdf`.
+  Its manifest status is `Unaccepted working draft`.
 
 ## Purpose
 
@@ -61,17 +64,32 @@ Do not replace these terms with invented umbrella labels such as `eigenschap`,
 
 ## Section 1 - Complete Catalogue Map
 
-Explain the complete relationship before individual details:
+Use a relationship graph rather than separate lanes:
 
-1. Attribute definitions and component definitions are reusable building
-   blocks.
-2. Basismodel -> Modelnummer -> Asset is the product identity chain.
-3. A Modelnummer contains direct attribute values and expected component
-   templates.
-4. A Componentdefinitie can contribute attribute values and expected child
-   components.
-5. An Asset adds current component state, allowed overrides, and workflow
-   evidence.
+1. Basismodel -> Modelnummer -> Asset is the product identity relationship.
+2. Directe attribuutwaarde and Expected Component connect directly to the
+   Modelnummer.
+3. A direct attribute value uses an Attribuutdefinitie.
+4. Expected Component uses a Componentdefinitie.
+5. Componentdefinitie uses reusable Attribuutdefinities for its attribute
+   contributions.
+6. A Placed Component is an instance of Componentdefinitie and belongs to one
+   physical Asset. Do not connect it to Expected Component as a mandatory
+   sequence.
+
+Semantic color follows the object, not only whether it is a definition or an
+instance:
+
+- purple represents catalogue/model and attribute structures;
+- amber represents Componentdefinitie, Expected Component, and Placed
+  Component;
+- green represents Asset identity and asset-specific state.
+
+Use labels and fill/border treatment to distinguish reusable definitions,
+expected baselines, and physical records. The Componentdefinitie-to-Placed
+Component connector must read in its actual direction: a definition can be
+physically placed as a component; do not label a definition as an instance of
+the placed component.
 
 The page explicitly states: a definition describes meaning and form; a value,
 expectation, or physical instance uses that definition.
@@ -89,25 +107,34 @@ The operator-facing block heading is `Voorbeelden: elk apparaattype gebruikt
 dezelfde structuur`. Layout instructions such as "two examples in three
 columns" may never appear in the PDF.
 
-One Basismodel can have several exact model numbers. Many physical assets can
-use the same model number. Replacing RAM or storage changes the physical asset
-and its component state; it does not invent a new manufacturer code.
+One Basismodel can have several exact model numbers. One model number can be
+used by many physical assets. Replacing RAM or storage changes the physical
+asset and its component state; it does not invent a new manufacturer code.
 
-Visual `2A` shows the complete Basismodel and exact model-number row. Visual
-`2B` shows category and manufacturer without cutting either value.
+Visual `2A` uses one wide crop to show the complete Basismodel breadcrumb and
+exact model-number row. The old category/manufacturer visual 2B is removed
+because it did not help distinguish the three identities.
 
 ## Section 3 - Attribute Definition And Attribute Value
 
-An Attribuutdefinitie is the reusable contract. Explain these fields in plain
-language:
+An Attribuutdefinitie is the reusable contract. Use the exact labels visible in
+the current form and give a concrete example for each:
 
-- label: operator-facing name;
-- datatype: yes/no, integer, decimal, enum/list, or text;
-- unit and constraints: unit, minimum, maximum, step, and permitted pattern;
-- category scope: where the attribute is selectable;
-- options: controlled choices for an enum;
-- asset override: whether one asset may carry an exception;
-- component-spec display: how component-derived values are presented.
+- `Label`: `Werkgeheugen`;
+- `Key`: `werkgeheugen`, normally generated automatically from Label;
+- `Datatype`: `Int` for a whole-number capacity;
+- `Unit (optional)`: `GB`;
+- `Category Scope`: `Laptops, Desktops`;
+- `Required for category`: enabled for a required laptop field;
+- `Allow asset overrides`: disabled when one asset may not deviate;
+- `Allow custom values (enum only)`: disabled when only defined choices apply;
+- `Component Spec Display`: `Value labels` for values such as `8 GB`;
+- `Constraints`: Minimum 1, Maximum 256, Step 1;
+- `Options`: only for Enum, for example DDR3, DDR4, and DDR5.
+
+The visible datatype choices are `Bool`, `Int`, `Decimal`, `Enum`, and `Text`.
+Datatype cannot be changed after the definition is created. This lifecycle
+rule is presented as a separate note rather than as another form field.
 
 The same definition can be used by a direct model-number value, component
 definition contribution, allowed asset override, or workflow/test. These are
@@ -119,13 +146,14 @@ definition on one exact model number.
 
 ## Section 4 - Component Definition, Expected, And Placed
 
-Explain three distinct records:
+Explain one definition with two possible uses, not three mandatory steps:
 
-1. Componentdefinitie: reusable component type, for example `RAM 8GB DDR4`.
-2. Verwachte component: the model-number baseline expects one component of
-   that type.
-3. Geplaatst component: the physical component actually registered in one
-   asset or tray, optionally with tag, serial number, status, and condition.
+1. Componentdefinitie: reusable group of attribute values, for example
+   `Werkgeheugen = 8 GB` and `Geheugentype = DDR4` combined as `RAM 8GB DDR4`.
+2. Expected Component: use of that definition and a quantity in the
+   model-number baseline; this is not yet a unique physical part.
+3. Placed Component: use on one physical asset or tray, optionally with tag,
+   serial number, status, and condition.
 
 A Componentdefinitie can also supply attribute contributions, decide which
 contributions appear in the asset specification, and define one level of
@@ -144,7 +172,7 @@ Use one coherent HP example:
 meetellende attribuutbijdragen`.
 
 Direct values cover stable facts of the exact manufacturer variant, such as
-introduction year, weight, colour, or operating-system family. Expected
+introduction year, weight, colour, or screen size. Expected
 component definitions cover the physical baseline, such as motherboard, RAM,
 storage, battery, and their component attributes.
 
@@ -170,8 +198,10 @@ change:
 - asset tag and serial number identify the physical asset, not the model
   specification.
 
-Visual `6A` shows assumed baseline rows and a tracked physical component in the
-same asset component roster.
+Visual `6A` shows tracked 8 GB RAM. Visual `6B` shows 256 GB storage that is
+still assumed from the model-number baseline. A separate hypothetical example
+explains that replacing 8 GB with 16 GB changes the asset build but not its
+manufacturer model number.
 
 ## Section 7 - Effective Value Rules
 
@@ -181,8 +211,10 @@ Explain the current implemented precedence without internal field names:
    specification wins for the asset.
 2. A permitted asset override is used only when no current component
    contribution owns the value.
-3. At model-number level, a contributing expected component wins over a
-   competing direct model-number value.
+3. At model-number level, a contributing expected component in the baseline
+   wins over a competing direct model-number value. Do not label this source
+   simply `Modelnummerbaseline`, because the direct value in rule 4 is also
+   part of that baseline.
 4. A direct model-number value is the fallback when no contributing component
    supplies the same fact.
 5. A component-instance value, when recorded, takes precedence over its
@@ -229,7 +261,7 @@ and choose the complete follow-up guide.
 
 | Label | Source ID | Purpose |
 | --- | --- | --- |
-| 2A/2B | `CAT-MODEL-DETAIL-DESKTOP-01` | Complete Basismodel, exact-number row, category, and manufacturer. |
+| 2A | `CAT-MODEL-DETAIL-DESKTOP-01` | Complete Basismodel breadcrumb and exact-number row. |
 | 3A | `CAT-ATTRIBUTE-LIST-DESKTOP-01` | Reusable attribute-definition fields and usage columns. |
 | 3B/5A | `CAT-MODEL-SPEC-DESKTOP-01` | Direct model-number value on Edit Spec. |
 | 4A | `CAT-COMPONENT-DEFINITION-LIST-DESKTOP-01` | Reusable component definitions with instance/template counts. |
@@ -246,5 +278,6 @@ and choose the complete follow-up guide.
 - No operator-facing text may use `eigenschap`, `onderdeeltype`,
   `cataloguslaag`, `catalogusobject`, `resolves_to_spec`, or code-oriented
   relationship names.
-- CAT-02 through CAT-06 remain planned guides. CAT-00 v4 remains a working
+- CAT-02 through CAT-06 remain planned guides. Mark those routes as
+  `In voorbereiding` in the PDF. CAT-00 v7 remains a working
   draft until this exact PDF is reviewed.

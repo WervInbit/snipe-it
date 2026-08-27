@@ -1,189 +1,226 @@
 # CAT-01 Model en modelnummer aanmaken
 
-Status: Working draft v2; cold-start pass and awaiting exact-version review.
+Status: Working draft v3; structural rewrite aligned with CAT-00 v7 and
+awaiting exact-version review.
 
 ## Maintenance Metadata
 
 - Family: `CAT`.
 - Type: Extended administration task.
-- Current version: v2 draft.
+- Current version: v3 draft.
 - Page model: Five-page procedure with continuous steps and page handoffs.
 - Layout recipe: `extended-admin-flow` with `single-visual`,
   `inline-route-alternative`, `inline-warning`, `reused-evidence`, and
   `two-sided-continuation`.
 - Generator: `scripts/manuals/generate-catalog-guide-review.mjs`.
-- Artifact root: `output/manuals/proofs/2026-08-20-cold-start-rework/catalog/`.
+- Artifact root: `output/manuals/proofs/catalog-guide-review/cat-01-v3/`.
+- Portable review package:
+  `resources/manuals/operator-guides/drafts/CAT-01-model-en-modelnummer-aanmaken-v3-draft.pdf`.
+  Its manifest status is `Unaccepted working draft`.
 
 ## Purpose
 
-Create a reusable base model and its exact model number, or add a missing exact
-model number to an existing model, without creating a duplicate catalogue path.
+Reuse or create the correct Basismodel and add one exact manufacturer
+model-number code without duplicating an existing catalogue route or confusing
+a physical asset change with a new manufacturer variant.
 
 ## Audience And Context
 
 - Role: Supervisor.
-- Needed: Device/manufacturer, product name and generation, exact manufacturer
-  model-number code, category, and an authoritative source.
-- Prerequisite: Ingelogd (`AC-01 Login`) and the distinctions in
-  `CAT-00 Catalogus begrijpen`.
+- Needed: catalogue-management rights, the product label, and a verified
+  manufacturer source for the product name and exact code.
+- Prerequisites: `AC-01 Login` and `CAT-00 Catalogus begrijpen`.
 - Primary path is desktop administration. Mobile screenshots are not required
   for this catalogue task.
+- The application menu and historical screenshots currently show
+  `Asset modellen`. In operator explanations, each reusable product and
+  generation record is called a `Basismodel`.
 
-## Page 1 - Open And Search
+## Page 1 - Find The Existing Catalogue Route
 
-### Step 1: Open Basismodellen
+### Step 1: Open Asset modellen
 
-From the dashboard, expand `Instellingen` and choose `Asset modellen`. This is
-the current visible menu label for the Basismodel area; it does not list the
-individual physical assets.
+From the dashboard, expand `Instellingen` and choose `Asset modellen`. This
+opens reusable Basismodellen, not the individual physical assets under
+`Apparaten`.
 
-Visual `1A`: dashboard/sidebar with `Instellingen` and `Asset modellen` visible.
+Visual `1A`: expanded dashboard navigation with `Instellingen` and
+`Asset modellen` visible.
+
 Caption: `Open Instellingen en kies Asset modellen.`
 
-### Step 2: Search before creating
+### Step 2: Search name and exact code
 
-Search using:
+Search before using the create control:
 
-- manufacturer plus product/generation, for example `HP ProBook 450 G8`;
-- the exact model-number code, for example `2E9F8EA#ABH`;
-- a distinctive part of the name only when spelling or spacing is uncertain.
+1. Search manufacturer, product family, and generation, for example
+   `HP ProBook 450 G8`.
+2. Search or compare the complete printed model-number code, including its
+   suffix, for example `2E9F8EA#ABH`.
+3. Compare the visible Basismodel name, `Model Nr.`, `Model Numbers` count,
+   and category.
 
-Compare the `Naam`, `Model Nr.`, category, and existing `Model Numbers` count.
+Visual `2A`: model list with search field, matching rows, exact codes, and
+create `+` in recognizable surrounding context.
 
-Visual `2A`: model list with search field, relevant rows, and create `+` visible.
-Caption: `Zoek op naam en exact modelnummer voordat je de + gebruikt.`
+Caption: `Zoek naam en exacte code voordat je de + gebruikt.`
 
-Amber warning: `Maak geen tweede record voor een ander RAM- of opslagprofiel
-wanneer het dezelfde productgeneratie is. Voeg dan meestal een modelnummer toe.`
+Amber warning: `Een vergelijkbare naam is niet genoeg. Controleer ook de
+volledige fabrikantcode en generatie.`
 
-Page handoff: `Volgende pagina: kies de bestaande of nieuwe route.`
+Page handoff: `Volgende pagina: kies de juiste bestaande of nieuwe route.`
 
-## Page 2 - Choose The Route
+## Page 2 - Choose The Correct Route
 
-### Step 3: Decide between two routes
+### Step 3: Choose one of three outcomes
 
-#### Route A - Base model exists
+#### Route A - Exact code already exists
 
-1. Open the matching model.
-2. Verify manufacturer, category, product name, and generation.
-3. Check the `Model Numbers` table.
-4. If the exact code is missing, choose `Create Model Number` and continue at
-   step 5.
+Open the matching Basismodel and exact row. Verify the code, label, category,
+and manufacturer. Do not create another record. Continue at step 7.
 
-Visual `3A`: existing model detail with `Create Model Number`, the primary row,
-and the model identity visible.
-Caption: `Gebruik het bestaande basismodel als product en generatie gelijk zijn.`
+#### Route B - Basismodel exists, exact code is missing
 
-#### Route B - Base model does not exist
+Open the matching Basismodel. Verify that manufacturer, product family, and
+generation agree, then choose `Create Model Number`. Continue at step 5.
 
-Choose `+` on the model list and continue at step 4.
+Visual `3A`: existing Basismodel with its identity, exact-number table, and
+`Create Model Number` action.
 
-Visual `3B`: model-list create `+` with surrounding toolbar context.
+Caption: `Gebruik het bestaande basismodel als product en generatie gelijk
+zijn.`
+
+#### Route C - Basismodel is missing
+
+Use `+` on the model list only when the manufacturer plus product family and
+generation are genuinely absent. Continue at step 4.
+
+Visual `3B`: model-list create `+` with toolbar and list context.
+
 Caption: `Gebruik de + alleen als het basismodel werkelijk ontbreekt.`
 
-Amber warning: `Bij twijfel niet dupliceren. Vergelijk de fabrikant, volledige
-productnaam, generatie en het exacte modelnummer.`
+Decision rule:
 
-Page handoff: `Volgende pagina: vul het basismodel in.`
+- A different printed manufacturer/SKU code is another exact model number,
+  even when it represents a factory RAM or storage configuration.
+- RAM or storage changed later in one physical device remains a component
+  change on that asset; it does not create a new manufacturer code.
 
-## Page 3 - Create The Base Model
+Page handoff: `Volgende pagina: maak alleen een ontbrekend Basismodel.`
 
-### Step 4: Fill the base-model form
+## Page 3 - Create A Missing Base Model
 
-| Field | What to enter | Why |
+### Step 4: Enter the reusable product identity
+
+Enter only the active catalogue identity fields:
+
+| Field | Example | Meaning |
 | --- | --- | --- |
-| Naam basismodel | Product family plus generation: `HP ProBook 450 G8` | Groups exact variants under one recognizable model. |
-| Categorienaam | Correct asset category: `Laptops` | Controls available catalogue structure and reporting. |
-| Fabrikant | Actual manufacturer: `HP` | Links support/manufacturer information and prevents ambiguous names. |
-| Afschrijving | Approved finance policy or `Do Not Depreciate` | Do not guess a period from device age. |
-| Veldverzameling | Only an approved legacy custom-field set | It is not a substitute for CAT attributes/components. |
-| Notities | Optional administrative context, not an identifier | Keep serial, tag, and model-number code in their own fields. |
-| Afbeelding | Optional generic model image | A model-number image can later provide a more exact variant image. |
+| Naam basismodel | `HP ProBook 450 G8` | Product family plus generation shared by exact variants. |
+| Categorienaam | `Laptops` | Correct device type used for applicable catalogue and workflow content. |
+| Fabrikant | `HP` | Actual manufacturer; do not substitute a similar brand. |
 
-Visual `4A`: unsaved create form populated with the example Basismodel,
-category, and manufacturer. The compact field summary places each field name
-directly before its example value; `Opslaan` remains visible in the form.
-Caption: `Vul het algemene basismodel in; het exacte nummer volgt hierna.`
+Visual `4A`: the unsaved example form cropped to the three active identity
+fields and `Opslaan`. Deprecated finance/custom-field controls are not taught
+as part of the refurbishment catalogue route.
 
-Before saving, check that the model name does not contain an asset tag, serial
-number, or an invented configuration code. Choose `Opslaan` once.
+Caption: `Vul product + generatie, categorie en fabrikant in.`
 
-The saved Basismodel is usable only after the exact model number is added.
+An optional generic image may aid recognition, but it is not an identifier and
+must not delay creation of the exact model number.
+
+Before saving, confirm that the Basismodel name contains no asset tag, serial
+number, exact SKU suffix, or invented configuration code. Choose `Opslaan`
+once. A newly saved Basismodel is not complete until it contains the exact
+model number.
+
+Amber warning: `Ontbreekt de juiste categorie of fabrikant, kies dan geen
+bijna-gelijke vervanger.`
 
 Page handoff: `Volgende pagina: voeg het exacte modelnummer toe.`
 
-## Page 4 - Add The Exact Model Number
+## Page 4 - Add The Exact Manufacturer Variant
 
 ### Step 5: Open Create Model Number
 
-On the saved model detail page, choose `Create Model Number`.
+On the saved or reused Basismodel detail page, choose
+`Create Model Number`.
 
-### Step 6: Enter code and label
+Visual `5A`: Basismodel detail with the exact-number table and create action.
+
+Caption: `Open de exacte variant vanaf het juiste Basismodel.`
+
+### Step 6: Enter code and recognition label
 
 | Field | What to enter |
 | --- | --- |
-| Code | Exact manufacturer model/SKU code, including meaningful suffix: `2E9F8EA#ABH`. |
-| `Aa` | Use only when the printed code intentionally contains lowercase; normal entry is capitalized automatically. |
-| Label | Human-readable variant summary: `HP ProBook 450 G8 - i5-1135G7 - 8GB - 256GB`. |
+| Code | Complete manufacturer/SKU code from the label or verified source: `2E9F8EA#ABH`. Preserve meaningful suffixes. |
+| `Aa` | Use only when the printed code intentionally contains lowercase. Normal input is capitalized automatically. |
+| Label | Readable recognition text, for example `HP ProBook 450 G8 - i5-1135G7 - 8GB - 256GB`. |
 
-Do not enter the serial number, Product ID, Inbit asset tag, or a made-up code.
-The code must be unique within this base model.
+The code is the exact identity. The label helps a refurbisher recognize the
+variant but is not a replacement for CAT-02 specification values.
 
-Visual `6A`: unsaved model-number form with example code, label, `Aa`, and
-`Opslaan` visible.
-Caption: `Code is de exacte variant; Label helpt de refurbisher kiezen.`
+Visual `6A`: unsaved model-number form with code, `Aa`, label, and `Opslaan`
+visible.
 
-Choose `Opslaan`. The system automatically marks the first exact model number
-as the standard row. This is a system default, not an extra choice the
-Supervisor must make in this task. A later default/lifecycle change belongs to
-CAT-05.
+Caption: `Code is exact; Label helpt de variant herkennen.`
 
-Page handoff: `Volgende pagina: controleer en bouw de specificatie.`
+Do not enter a serial number, Product ID, Inbit asset tag, or self-created code.
+Choose `Opslaan` once. The first exact number becomes the system standard
+automatically; changing that lifecycle choice belongs to CAT-05.
+
+Page handoff: `Volgende pagina: controleer de opgeslagen identiteit.`
 
 ## Page 5 - Verify And Continue
 
-### Step 7: Verify the saved result
+### Step 7: Verify the saved catalogue identity
 
-On the model detail page, check:
+Check the Basismodel and exact row together:
 
-1. the base-model name, manufacturer, and category;
-2. exact model-number code and complete suffix;
-3. understandable variant label;
-4. the row is active, and the first row is automatically shown as standard;
-5. no duplicate row under the same model.
+1. Basismodel name is product plus generation.
+2. Category and manufacturer match the source.
+3. Exact code includes every meaningful suffix.
+4. Label is understandable but does not replace the exact code.
+5. Row is active; the first row may be shown as the automatic standard.
+6. No duplicate Basismodel or exact-code row exists.
 
-Visual `7A`: model detail showing the complete model-number row and primary
-state.
-Caption: `Controleer code, label en status op het opgeslagen basismodel.`
+Visual `7A`: wide exact-number row with code, label, status, and actions.
 
-Visual `7B`: the model-information panel showing category and manufacturer.
-Caption: `Controleer categorie en fabrikant naast de exacte variant.`
+Caption: `Controleer code, label en actieve/standaardstatus.`
 
-### Step 8: Optional follow-up - build the specification
+Visual `7B`: readable information panel with category and manufacturer.
 
-The Basismodel and exact number are now ready. Use `CAT-02 Modelspecificatie
-opbouwen` when specifications or expected components are needed. Then use
-`AST-03 Asset registreren en labelen` for the physical device.
+Caption: `Controleer categorie en fabrikant.`
 
-### Duplication limitation
+### Step 8: Choose the next object
 
-`Kopieer model` copies the base-model form and optionally its base image. It
-does **not** copy model numbers, specification values, expected components, or
-model-number images. There is currently no complete model-number duplication
-workflow. Verify every child item manually when the clone route is used.
+- Use `CAT-02 Modelspecificatie opbouwen` when direct attributes or expected
+  components still need to be configured. CAT-02 is in preparation.
+- Use `AST-03 Asset registreren en labelen` only when the reusable catalogue
+  identity is ready and one physical device must be registered.
+
+### Copy Limitation
+
+`Kopieer model` copies only the Basismodel form and optionally its base image.
+It does not copy exact model numbers, model-number images, direct specification
+values, or expected components. Verify every child record manually when this
+route is used.
 
 ## Help
 
-- Exact code unavailable: use `CAT-06`; do not invent one.
-- Category or manufacturer missing: create/repair the dependency, then return.
-- Similar model found: use `CAT-00` and compare product generation and exact
-  number before adding anything.
-- Wrong primary or obsolete number: use `CAT-05`; do not delete an in-use row.
+- Exact code unavailable: use `CAT-06 Catalogus controleren en bronnen`; do
+  not invent a code.
+- Similar product found: return to CAT-00 and compare product generation and
+  complete exact number.
+- Wrong standard row or obsolete exact number: use `CAT-05 Varianten en
+  lifecycle beheren`; do not delete an in-use record.
 
 ## Completion
 
-`Klaar als`: one correct Basismodel contains the exact model number with the
-right label and active/standard state, without a duplicate.
+`Klaar als`: one correct Basismodel contains the verified exact manufacturer
+model number, with the right category, manufacturer, code, and recognition
+label, without a duplicate.
 
 ## Related Guides
 
@@ -199,21 +236,29 @@ right label and active/standard state, without a duplicate.
 | --- | --- | --- |
 | 1A | `CAT-MODEL-LIST-DESKTOP-01` | Start from the dashboard/sidebar and find Asset modellen. |
 | 2A | `CAT-MODEL-LIST-DESKTOP-01` | Search, compare existing rows, and locate the create control. |
-| 3A | `CAT-MODEL-DETAIL-DESKTOP-01` | Existing model route and model-number table. |
-| 3B | `CAT-MODEL-LIST-DESKTOP-01` | Reuse list evidence with a separate measured create target. |
-| 4A | `CAT-MODEL-CREATE-DESKTOP-01` | Explain base-model fields using an unsaved example. |
-| 6A | `CAT-MODEL-NUMBER-CREATE-DESKTOP-01` | Explain exact code, label, case behavior, and save action. |
-| 7A | `CAT-MODEL-DETAIL-DESKTOP-01` | Verify code, label, active state, and system-assigned standard state. |
-| 7B | `CAT-MODEL-DETAIL-DESKTOP-01` | Verify category and manufacturer without shrinking the model-number row. |
+| 3A | `CAT-MODEL-DETAIL-DESKTOP-01` | Existing Basismodel and exact-code routes. |
+| 3B | `CAT-MODEL-LIST-DESKTOP-01` | Create a genuinely missing Basismodel. |
+| 4A | `CAT-MODEL-CREATE-DESKTOP-01` | Explain only the active product-identity fields and save action. |
+| 5A | `CAT-MODEL-DETAIL-DESKTOP-01` | Open the exact-number route from the correct Basismodel. |
+| 6A | `CAT-MODEL-NUMBER-CREATE-DESKTOP-01` | Enter exact code, case behavior, recognition label, and save. |
+| 7A | `CAT-MODEL-DETAIL-DESKTOP-01` | Verify the complete exact-number row at readable size. |
+| 7B | `CAT-MODEL-DETAIL-DESKTOP-01` | Verify category and manufacturer at readable size. |
 
 ## Validation Notes
 
 - Step numbers continue 1-8 across all five pages.
-- Each page ends with an explicit `Volgende pagina` handoff except page 5.
-- The `+` target, search field, and `Create Model Number` target are measured
-  from their canonical source images and remain fully inside screenshot frames.
-- Screenshots retain page headers, nearby controls, and table/form landmarks;
+- Every page has a named task stage and an explicit next-page handoff.
+- Cross-guide references use their registered full name, symbol, and family
+  color.
+- CAT purple identifies Basismodel/model-number content, CMP amber identifies
+  physical component changes, and AST green identifies the physical-asset
+  follow-up.
+- Deprecated `Afschrijving` and `Veldverzameling` fields are not presented as
+  normal refurbishment catalogue inputs.
+- Focus marks remain symmetric and fully contained in their screenshot frame.
+- Screenshots retain recognizable navigation, form, table, and action context;
   no narrow viewfinder crops are acceptable.
-- The duplicate message is amber, not a red stop.
+- Duplicate and missing-dependency messages are amber recoverable warnings,
+  not red stops.
 - Printed operator text contains `https://snipe.inbit/` only; capture metadata
   may identify the controlled development environment internally.

@@ -31,7 +31,7 @@ guide needs more text or a wider screenshot.
 | `route-list` | Route list | A process overview that points to task guides without repeating their instructions. | AST-02 v5 |
 | `troubleshooting-grid` | Troubleshooting grid | Non-linear problem lookup using compact independent recovery routes. | HELP-01 v6 |
 | `reference-chapter` | Reference chapter | Multi-page explanation using diagrams, decision tables, examples, and selected interface landmarks. | CAT-00 v4 |
-| `extended-admin-flow` | Extended administration flow | A desktop-first procedure that preserves field explanations and recognizable screenshots over several continuously numbered pages. | CAT-01 v2 |
+| `extended-admin-flow` | Extended administration flow | A desktop-first procedure that preserves field explanations and recognizable screenshots over several continuously numbered pages. | CAT-01 v3 |
 | `unassigned` | Not yet selected | A planned guide whose real workflow has not been investigated. It may not be generated as a review candidate. | USR-05 |
 
 ## Step Patterns

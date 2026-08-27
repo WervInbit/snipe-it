@@ -47,8 +47,8 @@ related guides remain in the individual guide specification.
 | USR-03 Wachtwoord resetten | v3 draft; visual-correction pass, awaiting exact-version review | 1 | `stacked-step-flow` + `mixed-visual-widths` | `generate-user-account-guide-review.mjs` |
 | USR-04 Gebruiker uitschakelen of herstellen | v3 draft; visual-correction pass, awaiting exact-version review | 2 | `stacked-step-flow` + `two-sided-continuation` | `generate-user-account-guide-review.mjs` |
 | USR-05 Groepen beheren | planned | ? | `unassigned` | Not assigned |
-| CAT-00 Catalogus begrijpen | v4 draft; complete mental-model rewrite, awaiting exact-version review | 8 | `reference-chapter` + `reused-evidence` + `two-sided-continuation` | `generate-catalog-guide-review.mjs` |
-| CAT-01 Model en modelnummer aanmaken | v2 draft; cold-start pass, awaiting exact-version review | 5 | `extended-admin-flow` + alternatives + warnings + `two-sided-continuation` | `generate-catalog-guide-review.mjs` |
+| CAT-00 Catalogus begrijpen | v7 draft; semantic-color and audit correction pass, awaiting exact-version review | 8 | `reference-chapter` + `reused-evidence` + `two-sided-continuation` | `generate-catalog-guide-review.mjs` |
+| CAT-01 Model en modelnummer aanmaken | v3 draft; CAT-00-aligned structural rewrite, awaiting exact-version review | 5 | `extended-admin-flow` + three-route decision + warnings + `two-sided-continuation` | `generate-catalog-guide-review.mjs` |
 | CAT-02 Modelspecificatie opbouwen | planned; specification ready | 5 | `extended-admin-flow` | `generate-catalog-guide-review.mjs` after evidence capture |
 | CAT-03 Attributen beheren | planned; specification ready | 4 | `unassigned` | Not assigned |
 | CAT-04 Componentdefinities beheren | planned; specification ready | 5 | `unassigned` | Not assigned |
@@ -79,8 +79,8 @@ specification and evidence inventory but not in the active production matrix.
 | USR-02 | `resources/manuals/operator-guides/drafts/usr-02-rol-en-rechten-wijzigen-v9-draft.pdf`; accepted v7 remains in repository resources |
 | USR-03 | `resources/manuals/operator-guides/drafts/usr-03-wachtwoord-resetten-v3-draft.pdf` |
 | USR-04 | `resources/manuals/operator-guides/drafts/usr-04-gebruiker-uitschakelen-v3-draft.pdf` |
-| CAT-00 | `resources/manuals/operator-guides/drafts/CAT-00-catalogus-begrijpen-v4-draft.pdf` |
-| CAT-01 | `resources/manuals/operator-guides/drafts/CAT-01-model-en-modelnummer-aanmaken-v2-draft.pdf` |
+| CAT-00 | `resources/manuals/operator-guides/drafts/CAT-00-catalogus-begrijpen-v7-draft.pdf`; unaccepted working draft |
+| CAT-01 | `resources/manuals/operator-guides/drafts/CAT-01-model-en-modelnummer-aanmaken-v3-draft.pdf`; unaccepted working draft |
 
 Committed binary inputs live under `resources/manuals/operator-guides/`.
 Generated and superseded proofs remain under ignored output or the historical

@@ -225,19 +225,20 @@ branches remain review history; AST-03 v14 and AST-04/05 v5 are current:
 The catalogue-management family now has a standards-first foundation and two
 extensive working drafts:
 
-- CAT-00 v4 is an eight-page reference chapter. It first establishes the
+- CAT-00 v7 is an eight-page reference chapter. It first establishes the
   Basismodel/model-number/asset structure, then explains attribute definitions
   and values, component definitions, expected and placed components, model-
   number baselines, asset deviations, and effective-value precedence. The
   final page routes the reader to CAT-01 through CAT-06.
-- CAT-01 v2 is a five-page Supervisor procedure with
-  continuous steps 1-8, separate existing/new model routes, detailed field
-  explanations, exact-code rules, verification, and the real limits of
-  `Kopieer model`.
+- CAT-01 v3 is a five-page Supervisor procedure with continuous steps 1-8. It
+  searches before creation, separates the three possible reuse/create routes,
+  teaches only the active Basismodel identity fields, distinguishes exact code
+  from its readable label, verifies the saved identity, and routes onward to
+  CAT-02 or AST-03.
 - Nine canonical catalogue captures and one reused component-roster capture
   are registered by stable evidence IDs. The source forms were not submitted
   and contain no production record changes.
-- Both PDFs pass the cold-start, A4, page-count, text, component-geometry,
+- Both active PDFs pass their focused A4, page-count, text, component-geometry,
   context-column, and full-page raster gates. They remain working drafts;
   neither has been internally accepted yet.
 - CAT-02 through CAT-06 have detailed specifications. CAT-02 is the next

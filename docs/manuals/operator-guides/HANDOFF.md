@@ -1,6 +1,6 @@
 # Operator Guide Continuation Handoff
 
-Status: current continuation checkpoint, updated 2026-08-20.
+Status: current continuation checkpoint, updated 2026-08-27.
 
 Use this document when resuming guide creation in another task, on another
 device, or after a long interruption. It records the resume order, current
@@ -62,8 +62,8 @@ changes.
 | USR-03 Wachtwoord resetten | v3 draft | Visual-correction pass; awaiting exact-version review | Review the visible unsaved generated value, `Genereer` focus, and full AC-02 handoff. |
 | USR-04 Gebruiker uitschakelen of herstellen | v3 draft | Visual-correction pass; awaiting exact-version review | Review rectangular actions, contained warning text, and full references on both pages. |
 | USR-05 Groepen beheren | Planned | Investigation required | Investigate group list, add/edit controls, permission behavior, and verification route. |
-| CAT-00 Catalogus begrijpen | v2 draft | Cold-start pass; awaiting exact-version review | Review the task index, plain-language data placement, source priority, and follow-up map. |
-| CAT-01 Model en modelnummer aanmaken | v2 draft | Cold-start pass; awaiting exact-version review | Review the Supervisor Basismodel route, exact-code rules, automatic standard row, and optional CAT-02 handoff. |
+| CAT-00 Catalogus begrijpen | v7 draft | Portable unaccepted working draft | Review the complete eight-page v7 PDF, especially semantic colors, relationship direction, page 3 print readability, page 6 evidence crops, and page 7 priority flow. |
+| CAT-01 Model en modelnummer aanmaken | v3 draft | Portable unaccepted working draft | Review the three search outcomes, active Basismodel fields, exact-code/label split, final verification, and CAT-02/AST-03 handoff. |
 | CAT-02 Modelspecificatie opbouwen | Planned | Specification ready; evidence pending | Capture the complete specification workflow and generate the next extensive CAT draft. |
 | CAT-03 Attributen beheren | Planned | Specification ready; evidence pending | Generate after CAT-02 establishes which missing-definition handoffs are needed. |
 | CAT-04 Componentdefinities beheren | Planned | Specification ready; evidence pending | Generate with definition, tracking, placement, contribution, and child-template evidence. |
@@ -155,7 +155,7 @@ The following variables already work in at least one current script:
 | `SNIPEIT_GUIDE_CAPTURE_MODE` | AST capture supports `identity-only`, `ast03-only`, and `ast03-saved-check`; catalogue capture supports `all`, `core`, `definitions`, and `lifecycle`. |
 | `SNIPEIT_CMP01_VERSION` / `SNIPEIT_CMP02_VERSION` / `SNIPEIT_CMP04_VERSION` | Generate explicit component review versions. |
 | `SNIPEIT_USR01_VERSION` / `SNIPEIT_USR02_VERSION` / `SNIPEIT_USR03_VERSION` / `SNIPEIT_USR04_VERSION` / `SNIPEIT_AC02_VERSION` | Generate explicit user/access review versions; current defaults are the 2026-08-25 visual-correction revisions. |
-| `SNIPEIT_CAT00_VERSION` / `SNIPEIT_CAT01_VERSION` | Generate explicit catalogue review versions; current review versions are CAT-00 v4 and CAT-01 v2. |
+| `SNIPEIT_CAT00_VERSION` / `SNIPEIT_CAT01_VERSION` | Generate explicit catalogue review versions; current review versions are CAT-00 v7 and CAT-01 v3. |
 | `SNIPEIT_WF01_VERSION` / `SNIPEIT_WF02_VERSION` | Generate explicit workflow review versions while accepted defaults remain unchanged. |
 | `SNIPEIT_GUIDE_OUT_DIR` | Override focused proof output. |
 | `SNIPEIT_GUIDE_RESOURCE_ROOT` / `SNIPEIT_GUIDE_EVIDENCE_ROOT` | Override committed guide resources or evidence. |

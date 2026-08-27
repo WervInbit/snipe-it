@@ -1,5 +1,26 @@
 # Session Progress (2026-08-27)
 
+## Addendum (2026-08-27 CAT-01 Structural Rewrite)
+- Rebuilt CAT-01 v3 from the CAT-00 v7 semantic and layout foundation as a
+  five-page Supervisor procedure with continuous steps 1-8.
+- Replaced the old existing/new split with three explicit search outcomes:
+  reuse an exact code, add a missing exact code to an existing Basismodel, or
+  create a Basismodel only when product and generation are absent.
+- Limited Basismodel creation to the active name, category, and manufacturer
+  fields; separated exact code from its readable label; and clarified that a
+  later RAM/storage replacement changes the physical asset, not catalogue
+  identity.
+- Added final verification and styled CAT-02/AST-03 handoffs. Tightened the
+  final evidence crops so deprecated EOL and field-set controls are not shown
+  as part of the procedure.
+- Generated `output/pdf/CAT-01-model-en-modelnummer-aanmaken-v3-draft.pdf`.
+  Five A4 pages passed generator component/geometry checks and full-page raster
+  review. CAT-01 v3 remains an unaccepted working draft.
+- Packaged CAT-00 v7 and CAT-01 v3 under
+  `resources/manuals/operator-guides/drafts/` for environment transfer. The
+  draft manifest identifies both as `Unaccepted working draft`; no accepted
+  PDF, accepted hash, or approval record changed.
+
 ## Addendum (2026-08-27 Workflow Capability Review)
 - Began a read-only review of the implemented workflow engine, seeded workflow
   catalogue, and current environments for Windows installation, device wiping,
