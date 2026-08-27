@@ -36,6 +36,7 @@ class ProductionPermissionGroupSeeder extends Seeder
                 'assets.edit' => 1,
                 'assets.images.upload' => 1,
                 'scanning' => 1,
+                'tests.execute' => 1,
                 'components.view' => 1,
                 'components.create' => 1,
                 'components.update' => 1,

@@ -12,7 +12,7 @@ This matrix is the implemented least-privilege baseline for the four production 
 | View/upload/delete model-level files | No | No | No | Yes |
 | View licenses, keys, and license files | No | No | No | Yes |
 | Scan asset/component labels | Yes | Yes | Yes | Yes |
-| Execute and complete workflows | No | Yes | Yes | Yes |
+| Execute and complete workflows | Yes | Yes | Yes | Yes |
 | Delete workflow history | No | No | Yes | Yes |
 | View/register/update components | Yes | Yes | Yes | Yes |
 | Extract/install/move/verify components | Yes | Yes | Yes | Yes |

@@ -46,8 +46,8 @@ class ProductionOperationalRoleMatrixTest extends TestCase
             $this->assertTrue(Gate::forUser($operator)->allows('verify', $component));
         }
 
-        $this->assertFalse($refurbisher->hasAccess('tests.execute'));
-        $this->assertFalse(Gate::forUser($refurbisher)->allows('tests.execute'));
+        $this->assertTrue($refurbisher->hasAccess('tests.execute'));
+        $this->assertTrue(Gate::forUser($refurbisher)->allows('tests.execute'));
         $this->assertFalse($refurbisher->hasAccess('assets.images.manage'));
         $this->assertFalse(Gate::forUser($refurbisher)->allows('create', WorkOrder::class));
 
@@ -132,6 +132,10 @@ class ProductionOperationalRoleMatrixTest extends TestCase
             $this->actingAs($user)
                 ->get(route('components.index'))
                 ->assertOk();
+            $this->actingAs($user)
+                ->get(route('test-runs.index', $asset))
+                ->assertOk()
+                ->assertSee('data-testid="tests-index-start-run-form"', false);
             $this->actingAs($user)
                 ->post(route('asset-images.store', $asset), [
                     'image' => [UploadedFile::fake()->image($groupName.'.jpg')],
