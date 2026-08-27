@@ -1,28 +1,23 @@
 <?php
-/*! \mainpage Snipe-IT Code Documentation
+/*! \mainpage Inbit Device Refurbishment Platform Code Documentation
  *
  * \section intro_sec Introduction
  *
- * This documentation is designed to allow developers to easily understand
- * the backend code of Snipe-IT. Familiarity with the PHP language is assumed,
- * and experience with the Laravel framework (version 5.2) will be very helpful.
+ * This independent refurbishment-focused fork derives from Snipe-IT and keeps
+ * its upstream attribution and license. Its application and API contracts have
+ * diverged substantially from official Snipe-IT.
  *
- * **THIS DOCUMENTATION DOES NOT COVER INSTALLATION.** If you're here and you're not a
- * developer, you're probably in the wrong place. Please see the
- * [Installation documentation](https://snipe-it.readme.io) for
- * information on how to install Snipe-IT.
- *
- * To learn how to set up a development environment and get started developing for Snipe-IT,
- * please see the [contributing documentation](https://snipe-it.readme.io/docs/contributing-overview).
- *
- * Only the Snipe-IT specific controllers, models, helpers, service providers,
- * etc have been included in this documentation (excluding vendors, Laravel core, etc)
- * for simplicity.
+ * Use README.md for the supported development entry point,
+ * docs/production-deployment.md for production operations,
+ * docs/api-compatibility.md for the API boundary, and CONTRIBUTING.md for
+ * contributor requirements. Upstream installation and API documentation do
+ * not define this fork.
  */
 
 namespace App\Http\Controllers;
 
 use App\Models\Accessory;
+use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Component;
@@ -35,6 +30,8 @@ use App\Models\Maintenance;
 use App\Models\User;
 use App\Models\WorkOrder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
@@ -115,5 +112,30 @@ abstract class Controller extends BaseController
         $lastPageOffset = $remainder === 0 ? max(0, $total - $limit) : $total - $remainder;
 
         return $lastPageOffset;
+    }
+
+    protected function resolveUploadedFileParent(string $objectType, $id): ?Model
+    {
+        abort_unless(
+            isset(
+                static::$map_object_type[$objectType],
+                static::$map_storage_path[$objectType],
+                static::$map_file_prefix[$objectType]
+            ),
+            404
+        );
+
+        $modelClass = static::$map_object_type[$objectType];
+
+        return $modelClass::query()->find($id);
+    }
+
+    protected function uploadedFileLogQuery(string $objectType, Model $parent): Builder
+    {
+        return Actionlog::query()
+            ->where('action_type', 'uploaded')
+            ->whereNotNull('filename')
+            ->where('item_type', static::$map_object_type[$objectType])
+            ->where('item_id', $parent->getKey());
     }
 }

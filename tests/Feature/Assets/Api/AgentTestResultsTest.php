@@ -3,14 +3,13 @@
 namespace Tests\Feature\Assets\Api;
 
 use App\Models\Asset;
-use App\Models\AttributeDefinition;
-use App\Models\ModelNumberAttribute;
+use App\Models\ComponentDefinition;
+use App\Models\ModelNumberComponentTemplate;
 use App\Models\TestResult;
 use App\Models\TestType;
 use App\Models\TestRun;
-use Database\Seeders\DeviceAttributeSeeder;
-use Database\Seeders\DevicePresetSeeder;
-use Database\Seeders\AttributeTestSeeder;
+use App\Models\WorkflowProfile;
+use App\Models\WorkflowProfileItem;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
@@ -19,24 +18,43 @@ class AgentTestResultsTest extends TestCase
     protected string $keyboardSlug;
     protected string $wifiSlug;
 
+    /** @var array<string,int> */
+    protected array $componentDefinitionIds = [];
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->seed(DeviceAttributeSeeder::class);
-        $this->seed(AttributeTestSeeder::class);
-        $this->seed(DevicePresetSeeder::class);
+        $profile = WorkflowProfile::factory()->create([
+            'name' => 'Agent diagnostics',
+            'slug' => 'agent-diagnostics',
+            'is_default' => true,
+            'blocks_sale_readiness' => true,
+        ]);
 
-        $keyboardDefinition = AttributeDefinition::where('key', 'keyboard')->firstOrFail()->loadMissing('tests');
-        $wifiDefinition = AttributeDefinition::where('key', 'wifi')->firstOrFail()->loadMissing('tests');
+        foreach ([
+            'keyboard' => 'Keyboard - Generic',
+            'wifi' => 'Wireless - Generic',
+        ] as $slug => $componentName) {
+            $definition = ComponentDefinition::factory()->create(['name' => $componentName]);
+            $type = TestType::factory()->create([
+                'name' => $slug === 'keyboard' ? 'Keyboard' : 'Wi-Fi',
+                'slug' => $slug,
+                'display_order' => count($this->componentDefinitionIds),
+            ]);
+            $type->componentDefinitions()->sync([$definition->id]);
 
-        $this->keyboardSlug = $keyboardDefinition->tests->firstWhere('slug', 'keyboard')?->slug
-            ?? $keyboardDefinition->tests->first()?->slug;
-        $this->wifiSlug = $wifiDefinition->tests->firstWhere('slug', 'wifi')?->slug
-            ?? $wifiDefinition->tests->first()?->slug;
+            WorkflowProfileItem::factory()->create([
+                'workflow_profile_id' => $profile->id,
+                'workflow_item_id' => $type->id,
+                'sort_order' => count($this->componentDefinitionIds),
+            ]);
 
-        $this->assertNotNull($this->keyboardSlug, 'Keyboard test slug missing');
-        $this->assertNotNull($this->wifiSlug, 'Wi-Fi test slug missing');
+            $this->componentDefinitionIds[$slug] = $definition->id;
+        }
+
+        $this->keyboardSlug = 'keyboard';
+        $this->wifiSlug = 'wifi';
     }
 
     public function test_agent_can_submit_test_results(): void
@@ -44,7 +62,7 @@ class AgentTestResultsTest extends TestCase
         \App\Models\User::factory()->create();
         $agent = \App\Models\User::factory()->create();
         $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAG123']);
-        $this->assignWorkflowAttributesToAsset($asset, [$this->keyboardSlug, $this->wifiSlug]);
+        $this->assignWorkflowComponentsToAsset($asset, [$this->keyboardSlug, $this->wifiSlug]);
 
         $payload = [
             'type' => 'test_results',
@@ -54,6 +72,11 @@ class AgentTestResultsTest extends TestCase
                     'test_slug' => $this->keyboardSlug,
                     'status' => TestResult::STATUS_PASS,
                     'note' => 'All good',
+                ],
+                [
+                    'test_slug' => $this->wifiSlug,
+                    'status' => TestResult::STATUS_NVT,
+                    'note' => 'Not tested by agent',
                 ],
             ],
         ];
@@ -73,6 +96,7 @@ class AgentTestResultsTest extends TestCase
         $run = TestRun::where('asset_id', $asset->id)->first();
         $this->assertNotNull($run);
         $this->assertEquals($agent->id, $run->user_id);
+        $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', (string) $run->readiness_context_hash);
 
         $this->assertDatabaseHas('workflow_results', [
             'workflow_run_id' => $run->id,
@@ -143,7 +167,7 @@ class AgentTestResultsTest extends TestCase
     {
         \App\Models\User::factory()->create();
         $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAG999']);
-        $this->assignWorkflowAttributesToAsset($asset, [$this->keyboardSlug]);
+        $this->assignWorkflowComponentsToAsset($asset, [$this->keyboardSlug]);
 
         $payload = [
             'type' => 'test_results',
@@ -164,11 +188,161 @@ class AgentTestResultsTest extends TestCase
             ->assertJsonStructure(['message', 'errors']);
     }
 
+    public function test_unknown_test_slug_is_rejected_without_persisting_a_run(): void
+    {
+        $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAGUNKNOWN']);
+        $this->assignWorkflowComponentsToAsset($asset, [$this->keyboardSlug]);
+
+        config(['agent.api_token' => 'secrettoken']);
+
+        $this->postJson('/api/v1/agent/reports', [
+            'type' => 'test_results',
+            'asset_tag' => $asset->asset_tag,
+            'results' => [
+                [
+                    'test_slug' => 'not-in-this-workflow',
+                    'status' => TestResult::STATUS_PASS,
+                ],
+            ],
+        ], [
+            'Authorization' => 'Bearer secrettoken',
+        ])->assertStatus(422)
+            ->assertJson(['message' => 'Unknown test slugs']);
+
+        $this->assertDatabaseCount('workflow_runs', 0);
+        $this->assertDatabaseCount('workflow_results', 0);
+    }
+
+    public function test_partial_blocking_report_is_rejected_without_persisting_a_run(): void
+    {
+        $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAGPARTIAL']);
+        $this->assignWorkflowComponentsToAsset($asset, [$this->keyboardSlug, $this->wifiSlug]);
+
+        config(['agent.api_token' => 'secrettoken']);
+
+        $this->postJson('/api/v1/agent/reports', [
+            'type' => 'test_results',
+            'asset_tag' => $asset->asset_tag,
+            'results' => [
+                [
+                    'test_slug' => $this->keyboardSlug,
+                    'status' => TestResult::STATUS_PASS,
+                ],
+            ],
+        ], [
+            'Authorization' => 'Bearer secrettoken',
+        ])->assertStatus(422)
+            ->assertJson(['message' => 'Missing required workflow results'])
+            ->assertJsonPath('errors.results.0', 'Missing required test slugs: ' . $this->wifiSlug);
+
+        $this->assertDatabaseCount('workflow_runs', 0);
+        $this->assertDatabaseCount('workflow_results', 0);
+    }
+
+    public function test_duplicate_test_slugs_are_rejected_without_persisting_a_run(): void
+    {
+        $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAGDUPLICATE']);
+        $this->assignWorkflowComponentsToAsset($asset, [$this->keyboardSlug]);
+
+        config(['agent.api_token' => 'secrettoken']);
+
+        $this->postJson('/api/v1/agent/reports', [
+            'type' => 'test_results',
+            'asset_tag' => $asset->asset_tag,
+            'results' => [
+                [
+                    'test_slug' => $this->keyboardSlug,
+                    'status' => TestResult::STATUS_PASS,
+                ],
+                [
+                    'test_slug' => $this->keyboardSlug,
+                    'status' => TestResult::STATUS_FAIL,
+                ],
+            ],
+        ], [
+            'Authorization' => 'Bearer secrettoken',
+        ])->assertStatus(400)
+            ->assertJsonValidationErrors(['results.0.test_slug', 'results.1.test_slug']);
+
+        $this->assertDatabaseCount('workflow_runs', 0);
+        $this->assertDatabaseCount('workflow_results', 0);
+    }
+
+    public function test_empty_results_are_rejected_without_persisting_a_run(): void
+    {
+        $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAGEMPTY']);
+
+        config(['agent.api_token' => 'secrettoken']);
+
+        $this->postJson('/api/v1/agent/reports', [
+            'type' => 'test_results',
+            'asset_tag' => $asset->asset_tag,
+            'results' => [],
+        ], [
+            'Authorization' => 'Bearer secrettoken',
+        ])->assertStatus(400)
+            ->assertJsonValidationErrors(['results']);
+
+        $this->assertDatabaseCount('workflow_runs', 0);
+        $this->assertDatabaseCount('workflow_results', 0);
+    }
+
+    public function test_result_count_is_bounded_without_persisting_a_run(): void
+    {
+        $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAGOVERSIZED']);
+
+        config(['agent.api_token' => 'secrettoken']);
+
+        $results = [];
+        for ($index = 0; $index < 101; $index++) {
+            $results[] = [
+                'test_slug' => 'result-' . $index,
+                'status' => TestResult::STATUS_PASS,
+            ];
+        }
+
+        $this->postJson('/api/v1/agent/reports', [
+            'type' => 'test_results',
+            'asset_tag' => $asset->asset_tag,
+            'results' => $results,
+        ], [
+            'Authorization' => 'Bearer secrettoken',
+        ])->assertStatus(400)
+            ->assertJsonValidationErrors(['results']);
+
+        $this->assertDatabaseCount('workflow_runs', 0);
+        $this->assertDatabaseCount('workflow_results', 0);
+    }
+
+    public function test_unconfigured_or_malformed_agent_token_fails_closed_without_type_error(): void
+    {
+        foreach ([null, [], 123, '   '] as $configuredToken) {
+            config(['agent.api_token' => $configuredToken]);
+
+            $this->postJson('/api/v1/agent/reports', [
+                'type' => 'test_results',
+                'asset_tag' => 'TAGTOKEN',
+                'results' => [
+                    [
+                        'test_slug' => $this->keyboardSlug,
+                        'status' => TestResult::STATUS_PASS,
+                    ],
+                ],
+            ], [
+                'Authorization' => 'Bearer supplied-but-not-configured',
+            ])->assertUnauthorized()
+                ->assertJson(['message' => 'Unauthorized']);
+        }
+
+        $this->assertDatabaseCount('workflow_runs', 0);
+        $this->assertDatabaseCount('workflow_results', 0);
+    }
+
     public function test_agent_gets_401_if_ip_not_allowed(): void
     {
         \App\Models\User::factory()->create();
         $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAGIP1']);
-        $this->assignWorkflowAttributesToAsset($asset, [$this->keyboardSlug]);
+        $this->assignWorkflowComponentsToAsset($asset, [$this->keyboardSlug]);
 
         $payload = [
             'type' => 'test_results',
@@ -190,27 +364,26 @@ class AgentTestResultsTest extends TestCase
             ->assertJson(['message' => 'Unauthorized']);
     }
 
-    private function assignWorkflowAttributesToAsset(Asset $asset, array $slugs): void
+    private function assignWorkflowComponentsToAsset(Asset $asset, array $slugs): void
     {
-        $types = TestType::query()
-            ->with('attributeDefinition')
-            ->whereIn('slug', $slugs)
-            ->get();
+        foreach ($slugs as $index => $slug) {
+            $componentDefinitionId = $this->componentDefinitionIds[$slug] ?? null;
 
-        foreach ($types as $type) {
-            if (!$type->attribute_definition_id || !$asset->model_number_id) {
+            if (!$componentDefinitionId || !$asset->model_number_id) {
                 continue;
             }
 
-            ModelNumberAttribute::updateOrCreate(
+            ModelNumberComponentTemplate::updateOrCreate(
                 [
                     'model_number_id' => $asset->model_number_id,
-                    'attribute_definition_id' => $type->attribute_definition_id,
+                    'component_definition_id' => $componentDefinitionId,
+                    'expected_name' => $slug,
+                    'slot_name' => null,
                 ],
                 [
-                    'value' => '1',
-                    'raw_value' => '1',
-                    'display_order' => 0,
+                    'expected_qty' => 1,
+                    'is_required' => true,
+                    'sort_order' => $index,
                 ]
             );
         }

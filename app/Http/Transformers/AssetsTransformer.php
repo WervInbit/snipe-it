@@ -31,9 +31,10 @@ class AssetsTransformer
         $setting = Setting::getSettings();
 
         $testRunsCount = (int) ($asset->test_runs_count ?? 0);
+        $liveTestsCompletedOk = $asset->liveTestsCompletedOk();
         $testWorkflowStatus = $testRunsCount === 0
             ? 'missing'
-            : (($asset->tests_completed_ok) ? 'ok' : 'attention');
+            : ($liveTestsCompletedOk ? 'ok' : 'attention');
 
         $array = [
             'id' => (int) $asset->id,
@@ -45,9 +46,8 @@ class AssetsTransformer
                 'name'=> e($asset->model->name),
             ] : null,
             'byod' => ($asset->byod ? true : false),
-            'requestable' => ($asset->requestable ? true : false),
             'is_sellable' => ($asset->is_sellable ? true : false),
-            'tests_completed_ok' => ($asset->tests_completed_ok ? true : false),
+            'tests_completed_ok' => $liveTestsCompletedOk,
             'test_runs_count' => $testRunsCount,
             'test_workflow_status' => $testWorkflowStatus,
             'latest_test_run_id' => $asset->latest_test_run_id ? (int) $asset->latest_test_run_id : null,
@@ -115,7 +115,7 @@ class AssetsTransformer
             'checkin_counter' => (int) $asset->checkin_counter,
             'checkout_counter' => (int) $asset->checkout_counter,
             'requests_counter' => (int) $asset->requests_counter,
-            'user_can_checkout' => (bool) $asset->availableForCheckout(),
+            'user_can_checkout' => false,
             'book_value' => Helper::formatCurrencyOutput($asset->getDepreciatedValue()),
         ];
 
@@ -165,12 +165,12 @@ class AssetsTransformer
         }
 
         $permissions_array['available_actions'] = [
-            'checkout'      => ($asset->deleted_at=='' && Gate::allows('checkout', Asset::class)) ? true : false,
-            'checkin'       => ($asset->deleted_at=='' && Gate::allows('checkin', Asset::class)) ? true : false,
+            'checkout'      => false,
+            'checkin'       => false,
             'clone'         => Gate::allows('create', Asset::class) ? true : false,
             'restore'       => ($asset->deleted_at!='' && Gate::allows('create', Asset::class)) ? true : false,
             'update'        => ($asset->deleted_at=='' && Gate::allows('update', Asset::class)) ? true : false,
-            'audit'        => Gate::allows('audit', Asset::class) ? true : false,
+            'audit'         => false,
             'delete'        => ($asset->deleted_at=='' && $asset->assigned_to =='' && Gate::allows('delete', Asset::class) && ($asset->deleted_at == '')) ? true : false,
         ];      
 
@@ -181,6 +181,10 @@ class AssetsTransformer
                 $array['components'] = [];
     
                 foreach ($asset->components as $component) {
+                    if (Gate::denies('view', $component)) {
+                        continue;
+                    }
+
                     $array['components'][] = [
                         
                             'id' => $component->id,
@@ -209,87 +213,39 @@ class AssetsTransformer
 
     public function transformAssignedTo($asset)
     {
-        if ($asset->checkedOutToUser()) {
-            return $asset->assigned ? [
-                    'id' => (int) $asset->assigned->id,
-                    'username' => e($asset->assigned->username),
-                    'name' => e($asset->assigned->getFullNameAttribute()),
-                    'first_name'=> e($asset->assigned->first_name),
-                    'last_name'=> ($asset->assigned->last_name) ? e($asset->assigned->last_name) : null,
-                    'email'=> ($asset->assigned->email) ? e($asset->assigned->email) : null,
-                    'employee_number' =>  ($asset->assigned->employee_num) ? e($asset->assigned->employee_num) : null,
-                    'jobtitle' => $asset->assigned->jobtitle ? e($asset->assigned->jobtitle) : null,
-                    'type' => 'user',
-                ] : null;
+        if (! $asset->assigned) {
+            return null;
         }
 
-        return $asset->assigned ? [
+        if ($asset->checkedOutToUser()) {
+            if (Gate::denies('view', $asset->assigned)) {
+                return [
+                    'id' => (int) $asset->assigned->id,
+                    'type' => 'user',
+                    'name' => e($asset->assigned->getFullNameAttribute()),
+                ];
+            }
+
+            return [
+                'id' => (int) $asset->assigned->id,
+                'username' => e($asset->assigned->username),
+                'name' => e($asset->assigned->getFullNameAttribute()),
+                'first_name'=> e($asset->assigned->first_name),
+                'last_name'=> ($asset->assigned->last_name) ? e($asset->assigned->last_name) : null,
+                'email'=> ($asset->assigned->email) ? e($asset->assigned->email) : null,
+                'employee_number' =>  ($asset->assigned->employee_num) ? e($asset->assigned->employee_num) : null,
+                'jobtitle' => $asset->assigned->jobtitle ? e($asset->assigned->jobtitle) : null,
+                'type' => 'user',
+            ];
+        }
+
+        return [
             'id' => $asset->assigned->id,
             'name' => e($asset->assigned->display_name),
             'type' => $asset->assignedType()
-        ] : null;
-    }
-
-
-    public function transformRequestedAssets(Collection $assets, $total)
-    {
-        $array = [];
-        foreach ($assets as $asset) {
-            $array[] = self::transformRequestedAsset($asset);
-        }
-
-        return (new DatatablesTransformer)->transformDatatables($array, $total);
-    }
-
-    public function transformRequestedAsset(Asset $asset)
-    {
-        $array = [
-            'id' => (int)$asset->id,
-            'name' => e($asset->name),
-            'asset_tag' => e($asset->asset_tag),
-            'serial' => e($asset->serial),
-            'image' => ($asset->getImageUrl()) ? $asset->getImageUrl() : null,
-            'model' => ($asset->model) ? e($asset->model->name) : null,
-            'model_number' => $asset->displayModelNumber() ? e($asset->displayModelNumber()) : null,
-            'model_number_id' => $asset->model_number_id ? (int) $asset->model_number_id : null,
-            'expected_checkin' => Helper::getFormattedDateObject($asset->expected_checkin, 'date'),
-            'location' => ($asset->location) ? e($asset->location->name) : null,
-            'location_note' => $asset->location_note ? e($asset->location_note) : null,
-            'status' => ($asset->assetstatus) ? $asset->present()->statusMeta : null,
-            'assigned_to_self' => ($asset->assigned_to == auth()->id()),
         ];
-
-        if (($asset->model) && ($asset->model->fieldset) && ($asset->model->fieldset->fields->count() > 0)) {
-            $fields_array = [];
-
-            foreach ($asset->model->fieldset->fields as $field) {
-
-                // Only display this if it's allowed via the custom field setting
-                if (($field->field_encrypted == '0') && ($field->show_in_requestable_list == '1')) {
-
-                    $value = $asset->{$field->db_column};
-                    if (($field->format == 'DATE') && (!is_null($value)) && ($value != '')) {
-                        $value = Helper::getFormattedDateObject($value, 'date', false);
-                    }
-
-                    $fields_array[$field->db_column] = e($value);
-                }
-
-                $array['custom_fields'] = $fields_array;
-            }
-        } else {
-            $array['custom_fields'] = new \stdClass; // HACK to force generation of empty object instead of empty list
-        }
-
-
-        $permissions_array['available_actions'] = [
-            'cancel' => ($asset->isRequestedBy(auth()->user())) ? true : false,
-            'request' => ($asset->isRequestedBy(auth()->user())) ? false : true,
-        ];
-
-        $array += $permissions_array;
-        return $array;
     }
+
 
     public function transformAssetCompact(Asset $asset)
     {

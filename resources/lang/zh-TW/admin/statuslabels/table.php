@@ -8,7 +8,7 @@ return array(
     'default_label' => '預設標籤',
     'default_label_help' => '這用於確保在創建/編輯資產時, 最常用的狀態標籤出現在 "選擇" 框的頂部。',
     'deployable'      	=> '可部署',
-    'info'      	=> 'Status label types are used to describe the various states your assets could be in. They may be out for repair, lost/stolen, etc. You can create new status labels for your deployable, pending and archived assets according to your own workflow. For more information, <a href="https://snipe-it.readme.io/docs/overview#status-labels" target="_blank">see the documentation <i class="fa fa-external-link"></i></a>.',
+    'info'      	=> 'Status label types are used to describe the various states your assets could be in. They may be out for repair, lost/stolen, etc. You can create new status labels for your deployable, pending and archived assets according to your own workflow. For more information, <a href=":fork_documentation_url" target="_blank">see the documentation <i class="fa fa-external-link"></i></a>.',
     'name'      	=> '狀態名稱',
     'pending'      	=> '待處理',
     'status_type'   => '狀態類型',

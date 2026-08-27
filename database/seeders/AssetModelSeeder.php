@@ -4,14 +4,13 @@ namespace Database\Seeders;
 
 use App\Models\AssetModel;
 use App\Models\User;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 
-class AssetModelSeeder extends Seeder
+class AssetModelSeeder extends DestructiveFixtureSeeder
 {
-    public function run()
+    protected function seedFixtures(): void
     {
         Schema::disableForeignKeyConstraints();
         AssetModel::truncate();

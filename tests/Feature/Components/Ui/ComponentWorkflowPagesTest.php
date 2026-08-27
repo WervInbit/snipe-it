@@ -230,4 +230,28 @@ class ComponentWorkflowPagesTest extends TestCase
             ->assertDontSeeText('Stock Location')
             ->assertDontSeeText('Verification Location');
     }
+
+    public function test_component_workflow_rejects_external_and_prefix_lookalike_return_urls(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $component = ComponentInstance::factory()->inTray($user)->create();
+        $fallback = route('components.show', $component);
+
+        foreach ([
+            'https://example.invalid/steal',
+            '//example.invalid/steal',
+            url('/').'.example.invalid/steal',
+            '/%2f%2fexample.invalid/steal',
+            '/\\example.invalid/steal',
+        ] as $returnTo) {
+            $this->actingAs($user)
+                ->get(route('components.install.create', [
+                    $component,
+                    'return_to' => $returnTo,
+                ]))
+                ->assertOk()
+                ->assertSee('href="'.e($fallback).'"', false)
+                ->assertDontSee('example.invalid', false);
+        }
+    }
 }

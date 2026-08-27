@@ -35,7 +35,10 @@ class SaveUserRequest extends FormRequest
         $rules = [
             'department_id' => 'nullable|integer|exists:departments,id',
             'manager_id' => 'nullable|exists:users,id',
-            'company_id' => ['nullable', 'integer', 'exists:companies,id']
+            'company_id' => ['nullable', 'integer', 'exists:companies,id'],
+            'groups' => ['nullable', 'array'],
+            'groups.*' => ['integer', 'distinct', 'exists:permission_groups,id'],
+            'permission' => ['nullable', 'array'],
         ];
 
         switch ($this->method()) {
@@ -68,5 +71,14 @@ class SaveUserRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->exists('groups') && ! is_null($this->input('groups')) && ! is_array($this->input('groups'))) {
+            $this->merge([
+                'groups' => [$this->input('groups')],
+            ]);
+        }
     }
 }

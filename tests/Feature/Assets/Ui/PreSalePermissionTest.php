@@ -70,6 +70,7 @@ class PreSalePermissionTest extends TestCase
         ]);
         $sold = Statuslabel::factory()->archived()->create([
             'name' => 'Sold ' . Str::uuid(),
+            'lifecycle_stage' => Statuslabel::LIFECYCLE_SOLD,
             'default_label' => 0,
         ]);
 
@@ -96,6 +97,7 @@ class PreSalePermissionTest extends TestCase
         ]);
         $sold = Statuslabel::factory()->archived()->create([
             'name' => 'Sold ' . Str::uuid(),
+            'lifecycle_stage' => Statuslabel::LIFECYCLE_SOLD,
             'default_label' => 0,
         ]);
 
@@ -122,6 +124,7 @@ class PreSalePermissionTest extends TestCase
     {
         return Statuslabel::factory()->rtd()->create([
             'name' => 'Pre-Sale ' . Str::uuid(),
+            'lifecycle_stage' => Statuslabel::LIFECYCLE_READY_FOR_SALE,
             'default_label' => 0,
         ]);
     }

@@ -11,19 +11,18 @@ Route::group(['prefix' => 'kits/{kit}', 'middleware' => ['auth']], function () {
     //     [Kits\PredefinedKitsController::class, 'indexLicenses']
     // )->name('kits.licenses.index');
 
-    Route::put('licenses',
-        [Kits\PredefinedKitsController::class, 'storeLicense']
-    )->name('kits.licenses.store');
-
     Route::put('licenses/{license_id}',
         [Kits\PredefinedKitsController::class, 'updateLicense']
     )->name('kits.licenses.update');
 
     Route::get('licenses/{license_id}/edit', [Kits\PredefinedKitsController::class, 'editLicense'])
         ->name('kits.licenses.edit')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
-            ->push(trans('admin/settings/general.backups'), route('kits.licenses.edit')));
+        ->breadcrumbs(fn (Trail $trail, $kit, $license_id) =>
+        $trail->parent('kits.edit', PredefinedKit::findOrFail($kit))
+            ->push(
+                trans('admin/kits/general.update_appended_license'),
+                route('kits.licenses.edit', ['kit' => $kit, 'license_id' => $license_id])
+            ));
 
     Route::delete('licenses/{license_id}',
         [Kits\PredefinedKitsController::class, 'detachLicense']
@@ -67,14 +66,6 @@ Route::group(['prefix' => 'kits/{kit}', 'middleware' => ['auth']], function () {
     Route::delete('accessories/{accessory_id}', [Kits\PredefinedKitsController::class, 'detachAccessory'])
         ->name('kits.accessories.detach');
 
-    Route::get('checkout', [Kits\CheckoutKitController::class, 'showCheckout'])
-        ->name('kits.checkout.show')
-        ->breadcrumbs(fn (Trail $trail, PredefinedKit $kit) =>
-        $trail->parent('kits.show', $kit)
-            ->push(trans('general.checkout'), route('kits.checkout.show', $kit)));
-
-    Route::post('checkout', [Kits\CheckoutKitController::class, 'store'])
-        ->name('kits.checkout.store');
 }); // kits
 
 // Predefined Kit Management

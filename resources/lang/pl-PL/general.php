@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Zaimportuj',
     'import_this_file'      => 'Mapuj pola i przetwarzaj ten plik',
     'importing'         	=> 'Importowanie',
-    'importing_help'        => 'Możesz importować aktywa, akcesoria, licencje, komponenty, materiały eksploatacyjne i użytkowników za pomocą pliku CSV. <br><br>CSV powinien być rozdzielony przecinkami i sformatowany z nagłówkami, które pasują do tych w <a href="https://snipe-it.readme.io/docs/importing" target="_new">przykładowych CSV w dokumentacji</a>.',
+    'importing_help'        => 'Możesz importować aktywa, akcesoria, licencje, komponenty, materiały eksploatacyjne i użytkowników za pomocą pliku CSV. <br><br>CSV powinien być rozdzielony przecinkami i sformatowany z nagłówkami, które pasują do tych w <a href=":fork_documentation_url" target="_new">przykładowych CSV w dokumentacji</a>.',
     'import-history'        => 'Historia importu',
     'asset_maintenance'        => 'Utrzymanie aktywów',
     'asset_maintenance_report' => 'Raport utrzymywania aktywów',

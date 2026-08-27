@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 
 class StoreLdapSettings extends FormRequest
 {
@@ -23,6 +24,11 @@ class StoreLdapSettings extends FormRequest
     public function rules(): array
     {
         return [
+            'ldap_enabled' => [
+                'nullable',
+                'boolean',
+                Rule::prohibitedIf(! config('auth.ldap_integration_enabled', true)),
+            ],
             'ldap_username_field' => 'not_in:sAMAccountName|required_if:ldap_enabled,1',
             'ldap_auth_filter_query' => 'not_in:uid=samaccountname|required_if:ldap_enabled,1',
             'ldap_filter' => 'nullable|regex:"^[^(]"|required_if:ldap_enabled,1',

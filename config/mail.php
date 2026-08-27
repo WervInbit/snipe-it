@@ -10,13 +10,26 @@
 
 return [
 
+    /*
+    |--------------------------------------------------------------------------
+    | Mail delivery availability
+    |--------------------------------------------------------------------------
+    |
+    | When delivery is disabled, force the in-memory array transport. This is
+    | intentionally different from the log transport because password-reset
+    | links and other private message content must not be written to logs.
+    |
+    */
+
+    'enabled' => env('MAIL_ENABLED', true),
+
 
     /*
     | ***************************************************************************
     | DO NOT MAKE CHANGES DIRECTLY TO THIS FILE.
     |
     | Instead use your .env file to set your application configuration settings.
-    | See https://snipe-it.readme.io/docs/configuration for more info.
+    | See .env.example and docs/production-deployment.md for fork configuration.
     |
     |--------------------------------------------------------------------------
     | Mail Driver
@@ -46,7 +59,9 @@ return [
     |
     */
 
-    'default' =>  env('MAIL_DRIVER') != null ? env('MAIL_DRIVER') : env('MAIL_MAILER', 'smtp'),
+    'default' => env('MAIL_ENABLED', true)
+        ? (env('MAIL_DRIVER') != null ? env('MAIL_DRIVER') : env('MAIL_MAILER', 'smtp'))
+        : 'array',
 
     /*
     |--------------------------------------------------------------------------

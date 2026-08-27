@@ -16,6 +16,7 @@ use App\Models\TestType;
 use App\Models\User;
 use App\Models\WorkflowProfile;
 use App\Models\WorkflowProfileItem;
+use App\Services\WorkflowRunDefinitionService;
 use Tests\TestCase;
 
 class ShowAssetTest extends TestCase
@@ -241,6 +242,19 @@ class ShowAssetTest extends TestCase
         $response->assertSee(trans('general.status_history'));
     }
 
+    public function testDetailPageRendersStatusEventActorLink(): void
+    {
+        $actor = User::factory()->superuser()->create();
+        $asset = Asset::factory()->create();
+        $asset->statusEvents()->firstOrFail()->update(['triggered_by' => $actor->id]);
+
+        $response = $this->actingAs($actor)->get(route('hardware.show', $asset));
+
+        $response->assertOk();
+        $response->assertSee(route('users.show', $actor), false);
+        $response->assertSee(e($actor->present()->fullName()), false);
+    }
+
     public function testDetailPageUploadTabIsNotFloatedRight(): void
     {
         $asset = Asset::factory()->create();
@@ -368,8 +382,8 @@ class ShowAssetTest extends TestCase
     public function testDetailPageNamesMissingBlockingWorkflowProfiles(): void
     {
         $asset = Asset::factory()->create();
-        $diagnosticItem = TestType::factory()->create(['name' => 'Diagnostic']);
-        $photoItem = TestType::factory()->create(['name' => 'Sale Photos']);
+        $diagnosticItem = TestType::factory()->create(['name' => 'Diagnostic', 'applies_to_all' => true]);
+        $photoItem = TestType::factory()->create(['name' => 'Sale Photos', 'applies_to_all' => true]);
         $diagnostics = WorkflowProfile::factory()->create([
             'name' => 'Diagnostics',
             'blocks_sale_readiness' => true,
@@ -388,10 +402,13 @@ class ShowAssetTest extends TestCase
             'workflow_item_id' => $photoItem->id,
             'is_required' => true,
         ]);
+        $diagnosticHash = app(WorkflowRunDefinitionService::class)
+            ->forProfile($asset, $diagnostics)['readiness_context_hash'];
         $run = TestRun::factory()->create([
             'asset_id' => $asset->id,
             'workflow_profile_id' => $diagnostics->id,
             'profile_name_snapshot' => $diagnostics->name,
+            'readiness_context_hash' => $diagnosticHash,
         ]);
         TestResult::factory()->create([
             'workflow_run_id' => $run->id,

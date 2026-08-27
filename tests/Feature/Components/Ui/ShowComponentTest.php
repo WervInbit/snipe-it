@@ -122,7 +122,7 @@ class ShowComponentTest extends TestCase
                 'notes' => 'Needs follow-up inspection.',
             ])
             ->assertRedirect(route('components.show', $component))
-            ->assertSessionHas('success', 'Component note updated.');
+            ->assertSessionHas('success', 'Component updated.');
 
         $this->assertDatabaseHas('component_instances', [
             'id' => $component->id,

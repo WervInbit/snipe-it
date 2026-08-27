@@ -6,6 +6,7 @@ use App\Mail\CheckoutAccessoryMail;
 use App\Models\Accessory;
 use App\Models\Actionlog;
 use App\Models\Asset;
+use App\Models\Company;
 use App\Models\Location;
 use App\Models\User;
 use App\Notifications\CheckoutAccessoryNotification;
@@ -41,7 +42,7 @@ class AccessoryCheckoutTest extends TestCase
             ->assertSessionHas('errors')
             ->assertRedirect(route('accessories.checkout.store', $accessory));
 
-        $this->followRedirects($response)->assertSee(trans('general.error'));
+        $this->followRedirects($response)->assertSee(trans('general.notification_error'));
     }
 
     public function testAccessoryMustHaveAvailableItemsForCheckoutWhenCheckingOut()
@@ -58,7 +59,7 @@ class AccessoryCheckoutTest extends TestCase
             ->assertSessionHas('errors')
             ->assertRedirect(route('accessories.checkout.store', $accessory));
         $response->assertInvalid(['checkout_qty']);
-        $this->followRedirects($response)->assertSee(trans('general.error'));
+        $this->followRedirects($response)->assertSee(trans('general.notification_error'));
     }
 
     public function testAccessoryCanBeCheckedOutWithoutQuantity()
@@ -264,5 +265,24 @@ class AccessoryCheckoutTest extends TestCase
             ])
             ->assertStatus(302)
             ->assertRedirect(route('users.show', $user));
+    }
+
+    public function testAccessoryCannotBeCheckedOutAcrossCompanyBoundary(): void
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+        $itemCompany = Company::factory()->create();
+        $targetCompany = Company::factory()->create();
+        $accessory = Accessory::factory()->for($itemCompany)->create();
+        $target = User::factory()->for($targetCompany)->create();
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->from(route('accessories.checkout.show', $accessory))
+            ->post(route('accessories.checkout.store', $accessory), [
+                'assigned_user' => $target->id,
+                'checkout_to_type' => 'user',
+            ])
+            ->assertSessionHas('error', trans('general.error_user_company'));
+
+        $this->assertSame(0, $accessory->checkouts()->count());
     }
 }

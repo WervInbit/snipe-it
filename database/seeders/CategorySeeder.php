@@ -4,12 +4,11 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\User;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Schema;
 
-class CategorySeeder extends Seeder
+class CategorySeeder extends DestructiveFixtureSeeder
 {
-    public function run()
+    protected function seedFixtures(): void
     {
         Schema::disableForeignKeyConstraints();
         Category::truncate();

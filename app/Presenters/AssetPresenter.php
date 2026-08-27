@@ -301,17 +301,14 @@ class AssetPresenter extends Presenter
             $query->whereHas('models');
         })->get();
 
-        // Note: We do not need to e() escape the field names here, as they are already escaped when
-        // they are presented in the blade view. If we escape them here, custom fields with quotes in their
-        // name can break the listings page. - snipe
         foreach ($fields as $field) {
             $layout[] = [
                 'field' => $field->db_column,
                 'searchable' => true,
                 'sortable' => true,
                 'switchable' => true,
-                'title' => $field->name,
-                'formatter'=> 'customFieldsFormatter',
+                'title' => e($field->name),
+                'formatter' => 'customFieldsFormatter',
                 'escape' => true,
                 'class' => ($field->field_encrypted == '1') ? 'css-padlock' : '',
                 'visible' => ($field->show_in_listview == '1') ? true : false,
@@ -406,7 +403,7 @@ class AssetPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('hardware.show', e($this->name), $this->id);
+        return \App\Support\RouteLink::to('hardware.show', $this->name, $this->id);
     }
 
     public function modelUrl()

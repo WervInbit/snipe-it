@@ -148,6 +148,7 @@ class ComponentsTransformer
                 'install' => Gate::allows('install', $component),
                 'move' => Gate::allows('move', $component),
                 'verify' => Gate::allows('verify', $component),
+                'destroy' => Gate::allows('destroy', $component),
             ],
         ];
     }

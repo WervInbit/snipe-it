@@ -50,7 +50,7 @@
 @include ('partials.forms.edit.address')
 
 <!-- LDAP Search OU -->
-@if ($snipeSettings->ldap_enabled == 1)
+@if (\App\Models\Setting::ldapIsActive())
     <div class="form-group {{ $errors->has('ldap_ou') ? ' has-error' : '' }}">
         <label for="ldap_ou" class="col-md-3 control-label">
             {{ trans('admin/locations/table.ldap_ou') }}

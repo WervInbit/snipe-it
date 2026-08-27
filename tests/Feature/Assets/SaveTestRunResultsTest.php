@@ -7,6 +7,9 @@ use App\Models\TestRun;
 use App\Models\TestResult;
 use App\Models\TestType;
 use App\Models\User;
+use App\Models\WorkflowProfile;
+use App\Models\WorkflowProfileItem;
+use App\Services\WorkflowRunDefinitionService;
 use Tests\TestCase;
 
 class SaveTestRunResultsTest extends TestCase
@@ -14,14 +17,26 @@ class SaveTestRunResultsTest extends TestCase
     public function test_run_can_be_saved_and_marked_complete(): void
     {
         $asset = Asset::factory()->create();
-        $type = TestType::factory()->create();
+        $type = TestType::factory()->create(['applies_to_all' => true]);
+        $profile = WorkflowProfile::factory()->create();
+        $profileItem = WorkflowProfileItem::factory()->create([
+            'workflow_profile_id' => $profile->id,
+            'workflow_item_id' => $type->id,
+        ]);
+        $hash = app(WorkflowRunDefinitionService::class)
+            ->forProfile($asset, $profile)['readiness_context_hash'];
         $user = User::factory()->refurbisher()->create();
         $run = TestRun::factory()->for($asset)->for($user)->create([
+            'workflow_profile_id' => $profile->id,
+            'readiness_context_hash' => $hash,
             'finished_at' => now()->subDay(),
         ]);
         $oldFinished = $run->finished_at;
         $result = TestResult::factory()->for($run)->for($type, 'type')
-            ->create(['status' => TestResult::STATUS_NVT]);
+            ->create([
+                'workflow_profile_item_id' => $profileItem->id,
+                'status' => TestResult::STATUS_NVT,
+            ]);
 
         $response = $this->actingAs($user)->put(
             route('test-results.update', [$asset->id, $run->id]),

@@ -41,12 +41,22 @@ class PaveIt extends Command
      */
     public function handle()
     {
+        if (! app()->environment(['local', 'testing'])
+            || config('demo.allow_disposable_data_seeding') !== true) {
+            $this->error(
+                'Database paving is restricted to local/testing environments with '
+                .'SNIPEIT_ALLOW_DISPOSABLE_DATA_SEEDING=true.'
+            );
 
-        if (!$this->option('force')) {
-            $confirmation = $this->confirm("\n****************************************************\nTHIS WILL DELETE ALL OF THE DATA IN YOUR DATABASE. \nThere is NO undo. This WILL destroy ALL of your data, \nINCLUDING ANY non-Snipe-IT tables you have in this database. \n****************************************************\n\nDo you wish to continue? No backsies! ");
-            if (!$confirmation) {
+            return self::FAILURE;
+        }
+
+        if (! $this->option('force')) {
+            $confirmation = $this->confirm("\n****************************************************\nTHIS WILL DELETE ALL OF THE DATA IN YOUR DATABASE. \nThere is NO undo. This WILL destroy ALL of your data, \nINCLUDING ANY non-application tables in this database. \n****************************************************\n\nDo you wish to continue? No backsies! ");
+            if (! $confirmation) {
                 $this->error('ABORTING');
-                exit(-1);
+
+                return self::FAILURE;
             }
         }
 
@@ -86,6 +96,7 @@ class PaveIt extends Command
         // Leave in the demo oauth keys so we don't have to reset them every day in the demos
         DB::statement('delete from oauth_clients WHERE id > 2');
         DB::statement('delete from oauth_access_tokens WHERE user_id > 2');
-    
+
+        return self::SUCCESS;
     }
 }

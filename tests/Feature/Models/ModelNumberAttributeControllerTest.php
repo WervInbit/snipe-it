@@ -125,6 +125,119 @@ class ModelNumberAttributeControllerTest extends TestCase
         ]);
     }
 
+    public function test_user_without_model_edit_permission_cannot_remove_attribute_assignment(): void
+    {
+        $user = User::factory()->create(['permissions' => '{}']);
+        $category = Category::factory()->create();
+        $model = AssetModel::factory()->create(['category_id' => $category->id]);
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $definition = $this->makeDefinitionForModel($model);
+        $assignment = ModelNumberAttribute::create([
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $definition->id,
+            'display_order' => 0,
+        ]);
+
+        $this->actingAs($user)
+            ->deleteJson(route('models.numbers.attributes.destroy', [
+                'model' => $model,
+                'modelNumber' => $modelNumber,
+                'attributeDefinition' => $definition,
+            ]))
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('model_number_attributes', [
+            'id' => $assignment->id,
+        ]);
+    }
+
+    public function test_user_with_only_model_edit_permission_cannot_remove_attribute_assignment(): void
+    {
+        $user = User::factory()->create([
+            'permissions' => json_encode(['models.edit' => '1']),
+        ]);
+        $category = Category::factory()->create();
+        $model = AssetModel::factory()->create(['category_id' => $category->id]);
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $definition = $this->makeDefinitionForModel($model);
+        $assignment = ModelNumberAttribute::create([
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $definition->id,
+            'display_order' => 0,
+        ]);
+
+        $this->actingAs($user)
+            ->deleteJson(route('models.numbers.attributes.destroy', [
+                'model' => $model,
+                'modelNumber' => $modelNumber,
+                'attributeDefinition' => $definition,
+            ]))
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('model_number_attributes', [
+            'id' => $assignment->id,
+        ]);
+    }
+
+    public function test_user_with_specification_cleanup_permission_can_remove_attribute_assignment(): void
+    {
+        $user = User::factory()->create([
+            'permissions' => json_encode([
+                'models.edit' => '1',
+                'models.manage_specification_cleanup' => '1',
+            ]),
+        ]);
+        $category = Category::factory()->create();
+        $model = AssetModel::factory()->create(['category_id' => $category->id]);
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $definition = $this->makeDefinitionForModel($model);
+        $assignment = ModelNumberAttribute::create([
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $definition->id,
+            'display_order' => 0,
+        ]);
+
+        $this->actingAs($user)
+            ->deleteJson(route('models.numbers.attributes.destroy', [
+                'model' => $model,
+                'modelNumber' => $modelNumber,
+                'attributeDefinition' => $definition,
+            ]))
+            ->assertOk()
+            ->assertJsonFragment(['status' => 'removed']);
+
+        $this->assertDatabaseMissing('model_number_attributes', [
+            'id' => $assignment->id,
+        ]);
+    }
+
+    public function test_attribute_assignment_cannot_be_removed_through_another_model_parent(): void
+    {
+        $user = User::factory()->superuser()->create();
+        $category = Category::factory()->create();
+        $model = AssetModel::factory()->create(['category_id' => $category->id]);
+        $otherModel = AssetModel::factory()->create(['category_id' => $category->id]);
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $definition = $this->makeDefinitionForModel($model);
+        $assignment = ModelNumberAttribute::create([
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $definition->id,
+            'display_order' => 0,
+        ]);
+
+        $this->actingAs($user)
+            ->deleteJson(route('models.numbers.attributes.destroy', [
+                'model' => $otherModel,
+                'modelNumber' => $modelNumber,
+                'attributeDefinition' => $definition,
+            ]))
+            ->assertNotFound();
+
+        $this->assertDatabaseHas('model_number_attributes', [
+            'id' => $assignment->id,
+        ]);
+    }
+
     public function test_superuser_can_reorder_attributes(): void
     {
         $user = User::factory()->superuser()->create();

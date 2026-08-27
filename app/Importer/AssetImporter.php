@@ -14,11 +14,18 @@ class AssetImporter extends ItemImporter
     {
         parent::__construct($filename);
 
-        $this->defaultStatusLabelId = Statuslabel::first()?->id;
-
-        if (!is_null(Statuslabel::deployable()->first())) {
-            $this->defaultStatusLabelId = Statuslabel::deployable()->first()?->id;
-        }
+        $this->defaultStatusLabelId = Statuslabel::query()
+            ->where(function ($query) {
+                $query->whereNull('lifecycle_stage')
+                    ->orWhereNotIn('lifecycle_stage', [
+                        Statuslabel::LIFECYCLE_READY_FOR_SALE,
+                        Statuslabel::LIFECYCLE_SOLD,
+                    ]);
+            })
+            ->orderByDesc('default_label')
+            ->orderByDesc('pending')
+            ->orderBy('id')
+            ->value('id');
 
         if (is_null($this->defaultStatusLabelId)) {
             $defaultLabel = Statuslabel::create([
@@ -59,6 +66,18 @@ class AssetImporter extends ItemImporter
 
 
         $this->createAssetIfNotExists($row);
+    }
+
+    /**
+     * Asset assignment is not part of the fork's V1 lifecycle.
+     *
+     * ItemImporter normally resolves assignee columns before the item is saved,
+     * which can create a user or location even when no checkout is performed.
+     * Keep those legacy columns inert for Asset imports.
+     */
+    protected function determineCheckout($row)
+    {
+        return null;
     }
 
     /**
@@ -105,30 +124,21 @@ class AssetImporter extends ItemImporter
 
         // If no status ID is found
         if (! array_key_exists('status_id', $this->item) && ! $editingAsset) {
-            $this->log('No status ID field found, defaulting to first deployable status label.');
+            $this->log('No status ID field found, defaulting to the preferred safe intake status label.');
             $this->item['status_id'] = $this->defaultStatusLabelId;
         }
 
         $this->item['notes'] = trim($this->findCsvMatch($row, 'asset_notes'));
-        $this->item['image'] = trim($this->findCsvMatch($row, 'image'));
-        $this->item['requestable'] = trim(($this->fetchHumanBoolean($this->findCsvMatch($row, 'requestable'))) == 1) ? '1' : 0;
-        $asset->requestable = $this->item['requestable'];
+        $this->item['image'] = basename(trim($this->findCsvMatch($row, 'image')));
         $this->item['warranty_months'] = intval(trim($this->findCsvMatch($row, 'warranty_months')));
         $this->item['model_id'] = $this->createOrFetchAssetModel($row);
-        $this->item['byod'] = ($this->fetchHumanBoolean(trim($this->findCsvMatch($row, 'byod'))) == 1) ? '1' : 0;
-        $this->item['last_checkin'] = trim($this->findCsvMatch($row, 'last_checkin'));
-        $this->item['last_checkout'] = trim($this->findCsvMatch($row, 'last_checkout'));
-        $this->item['expected_checkin'] = trim($this->findCsvMatch($row, 'expected_checkin'));
-        $this->item['last_audit_date'] = trim($this->findCsvMatch($row, 'last_audit_date'));
-        $this->item['next_audit_date'] = trim($this->findCsvMatch($row, 'next_audit_date'));
+        $byod = trim((string) $this->findCsvMatch($row, 'byod'));
+        if ((! $this->updating) || ($byod !== '')) {
+            $this->item['byod'] = ($this->fetchHumanBoolean($byod) == 1) ? '1' : 0;
+            $asset->byod = $this->item['byod'];
+        }
         $this->item['asset_eol_date'] = trim($this->findCsvMatch($row, 'asset_eol_date'));
         $this->item['asset_tag'] = $asset_tag;
-
-        // We need to save the user if it exists so that we can checkout to user later.
-        // Sanitizing the item will remove it.
-        if (array_key_exists('checkout_target', $this->item)) {
-            $target = $this->item['checkout_target'];
-        }
 
         $item = $this->sanitizeItemForStoring($asset, $editingAsset);
 
@@ -139,36 +149,6 @@ class AssetImporter extends ItemImporter
             $item['rtd_location_id'] = $this->item['location_id'];
         }
 
-
-        /**
-         * We use this to backdate the checkin action further down
-         */
-        $checkin_date = date('Y-m-d H:i:s');
-        if ($this->item['last_checkin']!='') {
-            $item['last_checkin'] = $this->parseOrNullDate('last_checkin', 'datetime');
-            $checkout_date = $this->item['last_checkin'];
-        }
-
-        /**
-         * We use this to backdate the checkout action further down
-         */
-        $checkout_date = date('Y-m-d H:i:s');
-        if ($this->item['last_checkout']!='') {
-            $item['last_checkout'] = $this->parseOrNullDate('last_checkout', 'datetime');
-            $checkout_date = $this->item['last_checkout'];
-        }
-
-        if ($this->item['expected_checkin']!='') {
-            $item['expected_checkin'] = $this->parseOrNullDate('expected_checkin');
-        }
-
-        if ($this->item['last_audit_date']!='') {
-            $item['last_audit_date'] = $this->parseOrNullDate('last_audit_date');
-        }
-
-        if ($this->item['next_audit_date']!='') {
-            $item['next_audit_date'] = $this->parseOrNullDate('next_audit_date');
-        }
 
         if ($this->item['asset_eol_date']!='') {
             $item['asset_eol_date'] = $this->parseOrNullDate('asset_eol_date');
@@ -194,13 +174,6 @@ class AssetImporter extends ItemImporter
         if ($asset->save()) {
 
             $this->log('Asset '.$this->item['name'].' with serial number '.$this->item['serial'].' was created');
-
-            // If we have a target to checkout to, lets do so.
-            //-- created_by is a property of the abstract class Importer, which this class inherits from and it's set by
-            //-- the class that needs to use it (command importer or GUI importer inside the project).
-            if (isset($target) && ($target !== false)) {
-                $this->log('Checkout skipped for asset '.$asset->asset_tag.' — checkout functionality is disabled in this fork.');
-            }
 
             return;
         }

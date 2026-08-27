@@ -180,7 +180,7 @@ class DepreciationReportPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('hardware.show', e($this->name), $this->id);
+        return \App\Support\RouteLink::to('hardware.show', $this->name, $this->id);
     }
 
     public function modelUrl()

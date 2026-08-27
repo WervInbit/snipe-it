@@ -122,7 +122,7 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                              src="{{ Storage::disk('public')->url($snipeSettings->logo) }}"
                                              alt="{{ $snipeSettings->site_name }} logo">
                                     @endif
-                                    {{ $snipeSettings->site_name }}
+                                    <span class="navbar-brand-name">{{ $snipeSettings->site_name }}</span>
                                 </a>
                             @elseif ($snipeSettings->brand == '2')
                                 <a class="logo navbar-brand no-hover" href="{{ config('app.url') }}">
@@ -569,41 +569,19 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                         @endforeach
                                         <li class="divider">&nbsp;</li>
                                     @endif
-                                    @can('checkout', \App\Models\Asset::class)
-                                        <li{!! (request()->is('hardware/requested') ? ' class="active"' : '') !!}>
-                                            <a href="{{ route('assets.requested') }}">
-                                                {{ trans('general.requested') }}</a>
-                                        </li>
-                                    @endcan
-
                                     @can('create', \App\Models\Asset::class)
                                         <li{!! (Request::query('Deleted') ? ' class="active"' : '') !!}>
                                             <a href="{{ url('hardware?status=Deleted') }}">
                                                 {{ trans('general.deleted') }}
                                             </a>
                                         </li>
+                                    @endcan
+                                    @can('view', \App\Models\Asset::class)
                                         <li {!! (request()->is('maintenances') ? ' class="active"' : '') !!}>
                                             <a href="{{ route('maintenances.index') }}">
                                                 {{ trans('general.maintenances') }}
                                             </a>
                                         </li>
-                                    @endcan
-                                    @can('admin')
-                                        <li id="import-history-sidenav-option" {!! (request()->is('hardware/history') ? ' class="active"' : '') !!}>
-                                            <a href="{{ url('hardware/history') }}">
-                                                {{ trans('general.import-history') }}
-                                            </a>
-                                        </li>
-                                    @endcan
-                                    @can('audit', \App\Models\Asset::class)
-                                        {{-- Deprecated: Audit hidden per refurb workflow --}}
-                                        {{--
-                                        <li id="bulk-audit-sidenav-option" {!! (request()->is('hardware/bulkaudit') ? ' class="active"' : '') !!}>
-                                            <a href="{{ route('assets.bulkaudit') }}">
-                                                {{ trans('general.bulkaudit') }}
-                                            </a>
-                                        </li>
-                                        --}}
                                     @endcan
                                 </ul>
                             </li>
@@ -899,11 +877,6 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                     <li {{!! (request()->is('ui.reports.maintenances') ? ' class="active"' : '') !!}}>
                                         <a href="{{ route('ui.reports.maintenances') }}">
                                             {{ trans('general.asset_maintenance_report') }}
-                                        </a>
-                                    </li>
-                                    <li {{!! (request()->is('reports/unaccepted_assets') ? ' class="active"' : '') !!}}>
-                                        <a href="{{ url('reports/unaccepted_assets') }}">
-                                            {{ trans('general.unaccepted_asset_report') }}
                                         </a>
                                     </li>
                                     <li  {{!! (request()->is('reports/accessories') ? ' class="active"' : '') !!}}>

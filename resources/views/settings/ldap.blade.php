@@ -42,6 +42,17 @@
 
     @endif
 
+    @if (!config('auth.ldap_integration_enabled'))
+        <div class="row">
+            <div class="col-md-12">
+                <div class="alert alert-warning">
+                    <x-icon type="warning" />
+                    {{ trans('admin/settings/general.ldap_runtime_disabled') }}
+                </div>
+            </div>
+        </div>
+    @endif
+
     <form method="POST"  action="{{ route('settings.ldap.save') }}" autocomplete="off" class="form-horizontal" role="form" id="create-form">
     <!-- CSRF Token -->
     {{csrf_field()}}
@@ -75,7 +86,7 @@
                             <div class="col-md-8">
 
                                 <label class="form-control">
-                                    <input type="checkbox" name="ldap_enabled" value="1" id="ldap_enabled" @checked(old('ldap_enabled', $setting->ldap_enabled)) />
+                                    <input type="checkbox" name="ldap_enabled" value="1" id="ldap_enabled" @checked(old('ldap_enabled', $setting->ldap_enabled) && config('auth.ldap_integration_enabled')) @disabled(!config('auth.ldap_integration_enabled')) />
                                 {{ trans('admin/settings/general.ldap_enabled') }}
                                 </label>
 
@@ -771,7 +782,7 @@
                                 @endif
                             </div>
                         </div>
-                        @if ($setting->ldap_enabled)
+                        @if ($setting->ldap_enabled && config('auth.ldap_integration_enabled'))
 
                             <!-- LDAP test -->
                             <div class="form-group">

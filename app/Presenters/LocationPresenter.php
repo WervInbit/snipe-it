@@ -315,7 +315,7 @@ class LocationPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('locations.show', $this->name, $this->id);
+        return \App\Support\RouteLink::to('locations.show', $this->name, $this->id);
     }
 
     /**

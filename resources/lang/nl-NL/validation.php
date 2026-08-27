@@ -16,6 +16,7 @@ return [
     'accepted' => ':attribute veld moet geaccepteerd worden.',
     'accepted_if' => ':attribute veld moet geaccepteerd worden als :other :value is.',
     'active_url' => ':attribute veld moet een geldige URL zijn.',
+    'external_url' => 'Het :attribute veld moet een geldige externe HTTP(S)-URL zijn die niet naar een privé- of lokaal adres verwijst.',
     'after' => ':attribute veld moet een datum na :date zijn.',
     'after_or_equal' => ':attribute veld moet een datum na of gelijk aan :date zijn.',
     'alpha' => ':attribute veld mag alleen letters bevatten.',
@@ -174,6 +175,7 @@ return [
     'ulid' => ':attribute veld moet een geldige ULID zijn.',
     'uuid' => ':attribute veld moet een geldige UUID zijn.',
     'fmcs_location' => 'Full multiple company support and location scoping is enabled in the Admin Settings, and the selected location and selected company are not compatible.',
+    'valid_css_color' => 'Het veld :attribute moet een geldige CSS-kleur bevatten.',
 
 
     /*

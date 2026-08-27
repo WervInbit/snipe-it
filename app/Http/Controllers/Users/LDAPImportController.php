@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Users;
 
 use App\Http\Controllers\Controller;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan; // Note that this is awful close to 'Users' the namespace above; be careful
@@ -25,6 +26,9 @@ class LDAPImportController extends Controller
     {
         // I guess this prolly oughtta... I dunno. Do something?
         $this->authorize('update', User::class);
+        if (! Setting::ldapIsActive()) {
+            return redirect()->route('users.index')->with('error', trans('admin/settings/general.ldap_runtime_disabled'));
+        }
         try {
             //$this->ldap->connect(); I don't think this actually exists in LdapAd.php, and we don't really 'persist' LDAP connections anyways...right?
         } catch (\Exception $e) {
@@ -48,6 +52,9 @@ class LDAPImportController extends Controller
     public function store(Request $request)
     {
         $this->authorize('update', User::class);
+        if (! Setting::ldapIsActive()) {
+            return redirect()->route('users.index')->with('error', trans('admin/settings/general.ldap_runtime_disabled'));
+        }
         // Call Artisan LDAP import command.
 
         Artisan::call('snipeit:ldap-sync', ['--location_id' => $request->input('location_id'), '--json_summary' => true]);

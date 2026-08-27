@@ -3,12 +3,11 @@
 namespace Database\Seeders;
 
 use App\Models\Supplier;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Schema;
 
-class SupplierSeeder extends Seeder
+class SupplierSeeder extends DestructiveFixtureSeeder
 {
-    public function run()
+    protected function seedFixtures(): void
     {
         Schema::disableForeignKeyConstraints();
         Supplier::truncate();

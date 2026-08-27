@@ -182,13 +182,12 @@ class LocationsController extends Controller
         }
         $location = $request->handleImages($location);
 
-        // Only scope location if the setting is enabled
         if (Setting::getSettings()->scope_locations_fmcs) {
             $location->company_id = Company::getIdForCurrentUser($request->get('company_id'));
-            // check if parent is set and has a different company
-            if ($location->parent_id && Location::find($location->parent_id)->company_id != $location->company_id) {
-                response()->json(Helper::formatStandardApiResponse('error', null, 'different company than parent'));
-            }    
+        }
+
+        if ($response = $this->rejectMismatchedParentCompany($location)) {
+            return $response;
         }
 
         if ($location->save()) {
@@ -258,16 +257,19 @@ class LocationsController extends Controller
         $location = $request->handleImages($location);
 
         if ($request->filled('company_id')) {
-            // Only scope location if the setting is enabled
             if (Setting::getSettings()->scope_locations_fmcs) {
                 $location->company_id = Company::getIdForCurrentUser($request->get('company_id'));
-                // check if there are related objects with different company
+
                 if (Helper::test_locations_fmcs(false, $id, $location->company_id)) {
                     return response()->json(Helper::formatStandardApiResponse('error', null, 'error scoped locations'));
-                }                
+                }
             } else {
                 $location->company_id = $request->get('company_id');
             }
+        }
+
+        if ($response = $this->rejectMismatchedParentCompany($location)) {
+            return $response;
         }
 
         if ($location->isValid()) {
@@ -283,6 +285,37 @@ class LocationsController extends Controller
         }
 
         return response()->json(Helper::formatStandardApiResponse('error', null, $location->getErrors()));
+    }
+
+    private function rejectMismatchedParentCompany(Location $location): ?JsonResponse
+    {
+        if (! Setting::getSettings()->full_multiple_companies_support || ! $location->parent_id) {
+            return null;
+        }
+
+        $parent = Location::find($location->parent_id);
+
+        if (! $parent) {
+            return response()->json(Helper::formatStandardApiResponse(
+                'error',
+                null,
+                trans('admin/locations/message.does_not_exist')
+            ));
+        }
+
+        if ($parent->company_id === $location->company_id) {
+            return null;
+        }
+
+        return response()->json(Helper::formatStandardApiResponse(
+            'error',
+            null,
+            trans('general.error_location_parent_company', [
+                'parent' => $parent->name,
+                'parent_company' => $parent->company?->name ?? trans('general.unassigned'),
+                'location_company' => $location->company?->name ?? trans('general.unassigned'),
+            ])
+        ));
     }
 
 

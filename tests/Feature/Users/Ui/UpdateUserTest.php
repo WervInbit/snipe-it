@@ -4,6 +4,7 @@ namespace Tests\Feature\Users\Ui;
 
 use App\Models\Asset;
 use App\Models\Company;
+use App\Models\Location;
 use App\Models\User;
 use Error;
 use Tests\TestCase;
@@ -11,14 +12,6 @@ use Illuminate\Support\Facades\Hash;
 
 class UpdateUserTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->markTestSkipped('Asset checkout functionality removed in this fork.');
-    }
-
-
     public function testRequiresPermission()
     {
         $this->actingAs(User::factory()->create())
@@ -220,7 +213,10 @@ class UpdateUserTest extends TestCase
             'redirect_option' => 'index'
         ])->assertRedirect(route('users.index'));
 
-        $asset->checkOut($user, $superUser);
+        $asset->forceFill([
+            'assigned_to' => $user->id,
+            'assigned_type' => User::class,
+        ])->saveQuietly();
 
         // asset assigned, therefore error
         $response = $this->actingAs($superUser)->patchJson(route('users.update', $user), [
@@ -256,7 +252,10 @@ class UpdateUserTest extends TestCase
             'redirect_option' => 'index'
         ])->assertRedirect(route('users.index'));
 
-        $asset->checkOut($user, $superUser);
+        $asset->forceFill([
+            'assigned_to' => $user->id,
+            'assigned_type' => User::class,
+        ])->saveQuietly();
 
         // asset assigned, therefore error
         $response = $this->actingAs($superUser)->patchJson(route('users.update', $user), [
@@ -303,6 +302,29 @@ class UpdateUserTest extends TestCase
             'username' => 'test',
             'company_id' => $companyB->id,
         ]);
+    }
+
+    public function testChangingUserLocationDoesNotMoveAnAssetWithLegacyAssignmentState(): void
+    {
+        [$originalLocation, $newLocation] = Location::factory()->count(2)->create();
+        $user = User::factory()->create(['location_id' => $originalLocation->id]);
+        $asset = Asset::factory()->create(['location_id' => $originalLocation->id]);
+        $asset->forceFill([
+            'assigned_to' => $user->id,
+            'assigned_type' => User::class,
+        ])->saveQuietly();
+
+        $this->actingAs(User::factory()->editUsers()->create())
+            ->put(route('users.update', $user), [
+                'first_name' => $user->first_name,
+                'username' => $user->username,
+                'location_id' => $newLocation->id,
+            ])
+            ->assertRedirect();
+
+        $this->assertSame($newLocation->id, $user->fresh()->location_id);
+        $this->assertSame($originalLocation->id, $asset->fresh()->location_id);
+        $this->assertSame($user->id, $asset->fresh()->assigned_to);
     }
 }
 

@@ -379,7 +379,7 @@ return [
     'purge_barcodes' => 'Išvalyti brūkšninius kodus',
     'help_asterisk_bold'    => 'Tekstas, įvestas kaip <code>**tekstas**</code>, bus rodomas paryškintu šriftu',
     'help_blank_to_use'     => 'Palikite tuščią, kad būtų nauudojama <code>:setting_name</code> reikšmė',
-    'help_default_will_use' => '<code>:default</code> naudos reikšmę iš <code>:setting_name</code>. <br>Atkreipkite dėmesį, kad brūkšninio kodo reikšmė turi atitikti atitinkamą brūkšninio kodo specifikaciją tam, kad būtų sėkmingai sugeneruota. Jei reikia daugiau informacijos, peržiūrėkite <a href="https://snipe-it.readme.io/docs/barcodes">dokumentaciją<i class="fa fa-external-link"></i></a>. ',
+    'help_default_will_use' => '<code>:default</code> naudos reikšmę iš <code>:setting_name</code>. <br>Atkreipkite dėmesį, kad brūkšninio kodo reikšmė turi atitikti atitinkamą brūkšninio kodo specifikaciją tam, kad būtų sėkmingai sugeneruota. Jei reikia daugiau informacijos, peržiūrėkite <a href=":fork_documentation_url">dokumentaciją<i class="fa fa-external-link"></i></a>. ',
     'asset_id'              => 'Turto ID',
     'data'               => 'Duomenys',
     'default'               => 'Numatytasis',

@@ -705,6 +705,25 @@ class User extends SnipeModel implements AuthenticatableContract, AuthorizableCo
     }
 
     /**
+     * Require a byte-exact match after an externally supplied identifier was
+     * resolved through a database collation that may fold case or accents.
+     */
+    public static function verifyExactUsernameMatch(?self $user, string $expected): ?self
+    {
+        if ($user === null || $expected === '') {
+            return null;
+        }
+
+        $stored = (string) $user->username;
+
+        if ($stored === '') {
+            return null;
+        }
+
+        return hash_equals($stored, $expected) ? $user : null;
+    }
+
+    /**
      * Generate email from full name
      * 
      * @author A. Gianotto <snipe@snipe.net>

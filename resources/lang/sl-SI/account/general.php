@@ -9,7 +9,7 @@ return array(
     'api_base_url' => 'Vaš osnovni URL API-ja se nahaja na naslovu:',
     'api_base_url_endpoint' => '/&lt;endpoint&gt;',
     'api_token_expiration_time' => 'API tokens are set to expire in:',
-    'api_reference' => 'Za iskanje specifičnih končnih točk API-ja in dodatne dokumentacije API-ja preverite <a href="https://snipe-it.readme.io/reference" target="_blank">API reference</a>.',
+    'api_reference' => 'Za iskanje specifičnih končnih točk API-ja in dodatne dokumentacije API-ja preverite <a href=":fork_documentation_url" target="_blank">API reference</a>.',
     'profile_updated' => 'Račun je bil uspešno posodobljen',
     'no_tokens' => 'You have not created any personal access tokens.',
     'enable_sounds' => 'Omogoči zvočne učinke',

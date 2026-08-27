@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Soo dejinta',
     'import_this_file'      => 'Meelaha khariidad samee oo habee faylkan',
     'importing'         	=> 'Soo dejinta',
-    'importing_help'        => 'Waxaad ku soo dejisan kartaa hantida, agabka, shatiga, qaybaha, alaabta la isticmaalo, iyo isticmaalayaasha faylka CSV. <br><br>CSV-gu waa in uu noqdaa mid barar kooban oo lagu qaabeeyey madax u dhigma kuwa ku jira <a href="https://snipe-it.readme.io/docs/importing" target="_new"> tusaale CSV-yada ku jira dukumeentiga</a>.',
+    'importing_help'        => 'Waxaad ku soo dejisan kartaa hantida, agabka, shatiga, qaybaha, alaabta la isticmaalo, iyo isticmaalayaasha faylka CSV. <br><br>CSV-gu waa in uu noqdaa mid barar kooban oo lagu qaabeeyey madax u dhigma kuwa ku jira <a href=":fork_documentation_url" target="_new"> tusaale CSV-yada ku jira dukumeentiga</a>.',
     'import-history'        => 'Soo dejinta Taariikhda',
     'asset_maintenance'        => 'Dayactirka hantida',
     'asset_maintenance_report' => 'Warbixinta Dayactirka Hantida',

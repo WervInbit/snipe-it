@@ -184,11 +184,13 @@
                                     <button type="submit" class="btn btn-primary btn-sm">{{ trans('general.save') }}</button>
                                 </form>
 
-                                <form method="POST" action="{{ route('models.numbers.components.destroy', [$model, $modelNumber, $template]) }}" style="margin-top: 10px;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm">{{ trans('general.delete') }}</button>
-                                </form>
+                                @can('manageSpecificationCleanup', $model)
+                                    <form method="POST" action="{{ route('models.numbers.components.destroy', [$model, $modelNumber, $template]) }}" style="margin-top: 10px;">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm">{{ trans('general.delete') }}</button>
+                                    </form>
+                                @endcan
                             </div>
                         </div>
                     @endforeach

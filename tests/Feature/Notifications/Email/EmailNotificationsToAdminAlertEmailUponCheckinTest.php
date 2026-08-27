@@ -3,9 +3,8 @@
 namespace Tests\Feature\Notifications\Email;
 
 use App\Events\CheckoutableCheckedIn;
-use App\Mail\CheckinAssetMail;
-use App\Models\Asset;
-use App\Models\AssetModel;
+use App\Mail\CheckinAccessoryMail;
+use App\Models\Accessory;
 use App\Models\Category;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
@@ -15,8 +14,7 @@ use Tests\TestCase;
 #[Group('notifications')]
 class EmailNotificationsToAdminAlertEmailUponCheckinTest extends TestCase
 {
-    private Asset $asset;
-    private AssetModel $assetModel;
+    private Accessory $accessory;
     private Category $category;
     private User $user;
 
@@ -28,63 +26,35 @@ class EmailNotificationsToAdminAlertEmailUponCheckinTest extends TestCase
 
         $this->user = User::factory()->create();
 
-        $this->category = Category::factory()->create([
+        $this->category = Category::factory()->forAccessories()->create([
             'checkin_email' => false,
             'eula_text' => null,
             'require_acceptance' => false,
             'use_default_eula' => false,
         ]);
 
-        $this->assetModel = AssetModel::factory()->for($this->category)->create();
-
-        $this->asset = Asset::factory()
-            ->for($this->assetModel, 'model')
-            ->assignedToUser($this->user)
+        $this->accessory = Accessory::factory()
+            ->for($this->category)
+            ->checkedOutToUser($this->user)
             ->create();
     }
 
     public function test_admin_alert_email_sends()
     {
-        $this->settings->enableAdminCC('cc@example.com');
+        $this->settings
+            ->enableAdminCC('cc@example.com')
+            ->enableAdminCCAlways();
 
         $this->category->update(['checkin_email' => true]);
 
-        $this->fireCheckInEvent($this->asset, $this->user);
+        $this->fireCheckInEvent($this->accessory, $this->user);
 
-        Mail::assertSent(CheckinAssetMail::class, function ($mail) {
+        Mail::assertSent(CheckinAccessoryMail::class, function ($mail) {
             return $mail->hasTo($this->user->email) && $mail->hasCc('cc@example.com');
         });
     }
 
     public function test_admin_alert_email_still_sent_when_category_email_is_not_set_to_send_email_to_user()
-    {
-        $this->settings->enableAdminCC('cc@example.com');
-
-        $this->category->update(['checkin_email' => false]);
-
-        $this->fireCheckInEvent($this->asset, $this->user);
-
-        Mail::assertSent(CheckinAssetMail::class, function ($mail) {
-            return $mail->hasTo('cc@example.com');
-        });
-    }
-
-    public function test_admin_alert_email_still_sent_when_user_has_no_email_address()
-    {
-        $this->settings->enableAdminCC('cc@example.com');
-
-        $this->user->update(['email' => null]);
-
-        $this->category->update(['checkin_email' => true]);
-
-        $this->fireCheckInEvent($this->asset, $this->user);
-
-        Mail::assertSent(CheckinAssetMail::class, function ($mail) {
-            return $mail->hasTo('cc@example.com');
-        });
-    }
-
-    public function test_admin_alert_email_sent_when_always_send_is_true_and_asset_does_not_require_acceptance()
     {
         $this->settings
             ->enableAdminCC('cc@example.com')
@@ -92,14 +62,46 @@ class EmailNotificationsToAdminAlertEmailUponCheckinTest extends TestCase
 
         $this->category->update(['checkin_email' => false]);
 
-        $this->fireCheckInEvent($this->asset, $this->user);
+        $this->fireCheckInEvent($this->accessory, $this->user);
 
-        Mail::assertSent(CheckinAssetMail::class, function ($mail) {
+        Mail::assertSent(CheckinAccessoryMail::class, function ($mail) {
+            return $mail->hasTo('cc@example.com');
+        });
+    }
+
+    public function test_admin_alert_email_still_sent_when_user_has_no_email_address()
+    {
+        $this->settings
+            ->enableAdminCC('cc@example.com')
+            ->enableAdminCCAlways();
+
+        $this->user->update(['email' => null]);
+
+        $this->category->update(['checkin_email' => true]);
+
+        $this->fireCheckInEvent($this->accessory, $this->user);
+
+        Mail::assertSent(CheckinAccessoryMail::class, function ($mail) {
+            return $mail->hasTo('cc@example.com');
+        });
+    }
+
+    public function test_admin_alert_email_sent_when_always_send_is_true_and_item_does_not_require_acceptance()
+    {
+        $this->settings
+            ->enableAdminCC('cc@example.com')
+            ->enableAdminCCAlways();
+
+        $this->category->update(['checkin_email' => false]);
+
+        $this->fireCheckInEvent($this->accessory, $this->user);
+
+        Mail::assertSent(CheckinAccessoryMail::class, function ($mail) {
             return $mail->hasTo('cc@example.com') || $mail->hasCc('cc@example.com');
         });
     }
 
-    public function test_admin_alert_email_not_sent_when_always_send_is_false_and_asset_does_not_require_acceptance()
+    public function test_admin_alert_email_not_sent_when_always_send_is_false_and_item_does_not_require_acceptance()
     {
         $this->settings
             ->enableAdminCC('cc@example.com')
@@ -107,19 +109,21 @@ class EmailNotificationsToAdminAlertEmailUponCheckinTest extends TestCase
 
         $this->category->update(['checkin_email' => false]);
 
-        $this->fireCheckInEvent($this->asset, $this->user);
+        $this->fireCheckInEvent($this->accessory, $this->user);
 
-        Mail::assertNotSent(CheckinAssetMail::class, function ($mail) {
+        Mail::assertNotSent(CheckinAccessoryMail::class, function ($mail) {
             return $mail->hasTo('cc@example.com') || $mail->hasCc('cc@example.com');
         });
     }
 
-    private function fireCheckInEvent($asset, $user): void
+    private function fireCheckInEvent(Accessory $accessory, User $user): void
     {
+        $accessory->unsetRelation('category');
+
         event(new CheckoutableCheckedIn(
-            $asset,
+            $accessory,
             $user,
-            User::factory()->checkinAssets()->create(),
+            User::factory()->checkinAccessories()->create(),
             ''
         ));
     }

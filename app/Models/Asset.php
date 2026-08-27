@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Events\CheckoutableCheckedOut;
 use App\Exceptions\CheckoutNotAllowed;
 use App\Helpers\Helper;
 use App\Http\Traits\UniqueUndeletedTrait;
@@ -18,6 +17,7 @@ use App\Models\Traits\HasUploads;
 use App\Models\Traits\Searchable;
 use App\Presenters\AssetPresenter;
 use App\Presenters\Presentable;
+use App\Services\WorkflowReadinessService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -56,6 +56,14 @@ class Asset extends Depreciable
     public const QUALITY_GRADE_B = 'grade_b';
     public const QUALITY_GRADE_C = 'grade_c';
     public const QUALITY_GRADE_D = 'grade_d';
+    public const LEGACY_READ_ONLY_FIELDS = [
+        'requestable',
+        'last_checkin',
+        'last_checkout',
+        'expected_checkin',
+        'last_audit_date',
+        'next_audit_date',
+    ];
 
     use Acceptable;
 
@@ -130,11 +138,6 @@ class Asset extends Depreciable
         'name'              => ['nullable', 'max:255'],
         'company_id'        => ['nullable', 'integer', 'exists:companies,id'],
         'warranty_months'   => ['nullable', 'numeric', 'digits_between:0,240'],
-        'last_checkout'     => ['nullable', 'date_format:Y-m-d H:i:s'],
-        'last_checkin'      => ['nullable', 'date_format:Y-m-d H:i:s'],
-        'expected_checkin'  => ['nullable', 'date'],
-        'last_audit_date'   => ['nullable', 'date_format:Y-m-d H:i:s'],
-        'next_audit_date'   => ['nullable', 'date'],
         'location_id'       => ['nullable', 'exists:locations,id', 'fmcs_location'],
         'rtd_location_id'   => ['nullable', 'exists:locations,id', 'fmcs_location'],
         'location_note'     => ['nullable', 'string', 'max:65535'],
@@ -147,9 +150,6 @@ class Asset extends Depreciable
         'byod'              => ['nullable', 'boolean'],
         'order_number'      => ['nullable', 'string', 'max:191'],
         'notes'             => ['nullable', 'string', 'max:65535'],
-        'assigned_to'   => ['nullable', 'integer', 'required_with:assigned_type'],
-        'assigned_type' => ['nullable', 'required_with:assigned_to', 'in:'.User::class.",".Location::class.",".Asset::class],
-        'requestable'       => ['nullable', 'boolean'],
         'assigned_user'     => ['integer', 'nullable', 'exists:users,id,deleted_at,NULL'],
         'assigned_location' => ['integer', 'nullable', 'exists:locations,id,deleted_at,NULL', 'fmcs_location'],
         'assigned_asset'    => ['integer', 'nullable', 'exists:assets,id,deleted_at,NULL'],
@@ -170,8 +170,6 @@ class Asset extends Depreciable
      */
     protected $fillable = [
         'asset_tag',
-        'assigned_to',
-        'assigned_type',
         'company_id',
         'image',
         'location_id',
@@ -191,18 +189,11 @@ class Asset extends Depreciable
         'supplier_id',
         'image_override_enabled',
         'warranty_months',
-        'requestable',
         'is_sellable',
-        'last_checkout',
-        'expected_checkin',
         'byod',
         'asset_eol_date',
         'eol_explicit',
-        'last_audit_date',
-        'next_audit_date',
         'asset_eol_date',
-        'last_checkin',
-        'last_checkout',
     ];
 
     public function allowDuplicateSerial(bool $allow = true): self
@@ -216,7 +207,9 @@ class Asset extends Depreciable
     {
         $rules = $this->rules;
 
-        if ($this->allowDuplicateSerial && isset($rules['serial'])) {
+        $uniqueSerialsEnabled = (bool) (Setting::getSettings()?->unique_serial ?? false);
+
+        if (($this->allowDuplicateSerial || !$uniqueSerialsEnabled) && isset($rules['serial'])) {
             $rules['serial'] = $this->stripSerialUniqueness($rules['serial']);
         }
 
@@ -396,6 +389,12 @@ class Asset extends Depreciable
 
         // Enforce key workflow rules on status transitions and sellability
         static::saving(function (Asset $asset) {
+            if ($asset->exists && ($asset->isDirty('model_id') || $asset->isDirty('model_number_id'))) {
+                $asset->tests_completed_ok = false;
+                $asset->unsetRelation('model');
+                $asset->unsetRelation('modelNumber');
+            }
+
             // BYOD/Internal Use assets are not sellable
             if (!empty($asset->byod)) {
                 $asset->is_sellable = 0;
@@ -407,7 +406,6 @@ class Asset extends Depreciable
                     return;
                 }
 
-                $name = self::normalizedStatusName($newStatus->name);
                 // Sale lifecycle transitions require tests OK and explicit sale-transition permission.
                 if (self::isPreSaleStatus($newStatus) || self::isSoldStatus($newStatus)) {
                     $user = auth()->user();
@@ -416,7 +414,12 @@ class Asset extends Depreciable
                             throw new \DomainException('requires_sale_transition_permission');
                         }
 
-                        if (empty($asset->tests_completed_ok)) {
+                        $blockingProfiles = $asset->blockingSaleReadinessProfiles();
+                        $testsReady = $blockingProfiles->isEmpty()
+                            ? (bool) $asset->tests_completed_ok
+                            : app(WorkflowReadinessService::class)->isReady($asset, $blockingProfiles);
+
+                        if (!$testsReady) {
                             if (!request()->boolean('ack_failed_tests')) {
                                 throw new \DomainException('requires_ack_failed_tests');
                             }
@@ -435,13 +438,13 @@ class Asset extends Depreciable
                 }
 
                 // Returned → restore from archived so it re-enters workflow
-                if (str_contains($name, 'returned')) {
+                if ($newStatus->hasLifecycleStage(Statuslabel::LIFECYCLE_RETURNED)) {
                     $asset->archived = 0;
                     Log::info('Asset marked returned; unarchiving', ['asset_id' => $asset->id]);
                 }
 
                 // Broken/For Parts → unsellable and not requestable, add delist note
-                if (str_contains($name, 'broken') || str_contains($name, 'parts')) {
+                if ($newStatus->hasLifecycleStage(Statuslabel::LIFECYCLE_BROKEN_PARTS)) {
                     $asset->is_sellable = 0;
                     Log::info('Asset set to Broken/For Parts; disabling sellable', ['asset_id' => $asset->id]);
                     try {
@@ -462,22 +465,47 @@ class Asset extends Depreciable
 
     public static function isPreSaleStatus(?Statuslabel $status): bool
     {
-        return $status !== null
-            && (int) $status->deployable === 1
-            && (int) $status->pending === 0
-            && (int) $status->archived === 0;
+        return $status?->hasLifecycleStage(Statuslabel::LIFECYCLE_READY_FOR_SALE) ?? false;
+    }
+
+    /**
+     * Asset requests belonged to the retired checkout workflow. Keep the
+     * historical relationship for cleanup/reporting, but fail closed if old
+     * code attempts to create or cancel a request.
+     */
+    public function request($qty = 1): void
+    {
+        throw new \LogicException('Asset requests are disabled in the refurbishment workflow.');
+    }
+
+    public function deleteRequest(): void
+    {
+        throw new \LogicException('Asset requests are disabled in the refurbishment workflow.');
+    }
+
+    public function cancelRequest($user_id = null): void
+    {
+        throw new \LogicException('Asset requests are disabled in the refurbishment workflow.');
+    }
+
+    public function logCheckout($note, $target, $action_date = null, $originalValues = []): never
+    {
+        throw new \LogicException('Asset checkout history is read-only in the refurbishment workflow.');
+    }
+
+    public function logCheckin($target, $note, $action_date = null, $originalValues = []): never
+    {
+        throw new \LogicException('Asset check-in history is read-only in the refurbishment workflow.');
+    }
+
+    public function logAudit($note, $location_id, $filename = null, $originalValues = []): never
+    {
+        throw new \LogicException('Asset audit history is read-only in the refurbishment workflow.');
     }
 
     public static function isSoldStatus(?Statuslabel $status): bool
     {
-        return self::isSoldStatusName($status?->name);
-    }
-
-    public static function isSoldStatusName(?string $statusName): bool
-    {
-        $name = self::normalizedStatusName($statusName);
-
-        return $name === 'sold' || str_starts_with($name, 'sold ');
+        return $status?->hasLifecycleStage(Statuslabel::LIFECYCLE_SOLD) ?? false;
     }
 
     public static function statusRequiresTestAck(?Statuslabel $status): bool
@@ -491,18 +519,13 @@ class Asset extends Depreciable
             return false;
         }
 
-        $name = self::normalizedStatusName($status->name);
-
         return (int) $status->archived === 1
-            || self::isSoldStatus($status)
-            || str_contains($name, 'broken')
-            || str_contains($name, 'parts')
-            || str_contains($name, 'destroy');
-    }
-
-    private static function normalizedStatusName(?string $statusName): string
-    {
-        return strtolower(trim((string) $statusName));
+            || $status->hasLifecycleStage(
+                Statuslabel::LIFECYCLE_SOLD,
+                Statuslabel::LIFECYCLE_BROKEN_PARTS,
+                Statuslabel::LIFECYCLE_DESTRUCTION_PENDING,
+                Statuslabel::LIFECYCLE_DESTROYED
+            );
     }
 
     // To properly set the expected checkin as Y-m-d
@@ -1023,7 +1046,9 @@ class Asset extends Depreciable
 
         $this->image = $first ? Str::after($first->file_path, 'assets/') : null;
         $this->image_override_enabled = $first ? true : false;
-        $this->save();
+        if (! $this->save()) {
+            throw new \RuntimeException('Unable to persist asset image override pointers.');
+        }
     }
 
     /**
@@ -1291,19 +1316,28 @@ class Asset extends Depreciable
      */
     public static function getExpiringWarrantee($days = 30)
     {
-        $days = (is_null($days)) ? 30 : $days;
+        $days = is_null($days) ? 30 : (int) $days;
+        $now = now();
+        $cutoff = $now->copy()->addDays($days);
 
-        return self::where('archived', '=', '0') // this can stay for right now, as `archived` defaults to 0 at the db level, but should probably be replaced with assetstatus->archived?
+        $query = self::where('archived', '=', '0') // this can stay for right now, as `archived` defaults to 0 at the db level, but should probably be replaced with assetstatus->archived?
             ->whereNotNull('warranty_months')
             ->whereNotNull('purchase_date')
             ->whereNull('deleted_at')
-            ->NotArchived()
+            ->NotArchived();
+
+        $expirationExpression = match ($query->getConnection()->getDriverName()) {
+            'sqlite' => "date(purchase_date, '+' || CAST(warranty_months AS INTEGER) || ' months')",
+            'pgsql' => "purchase_date + (CAST(warranty_months AS INTEGER) * INTERVAL '1 month')",
+            default => 'DATE_ADD(purchase_date, INTERVAL warranty_months MONTH)',
+        };
+
+        return $query
             ->whereRaw(
-                'DATE_ADD(`purchase_date`, INTERVAL `warranty_months` MONTH) <= DATE_ADD(NOW(), INTERVAL '
-                                 . $days
-                . ' DAY) AND DATE_ADD(`purchase_date`, INTERVAL `warranty_months` MONTH) > NOW()'
+                "{$expirationExpression} <= ? AND {$expirationExpression} > ?",
+                [$cutoff, $now]
             )
-            ->orderByRaw('DATE_ADD(`purchase_date`,INTERVAL `warranty_months` MONTH)')
+            ->orderByRaw($expirationExpression)
             ->get();
     }
 
@@ -1394,49 +1428,7 @@ class Asset extends Depreciable
             return $this->latestSingleRunIssueSummary();
         }
 
-        $runs = collect();
-        $failed = collect();
-        $incomplete = collect();
-        $missingProfiles = collect();
-
-        foreach ($blockingProfiles as $profile) {
-            $run = $this->tests()
-                ->where('workflow_profile_id', $profile->id)
-                ->with(['results.type', 'results.attributeDefinition'])
-                ->first();
-
-            if (!$run) {
-                $missingProfiles->push($profile->name);
-                continue;
-            }
-
-            $runs->push($run);
-            $requiredResults = $run->results->filter(fn (TestResult $result) => $result->is_required);
-            $labelFor = function (TestResult $result) use ($profile): string {
-                $label = $result->attributeDefinition?->label ?? (string) optional($result->type)->name;
-
-                return $profile->name . ': ' . $label;
-            };
-
-            $failed = $failed->merge($requiredResults
-                ->filter(fn (TestResult $result) => $result->status === TestResult::STATUS_FAIL)
-                ->map($labelFor)
-                ->values());
-
-            $incomplete = $incomplete->merge($requiredResults
-                ->filter(fn (TestResult $result) => $result->status !== TestResult::STATUS_PASS && $result->status !== TestResult::STATUS_FAIL)
-                ->map($labelFor)
-                ->values());
-        }
-
-        return [
-            'run' => $runs->sortByDesc(fn ($run) => $run->finished_at ?? $run->created_at)->first(),
-            'runs' => $runs,
-            'failed' => $failed->values(),
-            'incomplete' => $incomplete->values(),
-            'missing_run' => $missingProfiles->isNotEmpty(),
-            'missing_profiles' => $missingProfiles->values(),
-        ];
+        return app(WorkflowReadinessService::class)->summary($this, $blockingProfiles);
     }
 
     /**
@@ -1453,6 +1445,15 @@ class Asset extends Depreciable
         $this->save();
     }
 
+    public function liveTestsCompletedOk(): bool
+    {
+        $summary = $this->latestTestIssueSummary();
+
+        return !$summary['missing_run']
+            && $summary['failed']->isEmpty()
+            && $summary['incomplete']->isEmpty();
+    }
+
     private function blockingSaleReadinessProfiles(): Collection
     {
         return WorkflowProfile::query()
@@ -1467,7 +1468,7 @@ class Asset extends Depreciable
     private function latestSingleRunIssueSummary(): array
     {
         $latestRun = $this->tests()
-            ->with(['results.type', 'results.attributeDefinition'])
+            ->with(['profile', 'results.type', 'results.attributeDefinition'])
             ->first();
 
         if (!$latestRun) {
@@ -1481,30 +1482,21 @@ class Asset extends Depreciable
             ];
         }
 
-        $requiredResults = $latestRun->results->filter(fn (TestResult $result) => $result->is_required);
+        if (!$latestRun->profile || !$latestRun->readiness_context_hash) {
+            return [
+                'run' => $latestRun,
+                'runs' => collect([$latestRun]),
+                'failed' => collect(),
+                'incomplete' => collect(),
+                'missing_run' => true,
+                'missing_profiles' => collect(),
+            ];
+        }
 
-        $labelFor = function (TestResult $result): string {
-            return $result->attributeDefinition?->label ?? (string) optional($result->type)->name;
-        };
-
-        $failed = $requiredResults
-            ->filter(fn (TestResult $result) => $result->status === TestResult::STATUS_FAIL)
-            ->map($labelFor)
-            ->values();
-
-        $incomplete = $requiredResults
-            ->filter(fn (TestResult $result) => $result->status !== TestResult::STATUS_PASS && $result->status !== TestResult::STATUS_FAIL)
-            ->map($labelFor)
-            ->values();
-
-        return [
-            'run' => $latestRun,
-            'runs' => collect([$latestRun]),
-            'failed' => $failed,
-            'incomplete' => $incomplete,
-            'missing_run' => false,
-            'missing_profiles' => collect(),
-        ];
+        return app(WorkflowReadinessService::class)->summary(
+            $this,
+            collect([$latestRun->profile])
+        );
     }
 
     /**

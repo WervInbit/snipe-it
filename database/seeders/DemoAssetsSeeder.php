@@ -14,12 +14,13 @@ use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\TestResult;
 use App\Models\TestRun;
-use App\Models\TestType;
 use App\Models\User;
 use App\Models\WorkflowProfile;
 use App\Services\ModelAttributes\AttributeValueService;
 use App\Services\QrLabelService;
+use App\Services\WorkflowRunDefinitionService;
 use Carbon\CarbonImmutable;
+use Database\Seeders\Concerns\GuardsDisposableDataSeeding;
 use Database\Seeders\Concerns\ProvidesDeviceCatalogData;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
@@ -28,10 +29,12 @@ use Illuminate\Support\Facades\DB;
 
 class DemoAssetsSeeder extends Seeder
 {
+    use GuardsDisposableDataSeeding;
     use ProvidesDeviceCatalogData;
 
     public function run(): void
     {
+        $this->assertDisposableDataSeedingAllowed();
         $this->resetTables();
 
         $admin = User::where('permissions->superuser', '1')->first();
@@ -40,24 +43,34 @@ class DemoAssetsSeeder extends Seeder
             Auth::login($admin);
         }
 
-        $models = $this->seedModelBlueprints();
-        $assets = $this->seedAssets($models);
-        $this->seedTestRuns($assets);
-        $this->bumpUiStateVersion();
-
-        if ($admin) {
-            Auth::logout();
+        try {
+            $models = $this->seedModelBlueprints();
+            $seededAssets = $this->seedAssets($models);
+            $this->seedTestRuns($seededAssets['assets'], $seededAssets['sale_status_ids']);
+            $this->bumpUiStateVersion();
+        } finally {
+            if ($admin) {
+                Auth::logout();
+            }
         }
     }
 
     /**
      * Remove existing asset/test data so the curated dataset stays small.
+     *
+     * Keep foreign keys enabled and do not truncate assets. Runtime component
+     * hierarchies are part of the disposable dataset and are removed before
+     * assets; work-order links keep their snapshots with a null asset reference.
+     * Preserving the asset auto-increment prevents unkeyed legacy rows from
+     * becoming associated with newly created demo assets by ID reuse.
      */
     private function resetTables(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        DB::table('work_order_assets')->update(['asset_id' => null]);
 
         foreach ([
+            'component_events',
+            'component_instances',
             'workflow_result_photos',
             'workflow_results',
             'workflow_runs',
@@ -69,10 +82,8 @@ class DemoAssetsSeeder extends Seeder
             'checkout_requests',
             'assets',
         ] as $table) {
-            DB::table($table)->truncate();
+            DB::table($table)->delete();
         }
-
-        DB::statement('SET FOREIGN_KEY_CHECKS=1');
     }
 
     /**
@@ -192,11 +203,15 @@ class DemoAssetsSeeder extends Seeder
      * Create a curated asset list tied to the seeded models.
      *
      * @param array<string,array{model:\App\Models\AssetModel,model_number_id:int}> $models
-     * @return array<int,\App\Models\Asset>
+     * Sale-lifecycle assets are created in a safe processing state. Their
+     * intended statuses are applied only after complete readiness runs exist.
+     *
+     * @return array{assets: array<int,\App\Models\Asset>, sale_status_ids: array<int,int>}
      */
     private function seedAssets(array $models): array
     {
-        $status = Statuslabel::query()->pluck('id', 'name');
+        $status = Statuslabel::query()->get()->keyBy('name');
+        $processingStatus = $status->get('Being Processed');
         $locations = Location::query()->pluck('id', 'name');
         $suppliers = Supplier::query()->pluck('id', 'name');
         $users = User::query()->pluck('id', 'username');
@@ -204,6 +219,7 @@ class DemoAssetsSeeder extends Seeder
         $qr = app(QrLabelService::class);
 
         $assets = [];
+        $saleStatusIds = [];
         $records = [
             [
                 'tag' => 'DEMO-001',
@@ -212,7 +228,6 @@ class DemoAssetsSeeder extends Seeder
                 'status' => 'Ready for Sale',
                 'location' => 'Ready to Ship',
                 'notes' => 'All refurb checks cleared; staged for sales.',
-                'assigned_to' => null,
                 'supplier' => $suppliers->first(),
             ],
             [
@@ -222,7 +237,6 @@ class DemoAssetsSeeder extends Seeder
                 'status' => 'Being Processed',
                 'location' => 'Repair Bench',
                 'notes' => 'Battery cycle validation pending before QA hand-off.',
-                'assigned_to' => null,
                 'supplier' => $suppliers->first(),
             ],
             [
@@ -232,7 +246,6 @@ class DemoAssetsSeeder extends Seeder
                 'status' => 'Stand-by',
                 'location' => 'Refurb Intake',
                 'notes' => 'Awaiting replacement battery calibration and cosmetic check.',
-                'assigned_to' => null,
                 'supplier' => $suppliers->get('Renewed Supply Co.') ?? $suppliers->first(),
             ],
             [
@@ -242,7 +255,6 @@ class DemoAssetsSeeder extends Seeder
                 'status' => 'Ready for Sale',
                 'location' => 'Ready to Ship',
                 'notes' => 'Flagship Android phone prepped for ecommerce batch.',
-                'assigned_to' => null,
                 'supplier' => $suppliers->get('Renewed Supply Co.') ?? $suppliers->first(),
             ],
             [
@@ -252,7 +264,6 @@ class DemoAssetsSeeder extends Seeder
                 'status' => 'QA Hold',
                 'location' => 'QA Station',
                 'notes' => 'Minor hinge play under review before final release.',
-                'assigned_to' => null,
                 'supplier' => $suppliers->first(),
             ],
             [
@@ -262,7 +273,6 @@ class DemoAssetsSeeder extends Seeder
                 'status' => 'Broken / Parts',
                 'location' => 'Repair Bench',
                 'notes' => 'Motherboard intermittently fails POST; retained for parts.',
-                'assigned_to' => null,
                 'supplier' => $suppliers->first(),
             ],
             [
@@ -272,7 +282,6 @@ class DemoAssetsSeeder extends Seeder
                 'status' => 'Internal Use',
                 'location' => 'Office',
                 'notes' => 'Allocated to internal bench for intake tooling.',
-                'assigned_to' => $users->get('demo_user'),
                 'supplier' => $suppliers->first(),
             ],
             [
@@ -282,7 +291,6 @@ class DemoAssetsSeeder extends Seeder
                 'status' => 'Archived',
                 'location' => 'Archive Storage',
                 'notes' => 'Legacy unit retained for historical tracking.',
-                'assigned_to' => null,
                 'supplier' => $suppliers->first(),
             ],
             [
@@ -292,7 +300,6 @@ class DemoAssetsSeeder extends Seeder
                 'status' => 'Returned / RMA',
                 'location' => 'Refurb Intake',
                 'notes' => 'Returned after touch flicker report; pending reassessment.',
-                'assigned_to' => null,
                 'supplier' => $suppliers->get('Renewed Supply Co.') ?? $suppliers->first(),
             ],
             [
@@ -302,7 +309,6 @@ class DemoAssetsSeeder extends Seeder
                 'status' => 'Sold',
                 'location' => 'Ready to Ship',
                 'notes' => 'Closed sale in latest ecommerce batch.',
-                'assigned_to' => null,
                 'supplier' => $suppliers->get('Renewed Supply Co.') ?? $suppliers->first(),
             ],
         ];
@@ -315,10 +321,17 @@ class DemoAssetsSeeder extends Seeder
             }
 
             $statusName = $record['status'];
-            $statusId = $status->get($statusName);
-            $normalizedStatus = strtolower((string) $statusName);
-            $testsOk = str_contains($normalizedStatus, 'ready for sale')
-                || str_contains($normalizedStatus, 'sold');
+            $statusLabel = $status->get($statusName);
+
+            if (! $statusLabel) {
+                throw new \RuntimeException("Missing required demo status [{$statusName}].");
+            }
+
+            $requiresReadiness = Asset::statusRequiresTestAck($statusLabel);
+
+            if ($requiresReadiness && ! $processingStatus) {
+                throw new \RuntimeException('Missing required demo staging status [Being Processed].');
+            }
 
             $asset = Asset::factory()->create([
                 'asset_tag' => $record['tag'],
@@ -326,16 +339,27 @@ class DemoAssetsSeeder extends Seeder
                 'notes' => $record['notes'],
                 'model_id' => $catalog['model']->id,
                 'model_number_id' => $catalog['model_number_id'],
-                'status_id' => $statusId,
-                'tests_completed_ok' => $testsOk,
+                'status_id' => $requiresReadiness ? $processingStatus->id : $statusLabel->id,
+                'tests_completed_ok' => false,
                 'rtd_location_id' => $locations->get($record['location']),
                 'supplier_id' => $record['supplier'],
                 'purchase_date' => CarbonImmutable::now()->subMonths(2)->format('Y-m-d'),
                 'purchase_cost' => 0,
-                'assigned_to' => $record['assigned_to'],
-                'assigned_type' => $record['assigned_to'] ? User::class : null,
+                'assigned_to' => null,
+                'assigned_type' => null,
+                'accepted' => null,
+                'expected_checkin' => null,
+                'last_checkin' => null,
+                'last_checkout' => null,
+                'last_audit_date' => null,
+                'next_audit_date' => null,
+                'requestable' => false,
                 'created_by' => $users->get('admin'),
             ]);
+
+            if ($requiresReadiness) {
+                $saleStatusIds[$asset->id] = $statusLabel->id;
+            }
 
             try {
                 $qr->generate($asset);
@@ -346,23 +370,25 @@ class DemoAssetsSeeder extends Seeder
             $assets[] = $asset;
         }
 
-        return $assets;
+        return [
+            'assets' => $assets,
+            'sale_status_ids' => $saleStatusIds,
+        ];
     }
 
     /**
      * Attach concise test history to the demo assets.
      *
      * @param array<int,\App\Models\Asset> $assets
+     * @param array<int,int> $saleStatusIds Asset IDs keyed to their intended sale-lifecycle status IDs.
      */
-    private function seedTestRuns(array $assets): void
+    private function seedTestRuns(array $assets, array $saleStatusIds): void
     {
-        $testTypes = TestType::query()->pluck('id', 'slug');
         $qaUser = User::where('username', 'qa_manager')->first();
         $standardProfile = WorkflowProfile::query()
             ->where('slug', 'standard-diagnostics')
             ->with('items')
             ->first();
-        $profileItems = $standardProfile?->items->keyBy('workflow_item_id') ?? collect();
 
         $fixtures = [
             'DEMO-001' => [
@@ -426,44 +452,73 @@ class DemoAssetsSeeder extends Seeder
         foreach ($assets as $asset) {
             $testMatrix = $fixtures[$asset->asset_tag] ?? null;
 
-            if (! $testMatrix) {
+            if (! $testMatrix || ! $standardProfile) {
                 continue;
             }
 
-            $run = TestRun::create([
-                'asset_id' => $asset->id,
-                'model_number_id' => $asset->model_number_id,
-                'workflow_profile_id' => $standardProfile?->id,
-                'profile_name_snapshot' => $standardProfile?->name ?? 'Standard Diagnostics',
-                'profile_slug_snapshot' => $standardProfile?->slug ?? 'standard-diagnostics',
-                'user_id' => $qaUser?->id ?? $asset->created_by,
-                'started_at' => CarbonImmutable::now()->subDays(2),
-                'finished_at' => CarbonImmutable::now()->subDay(),
-            ]);
+            $isSaleLifecycle = isset($saleStatusIds[$asset->id])
+                || Asset::isPreSaleStatus($asset->assetstatus)
+                || Asset::isSoldStatus($asset->assetstatus);
+            $profiles = WorkflowProfile::query()
+                ->active()
+                ->forAsset($asset)
+                ->where('blocks_sale_readiness', true)
+                ->whereHas('items')
+                ->ordered()
+                ->get();
 
-            foreach ($testMatrix as $slug => $result) {
-                $testTypeId = $testTypes->get($slug);
+            if ($profiles->isEmpty()) {
+                $profiles = collect([$standardProfile]);
+            }
 
-                if (! $testTypeId) {
-                    continue;
-                }
-
-                $profileItem = $profileItems->get($testTypeId);
-
-                TestResult::create([
-                    'workflow_run_id' => $run->id,
-                    'workflow_item_id' => $testTypeId,
-                    'workflow_profile_item_id' => $profileItem?->id,
-                    'status' => $result['status'],
-                    'note' => $result['note'],
-                    'is_required' => $profileItem?->is_required ?? true,
-                    'result_label_mode' => $profileItem?->result_label_mode ?? 'pass_fail',
-                    'sort_order' => $profileItem?->sort_order ?? 0,
+            foreach ($profiles as $profile) {
+                $definition = app(WorkflowRunDefinitionService::class)
+                    ->forProfile($asset, $profile);
+                $run = TestRun::create([
+                    'asset_id' => $asset->id,
+                    'model_number_id' => $asset->model_number_id,
+                    'workflow_profile_id' => $profile->id,
+                    'profile_name_snapshot' => $profile->name,
+                    'profile_slug_snapshot' => $profile->slug,
+                    'readiness_context_hash' => $definition['readiness_context_hash'],
+                    'user_id' => $qaUser?->id ?? $asset->created_by,
+                    'started_at' => CarbonImmutable::now()->subDays(2),
+                    'finished_at' => CarbonImmutable::now()->subDay(),
                 ]);
+
+                foreach ($definition['profile_items'] as $profileItem) {
+                    $testType = $profileItem->item;
+                    $fixture = $testMatrix[$testType->slug] ?? null;
+                    $status = $fixture['status']
+                        ?? ($isSaleLifecycle && $testType->is_required
+                            ? TestResult::STATUS_PASS
+                            : TestResult::STATUS_NVT);
+                    $note = $fixture['note']
+                        ?? ($isSaleLifecycle && $testType->is_required
+                            ? 'Demo readiness fixture: required check completed before sale.'
+                            : 'Not completed in this demo workflow run.');
+
+                    TestResult::create([
+                        'workflow_run_id' => $run->id,
+                        'workflow_item_id' => $testType->id,
+                        'workflow_profile_item_id' => $profileItem->id,
+                        'attribute_definition_id' => $testType->attribute_definition_id,
+                        'status' => $status,
+                        'note' => $note,
+                        'is_required' => $testType->is_required,
+                        'result_label_mode' => $testType->result_label_mode ?: 'pass_fail',
+                        'sort_order' => $profileItem->sort_order,
+                    ]);
+                }
             }
 
             $asset->refresh();
             $asset->refreshTestCompletionFlag();
+
+            if (isset($saleStatusIds[$asset->id])) {
+                $asset->status_id = $saleStatusIds[$asset->id];
+                $asset->save();
+            }
         }
     }
 

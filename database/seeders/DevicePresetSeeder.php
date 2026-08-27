@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\AssetModel;
 use App\Models\AttributeDefinition;
+use App\Models\ModelNumber;
 use App\Models\ModelNumberAttribute;
 use App\Services\ModelAttributes\AttributeValueService;
 use App\Services\ModelAttributes\ModelAttributeManager;
@@ -38,7 +39,7 @@ class DevicePresetSeeder extends Seeder
 
         /** @var AttributeValueService $valueService */
         $valueService = app(AttributeValueService::class);
-        $blueprints = $this->modelBlueprints();
+        $blueprints = $this->seedableModelBlueprints();
 
         foreach ($blueprints as $modelName => $config) {
             $model = AssetModel::where('name', $modelName)->first();
@@ -51,10 +52,16 @@ class DevicePresetSeeder extends Seeder
                 continue;
             }
 
-            $modelNumber = $model->primaryModelNumber ?: $model->ensurePrimaryModelNumber();
+            $seedCode = trim((string) ($config['code'] ?? ''));
+            /** @var ModelNumber|null $modelNumber */
+            $modelNumber = $seedCode !== ''
+                ? $model->modelNumbers()->where('code', $seedCode)->first()
+                : null;
 
-            if (!empty($config['code']) && $modelNumber->code !== $config['code']) {
-                $modelNumber->code = $config['code'];
+            if (!$modelNumber) {
+                $modelNumber = $seedCode !== ''
+                    ? $model->modelNumbers()->create(['code' => $seedCode])
+                    : ($model->primaryModelNumber ?: $model->ensurePrimaryModelNumber());
             }
 
             if (!empty($config['label'])) {
@@ -63,14 +70,16 @@ class DevicePresetSeeder extends Seeder
 
             $modelNumber->save();
 
-            if ($model->primary_model_number_id !== $modelNumber->id) {
+            if (!$model->primary_model_number_id) {
                 $model->forceFill([
                     'primary_model_number_id' => $modelNumber->id,
                     'model_number' => $modelNumber->code,
                 ])->save();
+            } elseif ((int) $model->primary_model_number_id === (int) $modelNumber->id
+                && $model->model_number !== $modelNumber->code) {
+                $model->forceFill(['model_number' => $modelNumber->code])->save();
             }
 
-            $assignedDefinitionIds = [];
             $position = 0;
             $modelNumber->unsetRelation('componentTemplates');
             $componentBackedDefinitionIds = app(ModelAttributeManager::class)
@@ -105,18 +114,8 @@ class DevicePresetSeeder extends Seeder
                 $assignment->display_order = $position;
                 $assignment->save();
 
-                $assignedDefinitionIds[] = $definition->id;
                 $position++;
             }
-
-            $staleAssignments = ModelNumberAttribute::query()
-                ->where('model_number_id', $modelNumber->id);
-
-            if (!empty($assignedDefinitionIds)) {
-                $staleAssignments->whereNotIn('attribute_definition_id', $assignedDefinitionIds);
-            }
-
-            $staleAssignments->delete();
         }
     }
 }

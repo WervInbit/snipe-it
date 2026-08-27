@@ -23,7 +23,11 @@ class ActionlogPresenter extends Presenter
     public function item()
     {
         if ($this->action_type == 'uploaded') {
-            return (string) link_to_route('show/userfile', $this->model->filename, [$this->model->item->id, $this->model->id]);
+            return \App\Support\RouteLink::to(
+                'show/userfile',
+                $this->model->filename,
+                [$this->model->item->id, $this->model->id],
+            );
         }
         if ($item = $this->model->item) {
             if (empty($item->deleted_at)) {

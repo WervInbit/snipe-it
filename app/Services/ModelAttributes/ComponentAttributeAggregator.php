@@ -131,7 +131,7 @@ class ComponentAttributeAggregator
         $records = collect();
 
         foreach ($rows as $rowIndex => $row) {
-            if (!$row instanceof AssetComponentRosterRow) {
+            if (!$row instanceof AssetComponentRosterRow || $row->isRemoved()) {
                 continue;
             }
 

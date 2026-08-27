@@ -90,19 +90,38 @@ class Handler extends ExceptionHandler
         }
 
         if ($e instanceof \DomainException && $e->getMessage() === 'requires_ack_failed_tests') {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(
+                    Helper::formatStandardApiResponse(
+                        'error',
+                        null,
+                        'This asset has not passed all required tests. Resubmit with ack_failed_tests=true to confirm the transition.'
+                    ),
+                    422
+                );
+            }
+
             return redirect()->back()
                 ->withInput()
                 ->with('requires_ack_failed_tests', true)
                 ->with('warning', 'This asset has not passed all tests. Submit again to confirm Ready for Sale.');
         }
 
-        // Enforce lifecycle transition permissions (non-API)
-        if (!($request->ajax() || $request->wantsJson())) {
-            if ($e instanceof \DomainException && $e->getMessage() === 'requires_sale_transition_permission') {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('error', 'Only users with sale-transition permission can move an asset into Ready for Sale or Sold.');
+        if ($e instanceof \DomainException && $e->getMessage() === 'requires_sale_transition_permission') {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(
+                    Helper::formatStandardApiResponse(
+                        'error',
+                        null,
+                        'Sale-transition permission is required for this lifecycle status.'
+                    ),
+                    403
+                );
             }
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Only users with sale-transition permission can move an asset into Ready for Sale or Sold.');
         }
 
         // Handle API requests that fail

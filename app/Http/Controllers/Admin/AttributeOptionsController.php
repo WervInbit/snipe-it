@@ -54,6 +54,9 @@ class AttributeOptionsController extends Controller
         $this->ensureOptionBelongsToAttribute($attribute, $option);
 
         $data = $request->validated();
+        if ($request->boolean('active', true) !== (bool) $option->active) {
+            $this->authorize('manageLifecycle', $attribute);
+        }
         $valueChanged = $data['value'] !== $option->value;
 
         $option->fill([
@@ -74,7 +77,7 @@ class AttributeOptionsController extends Controller
 
     public function destroy(AttributeDefinition $attribute, AttributeOption $option): RedirectResponse
     {
-        $this->authorize('update', $attribute);
+        $this->authorize('manageLifecycle', $attribute);
         $this->guardEnumDatatype($attribute);
         $this->ensureOptionBelongsToAttribute($attribute, $option);
 

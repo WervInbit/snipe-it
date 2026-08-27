@@ -160,7 +160,7 @@ Context | Request Context
     'import'         	    => 'İçeri aktar',
     'import_this_file'      => 'Alanları eşleyin ve bu dosyayı işleyin',
     'importing'         	=> 'İçeri Aktarma',
-    'importing_help'        => 'Demirbaşları, aksesuarları, lisansları, bileşenleri, sarf malzemelerini ve kullanıcıları CSV dosyası ile içeri aktarabilirsiniz. <br><br> CSV, virgülle ayrılmış olmalı ve <a href="https://snipe-it.readme.io/docs/importing" target="_new">dökümandaki örnek CSV\'lerdekilerle eşleşen başlıklarla hazırlanmalıdır.</a>.',
+    'importing_help'        => 'Demirbaşları, aksesuarları, lisansları, bileşenleri, sarf malzemelerini ve kullanıcıları CSV dosyası ile içeri aktarabilirsiniz. <br><br> CSV, virgülle ayrılmış olmalı ve <a href=":fork_documentation_url" target="_new">dökümandaki örnek CSV\'lerdekilerle eşleşen başlıklarla hazırlanmalıdır.</a>.',
     'import-history'        => 'İçeri aktarma geçmişi',
     'asset_maintenance'        => 'Demirbaş bakımı',
     'asset_maintenance_report' => 'Demirbaş bakım raporu',

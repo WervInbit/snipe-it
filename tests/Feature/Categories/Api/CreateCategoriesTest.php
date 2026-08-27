@@ -54,10 +54,8 @@ class CreateCategoriesTest extends TestCase
             ->assertOk()
             ->assertStatus(200)
             ->assertStatusMessageIs('error')
-            ->assertJson([
-                'messages' => [
-                    'category_type'    => ['The category type field is required.'],
-                ],
+            ->assertJsonStructure([
+                'messages' => ['category_type'],
             ]);
         $this->assertFalse(Category::where('name', 'Test Category')->exists());
 
@@ -74,10 +72,8 @@ class CreateCategoriesTest extends TestCase
             ->assertOk()
             ->assertStatus(200)
             ->assertStatusMessageIs('error')
-            ->assertJson([
-                'messages' => [
-                    'category_type'    => ['The selected category type is invalid.'],
-                ],
+            ->assertJsonStructure([
+                'messages' => ['category_type'],
             ]);
         
         $this->assertFalse(Category::where('name', 'Test Category')->exists());

@@ -24,7 +24,6 @@ class ActivityReportTest extends TestCase
 
     public function testRecordsAreScopedToCompanyWhenMultipleCompanySupportEnabled()
     {
-        $this->markTestIncomplete('This test returns strange results. Need to figure out why.');
         $this->settings->enableMultipleFullCompanySupport();
 
         $companyA = Company::factory()->create();
@@ -48,9 +47,18 @@ class ActivityReportTest extends TestCase
         Asset::factory()->count(4)->create(['company_id' => $companyB->id]);
         Asset::factory()->count(3)->create();
 
-        Actionlog::factory()->userUpdated()->count(5)->create(['company_id' => $companyA->id]);
-        Actionlog::factory()->userUpdated()->count(4)->create(['company_id' => $companyB->id]);
-        Actionlog::factory()->userUpdated()->count(3)->create(['company_id' => $companyB->id]);
+        Actionlog::factory()->count(5)->create([
+            'action_type' => 'update',
+            'company_id' => $companyA->id,
+        ]);
+        Actionlog::factory()->count(4)->create([
+            'action_type' => 'update',
+            'company_id' => $companyB->id,
+        ]);
+        Actionlog::factory()->count(3)->create([
+            'action_type' => 'update',
+            'company_id' => $companyB->id,
+        ]);
 
         // I don't love this, since it doesn't test that we're actually storing the company ID appropriately
         // but it's better than what we had

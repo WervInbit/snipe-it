@@ -21,26 +21,31 @@ class AttributeDefinitionPolicy
 
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->hasAccess('attributes.view');
     }
 
     public function view(User $user, AttributeDefinition $definition): bool
     {
-        return false;
+        return $user->hasAccess('attributes.view');
     }
 
     public function create(User $user): bool
     {
-        return false;
+        return $user->hasAccess('attributes.create');
     }
 
     public function update(User $user, AttributeDefinition $definition): bool
     {
-        return false;
+        return $user->hasAccess('attributes.edit');
     }
 
-    public function delete(User $user, AttributeDefinition $definition): bool
+    public function delete(User $user, ?AttributeDefinition $definition = null): bool
     {
-        return false;
+        return $user->hasAccess('attributes.delete');
+    }
+
+    public function manageLifecycle(User $user, ?AttributeDefinition $definition = null): bool
+    {
+        return $user->hasAccess('attributes.lifecycle');
     }
 }

@@ -18,7 +18,9 @@ use App\Models\Department;
 use App\Models\Depreciation;
 use App\Models\License;
 use App\Models\Location;
+use App\Models\Maintenance;
 use App\Models\Manufacturer;
+use App\Models\ModelNumber;
 use App\Models\PredefinedKit;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
@@ -42,7 +44,9 @@ use App\Policies\DepartmentPolicy;
 use App\Policies\DepreciationPolicy;
 use App\Policies\LicensePolicy;
 use App\Policies\LocationPolicy;
+use App\Policies\MaintenancePolicy;
 use App\Policies\ManufacturerPolicy;
+use App\Policies\ModelNumberPolicy;
 use App\Policies\PredefinedKitPolicy;
 use App\Policies\StatuslabelPolicy;
 use App\Policies\SupplierPolicy;
@@ -82,6 +86,8 @@ class AuthServiceProvider extends ServiceProvider
         Depreciation::class => DepreciationPolicy::class,
         License::class => LicensePolicy::class,
         Location::class => LocationPolicy::class,
+        Maintenance::class => MaintenancePolicy::class,
+        ModelNumber::class => ModelNumberPolicy::class,
         PredefinedKit::class => PredefinedKitPolicy::class,
         Statuslabel::class => StatuslabelPolicy::class,
         Supplier::class => SupplierPolicy::class,
@@ -122,13 +128,30 @@ class AuthServiceProvider extends ServiceProvider
          * This is where we set the superadmin permission to allow superadmins to be able to do everything within the system.
          *
          */
-        Gate::before(function ($user, $ability) {
+        Gate::before(function ($user, $ability, array $arguments = []) {
 
             // Disallow even superadmins to edit non-editable things when in demo mode.
             // (We have to do this to prevent jerks from trying to break the demo by editing things they shouldn't.)
             if (($ability == 'editableOnDemo') && (config('app.lock_passwords'))) {
                 return false;
             }
+
+            $subject = $arguments[0] ?? null;
+            $isAsset = $subject === Asset::class || $subject instanceof Asset;
+            $isMaintenance = $subject === Maintenance::class || $subject instanceof Maintenance;
+
+            if ($isAsset && in_array($ability, ['checkout', 'checkin', 'audit'], true)) {
+                return false;
+            }
+
+            if ($isMaintenance && in_array(
+                $ability,
+                ['create', 'update', 'delete', 'manage', 'createFiles', 'deleteFiles'],
+                true
+            )) {
+                return false;
+            }
+
             if ($user->isSuperUser()) {
                 return true;
             }
@@ -148,25 +171,21 @@ class AuthServiceProvider extends ServiceProvider
 
             if ($item instanceof User) {
 
-                // if they can only edit users, deny them if the user is admin or superadmin
-                if (($user->hasAccess('users.edit')) && (!$user->isAdmin()) && (!$user->isAdmin())) {
-
+                // The operation-specific policy is checked by each controller. This
+                // gate only enforces privilege hierarchy for auth-sensitive fields.
+                if (! $user->isAdmin() && ! $user->hasAccess('supervisor')) {
                     if ($item->isAdmin() || $item->isSuperUser()) {
                         return false;
                     }
-                    return true;
-                }
-
-                // if they are an admin, deny them only if the user is a superadmin
-                if ($user->hasAccess('admin') || $user->hasAccess('supervisor')) {
-                    if ($item->isSuperUser()) {
-                        return false;
-                    }
 
                     return true;
                 }
 
-                return false;
+                if ($item->isSuperUser()) {
+                    return false;
+                }
+
+                return true;
             }
 
             return false;
@@ -266,10 +285,6 @@ class AuthServiceProvider extends ServiceProvider
             return $user->hasAccess('self.edit_location');
         });
 
-        Gate::define('self.checkout_assets', function ($user) {
-            return $user->hasAccess('self.checkout_assets');
-        });
-
         Gate::define('self.view_purchase_cost', function ($user) {
             return $user->hasAccess('self.view_purchase_cost');
         });
@@ -288,7 +303,10 @@ class AuthServiceProvider extends ServiceProvider
                 || $user->can('view', Manufacturer::class)
                 || $user->can('view', CustomField::class)
                 || $user->can('view', CustomFieldset::class)
-                || $user->can('view', Depreciation::class);
+                || $user->can('view', Depreciation::class)
+                || $user->can('viewAny', AttributeDefinition::class)
+                || $user->can('index', TestType::class)
+                || $user->can('manage', ComponentDefinition::class);
         });
 
 
@@ -299,9 +317,6 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('view.selectlists', function ($user) {
             return $user->can('update', Asset::class) 
                 || $user->can('create', Asset::class)    
-                || $user->can('checkout', Asset::class)
-                || $user->can('checkin', Asset::class)
-                || $user->can('audit', Asset::class)       
                 || $user->can('update', License::class)   
                 || $user->can('create', License::class)   
                 || $user->can('update', Component::class)

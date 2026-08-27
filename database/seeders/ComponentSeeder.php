@@ -5,13 +5,12 @@ namespace Database\Seeders;
 use App\Models\Company;
 use App\Models\Component;
 use App\Models\Location;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-class ComponentSeeder extends Seeder
+class ComponentSeeder extends DestructiveFixtureSeeder
 {
-    public function run()
+    protected function seedFixtures(): void
     {
         Schema::disableForeignKeyConstraints();
         Component::truncate();

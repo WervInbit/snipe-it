@@ -23,11 +23,16 @@ class ComponentDefinitionPolicy extends SnipePermissionsPolicy
 
     public function delete(User $user, $item = null)
     {
-        return $user->hasAccess('components.manage_definitions');
+        return $user->hasAccess('components.manage_definition_lifecycle');
     }
 
     public function manage(User $user, $item = null)
     {
         return $user->hasAccess('components.manage_definitions');
+    }
+
+    public function manageLifecycle(User $user, $item = null)
+    {
+        return $user->hasAccess('components.manage_definition_lifecycle');
     }
 }

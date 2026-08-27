@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Tuo tiedot',
     'import_this_file'      => 'Kartta kentät ja käsitellä tätä tiedostoa',
     'importing'         	=> 'Tuonti',
-    'importing_help'        => 'Voit tuoda laitteita, oheistarvikkeita, lisenssejä, komponentteja, kulutustarvikkeita ja käyttäjiä CSV-tiedoston avulla. <br><br>CSV tulisi olla pilkulla rajattu ja sisältää otsikot, jotka vastaavat <a href="https://snipe-it.readme.io/docs/importing" target="_new"> CSV-otsikoita dokumentaatiossa</a>.',
+    'importing_help'        => 'Voit tuoda laitteita, oheistarvikkeita, lisenssejä, komponentteja, kulutustarvikkeita ja käyttäjiä CSV-tiedoston avulla. <br><br>CSV tulisi olla pilkulla rajattu ja sisältää otsikot, jotka vastaavat <a href=":fork_documentation_url" target="_new"> CSV-otsikoita dokumentaatiossa</a>.',
     'import-history'        => 'Tuo historia',
     'asset_maintenance'        => 'Laitteen huolto',
     'asset_maintenance_report' => 'Laitteiden huoltoraportti',

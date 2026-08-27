@@ -2,10 +2,10 @@
 @component('mail::message')
 @endif
 
-{{ trans('mail.test_mail_text') }}
+{{ trans('mail.test_mail_text', ['app' => $snipeSettings->site_name ?? config('app.name')]) }}
 
 Thanks,
-Snipe-IT
+{{ $snipeSettings->site_name ?? config('app.name') }}
 @if ($setupCompleted)
 @endcomponent
 @endif

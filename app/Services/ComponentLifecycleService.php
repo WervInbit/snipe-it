@@ -4,12 +4,16 @@ namespace App\Services;
 
 use App\Exceptions\ComponentConditionWarningException;
 use App\Exceptions\ComponentLifecycleWarningException;
+use App\Models\Actionlog;
 use App\Models\Asset;
+use App\Models\CompanyableScope;
 use App\Models\ComponentDefinition;
+use App\Models\ComponentDefinitionSubcomponentTemplate;
 use App\Models\ComponentEvent;
 use App\Models\ComponentExpectedSubcomponentState;
 use App\Models\ComponentInstance;
 use App\Models\ComponentStorageLocation;
+use App\Models\Location;
 use App\Models\Setting;
 use App\Models\User;
 use App\Models\WorkOrder;
@@ -30,7 +34,11 @@ class ComponentLifecycleService
         return DB::transaction(function () use ($attributes, $performedBy): ComponentInstance {
             $actorId = $this->resolveActorId($performedBy);
             $normalizedAttributes = $this->normalizeInstanceAttributes($attributes, $actorId);
-            $this->assertPlacementAllowedForInstanceAttributes($normalizedAttributes);
+            $this->lockLiveParentForChildCreation($normalizedAttributes);
+            $definition = $this->activeDefinitionForInstanceAttributes($normalizedAttributes);
+            $this->assertPlacementAllowedForInstanceAttributes($normalizedAttributes, $definition);
+            $this->assertCompanyConsistencyForInstanceAttributes($normalizedAttributes);
+            $this->assertSerialMatchesDefinition($definition, $normalizedAttributes['serial'] ?? null);
 
             $instance = new ComponentInstance(array_merge([
                 'created_by' => $attributes['created_by'] ?? $actorId,
@@ -160,6 +168,21 @@ class ComponentLifecycleService
         Asset $asset,
         array $context = [],
     ): ComponentInstance {
+        $targetCompanyId = $context['company_id'] ?? $asset->company_id ?? $instance->company_id;
+        if ($targetCompanyId) {
+            $this->assertActorCanUseCompanyScope(
+                $this->resolveActorId($context['performed_by'] ?? null),
+                (int) $targetCompanyId
+            );
+        }
+
+        if ($asset->company_id
+            && $targetCompanyId
+            && (int) $asset->company_id !== (int) $targetCompanyId
+        ) {
+            throw new InvalidArgumentException('Component company must match the destination asset company.');
+        }
+
         $this->assertCanInstall($instance);
         $this->assertComponentDefinitionCanBeInstalledOnAsset($instance);
         $this->assertLifecycleWarningConfirmed($instance, $context);
@@ -219,52 +242,70 @@ class ComponentLifecycleService
         ?ComponentInstance $parent = null,
         array $context = [],
     ): ComponentInstance {
-        $this->assertNotTerminal($instance);
+        $instanceId = (int) $instance->getKey();
+        $targetParentId = $parent?->getKey() ? (int) $parent->getKey() : null;
 
-        if (!$instance->current_asset_id || $instance->effectiveLifecycleStatus() !== ComponentInstance::LIFECYCLE_ATTACHED) {
-            throw new InvalidArgumentException('Only attached components can be moved within an asset.');
-        }
+        return DB::transaction(function () use ($instanceId, $context, $targetParentId): ComponentInstance {
+            $instance = ComponentInstance::withoutGlobalScope(CompanyableScope::class)
+                ->whereKey($instanceId)
+                ->lockForUpdate()
+                ->first();
 
-        if ($parent) {
-            $this->assertNotTerminal($parent);
-
-            if ((int) $parent->id === (int) $instance->id) {
-                throw new InvalidArgumentException('A component cannot be attached to itself.');
+            if (!$instance) {
+                throw new InvalidArgumentException('Component could not be found.');
             }
 
-            if ((int) $parent->current_asset_id !== (int) $instance->current_asset_id) {
-                throw new InvalidArgumentException('The parent component must be attached to the same asset.');
+            $actorId = $this->resolveActorId($context['performed_by'] ?? null);
+            if ($instance->company_id) {
+                $this->assertActorCanUseCompanyScope($actorId, (int) $instance->company_id);
             }
 
-            if ($parent->parent_component_instance_id) {
-                throw new InvalidArgumentException('Component hierarchy is limited to one subcomponent level.');
+            $fromParentId = $instance->parent_component_instance_id
+                ? (int) $instance->parent_component_instance_id
+                : null;
+            $parentIds = array_values(array_unique(array_filter([
+                $fromParentId,
+                $targetParentId,
+            ])));
+            sort($parentIds);
+
+            $lockedParents = ComponentInstance::withoutGlobalScope(CompanyableScope::class)
+                ->whereIn('id', $parentIds)
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+
+            /** @var ComponentInstance|null $parent */
+            $parent = $targetParentId ? $lockedParents->get($targetParentId) : null;
+            if ($targetParentId && !$parent) {
+                throw new InvalidArgumentException('Parent component could not be found.');
             }
 
-            if ($parent->effectiveLifecycleStatus() !== ComponentInstance::LIFECYCLE_ATTACHED) {
-                throw new InvalidArgumentException('The parent component must be attached to the asset.');
+            $this->assertCanReparentWithinAsset($instance, $parent);
+
+            if (($fromParentId ?? 0) === ($targetParentId ?? 0)) {
+                return $instance->fresh();
             }
 
-            if ($instance->componentDefinition && !$instance->componentDefinition->canBeUsedAsSubcomponent()) {
-                throw new InvalidArgumentException('This component definition is restricted to direct asset placement and cannot be used as a subcomponent.');
+            if ($fromParentId && !$lockedParents->has($fromParentId)) {
+                throw new InvalidArgumentException('The current parent component could not be found.');
             }
-        } elseif ($instance->componentDefinition && !$instance->componentDefinition->canBeInstalledOnAsset()) {
-            throw new InvalidArgumentException('This component definition is restricted to subcomponent placement and cannot be installed directly on an asset.');
-        }
 
-        $targetParentId = $parent?->id;
-        if ((int) ($instance->parent_component_instance_id ?? 0) === (int) ($targetParentId ?? 0)) {
-            return $instance->fresh();
-        }
-
-        return DB::transaction(function () use ($instance, $parent, $context, $targetParentId): ComponentInstance {
-            $fromParentId = $instance->parent_component_instance_id;
+            $expectedStateChanges = $this->reconcileExpectedSubcomponentReparent(
+                $instance,
+                $fromParentId ? $lockedParents->get($fromParentId) : null,
+                $parent
+            );
             $assetId = (int) $instance->current_asset_id;
+            $metadata = $this->reparentedMetadata($instance, $fromParentId, $targetParentId);
 
-            $instance->forceFill([
+            $instance->forceFill(array_filter([
                 'parent_component_instance_id' => $targetParentId,
                 'root_asset_id' => $parent ? ($parent->root_asset_id ?: $parent->current_asset_id) : $assetId,
-                'updated_by' => $this->resolveActorId($context['performed_by'] ?? null),
-            ])->save();
+                'updated_by' => $actorId,
+                'metadata_json' => $metadata,
+            ], fn ($value, $key) => $key !== 'metadata_json' || $value !== null, ARRAY_FILTER_USE_BOTH))->save();
 
             $this->events->write($instance, 'reparented', [
                 'performed_by' => $context['performed_by'] ?? null,
@@ -276,6 +317,7 @@ class ComponentLifecycleService
                 'payload_json' => [
                     'from_parent_component_instance_id' => $fromParentId,
                     'to_parent_component_instance_id' => $targetParentId,
+                    'expected_subcomponent_state_changes' => $expectedStateChanges ?: null,
                 ],
             ]);
 
@@ -283,9 +325,80 @@ class ComponentLifecycleService
         });
     }
 
+    /**
+     * Soft deletion is only safe once an assembly has no live children.
+     * Lifecycle moves intentionally keep children linked to their parent, even
+     * while the complete assembly is off an asset, so those children must be
+     * detached or deleted explicitly before the parent can disappear.
+     */
+    public function deleteInstance(
+        ComponentInstance $instance,
+        User|int|null $performedBy = null,
+        array $context = [],
+    ): ComponentInstance {
+        $instanceId = (int) $instance->getKey();
+
+        return DB::transaction(function () use ($instanceId, $performedBy, $context): ComponentInstance {
+            $instance = ComponentInstance::withoutGlobalScope(CompanyableScope::class)
+                ->whereKey($instanceId)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$instance) {
+                throw new InvalidArgumentException('Component could not be found.');
+            }
+
+            $actorId = $this->resolveActorId($performedBy);
+            if ($instance->company_id) {
+                $this->assertActorCanUseCompanyScope($actorId, (int) $instance->company_id);
+            }
+
+            if ($instance->effectiveLifecycleStatus() === ComponentInstance::LIFECYCLE_ATTACHED) {
+                throw new InvalidArgumentException('Installed components must be removed before deletion.');
+            }
+
+            $children = ComponentInstance::withoutGlobalScope(CompanyableScope::class)
+                ->where('parent_component_instance_id', $instance->id)
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
+
+            if ($children->isNotEmpty()) {
+                throw new InvalidArgumentException(
+                    'Components with child components cannot be deleted. Detach or delete the child components first.'
+                );
+            }
+
+            $expectedStateChanges = $this->reconcileExpectedSubcomponentDeletion($instance);
+
+            $this->events->write($instance, 'deleted', [
+                'performed_by' => $performedBy,
+                'from_status' => $instance->status,
+                'from_asset_id' => $instance->current_asset_id,
+                'from_storage_location_id' => $instance->storage_location_id,
+                'held_by_user_id' => $instance->held_by_user_id,
+                'note' => $context['note'] ?? null,
+                'payload_json' => array_filter([
+                    'parent_component_instance_id' => $instance->parent_component_instance_id,
+                    'expected_subcomponent_state_changes' => $expectedStateChanges ?: null,
+                ], fn ($value) => $value !== null),
+            ]);
+
+            $this->writeDeleteActionLog($instance, $actorId, $context['note'] ?? null);
+
+            if (!$instance->delete()) {
+                throw new \RuntimeException('Component deletion could not be persisted.');
+            }
+
+            return $instance;
+        });
+    }
+
     public function updateSerial(ComponentInstance $instance, ?string $serial, array $context = []): ComponentInstance
     {
         $this->assertNotTerminal($instance);
+        $instance->loadMissing('componentDefinition');
+        $this->assertSerialMatchesDefinition($instance->componentDefinition, $serial);
 
         return DB::transaction(function () use ($instance, $serial, $context): ComponentInstance {
             $fromSerial = $this->normalizeComponentSerial($instance->serial);
@@ -314,6 +427,97 @@ class ComponentLifecycleService
         });
     }
 
+    /**
+     * Update descriptive and procurement metadata without allowing lifecycle,
+     * hierarchy, or immutable traceability fields to bypass their dedicated
+     * actions.
+     */
+    public function updateMetadata(ComponentInstance $instance, array $attributes, array $context = []): ComponentInstance
+    {
+        $allowed = array_flip([
+            'component_definition_id',
+            'display_name',
+            'supplier_id',
+            'purchase_cost',
+            'received_at',
+            'metadata_json',
+            'notes',
+        ]);
+        $attributes = array_intersect_key($attributes, $allowed);
+
+        return DB::transaction(function () use ($instance, $attributes, $context): ComponentInstance {
+            $locked = ComponentInstance::query()
+                ->with('componentDefinition')
+                ->lockForUpdate()
+                ->findOrFail($instance->id);
+
+            $this->assertNotTerminal($locked);
+
+            if (array_key_exists('display_name', $attributes)) {
+                $displayName = trim((string) ($attributes['display_name'] ?? ''));
+                $attributes['display_name'] = $displayName !== '' ? $displayName : null;
+            }
+
+            if (array_key_exists('notes', $attributes)) {
+                $notes = trim((string) ($attributes['notes'] ?? ''));
+                $attributes['notes'] = $notes !== '' ? $notes : null;
+            }
+
+            if (array_key_exists('component_definition_id', $attributes)) {
+                $definitionId = filled($attributes['component_definition_id'])
+                    ? (int) $attributes['component_definition_id']
+                    : null;
+                $attributes['component_definition_id'] = $definitionId;
+
+                $this->assertComponentDefinitionChangeIsSafe($locked, $definitionId);
+            }
+
+            $candidateDefinitionId = array_key_exists('component_definition_id', $attributes)
+                ? $attributes['component_definition_id']
+                : $locked->component_definition_id;
+            $candidateDisplayName = array_key_exists('display_name', $attributes)
+                ? $attributes['display_name']
+                : $locked->getRawOriginal('display_name');
+
+            if (!$candidateDefinitionId && blank($candidateDisplayName)) {
+                throw new InvalidArgumentException('A component definition or free name is required.');
+            }
+
+            $candidateAttributes = array_merge($locked->getAttributes(), [
+                'component_definition_id' => $candidateDefinitionId,
+            ]);
+            $this->assertPlacementAllowedForInstanceAttributes($candidateAttributes);
+
+            $locked->fill($attributes);
+            $locked->updated_by = $this->resolveActorId($context['performed_by'] ?? null);
+
+            $changedFields = array_values(array_diff(
+                array_keys($locked->getDirty()),
+                ['updated_by', 'updated_at']
+            ));
+
+            if ($changedFields === []) {
+                return $locked->fresh();
+            }
+
+            $locked->save();
+
+            $this->events->write($locked, 'metadata_updated', [
+                'performed_by' => $context['performed_by'] ?? null,
+                'from_status' => $locked->status,
+                'to_status' => $locked->status,
+                'from_asset_id' => $locked->current_asset_id,
+                'to_asset_id' => $locked->current_asset_id,
+                'from_storage_location_id' => $locked->storage_location_id,
+                'to_storage_location_id' => $locked->storage_location_id,
+                'note' => $context['note'] ?? null,
+                'payload_json' => ['changed_fields' => $changedFields],
+            ]);
+
+            return $locked->fresh();
+        });
+    }
+
     public function moveToStock(
         ComponentInstance $instance,
         ?ComponentStorageLocation $location = null,
@@ -324,6 +528,7 @@ class ComponentLifecycleService
         }
 
         $this->assertNotTerminal($instance);
+        $this->assertStorageLocationCompany($instance, $location);
 
         $updated = DB::transaction(function () use ($instance, $location, $context): ComponentInstance {
             $detachedChild = $this->prepareDetachedChildSnapshot($instance);
@@ -383,6 +588,7 @@ class ComponentLifecycleService
         array $context = [],
     ): ComponentInstance {
         $this->assertNotTerminal($instance);
+        $this->assertStorageLocationCompany($instance, $location);
 
         if ($instance->effectiveLifecycleStatus() === ComponentInstance::LIFECYCLE_ATTACHED) {
             throw new InvalidArgumentException('Installed components do not have a storage location.');
@@ -423,6 +629,7 @@ class ComponentLifecycleService
 
         return DB::transaction(function () use ($instance, $context): ComponentInstance {
             $location = $context['storage_location'] ?? $instance->storageLocation;
+            $this->assertStorageLocationCompany($instance, $location);
             $fromStatus = $instance->status;
             $fromAssetId = $instance->current_asset_id;
             $fromConditionStatus = $instance->effectiveConditionStatus();
@@ -477,6 +684,7 @@ class ComponentLifecycleService
         array $context = [],
     ): ComponentInstance {
         $this->assertNotTerminal($instance);
+        $this->assertStorageLocationCompany($instance, $location);
 
         return DB::transaction(function () use ($instance, $location, $context): ComponentInstance {
             $fromStatus = $instance->status;
@@ -630,6 +838,7 @@ class ComponentLifecycleService
         array $context = [],
     ): ComponentInstance {
         $this->assertNotTerminal($instance);
+        $this->assertStorageLocationCompany($instance, $location);
 
         return DB::transaction(function () use ($instance, $location, $context): ComponentInstance {
             $detachedChild = $this->prepareDetachedChildSnapshot($instance);
@@ -764,6 +973,388 @@ class ComponentLifecycleService
 
         if ($note === '' && (empty($evidence) || !is_array($evidence))) {
             throw new InvalidArgumentException('A destruction note or verification evidence is required before marking a component destroyed.');
+        }
+    }
+
+    private function assertCanReparentWithinAsset(
+        ComponentInstance $instance,
+        ?ComponentInstance $parent
+    ): void {
+        $this->assertNotTerminal($instance);
+        $instance->loadMissing('componentDefinition');
+
+        if (!$instance->current_asset_id
+            || $instance->effectiveLifecycleStatus() !== ComponentInstance::LIFECYCLE_ATTACHED
+        ) {
+            throw new InvalidArgumentException('Only attached components can be moved within an asset.');
+        }
+
+        if (!$parent) {
+            if ($instance->componentDefinition && !$instance->componentDefinition->canBeInstalledOnAsset()) {
+                throw new InvalidArgumentException(
+                    'This component definition is restricted to subcomponent placement and cannot be installed directly on an asset.'
+                );
+            }
+
+            return;
+        }
+
+        $this->assertNotTerminal($parent);
+
+        if ((int) $parent->id === (int) $instance->id) {
+            throw new InvalidArgumentException('A component cannot be attached to itself.');
+        }
+
+        if ((int) $parent->current_asset_id !== (int) $instance->current_asset_id) {
+            throw new InvalidArgumentException('The parent component must be attached to the same asset.');
+        }
+
+        if ($parent->parent_component_instance_id) {
+            throw new InvalidArgumentException('Component hierarchy is limited to one subcomponent level.');
+        }
+
+        if ($parent->effectiveLifecycleStatus() !== ComponentInstance::LIFECYCLE_ATTACHED) {
+            throw new InvalidArgumentException('The parent component must be attached to the asset.');
+        }
+
+        if (ComponentInstance::withoutGlobalScope(CompanyableScope::class)
+            ->where('parent_component_instance_id', $instance->id)
+            ->exists()
+        ) {
+            throw new InvalidArgumentException(
+                'A component with attached child components cannot also become a subcomponent.'
+            );
+        }
+
+        if ($instance->componentDefinition && !$instance->componentDefinition->canBeUsedAsSubcomponent()) {
+            throw new InvalidArgumentException(
+                'This component definition is restricted to direct asset placement and cannot be used as a subcomponent.'
+            );
+        }
+    }
+
+    private function lockLiveParentForChildCreation(array $attributes): void
+    {
+        $parentId = (int) ($attributes['parent_component_instance_id'] ?? 0);
+        if ($parentId <= 0) {
+            return;
+        }
+
+        $parent = ComponentInstance::withoutGlobalScope(CompanyableScope::class)
+            ->whereKey($parentId)
+            ->lockForUpdate()
+            ->first();
+
+        if (!$parent) {
+            throw new InvalidArgumentException('Parent component could not be found.');
+        }
+    }
+
+    private function reconcileExpectedSubcomponentReparent(
+        ComponentInstance $instance,
+        ?ComponentInstance $fromParent,
+        ?ComponentInstance $toParent
+    ): array {
+        $template = $this->expectedSubcomponentTemplateFor($instance);
+        if (!$template) {
+            return [];
+        }
+
+        $this->assertExpectedSubcomponentTemplateMatchesChild($instance, $template);
+        if ($fromParent) {
+            $this->assertExpectedSubcomponentTemplateMatchesParent($fromParent, $template);
+        }
+        if ($toParent) {
+            $this->assertExpectedSubcomponentTemplateMatchesParent($toParent, $template);
+        }
+
+        $changes = [
+            'component_definition_subcomponent_template_id' => $template->id,
+        ];
+
+        if ($fromParent) {
+            $changes['from_parent'] = $this->releaseExpectedSubcomponentSlot(
+                $fromParent,
+                $template,
+                $toParent === null
+            );
+        }
+
+        if ($toParent) {
+            $changes['to_parent'] = $this->claimExpectedSubcomponentSlot($toParent, $template);
+        }
+
+        return $changes;
+    }
+
+    private function reconcileExpectedSubcomponentDeletion(ComponentInstance $instance): array
+    {
+        if (!$instance->parent_component_instance_id || !$instance->is_materialized_expected) {
+            return [];
+        }
+
+        $template = $this->expectedSubcomponentTemplateFor($instance);
+        if (!$template) {
+            return [];
+        }
+
+        $parent = ComponentInstance::withoutGlobalScope(CompanyableScope::class)
+            ->withTrashed()
+            ->whereKey((int) $instance->parent_component_instance_id)
+            ->lockForUpdate()
+            ->first();
+
+        if (!$parent) {
+            throw new InvalidArgumentException(
+                'The expected subcomponent parent could not be found; deletion was stopped to preserve expected counts.'
+            );
+        }
+
+        $this->assertExpectedSubcomponentTemplateMatchesChild($instance, $template);
+        $this->assertExpectedSubcomponentTemplateMatchesParent($parent, $template);
+
+        return [
+            'component_definition_subcomponent_template_id' => $template->id,
+            'from_parent' => $this->releaseExpectedSubcomponentSlot($parent, $template, true),
+        ];
+    }
+
+    private function expectedSubcomponentTemplateFor(
+        ComponentInstance $instance
+    ): ?ComponentDefinitionSubcomponentTemplate {
+        if (!$instance->is_materialized_expected) {
+            return null;
+        }
+
+        $templateId = (int) data_get(
+            $instance->metadata_json,
+            'component_definition_subcomponent_template_id',
+            0
+        );
+
+        if ($templateId <= 0) {
+            throw new InvalidArgumentException(
+                'Expected subcomponent template metadata is missing; the hierarchy change was stopped.'
+            );
+        }
+
+        $template = ComponentDefinitionSubcomponentTemplate::query()->find($templateId);
+        if (!$template) {
+            throw new InvalidArgumentException(
+                'Expected subcomponent template could not be found; the hierarchy change was stopped.'
+            );
+        }
+
+        return $template;
+    }
+
+    private function assertExpectedSubcomponentTemplateMatchesChild(
+        ComponentInstance $instance,
+        ComponentDefinitionSubcomponentTemplate $template
+    ): void {
+        if ($instance->component_definition_id
+            && (int) $instance->component_definition_id !== (int) $template->child_component_definition_id
+        ) {
+            throw new InvalidArgumentException(
+                'Expected subcomponent definition does not match its materialization template.'
+            );
+        }
+    }
+
+    private function assertExpectedSubcomponentTemplateMatchesParent(
+        ComponentInstance $parent,
+        ComponentDefinitionSubcomponentTemplate $template
+    ): void {
+        if ((int) $parent->component_definition_id !== (int) $template->parent_component_definition_id) {
+            throw new InvalidArgumentException(
+                'Expected subcomponents can only be moved to a parent that owns the same expected template.'
+            );
+        }
+    }
+
+    private function releaseExpectedSubcomponentSlot(
+        ComponentInstance $parent,
+        ComponentDefinitionSubcomponentTemplate $template,
+        bool $markRemoved
+    ): array {
+        $state = $this->expectedSubcomponentStateForUpdate($parent, $template);
+        $expectedQty = max(1, (int) $template->expected_qty);
+        $actualMaterializedQty = $this->liveExpectedSubcomponentCount($parent, $template);
+        $removedQty = max(0, (int) $state->removed_qty);
+
+        if ($actualMaterializedQty < 1) {
+            throw new InvalidArgumentException(
+                'Expected subcomponent materialization state is inconsistent; the hierarchy change was stopped.'
+            );
+        }
+
+        if ($actualMaterializedQty + $removedQty > $expectedQty) {
+            throw new InvalidArgumentException(
+                'Expected subcomponent counts exceed the configured quantity; the hierarchy change was stopped.'
+            );
+        }
+
+        $newMaterializedQty = $actualMaterializedQty - 1;
+        $newRemovedQty = $removedQty + ($markRemoved ? 1 : 0);
+
+        if ($newMaterializedQty + $newRemovedQty > $expectedQty) {
+            throw new InvalidArgumentException(
+                'Expected subcomponent counts would exceed the configured quantity; the hierarchy change was stopped.'
+            );
+        }
+
+        $before = [
+            'component_instance_id' => $parent->id,
+            'removed_qty' => (int) $state->removed_qty,
+            'materialized_qty' => (int) $state->materialized_qty,
+        ];
+
+        $state->forceFill([
+            'removed_qty' => $newRemovedQty,
+            'materialized_qty' => $newMaterializedQty,
+        ])->save();
+
+        return [
+            'before' => $before,
+            'after' => [
+                'component_instance_id' => $parent->id,
+                'removed_qty' => $newRemovedQty,
+                'materialized_qty' => $newMaterializedQty,
+            ],
+        ];
+    }
+
+    private function claimExpectedSubcomponentSlot(
+        ComponentInstance $parent,
+        ComponentDefinitionSubcomponentTemplate $template
+    ): array {
+        $state = $this->expectedSubcomponentStateForUpdate($parent, $template);
+        $expectedQty = max(1, (int) $template->expected_qty);
+        $actualMaterializedQty = $this->liveExpectedSubcomponentCount($parent, $template);
+        $removedQty = max(0, (int) $state->removed_qty);
+
+        if ($actualMaterializedQty + $removedQty > $expectedQty) {
+            throw new InvalidArgumentException(
+                'Expected subcomponent counts exceed the configured quantity; the hierarchy change was stopped.'
+            );
+        }
+
+        if ($actualMaterializedQty >= $expectedQty) {
+            throw new InvalidArgumentException(
+                'The destination parent has no remaining expected slot for this subcomponent.'
+            );
+        }
+
+        // A tracked expected child restores a previously removed slot before
+        // consuming an untouched virtual baseline slot.
+        if ($removedQty > 0) {
+            $removedQty--;
+        }
+
+        $before = [
+            'component_instance_id' => $parent->id,
+            'removed_qty' => (int) $state->removed_qty,
+            'materialized_qty' => (int) $state->materialized_qty,
+        ];
+        $newMaterializedQty = $actualMaterializedQty + 1;
+
+        $state->forceFill([
+            'removed_qty' => $removedQty,
+            'materialized_qty' => $newMaterializedQty,
+        ])->save();
+
+        return [
+            'before' => $before,
+            'after' => [
+                'component_instance_id' => $parent->id,
+                'removed_qty' => $removedQty,
+                'materialized_qty' => $newMaterializedQty,
+            ],
+        ];
+    }
+
+    private function expectedSubcomponentStateForUpdate(
+        ComponentInstance $parent,
+        ComponentDefinitionSubcomponentTemplate $template
+    ): ComponentExpectedSubcomponentState {
+        ComponentExpectedSubcomponentState::query()->firstOrCreate(
+            [
+                'component_instance_id' => $parent->id,
+                'component_definition_subcomponent_template_id' => $template->id,
+            ],
+            [
+                'removed_qty' => 0,
+                'materialized_qty' => 0,
+            ]
+        );
+
+        return ComponentExpectedSubcomponentState::query()
+            ->where('component_instance_id', $parent->id)
+            ->where('component_definition_subcomponent_template_id', $template->id)
+            ->lockForUpdate()
+            ->firstOrFail();
+    }
+
+    private function liveExpectedSubcomponentCount(
+        ComponentInstance $parent,
+        ComponentDefinitionSubcomponentTemplate $template
+    ): int {
+        return ComponentInstance::withoutGlobalScope(CompanyableScope::class)
+            ->where('parent_component_instance_id', $parent->id)
+            ->where('is_materialized_expected', true)
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get(['id', 'metadata_json'])
+            ->filter(
+                fn (ComponentInstance $child): bool => (int) data_get(
+                    $child->metadata_json,
+                    'component_definition_subcomponent_template_id',
+                    0
+                ) === (int) $template->id
+            )
+            ->count();
+    }
+
+    private function reparentedMetadata(
+        ComponentInstance $instance,
+        ?int $fromParentId,
+        ?int $targetParentId
+    ): ?array {
+        $metadata = $instance->metadata_json;
+        if (!is_array($metadata)) {
+            return null;
+        }
+
+        if ($fromParentId && !array_key_exists('origin_parent_component_instance_id', $metadata)) {
+            $metadata['origin_parent_component_instance_id'] = $fromParentId;
+        }
+
+        if (array_key_exists('parent_component_instance_id', $metadata)
+            || $instance->is_materialized_expected
+            || !empty($metadata['manual_child_component'])
+        ) {
+            $metadata['parent_component_instance_id'] = $targetParentId;
+        }
+
+        return $metadata;
+    }
+
+    private function writeDeleteActionLog(
+        ComponentInstance $instance,
+        ?int $actorId,
+        ?string $note
+    ): void {
+        $timestamp = now();
+        $logAction = new Actionlog();
+        $logAction->item_type = ComponentInstance::class;
+        $logAction->item_id = $instance->id;
+        $logAction->created_at = $timestamp;
+        $logAction->action_date = $timestamp;
+        $logAction->created_by = $actorId;
+        $logAction->note = $note;
+
+        if (!$logAction->logaction('delete')) {
+            throw new \RuntimeException('Component deletion audit log could not be persisted.');
         }
     }
 
@@ -1198,7 +1789,31 @@ class ComponentLifecycleService
         return $attributes;
     }
 
-    protected function assertPlacementAllowedForInstanceAttributes(array $attributes): void
+    protected function activeDefinitionForInstanceAttributes(array $attributes): ?ComponentDefinition
+    {
+        $definitionId = $attributes['component_definition_id'] ?? null;
+
+        if (!$definitionId) {
+            return null;
+        }
+
+        $definition = ComponentDefinition::query()->find((int) $definitionId);
+
+        if (!$definition) {
+            throw new InvalidArgumentException('Component definition could not be found.');
+        }
+
+        if (!$definition->is_active) {
+            throw new InvalidArgumentException('The selected component definition is not active.');
+        }
+
+        return $definition;
+    }
+
+    protected function assertPlacementAllowedForInstanceAttributes(
+        array $attributes,
+        ?ComponentDefinition $definition = null
+    ): void
     {
         $definitionId = $attributes['component_definition_id'] ?? null;
 
@@ -1206,7 +1821,7 @@ class ComponentLifecycleService
             return;
         }
 
-        $definition = ComponentDefinition::query()->find((int) $definitionId);
+        $definition ??= ComponentDefinition::query()->find((int) $definitionId);
 
         if (!$definition) {
             throw new InvalidArgumentException('Component definition could not be found.');
@@ -1226,6 +1841,66 @@ class ComponentLifecycleService
 
         if ($isAssetAttachment && !$definition->canBeInstalledOnAsset()) {
             throw new InvalidArgumentException('This component definition is restricted to subcomponent placement and cannot be installed directly on an asset.');
+        }
+    }
+
+    protected function assertComponentDefinitionChangeIsSafe(
+        ComponentInstance $instance,
+        ?int $definitionId
+    ): void {
+        $currentDefinitionId = $instance->component_definition_id
+            ? (int) $instance->component_definition_id
+            : null;
+
+        if ($definitionId === $currentDefinitionId) {
+            return;
+        }
+
+        $definition = $definitionId
+            ? ComponentDefinition::query()->where('is_active', true)->find($definitionId)
+            : null;
+
+        if ($definitionId && !$definition) {
+            throw new InvalidArgumentException('The selected component definition is not active.');
+        }
+
+        if ($instance->childComponents()->exists() || $instance->expectedSubcomponentStates()->exists()) {
+            throw new InvalidArgumentException(
+                'A component definition cannot be changed while the component has child or expected-subcomponent state.'
+            );
+        }
+
+        $expectedTemplateId = (int) data_get(
+            $instance->metadata_json,
+            'component_definition_subcomponent_template_id',
+            0
+        );
+
+        if ($expectedTemplateId > 0) {
+            $template = ComponentDefinitionSubcomponentTemplate::query()->find($expectedTemplateId);
+
+            if ($template && (int) $template->child_component_definition_id !== (int) $definitionId) {
+                throw new InvalidArgumentException(
+                    'An expected component must keep the definition declared by its expected-subcomponent template.'
+                );
+            }
+        }
+
+        $this->assertSerialMatchesDefinition($definition, $instance->serial);
+    }
+
+    protected function assertSerialMatchesDefinition(
+        ?ComponentDefinition $definition,
+        mixed $serial
+    ): void {
+        $serial = trim((string) ($serial ?? ''));
+
+        if ($definition?->serial_tracking_mode === 'required' && $serial === '') {
+            throw new InvalidArgumentException('A serial number is required for this component definition.');
+        }
+
+        if ($definition?->serial_tracking_mode === 'not_tracked' && $serial !== '') {
+            throw new InvalidArgumentException('This component definition does not track serial numbers.');
         }
     }
 
@@ -1286,23 +1961,28 @@ class ComponentLifecycleService
     protected function resolveInstanceCompanyId(array $attributes, ?int $actorId): ?int
     {
         if (array_key_exists('company_id', $attributes) && $attributes['company_id'] !== null && $attributes['company_id'] !== '') {
-            return (int) $attributes['company_id'];
+            $companyId = (int) $attributes['company_id'];
+            $this->assertActorCanUseCompanyScope($actorId, $companyId);
+
+            return $companyId;
         }
 
         foreach (['current_asset_id', 'source_asset_id'] as $assetKey) {
             if (!empty($attributes[$assetKey])) {
-                $companyId = Asset::query()
+                $companyId = Asset::withoutGlobalScopes()
                     ->whereKey($attributes[$assetKey])
                     ->value('company_id');
 
                 if ($companyId) {
+                    $this->assertActorCanUseCompanyScope($actorId, (int) $companyId);
+
                     return (int) $companyId;
                 }
             }
         }
 
         if ($actorId) {
-            $companyId = User::query()->whereKey($actorId)->value('company_id');
+            $companyId = User::withoutGlobalScopes()->whereKey($actorId)->value('company_id');
 
             if ($companyId) {
                 return (int) $companyId;
@@ -1314,6 +1994,94 @@ class ComponentLifecycleService
         }
 
         return null;
+    }
+
+    protected function assertActorCanUseCompanyScope(?int $actorId, int $companyId): void
+    {
+        if (!$this->requiresExplicitCompanyScope() || !$actorId) {
+            return;
+        }
+
+        $actor = User::withoutGlobalScopes()->find($actorId);
+
+        if (!$actor || (!$actor->isSuperUser() && (int) $actor->company_id !== $companyId)) {
+            throw new InvalidArgumentException('The component company is outside the acting user\'s access scope.');
+        }
+    }
+
+    protected function assertStorageLocationCompany(
+        ComponentInstance $instance,
+        ?ComponentStorageLocation $location
+    ): void {
+        if (!$location || !$instance->company_id || !$location->site_location_id) {
+            return;
+        }
+
+        $storageCompanyId = Location::withoutGlobalScopes()
+            ->whereKey((int) $location->site_location_id)
+            ->value('company_id');
+
+        if ($storageCompanyId && (int) $storageCompanyId !== (int) $instance->company_id) {
+            throw new InvalidArgumentException('Storage location belongs to a different company.');
+        }
+    }
+
+    protected function assertCompanyConsistencyForInstanceAttributes(array $attributes): void
+    {
+        $companyId = isset($attributes['company_id']) && $attributes['company_id'] !== ''
+            ? (int) $attributes['company_id']
+            : null;
+
+        if (!$companyId) {
+            return;
+        }
+
+        foreach (['source_asset_id', 'current_asset_id', 'root_asset_id'] as $assetKey) {
+            if (empty($attributes[$assetKey])) {
+                continue;
+            }
+
+            $assetCompanyId = Asset::withoutGlobalScopes()
+                ->whereKey((int) $attributes[$assetKey])
+                ->value('company_id');
+
+            if ($assetCompanyId && (int) $assetCompanyId !== $companyId) {
+                throw new InvalidArgumentException('Component placement references an asset in a different company.');
+            }
+        }
+
+        if (!empty($attributes['parent_component_instance_id'])) {
+            $parentCompanyId = ComponentInstance::withoutGlobalScopes()
+                ->whereKey((int) $attributes['parent_component_instance_id'])
+                ->value('company_id');
+
+            if ($parentCompanyId && (int) $parentCompanyId !== $companyId) {
+                throw new InvalidArgumentException('Component placement references a parent component in a different company.');
+            }
+        }
+
+        if (!empty($attributes['held_by_user_id'])) {
+            $holderCompanyId = User::withoutGlobalScopes()
+                ->whereKey((int) $attributes['held_by_user_id'])
+                ->value('company_id');
+
+            if ($holderCompanyId && (int) $holderCompanyId !== $companyId) {
+                throw new InvalidArgumentException('Component placement references a tray holder in a different company.');
+            }
+        }
+
+        if (!empty($attributes['storage_location_id'])) {
+            $siteLocationId = ComponentStorageLocation::query()
+                ->whereKey((int) $attributes['storage_location_id'])
+                ->value('site_location_id');
+            $storageCompanyId = $siteLocationId
+                ? Location::withoutGlobalScopes()->whereKey((int) $siteLocationId)->value('company_id')
+                : null;
+
+            if ($storageCompanyId && (int) $storageCompanyId !== $companyId) {
+                throw new InvalidArgumentException('Component placement references a storage location in a different company.');
+            }
+        }
     }
 
     protected function ensureInstanceCompanyId(ComponentInstance $instance): void

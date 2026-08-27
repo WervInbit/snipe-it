@@ -31,7 +31,7 @@ class UsersForSelectListTest extends TestCase
     {
         User::factory()->create(['first_name' => 'Luke', 'last_name' => 'Skywalker']);
 
-        Passport::actingAs(User::factory()->create());
+        Passport::actingAs(User::factory()->editUsers()->create());
         $response = $this->getJson(route('api.users.selectlist', ['search' => 'luke sky']))->assertOk();
 
         $results = collect($response->json('results'));
@@ -44,7 +44,7 @@ class UsersForSelectListTest extends TestCase
     {
         User::factory()->create(['first_name' => 'Luke', 'last_name' => 'Skywalker', 'email' => 'luke@jedis.org']);
 
-        Passport::actingAs(User::factory()->create());
+        Passport::actingAs(User::factory()->editUsers()->create());
         $response = $this->getJson(route('api.users.selectlist', ['search' => 'luke@jedis']))->assertOk();
 
         $results = collect($response->json('results'));
@@ -67,7 +67,9 @@ class UsersForSelectListTest extends TestCase
             ->has(User::factory()->state(['first_name' => 'Darth', 'last_name' => 'Vader', 'username' => 'dvader']))
             ->create();
 
-        Passport::actingAs($jedi->users->first());
+        $actor = $jedi->users->first();
+        $actor->forceFill(['permissions' => json_encode(['users.edit' => '1'])])->save();
+        Passport::actingAs($actor);
         $response = $this->getJson(route('api.users.selectlist'))->assertOk();
 
         $results = collect($response->json('results'));
@@ -95,7 +97,9 @@ class UsersForSelectListTest extends TestCase
             ->has(User::factory()->state(['first_name' => 'Darth', 'last_name' => 'Vader', 'username' => 'dvader', 'email' => 'dvader@empire.jerks']))
             ->create();
 
-        Passport::actingAs($jedi->users->first());
+        $actor = $jedi->users->first();
+        $actor->forceFill(['permissions' => json_encode(['users.edit' => '1'])])->save();
+        Passport::actingAs($actor);
         $response = $this->getJson(route('api.users.selectlist', ['search' => 'a']))->assertOk();
 
         $results = collect($response->json('results'));

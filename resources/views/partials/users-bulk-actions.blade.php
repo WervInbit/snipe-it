@@ -18,7 +18,10 @@
 
                     @can('update', \App\Models\User::class)
                         <option value="edit">{{ trans('general.bulk_edit') }}</option>
+                        @if (config('mail.enabled'))
                         <option value="send_assigned">{{ trans('admin/users/general.email_assigned') }}</option>
+                        <option value="bulkpasswordreset">{{ trans('button.send_password_link') }}</option>
+                        @endif
                     @endcan
 
                     @can('delete', \App\Models\User::class)
@@ -26,7 +29,6 @@
                         <option value="merge">{!! trans('general.merge_users') !!}</option>
                     @endcan
 
-                    <option value="bulkpasswordreset">{{ trans('button.send_password_link') }}</option>
                     <option value="print">{{ trans('admin/users/general.print_assigned') }}</option>
                 </select>
                 <button class="btn btn-primary bulk-edit-toolbar__button" id="bulkUserEditButton" disabled>{{ trans('button.go') }}</button>

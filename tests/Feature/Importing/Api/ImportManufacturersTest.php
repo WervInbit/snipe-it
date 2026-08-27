@@ -92,7 +92,7 @@ class ImportManufacturersTest extends ImportDataTestCase implements TestsPermiss
                     '' => [
                         'Manufacturer ""' => [
                             'name' =>
-                                ['The name field is required.'],
+                                [trans('validation.required', ['attribute' => 'name'])],
                         ],
                     ]
 

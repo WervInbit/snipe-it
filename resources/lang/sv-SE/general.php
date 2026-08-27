@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Importera',
     'import_this_file'      => 'Mappa fält och bearbeta denna fil',
     'importing'         	=> 'Importerar',
-    'importing_help'        => 'Du kan importera tillgångar, tillbehör, licenser, komponenter, förbrukningsvaror och användare via CSV-fil. <br><br>CSV-filen bör vara komma-avgränsad och formaterad med rubriker som matchar de i <a href="https://snipe-it.readme.io/docs/importing" target="_new">ta prov CSVs i dokumentationen</a>.',
+    'importing_help'        => 'Du kan importera tillgångar, tillbehör, licenser, komponenter, förbrukningsvaror och användare via CSV-fil. <br><br>CSV-filen bör vara komma-avgränsad och formaterad med rubriker som matchar de i <a href=":fork_documentation_url" target="_new">ta prov CSVs i dokumentationen</a>.',
     'import-history'        => 'Importera historik',
     'asset_maintenance'        => 'Tillgångsunderhåll',
     'asset_maintenance_report' => 'Tillgångsunderhållsrapport',

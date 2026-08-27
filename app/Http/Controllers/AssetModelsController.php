@@ -173,14 +173,11 @@ class AssetModelsController extends Controller
 
         $model->fieldset_id = $request->input('fieldset_id');
 
-        $modelNumberInput = trim((string) $request->input('model_number', ''));
-
         if ($model->save()) {
-            $model->syncPrimaryModelNumber($modelNumberInput !== '' ? $modelNumberInput : null);
-            $modelNumber = $model->ensurePrimaryModelNumber();
-            $modelNumber->fill([
-                'code' => $model->model_number,
-            ])->save();
+            if ($request->exists('model_number')) {
+                $modelNumberInput = trim((string) $request->input('model_number'));
+                $model->syncPrimaryModelNumber($modelNumberInput !== '' ? $modelNumberInput : null);
+            }
 
             $this->removeCustomFieldsDefaultValues($model);
 
@@ -241,7 +238,7 @@ class AssetModelsController extends Controller
      */
     public function getRestore($id) : RedirectResponse
     {
-        $this->authorize('create', AssetModel::class);
+        $this->authorize('manageLifecycle', AssetModel::class);
 
         if ($model = AssetModel::withTrashed()->find($id)) {
 

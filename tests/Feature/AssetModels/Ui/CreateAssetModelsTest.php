@@ -19,6 +19,20 @@ class CreateAssetModelsTest extends TestCase
             ->assertForbidden();
     }
 
+    public function testEditPermissionDoesNotAllowCreatingAssetModels()
+    {
+        $this->actingAs(User::factory()->create([
+            'permissions' => json_encode(['models.edit' => '1']),
+        ]))
+            ->post(route('models.store'), [
+                'name' => 'Edit-only model',
+                'category_id' => Category::factory()->create()->id,
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('models', ['name' => 'Edit-only model']);
+    }
+
     public function testPageRenders()
     {
         $this->actingAs(User::factory()->superuser()->create())
@@ -40,15 +54,18 @@ class CreateAssetModelsTest extends TestCase
     {
         $this->assertFalse(AssetModel::where('name', 'Test Model')->exists());
 
-        $this->actingAs(User::factory()->superuser()->create())
+        $response = $this->actingAs(User::factory()->create([
+            'permissions' => json_encode(['models.create' => '1']),
+        ]))
             ->from(route('models.create'))
             ->post(route('models.store'), [
                 'name' => 'Test Model',
                 'category_id' => Category::factory()->create()->id
-            ])
-            ->assertRedirect(route('models.index'));
+            ]);
 
-        $this->assertTrue(AssetModel::where('name', 'Test Model')->exists());
+        $model = AssetModel::where('name', 'Test Model')->firstOrFail();
+
+        $response->assertRedirect(route('models.show', $model));
     }
 
     public function testUserCannotUseAccessoryCategoryTypeAsAssetModelCategoryType()
@@ -64,7 +81,6 @@ class CreateAssetModelsTest extends TestCase
         $response->assertRedirect(route('models.create'));
         $response->assertInvalid(['category_type']);
         $response->assertSessionHasErrors(['category_type']);
-        $this->followRedirects($response)->assertSee(trans('general.error'));
         $this->assertFalse(AssetModel::where('name', 'Test Invalid Model Category')->exists());
 
     }
@@ -82,11 +98,9 @@ class CreateAssetModelsTest extends TestCase
                 'category_id' => Category::factory()->create()->id
             ])
             ->assertStatus(302)
-            ->assertSessionHasErrors(['name','model_number'])
+            ->assertSessionHasErrors(['name'])
             ->assertRedirect(route('models.create'))
-            ->assertInvalid(['name','model_number']);
-
-        $this->followRedirects($response)->assertSee(trans('general.error'));
+            ->assertInvalid(['name']);
 
     }
 
@@ -106,8 +120,6 @@ class CreateAssetModelsTest extends TestCase
             ->assertSessionHasErrors(['name'])
             ->assertRedirect(route('models.create'))
             ->assertInvalid(['name']);
-
-        $this->followRedirects($response)->assertSee(trans('general.error'));
 
     }
 

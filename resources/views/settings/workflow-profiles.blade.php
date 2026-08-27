@@ -17,9 +17,11 @@
     <a href="{{ route('settings.testtypes.index') }}" class="btn btn-default">
         <x-icon type="tasks" /> {{ __('Workflow Items') }}
     </a>
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#create-workflow-profile-modal">
-        <x-icon type="plus" /> {{ __('Create Profile') }}
-    </button>
+    @can('create', AppModelsTestType::class)
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#create-workflow-profile-modal">
+            <x-icon type="plus" /> {{ __('Create Profile') }}
+        </button>
+    @endcan
 @stop
 
 @section('content')
@@ -70,25 +72,29 @@
                                     </td>
                                     <td class="text-right">
                                         <div class="btn-group btn-group-sm" role="group" aria-label="{{ trans('button.actions') }}">
-                                            <a href="{{ route('settings.workflow-profiles.items.edit', $profile) }}" class="btn btn-default">
-                                                {{ __('Items') }}
-                                            </a>
-                                            <button type="button"
-                                                    class="btn btn-default"
-                                                    data-toggle="modal"
-                                                    data-target="#edit-workflow-profile-{{ $profile->id }}-modal">
-                                                {{ trans('button.edit') }}
-                                            </button>
-                                            <form method="POST"
-                                                  action="{{ route('settings.workflow-profiles.destroy', $profile) }}"
-                                                  style="display:inline-block"
-                                                  onsubmit="return confirm('{{ __('Delete this workflow profile? Historical runs keep their saved profile snapshot.') }}');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-danger">
-                                                    {{ trans('button.delete') }}
+                                            @can('update', AppModelsTestType::class)
+                                                <a href="{{ route('settings.workflow-profiles.items.edit', $profile) }}" class="btn btn-default">
+                                                    {{ __('Items') }}
+                                                </a>
+                                                <button type="button"
+                                                        class="btn btn-default"
+                                                        data-toggle="modal"
+                                                        data-target="#edit-workflow-profile-{{ $profile->id }}-modal">
+                                                    {{ trans('button.edit') }}
                                                 </button>
-                                            </form>
+                                            @endcan
+                                            @can('delete', AppModelsTestType::class)
+                                                <form method="POST"
+                                                      action="{{ route('settings.workflow-profiles.destroy', $profile) }}"
+                                                      style="display:inline-block"
+                                                      onsubmit="return confirm('{{ __('Delete this workflow profile? Historical runs keep their saved profile snapshot.') }}');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger">
+                                                        {{ trans('button.delete') }}
+                                                    </button>
+                                                </form>
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>
@@ -104,6 +110,7 @@
         </div>
     </div>
 
+    @can('create', AppModelsTestType::class)
     <div class="modal fade" id="create-workflow-profile-modal" tabindex="-1" role="dialog" aria-labelledby="create-workflow-profile-label">
         <div class="modal-dialog" role="document">
             <form method="POST" action="{{ route('settings.workflow-profiles.store') }}">
@@ -124,7 +131,9 @@
             </form>
         </div>
     </div>
+    @endcan
 
+    @can('update', AppModelsTestType::class)
     @foreach($profiles as $profile)
         <div class="modal fade" id="edit-workflow-profile-{{ $profile->id }}-modal" tabindex="-1" role="dialog" aria-labelledby="edit-workflow-profile-{{ $profile->id }}-label">
             <div class="modal-dialog" role="document">
@@ -148,4 +157,5 @@
             </div>
         </div>
     @endforeach
+    @endcan
 @endsection

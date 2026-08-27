@@ -16,10 +16,10 @@ use App\Models\CustomField;
 use App\Models\Group;
 use App\Models\Labels\Label as LabelModel;
 use App\Models\Setting;
-use App\Models\Asset;
 use App\Models\User;
 use App\Notifications\FirstAdminNotification;
 use App\Notifications\MailTest;
+use App\Rules\CssColor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
@@ -37,8 +37,10 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Illuminate\Support\Facades\Gate;
+use ZipArchive;
 
 /**
  * This controller handles all actions related to Settings for
@@ -203,7 +205,7 @@ class SettingsController extends Controller
             Auth::login($user, true);
             $settings->save();
 
-            if ($request->input('email_creds') == '1') {
+            if (config('mail.enabled', true) && $request->input('email_creds') == '1') {
                 $data = [];
                 $data['email'] = $user->email;
                 $data['username'] = $user->username;
@@ -402,6 +404,19 @@ class SettingsController extends Controller
             return redirect()->to('admin')->with('error', trans('admin/settings/message.update.error'));
         }
 
+        $previousBrandingImages = [
+            'logo' => ['', $setting->logo],
+            'email_logo' => ['', $setting->email_logo],
+            'label_logo' => ['', $setting->label_logo],
+            'acceptance_pdf_logo' => ['', $setting->acceptance_pdf_logo],
+            'favicon' => ['', $setting->favicon],
+            'default_avatar' => ['avatars', $setting->default_avatar],
+        ];
+
+        $request->validate([
+            'header_color' => ['nullable', new CssColor],
+        ]);
+
         $setting->brand = $request->input('brand', '1');
         $setting->header_color = $request->input('header_color');
         $setting->support_footer = $request->input('support_footer');
@@ -422,7 +437,7 @@ class SettingsController extends Controller
                 $request->validate(['site_name' => 'required']);
             }
 
-            $setting->site_name = $request->input('site_name', 'Snipe-IT');
+            $setting->site_name = $request->input('site_name', config('app.name'));
             $setting->custom_css = $request->input('custom_css');
 
             // Logo upload
@@ -501,11 +516,44 @@ class SettingsController extends Controller
         }
 
         if ($setting->save()) {
+            $this->deleteReplacedBrandingImages($previousBrandingImages, $setting);
+
             return redirect()->route('settings.index')
                 ->with('success', trans('admin/settings/message.update.success'));
         }
 
         return redirect()->back()->withInput()->withErrors($setting->getErrors());
+    }
+
+    private function deleteReplacedBrandingImages(array $previousImages, Setting $setting): void
+    {
+        foreach ($previousImages as $field => [$directory, $previousFilename]) {
+            $previousFilename = (string) $previousFilename;
+
+            if ($previousFilename === ''
+                || $previousFilename === (string) $setting->{$field}
+                || ($field === 'default_avatar' && $previousFilename === 'default.png')
+            ) {
+                continue;
+            }
+
+            $normalizedFilename = str_replace('\\', '/', $previousFilename);
+
+            // Settings image columns store a filename, not an arbitrary path.
+            if (basename($normalizedFilename) !== $normalizedFilename) {
+                Log::warning('Skipped deleting an invalid stored branding image path.', [
+                    'field' => $field,
+                ]);
+
+                continue;
+            }
+
+            $path = $directory === ''
+                ? $normalizedFilename
+                : trim($directory, '/').'/'.$normalizedFilename;
+
+            Storage::disk('public')->delete($path);
+        }
     }
 
 
@@ -647,26 +695,6 @@ class SettingsController extends Controller
     {
         if (is_null($setting = Setting::getSettings())) {
             return redirect()->to('admin')->with('error', trans('admin/settings/message.update.error'));
-        }
-
-        // Check if the audit interval has changed - if it has, we want to update ALL of the assets audit dates
-        if ($request->input('audit_interval') != $setting->audit_interval) {
-
-            // This could be a negative number if the user is trying to set the audit interval to a lower number than it was before
-            $audit_diff_months = ((int)$request->input('audit_interval') - (int)($setting->audit_interval));
-
-            // Batch update the dates. We have to use this method to avoid time limit exceeded errors on very large datasets,
-            // but it DOES mean this change doesn't get logged in the action logs, since it skips the observer.
-            // @see https://stackoverflow.com/questions/54879160/laravel-observer-not-working-on-bulk-insert
-            $affected = Asset::whereNotNull('next_audit_date')
-                ->whereNull('deleted_at')
-                ->update(
-                    ['next_audit_date' => DB::raw('DATE_ADD(next_audit_date, INTERVAL '.$audit_diff_months.' MONTH)')]
-            );
-
-            Log::debug($affected .' assets affected by audit interval update');
-
-
         }
 
         $alert_email = rtrim($request->input('alert_email'), ',');
@@ -1080,11 +1108,11 @@ class SettingsController extends Controller
     public function postBackups() : RedirectResponse
     {
         if (! config('app.lock_passwords')) {
-            Artisan::call('snipeit:backup', ['--filename' => 'manual-backup-'.date('Y-m-d-H-i-s')]);
+            $exitCode = Artisan::call('snipeit:backup', ['--filename' => 'manual-backup-'.date('Y-m-d-H-i-s')]);
             $output = Artisan::output();
 
             // Backup completed
-            if (! preg_match('/failed/', $output)) {
+            if ($exitCode === SymfonyCommand::SUCCESS && ! preg_match('/failed/', $output)) {
                 return redirect()->route('settings.backups.index')
                     ->with('success', trans('admin/settings/message.backup.generated'));
             }
@@ -1248,6 +1276,10 @@ class SettingsController extends Controller
 
     public function postUploadBackup(Request $request) : RedirectResponse
     {
+        if (! config('app.allow_backup_restore')) {
+            return redirect()->route('settings.backups.index')
+                ->with('error', trans('admin/settings/message.backup.restore_disabled'));
+        }
 
         if (! config('app.lock_passwords')) {
             if (!$request->hasFile('file')) {
@@ -1283,17 +1315,38 @@ class SettingsController extends Controller
      */
     public function postRestore(Request $request, $filename = null): RedirectResponse
     {
+        if (! config('app.allow_backup_restore')) {
+            return redirect()->route('settings.backups.index')
+                ->with('error', trans('admin/settings/message.backup.restore_disabled'));
+        }
 
         if (! config('app.lock_passwords')) {
             $path = 'app/backups';
 
+            if (! $this->isSafeBackupFilename($filename)) {
+                return redirect()->route('settings.backups.index')
+                    ->with('error', trans('admin/settings/message.backup.file_not_found'));
+            }
+
             if (Storage::exists($path.'/'.$filename)) {
+                if (! $this->isStructurallyValidBackupArchive($path.'/'.$filename)) {
+                    return redirect()->route('settings.backups.index')
+                        ->with('error', trans('admin/settings/message.backup.invalid_archive'));
+                }
 
                 // grab the user's info so we can make sure they exist in the system
                 $user = User::find(auth()->id());
 
-                // TODO: run a backup
+                $backupExitCode = Artisan::call('snipeit:backup', [
+                    '--filename' => 'pre-restore-backup-'.date('Y-m-d-H-i-s'),
+                ]);
 
+                if ($backupExitCode !== SymfonyCommand::SUCCESS) {
+                    Log::error('Pre-restore backup failed; uploaded-backup restore was aborted.');
+
+                    return redirect()->route('settings.backups.index')
+                        ->with('error', trans('admin/settings/message.backup.restore_backup_failed'));
+                }
 
                 Artisan::call('db:wipe', [
                     '--force' => true,
@@ -1356,6 +1409,55 @@ class SettingsController extends Controller
             }
         } else {
             return redirect()->route('settings.backups.index')->with('error', trans('general.feature_disabled'));
+        }
+    }
+
+    private function isSafeBackupFilename(mixed $filename): bool
+    {
+        return is_string($filename)
+            && $filename !== ''
+            && $filename === basename($filename)
+            && ! str_contains($filename, '/')
+            && ! str_contains($filename, '\\')
+            && strtolower(pathinfo($filename, PATHINFO_EXTENSION)) === 'zip';
+    }
+
+    private function isStructurallyValidBackupArchive(string $path): bool
+    {
+        $archive = new ZipArchive();
+        $opened = false;
+
+        try {
+            $opened = $archive->open(Storage::path($path)) === true;
+
+            if (! $opened) {
+                return false;
+            }
+
+            $sqlFiles = 0;
+
+            for ($index = 0; $index < $archive->numFiles; $index++) {
+                $entry = $archive->statIndex($index);
+
+                if (! is_array($entry)
+                    || strtolower(pathinfo((string) ($entry['name'] ?? ''), PATHINFO_EXTENSION)) !== 'sql') {
+                    continue;
+                }
+
+                if ((int) ($entry['size'] ?? 0) < 1) {
+                    return false;
+                }
+
+                $sqlFiles++;
+            }
+
+            return $sqlFiles === 1;
+        } catch (\Throwable) {
+            return false;
+        } finally {
+            if ($opened) {
+                $archive->close();
+            }
         }
     }
 
@@ -1443,6 +1545,13 @@ class SettingsController extends Controller
      */
     public function ajaxTestEmail() : JsonResponse
     {
+        if (! config('mail.enabled', true)) {
+            return response()->json(
+                Helper::formatStandardApiResponse('error', null, trans('mail.delivery_disabled')),
+                503
+            );
+        }
+
         try {
             (new User())->forceFill([
                 'name'  => config('mail.from.name'),

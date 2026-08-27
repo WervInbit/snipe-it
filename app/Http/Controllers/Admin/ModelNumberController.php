@@ -8,9 +8,11 @@ use App\Models\ModelNumber;
 use App\Services\ModelNumberImageSyncService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Throwable;
 
 class ModelNumberController extends Controller
 {
@@ -30,6 +32,10 @@ class ModelNumberController extends Controller
     public function store(Request $request, AssetModel $model): RedirectResponse
     {
         $this->authorize('update', $model);
+
+        if ($request->boolean('make_primary') && $model->primary_model_number_id) {
+            $this->authorize('manageLifecycle', $model);
+        }
 
         $normalizedCode = $this->normalizeModelNumberCode(
             (string) $request->input('code', ''),
@@ -107,6 +113,8 @@ class ModelNumberController extends Controller
             'code_case_override' => ['nullable', 'boolean'],
         ], $imageSyncService->validationRules()));
 
+        $this->authorizeLifecycleChanges($request, $model, $modelNumber, $data['status']);
+
         if ($data['status'] === 'deprecated' && $model->primary_model_number_id === $modelNumber->id) {
             return redirect()
                 ->route('models.numbers.edit', [$model, $modelNumber])
@@ -114,22 +122,40 @@ class ModelNumberController extends Controller
                 ->with('error', __('Cannot deprecate the primary model number.'));
         }
 
-        $modelNumber->fill([
-            'code' => $data['code'],
-            'label' => $data['label'] ?? null,
-        ])->save();
+        $imageChanges = ['new_paths' => [], 'old_paths' => []];
 
-        if ($data['status'] === 'deprecated') {
-            $modelNumber->deprecate();
-        } else {
-            $modelNumber->restoreStatus();
+        try {
+            DB::transaction(function () use (
+                $data,
+                $imageSyncService,
+                $model,
+                $modelNumber,
+                $request,
+                &$imageChanges
+            ): void {
+                $modelNumber->fill([
+                    'code' => $data['code'],
+                    'label' => $data['label'] ?? null,
+                ])->save();
+
+                if ($data['status'] === 'deprecated') {
+                    $modelNumber->deprecate();
+                } else {
+                    $modelNumber->restoreStatus();
+                }
+
+                if ($request->boolean('make_primary')) {
+                    $this->setPrimaryModelNumber($model, $modelNumber);
+                }
+
+                $imageChanges = $imageSyncService->sync($modelNumber, $request, $data);
+            });
+        } catch (Throwable $exception) {
+            $imageSyncService->cleanupAfterRollback($imageChanges);
+            throw $exception;
         }
 
-        if ($request->boolean('make_primary')) {
-            $this->setPrimaryModelNumber($model, $modelNumber);
-        }
-
-        $imageSyncService->sync($modelNumber, $request, $data);
+        $imageSyncService->cleanupAfterCommit($imageChanges);
 
         return redirect()
             ->route('models.show', $model)
@@ -139,7 +165,7 @@ class ModelNumberController extends Controller
 
     public function deprecate(AssetModel $model, ModelNumber $modelNumber): RedirectResponse
     {
-        $this->authorize('update', $model);
+        $this->authorize('manageLifecycle', $model);
         $this->ensureModelNumber($model, $modelNumber);
 
         if ($model->primary_model_number_id === $modelNumber->id) {
@@ -157,7 +183,7 @@ class ModelNumberController extends Controller
 
     public function restore(AssetModel $model, ModelNumber $modelNumber): RedirectResponse
     {
-        $this->authorize('update', $model);
+        $this->authorize('manageLifecycle', $model);
         $this->ensureModelNumber($model, $modelNumber);
 
         $modelNumber->restoreStatus();
@@ -169,7 +195,7 @@ class ModelNumberController extends Controller
 
     public function destroy(AssetModel $model, ModelNumber $modelNumber): RedirectResponse
     {
-        $this->authorize('update', $model);
+        $this->authorize('delete', $modelNumber);
         $this->ensureModelNumber($model, $modelNumber);
 
         if ($model->primary_model_number_id === $modelNumber->id) {
@@ -193,7 +219,7 @@ class ModelNumberController extends Controller
 
     public function makePrimary(AssetModel $model, ModelNumber $modelNumber): RedirectResponse
     {
-        $this->authorize('update', $model);
+        $this->authorize('manageLifecycle', $model);
         $this->ensureModelNumber($model, $modelNumber);
 
         if ($modelNumber->isDeprecated()) {
@@ -253,6 +279,20 @@ class ModelNumberController extends Controller
         }
 
         return Str::upper($trimmed);
+    }
+
+    private function authorizeLifecycleChanges(
+        Request $request,
+        AssetModel $model,
+        ModelNumber $modelNumber,
+        string $requestedStatus
+    ): void
+    {
+        $currentStatus = $modelNumber->isDeprecated() ? 'deprecated' : 'active';
+
+        if ($requestedStatus !== $currentStatus || $request->boolean('make_primary')) {
+            $this->authorize('manageLifecycle', $model);
+        }
     }
 }
 

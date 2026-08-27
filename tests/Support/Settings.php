@@ -11,7 +11,13 @@ class Settings
 
     private function __construct()
     {
-        $this->setting = Setting::factory()->create();
+        // The application contract permits exactly one settings row. Remove
+        // rows committed by an earlier MariaDB DDL test before creating the
+        // current test's settings singleton.
+        Setting::$_cache = null;
+        Setting::query()->delete();
+        $this->setting = Setting::factory()->create()->refresh();
+        Setting::$_cache = $this->setting;
     }
 
     public static function initialize(): Settings
@@ -182,7 +188,8 @@ class Settings
     private function update(array $attributes): Settings
     {
         Setting::unguarded(fn() => $this->setting->update($attributes));
-        Setting::$_cache = null;
+        $this->setting->refresh();
+        Setting::$_cache = $this->setting;
 
         return $this;
     }

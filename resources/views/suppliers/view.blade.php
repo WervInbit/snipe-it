@@ -234,7 +234,6 @@
                       data-side-pagination="server"
                       data-sort-order="asc"
                       id="maintenancesTable"
-                      data-buttons="maintenanceButtons"
                       class="table table-striped snipe-table"
                       data-url="{{ route('api.maintenances.index', ['supplier_id' => $supplier->id])}}"
                       data-export-options='{

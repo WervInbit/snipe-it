@@ -6,7 +6,9 @@
 @stop
 
 @section('header_right')
-    <a href="{{ route('settings.model_numbers.create') }}" class="btn btn-primary" style="margin-right: 10px;">{{ __('Create New') }}</a>
+    @can('update', \App\Models\AssetModel::class)
+        <a href="{{ route('settings.model_numbers.create') }}" class="btn btn-primary" style="margin-right: 10px;">{{ __('Create New') }}</a>
+    @endcan
     <form method="GET" class="form-inline" role="search" style="display:inline-block;">
         <div class="input-group">
             <input type="search" name="search" class="form-control" placeholder="{{ __('Search model numbers...') }}" value="{{ $search }}">
@@ -94,30 +96,34 @@
                                     </td>
                                     <td class="text-right">
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <a href="{{ route('settings.model_numbers.edit', $number) }}" class="btn btn-default">{{ __('Edit') }}</a>
-                                            <a href="{{ route('models.numbers.spec.edit', ['model' => $number->model_id, 'modelNumber' => $number->id]) }}" class="btn btn-default">{{ __('Edit Spec') }}</a>
-                                            @if ($canDelete)
-                                                <form method="POST"
-                                                      action="{{ route('settings.model_numbers.destroy', $number) }}"
-                                                      style="display:inline;"
-                                                      onsubmit="return confirm('{{ __('Are you sure you want to delete this model number?') }}');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger">
+                                            @can('update', $number->model)
+                                                <a href="{{ route('settings.model_numbers.edit', $number) }}" class="btn btn-default">{{ __('Edit') }}</a>
+                                                <a href="{{ route('models.numbers.spec.edit', ['model' => $number->model_id, 'modelNumber' => $number->id]) }}" class="btn btn-default">{{ __('Edit Spec') }}</a>
+                                            @endcan
+                                            @can('delete', $number)
+                                                @if ($canDelete)
+                                                    <form method="POST"
+                                                          action="{{ route('settings.model_numbers.destroy', $number) }}"
+                                                          style="display:inline;"
+                                                          onsubmit="return confirm('{{ __('Are you sure you want to delete this model number?') }}');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-danger">
+                                                            {{ trans('button.delete') }}
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <button type="button"
+                                                            class="btn btn-danger"
+                                                            disabled
+                                                            @if ($deleteTooltip)
+                                                                data-toggle="tooltip"
+                                                                title="{{ $deleteTooltip }}"
+                                                            @endif>
                                                         {{ trans('button.delete') }}
                                                     </button>
-                                                </form>
-                                            @else
-                                                <button type="button"
-                                                        class="btn btn-danger"
-                                                        disabled
-                                                        @if ($deleteTooltip)
-                                                            data-toggle="tooltip"
-                                                            title="{{ $deleteTooltip }}"
-                                                        @endif>
-                                                    {{ trans('button.delete') }}
-                                                </button>
-                                            @endif
+                                                @endif
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>

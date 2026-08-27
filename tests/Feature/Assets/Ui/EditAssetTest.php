@@ -5,11 +5,13 @@ namespace Tests\Feature\Assets\Ui;
 use App\Events\CheckoutableCheckedIn;
 use App\Models\Asset;
 use App\Models\AssetModel;
+use App\Models\CheckoutAcceptance;
 use App\Models\Location;
 use App\Models\StatusLabel;
 use App\Models\User;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class EditAssetTest extends TestCase
@@ -133,7 +135,7 @@ class EditAssetTest extends TestCase
         $this->assertEquals($originalTag, $asset->asset_tag);
     }
 
-    public function testAdminCanChangeAssetTag(): void
+    public function testAdminCanChangeAssetTagWithDefaultUppercaseNormalization(): void
     {
         $asset = Asset::factory()->create();
 
@@ -145,41 +147,125 @@ class EditAssetTest extends TestCase
             ->assertRedirect();
 
         $asset->refresh();
-        $this->assertEquals('New Asset Tag', $asset->asset_tag);
+        $this->assertSame('NEW ASSET TAG', $asset->asset_tag);
     }
 
-    public function testNewCheckinIsLoggedIfStatusChangedToUndeployable()
+    public function testAdminCanPreserveAssetTagCaseWithOverride(): void
+    {
+        $asset = Asset::factory()->create();
+
+        $this->actingAs(User::factory()->admin()->create())
+            ->from(route('hardware.edit', $asset))
+            ->put(route('hardware.update', $asset), [
+                'asset_tags' => [1 => 'New Asset Tag'],
+                'asset_tag_case_override' => [1 => '1'],
+            ])
+            ->assertRedirect();
+
+        $this->assertSame('New Asset Tag', $asset->fresh()->asset_tag);
+    }
+
+    public function testUndeployableEditClearsLegacyAssignmentWithoutCreatingCheckinHistory()
     {
         Event::fake([CheckoutableCheckedIn::class]);
 
         $user = User::factory()->create();
         $deployable_status = Statuslabel::factory()->rtd()->create();
         $achived_status = Statuslabel::factory()->archived()->create();
-        $asset = Asset::factory()->assignedToUser($user)->create(['status_id' => $deployable_status->id]);
+        $asset = Asset::factory()->assignedToUser($user)->create([
+            'status_id' => $deployable_status->id,
+            'accepted' => 'pending',
+            'expected_checkin' => now()->addDay(),
+        ]);
+        $pendingAcceptance = CheckoutAcceptance::factory()->pending()->create([
+            'checkoutable_type' => Asset::class,
+            'checkoutable_id' => $asset->id,
+            'assigned_to_id' => $user->id,
+        ]);
+        $completedAcceptance = CheckoutAcceptance::factory()->accepted()->create([
+            'checkoutable_type' => Asset::class,
+            'checkoutable_id' => $asset->id,
+            'assigned_to_id' => $user->id,
+        ]);
         $this->assertTrue($asset->assignedTo->is($user));
-
-        $currentTimestamp = now();
 
         $this->actingAs(User::factory()->viewAssets()->editAssets()->create())
             ->from(route('hardware.edit', $asset))
             ->put(route('hardware.update', $asset), [
+                    'redirect_option' => 'item',
                     'status_id' => $achived_status->id,
                     'model_id' => $asset->model_id,
+                    'model_number_id' => $asset->model_number_id ?? $asset->model?->primaryModelNumber?->id,
                     'asset_tags' => $asset->asset_tag,
                 ],
             )
-            ->assertStatus(302);
-            //->assertRedirect(route('hardware.show', ['hardware' => $asset->id]));;
+            ->assertRedirect(route('hardware.show', $asset));
 
-        // $asset->refresh();
         $asset = Asset::find($asset->id);
         $this->assertNull($asset->assigned_to);
         $this->assertNull($asset->assigned_type);
+        $this->assertNull($asset->accepted);
+        $this->assertNull($asset->expected_checkin);
         $this->assertEquals($achived_status->id, $asset->status_id);
+        $this->assertSoftDeleted($pendingAcceptance);
+        $this->assertNotSoftDeleted($completedAcceptance);
+        $this->assertDatabaseHas('asset_status_events', [
+            'asset_id' => $asset->id,
+            'from_status_id' => $deployable_status->id,
+            'to_status_id' => $achived_status->id,
+        ]);
+        $this->assertDatabaseMissing('action_logs', [
+            'item_type' => Asset::class,
+            'item_id' => $asset->id,
+            'action_type' => 'checkin from',
+        ]);
+        Event::assertNotDispatched(CheckoutableCheckedIn::class);
+    }
 
-        Event::assertDispatched(function (CheckoutableCheckedIn $event) use ($currentTimestamp) {
-            return (int) Carbon::parse($event->action_date)->diffInSeconds($currentTimestamp, true) < 2;
-        }, 1);
+    public function testUndeployableStatusPatchClearsLegacyAssignmentWithoutCreatingCheckinHistory()
+    {
+        Event::fake([CheckoutableCheckedIn::class]);
+
+        $user = User::factory()->create();
+        $deployableStatus = Statuslabel::factory()->rtd()->create();
+        $archivedStatus = Statuslabel::factory()->archived()->create();
+        $asset = Asset::factory()->assignedToUser($user)->create([
+            'status_id' => $deployableStatus->id,
+            'accepted' => 'pending',
+            'expected_checkin' => now()->addDay(),
+        ]);
+        $pendingAcceptance = CheckoutAcceptance::factory()->pending()->create([
+            'checkoutable_type' => Asset::class,
+            'checkoutable_id' => $asset->id,
+            'assigned_to_id' => $user->id,
+        ]);
+
+        $this->actingAs(User::factory()->viewAssets()->editAssets()->create())
+            ->patch(route('hardware.status.update', $asset), [
+                'status_id' => $archivedStatus->id,
+                'status_change_note' => 'Retired without legacy check-in.',
+            ])
+            ->assertRedirect(route('hardware.show', $asset));
+
+        $asset->refresh();
+        $this->assertNull($asset->assigned_to);
+        $this->assertNull($asset->assigned_type);
+        $this->assertNull($asset->accepted);
+        $this->assertNull($asset->expected_checkin);
+        $this->assertSame($archivedStatus->id, $asset->status_id);
+        $this->assertSoftDeleted($pendingAcceptance);
+        $this->assertDatabaseHas('asset_status_events', [
+            'asset_id' => $asset->id,
+            'from_status_id' => $deployableStatus->id,
+            'to_status_id' => $archivedStatus->id,
+            'note' => 'Retired without legacy check-in.',
+        ]);
+        $this->assertDatabaseMissing('action_logs', [
+            'item_type' => Asset::class,
+            'item_id' => $asset->id,
+            'action_type' => 'checkin from',
+        ]);
+        Event::assertNotDispatched(CheckoutableCheckedIn::class);
     }
 
     public function testCurrentLocationIsNotUpdatedOnEdit()
@@ -198,11 +284,46 @@ class EditAssetTest extends TestCase
                 'asset_tags' => $asset->asset_tag,
                 'status_id' => $asset->status_id,
                 'model_id' => $asset->model_id,
+                'model_number_id' => $asset->model_number_id,
             ]);
 
         $asset->refresh();
         $this->assertEquals('New name', $asset->name);
         $this->assertEquals($currentLocation->id, $asset->location_id);
+    }
+
+    public function testImageDeleteConfinesLegacyImagePathToAssetsDirectory(): void
+    {
+        $originalPublicPath = $this->app->publicPath();
+        $temporaryPublicPath = storage_path('framework/testing/public-'.Str::uuid());
+        $asset = Asset::factory()->create([
+            'model_id' => null,
+            'model_number_id' => null,
+            'image' => '../keep.jpg',
+        ]);
+
+        File::ensureDirectoryExists($temporaryPublicPath.'/uploads/assets');
+        File::put($temporaryPublicPath.'/uploads/keep.jpg', 'must remain');
+        File::put($temporaryPublicPath.'/uploads/assets/keep.jpg', 'asset image');
+        $this->app->usePublicPath($temporaryPublicPath);
+
+        try {
+            $this->actingAs(User::factory()->superuser()->create())
+                ->put(route('hardware.update', $asset), [
+                    'redirect_option' => 'item',
+                    'asset_tags' => $asset->asset_tag,
+                    'status_id' => $asset->status_id,
+                    'image_delete' => '1',
+                ])
+                ->assertRedirect(route('hardware.show', $asset));
+
+            $this->assertFileExists($temporaryPublicPath.'/uploads/keep.jpg');
+            $this->assertFileDoesNotExist($temporaryPublicPath.'/uploads/assets/keep.jpg');
+            $this->assertNull($asset->fresh()->image);
+        } finally {
+            $this->app->usePublicPath($originalPublicPath);
+            File::deleteDirectory($temporaryPublicPath);
+        }
     }
 
     public function testEditAcceptsSerialArrayInputFromFormShape(): void
@@ -218,6 +339,7 @@ class EditAssetTest extends TestCase
                 'serials' => [1 => 'SERIAL-ARRAY-1'],
                 'status_id' => $status->id,
                 'model_id' => $asset->model_id,
+                'model_number_id' => $asset->model_number_id,
             ])
             ->assertRedirect(route('hardware.show', $asset));
 

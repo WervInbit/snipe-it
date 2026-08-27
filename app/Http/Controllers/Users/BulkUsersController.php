@@ -3,26 +3,27 @@
 namespace App\Http\Controllers\Users;
 
 use App\Events\UserMerged;
-use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Models\Accessory;
 use App\Models\License;
 use App\Models\Actionlog;
 use App\Models\Asset;
+use App\Models\Company;
+use App\Models\CompanyableScope;
 use App\Models\Group;
 use App\Models\LicenseSeat;
 use App\Models\ConsumableAssignment;
-use App\Models\Consumable;
 use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\CurrentInventory;
-use Carbon\Carbon;
+use App\Services\Assets\LegacyAssetAssignmentCleanupService;
+use App\Services\Users\PrintableUserInventoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class BulkUsersController extends Controller
 {
@@ -35,7 +36,7 @@ class BulkUsersController extends Controller
      * @return \Illuminate\Contracts\View\View | \Illuminate\Http\RedirectResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function edit(Request $request)
+    public function edit(Request $request, PrintableUserInventoryService $printableInventory)
     {
         $this->authorize('view', User::class);
 
@@ -56,6 +57,10 @@ class BulkUsersController extends Controller
             // bulk send assigned inventory
             } elseif ($request->input('bulk_actions') == 'send_assigned') {
                     $this->authorize('update', User::class);
+
+                if (! config('mail.enabled', true)) {
+                    return redirect()->back()->with('error', trans('mail.delivery_disabled'));
+                }
 
                 $users_without_email = 0;
                 foreach ($users as $user) {
@@ -78,7 +83,7 @@ class BulkUsersController extends Controller
             // bulk delete, display the bulk delete confirmation form
             } elseif ($request->input('bulk_actions') == 'delete') {
                 $this->authorize('delete', User::class);
-                return view('users/confirm-bulk-delete')->with('users', $users)->with('statuslabel_list', Helper::statusLabelList());
+                return view('users/confirm-bulk-delete')->with('users', $users);
 
             // merge, confirm they have at least 2 users selected and display the merge screen
             } elseif ($request->input('bulk_actions') == 'merge') {
@@ -92,7 +97,30 @@ class BulkUsersController extends Controller
 
             // bulk password reset, just do the thing
             } elseif ($request->input('bulk_actions') == 'bulkpasswordreset') {
-                foreach ($users as $user) {
+                $this->authorize('update', User::class);
+                if (! config('mail.enabled', true)) {
+                    return redirect()->back()->with('error', trans('mail.password_reset_disabled'));
+                }
+                $passwordResetUserIds = collect($user_raw_array)
+                    ->map(fn ($id) => (int) $id)
+                    ->filter()
+                    ->unique()
+                    ->values();
+                $passwordResetUsers = User::withoutGlobalScope(CompanyableScope::class)
+                    ->whereIn('id', $passwordResetUserIds)
+                    ->get();
+
+                abort_if(
+                    $passwordResetUserIds->isEmpty()
+                    || $passwordResetUsers->count() !== $passwordResetUserIds->count(),
+                    404
+                );
+
+                foreach ($passwordResetUsers as $user) {
+                    $this->authorize('update', $user);
+                }
+
+                foreach ($passwordResetUsers as $user) {
                     if (($user->activated == '1') && ($user->email != '') && ($user->ldap_import != '1')) {
                         $credentials = ['email' => $user->email];
                         Password::sendResetLink($credentials/* , function (Message $message) {
@@ -103,26 +131,11 @@ class BulkUsersController extends Controller
                 return redirect()->back()->with('success', trans('admin/users/message.password_resets_sent'));
 
             } elseif ($request->input('bulk_actions') == 'print') {
-                $users = User::query()
-                    ->with([
-                        'assets.assetlog',
-                        'assets.assignedAssets.assetlog',
-                        'assets.assignedAssets.defaultLoc',
-                        'assets.assignedAssets.location',
-                        'assets.assignedAssets.model.category',
-                        'assets.defaultLoc',
-                        'assets.location',
-                        'assets.model.category',
-                        'accessories.assetlog',
-                        'accessories.category',
-                        'accessories.manufacturer',
-                        'consumables.assetlog',
-                        'consumables.category',
-                        'consumables.manufacturer',
-                        'licenses.category',
-                    ])
-                    ->withTrashed()
-                    ->findMany($request->input('ids'));
+                $actor = $request->user();
+                $users = collect($request->input('ids'))
+                    ->map(fn ($id) => $printableInventory->findFor($actor, (int) $id))
+                    ->filter()
+                    ->values();
 
                 $users->each(fn($user) => $this->authorize('view', $user));
 
@@ -148,114 +161,140 @@ class BulkUsersController extends Controller
     {
         $this->authorize('update', User::class);
 
-        if ((! $request->filled('ids')) || $request->input('ids') <= 0) {
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['required', 'integer', 'distinct', 'exists:users,id'],
+            'location_id' => ['nullable', 'integer', 'exists:locations,id', 'fmcs_location'],
+            'department_id' => ['nullable', 'integer', 'exists:departments,id'],
+            'company_id' => ['nullable', 'integer', 'exists:companies,id'],
+            'manager_id' => ['nullable', 'integer', 'exists:users,id'],
+            'locale' => ['nullable', 'string', 'max:10'],
+            'remote' => ['nullable', 'boolean'],
+            'ldap_import' => ['nullable', 'boolean'],
+            'activated' => ['nullable', 'boolean'],
+            'autoassign_licenses' => ['nullable', 'boolean'],
+            'start_date' => ['nullable', 'date_format:Y-m-d'],
+            'end_date' => ['nullable', 'date_format:Y-m-d'],
+            'city' => ['nullable', 'string', 'max:191'],
+            'groups' => ['nullable', 'array'],
+            'groups.*' => ['nullable', 'integer', 'distinct', 'exists:permission_groups,id'],
+            'null_location_id' => ['nullable', 'boolean'],
+            'null_department_id' => ['nullable', 'boolean'],
+            'null_company_id' => ['nullable', 'boolean'],
+            'null_manager_id' => ['nullable', 'boolean'],
+            'null_start_date' => ['nullable', 'boolean'],
+            'null_end_date' => ['nullable', 'boolean'],
+            'null_locale' => ['nullable', 'boolean'],
+        ]);
+
+        if (($request->has('company_id') || $request->boolean('null_company_id'))
+            && ! Company::canManageUsersCompanies()
+        ) {
+            abort(403);
+        }
+
+        $syncGroups = $request->has('groups');
+        if ($syncGroups && ! $request->user()->isSuperUser()) {
+            abort(403);
+        }
+
+        $userIds = collect($validated['ids'])
+            ->map(fn ($id) => (int) $id)
+            ->reject(fn (int $id) => $id === (int) auth()->id())
+            ->unique()
+            ->values();
+
+        if ($userIds->isEmpty()) {
             return redirect()->back()->with('error', trans('general.no_users_selected'));
         }
-        $user_raw_array = $request->input('ids');
 
-        // Remove the user from any updates.
-        $user_raw_array = array_diff($user_raw_array, [auth()->id()]);
-        $manager_conflict = false;
-        $users = User::whereIn('id', $user_raw_array)->where('id', '!=', auth()->id())->get();
-
-        $return_array = [
-            'success' => trans('admin/users/message.success.update_bulk'),
-        ];
-
-        $this->conditionallyAddItem('location_id')
-            ->conditionallyAddItem('department_id')
-            ->conditionallyAddItem('company_id')
-            ->conditionallyAddItem('locale')
-            ->conditionallyAddItem('remote')
-            ->conditionallyAddItem('ldap_import')
-            ->conditionallyAddItem('activated')
-            ->conditionallyAddItem('start_date')
-            ->conditionallyAddItem('end_date')
-            ->conditionallyAddItem('city')
-            ->conditionallyAddItem('autoassign_licenses');
-
-
-        // If the manager_id is one of the users being updated, generate a warning.
-        if (array_search($request->input('manager_id'), $user_raw_array)) {
-            $manager_conflict = true;
-            $return_array = [
-                'warning' => trans('admin/users/message.bulk_manager_warn'),
-            ];
+        $users = User::whereIn('id', $userIds)->get();
+        if ($users->count() !== $userIds->count()) {
+            return redirect()->back()->with('error', trans('general.no_users_selected'));
         }
 
-        /**
-         * Check to see if the user wants to actually blank out the values vs skip them
-         */
-        if ($request->input('null_location_id')=='1') {
-            $this->update_array['location_id'] = null;
+        foreach ($users as $user) {
+            $this->authorize('update', $user);
         }
 
-        if ($request->input('null_department_id')=='1') {
-            $this->update_array['department_id'] = null;
+        if ($request->filled('manager_id')
+            && $userIds->contains((int) $validated['manager_id'])
+        ) {
+            throw ValidationException::withMessages([
+                'manager_id' => trans('admin/users/message.bulk_manager_warn'),
+            ]);
         }
 
-        if ($request->input('null_manager_id')=='1') {
-            $this->update_array['manager_id'] = null;
-        }
-
-        if ($request->input('null_company_id')=='1') {
-            $this->update_array['company_id'] = null;
-        }
-
-        if ($request->input('null_start_date')=='1') {
-            $this->update_array['start_date'] = null;
-        }
-
-        if ($request->input('null_end_date')=='1') {
-            $this->update_array['end_date'] = null;
-        }
-
-        if ($request->input('null_locale')=='1') {
-            $this->update_array['locale'] = null;
-        }
-
-        if (! $manager_conflict) {
-            $this->conditionallyAddItem('manager_id');
-        }
-        // Save the updated info
-        User::whereIn('id', $user_raw_array)
-            ->where('id', '!=', auth()->id())->update($this->update_array);
-
-        if (array_key_exists('location_id', $this->update_array)){
-            Asset::where('assigned_type', User::class)
-                ->whereIn('assigned_to', $user_raw_array)
-                ->update(['location_id' => $this->update_array['location_id']]);
-        }
-
-        // Only sync groups if groups were selected
-        if ($request->filled('groups')) {
-            foreach ($users as $user) {
-                $user->groups()->sync($request->input('groups'));
+        $updates = [];
+        foreach ([
+            'location_id',
+            'department_id',
+            'company_id',
+            'manager_id',
+            'locale',
+            'remote',
+            'ldap_import',
+            'activated',
+            'start_date',
+            'end_date',
+            'city',
+            'autoassign_licenses',
+        ] as $field) {
+            if ($request->filled($field)) {
+                $updates[$field] = $validated[$field];
             }
         }
 
-        return redirect()->route('users.index')
-            ->with($return_array);
-    }
-
-    /**
-     * Array to store update data per item
-     * @var array
-     */
-    private $update_array = [];
-
-    /**
-     * Adds parameter to update array for an item if it exists in request
-     * @param  string $field field name
-     * @return BulkUsersController Model for Chaining
-     */
-    protected function conditionallyAddItem($field)
-    {
-        if (request()->filled($field)) {
-            $this->update_array[$field] = request()->input($field);
+        foreach ([
+            'null_location_id' => 'location_id',
+            'null_department_id' => 'department_id',
+            'null_company_id' => 'company_id',
+            'null_manager_id' => 'manager_id',
+            'null_start_date' => 'start_date',
+            'null_end_date' => 'end_date',
+            'null_locale' => 'locale',
+        ] as $nullFlag => $field) {
+            if ($request->boolean($nullFlag)) {
+                $updates[$field] = null;
+            }
         }
 
-        return $this;
+        if (array_key_exists('company_id', $updates)) {
+            $updates['company_id'] = Company::getIdForUser($updates['company_id']);
+        }
+
+        $groupIds = collect($validated['groups'] ?? [])
+            ->filter(fn ($id) => $id !== null && $id !== '')
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+
+        $actor = $request->user();
+
+        DB::transaction(function () use ($actor, $groupIds, $syncGroups, $updates, $users): void {
+            foreach ($users as $user) {
+                $canEditAuthFields = $actor->can('canEditAuthFields', $user)
+                    && $actor->can('editableOnDemo');
+                $userUpdates = $updates;
+
+                if (! $canEditAuthFields) {
+                    unset($userUpdates['activated'], $userUpdates['ldap_import']);
+                }
+
+                $user->fill($userUpdates);
+                if (! $user->save()) {
+                    throw ValidationException::withMessages($user->getErrors()->toArray());
+                }
+
+                if ($syncGroups && $canEditAuthFields) {
+                    $user->groups()->sync($groupIds);
+                }
+            }
+        });
+
+        return redirect()->route('users.index')
+            ->with('success', trans('admin/users/message.success.update_bulk'));
     }
 
     /**
@@ -267,83 +306,109 @@ class BulkUsersController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function destroy(Request $request)
+    public function destroy(
+        Request $request,
+        LegacyAssetAssignmentCleanupService $legacyAssignmentCleanup
+    )
     {
-        $this->authorize('update', User::class);
+        $this->authorize('delete', User::class);
 
         if ((! $request->filled('ids')) || (count($request->input('ids')) == 0)) {
             return redirect()->back()->with('error', trans('general.no_users_selected'));
+        }
+
+        if (! $request->boolean('delete_user')) {
+            return redirect()->back()->with('error', trans('admin/users/message.error.delete'));
         }
 
         if (config('app.lock_passwords')) {
             return redirect()->route('users.index')->with('error', trans('general.feature_disabled'));
         }
 
-        $user_raw_array = request('ids');
-
-        if (($key = array_search(auth()->id(), $user_raw_array)) !== false) {
-            unset($user_raw_array[$key]);
-        }
-
-        $users = User::whereIn('id', $user_raw_array)->get();
-        $assets = Asset::whereIn('assigned_to', $user_raw_array)->where('assigned_type', User::class)->get();
-        $accessoryUserRows = DB::table('accessories_checkout')->where('assigned_type', User::class)->whereIn('assigned_to', $user_raw_array)->get();
-        $licenses = DB::table('license_seats')->whereIn('assigned_to', $user_raw_array)->get();
-        $consumableUserRows = DB::table('consumables_users')->whereIn('assigned_to', $user_raw_array)->get();
-
-        if ((($assets->count() > 0) && ((!$request->filled('status_id')) || ($request->input('status_id') == '')))) {
-            return redirect()->route('users.index')->with('error', 'No status selected');
-        }
-
-        $this->logItemCheckinAndDelete($assets, Asset::class);
-        $this->logAccessoriesCheckin($accessoryUserRows);
-        $this->logItemCheckinAndDelete($licenses, License::class);
-
-        Asset::whereIn('id', $assets->pluck('id'))->update([
-            'status_id'     => e(request('status_id')),
-            'assigned_to'   => null,
-            'assigned_type' => null,
-            'expected_checkin' => null,
+        $validated = $request->validate([
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['required', 'integer', 'distinct', 'exists:users,id'],
+            'delete_user' => ['accepted'],
         ]);
 
-        LicenseSeat::whereIn('id', $licenses->pluck('id'))->update(['assigned_to' => null]);
-        ConsumableAssignment::whereIn('id', $consumableUserRows->pluck('id'))->delete();
+        $requestedUserIds = collect($validated['ids'])
+            ->map(fn ($id) => (int) $id)
+            ->reject(fn (int $id) => $id === (int) auth()->id())
+            ->values();
+
+        $users = User::whereIn('id', $requestedUserIds)->get();
+
+        if ($users->count() !== $requestedUserIds->count()) {
+            abort(403);
+        }
 
         foreach ($users as $user) {
-            $user->accessories()->sync([]);
-            if ($request->input('delete_user')=='1') {
+            $this->authorize('delete', $user);
+        }
+
+        $actor = $request->user();
+        if ($users->contains(
+            fn (User $user) => ! $actor->can('canEditAuthFields', $user)
+                || ! $actor->can('editableOnDemo')
+        )) {
+            return redirect()->route('users.index')
+                ->with('error', trans('general.insufficient_permissions'));
+        }
+
+        $authorizedUserIds = $users->modelKeys();
+        $assets = Asset::whereIn('assigned_to', $authorizedUserIds)
+            ->where('assigned_type', User::class)
+            ->get();
+        $accessoryUserRows = DB::table('accessories_checkout')
+            ->where('assigned_type', User::class)
+            ->whereIn('assigned_to', $authorizedUserIds)
+            ->get();
+        $licenses = DB::table('license_seats')
+            ->whereIn('assigned_to', $authorizedUserIds)
+            ->get();
+        $consumableUserRows = DB::table('consumables_users')
+            ->whereIn('assigned_to', $authorizedUserIds)
+            ->get();
+
+        DB::transaction(function () use (
+            $accessoryUserRows,
+            $assets,
+            $consumableUserRows,
+            $legacyAssignmentCleanup,
+            $licenses,
+            $users
+        ): void {
+            $assets->each(
+                fn (Asset $asset) => $legacyAssignmentCleanup->clear($asset)
+            );
+            $this->logAccessoriesCheckin($accessoryUserRows);
+            $this->logLicenseCheckins($licenses);
+
+            LicenseSeat::whereIn('id', $licenses->pluck('id'))->update(['assigned_to' => null]);
+            ConsumableAssignment::whereIn('id', $consumableUserRows->pluck('id'))->delete();
+
+            foreach ($users as $user) {
+                $user->accessories()->sync([]);
                 $user->delete();
             }
-        }
+        });
 
-        $msg = trans('general.bulk_checkin_success');
-        if ($request->input('delete_user')=='1') {
-            $msg = trans('general.bulk_checkin_delete_success');
-        }
-
-
-        return redirect()->route('users.index')->with('success', $msg);
+        return redirect()->route('users.index')
+            ->with('success', trans('general.bulk_checkin_delete_success'));
     }
 
     /**
-     * Generate an action log entry for each of a group of items.
-     * @param $items
-     * @param $itemType string name of items being passed.
+     * Preserve check-in audit history for license seats handled by this shared
+     * user cleanup flow. Assets use silent legacy-state cleanup instead.
      */
-    protected function logItemCheckinAndDelete($items, $itemType)
+    protected function logLicenseCheckins($licenses)
     {
-        foreach ($items as $item) {
-            $item_id = $item->id;
+        foreach ($licenses as $license) {
             $logAction = new Actionlog();
-
-            if ($itemType == License::class){
-                $item_id = $item->license_id;
-            }
-
-            $logAction->item_id = $item_id;
+            $logAction->item_id = $license->license_id;
             // We can't rely on get_class here because the licenses/accessories fetched above are not eloquent models, but simply arrays.
-            $logAction->item_type = $itemType;
-            $logAction->target_id = $item->assigned_to;
+            $logAction->item_type = License::class;
+            $logAction->target_id = $license->assigned_to;
             $logAction->target_type = User::class;
             $logAction->created_by = auth()->id();
             $logAction->note = 'Bulk checkin items';
@@ -374,79 +439,127 @@ class BulkUsersController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function merge(Request $request)
+    public function merge(Request $request, LegacyAssetAssignmentCleanupService $legacyAssignmentCleanup)
     {
         $this->authorize('update', User::class);
+        $this->authorize('delete', User::class);
 
         if (config('app.lock_passwords')) {
             return redirect()->route('users.index')->with('error', trans('general.feature_disabled'));
         }
 
-        $user_ids_to_merge = $request->input('ids_to_merge');
-        $user_ids_to_merge = array_diff($user_ids_to_merge, array($request->input('merge_into_id')));
+        $validated = $request->validate([
+            'ids_to_merge' => ['required', 'array', 'min:1'],
+            'ids_to_merge.*' => ['required', 'integer', 'distinct', 'exists:users,id'],
+            'merge_into_id' => ['required', 'integer', 'exists:users,id'],
+        ]);
 
-        if ((!$request->filled('merge_into_id')) || (count($user_ids_to_merge) < 1)) {
+        $mergeIntoId = (int) $validated['merge_into_id'];
+        $userIdsToMerge = collect($validated['ids_to_merge'])
+            ->map(fn ($id) => (int) $id)
+            ->reject(fn (int $id) => $id === $mergeIntoId)
+            ->unique()
+            ->values();
+
+        if ($userIdsToMerge->isEmpty() || $userIdsToMerge->contains((int) auth()->id())) {
             return redirect()->back()->with('error', trans('general.no_users_selected'));
         }
 
-        // Get the users
-        $merge_into_user = User::find($request->input('merge_into_id'));
-        $users_to_merge = User::whereIn('id', $user_ids_to_merge)->with('assets', 'manager', 'userlog', 'licenses', 'consumables', 'accessories', 'managedLocations','uploads', 'acceptances')->get();
-        $admin = User::find(auth()->id());
+        $mergeIntoUser = User::findOrFail($mergeIntoId);
+        $usersToMerge = User::whereIn('id', $userIdsToMerge)
+            ->with(
+                'assets',
+                'manager',
+                'userlog',
+                'licenses',
+                'consumables',
+                'accessories',
+                'managedLocations',
+                'uploads',
+                'acceptances'
+            )
+            ->get();
 
-        // Walk users
-        foreach ($users_to_merge as $user_to_merge) {
-
-            foreach ($user_to_merge->assets as $asset) {
-                Log::debug('Updating asset: '.$asset->asset_tag . ' to '.$merge_into_user->id);
-                $asset->assigned_to = $request->input('merge_into_id');
-                $asset->save();
-            }
-
-            foreach ($user_to_merge->licenses as $license) {
-                Log::debug('Updating license pivot: '.$license->id . ' to '.$merge_into_user->id);
-                $user_to_merge->licenses()->updateExistingPivot($license->id, ['assigned_to' => $merge_into_user->id]);
-            }
-
-            foreach ($user_to_merge->consumables as $consumable) {
-                Log::debug('Updating consumable pivot: '.$consumable->id . ' to '.$merge_into_user->id);
-                $user_to_merge->consumables()->updateExistingPivot($consumable->id, ['assigned_to' => $merge_into_user->id]);
-            }
-
-            foreach ($user_to_merge->accessories as $accessory) {
-                $user_to_merge->accessories()->updateExistingPivot($accessory->id, ['assigned_to' => $merge_into_user->id]);
-            }
-
-            foreach ($user_to_merge->userlog as $log) {
-                $log->target_id = $merge_into_user->id;
-                $log->save();
-            }
-
-            foreach ($user_to_merge->uploads as $upload) {
-                $upload->item_id = $merge_into_user->id;
-                $upload->save();
-            }
-
-            foreach ($user_to_merge->acceptances as $acceptance) {
-                $acceptance->item_id = $merge_into_user->id;
-                $acceptance->save();
-            }
-
-            User::where('manager_id', '=', $user_to_merge->id)->update(['manager_id' => $merge_into_user->id]);
-
-            foreach ($user_to_merge->managedLocations as $managedLocation) {
-                $managedLocation->manager_id = $merge_into_user->id;
-                $managedLocation->save();
-            }
-
-            $user_to_merge->delete();
-
-            event(new UserMerged($user_to_merge, $merge_into_user, $admin));
-
+        if ($usersToMerge->count() !== $userIdsToMerge->count()) {
+            return redirect()->back()->with('error', trans('general.no_users_selected'));
         }
 
-        return redirect()->route('users.index')->with('success', trans('general.merge_success', ['count' => $users_to_merge->count(), 'into_username' => $merge_into_user->username]));
+        $admin = $request->user();
 
+        $this->authorize('update', $mergeIntoUser);
+        if (
+            ! $admin->can('canEditAuthFields', $mergeIntoUser)
+            || ! $admin->can('editableOnDemo')
+        ) {
+            return redirect()->route('users.index')
+                ->with('error', trans('general.insufficient_permissions'));
+        }
+
+        foreach ($usersToMerge as $userToMerge) {
+            $this->authorize('delete', $userToMerge);
+
+            if (
+                ! $admin->can('canEditAuthFields', $userToMerge)
+                || ! $admin->can('editableOnDemo')
+            ) {
+                return redirect()->route('users.index')
+                    ->with('error', trans('general.insufficient_permissions'));
+            }
+        }
+
+        DB::transaction(function () use (
+            $admin,
+            $legacyAssignmentCleanup,
+            $mergeIntoUser,
+            $usersToMerge
+        ): void {
+            foreach ($usersToMerge as $userToMerge) {
+                foreach ($userToMerge->assets as $asset) {
+                    Log::debug('Clearing retired asset assignment during user merge: '.$asset->asset_tag);
+                    $legacyAssignmentCleanup->clear($asset);
+                }
+
+                foreach ($userToMerge->licenses as $license) {
+                    Log::debug('Updating license pivot: '.$license->id.' to '.$mergeIntoUser->id);
+                    $userToMerge->licenses()->updateExistingPivot($license->id, ['assigned_to' => $mergeIntoUser->id]);
+                }
+
+                foreach ($userToMerge->consumables as $consumable) {
+                    Log::debug('Updating consumable pivot: '.$consumable->id.' to '.$mergeIntoUser->id);
+                    $userToMerge->consumables()->updateExistingPivot($consumable->id, ['assigned_to' => $mergeIntoUser->id]);
+                }
+
+                foreach ($userToMerge->accessories as $accessory) {
+                    $userToMerge->accessories()->updateExistingPivot($accessory->id, ['assigned_to' => $mergeIntoUser->id]);
+                }
+
+                foreach ($userToMerge->userlog as $log) {
+                    $log->target_id = $mergeIntoUser->id;
+                    $log->save();
+                }
+
+                foreach ($userToMerge->uploads as $upload) {
+                    $upload->item_id = $mergeIntoUser->id;
+                    $upload->save();
+                }
+
+                User::where('manager_id', $userToMerge->id)
+                    ->update(['manager_id' => $mergeIntoUser->id]);
+
+                foreach ($userToMerge->managedLocations as $managedLocation) {
+                    $managedLocation->manager_id = $mergeIntoUser->id;
+                    $managedLocation->save();
+                }
+
+                $userToMerge->delete();
+                event(new UserMerged($userToMerge, $mergeIntoUser, $admin));
+            }
+        });
+
+        return redirect()->route('users.index')->with('success', trans('general.merge_success', [
+            'count' => $usersToMerge->count(),
+            'into_username' => $mergeIntoUser->username,
+        ]));
 
     }
 }

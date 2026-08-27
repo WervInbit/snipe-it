@@ -184,6 +184,9 @@
     @endpush
 @endonce
 
+@php($canManageDefinitionLifecycle = ! $item->exists || auth()->user()?->can('manageLifecycle', $item))
+@php($persistedContributionDefinitionIds = $item->exists ? $item->attributeContributions->pluck('attribute_definition_id')->map(fn ($id) => (int) $id)->all() : [])
+
 <div class="box box-default">
     <div class="box-body">
         <div class="row">
@@ -235,8 +238,13 @@
                 <label>{{ __('Status') }}</label>
                 <div class="checkbox" style="margin-top:8px;">
                     <label>
-                        <input type="hidden" name="is_active" value="0">
-                        <input type="checkbox" name="is_active" value="1" @checked((bool) old('is_active', $item->exists ? $item->is_active : true))>
+                        @if($canManageDefinitionLifecycle)
+                            <input type="hidden" name="is_active" value="0">
+                            <input type="checkbox" name="is_active" value="1" @checked((bool) old('is_active', $item->exists ? $item->is_active : true))>
+                        @else
+                            <input type="checkbox" value="1" @checked((bool) $item->is_active) disabled>
+                            <input type="hidden" name="is_active" value="{{ $item->is_active ? '1' : '0' }}">
+                        @endif
                         {{ __('Active') }}
                     </label>
                 </div>

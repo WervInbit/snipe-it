@@ -68,7 +68,9 @@
                                         <a href="{{ route('components.install.create', [$component, 'return_to' => $returnTo]) }}" class="btn btn-xs btn-primary">{{ trans('general.install') }}</a>
                                         <a href="{{ route('components.move_to_stock.create', [$component, 'return_to' => $returnTo]) }}" class="btn btn-xs btn-default">{{ trans('general.to_storage') }}</a>
                                         <a href="{{ route('components.flag_needs_verification.create', [$component, 'return_to' => $returnTo]) }}" class="btn btn-xs btn-warning">{{ trans('general.needs_verification') }}</a>
-                                        <a href="{{ route('components.mark_destruction_pending.create', [$component, 'return_to' => $returnTo]) }}" class="btn btn-xs btn-danger">{{ trans('general.mark_destruction_pending') }}</a>
+                                        @can('destroy', $component)
+                                            <a href="{{ route('components.mark_destruction_pending.create', [$component, 'return_to' => $returnTo]) }}" class="btn btn-xs btn-danger">{{ trans('general.mark_destruction_pending') }}</a>
+                                        @endcan
                                         <a href="{{ route('components.show', $component) }}" class="btn btn-xs btn-default">{{ trans('general.open') }}</a>
                                     </td>
                                 </tr>

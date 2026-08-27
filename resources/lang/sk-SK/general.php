@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Import',
     'import_this_file'      => 'Namapovať polia a spracovať tento súbor',
     'importing'         	=> 'Importujem',
-    'importing_help'        => 'Môžete importovať majetok, príslušenstvo, licencie, komponenty, spotrebný materiál a používateľov cez CSV súbor. <br><br> CSV súbor musí používať ako oddelovač čiarku a obsahovať hlavičky v súlade s definíciou <a href="https://snipe-it.readme.io/docs/importing" target="_new">vzorového CSV uvedeného v dokumentácií</a>.',
+    'importing_help'        => 'Môžete importovať majetok, príslušenstvo, licencie, komponenty, spotrebný materiál a používateľov cez CSV súbor. <br><br> CSV súbor musí používať ako oddelovač čiarku a obsahovať hlavičky v súlade s definíciou <a href=":fork_documentation_url" target="_new">vzorového CSV uvedeného v dokumentácií</a>.',
     'import-history'        => 'Importovať históriu',
     'asset_maintenance'        => 'Opravy majetku',
     'asset_maintenance_report' => 'Report opráv majetku',

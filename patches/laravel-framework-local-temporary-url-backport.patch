@@ -1,0 +1,23 @@
+From 12df688e942117d201bb37ddc7bf035f2e8bf607 Mon Sep 17 00:00:00 2001
+From: Jack Bayliss <jjbayliss@icloud.com>
+Date: Tue, 2 Jun 2026 14:54:37 +0100
+Subject: [PATCH] Backport local temporary URL path encoding to Laravel 11
+
+Source: https://github.com/laravel/framework/commit/12df688e942117d201bb37ddc7bf035f2e8bf607
+
+Laravel 11 does not expose the local temporary upload URL method changed by
+the upstream Laravel 12 patch, so this backport applies the corresponding
+temporary download URL fix to the Laravel 11 implementation.
+
+diff --git a/src/Illuminate/Filesystem/LocalFilesystemAdapter.php b/src/Illuminate/Filesystem/LocalFilesystemAdapter.php
+--- a/src/Illuminate/Filesystem/LocalFilesystemAdapter.php
++++ b/src/Illuminate/Filesystem/LocalFilesystemAdapter.php
+@@ -65,7 +65,7 @@ public function temporaryUrl($path, $expiration, array $options = [])
+         return $url->to($url->temporarySignedRoute(
+             'storage.'.$this->disk,
+             $expiration,
+-            ['path' => $path],
++            ['path' => strtr(rawurlencode($path), ['%2F' => '/'])],
+             absolute: false
+         ));
+     }

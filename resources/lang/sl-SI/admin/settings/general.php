@@ -379,7 +379,7 @@ return [
     'purge_barcodes' => 'Purge Barcodes',
     'help_asterisk_bold'    => 'Besedilo, vneseno kot <code>**text**</code>, bo prikazano krepko',
     'help_blank_to_use'     => 'Pustite prazno, če želite uporabiti vrednost iz <code>:setting_name</code>',
-    'help_default_will_use' => '<code>:default</code> bo uporabil vrednost iz <code>:setting_name</code>. <br>Upoštevajte, da mora vrednost črtnih kod ustrezati ustrezni specifikaciji črtnih kod, da se uspešno ustvari. Za več podrobnosti glejte <a href="https://snipe-it.readme.io/docs/barcodes">the documentation <i class="fa fa-external-link"></i></a> for more details. ',
+    'help_default_will_use' => '<code>:default</code> bo uporabil vrednost iz <code>:setting_name</code>. <br>Upoštevajte, da mora vrednost črtnih kod ustrezati ustrezni specifikaciji črtnih kod, da se uspešno ustvari. Za več podrobnosti glejte <a href=":fork_documentation_url">the documentation <i class="fa fa-external-link"></i></a> for more details. ',
     'asset_id'              => 'ID sredstva',
     'data'               => 'Podatki',
     'default'               => 'Privzeto',

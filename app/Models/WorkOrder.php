@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Traits\HasUploads;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -14,6 +15,8 @@ class WorkOrder extends SnipeModel
 {
     use HasFactory;
     use CompanyableTrait;
+    use HasUploads;
+    use Loggable;
     use SoftDeletes;
 
     public const STATUS_DRAFT = 'draft';
@@ -114,7 +117,7 @@ class WorkOrder extends SnipeModel
             || ($user && !$user->isSuperUser() && $user->company_id === null);
 
         if ($shouldBypassCompanyScope) {
-            $query->withoutGlobalScope(CompanyableScope::class);
+            $query = $query->withoutGlobalScope(CompanyableScope::class);
         }
 
         return parent::resolveRouteBindingQuery($query, $value, $field);
@@ -164,7 +167,7 @@ class WorkOrder extends SnipeModel
 
     public function isVisibleTo(User $user): bool
     {
-        if ($user->isSuperUser() || $user->isAdmin() || $user->hasAccess('workorders.view')) {
+        if ($user->isSuperUser() || $user->isAdmin()) {
             return true;
         }
 
@@ -184,7 +187,7 @@ class WorkOrder extends SnipeModel
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        if ($user->isSuperUser() || $user->isAdmin() || $user->hasAccess('workorders.view')) {
+        if ($user->isSuperUser() || $user->isAdmin()) {
             return $query;
         }
 

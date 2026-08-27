@@ -11,6 +11,8 @@ class StoreAssetsTest extends TestCase
     {
         $this->actingAs(User::factory()->superuser()->create())
             ->get(route('hardware.create'))
-            ->assertOk();
+            ->assertOk()
+            ->assertSee("document.getElementById('rtd_location_id_location_select')", false)
+            ->assertDontSee('user_add(', false);
     }
 }

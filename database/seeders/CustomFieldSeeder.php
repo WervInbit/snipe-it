@@ -5,13 +5,12 @@ namespace Database\Seeders;
 use App\Models\CustomField;
 use App\Models\CustomFieldset;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-class CustomFieldSeeder extends Seeder
+class CustomFieldSeeder extends DestructiveFixtureSeeder
 {
-    public function run()
+    protected function seedFixtures(): void
     {
         $columns = DB::getSchemaBuilder()->getColumnListing('assets');
 

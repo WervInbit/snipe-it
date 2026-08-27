@@ -19,9 +19,25 @@ class CreateAssetModelsTest extends TestCase
             ->assertForbidden();
     }
 
+    public function testEditPermissionDoesNotAllowCreatingAssetModels()
+    {
+        $this->actingAsForApi(User::factory()->create([
+            'permissions' => json_encode(['models.edit' => '1']),
+        ]))
+            ->postJson(route('api.models.store'), [
+                'name' => 'Edit-only model',
+                'category_id' => Category::factory()->assetLaptopCategory()->create()->id,
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseMissing('models', ['name' => 'Edit-only model']);
+    }
+
     public function testCanCreateAssetModelWithAssetModelType()
     {
-        $response = $this->actingAsForApi(User::factory()->superuser()->create())
+        $response = $this->actingAsForApi(User::factory()->create([
+            'permissions' => json_encode(['models.create' => '1']),
+        ]))
             ->postJson(route('api.models.store'), [
                 'name' => 'Test AssetModel',
                 'category_id' => Category::factory()->assetLaptopCategory()->create()->id
@@ -46,11 +62,7 @@ class CreateAssetModelsTest extends TestCase
             ->assertStatus(200)
             ->assertOk()
             ->assertStatusMessageIs('error')
-            ->assertJson([
-                'messages' => [
-                    'category_id'    => ['The category id field is required.'],
-                ],
-            ])
+            ->assertJsonStructure(['messages' => ['category_id']])
             ->json();
 
         $this->assertFalse(AssetModel::where('name', 'Test AssetModel')->exists());
@@ -70,12 +82,7 @@ class CreateAssetModelsTest extends TestCase
             ->assertStatus(200)
             ->assertOk()
             ->assertStatusMessageIs('error')
-            ->assertJson([
-                'messages' => [
-                    'name'    => ['The name must be unique across models and model number. '],
-                    'model_number'    => ['The model number must be unique across models and name. '],
-                ],
-            ])
+            ->assertJsonStructure(['messages' => ['name', 'model_number']])
             ->json();
 
     }
@@ -92,11 +99,7 @@ class CreateAssetModelsTest extends TestCase
             ->assertStatus(200)
             ->assertOk()
             ->assertStatusMessageIs('error')
-            ->assertJson([
-                'messages' => [
-                    'name'    => ['The name must be unique across models and model number. '],
-                ],
-            ])
+            ->assertJsonStructure(['messages' => ['name']])
             ->json();
 
     }

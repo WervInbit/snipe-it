@@ -2,7 +2,9 @@
     'createText' => trans('admin/statuslabels/table.create') ,
     'updateText' => trans('admin/statuslabels/table.update'),
     'helpTitle' => trans('admin/statuslabels/table.about'),
-    'helpText' => trans('admin/statuslabels/table.info'),
+    'helpText' => trans('admin/statuslabels/table.info', [
+        'fork_documentation_url' => route('help.api-compatibility'),
+    ]),
     'formAction' => (isset($item->id)) ? route('statuslabels.update', ['statuslabel' => $item->id]) : route('statuslabels.store'),
 ])
 
@@ -35,6 +37,24 @@
             aria-label="statuslabel_types"
         />
         {!! $errors->first('statuslabel_types', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+    </div>
+</div>
+
+<!-- Stable lifecycle semantics -->
+<div class="form-group{{ $errors->has('lifecycle_stage') ? ' has-error' : '' }}">
+    <label for="lifecycle_stage" class="col-md-3 control-label">
+        {{ trans('admin/statuslabels/table.lifecycle_stage') }}
+    </label>
+    <div class="col-md-7">
+        <x-input.select
+            name="lifecycle_stage"
+            :options="$lifecycle_stages"
+            :selected="old('lifecycle_stage', $item->lifecycle_stage)"
+            style="width: 100%; min-width:400px"
+            aria-label="lifecycle_stage"
+        />
+        <p class="help-block">{{ trans('admin/statuslabels/table.lifecycle_stage_help') }}</p>
+        {!! $errors->first('lifecycle_stage', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
     </div>
 </div>
 

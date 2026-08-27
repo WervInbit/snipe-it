@@ -41,6 +41,21 @@ class UpdateConsumableTest extends TestCase
             ->assertViewIs('consumables.edit');
     }
 
+    public function testCreatePermissionDoesNotAllowUpdatingConsumables(): void
+    {
+        $consumable = Consumable::factory()->create();
+
+        $this->actingAs(User::factory()->createConsumables()->create())
+            ->put(route('consumables.update', $consumable), [
+                'name' => 'Create-only update',
+                'category_id' => $consumable->category_id,
+                'qty' => $consumable->qty,
+            ])
+            ->assertForbidden();
+
+        $this->assertNotSame('Create-only update', $consumable->fresh()->name);
+    }
+
     public function testCannotUpdateConsumableBelongingToAnotherCompany()
     {
         $this->settings->enableMultipleFullCompanySupport();
@@ -98,7 +113,7 @@ class UpdateConsumableTest extends TestCase
             'notes' => 'Some Notes',
         ];
 
-        $this->actingAs(User::factory()->createConsumables()->editConsumables()->create())
+        $this->actingAs(User::factory()->editConsumables()->create())
             ->put(route('consumables.update', $consumable), $data + [
                     'redirect_option' => 'index',
                     'category_type' => 'consumable',

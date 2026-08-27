@@ -7,21 +7,32 @@ use App\Models\TestRun;
 use App\Models\TestResult;
 use App\Models\TestType;
 use App\Models\WorkflowProfile;
-use App\Services\ModelAttributes\EffectiveAttributeResolver;
+use App\Services\WorkflowRunDefinitionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class AgentReportController extends Controller
 {
+    private const MAX_RESULTS_PER_REPORT = 100;
+
     /**
      * Handle a report submission from the local agent.
      */
     public function store(Request $request): JsonResponse
     {
         $token = $request->bearerToken();
-        if (!$token || !hash_equals(config('agent.api_token'), $token)) {
+        $configuredToken = config('agent.api_token');
+
+        if (
+            !is_string($configuredToken)
+            || trim($configuredToken) === ''
+            || !is_string($token)
+            || $token === ''
+            || !hash_equals($configuredToken, $token)
+        ) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
@@ -46,12 +57,12 @@ class AgentReportController extends Controller
     {
         $validator = validator($request->all(), [
             'type' => ['required', 'string', 'in:test_results,workflow_results'],
-            'asset_tag' => ['required', 'string'],
-            'workflow_profile_slug' => ['nullable', 'string'],
-            'results' => ['required', 'array'],
-            'results.*.test_slug' => ['required', 'string'],
+            'asset_tag' => ['required', 'string', 'max:255'],
+            'workflow_profile_slug' => ['nullable', 'string', 'max:255'],
+            'results' => ['required', 'array', 'min:1', 'max:' . self::MAX_RESULTS_PER_REPORT],
+            'results.*.test_slug' => ['required', 'string', 'max:255', 'distinct:strict'],
             'results.*.status' => ['required', 'string', 'in:' . implode(',', TestResult::STATUSES)],
-            'results.*.note' => ['nullable', 'string'],
+            'results.*.note' => ['nullable', 'string', 'max:10000'],
         ]);
 
         if ($validator->fails()) {
@@ -88,43 +99,25 @@ class AgentReportController extends Controller
             ], 422);
         }
 
-        $run = new TestRun();
-        $run->asset()->associate($asset);
-        $run->model_number_id = $asset->model_number_id;
-        $run->workflow_profile_id = $profile->id;
-        $run->profile_name_snapshot = $profile->name;
-        $run->profile_slug_snapshot = $profile->slug;
-        if ($agentUserId) {
-            $run->user_id = $agentUserId;
-        }
-        $run->started_at = now();
-        $run->finished_at = now();
-        $run->save();
-
-        $resolver = app(EffectiveAttributeResolver::class);
-        $resolvedAttributes = $resolver->resolveForAsset($asset);
-        $resolvedByDefinition = $resolvedAttributes->keyBy(fn ($attribute) => $attribute->definition->id);
-
-        $applicableItemIds = TestType::forAsset($asset)->pluck('id')->all();
-        $profile->load(['items.item']);
-        $types = $profile->items
-            ->filter(fn ($profileItem) => $profileItem->item && in_array($profileItem->workflow_item_id, $applicableItemIds, true))
+        $definition = app(WorkflowRunDefinitionService::class)->forProfile($asset, $profile);
+        $resolvedByDefinition = $definition['resolved_by_definition'];
+        $types = $definition['profile_items']
             ->mapWithKeys(function ($profileItem) use ($resolvedByDefinition) {
-            $testType = $profileItem->item;
-            $attribute = null;
+                $testType = $profileItem->item;
+                $attribute = null;
 
-            if ($testType->attribute_definition_id) {
-                $attribute = $resolvedByDefinition->get($testType->attribute_definition_id);
-            }
+                if ($testType->attribute_definition_id) {
+                    $attribute = $resolvedByDefinition->get($testType->attribute_definition_id);
+                }
 
-            return [
-                $testType->slug => [
-                    'type' => $testType,
-                    'attribute' => $attribute,
-                    'profile_item' => $profileItem,
-                ],
-            ];
-        });
+                return [
+                    $testType->slug => [
+                        'type' => $testType,
+                        'attribute' => $attribute,
+                        'profile_item' => $profileItem,
+                    ],
+                ];
+            });
 
         $provided = collect($validated['results'])->keyBy('test_slug');
 
@@ -138,42 +131,82 @@ class AgentReportController extends Controller
             ], 422);
         }
 
-        foreach ($types as $slug => $payload) {
-            /** @var \App\Services\ModelAttributes\ResolvedAttribute $attribute */
-            $attribute = $payload['attribute'];
-            /** @var TestType $type */
-            $type = $payload['type'];
-            $profileItem = $payload['profile_item'];
-            $data = $provided[$slug] ?? null;
+        $missingBlocking = $profile->blocks_sale_readiness
+            ? $types
+                ->filter(fn (array $payload) => $payload['type']->is_required)
+                ->keys()
+                ->diff($provided->keys())
+            : collect();
 
-            $status = $data['status'] ?? TestResult::STATUS_NVT;
-            $note = $data['note'] ?? ($data ? null : 'Not tested by agent');
-
-            $run->results()->create([
-                'workflow_item_id' => $type->id,
-                'workflow_profile_item_id' => $profileItem->id,
-                'attribute_definition_id' => $attribute?->definition->id,
-                'status' => $status,
-                'note' => $note,
-                'expected_value' => $attribute?->value,
-                'expected_raw_value' => $attribute?->rawValue,
-                'is_required' => $type->is_required,
-                'result_label_mode' => $type->result_label_mode
-                    ?: $profileItem->result_label_mode
-                    ?: \App\Models\WorkflowProfileItem::LABEL_MODE_PASS_FAIL,
-                'sort_order' => $profileItem->sort_order,
-            ]);
+        if ($missingBlocking->isNotEmpty()) {
+            return response()->json([
+                'message' => 'Missing required workflow results',
+                'errors' => [
+                    'results' => ['Missing required test slugs: ' . $missingBlocking->implode(', ')],
+                ],
+            ], 422);
         }
 
-        $run->audits()->create([
-            'user_id' => $agentUserId,
-            'field' => 'source',
-            'before' => null,
-            'after' => 'agent',
-            'created_at' => now(),
-        ]);
+        $run = DB::transaction(function () use (
+            $agentUserId,
+            $asset,
+            $profile,
+            $provided,
+            $types,
+            $definition
+        ): TestRun {
+            $run = new TestRun();
+            $run->asset()->associate($asset);
+            $run->model_number_id = $asset->model_number_id;
+            $run->workflow_profile_id = $profile->id;
+            $run->profile_name_snapshot = $profile->name;
+            $run->profile_slug_snapshot = $profile->slug;
+            $run->readiness_context_hash = $definition['readiness_context_hash'];
+            if ($agentUserId) {
+                $run->user_id = $agentUserId;
+            }
+            $run->started_at = now();
+            $run->finished_at = now();
+            $run->save();
 
-        $asset->refreshTestCompletionFlag();
+            foreach ($types as $slug => $payload) {
+                /** @var \App\Services\ModelAttributes\ResolvedAttribute $attribute */
+                $attribute = $payload['attribute'];
+                /** @var TestType $type */
+                $type = $payload['type'];
+                $profileItem = $payload['profile_item'];
+                $data = $provided->get($slug);
+
+                $status = $data['status'] ?? TestResult::STATUS_NVT;
+                $note = $data['note'] ?? ($data ? null : 'Not tested by agent');
+
+                $run->results()->create([
+                    'workflow_item_id' => $type->id,
+                    'workflow_profile_item_id' => $profileItem->id,
+                    'attribute_definition_id' => $attribute?->definition->id,
+                    'status' => $status,
+                    'note' => $note,
+                    'expected_value' => $attribute?->value,
+                    'expected_raw_value' => $attribute?->rawValue,
+                    'is_required' => $type->is_required,
+                    'result_label_mode' => $type->result_label_mode
+                        ?: \App\Models\WorkflowProfileItem::LABEL_MODE_PASS_FAIL,
+                    'sort_order' => $profileItem->sort_order,
+                ]);
+            }
+
+            $run->audits()->create([
+                'user_id' => $agentUserId,
+                'field' => 'source',
+                'before' => null,
+                'after' => 'agent',
+                'created_at' => now(),
+            ]);
+
+            $asset->refreshTestCompletionFlag();
+
+            return $run;
+        });
 
         Log::info('Agent results received for Asset ' . $asset->asset_tag . ' by IP ' . $request->ip());
 

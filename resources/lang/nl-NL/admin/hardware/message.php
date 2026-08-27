@@ -12,10 +12,13 @@ return [
     'labels_generated'   => 'Labels were successfully generated.',
     'error_generating_labels' => 'Error while generating labels.',
     'no_assets_selected' => 'No assets selected.',
+    'legacy_assignment_disabled' => 'Velden voor assettoewijzing zijn uitgeschakeld in deze fork; wijzig in plaats daarvan de levenscyclusstatus van het asset.',
+    'legacy_metadata_read_only' => 'Verouderde checkout-, check-in-, aanvraag- en auditgegevens zijn historisch en kunnen niet worden gewijzigd.',
 
     'create' => [
         'error'   		=> 'Asset is niet aangemaakt, probeer het opnieuw :(',
         'success' 		=> 'Asset is succesvol aangemaakt. :)',
+        'encrypted_warning' => 'Asset is succesvol aangemaakt, maar invoer voor versleutelde aangepaste velden is genegeerd wegens ontbrekende rechten.',
         'success_linked' => 'Asset met tag :tag is succesvol gemaakt. <strong><a href=":link" style="color: white;">Klik hier om te bekijken</a></strong>.',
         'multi_success_linked' => 'Asset with tag :links was created successfully.|:count assets were created succesfully. :links.',
         'partial_failure' => 'An asset was unable to be created. Reason: :failures|:count assets were unable to be created. Reasons: :failures',
@@ -69,9 +72,10 @@ return [
         'file_delete_error'      => 'Het bestand kon niet worden verwijderd',
         'file_missing' => 'Het geselecteerde bestand ontbreekt',
         'file_already_deleted' => 'Het geselecteerde bestand is al verwijderd',
+        'backup_failed' => 'De back-up voorafgaand aan de import is mislukt. De import is niet gestart.',
         'header_row_has_malformed_characters' => 'Een of meer attributen in de kopregel bevatten ongeldige UTF-8-tekens',
         'content_row_has_malformed_characters' => 'Een of meer attributen in de eerste rij inhoud bevat ongeldige UTF-8 tekens',
-        'transliterate_failure' => 'Transliteration from :encoding to UTF-8 failed due to invalid characters in input'
+        'transliterate_failure' => 'Transliteration from :encoding to UTF-8 failed due to invalid characters in input',
     ],
 
 

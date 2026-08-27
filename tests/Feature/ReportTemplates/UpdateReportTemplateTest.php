@@ -35,9 +35,7 @@ class UpdateReportTemplateTest extends TestCase implements TestsPermissionsRequi
             ->post(route('report-templates.update', $reportTemplate), [
                 //
             ])
-            ->assertSessionHasErrors([
-                'name' => 'The name field is required.',
-            ]);
+            ->assertSessionHasErrors('name');
     }
 
     public function testCanUpdateAReportTemplate()

@@ -3,11 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Seeder;
 
-class RolePermissionSeeder extends Seeder
+class RolePermissionSeeder extends DestructiveFixtureSeeder
 {
-    public function run()
+    protected function seedFixtures(): void
     {
         $user = User::where('username', 'admin')->first() ?? User::factory()->firstAdmin()->create();
 

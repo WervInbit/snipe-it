@@ -9,12 +9,24 @@ use Tests\TestCase;
 
 class ConsumableUpdateTest extends TestCase
 {
+    public function testCreatePermissionDoesNotAllowUpdatingConsumables(): void
+    {
+        $consumable = Consumable::factory()->create();
+
+        $this->actingAsForApi(User::factory()->createConsumables()->create())
+            ->patchJson(route('api.consumables.update', $consumable), [
+                'name' => 'Create-only update',
+            ])
+            ->assertForbidden();
+
+        $this->assertNotSame('Create-only update', $consumable->fresh()->name);
+    }
 
     public function testCanUpdateConsumableViaPatchWithoutCategoryType()
     {
         $consumable = Consumable::factory()->create();
 
-        $this->actingAsForApi(User::factory()->superuser()->create())
+        $this->actingAsForApi(User::factory()->editConsumables()->create())
             ->patchJson(route('api.consumables.update', $consumable), [
                 'name' => 'Test Consumable',
             ])

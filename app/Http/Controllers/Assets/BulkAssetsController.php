@@ -7,11 +7,14 @@ use App\Http\Controllers\CheckInOutRequest;
 use App\Http\Controllers\Controller;
 use App\Models\Asset;
 use App\Models\AssetModel;
+use App\Models\Company;
 use App\Models\Statuslabel;
 use App\Models\Setting;
 use App\View\Label;
 use App\Services\QrLabelService;
+use App\Services\Assets\LegacyAssetAssignmentCleanupService;
 use App\Services\Components\AttachedComponentIssueService;
+use App\Support\SameOriginRedirect;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Crypt;
@@ -21,6 +24,7 @@ use Illuminate\Support\Facades\Log;
 use App\Models\CustomField;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
 
@@ -42,7 +46,7 @@ class BulkAssetsController extends Controller
      * @internal param int $assetId
      * @since [v2.0]
      */
-    public function edit(Request $request) : View | RedirectResponse
+    public function edit(Request $request): View|RedirectResponse|Response
     {
         $this->authorize('view', Asset::class);
 
@@ -56,26 +60,19 @@ class BulkAssetsController extends Controller
         $asset_ids = $request->input('ids');
 
         if ($request->input('bulk_actions') === 'checkout') {
-            $status_check =$this->hasUndeployableStatus($asset_ids);
-            if($status_check && $status_check['status'] === true){
-
-                $asset_tags = implode(', ', array_column($status_check['tags'], 'asset_tag'));
-                $asset_ids = $status_check['asset_ids'];
-
-                session()->flash('warning', trans('admin/hardware/message.undeployable', ['asset_tags' => $asset_tags]));
-            }
-
-            $request->session()->flashInput(['selected_assets' => $asset_ids]);
-            return redirect()->route('hardware.bulkcheckout.show');
+            return redirect()->back()
+                ->with('error', trans('admin/hardware/message.legacy_assignment_disabled'));
         }
 
         if ($request->input('bulk_actions') === 'maintenance') {
-            $request->session()->flashInput(['selected_assets' => $asset_ids]);
-            return redirect()->route('maintenances.create');
+            return redirect()->back()
+                ->with('error', trans('general.feature_disabled'));
         }
 
         // Figure out where we need to send the user after the update is complete, and store that in the session
-        $bulk_back_url = request()->headers->get('referer');
+        $bulk_back_url = SameOriginRedirect::sanitize(
+            request()->headers->get('referer')
+        ) ?? route('hardware.index');
         session(['bulk_back_url' => $bulk_back_url]);
 
         $allowed_columns = [
@@ -198,11 +195,9 @@ class BulkAssetsController extends Controller
                     return view('hardware/bulk-delete')->with('assets', $assets);
 
                 case 'restore':
-                    $this->authorize('update', Asset::class);
-                    $assets = Asset::withTrashed()->find($asset_ids);
-                    $assets->each(function ($asset) {
-                        $this->authorize('delete', $asset);
-                    });
+                    $this->authorize('delete', Asset::class);
+                    $assets = Asset::onlyTrashed()->whereIn('id', $asset_ids)->get();
+
                     return view('hardware/bulk-restore')->with('assets', $assets);
 
                 case 'batch-edit':
@@ -233,15 +228,29 @@ class BulkAssetsController extends Controller
      * @internal param array $assets
      * @since [v2.0]
      */
-    public function update(Request $request) : RedirectResponse
-    {
+    public function update(
+        Request $request,
+        LegacyAssetAssignmentCleanupService $legacyAssignmentCleanup
+    ): RedirectResponse {
         $this->authorize('update', Asset::class);
+        $legacyWriteFields = array_merge(Asset::LEGACY_READ_ONLY_FIELDS, [
+            'null_expected_checkin_date',
+            'null_next_audit_date',
+        ]);
+        if ($request->hasAny($legacyWriteFields)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', trans('admin/hardware/message.legacy_metadata_read_only'));
+        }
+
         $has_errors = 0;
         $error_array = array();
 
         // Get the back url from the session and then destroy the session
 
-        $bulk_back_url = $request->session()->pull('bulk_back_url', url()->previous());
+        $bulk_back_url = SameOriginRedirect::sanitize(
+            $request->session()->pull('bulk_back_url', url()->previous())
+        ) ?? route('hardware.index');
 
        $custom_field_columns = CustomField::all()->pluck('db_column')->toArray();
 
@@ -268,8 +277,10 @@ class BulkAssetsController extends Controller
 
         $assets = Asset::whereIn('id', $request->input('ids'))->get();
 
+        $requestedStatus = null;
         if ($request->filled('status_id')) {
             $status = Statuslabel::find($request->input('status_id'));
+            $requestedStatus = $status;
             if ($status && $this->statusRequiresTestAck($status)) {
                 $warnings = [];
                 foreach ($assets as $asset) {
@@ -319,23 +330,18 @@ class BulkAssetsController extends Controller
 
         if (($request->filled('name'))
             || ($request->filled('purchase_date'))
-            || ($request->filled('expected_checkin'))
             || ($request->filled('purchase_cost'))
             || ($request->filled('supplier_id'))
             || ($request->filled('order_number'))
             || ($request->filled('warranty_months'))
             || ($request->filled('rtd_location_id'))
-            || ($request->filled('requestable'))
             || ($request->filled('company_id'))
             || ($request->filled('status_id'))
             || ($request->filled('model_id'))
             || ($request->filled('category_id'))
-            || ($request->filled('next_audit_date'))
             || ($request->filled('asset_eol_date'))
             || ($request->filled('null_name'))
             || ($request->filled('null_purchase_date'))
-            || ($request->filled('null_expected_checkin_date'))
-            || ($request->filled('null_next_audit_date'))
             || ($request->filled('null_asset_eol_date'))
             || ($request->filled('null_notes'))
             || ($request->anyFilled($custom_field_columns))
@@ -358,12 +364,9 @@ class BulkAssetsController extends Controller
                  */
                 $this->conditionallyAddItem('name')
                     ->conditionallyAddItem('purchase_date')
-                    ->conditionallyAddItem('expected_checkin')
                     ->conditionallyAddItem('order_number')
-                    ->conditionallyAddItem('requestable')
                     ->conditionallyAddItem('supplier_id')
                     ->conditionallyAddItem('warranty_months')
-                    ->conditionallyAddItem('next_audit_date')
                     ->conditionallyAddItem('asset_eol_date')
                     ->conditionallyAddItem('notes')
                     ->conditionallyAddItem('category_id');
@@ -406,14 +409,6 @@ class BulkAssetsController extends Controller
 					}
                 }
 
-                if ($request->input('null_expected_checkin_date')=='1') {
-                    $this->update_array['expected_checkin'] = null;
-                }
-
-                if ($request->input('null_next_audit_date')=='1') {
-                    $this->update_array['next_audit_date'] = null;
-                }
-
                 if ($request->input('null_asset_eol_date')=='1') {
                     $this->update_array['asset_eol_date'] = null;
 
@@ -434,10 +429,10 @@ class BulkAssetsController extends Controller
                 }
 
                 if ($request->filled('company_id')) {
-                    $this->update_array['company_id'] = $request->input('company_id');
-                    if ($request->input('company_id') == 'clear') {
-                        $this->update_array['company_id'] = null;
-                    }
+                    $requestedCompanyId = $request->input('company_id') === 'clear'
+                        ? '0'
+                        : $request->input('company_id');
+                    $this->update_array['company_id'] = Company::getIdForCurrentUser($requestedCompanyId);
                 }
 
                 /**
@@ -463,18 +458,7 @@ class BulkAssetsController extends Controller
                         return redirect($bulk_back_url)->with('error', trans('admin/statuslabels/message.does_not_exist'));
                     }
 
-                    // We cannot assign a non-deployable status type if the asset is already assigned.
-                    // This could probably be added to a form request.
-                    // If the asset isn't assigned, we don't care what the status is.
-                    // Otherwise we need to make sure the status type is still a deployable one.
-
-                    $unassigned = $asset->assigned_to == '';
-                    $deployable = $updated_status->deployable == '1' && $asset->assetstatus?->deployable == '1';
-                    $pending =  $updated_status->pending === 1;
-
-                    if ($unassigned || $deployable || $pending) {
-                        $this->update_array['status_id'] = $updated_status->id;
-                    }
+                    $this->update_array['status_id'] = $updated_status->id;
 
                 }
 
@@ -594,6 +578,11 @@ class BulkAssetsController extends Controller
                         }
                     }
 
+                } elseif (
+                    array_key_exists('status_id', $this->update_array)
+                    && $legacyAssignmentCleanup->statusRetiresAssignment($requestedStatus)
+                ) {
+                    $legacyAssignmentCleanup->clear($asset);
                 }  // end if saved
 
             } // end asset foreach
@@ -654,7 +643,9 @@ class BulkAssetsController extends Controller
         $bulk_back_url = route('hardware.index');
 
         if ($request->session()->has('bulk_back_url')) {
-            $bulk_back_url = $request->session()->pull('bulk_back_url');
+            $bulk_back_url = SameOriginRedirect::sanitize(
+                $request->session()->pull('bulk_back_url')
+            ) ?? route('hardware.index');
         }
         $assetIds = $request->get('ids');
 
@@ -675,20 +666,46 @@ class BulkAssetsController extends Controller
         return redirect($bulk_back_url)->with('success', trans('admin/hardware/message.delete.success'));
     }
 
-    public function restore(Request $request) : RedirectResponse
+    public function restore(
+        Request $request,
+        LegacyAssetAssignmentCleanupService $legacyAssignmentCleanup
+    ) : RedirectResponse
     {
-        $this->authorize('update', Asset::class);
-        $assetIds = $request->get('ids');
+        $this->authorize('delete', Asset::class);
+        $assetIds = $request->input('ids', []);
 
-        if (empty($assetIds)) {
+        if (! is_array($assetIds) || $assetIds === []) {
             return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.restore.nothing_updated'));
-        } else {
-            foreach ($assetIds as $key => $assetId) {
-                $asset = Asset::withTrashed()->find($assetId);
-                $asset->restore();
-            } 
-            return redirect()->route('hardware.index')->with('success', trans('admin/hardware/message.restore.success'));
         }
+
+        $assetIds = collect($assetIds)
+            ->filter(fn ($assetId) => is_int($assetId) || (is_string($assetId) && ctype_digit($assetId)))
+            ->map(fn ($assetId) => (int) $assetId)
+            ->filter(fn (int $assetId) => $assetId > 0)
+            ->unique()
+            ->values();
+
+        if ($assetIds->isEmpty()) {
+            return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.restore.nothing_updated'));
+        }
+
+        $assets = Asset::onlyTrashed()
+            ->whereIn('id', $assetIds)
+            ->get();
+
+        if ($assets->isEmpty()) {
+            return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.restore.nothing_updated'));
+        }
+
+        DB::transaction(function () use ($assets, $legacyAssignmentCleanup): void {
+            foreach ($assets as $asset) {
+                if ($asset->restore()) {
+                    $legacyAssignmentCleanup->clear($asset);
+                }
+            }
+        });
+
+        return redirect()->route('hardware.index')->with('success', trans('admin/hardware/message.restore.success'));
     }
     public function hasUndeployableStatus (array $asset_ids)
     {
@@ -714,17 +731,7 @@ class BulkAssetsController extends Controller
 
     private function statusRequiresComponentIssueAck(?Statuslabel $status): bool
     {
-        if (!$status) {
-            return false;
-        }
-
-        $name = strtolower(trim((string) $status->name));
-
-        return Asset::isPreSaleStatus($status)
-            || $name === 'for sale'
-            || str_starts_with($name, 'for sale ')
-            || str_contains($name, 'selling')
-            || Asset::isSoldStatus($status);
+        return Asset::statusRequiresTestAck($status);
     }
 
     private function statusRequiresTestAck(?Statuslabel $status): bool

@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Impordi',
     'import_this_file'      => 'Kaardista väljad ja töötle see fail',
     'importing'         	=> 'Importimine',
-    'importing_help'        => 'CSV-faili kaudu saate importida vahendeid, tarvikuid, litsentse, komponente, kulumaterjale ja kasutajaid. <br><br>CSV peaks olema komadega eraldatud ja vormindatud päistega, mis ühtivad <a href="https://snipe-it.readme.io/docs/importing" target="_new">CSV-de näidistega dokumentatsioonis</a>.',
+    'importing_help'        => 'CSV-faili kaudu saate importida vahendeid, tarvikuid, litsentse, komponente, kulumaterjale ja kasutajaid. <br><br>CSV peaks olema komadega eraldatud ja vormindatud päistega, mis ühtivad <a href=":fork_documentation_url" target="_new">CSV-de näidistega dokumentatsioonis</a>.',
     'import-history'        => 'Impordi ajalugu',
     'asset_maintenance'        => 'Varade hooldus',
     'asset_maintenance_report' => 'Varade hooldusaruanne',

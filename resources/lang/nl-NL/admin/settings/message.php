@@ -11,6 +11,9 @@ return [
         'file_deleted'          => 'De Back-up bestand is met succes verwijderd. ',
         'generated'             => 'Een nieuw Back-up bestand is met succes aangemaakt.',
         'file_not_found'        => 'Die Back-up bestand kon niet gevonden worden op de server.',
+        'invalid_archive'       => 'Dit back-uparchief is ongeldig of bevat niet precies één niet-lege SQL-dump.',
+        'restore_backup_failed' => 'De veiligheidsback-up is mislukt. Het herstel is niet gestart.',
+        'restore_disabled'      => 'Herstellen vanuit een geüploade back-up is uitgeschakeld. Gebruik in plaats daarvan de beoordeelde herstelprocedure voor beheerders.',
         'restore_warning'       => 'Ja, herstellen. Ik bevestig dat dit alle bestaande gegevens die momenteel in de database aanwezig zijn, overschreven worden. Dit zal ook alle bestaande gebruikers uitloggen (inclusief jijzelf).',
         'restore_confirm'       => 'Weet je zeker dat je je database wilt herstellen met :filename?'
     ],
@@ -46,6 +49,7 @@ return [
         'success_pt2' => ' kanaal voor uw testbericht, vergeet niet om op OPSLAAN te klikken om de instellingen op te slaan.',
         '500' => '500 Server Error.',
         'error' => 'Er ging iets mis. :app reageerde met: :error_message',
+        'error_safe' => 'Er ging iets mis bij het verbinden met :app. Controleer het eindpunt en de applicatielogboeken voor details.',
         'error_redirect' => 'FOUT: 301/302 :endpoint geeft een omleiding. Om veiligheidsredenen volgen we geen omleidingen. Gebruik het werkelijke eindpunt.',
         'error_misc' => 'Er ging iets mis. :( ',
         'webhook_fail' => ' webhook notification failed: Check to make sure the URL is still valid.',

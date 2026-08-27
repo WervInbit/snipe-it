@@ -9,7 +9,7 @@
 {{-- Account page content --}}
 @section('content')
 
-@if ($acceptances = \App\Models\CheckoutAcceptance::forUser(Auth::user())->pending()->count())
+@if ($acceptances = \App\Models\CheckoutAcceptance::forUser(Auth::user())->pending()->actionable()->count())
   <div class="row">
     <div class="col-md-12">
       <div class="alert alert alert-warning fade in">
@@ -180,6 +180,7 @@
                   </div>
 
 
+                  @if (config('mail.enabled'))
                   <div class="col-md-12" style="padding-top: 5px;">
                     @if (!empty($user->email))
                       <form action="{{ route('profile.email_assets') }}" method="POST">
@@ -196,6 +197,7 @@
                       </button>
                     @endif
                   </div>
+                  @endif
 
                 <br><br>
               </div>
@@ -371,7 +373,7 @@
                         {{ trans('admin/users/table.location') }}
                       </div>
                       <div class="col-md-9">
-                        {{ link_to_route('locations.show', $user->userloc->name, [$user->userloc->id]) }}
+                        <a href="{{ route('locations.show', $user->userloc->id) }}">{{ $user->userloc->name }}</a>
                       </div>
                     </div>
                   @endif

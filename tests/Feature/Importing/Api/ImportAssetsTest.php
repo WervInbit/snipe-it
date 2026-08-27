@@ -2,18 +2,16 @@
 
 namespace Tests\Feature\Importing\Api;
 
-use App\Mail\CheckoutAssetMail;
 use App\Models\Actionlog as ActionLog;
 use App\Models\Asset;
+use App\Models\AssetModel;
 use App\Models\CustomField;
 use App\Models\Import;
+use App\Models\Statuslabel;
 use App\Models\User;
-use App\Notifications\CheckoutAssetNotification;
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Attributes\Test;
@@ -46,9 +44,10 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
     #[Test]
     public function userWithImportAssetsPermissionCanImportAssets(): void
     {
-        $this->actingAsForApi(User::factory()->canImport()->create());
+        $actor = User::factory()->canImport()->create();
+        $this->actingAsForApi($actor);
 
-        $import = Import::factory()->asset()->create();
+        $import = Import::factory()->asset()->create(['created_by' => $actor->id]);
 
         $this->importFileResponse(['import' => $import->id])->assertOk();
     }
@@ -57,11 +56,14 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
     public function importAsset(): void
     {
 
-        $importFileBuilder = ImportFileBuilder::new();
+        $importFileBuilder = ImportFileBuilder::new(['status' => 'Ready to Deploy']);
         $row = $importFileBuilder->firstRow();
         $import = Import::factory()->asset()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
 
-        $this->actingAsForApi(User::factory()->superuser()->create());
+        $actor = User::factory()->superuser()->create();
+        $userCount = User::count();
+
+        $this->actingAsForApi($actor);
         $this->importFileResponse(['import' => $import->id])
             ->assertOk()
             ->assertExactJson([
@@ -71,42 +73,43 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
             ]);
 
         $newAsset = Asset::query()
-            ->with(['location', 'supplier', 'company', 'assignedAssets', 'defaultLoc', 'assetStatus', 'model.category', 'model.manufacturer'])
-            ->where('serial', $row['serialNumber'])
+            ->with([
+                'location',
+                'supplier',
+                'company',
+                'assignedAssets',
+                'defaultLoc',
+                'assetStatus',
+                'model.category',
+                'model.manufacturer',
+                'model.primaryModelNumber',
+                'modelNumber',
+            ])
+            ->whereRaw('LOWER(serial) = ?', [Str::lower($row['serialNumber'])])
             ->sole();
-
-        $assignee = User::query()->find($newAsset->assigned_to, ['id', 'first_name', 'last_name', 'email', 'username']);
 
         $activityLogs = ActionLog::query()
             ->where('item_type', Asset::class)
             ->where('item_id', $newAsset->id)
             ->get();
 
-        $this->assertCount(2, $activityLogs);
-
-        $this->assertEquals('checkout', $activityLogs[0]->action_type);
+        $this->assertCount(1, $activityLogs);
+        $this->assertEquals('create', $activityLogs[0]->action_type);
+        $this->assertNull($activityLogs[0]->target_id);
         $this->assertEquals(Asset::class, $activityLogs[0]->item_type);
-        $this->assertEquals($assignee->id, $activityLogs[0]->target_id);
-        $this->assertEquals(User::class, $activityLogs[0]->target_type);
-        $this->assertEquals('Checkout from CSV Importer', $activityLogs[0]->note);
-        $this->assertHasTheseActionLogs($newAsset, ['create', 'checkout']); // TODO - order reversed but passes?!
-
-        $this->assertEquals('create', $activityLogs[1]->action_type);
-        $this->assertNull($activityLogs[1]->target_id);
-        $this->assertEquals(Asset::class, $activityLogs[1]->item_type);
-        $this->assertNull($activityLogs[1]->note);
-        $this->assertNull($activityLogs[1]->target_type);
-
-        $this->assertEquals($row['assigneeFullName'], "{$assignee->first_name} {$assignee->last_name}");
-        $this->assertEquals($row['assigneeEmail'], $assignee->email);
-        $this->assertEquals($row['assigneeUsername'], $assignee->username);
+        $this->assertNull($activityLogs[0]->note);
+        $this->assertNull($activityLogs[0]->target_type);
+        $this->assertHasTheseActionLogs($newAsset, ['create']);
+        $this->assertSame($userCount, User::count(), 'Legacy assignee columns must not create a user.');
 
         $this->assertEquals($row['category'], $newAsset->model->category->name);
         $this->assertEquals($row['manufacturerName'], $newAsset->model->manufacturer->name);
         $this->assertEquals($row['itemName'], $newAsset->name);
-        $this->assertEquals($row['tag'], $newAsset->asset_tag);
+        $this->assertSame(Str::upper($row['tag']), $newAsset->asset_tag);
         $this->assertEquals($row['model'], $newAsset->model->name);
         $this->assertEquals($row['modelNumber'], $newAsset->model->model_number);
+        $this->assertEquals($row['modelNumber'], $newAsset->modelNumber->code);
+        $this->assertTrue($newAsset->modelNumber->is($newAsset->model->primaryModelNumber));
         $this->assertEquals($row['purchaseDate'], $newAsset->purchase_date->toDateString());
         $this->assertNull($newAsset->asset_eol_date);
         $this->assertEquals(0, $newAsset->eol_explicit);
@@ -124,22 +127,125 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $this->assertEquals(0, $newAsset->requestable);
         $this->assertEquals($row['location'], $newAsset->defaultLoc->name);
         $this->assertEquals(null, $newAsset->accepted);
-        $this->assertEquals(now()->toDateString(), Carbon::parse($newAsset->last_checkout)->toDateString());
+        $this->assertNull($newAsset->last_checkout);
         $this->assertEquals(0, $newAsset->last_checkin);
         $this->assertEquals(0, $newAsset->expected_checkin);
         $this->assertEquals($row['companyName'], $newAsset->company->name);
-        $this->assertEquals(User::class, $newAsset->assigned_type);
+        $this->assertNull($newAsset->assigned_to);
+        $this->assertNull($newAsset->assigned_type);
         $this->assertNull($newAsset->last_audit_date);
         $this->assertNull($newAsset->next_audit_date);
         $this->assertEquals($row['location'], $newAsset->location->name);
         $this->assertEquals(0, $newAsset->checkin_counter);
-        $this->assertEquals(1, $newAsset->checkout_counter);
+        $this->assertEquals(0, $newAsset->checkout_counter);
         $this->assertEquals(0, $newAsset->requests_counter);
         $this->assertEquals(0, $newAsset->byod);
 
         //Notes is never read.
         // $this->assertEquals($row['notes'], $newAsset->notes);
 
+    }
+
+    #[Test]
+    public function imported_asset_image_is_confined_to_a_filename(): void
+    {
+        $baseBuilder = ImportFileBuilder::new(['status' => 'Ready to Deploy']);
+        $row = $baseBuilder->firstRow();
+        $row['image'] = '../../outside.jpg';
+        $importFileBuilder = new ImportFileBuilder([$row]);
+
+        $actor = User::factory()->superuser()->create();
+        $import = Import::factory()->asset()->create([
+            'created_by' => $actor->id,
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+
+        $this->actingAsForApi($actor);
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $asset = Asset::query()
+            ->whereRaw('LOWER(serial) = ?', [Str::lower($row['serialNumber'])])
+            ->sole();
+
+        $this->assertSame('outside.jpg', $asset->image);
+    }
+
+    #[Test]
+    public function assetsWithDifferentModelNumbersShareTheBaseModelAndSelectTheirPreset(): void
+    {
+        $modelName = 'Shared Model '.Str::random();
+        $rows = ImportFileBuilder::times(2)
+            ->replace(['model' => $modelName])
+            ->all();
+        $rows[0]['modelNumber'] = 'VARIANT-A';
+        $rows[1]['modelNumber'] = 'VARIANT-B';
+        $importFileBuilder = new ImportFileBuilder($rows);
+        $import = Import::factory()->asset()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $model = AssetModel::query()
+            ->with(['modelNumbers', 'primaryModelNumber'])
+            ->where('name', $modelName)
+            ->sole();
+        $assets = Asset::query()
+            ->with('modelNumber')
+            ->whereIn('serial', array_map(
+                fn (string $serial) => Str::upper($serial),
+                $importFileBuilder->pluck('serialNumber'),
+            ))
+            ->get()
+            ->keyBy('serial');
+
+        $this->assertSame(
+            ['VARIANT-A', 'VARIANT-B'],
+            $model->modelNumbers->pluck('code')->sort()->values()->all(),
+        );
+        $this->assertSame('VARIANT-A', $model->primaryModelNumber->code);
+        $this->assertSame(
+            'VARIANT-A',
+            $assets->get(Str::upper($rows[0]['serialNumber']))->modelNumber->code,
+        );
+        $this->assertSame(
+            'VARIANT-B',
+            $assets->get(Str::upper($rows[1]['serialNumber']))->modelNumber->code,
+        );
+    }
+
+    #[Test]
+    public function importingASecondaryModelNumberDoesNotReplaceTheExistingPrimary(): void
+    {
+        $model = AssetModel::factory()->create([
+            'name' => 'Existing Model '.Str::random(),
+            'model_number' => 'PRIMARY-NUMBER',
+        ]);
+        $primary = $model->ensurePrimaryModelNumber();
+        $importFileBuilder = ImportFileBuilder::new([
+            'model' => $model->name,
+            'modelNumber' => 'SECONDARY-NUMBER',
+        ]);
+        $row = $importFileBuilder->firstRow();
+        $import = Import::factory()->asset()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $asset = Asset::query()
+            ->with('modelNumber')
+            ->where('serial', Str::upper($row['serialNumber']))
+            ->sole();
+        $model->refresh();
+
+        $this->assertSame($model->id, $asset->model_id);
+        $this->assertSame('SECONDARY-NUMBER', $asset->modelNumber->code);
+        $this->assertSame($primary->id, $model->primary_model_number_id);
+        $this->assertSame('PRIMARY-NUMBER', $model->model_number);
+        $this->assertCount(2, $model->modelNumbers);
     }
 
     #[Test]
@@ -174,7 +280,7 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
                     '' => [
                         'asset_tag' => [
                             'asset_tag' => [
-                                "An asset with the asset tag {$asset->asset_tag} already exists and an update was not requested. No change was made."
+                                trans('general.import_asset_tag_exists', ['asset_tag' => $asset->asset_tag]),
                             ]
                         ]
                     ]
@@ -196,7 +302,10 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $this->importFileResponse(['import' => $import->id])->assertOk();
 
         $newAssets = Asset::query()
-            ->whereIn('serial', $importFileBuilder->pluck('serialNumber'))
+            ->whereIn('serial', array_map(
+                fn (string $serial) => Str::upper($serial),
+                $importFileBuilder->pluck('serialNumber'),
+            ))
             ->get();
 
         $this->assertCount(1, $newAssets->pluck('company_id')->unique()->all());
@@ -212,7 +321,10 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $this->importFileResponse(['import' => $import->id])->assertOk();
 
         $newAssets = Asset::query()
-            ->whereIn('serial', $importFileBuilder->pluck('serialNumber'))
+            ->whereIn('serial', array_map(
+                fn (string $serial) => Str::upper($serial),
+                $importFileBuilder->pluck('serialNumber'),
+            ))
             ->get();
 
         $this->assertCount(1, $newAssets->pluck('location_id')->unique()->all());
@@ -228,7 +340,10 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $this->importFileResponse(['import' => $import->id])->assertOk();
 
         $newAssets = Asset::query()
-            ->whereIn('serial', $importFileBuilder->pluck('serialNumber'))
+            ->whereIn('serial', array_map(
+                fn (string $serial) => Str::upper($serial),
+                $importFileBuilder->pluck('serialNumber'),
+            ))
             ->get(['supplier_id']);
 
         $this->assertCount(1, $newAssets->pluck('supplier_id')->unique()->all());
@@ -245,7 +360,10 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
 
         $newAssets = Asset::query()
             ->with('model.manufacturer')
-            ->whereIn('serial', $importFileBuilder->pluck('serialNumber'))
+            ->whereIn('serial', array_map(
+                fn (string $serial) => Str::upper($serial),
+                $importFileBuilder->pluck('serialNumber'),
+            ))
             ->get();
 
         $this->assertCount(1, $newAssets->pluck('model.manufacturer_id')->unique()->all());
@@ -262,7 +380,10 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
 
         $newAssets = Asset::query()
             ->with('model.category')
-            ->whereIn('serial', $importFileBuilder->pluck('serialNumber'))
+            ->whereIn('serial', array_map(
+                fn (string $serial) => Str::upper($serial),
+                $importFileBuilder->pluck('serialNumber'),
+            ))
             ->get();
 
         $this->assertCount(1, $newAssets->pluck('model.category_id')->unique()->all());
@@ -279,7 +400,10 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
 
         $newAssets = Asset::query()
             ->with('model')
-            ->whereIn('serial', $importFileBuilder->pluck('serialNumber'))
+            ->whereIn('serial', array_map(
+                fn (string $serial) => Str::upper($serial),
+                $importFileBuilder->pluck('serialNumber'),
+            ))
             ->get();
 
         $this->assertCount(1, $newAssets->pluck('model.name')->unique()->all());
@@ -299,12 +423,17 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $this->actingAsForApi(User::factory()->superuser()->create());
         $this->importFileResponse(['import' => $import->id])->assertOk();
 
+        $expectedStatus = Statuslabel::query()
+            ->where('default_label', 1)
+            ->whereNull('lifecycle_stage')
+            ->firstOrFail();
         $newAsset = Asset::query()
             ->with(['assetStatus'])
-            ->where('serial', $importFileBuilder->firstRow()['serialNumber'])
+            ->where('serial', Str::upper($importFileBuilder->firstRow()['serialNumber']))
             ->sole();
 
-        $this->assertEquals('Ready to Deploy', $newAsset->assetStatus->name);
+        $this->assertTrue($newAsset->assetStatus->is($expectedStatus));
+        $this->assertFalse(Asset::statusRequiresTestAck($newAsset->assetStatus));
         $this->assertNull($newAsset->purchase_date);
         $this->assertNull($newAsset->purchase_cost);
     }
@@ -323,7 +452,7 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $this->importFileResponse(['import' => $import->id])->assertOk();
 
         $newAsset = Asset::query()
-            ->where('serial', $importFileBuilder->firstRow()['serialNumber'])
+            ->where('serial', Str::upper($importFileBuilder->firstRow()['serialNumber']))
             ->sole();
 
         $this->assertEquals(3, $newAsset->warranty_months);
@@ -331,7 +460,7 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
     }
 
     #[Test]
-    public function whenRequiredColumnsAreMissingInImportFile(): void
+    public function missingTagAndModelNameUseGeneratedTagAndNullableModel(): void
     {
         $importFileBuilder = ImportFileBuilder::times(2)
             ->forget(['tag'])
@@ -339,42 +468,28 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
 
         $rows = $importFileBuilder->all();
         $import = Import::factory()->asset()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
+        $actor = User::factory()->superuser()->create();
+        $userCount = User::count();
 
-        $this->actingAsForApi(User::factory()->superuser()->create());
-        $this->importFileResponse(['import' => $import->id])
-            ->assertInternalServerError()
-            ->assertJson([
-                'status' => 'import-errors',
-                'payload' => null,
-                'messages' => [
-                    $rows[0]['itemName'] => [
-                        "Asset \"{$rows[0]['itemName']}\"" => [
-                            'asset_tag' => [
-                                'The asset tag field must be at least 1 characters.',
-                            ],
-                            'model_id' => [
-                                'The model id field is required.'
-                            ]
-                        ]
-                    ],
-                    $rows[1]['itemName'] => [
-                        "Asset \"{$rows[1]['itemName']}\"" => [
-                            'asset_tag' => [
-                                'The asset tag field must be at least 1 characters.',
-                            ],
-                            'model_id' => [
-                                'The model id field is required.'
-                            ]
-                        ]
-                    ]
-                ]
-            ]);
+        $this->actingAsForApi($actor);
+        $this->importFileResponse(['import' => $import->id])->assertOk();
 
         $newAssets = Asset::query()
-            ->whereIn('serial', Arr::pluck($rows, 'serialNumber'))
+            ->whereIn('serial', array_map(
+                fn (string $serial) => Str::upper($serial),
+                Arr::pluck($rows, 'serialNumber'),
+            ))
             ->get();
 
-        $this->assertCount(0, $newAssets);
+        $this->assertCount(2, $newAssets);
+        $this->assertCount(2, $newAssets->pluck('asset_tag')->unique());
+        foreach ($newAssets as $asset) {
+            $this->assertMatchesRegularExpression('/^INBIT-[A-Z]{2}\d{4}$/', $asset->asset_tag);
+            $this->assertNull($asset->model_id);
+            $this->assertNull($asset->assigned_to);
+            $this->assertNull($asset->assigned_type);
+        }
+        $this->assertSame($userCount, User::count());
     }
 
     #[Test]
@@ -385,32 +500,30 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $row = $importFileBuilder->firstRow();
         $import = Import::factory()->asset()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
 
-        $this->actingAsForApi(User::factory()->superuser()->create());
+        $actor = User::factory()->superuser()->create();
+        $userCount = User::count();
+
+        $this->actingAsForApi($actor);
         $this->importFileResponse(['import' => $import->id, 'import-update' => true])->assertOk();
 
         $updatedAsset = Asset::query()
             ->with(['location', 'supplier', 'company', 'defaultLoc', 'assetStatus', 'model.category', 'model.manufacturer'])
             ->find($asset->id);
 
-        $assignee = User::query()->find($updatedAsset->assigned_to, ['id', 'first_name', 'last_name', 'email', 'username']);
-
-        $updatedAttributes = [
-            'category', 'manufacturer_id', 'name', 'tag', 'model_id',
-            'model_number', 'purchase_date', 'purchase_cost', 'warranty_months', 'supplier_id',
-            'location_id', 'company_id', 'serial', 'assigned_to', 'status_id', 'rtd_location_id',
-            'last_checkout', 'requestable', 'updated_at', 'checkout_counter', 'assigned_type'
-        ];
-
-        $this->assertEquals($row['assigneeFullName'], "{$assignee->first_name} {$assignee->last_name}");
-        $this->assertEquals($row['assigneeEmail'], $assignee->email);
-        $this->assertEquals($row['assigneeUsername'], $assignee->username);
+        $updatedAttributes = array_merge([
+            'category', 'category_id', 'manufacturer_id', 'name', 'tag', 'model_id',
+            'model_number', 'model_number_id', 'purchase_date', 'purchase_cost', 'warranty_months', 'supplier_id',
+            'location_id', 'company_id', 'serial', 'status_id', 'rtd_location_id',
+            'archived', 'is_sellable', 'updated_at',
+        ], Asset::LEGACY_READ_ONLY_FIELDS);
 
         $this->assertEquals($row['category'], $updatedAsset->model->category->name);
         $this->assertEquals($row['manufacturerName'], $updatedAsset->model->manufacturer->name);
         $this->assertEquals($row['itemName'], $updatedAsset->name);
-        $this->assertEquals($row['tag'], $updatedAsset->asset_tag);
+        $this->assertSame(Str::upper($row['tag']), $updatedAsset->asset_tag);
         $this->assertEquals($row['model'], $updatedAsset->model->name);
         $this->assertEquals($row['modelNumber'], $updatedAsset->model->model_number);
+        $this->assertEquals($row['modelNumber'], $updatedAsset->modelNumber->code);
         $this->assertEquals($row['purchaseDate'], $updatedAsset->purchase_date->toDateString());
         $this->assertEquals($row['purchaseCost'], $updatedAsset->purchase_cost);
         $this->assertEquals($row['status'], $updatedAsset->assetStatus->name);
@@ -419,15 +532,181 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $this->assertEquals($row['location'], $updatedAsset->defaultLoc->name);
         $this->assertEquals($row['companyName'], $updatedAsset->company->name);
         $this->assertEquals($row['location'], $updatedAsset->location->name);
-        $this->assertEquals(1, $updatedAsset->checkout_counter);
-        $this->assertEquals(user::class, $updatedAsset->assigned_type);
-
-        //RequestAble is always updated regardless of initial value.
-        // $this->assertEquals($asset->requestable, $updatedAsset->requestable);
+        $this->assertNull($updatedAsset->assigned_to);
+        $this->assertNull($updatedAsset->assigned_type);
+        $this->assertEquals(0, $updatedAsset->checkout_counter);
+        $this->assertSame($userCount, User::count(), 'Legacy assignee columns must not create a user.');
+        $this->assertFalse(
+            $updatedAsset->assetlog()->where('action_type', 'checkout')->exists(),
+            'Asset imports must not synthesize checkout history.'
+        );
+        foreach (Asset::LEGACY_READ_ONLY_FIELDS as $field) {
+            $this->assertSame(
+                $asset->getRawOriginal($field),
+                $updatedAsset->getRawOriginal($field),
+                "Asset imports must preserve historical [{$field}] metadata.",
+            );
+        }
 
         $this->assertEquals(
             Arr::except($asset->attributesToArray(), $updatedAttributes),
             Arr::except($updatedAsset->attributesToArray(), $updatedAttributes),
+        );
+    }
+
+    #[Test]
+    public function updateImportCanClearTheByodFlag(): void
+    {
+        $asset = Asset::factory()->create(['byod' => true]);
+        $row = ImportFileBuilder::new()->firstRow();
+        $row['tag'] = $asset->asset_tag;
+        $row['byod'] = 'FALSE';
+        $importFileBuilder = new ImportFileBuilder([$row]);
+        $import = Import::factory()->asset()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse([
+            'import' => $import->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $this->assertFalse((bool) $asset->fresh()->byod);
+    }
+
+    #[Test]
+    public function updateImportPreservesTheByodFlagWhenTheColumnIsMissing(): void
+    {
+        $asset = Asset::factory()->create(['byod' => true]);
+        $importFileBuilder = ImportFileBuilder::new(['tag' => $asset->asset_tag]);
+        $import = Import::factory()->asset()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse([
+            'import' => $import->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $this->assertTrue((bool) $asset->fresh()->byod);
+    }
+
+    #[Test]
+    public function invalidPurchaseDateDoesNotBecomeTheUnixEpoch(): void
+    {
+        $importFileBuilder = ImportFileBuilder::new([
+            'purchaseDate' => 'definitely-not-a-date',
+        ]);
+        $row = $importFileBuilder->firstRow();
+        $import = Import::factory()->asset()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $asset = Asset::query()
+            ->where('serial', Str::upper($row['serialNumber']))
+            ->sole();
+
+        $this->assertNull($asset->purchase_date);
+    }
+
+    #[Test]
+    public function assetImportMappingsCannotWriteLegacyMetadataOrCreateAnAssignee(): void
+    {
+        $asset = Asset::factory()->create(['name' => 'Historical Asset']);
+        $legacyValues = [
+            'requestable' => 1,
+            'last_checkin' => '2024-01-02 03:04:05',
+            'last_checkout' => '2024-01-03 04:05:06',
+            'expected_checkin' => '2024-02-01',
+            'last_audit_date' => '2024-01-04 05:06:07',
+            'next_audit_date' => '2024-03-01',
+        ];
+        DB::table('assets')->where('id', $asset->id)->update($legacyValues);
+        $historicalSnapshot = (array) DB::table('assets')
+            ->where('id', $asset->id)
+            ->first(Asset::LEGACY_READ_ONLY_FIELDS);
+
+        $row = ImportFileBuilder::new()->firstRow();
+        $row['tag'] = $asset->asset_tag;
+        $row['Legacy Requestable'] = '0';
+        $row['Legacy Last Checkin'] = '2030-01-02 03:04:05';
+        $row['Legacy Last Checkout'] = '2030-01-03 04:05:06';
+        $row['Legacy Expected Checkin'] = '2030-02-01';
+        $row['Legacy Last Audit'] = '2030-01-04 05:06:07';
+        $row['Legacy Next Audit'] = '2030-03-01';
+        $row['Legacy Checkout Type'] = 'user';
+        $row['Legacy Checkout Location'] = 'Must Not Exist';
+        $row['Legacy Full Name'] = 'Must Not Exist';
+        $row['Legacy Email'] = 'must-not-exist@example.test';
+        $row['Legacy Username'] = 'must-not-exist';
+        $row['Legacy Assigned To'] = '999999';
+        $row['Legacy Assigned Type'] = User::class;
+
+        $importFileBuilder = new ImportFileBuilder([$row]);
+        $import = Import::factory()->asset()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+        $actor = User::factory()->superuser()->create();
+        $userCount = User::count();
+        $legacyLogCount = ActionLog::query()
+            ->where('item_type', Asset::class)
+            ->where('item_id', $asset->id)
+            ->where(function ($query) {
+                $query->where('action_type', 'checkout')
+                    ->orWhere('action_type', 'like', 'checkin%')
+                    ->orWhere('action_type', 'audit');
+            })
+            ->count();
+
+        $this->actingAsForApi($actor);
+        $this->importFileResponse([
+            'import' => $import->id,
+            'import-update' => true,
+            'column-mappings' => [
+                'Legacy Requestable' => 'requestable',
+                'Legacy Last Checkin' => 'last_checkin',
+                'Legacy Last Checkout' => 'last_checkout',
+                'Legacy Expected Checkin' => 'expected_checkin',
+                'Legacy Last Audit' => 'last_audit_date',
+                'Legacy Next Audit' => 'next_audit_date',
+                'Legacy Checkout Type' => 'checkout_class',
+                'Legacy Checkout Location' => 'checkout_location',
+                'Legacy Full Name' => 'full_name',
+                'Legacy Email' => 'email',
+                'Legacy Username' => 'username',
+                'Legacy Assigned To' => 'assigned_to',
+                'Legacy Assigned Type' => 'assigned_type',
+            ],
+        ])->assertOk();
+
+        $this->assertSame(
+            $historicalSnapshot,
+            (array) DB::table('assets')
+                ->where('id', $asset->id)
+                ->first(Asset::LEGACY_READ_ONLY_FIELDS),
+        );
+        $this->assertDatabaseHas('assets', [
+            'id' => $asset->id,
+            'assigned_to' => null,
+            'assigned_type' => null,
+        ]);
+        $this->assertSame($userCount, User::count());
+        $this->assertSame(
+            $legacyLogCount,
+            ActionLog::query()
+                ->where('item_type', Asset::class)
+                ->where('item_id', $asset->id)
+                ->where(function ($query) {
+                    $query->where('action_type', 'checkout')
+                        ->orWhere('action_type', 'like', 'checkin%')
+                        ->orWhere('action_type', 'audit');
+                })
+                ->count(),
         );
     }
 
@@ -443,7 +722,10 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
             'companyName'         => $faker['purchaseCost'],
             'itemName'            => $faker['modelNumber'],
             'location'            => $faker['assigneeUsername'],
-            'manufacturerName'    => $faker['status'],
+            // Keep the shuffled status mapping deterministic. The builder's
+            // random Archived value correctly archives the imported asset,
+            // which conflicts with this test's non-archived field assertions.
+            'manufacturerName'    => 'Ready to Deploy',
             'model'               => $faker['itemName'],
             'modelNumber'         => $faker['category'],
             'notes'               => $faker['notes'],
@@ -459,7 +741,10 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $importFileBuilder = new ImportFileBuilder([$row]);
         $import = Import::factory()->asset()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
 
-        $this->actingAsForApi(User::factory()->superuser()->create());
+        $actor = User::factory()->superuser()->create();
+        $userCount = User::count();
+
+        $this->actingAsForApi($actor);
 
         $this->importFileResponse([
             'import' => $import->id,
@@ -487,19 +772,13 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
 
         $asset = Asset::query()
             ->with(['location', 'supplier', 'company', 'assignedAssets', 'defaultLoc', 'assetStatus', 'model.category', 'model.manufacturer'])
-            ->where('serial', $row['assigneeUsername'])
+            ->whereRaw('LOWER(serial) = ?', [Str::lower($row['assigneeUsername'])])
             ->sole();
-
-        $assignee = User::query()->find($asset->assigned_to, ['id', 'first_name', 'last_name', 'email', 'username']);
-
-        $this->assertEquals($row['warrantyInMonths'], "{$assignee->first_name} {$assignee->last_name}");
-        $this->assertEquals($row['tag'], $assignee->email);
-        $this->assertEquals($row['location'], $assignee->username);
 
         $this->assertEquals($row['modelNumber'], $asset->model->category->name);
         $this->assertEquals($row['assigneeEmail'], $asset->model->manufacturer->name);
         $this->assertEquals($row['model'], $asset->name);
-        $this->assertEquals($row['serialNumber'], $asset->asset_tag);
+        $this->assertSame(Str::upper($row['serialNumber']), $asset->asset_tag);
         $this->assertEquals($row['purchaseCost'], $asset->model->name);
         $this->assertEquals($row['itemName'], $asset->model->model_number);
         $this->assertEquals($row['supplierName'], $asset->purchase_date->toDateString());
@@ -521,16 +800,22 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $this->assertNull($asset->deprecate);
         $this->assertEquals(0, $asset->requestable);
         $this->assertEquals(null, $asset->accepted);
-        $this->assertEquals(now()->toDateString(), Carbon::parse($asset->last_checkout)->toDateString());
+        $this->assertNull($asset->last_checkout);
         $this->assertEquals(0, $asset->last_checkin);
         $this->assertEquals(0, $asset->expected_checkin);
-        $this->assertEquals(User::class, $asset->assigned_type);
+        $this->assertNull($asset->assigned_to);
+        $this->assertNull($asset->assigned_type);
         $this->assertNull($asset->last_audit_date);
         $this->assertNull($asset->next_audit_date);
         $this->assertEquals(0, $asset->checkin_counter);
-        $this->assertEquals(1, $asset->checkout_counter);
+        $this->assertEquals(0, $asset->checkout_counter);
         $this->assertEquals(0, $asset->requests_counter);
         $this->assertEquals(0, $asset->byod);
+        $this->assertSame($userCount, User::count(), 'Legacy assignee columns must not create a user.');
+        $this->assertFalse(
+            $asset->assetlog()->where('action_type', 'checkout')->exists(),
+            'Asset imports must not synthesize checkout history.'
+        );
     }
 
     #[Test]
@@ -558,7 +843,9 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $this->actingAsForApi(User::factory()->superuser()->create());
         $this->importFileResponse(['import' => $import->id])->assertOk();
 
-        $newAsset = Asset::query()->where('serial', $importFileBuilder->firstRow()['serialNumber'])->sole();
+        $newAsset = Asset::query()
+            ->where('serial', Str::upper($importFileBuilder->firstRow()['serialNumber']))
+            ->sole();
 
         $this->assertEquals($macAddress, $newAsset->getAttribute($customField->db_column));
     }
@@ -588,7 +875,9 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         $this->actingAsForApi(User::factory()->superuser()->create());
         $this->importFileResponse(['import' => $import->id])->assertOk();
 
-        $asset = Asset::query()->where('serial', $importFileBuilder->firstRow()['serialNumber'])->sole();
+        $asset = Asset::query()
+            ->where('serial', Str::upper($importFileBuilder->firstRow()['serialNumber']))
+            ->sole();
         $encryptedMacAddress = $asset->getAttribute($customField->db_column);
 
         $this->assertNotEquals($encryptedMacAddress, $macAddress);

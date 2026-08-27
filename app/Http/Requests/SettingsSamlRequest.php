@@ -100,12 +100,16 @@ class SettingsSamlRequest extends FormRequest
                 // key regeneration requested, no certificate defined yet or previous custom certicate was removed
                 error_log('regen');
                 $cert_updated = true;
+                $certificateIdentity = trim((string) config('app.name'));
+                $certificateIdentity = $certificateIdentity !== ''
+                    ? mb_strcut($certificateIdentity, 0, 64, 'UTF-8')
+                    : 'Inbit Device Refurbishment';
                 $dn = [
                     'countryName' => 'US',
                     'stateOrProvinceName' => 'N/A',
                     'localityName' => 'N/A',
-                    'organizationName' => 'Snipe-IT',
-                    'commonName' => 'Snipe-IT',
+                    'organizationName' => $certificateIdentity,
+                    'commonName' => $certificateIdentity,
                 ];
 
                 $pkey = openssl_pkey_new([

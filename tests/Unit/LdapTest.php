@@ -27,10 +27,46 @@ class LdapTest extends TestCase
         $this->assertEquals('hello',$blah,"LDAP_connect should return 'hello'");
     }
 
+    public function testConnectThrowsWhenStartTlsFails(): void
+    {
+        $this->settings->enableLdap()->set(['ldap_tls' => 1]);
+
+        $this->getFunctionMock('App\\Models', 'ldap_connect')
+            ->expects($this->once())
+            ->willReturn('hello');
+        $this->getFunctionMock('App\\Models', 'ldap_set_option')
+            ->expects($this->exactly(3))
+            ->willReturn(true);
+        $this->getFunctionMock('App\\Models', 'ldap_start_tls')
+            ->expects($this->once())
+            ->willReturn(false);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('STARTTLS failed.');
+
+        Ldap::connectToLdap();
+    }
+
+    public function testConnectReturnsConnectionWhenStartTlsSucceeds(): void
+    {
+        $this->settings->enableLdap()->set(['ldap_tls' => 1]);
+
+        $this->getFunctionMock('App\\Models', 'ldap_connect')
+            ->expects($this->once())
+            ->willReturn('hello');
+        $this->getFunctionMock('App\\Models', 'ldap_set_option')
+            ->expects($this->exactly(3))
+            ->willReturn(true);
+        $this->getFunctionMock('App\\Models', 'ldap_start_tls')
+            ->expects($this->once())
+            ->willReturn(true);
+
+        $this->assertSame('hello', Ldap::connectToLdap());
+    }
+
     // other test cases - with/without client-side certs?
     // with/without LDAP version 3?
     // with/without ignore cert validation?
-    // test (and mock) ldap_start_tls() ?
 
     public function testBindAdmin()
     {
@@ -104,6 +140,51 @@ class LdapTest extends TestCase
 
         $results = Ldap::findAndBindUserLdap("username","password");
         $this->assertEqualsCanonicalizing(["count" =>1,0 =>['sn' => 'Surname','firstname' => 'FirstName']],$results);
+    }
+
+    public function testFindAndBindEscapesUsernameForDnAndFilterContexts(): void
+    {
+        $this->settings->enableLdap()->set([
+            'ldap_tls' => 0,
+            'ldap_username_field' => 'uid',
+            'ldap_auth_filter_query' => 'uid=',
+            'ldap_filter' => '&',
+            'is_ad' => 0,
+        ]);
+
+        $this->getFunctionMock('App\\Models', 'ldap_connect')
+            ->expects($this->once())
+            ->willReturn('ldap-connection');
+        $this->getFunctionMock('App\\Models', 'ldap_set_option')
+            ->expects($this->exactly(3))
+            ->willReturn(true);
+        $this->getFunctionMock('App\\Models', 'ldap_bind')
+            ->expects($this->once())
+            ->with(
+                'ldap-connection',
+                'uid=admin\\2c*)(uid\\3d*),CN=Users,DC=ad,DC=example,Dc=com',
+                'password'
+            )
+            ->willReturn(true);
+        $this->getFunctionMock('App\\Models', 'ldap_search')
+            ->expects($this->once())
+            ->with(
+                'ldap-connection',
+                'CN=Users,DC=ad,DC=example,Dc=com',
+                '(&(uid=admin,\\2a\\29\\28uid=\\2a\\29))'
+            )
+            ->willReturn(true);
+        $this->getFunctionMock('App\\Models', 'ldap_first_entry')
+            ->expects($this->once())
+            ->willReturn(true);
+        $this->getFunctionMock('App\\Models', 'ldap_get_attributes')
+            ->expects($this->once())
+            ->willReturn(['count' => 0]);
+
+        $this->assertSame(
+            ['count' => 0],
+            Ldap::findAndBindUserLdap('admin,*)(uid=*)', 'password')
+        );
     }
 
     public function testFindAndBindBadPassword()

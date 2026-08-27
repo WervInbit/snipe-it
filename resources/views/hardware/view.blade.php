@@ -680,21 +680,6 @@
                     </li>
                     @endcan
 
-                    @can('view', \App\Models\Asset::class)
-                    <li>
-                        <a href="#assets" data-toggle="tab">
-                          <span class="hidden-lg hidden-md">
-                            <x-icon type="assets" class="fa-2x" />
-                          </span>
-                            <span class="hidden-xs hidden-sm">
-                                {{ trans('general.assets') }}
-                                {!! ($asset->assignedAssets()->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($asset->assignedAssets()->count()).'</span>' : '' !!}
-
-                          </span>
-                        </a>
-                    </li>
-                    @endcan
-
                     @if ($asset->assignedAccessories->count() > 0)
                         @can('view', \App\Models\Accessory::class)
                         <li>
@@ -746,19 +731,9 @@
                         </a>
                     </li>
 
-                    <li>
-                        <a href="#maintenances" data-toggle="tab">
-                          <span class="hidden-lg hidden-md">
-                              <x-icon type="maintenances" class="fa-2x" />
-                          </span>
-                            <span class="hidden-xs hidden-sm">{{ trans('general.maintenances') }}
-                                {!! ($asset->maintenances()->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($asset->maintenances()->count()).'</span>' : '' !!}
-                          </span>
-                        </a>
-                    </li>
                     @endcan
 
-                    @can('files', $asset)
+                    @can('viewFiles', $asset)
                     <li>
                         <a href="#files" data-toggle="tab">
                           <span class="hidden-lg hidden-md">
@@ -771,45 +746,24 @@
                     </li>
                     @endcan
 
-                    @can('view', $asset->model)
-                    <li>
-                        <a href="#modelfiles" data-toggle="tab">
-                          <span class="hidden-lg hidden-md">
-                              <x-icon type="more-files" class="fa-2x" />
-                          </span>
-                            <span class="hidden-xs hidden-sm">
-                            {{ trans('general.additional_files') }}
-                                {!! ($asset->model) && ($asset->model->uploads->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($asset->model->uploads->count()).'</span>' : '' !!}
-                          </span>
-                        </a>
-                    </li>
-                    @endcan
-
-
-                    @can('update', \App\Models\Asset::class)
+                    @if ($asset->model)
+                        @can('viewFiles', $asset->model)
                         <li>
-                            <a href="#" onclick="var f=document.getElementById('upload-form');f.style.display=f.style.display==='none'?'block':'none';return false;">
-                                <span class="hidden-lg hidden-xl hidden-md">
-                                    <x-icon type="paperclip" class="fa-2x" />
-                                </span>
+                            <a href="#modelfiles" data-toggle="tab">
+                              <span class="hidden-lg hidden-md">
+                                  <x-icon type="more-files" class="fa-2x" />
+                              </span>
                                 <span class="hidden-xs hidden-sm">
-                                    <x-icon type="paperclip" />
-                                    {{ trans('button.upload') }}
-                                </span>
+                                {{ trans('general.model_resources') }}
+                                    {!! ($asset->model->uploads->count() > 0 ) ? '<span class="badge badge-secondary">'.number_format($asset->model->uploads->count()).'</span>' : '' !!}
+                              </span>
                             </a>
                         </li>
-                    @endcan
+                        @endcan
+                    @endif
+
 
                 </ul>
-
-                @can('update', \App\Models\Asset::class)
-                    <form id="upload-form" method="POST" action="{{ route('ui.files.store', ['object_type' => 'assets', 'id' => $asset->id]) }}" enctype="multipart/form-data" style="display:none; margin:15px 0;">
-                        @csrf
-                        <input type="file" name="file[]" multiple class="form-control" accept="{{ config('filesystems.allowed_upload_mimetypes') }}">
-                        <textarea class="form-control" name="notes" placeholder="{{ trans('general.notes') }}" rows="3" style="margin-top:10px;"></textarea>
-                        <button type="submit" class="btn btn-primary" style="margin-top:10px;">{{ trans('button.upload') }}</button>
-                    </form>
-                @endcan
 
                 <div class="tab-content">
                     <div class="tab-pane fade in active" id="details">
@@ -1347,7 +1301,7 @@
                                                 {!! $asset->checkInvalidNextAuditDate() ? '<i class="fas fa-exclamation-triangle text-orange" aria-hidden="true"></i>' : '' !!}
                                                 {{ Helper::getFormattedDateObject($audit_log->created_at, 'datetime', false) }}
                                                 @if ($audit_log->user)
-                                                    (by {{ link_to_route('users.show', $audit_log->user->present()->fullname(), [$audit_log->user->id]) }})
+                                                    (by <a href="{{ route('users.show', $audit_log->user->id) }}">{{ $audit_log->user->present()->fullname() }}</a>)
                                                 @endif
 
                                             </div>
@@ -1972,7 +1926,9 @@
                                                         {{ Helper::getFormattedDateObject($seat->license->expiration_date, 'date', false) }}
                                                     </td>
                                                     <td>
-                                                        <a href="{{ route('licenses.checkin', $seat->id) }}" class="btn btn-sm bg-purple hidden-print" data-tooltip="true">{{ trans('general.checkin') }}</a>
+                                                        @can('checkin', $seat->license)
+                                                            <a href="{{ route('licenses.checkin', $seat->id) }}" class="btn btn-sm bg-purple hidden-print" data-tooltip="true">{{ trans('general.checkin') }}</a>
+                                                        @endcan
                                                     </td>
                                                 </tr>
                                             @endif
@@ -1987,43 +1943,6 @@
                     @can('view', \App\Models\ComponentInstance::class)
                         @include('components.partials.asset-tab')
                     @endcan
-
-                    @can('view', \App\Models\Asset::class)
-                    <div class="tab-pane fade" id="assets">
-                        <div class="row{{($asset->assignedAssets->count() > 0 ) ? '' : ' hidden-print'}}">
-                            <div class="col-md-12">
-
-                                @include('partials.asset-bulk-actions')
-
-                                    <!-- checked out assets table -->
-                                    <div class="table-responsive">
-
-                                        <table
-                                                data-columns="{{ \App\Presenters\AssetPresenter::dataTableLayout() }}"
-                                                data-cookie-id-table="assetsTable"
-                                                data-id-table="assetsTable"
-                                                data-side-pagination="server"
-                                                data-sort-order="asc"
-                                                data-toolbar="#assetsBulkEditToolbar"
-                                                data-bulk-button-id="#bulkAssetEditButton"
-                                                data-bulk-form-id="#assetsBulkForm"
-                                                id="assetsListingTable"
-                                                class="table table-striped snipe-table"
-                                                data-url="{{route('api.assets.index',['assigned_to' => $asset->id, 'assigned_type' => 'App\Models\Asset']) }}"
-                                                data-export-options='{
-                              "fileName": "export-assets-{{ str_slug($asset->name) }}-assets-{{ date('Y-m-d') }}",
-                              "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                              }'>
-
-                                        </table>
-                                    </div>
-
-
-                            </div><!-- /col -->
-                        </div> <!-- row -->
-                    </div> <!-- /.tab-pane software -->
-                    @endcan
-
 
                 @can('view', \App\Models\Accessory::class)
                 <div class="tab-pane" id="accessories_assigned">
@@ -2220,13 +2139,21 @@
                     <div class="tab-pane fade" id="images">
                         @php
                             $user = auth()->user();
-                            $uploadRoles = ['superuser', 'admin', 'supervisor', 'senior-refurbisher', 'refurbisher'];
-                            $deleteRoles = ['superuser', 'admin', 'supervisor', 'senior-refurbisher'];
-                            $canManageImages = $user && $user->can('update', $asset) && collect($uploadRoles)->contains(fn($role) => $user->hasAccess($role));
-                            $canDeleteImages = $user && $user->can('update', $asset) && collect($deleteRoles)->contains(fn($role) => $user->hasAccess($role));
+                            $canManageImages = $user
+                                && $user->can('update', $asset)
+                                && $user->can('uploadImages', $asset);
+                            $canDeleteImages = $user
+                                && $user->can('update', $asset)
+                                && $user->can('manageImages', $asset);
                         @endphp
                         <div class="row">
                             <div class="col-12 text-muted small mb-2">{{ trans('general.cover_image_notice') }}</div>
+                            <div class="col-12">
+                                <div class="alert alert-warning" role="note">
+                                    <i class="fas fa-globe" aria-hidden="true"></i>
+                                    {{ trans('general.public_gallery_notice') }}
+                                </div>
+                            </div>
 
                             @forelse ($asset->images as $image)
                                 @php
@@ -2245,16 +2172,16 @@
                                                 <input type="text" name="caption" value="{{ $image->caption }}" class="form-control form-control-sm">
                                                 <button type="submit" class="btn btn-xs btn-primary ml-1">{{ trans('general.save') }}</button>
                                             </form>
+                                        @else
+                                            {{ $image->caption }}
+                                        @endif
 
-                                            @if ($canDeleteImages)
-                                            <form method="POST" action="{{ route('asset-images.destroy', [$asset, $image]) }}" class="mt-1" onsubmit="return confirm('{{ trans('general.delete_confirm', ['item' => trans('general.image')]) }}');">
+                                        @if ($canDeleteImages)
+                                            <form method="POST" action="{{ route('asset-images.destroy', [$asset, $image]) }}" class="mt-1 asset-image-delete-form" onsubmit="return confirm('{{ trans('general.delete_confirm', ['item' => trans('general.image')]) }}');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-xs btn-danger">{{ trans('button.delete') }}</button>
                                             </form>
-                                            @endif
-                                        @else
-                                            {{ $image->caption }}
                                         @endif
 
                                     </div>
@@ -2281,34 +2208,6 @@
                         @endif
 
                     </div>
-
-                    @can('view', \App\Models\Asset::class)
-                    <div class="tab-pane fade" id="maintenances">
-                        <div class="row{{($asset->maintenances->count() > 0 ) ? '' : ' hidden-print'}}">
-                            <div class="col-md-12">
-
-                                <!-- Asset Maintenance table -->
-                                <table
-                                        data-columns="{{ \App\Presenters\MaintenancesPresenter::dataTableLayout() }}"
-                                        class="table table-striped snipe-table"
-                                        id="MaintenancesTable"
-                                        data-buttons="maintenanceButtons"
-                                        data-id-table="MaintenancesTable"
-                                        data-side-pagination="server"
-                                        data-toolbar="#maintenance-toolbar"
-                                        data-export-options='{
-                                           "fileName": "export-{{ $asset->asset_tag }}-maintenances",
-                                           "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
-                                         }'
-                                        data-url="{{ route('api.maintenances.index', array('asset_id' => $asset->id)) }}"
-                                        data-cookie-id-table="MaintenancesTable"
-                                        data-cookie="true">
-                                </table>
-                            </div> <!-- /.col-md-12 -->
-                        </div> <!-- /.row -->
-                    </div> <!-- /.tab-pane maintenances -->
-                    @endcan
-
 
                 <div class="tab-pane fade" id="history">
                         <div class="row">
@@ -2340,7 +2239,7 @@
                                                             <td>{{ optional($event->toStatus)->name ?? trans('general.none') }}</td>
                                                             <td>
                                                                 @if ($event->user)
-                                                                    {!! link_to_route('users.show', $event->user->present()->fullName(), [$event->user->id]) !!}
+                                                                    <a href="{{ route('users.show', $event->user->id) }}">{{ $event->user->present()->fullName() }}</a>
                                                                 @else
                                                                     {{ trans('general.system') }}
                                                                 @endif
@@ -2376,10 +2275,18 @@
                         </div> <!-- /.row -->
                     </div> <!-- /.tab-pane history -->
 
-                    @can('files', $asset)
+                    @can('viewFiles', $asset)
                     <div class="tab-pane fade" id="files">
                         <div class="row{{ ($asset->uploads->count() > 0 ) ? '' : ' hidden-print' }}">
                             <div class="col-md-12">
+                                @can('createFiles', $asset)
+                                    <form id="upload-form" method="POST" action="{{ route('ui.files.store', ['object_type' => 'assets', 'id' => $asset->id]) }}" enctype="multipart/form-data" style="margin:15px 0;">
+                                        @csrf
+                                        <input type="file" name="file[]" multiple class="form-control" accept="{{ config('filesystems.allowed_upload_mimetypes') }}">
+                                        <textarea class="form-control" name="notes" placeholder="{{ trans('general.notes') }}" rows="3" style="margin-top:10px;"></textarea>
+                                        <button type="submit" class="btn btn-primary" style="margin-top:10px;">{{ trans('button.upload') }}</button>
+                                    </form>
+                                @endcan
                                 <x-filestable object_type="assets" :object="$asset" />
                             </div> <!-- /.col-md-12 -->
                         </div> <!-- /.row -->
@@ -2387,10 +2294,14 @@
                     @endcan
 
                     @if ($asset->model)
-                        @can('files', $asset->model)
+                        @can('viewFiles', $asset->model)
                             <div class="tab-pane fade" id="modelfiles">
                                 <div class="row{{ (($asset->model) && ($asset->model->uploads->count() > 0)) ? '' : ' hidden-print' }}">
                                     <div class="col-md-12">
+                                        <div class="alert alert-info" role="note">
+                                            <x-icon type="info-circle" />
+                                            {{ trans('general.model_resources_help', ['model' => $asset->model->name]) }}
+                                        </div>
                                         <x-filestable object_type="models" :object="$asset->model" />
                                     </div> <!-- /.col-md-12 -->
                                 </div> <!-- /.row -->

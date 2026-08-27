@@ -19,7 +19,7 @@
 @section('header_right')
 
     @can('create', \App\Models\User::class)
-        @if ($snipeSettings->ldap_enabled == 1)
+        @if (\App\Models\Setting::ldapIsActive())
             <a href="{{ route('ldap/user') }}" class="btn btn-default pull-right"><span class="fas fa-sitemap"></span>{{trans('general.ldap_sync')}}</a>
         @endif
     @endcan

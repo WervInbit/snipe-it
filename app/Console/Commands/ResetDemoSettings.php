@@ -21,7 +21,7 @@ class ResetDemoSettings extends Command
      *
      * @var string
      */
-    protected $description = 'This will reset the Snipe-IT demo settings back to default. ';
+    protected $description = 'Reset the fork demo settings to safe defaults.';
 
     /**
      * Create a new command instance.
@@ -44,20 +44,20 @@ class ResetDemoSettings extends Command
         $this->info('Resetting the demo settings.');
         $settings = Setting::first();
         $settings->per_page = 20;
-        $settings->site_name = 'Snipe-IT Asset Management Demo';
+        $settings->site_name = config('app.name') . ' Demo';
         $settings->auto_increment_assets = 1;
-        $settings->logo = 'snipe-logo.png';
-        $settings->alert_email = 'service@snipe-it.io';
+        $settings->logo = null;
+        $settings->alert_email = 'demo@example.invalid';
         $settings->login_note = 'Use `admin` / `password` to login to the demo.';
         $settings->header_color = null;
         $settings->label2_2d_type = 'QRCODE';
         $settings->default_currency = 'USD';
-        $settings->brand = 2;
+        $settings->brand = 1;
         $settings->ldap_enabled = 0;
         $settings->full_multiple_companies_support = 0;
         $settings->label2_1d_type = 'C128';
         $settings->skin = '';
-        $settings->email_domain = 'snipeitapp.com';
+        $settings->email_domain = 'example.invalid';
         $settings->email_format = 'filastname';
         $settings->username_format = 'filastname';
         $settings->date_display_format = 'D M d, Y';
@@ -71,7 +71,7 @@ class ResetDemoSettings extends Command
         $settings->saml_idp_metadata = null;
         $settings->saml_attr_mapping_username = null;
         $settings->saml_forcelogin = '0';
-        $settings->saml_slo = null;
+        $settings->saml_slo = 0;
         $settings->saml_custom_settings = null;
         $settings->default_avatar = 'default.png';
 
@@ -82,9 +82,6 @@ class ResetDemoSettings extends Command
             $user->locale = 'en-US';
             $user->save();
         }
-
-        \Storage::disk('public')->put('snipe-logo.png', file_get_contents(public_path('img/demo/snipe-logo.png')));
-        \Storage::disk('public')->put('snipe-logo-lg.png', file_get_contents(public_path('img/demo/snipe-logo-lg.png')));
 
     }
 

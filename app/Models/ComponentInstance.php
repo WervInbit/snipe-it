@@ -172,16 +172,28 @@ class ComponentInstance extends SnipeModel
 
     public function displayConditionLabel(): string
     {
-        if ($this->condition_code === null || $this->condition_code === '') {
-            return self::conditionStatusLabel($this->effectiveConditionStatus()) ?? __('Needs Attention');
+        if ($this->condition_status !== null && $this->condition_status !== '') {
+            return self::conditionStatusLabel($this->condition_status) ?? __('Needs Attention');
         }
 
-        return self::conditionCodeLabel($this->condition_code)
-            ?? self::conditionStatusLabel(self::CONDITION_STATUS_NEEDS_ATTENTION);
+        if ($this->condition_code !== null && $this->condition_code !== '') {
+            return self::conditionCodeLabel($this->condition_code)
+                ?? self::conditionStatusLabel(self::CONDITION_STATUS_NEEDS_ATTENTION);
+        }
+
+        return self::conditionStatusLabel($this->effectiveConditionStatus()) ?? __('Needs Attention');
     }
 
     public function conditionBadgeLabel(): ?string
     {
+        if ($this->condition_status !== null && $this->condition_status !== '') {
+            return match ($this->condition_status) {
+                self::CONDITION_STATUS_GOOD => null,
+                self::CONDITION_STATUS_NEEDS_ATTENTION, self::CONDITION_STATUS_DAMAGED => self::conditionStatusLabel($this->condition_status),
+                default => self::conditionStatusLabel(self::CONDITION_STATUS_NEEDS_ATTENTION),
+            };
+        }
+
         if ($this->condition_code === null || $this->condition_code === '') {
             return self::conditionStatusLabel(self::CONDITION_STATUS_NEEDS_ATTENTION);
         }
@@ -196,6 +208,14 @@ class ComponentInstance extends SnipeModel
 
     public function conditionBadgeClass(): ?string
     {
+        if ($this->condition_status !== null && $this->condition_status !== '') {
+            return match ($this->condition_status) {
+                self::CONDITION_STATUS_GOOD => null,
+                self::CONDITION_STATUS_DAMAGED => 'label-danger',
+                default => 'label-warning',
+            };
+        }
+
         if ($this->condition_code === null || $this->condition_code === '') {
             return 'label-warning';
         }

@@ -10,12 +10,13 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\URL;
 use Laravel\Dusk\TestCase as BaseTestCase;
 use PHPUnit\Framework\Attributes\BeforeClass;
+use Tests\Support\TestEnvironmentGuard;
 
 abstract class DuskTestCase extends BaseTestCase
 {
     use CreatesApplication;
 
-    protected string $baseUrl = 'https://dev.snipe.inbit';
+    protected string $baseUrl = 'http://127.0.0.1:8000';
 
     #[BeforeClass]
     public static function prepare(): void
@@ -28,14 +29,21 @@ abstract class DuskTestCase extends BaseTestCase
     public function createApplication()
     {
         $baseUrl = env('DUSK_BASE_URL', $this->baseUrl);
+        $forceTls = parse_url($baseUrl, PHP_URL_SCHEME) === 'https' ? 'true' : 'false';
+        $configuredForceTls = $_ENV['APP_FORCE_TLS'] ?? getenv('APP_FORCE_TLS');
 
         $this->syncEnv('APP_URL', $baseUrl);
-        $this->syncEnv('APP_FORCE_TLS', $_ENV['APP_FORCE_TLS'] ?? getenv('APP_FORCE_TLS') ?? 'true');
+        $this->syncEnv(
+            'APP_FORCE_TLS',
+            is_string($configuredForceTls) && $configuredForceTls !== '' ? $configuredForceTls : $forceTls
+        );
         $this->syncEnv('APP_ALLOW_INSECURE_HOSTS', $_ENV['APP_ALLOW_INSECURE_HOSTS'] ?? getenv('APP_ALLOW_INSECURE_HOSTS') ?? 'false');
         $this->syncEnv('APP_ENV', 'testing');
+        TestEnvironmentGuard::prepareDuskProcess(realpath(__DIR__ . '/../'));
 
         $app = require __DIR__.'/../bootstrap/app.php';
         $app->make(Kernel::class)->bootstrap();
+        TestEnvironmentGuard::assertBootedDuskApplication($app);
 
         $config = $app->make('config');
         $config->set('app.url', $baseUrl);
@@ -57,6 +65,7 @@ abstract class DuskTestCase extends BaseTestCase
         URL::forceScheme(parse_url($baseUrl, PHP_URL_SCHEME) ?: 'https');
 
         $this->artisan('view:clear');
+        TestEnvironmentGuard::assertBootedDuskApplication($this->app);
         $this->artisan('migrate:fresh', ['--seed' => true]);
     }
 

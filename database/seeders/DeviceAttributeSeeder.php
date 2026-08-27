@@ -19,7 +19,6 @@ class DeviceAttributeSeeder extends Seeder
 
         DB::transaction(function () use ($categories) {
             $this->seedDefinitions($categories);
-            $this->markRemovedDefinitions();
         });
     }
 
@@ -115,39 +114,14 @@ class DeviceAttributeSeeder extends Seeder
         ];
     }
 
-    private function markRemovedDefinitions(): void
-    {
-        $definitionIds = AttributeDefinition::query()
-            ->whereIn('key', $this->removedAttributeKeys())
-            ->pluck('id');
-
-        if ($definitionIds->isEmpty()) {
-            return;
-        }
-
-        AttributeDefinition::query()
-            ->whereIn('id', $definitionIds)
-            ->update([
-                'deprecated_at' => now(),
-                'hidden_at' => now(),
-            ]);
-
-        DB::table('attribute_options')
-            ->whereIn('attribute_definition_id', $definitionIds->all())
-            ->update(['active' => false]);
-    }
-
     private function syncOptions(AttributeDefinition $definition, array $options): void
     {
         if (empty($options)) {
             return;
         }
 
-        $activeValues = [];
-
         foreach ($options as $index => $optionConfig) {
             $value = $optionConfig['value'];
-            $activeValues[] = $value;
 
             $option = $definition->options()->withTrashed()->firstOrNew(['value' => $value]);
             $option->label = $optionConfig['label'];
@@ -160,9 +134,5 @@ class DeviceAttributeSeeder extends Seeder
 
             $option->save();
         }
-
-        $definition->options()
-            ->whereNotIn('value', $activeValues)
-            ->update(['active' => false]);
     }
 }

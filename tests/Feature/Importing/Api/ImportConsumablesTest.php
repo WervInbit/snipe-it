@@ -40,9 +40,10 @@ class ImportConsumablesTest extends ImportDataTestCase implements TestsPermissio
     #[Test]
     public function userWithImportAssetsPermissionCanImportConsumables(): void
     {
-        $this->actingAsForApi(User::factory()->canImport()->create());
+        $actor = User::factory()->canImport()->create();
+        $this->actingAsForApi($actor);
 
-        $import = Import::factory()->consumable()->create();
+        $import = Import::factory()->consumable()->create(['created_by' => $actor->id]);
 
         $this->importFileResponse(['import' => $import->id])->assertOk();
     }
@@ -195,7 +196,7 @@ class ImportConsumablesTest extends ImportDataTestCase implements TestsPermissio
                 'messages' => [
                     $row['itemName'] => [
                         'Consumable' => [
-                            'category_id' => ['The category id field is required.']
+                            'category_id' => [trans('validation.required', ['attribute' => 'category id'])]
                         ]
                     ]
                 ]

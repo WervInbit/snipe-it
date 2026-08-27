@@ -22,12 +22,56 @@ class ActionlogFactory extends Factory
             'action_type' => 'note',
             'target_id'   => null,
             'target_type' => null,
-            'item_id'     => null,
-            'item_type'   => null,
+            'item_id'     => Asset::factory(),
+            'item_type'   => Asset::class,
             'note'        => $this->faker->sentence,
             'created_at'  => now(),
             'updated_at'  => now(),
         ];
+    }
+
+    public function filesUploaded(): static
+    {
+        return $this->state(fn () => [
+            'created_at' => $this->faker->dateTimeBetween('-1 years', 'now', date_default_timezone_get()),
+            'action_type' => 'uploaded',
+            'item_type' => User::class,
+            'filename' => (string) $this->faker->unixTime('now'),
+        ]);
+    }
+
+    public function acceptedSignature(): static
+    {
+        return $this->state(fn () => [
+            'created_at' => $this->faker->dateTimeBetween('-1 years', 'now', date_default_timezone_get()),
+            'action_type' => 'accepted',
+            'item_id' => Asset::factory(),
+            'item_type' => Asset::class,
+            'target_type' => User::class,
+            'accept_signature' => (string) $this->faker->unixTime('now'),
+        ]);
+    }
+
+    public function acceptedEula(): static
+    {
+        return $this->state(fn () => [
+            'created_at' => $this->faker->dateTimeBetween('-1 years', 'now', date_default_timezone_get()),
+            'action_type' => 'accepted',
+            'item_id' => Asset::factory(),
+            'item_type' => Asset::class,
+            'target_type' => User::class,
+            'filename' => (string) $this->faker->unixTime('now'),
+        ]);
+    }
+
+    public function userUpdated(): static
+    {
+        return $this->state(fn () => [
+            'created_at' => $this->faker->dateTimeBetween('-1 years', 'now', date_default_timezone_get()),
+            'action_type' => 'update',
+            'target_type' => User::class,
+            'item_type' => User::class,
+        ]);
     }
 
     /**

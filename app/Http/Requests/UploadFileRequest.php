@@ -2,11 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\Helper;
 use App\Http\Traits\ConvertsBase64ToFiles;
 use enshrined\svgSanitize\Sanitizer;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
-use \App\Helpers\Helper;
+use RuntimeException;
 
 class UploadFileRequest extends Request
 {
@@ -31,6 +31,7 @@ class UploadFileRequest extends Request
         $max_file_size = Helper::file_upload_max_size();
 
         return [
+            'file' => 'nullable|array',
             'file.*' => 'required|mimes:'.config('filesystems.allowed_upload_extensions_for_validator').'|max:'.$max_file_size,
         ];
     }
@@ -41,21 +42,30 @@ class UploadFileRequest extends Request
      */
     public function handleFile(string $dirname, string $name_prefix, $file): string
     {
+        $clientExtension = $file->getClientOriginalExtension();
+        $serverExtension = $file->guessExtension();
+        if (! is_string($serverExtension) || $serverExtension === '') {
+            throw new RuntimeException('Unable to determine a safe uploaded-file extension.');
+        }
 
-        $extension = $file->getClientOriginalExtension();
-        $file_name = $name_prefix.'-'.str_random(8).'-'.str_slug(basename($file->getClientOriginalName(), '.'.$extension)).'.'.$file->guessExtension();
+        $originalStem = basename($file->getClientOriginalName(), '.'.$clientExtension);
+        $safeStem = str_slug($originalStem) ?: 'file';
+        $file_name = $name_prefix.'-'.str_random(8).'-'.$safeStem.'.'.$serverExtension;
 
         // Check for SVG and sanitize it
         if ($file->getMimeType() === 'image/svg+xml') {
             $uploaded_file = $this->handleSVG($file);
         } else {
-            $uploaded_file = file_get_contents($file);
+            $uploaded_file = @file_get_contents($file->getRealPath());
         }
 
-        try {
-            Storage::put($dirname.$file_name, $uploaded_file);
-        } catch (\Exception $e) {
-            Log::debug($e);
+        if (! is_string($uploaded_file)) {
+            throw new RuntimeException('Unable to read or safely sanitize the uploaded file.');
+        }
+
+        $path = rtrim($dirname, '/\\').'/'.$file_name;
+        if (! Storage::put($path, $uploaded_file)) {
+            throw new RuntimeException('Unable to store the uploaded file.');
         }
 
         return $file_name;
@@ -64,8 +74,18 @@ class UploadFileRequest extends Request
     public function handleSVG($file)
     {
         $sanitizer = new Sanitizer();
-        $dirtySVG = file_get_contents($file->getRealPath());
-        return $sanitizer->sanitize($dirtySVG);
+        $dirtySVG = @file_get_contents($file->getRealPath());
+        if (! is_string($dirtySVG)) {
+            throw new RuntimeException('Unable to read the uploaded SVG.');
+        }
+
+        $cleanSVG = $sanitizer->sanitize($dirtySVG);
+
+        if (! is_string($cleanSVG) || trim($cleanSVG) === '') {
+            throw new RuntimeException('Unable to safely sanitize the uploaded SVG.');
+        }
+
+        return $cleanSVG;
     }
 
 

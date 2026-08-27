@@ -111,4 +111,43 @@ class PortalWorkOrdersTest extends TestCase
             ->assertSee($workOrder->work_order_number)
             ->assertSee('Company Visible Work Order');
     }
+
+    public function testInternalViewPermissionDoesNotBypassPortalCompanyVisibility(): void
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+        $user = User::factory()
+            ->for($companyA)
+            ->viewPortal()
+            ->viewWorkOrders()
+            ->create();
+        $companyWorkOrder = WorkOrder::factory()->for($companyA)->create([
+            'title' => 'Company Portal Work Order',
+        ]);
+        $explicitWorkOrder = WorkOrder::factory()->for($companyB)->create([
+            'title' => 'Explicit Portal Work Order',
+        ]);
+        $blockedWorkOrder = WorkOrder::factory()->for($companyB)->create([
+            'title' => 'Blocked Portal Work Order',
+        ]);
+
+        $explicitWorkOrder->visibleUsers()->attach($user->id, ['granted_by' => null]);
+
+        $this->actingAs($user)
+            ->get(route('account.work-orders.index'))
+            ->assertOk()
+            ->assertSee($companyWorkOrder->title)
+            ->assertSee($explicitWorkOrder->title)
+            ->assertDontSee($blockedWorkOrder->title);
+
+        $this->actingAs($user)
+            ->get(route('account.work-orders.show', $explicitWorkOrder))
+            ->assertOk()
+            ->assertSee($explicitWorkOrder->work_order_number);
+
+        $this->actingAs($user)
+            ->get(route('account.work-orders.show', $blockedWorkOrder))
+            ->assertForbidden();
+    }
 }

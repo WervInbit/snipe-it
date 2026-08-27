@@ -7,11 +7,13 @@ use App\Helpers\StorageHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UploadFileRequest;
 use App\Http\Transformers\UploadedFilesTransformer;
-use App\Models\Actionlog;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 
@@ -31,13 +33,12 @@ class UploadedFilesController extends Controller
     public function index(Request $request, $object_type, $id) : JsonResponse | array
     {
 
-        // Check the permissions to make sure the user can view the object
-        $object = self::$map_object_type[$object_type]::find($id);
-        $this->authorize('view', $object);
-
+        $object = $this->resolveUploadedFileParent($object_type, $id);
         if (!$object) {
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.file_upload_status.invalid_object')));
         }
+
+        $this->authorize('viewFiles', $object);
 
         // Columns allowed for sorting
         $allowed_columns =
@@ -51,11 +52,8 @@ class UploadedFilesController extends Controller
             ];
 
 
-        $uploads = Actionlog::select('action_logs.*')
-            ->whereNotNull('filename')
-            ->where('item_type', self::$map_object_type[$object_type])
-            ->where('item_id', $object->id)
-            ->where('action_type', '=', 'uploaded')
+        $uploads = $this->uploadedFileLogQuery($object_type, $object)
+            ->select('action_logs.*')
             ->with('adminuser');
 
         $limit = app('api_limit_value');
@@ -79,7 +77,7 @@ class UploadedFilesController extends Controller
         $offset = $this->resolveOffset($request, $total, $limit);
         $uploads = $uploads->skip($offset)->take($limit)->orderBy($sort, $order)->get();
 
-        return (new UploadedFilesTransformer())->transformFiles($uploads, $total);
+        return (new UploadedFilesTransformer())->transformFiles($uploads, $total, $object);
     }
 
 
@@ -95,34 +93,74 @@ class UploadedFilesController extends Controller
     public function store(UploadFileRequest $request, $object_type, $id) : JsonResponse
     {
 
-        // Check the permissions to make sure the user can view the object
-        $object = self::$map_object_type[$object_type]::find($id);
-        $this->authorize('view', $object);
-
+        $object = $this->resolveUploadedFileParent($object_type, $id);
         if (!$object) {
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.file_upload_status.invalid_object')));
         }
 
+        $this->authorize('createFiles', $object);
+
         // If the file storage directory doesn't exist, create it
-        if (! Storage::exists(self::$map_storage_path[$object_type])) {
-            Storage::makeDirectory(self::$map_storage_path[$object_type], 775);
+        if (! Storage::exists(self::$map_storage_path[$object_type])
+            && ! Storage::makeDirectory(self::$map_storage_path[$object_type], 775)
+        ) {
+            return response()->json(Helper::formatStandardApiResponse(
+                'error',
+                null,
+                trans_choice('general.file_upload_status.upload.error', 1)
+            ), 500);
         }
 
 
         if ($request->hasFile('file')) {
-            // Loop over the attached files and add them to the object
-            foreach ($request->file('file') as $file) {
-                $file_name = $request->handleFile(self::$map_storage_path[$object_type], self::$map_file_prefix[$object_type].'-'.$object->id, $file);
-                $files[] = $file_name;
-                $object->logUpload($file_name, $request->get('notes'));
+            $files = [];
+
+            try {
+                $logs = DB::transaction(function () use ($request, $object_type, $object, &$files) {
+                    $logs = new Collection();
+
+                    foreach ($request->file('file') as $file) {
+                        $fileName = $request->handleFile(
+                            self::$map_storage_path[$object_type],
+                            self::$map_file_prefix[$object_type].'-'.$object->id,
+                            $file
+                        );
+                        $files[] = $fileName;
+                        $logs->push($object->logUpload($fileName, $request->get('notes')));
+                    }
+
+                    return $logs;
+                });
+            } catch (\Throwable $exception) {
+                foreach ($files as $fileName) {
+                    $path = rtrim(self::$map_storage_path[$object_type], '/\\').'/'.$fileName;
+                    if (! Storage::delete($path)) {
+                        Log::critical('Unable to remove an API attachment after its log failed.', [
+                            'object_type' => $object_type,
+                            'object_id' => $object->getKey(),
+                            'path' => $path,
+                        ]);
+                    }
+                }
+
+                Log::error('API attachment upload failed and was rolled back.', [
+                    'object_type' => $object_type,
+                    'object_id' => $object->getKey(),
+                    'exception' => $exception,
+                ]);
+
+                return response()->json(Helper::formatStandardApiResponse(
+                    'error',
+                    null,
+                    trans_choice('general.file_upload_status.upload.error', count($request->file('file')))
+                ), 500);
             }
 
-            $files = Actionlog::select('action_logs.*')->where('action_type', '=', 'uploaded')
-                ->where('item_type', '=', self::$map_object_type[$object_type])
-                ->where('item_id', '=', $id)->whereIn('filename', $files)
-                ->get();
-
-            return response()->json(Helper::formatStandardApiResponse('success', (new UploadedFilesTransformer())->transformFiles($files, count($files)), trans_choice('general.file_upload_status.upload.success',  count($files))));
+            return response()->json(Helper::formatStandardApiResponse(
+                'success',
+                (new UploadedFilesTransformer())->transformFiles($logs, $logs->count(), $object),
+                trans_choice('general.file_upload_status.upload.success', $logs->count())
+            ));
         }
 
         // No files were submitted
@@ -141,20 +179,17 @@ class UploadedFilesController extends Controller
      * @since  [v8.1.17]
      * @author [A. Gianotto <snipe@snipe.net>]
      */
-    public function show($object_type, $id, $file_id) : JsonResponse | StreamedResponse | Storage | StorageHelper | BinaryFileResponse
+    public function show($object_type, $id, $file_id) : JsonResponse | StreamedResponse
     {
-        // Check the permissions to make sure the user can view the object
-        $object = self::$map_object_type[$object_type]::find($id);
-        $this->authorize('view', $object);
-
+        $object = $this->resolveUploadedFileParent($object_type, $id);
         if (!$object) {
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.file_upload_status.invalid_object')));
         }
 
+        $this->authorize('viewFiles', $object);
 
         // Check that the file being requested exists for the object
-        if (! $log = Actionlog::whereNotNull('filename')->where('item_type', self::$map_object_type[$object_type])->where('item_id', $object->id)->find($file_id)
-        ) {
+        if (! $log = $this->uploadedFileLogQuery($object_type, $object)->find($file_id)) {
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.file_upload_status.invalid_id')), 200);
         }
 
@@ -163,14 +198,10 @@ class UploadedFilesController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.file_upload_status.file_not_found'), 200));
         }
 
-        if (request('inline') == 'true') {
-            $headers = [
-                'Content-Disposition' => 'inline',
-            ];
-            return Storage::download(self::$map_storage_path[$object_type].'/'.$log->filename, $log->filename, $headers);
-        }
-
-        return StorageHelper::downloader(self::$map_storage_path[$object_type].'/'.$log->filename);
+        return StorageHelper::showOrDownloadFile(
+            self::$map_storage_path[$object_type].'/'.$log->filename,
+            $log->filename
+        );
 
     }
 
@@ -187,30 +218,54 @@ class UploadedFilesController extends Controller
     public function destroy($object_type, $id, $file_id) : JsonResponse
     {
 
-        // Check the permissions to make sure the user can view the object
-        $object = self::$map_object_type[$object_type]::find($id);
-        $this->authorize('update', self::$map_object_type[$object_type]);
-
+        $object = $this->resolveUploadedFileParent($object_type, $id);
         if (!$object) {
             return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.file_upload_status.invalid_object')));
         }
 
+        $this->authorize('deleteFiles', $object);
 
         // Check for the file
-        $log = Actionlog::find($file_id)->where('item_type', self::$map_object_type[$object_type])
-            ->where('item_id', $object->id)->first();
+        $log = $this->uploadedFileLogQuery($object_type, $object)->find($file_id);
 
         if ($log) {
-            // Check the file actually exists, and delete it
-            if (Storage::exists(self::$map_storage_path[$object_type].'/'.$log->filename)) {
-                Storage::delete(self::$map_storage_path[$object_type].'/'.$log->filename);
-            }
-            // Delete the record of the file
-            if ($log->delete()) {
-                return response()->json(Helper::formatStandardApiResponse('success', null, trans_choice('general.file_upload_status.delete.success', 1)), 200);
-            }
+            $path = rtrim(self::$map_storage_path[$object_type], '/\\').'/'.$log->filename;
+            $contents = null;
 
+            try {
+                if (Storage::exists($path)) {
+                    $contents = Storage::get($path);
+                    if (! Storage::delete($path)) {
+                        throw new RuntimeException('Unable to delete attachment from storage.');
+                    }
+                }
 
+                DB::transaction(function () use ($log) {
+                    if (! $log->delete()) {
+                        throw new RuntimeException('Unable to delete attachment log.');
+                    }
+                });
+
+                return response()->json(Helper::formatStandardApiResponse(
+                    'success',
+                    null,
+                    trans_choice('general.file_upload_status.delete.success', 1)
+                ), 200);
+            } catch (\Throwable $exception) {
+                if (is_string($contents) && ! Storage::exists($path)) {
+                    if (! Storage::put($path, $contents)) {
+                        Log::critical('Unable to restore an API attachment after database rollback.', [
+                            'action_log_id' => $log->getKey(),
+                            'path' => $path,
+                        ]);
+                    }
+                }
+
+                Log::error('API attachment delete failed and was rolled back.', [
+                    'action_log_id' => $log->getKey(),
+                    'exception' => $exception,
+                ]);
+            }
         }
 
         // The file doesn't seem to really exist, so report an error

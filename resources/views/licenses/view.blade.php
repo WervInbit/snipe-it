@@ -47,7 +47,7 @@
             </a>
           </li>
 
-          @can('licenses.files', $license)
+          @can('viewFiles', $license)
             <li>
               <a href="#files" data-toggle="tab">
             <span class="hidden-lg hidden-md">
@@ -69,7 +69,7 @@
             </a>
           </li>
 
-          @can('update', \App\Models\License::class)
+          @can('createFiles', $license)
             <li class="pull-right"><a href="#" data-toggle="modal" data-target="#uploadFileModal">
                 <x-icon type="paperclip" /> {{ trans('button.upload') }}</a>
             </li>
@@ -496,7 +496,7 @@
             </div> <!--/.row-->
           </div> <!-- /.tab-pane -->
 
-          @can('licenses.files', $license)
+          @can('viewFiles', $license)
             <div class="tab-pane" id="files">
               <x-filestable object_type="licenses" :object="$license" />
             </div> <!-- /.tab-pane -->
@@ -545,7 +545,7 @@
 
       @can('checkout', $license)
 
-        @if ($license->availCount()->count() > 0)
+        @if (! $license->isInactive() && $license->availCount()->count() > 0)
 
           <a href="{{ route('licenses.checkout', $license->id) }}" class="btn bg-maroon btn-sm btn-social btn-block hidden-print" style="margin-bottom: 5px;">
             <x-icon type="checkout" />
@@ -558,13 +558,18 @@
           </a>
 
         @else
-          <span data-tooltip="true" title=" {{ trans('admin/licenses/general.bulk.checkout_all.disabled_tooltip') }}">
+          @php
+            $checkoutDisabledMessage = $license->isInactive()
+              ? trans('admin/licenses/message.checkout.license_is_inactive')
+              : trans('admin/licenses/general.bulk.checkout_all.disabled_tooltip');
+          @endphp
+          <span data-tooltip="true" title="{{ $checkoutDisabledMessage }}">
           <a href="#" class="btn bg-maroon btn-sm btn-social btn-block hidden-print disabled" style="margin-bottom: 5px;" data-tooltip="true" title="{{ trans('general.checkout') }}">
             <x-icon type="checkout" />
             {{ trans('general.checkout') }}
           </a>
           </span>
-          <span data-tooltip="true" title=" {{ trans('admin/licenses/general.bulk.checkout_all.disabled_tooltip') }}">
+          <span data-tooltip="true" title="{{ $checkoutDisabledMessage }}">
             <a href="#" class="btn bg-maroon btn-sm btn-social btn-block hidden-print disabled" style="margin-bottom: 5px;" data-tooltip="true" title="{{ trans('general.checkout') }}">
               <x-icon type="checkout" />
               {{ trans('admin/licenses/general.bulk.checkout_all.button') }}
@@ -618,29 +623,29 @@
   </div> <!-- /.row -->
 
 
-  @can('checkin', \App\Models\License::class)
+  @can('checkin', $license)
     @include ('modals.confirm-action',
           [
               'modal_name' => 'checkinFromAllModal',
               'route' => route('licenses.bulkcheckin', $license->id),
               'title' => trans('general.modal_confirm_generic'),
-              'body' => trans_choice('admin/licenses/general.bulk.checkin_all.modal', 2, ['checkedout_seats_count' => $checkedout_seats_count])
+              'body' => trans_choice('admin/licenses/general.bulk.checkin_all.modal', $checkedout_seats_count, ['checkedout_seats_count' => $checkedout_seats_count])
           ])
   @endcan
 
-  @can('checkout', \App\Models\License::class)
+  @can('checkout', $license)
     @include ('modals.confirm-action',
           [
               'modal_name' => 'checkoutFromAllModal',
               'route' => route('licenses.bulkcheckout', $license->id),
               'title' => trans('general.modal_confirm_generic'),
-              'body' => trans_choice('admin/licenses/general.bulk.checkout_all.modal', 2, ['available_seats_count' => $available_seats_count])
+              'body' => trans_choice('admin/licenses/general.bulk.checkout_all.modal', $available_seats_count, ['available_seats_count' => $available_seats_count])
           ])
   @endcan
 
 
 
-  @can('update', \App\Models\License::class)
+  @can('createFiles', $license)
     @include ('modals.upload-file', ['item_type' => 'license', 'item_id' => $license->id])
   @endcan
 

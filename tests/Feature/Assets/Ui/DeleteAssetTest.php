@@ -4,6 +4,7 @@ namespace Tests\Feature\Assets\Ui;
 
 use App\Events\CheckoutableCheckedIn;
 use App\Models\Asset;
+use App\Models\CheckoutAcceptance;
 use App\Models\User;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
@@ -71,12 +72,20 @@ class DeleteAssetTest extends TestCase
 
     }
 
-    public function testAssetIsCheckedInWhenDeleted()
+    public function testDeletingLegacyAssignedAssetClearsStaleStateWithoutCreatingCheckinHistory()
     {
-        Event::fake();
+        Event::fake([CheckoutableCheckedIn::class]);
 
         $assignedUser = User::factory()->create();
-        $asset = Asset::factory()->assignedToUser($assignedUser)->create();
+        $asset = Asset::factory()->assignedToUser($assignedUser)->create([
+            'accepted' => 'pending',
+            'expected_checkin' => now()->addDay(),
+        ]);
+        $pendingAcceptance = CheckoutAcceptance::factory()->pending()->create([
+            'checkoutable_type' => Asset::class,
+            'checkoutable_id' => $asset->id,
+            'assigned_to_id' => $assignedUser->id,
+        ]);
 
         $this->assertTrue($assignedUser->assets->contains($asset));
 
@@ -91,23 +100,60 @@ class DeleteAssetTest extends TestCase
         $asset->refresh();
         $this->assertNull($asset->assigned_to);
         $this->assertNull($asset->assigned_type);
+        $this->assertNull($asset->accepted);
+        $this->assertNull($asset->expected_checkin);
+        $this->assertSoftDeleted($pendingAcceptance);
+        $this->assertDatabaseHas('action_logs', [
+            'item_type' => Asset::class,
+            'item_id' => $asset->id,
+            'action_type' => 'delete',
+        ]);
+        $this->assertDatabaseMissing('action_logs', [
+            'item_type' => Asset::class,
+            'item_id' => $asset->id,
+            'action_type' => 'checkin from',
+        ]);
 
-        Event::assertDispatched(CheckoutableCheckedIn::class);
+        Event::assertNotDispatched(CheckoutableCheckedIn::class);
     }
 
-    public function testImageIsDeletedWhenAssetDeleted()
+    public function testImageIsPreservedWhenAssetIsSoftDeletedAndRestored()
     {
         Storage::fake('public');
 
         $asset = Asset::factory()->create(['image' => 'image.jpg']);
+        $user = User::factory()->superuser()->create();
 
         Storage::disk('public')->put('assets/image.jpg', 'content');
 
         Storage::disk('public')->assertExists('assets/image.jpg');
 
-        $this->actingAs(User::factory()->deleteAssets()->create())
+        $this->actingAs($user)
             ->delete(route('hardware.destroy', $asset));
 
-        Storage::disk('public')->assertMissing('assets/image.jpg');
+        Storage::disk('public')->assertExists('assets/image.jpg');
+
+        $this->actingAs($user)
+            ->post(route('restore/hardware', $asset))
+            ->assertRedirect();
+
+        Storage::disk('public')->assertExists('assets/image.jpg');
+        $this->assertNotSoftDeleted($asset);
+    }
+
+    public function testAssetSoftDeletionDoesNotDeleteLegacyImagePaths(): void
+    {
+        Storage::fake('public');
+
+        $asset = Asset::factory()->create(['image' => '../secrets/keep.jpg']);
+        Storage::disk('public')->put('secrets/keep.jpg', 'must remain');
+        Storage::disk('public')->put('assets/keep.jpg', 'asset image');
+
+        $this->actingAs(User::factory()->deleteAssets()->create())
+            ->delete(route('hardware.destroy', $asset))
+            ->assertRedirectToRoute('hardware.index');
+
+        Storage::disk('public')->assertExists('secrets/keep.jpg');
+        Storage::disk('public')->assertExists('assets/keep.jpg');
     }
 }

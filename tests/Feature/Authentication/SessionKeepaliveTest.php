@@ -9,11 +9,12 @@ class SessionKeepaliveTest extends TestCase
 {
     public function testKeepaliveRequiresAuthentication(): void
     {
+        User::factory()->create();
         $token = 'session-keepalive-token';
 
         $this->withSession(['_token' => $token])
             ->postJson(route('session.keepalive'), ['_token' => $token])
-            ->assertRedirect();
+            ->assertUnauthorized();
     }
 
     public function testAuthenticatedKeepaliveRefreshesSession(): void

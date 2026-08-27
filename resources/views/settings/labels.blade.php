@@ -202,6 +202,7 @@
                                             trans('admin/settings/general.help_default_will_use', [
                                                 'default' => trans('admin/settings/general.default'),
                                                 'setting_name' => trans('admin/settings/general.barcodes').' &gt; '.trans('admin/settings/general.alt_barcode_type'),
+                                                'fork_documentation_url' => route('help.api-compatibility'),
                                             ])
                                         !!}
                                     </p>
@@ -251,7 +252,9 @@
                                         <p class="help-block">
                                             {{ trans('admin/settings/general.label2_2d_type_help', ['current' => $setting->barcode_type]) }}.
                                             {!!
-                                                trans('admin/settings/general.help_default_will_use')
+                                                trans('admin/settings/general.help_default_will_use', [
+                                                    'fork_documentation_url' => route('help.api-compatibility'),
+                                                ])
                                             !!}
                                         </p>
                                     </div>

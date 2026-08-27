@@ -40,9 +40,10 @@ class ImportComponentsTest extends ImportDataTestCase implements TestsPermission
     #[Test]
     public function userWithImportAssetsPermissionCanImportComponents(): void
     {
-        $this->actingAsForApi(User::factory()->canImport()->create());
+        $actor = User::factory()->canImport()->create();
+        $this->actingAsForApi($actor);
 
-        $import = Import::factory()->component()->create();
+        $import = Import::factory()->component()->create(['created_by' => $actor->id]);
 
         $this->importFileResponse(['import' => $import->id])->assertOk();
     }
@@ -201,8 +202,8 @@ class ImportComponentsTest extends ImportDataTestCase implements TestsPermission
                 'messages' => [
                     $row['itemName'] => [
                         'Component' => [
-                            'qty' => ['The qty field must be at least 1.'],
-                            'category_id' => ['The category id field is required.']
+                            'qty' => [trans('validation.min.numeric', ['attribute' => 'qty', 'min' => 1])],
+                            'category_id' => [trans('validation.required', ['attribute' => 'category id'])]
                         ]
                     ]
                 ]

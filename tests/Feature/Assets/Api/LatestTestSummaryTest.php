@@ -9,6 +9,7 @@ use App\Models\TestType;
 use App\Models\User;
 use App\Models\WorkflowProfile;
 use App\Models\WorkflowProfileItem;
+use App\Services\WorkflowRunDefinitionService;
 use Tests\TestCase;
 
 class LatestTestSummaryTest extends TestCase
@@ -16,8 +17,8 @@ class LatestTestSummaryTest extends TestCase
     public function testSummaryUsesBlockingWorkflowProfilesInsteadOfNewestRunOnly(): void
     {
         $asset = Asset::factory()->create();
-        $battery = TestType::factory()->create(['name' => 'Battery']);
-        $shippingCheck = TestType::factory()->create(['name' => 'Shipping Check']);
+        $battery = TestType::factory()->create(['name' => 'Battery', 'applies_to_all' => true]);
+        $shippingCheck = TestType::factory()->create(['name' => 'Shipping Check', 'applies_to_all' => true]);
         $diagnostics = WorkflowProfile::factory()->create([
             'name' => 'Diagnostics',
             'blocks_sale_readiness' => true,
@@ -36,11 +37,14 @@ class LatestTestSummaryTest extends TestCase
             'workflow_item_id' => $shippingCheck->id,
             'is_required' => true,
         ]);
+        $diagnosticHash = app(WorkflowRunDefinitionService::class)
+            ->forProfile($asset, $diagnostics)['readiness_context_hash'];
 
         $diagnosticRun = TestRun::factory()->create([
             'asset_id' => $asset->id,
             'workflow_profile_id' => $diagnostics->id,
             'profile_name_snapshot' => $diagnostics->name,
+            'readiness_context_hash' => $diagnosticHash,
             'created_at' => now()->subDay(),
             'finished_at' => now()->subDay(),
         ]);
@@ -79,8 +83,8 @@ class LatestTestSummaryTest extends TestCase
     public function testSummaryReportsMissingBlockingWorkflowProfileNames(): void
     {
         $asset = Asset::factory()->create();
-        $diagnosticItem = TestType::factory()->create(['name' => 'Diagnostic']);
-        $photoItem = TestType::factory()->create(['name' => 'Sale Photos']);
+        $diagnosticItem = TestType::factory()->create(['name' => 'Diagnostic', 'applies_to_all' => true]);
+        $photoItem = TestType::factory()->create(['name' => 'Sale Photos', 'applies_to_all' => true]);
         $diagnostics = WorkflowProfile::factory()->create([
             'name' => 'Diagnostics',
             'blocks_sale_readiness' => true,
@@ -99,10 +103,13 @@ class LatestTestSummaryTest extends TestCase
             'workflow_item_id' => $photoItem->id,
             'is_required' => true,
         ]);
+        $diagnosticHash = app(WorkflowRunDefinitionService::class)
+            ->forProfile($asset, $diagnostics)['readiness_context_hash'];
         $run = TestRun::factory()->create([
             'asset_id' => $asset->id,
             'workflow_profile_id' => $diagnostics->id,
             'profile_name_snapshot' => $diagnostics->name,
+            'readiness_context_hash' => $diagnosticHash,
         ]);
         TestResult::factory()->create([
             'workflow_run_id' => $run->id,

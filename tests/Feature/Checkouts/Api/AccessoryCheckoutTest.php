@@ -5,6 +5,7 @@ namespace Tests\Feature\Checkouts\Api;
 use App\Mail\CheckoutAccessoryMail;
 use App\Models\Accessory;
 use App\Models\Actionlog;
+use App\Models\Company;
 use App\Models\User;
 use App\Notifications\CheckoutAccessoryNotification;
 use Illuminate\Support\Facades\Mail;
@@ -80,7 +81,6 @@ class AccessoryCheckoutTest extends TestCase implements TestsPermissionsRequirem
             ->json();
 
         $this->assertTrue($accessory->checkouts()->where('assigned_type', User::class)->where('assigned_to', $user->id)->count() > 0);
-
         $this->assertEquals(
             1,
             Actionlog::where([
@@ -114,6 +114,10 @@ class AccessoryCheckoutTest extends TestCase implements TestsPermissionsRequirem
             ->json();
 
         $this->assertTrue($accessory->checkouts()->where('assigned_type', User::class)->where('assigned_to', $user->id)->count() > 0);
+        $this->assertSame(
+            2,
+            $accessory->checkouts()->where('assigned_type', User::class)->where('assigned_to', $user->id)->count()
+        );
 
         $this->assertEquals(
             1,
@@ -196,5 +200,48 @@ class AccessoryCheckoutTest extends TestCase implements TestsPermissionsRequirem
         );
         $this->assertHasTheseActionLogs($accessory, ['create', 'checkout']);
 
+    }
+
+    public function testExhaustedInventoryCannotBeOverAllocated(): void
+    {
+        $target = User::factory()->create();
+        $accessory = Accessory::factory()->create(['qty' => 1]);
+        $actor = User::factory()->superuser()->create();
+
+        $accessory->checkouts()->create([
+            'assigned_to' => $target->id,
+            'assigned_type' => User::class,
+            'created_by' => $actor->id,
+        ]);
+
+        $this->actingAsForApi($actor)
+            ->postJson(route('api.accessories.checkout', $accessory), [
+                'assigned_user' => $target->id,
+                'checkout_to_type' => 'user',
+                'checkout_qty' => 1,
+            ])
+            ->assertStatusMessageIs('error');
+
+        $this->assertSame(1, $accessory->checkouts()->count());
+        $this->assertSame(0, $accessory->fresh()->numRemaining());
+    }
+
+    public function testAccessoryCannotBeCheckedOutAcrossCompanyBoundary(): void
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+        $itemCompany = Company::factory()->create();
+        $targetCompany = Company::factory()->create();
+        $accessory = Accessory::factory()->for($itemCompany)->create();
+        $target = User::factory()->for($targetCompany)->create();
+
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->postJson(route('api.accessories.checkout', $accessory), [
+                'assigned_user' => $target->id,
+                'checkout_to_type' => 'user',
+            ])
+            ->assertStatusMessageIs('error')
+            ->assertJsonPath('messages', trans('general.error_user_company'));
+
+        $this->assertSame(0, $accessory->checkouts()->count());
     }
 }

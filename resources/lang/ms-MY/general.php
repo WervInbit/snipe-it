@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Import',
     'import_this_file'      => 'Map fields and process this file',
     'importing'         	=> 'Importing',
-    'importing_help'        => 'You can import assets, accessories, licenses, components, consumables, and users via CSV file. <br><br>The CSV should be comma-delimited and formatted with headers that match the ones in the <a href="https://snipe-it.readme.io/docs/importing" target="_new">sample CSVs in the documentation</a>.',
+    'importing_help'        => 'You can import assets, accessories, licenses, components, consumables, and users via CSV file. <br><br>The CSV should be comma-delimited and formatted with headers that match the ones in the <a href=":fork_documentation_url" target="_new">sample CSVs in the documentation</a>.',
     'import-history'        => 'Sejarah Import',
     'asset_maintenance'        => 'Penyelenggaraan Aset',
     'asset_maintenance_report' => 'Laporan Penyenggaraan Aset',

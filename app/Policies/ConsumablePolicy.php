@@ -8,4 +8,9 @@ class ConsumablePolicy extends CheckoutablePermissionsPolicy
     {
         return 'consumables';
     }
+
+    protected function usesDedicatedFilePermission(): bool
+    {
+        return true;
+    }
 }

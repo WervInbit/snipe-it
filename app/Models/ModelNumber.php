@@ -13,6 +13,7 @@ class ModelNumber extends SnipeModel
 {
     use HasFactory;
     use HasUploads;
+    use Loggable;
 
     protected $table = 'model_numbers';
 

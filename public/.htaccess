@@ -8,6 +8,10 @@
     # Needed for https://letsencrypt.org/ certificates.
     RewriteRule ^\.well-known/acme-challenge/ - [L]
 
+    # Defense in depth: uploaded content must never execute as server-side code.
+    RewriteRule ^uploads/test_images(/.*)?$ - [F,L,NC]
+    RewriteRule ^uploads/.*\.(php[0-9]?|phtml|phar|cgi|pl|py|sh)(/.*)?$ - [F,L,NC]
+
     # Uncomment these two lines to force SSL redirect in Apache
     # RewriteCond %{HTTPS} off
     # RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]

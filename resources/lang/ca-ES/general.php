@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Import',
     'import_this_file'      => 'Map fields and process this file',
     'importing'         	=> 'Importing',
-    'importing_help'        => 'Podeu importar recursos, accessoris, llicències, components, consumibles, and usuaris via fitxer CSV. <br><br>El CSV cal que estigui delimitat per comes i formatat amb capçaleres que coincideixin amb les de les <a href="https://snipe-it.readme.io/docs/importing" target="_new">mostres de CSV a la documentació</a>.',
+    'importing_help'        => 'Podeu importar recursos, accessoris, llicències, components, consumibles, and usuaris via fitxer CSV. <br><br>El CSV cal que estigui delimitat per comes i formatat amb capçaleres que coincideixin amb les de les <a href=":fork_documentation_url" target="_new">mostres de CSV a la documentació</a>.',
     'import-history'        => 'Import History',
     'asset_maintenance'        => 'Manteniment de Recursos',
     'asset_maintenance_report' => 'Informe de Manteniment de Recursos',

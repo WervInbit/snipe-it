@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Storage;
 
 class SettingsSeeder extends Seeder
 {
@@ -17,14 +16,14 @@ class SettingsSeeder extends Seeder
 
         $settings = new Setting;
         $settings->per_page = 20;
-        $settings->site_name = 'Snipe-IT';
+        $settings->site_name = 'Inbit Device Refurbishment';
         $settings->auto_increment_assets = 1;
-        $settings->logo = 'snipe-logo.png';
-        $settings->alert_email = 'service@snipe-it.io';
+        $settings->logo = null;
+        $settings->alert_email = null;
         $settings->header_color = null;
         $settings->label2_2d_type = 'QRCODE';
         $settings->default_currency = 'USD';
-        $settings->brand = 3;
+        $settings->brand = 1;
         $settings->ldap_enabled = 0;
         $settings->full_multiple_companies_support = 0;
         $settings->scope_locations_fmcs = 0;
@@ -42,7 +41,7 @@ class SettingsSeeder extends Seeder
         $settings->thumbnail_max_h = '30';
         $settings->locale = 'nl-NL';
         $settings->version_footer = 'on';
-        $settings->support_footer = 'on';
+        $settings->support_footer = 'off';
         $settings->pwd_secure_min = '8';
         $settings->qr_code = 1;
         $settings->qr_text_redundancy = 0;
@@ -54,9 +53,5 @@ class SettingsSeeder extends Seeder
             $user->locale = 'nl-NL';
             $user->save();
         }
-
-        // Copy the logos from the img/demo directory
-        Storage::disk('local_public')->put('snipe-logo.png', file_get_contents(public_path('img/demo/snipe-logo.png')));
-        Storage::disk('local_public')->put('snipe-logo-lg.png', file_get_contents(public_path('img/demo/snipe-logo-lg.png')));
     }
 }

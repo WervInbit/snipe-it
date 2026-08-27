@@ -60,7 +60,7 @@ class BatchMetadataEditTest extends TestCase
         });
     }
 
-    public function test_batch_edit_rolls_back_on_failure()
+    public function test_batch_edit_to_archived_status_clears_legacy_assignment()
     {
         $deployable = Statuslabel::factory()->create(['deployable' => 1]);
         $nonDeployable = Statuslabel::factory()->archived()->create();
@@ -76,11 +76,14 @@ class BatchMetadataEditTest extends TestCase
                 'ids' => $ids,
                 'status_id' => $nonDeployable->id,
             ])
-            ->assertSessionHas('bulk_asset_errors');
+            ->assertSessionHas('success');
 
-        $assets->each(function (Asset $asset) use ($deployable) {
+        $assets->each(function (Asset $asset) use ($nonDeployable) {
             $asset->refresh();
-            $this->assertEquals($deployable->id, $asset->status_id);
+            $this->assertEquals($nonDeployable->id, $asset->status_id);
+            $this->assertSame(1, (int) $asset->archived);
+            $this->assertNull($asset->assigned_to);
+            $this->assertNull($asset->assigned_type);
         });
     }
 }

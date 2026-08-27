@@ -42,9 +42,10 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
     #[Test]
     public function userWithImportAssetsPermissionCanImportUsers(): void
     {
-        $this->actingAsForApi(User::factory()->canImport()->create());
+        $actor = User::factory()->canImport()->create();
+        $this->actingAsForApi($actor);
 
-        $import = Import::factory()->users()->create();
+        $import = Import::factory()->users()->create(['created_by' => $actor->id]);
 
         $this->importFileResponse(['import' => $import->id])->assertOk();
     }
@@ -114,6 +115,48 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
         $this->assertNull($newUser->persist_code);
         $this->assertNull($newUser->reset_password_code);
         $this->assertEquals(0, $newUser->activated);
+    }
+
+    #[Test]
+    public function parsesNonIsoStartAndEndDates(): void
+    {
+        $row = ImportFileBuilder::new()->definition();
+        $row['start_date'] = '07/28/2025';
+        $row['end_date'] = '12/31/2025';
+
+        $importFileBuilder = new ImportFileBuilder([$row]);
+        $import = Import::factory()->users()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $newUser = User::query()->where('username', $row['username'])->sole();
+
+        $this->assertEquals('2025-07-28', $newUser->start_date);
+        $this->assertEquals('2025-12-31', $newUser->end_date);
+    }
+
+    #[Test]
+    public function storesNullWhenStartOrEndDateIsUnparseable(): void
+    {
+        $row = ImportFileBuilder::new()->definition();
+        $row['start_date'] = 'not-a-date';
+        $row['end_date'] = 'also-not-a-date';
+
+        $importFileBuilder = new ImportFileBuilder([$row]);
+        $import = Import::factory()->users()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $newUser = User::query()->where('username', $row['username'])->sole();
+
+        $this->assertNull($newUser->start_date);
+        $this->assertNull($newUser->end_date);
     }
 
     #[Test]
@@ -202,7 +245,7 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
                 'messages' => [
                     '' => [
                         'User' => [
-                            'first_name' => ['The first name field is required.'],
+                            'first_name' => [trans('validation.required', ['attribute' => 'first name'])],
                         ]
                     ]
                 ]
@@ -246,6 +289,34 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
         $this->assertEquals(
             Arr::except($user->attributesToArray(), $updatedAttributes),
             Arr::except($updatedUser->attributesToArray(), $updatedAttributes),
+        );
+    }
+
+    #[Test]
+    public function importOnlyUserCannotUpdateExistingUserAuthFields(): void
+    {
+        $this->assertImportCannotUpdateProtectedAuthFields(
+            User::factory()->canImport()->create(),
+            User::factory()->create([
+                'first_name' => 'Original',
+                'username' => 'protected-import-user',
+                'email' => 'protected-import-user@example.test',
+                'activated' => 0,
+            ])
+        );
+    }
+
+    #[Test]
+    public function granularEditorCannotUpdateAdminAuthFieldsThroughImport(): void
+    {
+        $this->assertImportCannotUpdateProtectedAuthFields(
+            User::factory()->canImport()->editUsers()->create(),
+            User::factory()->admin()->create([
+                'first_name' => 'Original',
+                'username' => 'protected-import-admin',
+                'email' => 'protected-import-admin@example.test',
+                'activated' => 0,
+            ])
         );
     }
 
@@ -330,5 +401,35 @@ class ImportUsersTest extends ImportDataTestCase implements TestsPermissionsRequ
         $this->assertNull($newUser->persist_code);
         $this->assertNull($newUser->reset_password_code);
         $this->assertEquals(0, $newUser->activated);
+    }
+
+    private function assertImportCannotUpdateProtectedAuthFields(User $actor, User $target): void
+    {
+        $originalUsername = $target->username;
+        $originalEmail = $target->email;
+        $row = array_merge(ImportFileBuilder::new()->definition(), [
+            'id' => (string) $target->id,
+            'username' => 'replacement-'.Str::random(20),
+            'email' => Str::random(20).'@example.test',
+            'firstName' => 'Updated by import',
+            'activated' => '1',
+        ]);
+        $importFileBuilder = new ImportFileBuilder([$row]);
+        $import = Import::factory()->users()->create([
+            'created_by' => $actor->id,
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+
+        $this->actingAsForApi($actor);
+        $this->importFileResponse([
+            'import' => $import->id,
+            'import-update' => true,
+        ])->assertOk();
+
+        $target->refresh();
+        $this->assertSame('Updated by import', $target->first_name);
+        $this->assertSame($originalUsername, $target->username);
+        $this->assertSame($originalEmail, $target->email);
+        $this->assertEquals(0, $target->activated);
     }
 }

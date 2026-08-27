@@ -21,7 +21,7 @@
         <label for="site_name">
           {{ trans('general.site_name') }}
         </label>
-        <input class="form-control" placeholder="Snipe-IT Asset Management" required="" name="site_name" type="text" value="{{ old('site_name') }}">
+        <input class="form-control" placeholder="{{ config('app.name') }}" required="" name="site_name" type="text" value="{{ old('site_name') }}">
 
         {!! $errors->first('site_name', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
       </div>
@@ -99,7 +99,7 @@
       <!-- email format  -->
       <div class="form-group col-lg-6 {{ $errors->has('email_format') ? 'error' : '' }}">
         <label for="email_format">{{ trans('admin/settings/general.email_formats.email_format') }}</label>
-        {!! Form::username_format('email_format', old('email_format', 'filastname'), 'select2') !!}
+        {!! \App\Support\FormSelect::emailFormat('email_format', old('email_format', 'filastname'), 'select2') !!}
         {!! $errors->first('email_format', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
       </div>
     </div>
@@ -154,11 +154,13 @@
     </div>
 
     <!-- Email credentials -->
+    @if (config('mail.enabled'))
     <div class="form-group col-lg-12">
       <label class="form-control form-control">
         <input type="checkbox" value="1" name="email_creds">{{ trans('admin/users/general.email_credentials_text') }}
       </label>
     </div>
+    @endif
   </div> <!--/.COL-LG-12-->
 @stop
 

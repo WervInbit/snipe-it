@@ -18,6 +18,13 @@ class CheckoutLicenseMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public mixed $item;
+    public mixed $admin;
+    public mixed $note;
+    public mixed $acceptance;
+    public mixed $settings;
+    public mixed $target;
+
     /**
      * Create a new message instance.
      */

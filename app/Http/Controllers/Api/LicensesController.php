@@ -9,6 +9,7 @@ use App\Http\Transformers\SelectlistTransformer;
 use App\Models\License;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\JsonResponse;
 
 class LicensesController extends Controller
@@ -23,6 +24,7 @@ class LicensesController extends Controller
     public function index(Request $request) : JsonResponse | array
     {
         $this->authorize('view', License::class);
+        $canViewKeys = Gate::allows('viewKeys', License::class);
 
         $licenses = License::with('company', 'manufacturer', 'supplier','category', 'adminuser')->withCount('freeSeats as free_seats_count');
 
@@ -35,6 +37,7 @@ class LicensesController extends Controller
         }
 
         if ($request->filled('product_key')) {
+            abort_unless($canViewKeys, 403);
             $licenses->where('licenses.serial', '=', $request->input('product_key'));
         }
 
@@ -87,7 +90,10 @@ class LicensesController extends Controller
         }
 
         if ($request->filled('search')) {
-            $licenses = $licenses->TextSearch($request->input('search'));
+            $licenses = $licenses->TextSearch(
+                $request->input('search'),
+                $canViewKeys ? [] : ['serial']
+            );
         }
 
         if ($request->input('deleted')=='true') {
@@ -118,6 +124,10 @@ class LicensesController extends Controller
                 $licenses = $licenses->OrderByCreatedBy($order);
                 break;
             default:
+                if ($request->input('sort') === 'serial') {
+                    abort_unless($canViewKeys, 403);
+                }
+
                 $allowed_columns =
                     [
                         'id',
@@ -245,6 +255,8 @@ class LicensesController extends Controller
      */
     public function selectlist(Request $request) : array
     {
+        $this->authorize('view.selectlists');
+
         $licenses = License::select([
             'licenses.id',
             'licenses.name',

@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Impor',
     'import_this_file'      => 'Petakan kolom dan proses berkas ini',
     'importing'         	=> 'Pengimporan',
-    'importing_help'        => 'Anda dapat mengimpor aset, aksesori, lisensi, komponen, bahan habis pakai, dan pengguna melalui file CSV. <br><br> CSV harus dibatasi koma dan diformat dengan header yang cocok dengan header di <a href="https://snipe-it.readme.io/docs/importing" target="_new"> contoh CSV dalam dokumentasi</a>.',
+    'importing_help'        => 'Anda dapat mengimpor aset, aksesori, lisensi, komponen, bahan habis pakai, dan pengguna melalui file CSV. <br><br> CSV harus dibatasi koma dan diformat dengan header yang cocok dengan header di <a href=":fork_documentation_url" target="_new"> contoh CSV dalam dokumentasi</a>.',
     'import-history'        => 'Sejarah Impor',
     'asset_maintenance'        => 'Pemeliharaan Aset',
     'asset_maintenance_report' => 'Laporan Pemeliharaan Aset',

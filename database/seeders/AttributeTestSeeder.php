@@ -66,7 +66,6 @@ class AttributeTestSeeder extends Seeder
 
         $this->seedOperationalWorkflowItems();
         $this->seedWorkflowProfiles($diagnosticItems);
-        $this->pruneLegacyWorkflowItems();
     }
 
     /**
@@ -199,7 +198,7 @@ class AttributeTestSeeder extends Seeder
             ->pluck('id')
             ->all();
 
-        $item->categories()->sync($categoryIds);
+        $item->categories()->syncWithoutDetaching($categoryIds);
     }
 
     /**
@@ -217,7 +216,7 @@ class AttributeTestSeeder extends Seeder
             ->pluck('id')
             ->all();
 
-        $item->componentCategories()->sync($categoryIds);
+        $item->componentCategories()->syncWithoutDetaching($categoryIds);
     }
 
     /**
@@ -245,7 +244,7 @@ class AttributeTestSeeder extends Seeder
             ? $query->pluck('id')->all()
             : [];
 
-        $item->componentDefinitions()->sync($definitionIds);
+        $item->componentDefinitions()->syncWithoutDetaching($definitionIds);
     }
 
     private function seedOperationalWorkflowItems(): void
@@ -270,7 +269,7 @@ class AttributeTestSeeder extends Seeder
                 ]
             );
 
-            $item->categories()->sync(
+            $item->categories()->syncWithoutDetaching(
                 isset($config['categories'])
                     ? Category::query()
                         ->whereIn('name', $config['categories'])
@@ -338,40 +337,27 @@ class AttributeTestSeeder extends Seeder
         ];
 
         foreach ($profiles as $slug => $config) {
-            $profile = WorkflowProfile::updateOrCreate(
-                ['slug' => $slug],
-                [
-                    'name' => $config['name'],
-                    'description' => $config['description'],
-                    'is_active' => true,
-                    'is_default' => (bool) $config['is_default'],
-                    'blocks_sale_readiness' => (bool) $config['blocks_sale_readiness'],
-                    'display_order' => array_search($slug, array_keys($profiles), true) ?: 0,
-                ]
-            );
+            $profile = WorkflowProfile::query()->firstOrNew(['slug' => $slug]);
+            $isNewProfile = !$profile->exists;
+            $profile->fill([
+                'name' => $config['name'],
+                'description' => $config['description'],
+                'is_active' => true,
+                'blocks_sale_readiness' => (bool) $config['blocks_sale_readiness'],
+                'display_order' => array_search($slug, array_keys($profiles), true) ?: 0,
+            ]);
 
-            if ($profile->is_default) {
-                WorkflowProfile::query()
-                    ->whereKeyNot($profile->id)
-                    ->update(['is_default' => false]);
+            if ($isNewProfile) {
+                $profile->is_default = (bool) $config['is_default']
+                    && !WorkflowProfile::query()->where('is_default', true)->exists();
             }
+
+            $profile->save();
 
             $items = TestType::query()
                 ->whereIn('slug', $config['items'])
                 ->get()
                 ->keyBy('slug');
-            $intendedItemIds = $items->pluck('id')->all();
-
-            $staleItemsQuery = WorkflowProfileItem::query()
-                ->where('workflow_profile_id', $profile->id);
-
-            if ($intendedItemIds === []) {
-                $staleItemsQuery->delete();
-            } else {
-                $staleItemsQuery
-                    ->whereNotIn('workflow_item_id', $intendedItemIds)
-                    ->delete();
-            }
 
             foreach ($config['items'] as $index => $itemSlug) {
                 $item = $items->get($itemSlug);
@@ -453,13 +439,4 @@ class AttributeTestSeeder extends Seeder
         ];
     }
 
-    private function pruneLegacyWorkflowItems(): void
-    {
-        TestType::query()
-            ->whereIn('slug', [
-                'install-update-windows',
-                'wipen',
-            ])
-            ->delete();
-    }
 }

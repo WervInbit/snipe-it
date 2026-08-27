@@ -84,7 +84,7 @@
                             </div>
                         @endif
 
-                        @if (auth()->user()->email!='')
+                        @if (config('mail.enabled') && auth()->user()->email!='')
                             <div class="col-md-12" style="padding-top: 20px; display: none;" id="showEmailBox">
                                 <label class="form-control">
                                     <input type="checkbox" value="1" name="send_copy" id="send_copy" checked="checked" aria-label="send_copy">

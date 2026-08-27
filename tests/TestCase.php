@@ -3,25 +3,29 @@
 namespace Tests;
 
 use App\Http\Middleware\SecurityHeaders;
+use Illuminate\Foundation\Testing\DatabaseTransactionsManager;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Foundation\Testing\RefreshDatabaseState;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Illuminate\Support\Facades\Cache;
 use RuntimeException;
 use Tests\Support\AssertsAgainstSlackNotifications;
 use Tests\Support\AssertHasActionLogs;
-use Tests\Support\CanSkipTests;
 use Tests\Support\CustomTestMacros;
 use Tests\Support\InteractsWithAuthentication;
 use Tests\Support\InitializesSettings;
+use Tests\Support\TestEnvironmentGuard;
 
 abstract class TestCase extends BaseTestCase
 {
     use AssertsAgainstSlackNotifications;
-    use CanSkipTests;
     use CreatesApplication;
     use CustomTestMacros;
     use InteractsWithAuthentication;
     use InitializesSettings;
-    use LazilyRefreshDatabase;
+    use LazilyRefreshDatabase {
+        beginDatabaseTransaction as private beginFrameworkDatabaseTransaction;
+    }
     use AssertHasActionLogs;
 
     private array $globallyDisabledMiddleware = [
@@ -35,11 +39,69 @@ abstract class TestCase extends BaseTestCase
 
         parent::setUp();
 
+        Cache::flush();
+        $this->app->setLocale(config('app.locale'));
+
         $this->registerCustomMacros();
 
         $this->withoutMiddleware($this->globallyDisabledMiddleware);
 
         $this->initializeSettings();
+    }
+
+    /**
+     * Keep the guarded disposable MariaDB suite recoverable when application
+     * behavior intentionally alters the assets table for custom fields.
+     *
+     * MariaDB implicitly commits transactions around DDL. Laravel's default
+     * teardown then attempts to roll back a transaction that no longer exists.
+     * Detect that state, require a fresh schema before the next test, and avoid
+     * disguising executable database coverage as incomplete tests.
+     */
+    public function beginDatabaseTransaction()
+    {
+        if (config('database.default') !== 'mysql') {
+            $this->beginFrameworkDatabaseTransaction();
+
+            return;
+        }
+
+        $database = $this->app->make('db');
+        $connections = $this->connectionsToTransact();
+
+        $this->app->instance(
+            'db.transactions',
+            $transactionsManager = new DatabaseTransactionsManager($connections)
+        );
+
+        foreach ($connections as $name) {
+            $connection = $database->connection($name);
+            $connection->setTransactionManager($transactionsManager);
+
+            $dispatcher = $connection->getEventDispatcher();
+            $connection->unsetEventDispatcher();
+            $connection->beginTransaction();
+            $connection->setEventDispatcher($dispatcher);
+        }
+
+        $this->beforeApplicationDestroyed(function () use ($database) {
+            foreach ($this->connectionsToTransact() as $name) {
+                $connection = $database->connection($name);
+                $dispatcher = $connection->getEventDispatcher();
+
+                $connection->unsetEventDispatcher();
+
+                $pdo = $connection->getPdo();
+                if ($pdo && $pdo->inTransaction()) {
+                    $connection->rollBack();
+                } else {
+                    RefreshDatabaseState::$migrated = false;
+                }
+
+                $connection->setEventDispatcher($dispatcher);
+                $connection->disconnect();
+            }
+        });
     }
 
     private function guardAgainstMissingEnv(): void
@@ -53,56 +115,11 @@ abstract class TestCase extends BaseTestCase
 
     private function guardAgainstUnsafeTestingConfig(): void
     {
-        $basePath = realpath(__DIR__ . '/../');
-        $configCachePath = $basePath . '/bootstrap/cache/config.php';
-
-        if (file_exists($configCachePath)) {
-            throw new RuntimeException(
-                'Refusing to run tests while bootstrap/cache/config.php exists. ' .
-                'Cached local config can override PHPUnit testing DB settings and hit the dev database. ' .
-                'Run `php artisan optimize:clear` in the app container first.'
-            );
-        }
-
-        $testingEnv = $this->readEnvironmentFile($basePath . '/.env.testing');
-        $dbConnection = $testingEnv['DB_CONNECTION'] ?? null;
-        if ($dbConnection !== 'sqlite') {
-            throw new RuntimeException(
-                'Refusing to run tests because .env.testing DB_CONNECTION is not sqlite. Current DB_CONNECTION=' .
-                ($dbConnection ?: 'undefined') . '.'
-            );
-        }
-
-        $dbDatabase = $testingEnv['DB_DATABASE'] ?? null;
-        $allowedSqliteTargets = [
-            ':memory:',
-            '/var/www/html/database/database.sqlite',
-            $basePath . '/database/database.sqlite',
-        ];
-
-        if (!in_array($dbDatabase, $allowedSqliteTargets, true)) {
-            throw new RuntimeException(
-                'Refusing to run tests because DB_DATABASE does not match the approved sqlite test targets. ' .
-                'Current DB_DATABASE=' . ($dbDatabase ?: 'undefined') . '.'
-            );
-        }
+        TestEnvironmentGuard::assertPhpUnitProcessIsSafe(realpath(__DIR__ . '/../'));
     }
 
-    private function readEnvironmentFile(string $path): array
+    private function guardAgainstUnsafeBootedApplication($app): void
     {
-        $values = [];
-
-        foreach (file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) ?: [] as $line) {
-            $trimmed = trim($line);
-            if ($trimmed === '' || str_starts_with($trimmed, '#') || !str_contains($trimmed, '=')) {
-                continue;
-            }
-
-            [$key, $value] = explode('=', $trimmed, 2);
-            $values[trim($key)] = trim($value, " \t\n\r\0\x0B\"'");
-        }
-
-        return $values;
+        TestEnvironmentGuard::assertBootedPhpUnitApplication($app);
     }
-
 }

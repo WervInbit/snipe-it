@@ -10,6 +10,7 @@ use App\Models\TestType;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PartialUpdateTestResultTest extends TestCase
@@ -18,6 +19,7 @@ class PartialUpdateTestResultTest extends TestCase
     {
         parent::setUp();
         $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+        Storage::fake(config('filesystems.default'));
     }
 
     private function makeRun(): array
@@ -152,11 +154,8 @@ class PartialUpdateTestResultTest extends TestCase
         $photoRecord = TestResultPhoto::where('workflow_result_id', $result->id)->first();
         $this->assertNotNull($photoRecord);
         $this->assertSame($photoId, $photoRecord->id);
-        $this->assertTrue(File::exists(public_path($photoRecord->path)));
-
-        // Clean up uploaded files
-        File::delete(public_path($photoRecord->path));
-        $photoRecord->delete();
+        Storage::disk(config('filesystems.default'))->assertExists($photoRecord->path);
+        $this->assertFalse(File::exists(public_path($photoRecord->path)));
     }
 
     public function test_photo_can_be_removed(): void
@@ -175,8 +174,8 @@ class PartialUpdateTestResultTest extends TestCase
         $result->refresh();
         $photoRecord = $result->photos()->find($photoId);
         $this->assertNotNull($photoRecord);
-        $photoPath = public_path($photoRecord->path);
-        $this->assertTrue(File::exists($photoPath));
+        $photoPath = $photoRecord->path;
+        Storage::disk(config('filesystems.default'))->assertExists($photoPath);
 
         $response = $this->actingAs($user, 'web')->postJson(
             route('test-results.partial-update', [$asset->id, $run->id, $result->id]),
@@ -192,7 +191,7 @@ class PartialUpdateTestResultTest extends TestCase
 
         $result->refresh();
         $this->assertNull($result->photos()->find($photoId));
-        $this->assertFalse(File::exists($photoPath));
+        Storage::disk(config('filesystems.default'))->assertMissing($photoPath);
     }
 
     public function test_multiple_photos_can_be_uploaded_and_removed_individually(): void
@@ -218,8 +217,8 @@ class PartialUpdateTestResultTest extends TestCase
         $this->assertCount(2, $result->fresh()->photos);
 
         $firstPhoto = TestResultPhoto::find($photoIds[0]);
-        $firstPath = public_path($firstPhoto->path);
-        $this->assertTrue(File::exists($firstPath));
+        $firstPath = $firstPhoto->path;
+        Storage::disk(config('filesystems.default'))->assertExists($firstPath);
 
         $deleteResponse = $this->actingAs($user, 'web')->postJson(
             route('test-results.partial-update', [$asset->id, $run->id, $result->id]),
@@ -234,14 +233,8 @@ class PartialUpdateTestResultTest extends TestCase
         $this->assertNull(TestResultPhoto::find($photoIds[0]));
         $remainingPhoto = TestResultPhoto::find($photoIds[1]);
         $this->assertNotNull($remainingPhoto);
-        $this->assertTrue(File::exists(public_path($remainingPhoto->path)));
-        $this->assertFalse(File::exists($firstPath));
-
-        // Clean up remaining photo
-        foreach (TestResultPhoto::where('workflow_result_id', $result->id)->get() as $photo) {
-            File::delete(public_path($photo->path));
-            $photo->delete();
-        }
+        Storage::disk(config('filesystems.default'))->assertExists($remainingPhoto->path);
+        Storage::disk(config('filesystems.default'))->assertMissing($firstPath);
     }
 
     public function test_asset_editor_can_update_foreign_run_via_partial_endpoint(): void

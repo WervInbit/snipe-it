@@ -97,6 +97,10 @@ class AttributeDefinitionsController extends Controller
     {
         $this->authorize('update', $attribute);
 
+        if ($this->requiresOptionLifecycleChange($attribute, $request->input('options.existing', []))) {
+            $this->authorize('manageLifecycle', $attribute);
+        }
+
         $attribute->fill($this->payload($request, $attribute, includeDatatype: false));
         $attribute->save();
         $attribute->categories()->sync($request->input('category_ids', []));
@@ -134,7 +138,7 @@ class AttributeDefinitionsController extends Controller
 
     public function hide(AttributeDefinition $attribute): RedirectResponse
     {
-        $this->authorize('update', $attribute);
+        $this->authorize('manageLifecycle', $attribute);
         $attribute->markHidden();
 
         return back()->with('success', __('Attribute hidden from selectors.'));
@@ -142,7 +146,7 @@ class AttributeDefinitionsController extends Controller
 
     public function unhide(AttributeDefinition $attribute): RedirectResponse
     {
-        $this->authorize('update', $attribute);
+        $this->authorize('manageLifecycle', $attribute);
 
         if ($attribute->isDeprecated()) {
             return back()->with('error', __('Deprecated attributes cannot be made visible again.'));
@@ -299,6 +303,37 @@ class AttributeDefinitionsController extends Controller
                 $this->syncCurrentOptionValue($option);
             }
         }
+    }
+
+    private function requiresOptionLifecycleChange(AttributeDefinition $attribute, mixed $options): bool
+    {
+        if (!is_array($options) || $options === []) {
+            return false;
+        }
+
+        $existingOptions = $attribute->options()->get()->keyBy('id');
+
+        foreach ($options as $optionId => $payload) {
+            if (!is_array($payload)) {
+                continue;
+            }
+
+            /** @var AttributeOption|null $option */
+            $option = $existingOptions->get((int) $optionId);
+            if (!$option) {
+                continue;
+            }
+
+            if (!empty($payload['delete'])) {
+                return true;
+            }
+
+            if (array_key_exists('active', $payload) && (bool) $payload['active'] !== (bool) $option->active) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function syncCurrentOptionValue(AttributeOption $option): void

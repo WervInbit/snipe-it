@@ -16,6 +16,7 @@ use App\Services\ComponentLifecycleService;
 use App\Services\Components\AssetExpectedComponentService;
 use App\Services\Components\ComponentExpectedSubcomponentService;
 use Carbon\CarbonImmutable;
+use Database\Seeders\Concerns\GuardsDisposableDataSeeding;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +25,8 @@ use Illuminate\Support\Facades\Schema;
 
 class DevelopmentDeviceScenarioSeeder extends Seeder
 {
+    use GuardsDisposableDataSeeding;
+
     private const ASSET_TAG_PREFIX = 'DEV-COMP-';
     private const DEV_ACTOR_USERNAME = 'dev_component_seed_admin';
     private const DEV_SUPPLIER_NAME = 'DEV - Component Scenario Supplier';
@@ -39,6 +42,8 @@ class DevelopmentDeviceScenarioSeeder extends Seeder
 
     public function run(): void
     {
+        $this->assertDisposableDataSeedingAllowed();
+
         if (!Schema::hasTable('component_instances')) {
             return;
         }

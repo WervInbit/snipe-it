@@ -83,7 +83,7 @@
                                         <span class="btn btn-primary fileinput-button">
                                         <span>{{ trans('button.select_file') }}</span>
                                          <!-- The file input field used as target for the file upload widget -->
-                                        <label for="files[]"><span class="sr-only">{{ trans('admin/importer/general.select_file') }}</span></label>
+                                        <label for="files[]"><span class="sr-only">{{ trans('button.select_file') }}</span></label>
                                         <input id="fileupload" type="file" name="files[]" data-url="{{ route('api.imports.index') }}" accept="text/csv" aria-label="files[]">
                                         </span>
                                     @endif
@@ -191,7 +191,7 @@
 
 
 
-                                                                @if ($typeOfImport === 'user')
+                                                                @if ($typeOfImport === 'user' && config('mail.enabled'))
                                                                 <label class="form-control">
                                                                     <input type="checkbox" name="send_welcome" data-livewire-component="{{ $this->getId() }}" wire:model.live="send_welcome">
                                                                     {{ trans('general.send_welcome_email_to_users') }}
@@ -312,7 +312,9 @@
             </div>
             <div class="col-md-3">
                 <h2>{{ trans('general.importing') }}</h2>
-                <p>{!!   trans('general.importing_help') !!}</p>
+                <p>{!! trans('general.importing_help', [
+                    'fork_documentation_url' => route('help.api-compatibility'),
+                ]) !!}</p>
             </div>
 
         </div>

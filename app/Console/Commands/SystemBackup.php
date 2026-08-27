@@ -33,9 +33,9 @@ class SystemBackup extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return int
      */
-    public function handle()
+    public function handle(): int
     {
         if ($this->option('filename')) {
             $filename = $this->option('filename');
@@ -45,10 +45,9 @@ class SystemBackup extends Command
                 $filename = $filename.'.zip';
             }
 
-            $this->call('backup:run', ['--filename' => $filename]);
-        } else {
-            $this->call('backup:run');
+            return $this->call('backup:run', ['--filename' => $filename]);
         }
 
+        return $this->call('backup:run');
     }
 }

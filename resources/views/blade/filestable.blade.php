@@ -5,6 +5,10 @@
 ])
 
 <!-- begin non-ajaxed file listing table -->
+<div class="alert alert-info" role="note">
+    <i class="fas fa-lock" aria-hidden="true"></i>
+    {{ trans('general.private_attachment_notice') }}
+</div>
 <div class="table-responsive">
     <table
             data-columns="{{ \App\Presenters\UploadedFilesPresenter::dataTableLayout() }}"

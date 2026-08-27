@@ -29,6 +29,7 @@ class ModelSpecificationController extends Controller
     public function edit(Request $request, AssetModel $model): View
     {
         $this->authorize('update', $model);
+        $canRemoveSavedSpecification = $request->user()?->can('manageSpecificationCleanup', $model) ?? false;
 
         $model->loadMissing([
             'category',
@@ -49,6 +50,7 @@ class ModelSpecificationController extends Controller
                 'item' => $model,
                 'modelNumber' => null,
                 'modelNumbers' => $modelNumbers,
+                'canRemoveSavedSpecification' => $canRemoveSavedSpecification,
                 'selectedDefinitionIds' => [],
                 'definitionsById' => collect(),
                 'resolvedAttributes' => collect(),
@@ -142,6 +144,7 @@ class ModelSpecificationController extends Controller
             'availableAttributes' => $availableDefinitions,
             'componentDefinitions' => $componentDefinitions,
             'componentDefinitionOverlapWarnings' => $this->hierarchyWarningService->overlapWarningsByDefinition($componentDefinitions),
+            'canRemoveSavedSpecification' => $canRemoveSavedSpecification,
         ]);
     }
 
@@ -163,17 +166,24 @@ class ModelSpecificationController extends Controller
         $attributeOrder = $request->input('attribute_order', []);
         $attributeValues = $request->input('attributes', []);
         $componentTemplates = $request->input('component_templates', []);
+        $filteredOrder = collect($attributeOrder)
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
 
-        DB::transaction(function () use ($modelNumber, $attributeOrder, $attributeValues, $componentTemplates) {
+        if ($this->removesSavedSpecificationRows($modelNumber, $filteredOrder, $componentTemplates)) {
+            $this->authorize('manageSpecificationCleanup', $model);
+        }
+
+        DB::transaction(function () use ($modelNumber, $filteredOrder, $attributeValues, $componentTemplates) {
             $this->syncComponentTemplates($modelNumber, $componentTemplates);
             $modelNumber->unsetRelation('componentTemplates');
             $lockedDefinitionIds = $this->attributeManager->componentResolvedSpecDefinitionIds($modelNumber);
-            $filteredOrder = collect($attributeOrder)
-                ->map(fn ($id) => (int) $id)
+            $editableOrder = collect($filteredOrder)
                 ->reject(fn (int $id) => in_array($id, $lockedDefinitionIds, true))
                 ->values()
                 ->all();
-            $this->attributeManager->syncModelNumberAssignments($modelNumber, $filteredOrder);
+            $this->attributeManager->syncModelNumberAssignments($modelNumber, $editableOrder);
             $this->attributeManager->saveModelAttributes($modelNumber, $attributeValues);
         });
 
@@ -286,6 +296,40 @@ class ModelSpecificationController extends Controller
         }
 
         $query->delete();
+    }
+
+    /**
+     * @param array<int> $submittedAttributeIds
+     * @param array<int, array<string, mixed>> $submittedComponentTemplates
+     */
+    private function removesSavedSpecificationRows(
+        ModelNumber $modelNumber,
+        array $submittedAttributeIds,
+        array $submittedComponentTemplates
+    ): bool
+    {
+        $existingAttributeIds = $modelNumber->attributes()
+            ->pluck('attribute_definition_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        if (array_diff($existingAttributeIds, $submittedAttributeIds) !== []) {
+            return true;
+        }
+
+        $submittedTemplateIds = collect($submittedComponentTemplates)
+            ->filter(fn ($row) => is_array($row))
+            ->pluck('id')
+            ->filter(fn ($id) => $id !== null && $id !== '')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $existingTemplateIds = $modelNumber->componentTemplates()
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        return array_diff($existingTemplateIds, $submittedTemplateIds) !== [];
     }
 }
 

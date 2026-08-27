@@ -423,7 +423,10 @@
                         @if(!$definition)
                             @continue
                         @endif
-                        @include('models.model_numbers.partials.selected-attribute-item', ['definition' => $definition])
+                        @include('models.model_numbers.partials.selected-attribute-item', [
+                            'definition' => $definition,
+                            'canRemoveAssigned' => $canRemoveSavedSpecification,
+                        ])
                     @empty
                         <li class="list-group-item text-muted js-selected-empty">{{ __('No attributes selected.') }}</li>
                     @endforelse
@@ -505,7 +508,11 @@
                                                     <div class="component-template-row__actions">
                                                         <button type="button" class="btn btn-default btn-sm js-component-template-move-up">{{ __('Up') }}</button>
                                                         <button type="button" class="btn btn-default btn-sm js-component-template-move-down">{{ __('Down') }}</button>
-                                                        <button type="button" class="btn btn-default btn-sm js-component-template-remove">{{ __('Remove') }}</button>
+                                                        @if($canRemoveSavedSpecification || empty($row['id']))
+                                                            <button type="button" class="btn btn-default btn-sm js-component-template-remove">{{ __('Remove') }}</button>
+                                                        @else
+                                                            <span class="text-muted small">{{ __('Admin only') }}</span>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>
@@ -600,7 +607,10 @@
         <div class="attribute-template-cache" hidden>
             @foreach($definitionsById as $definition)
                 <template class="js-selected-template" data-attribute-id="{{ $definition->id }}">
-                    @include('models.model_numbers.partials.selected-attribute-item', ['definition' => $definition])
+                    @include('models.model_numbers.partials.selected-attribute-item', [
+                        'definition' => $definition,
+                        'canRemoveAssigned' => true,
+                    ])
                 </template>
                 @php($templateResolved = $resolvedAttributes->get($definition->id))
                 @if($templateResolved)

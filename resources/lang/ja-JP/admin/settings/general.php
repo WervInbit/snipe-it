@@ -382,7 +382,7 @@ return [
     'purge_barcodes' => 'バーコードを消去',
     'help_asterisk_bold'    => '<code>**text**</code> として入力されたテキストは太字で表示されます',
     'help_blank_to_use'     => 'Leave blank to use the value from <code>:setting_name</code>',
-    'help_default_will_use' => '<code>:default</code> will use the value from <code>:setting_name</code>. <br>Note that the value of the barcodes must comply with the respective barcode spec in order to be successfully generated. Please see <a href="https://snipe-it.readme.io/docs/barcodes">the documentation <i class="fa fa-external-link"></i></a> for more details. ',
+    'help_default_will_use' => '<code>:default</code> will use the value from <code>:setting_name</code>. <br>Note that the value of the barcodes must comply with the respective barcode spec in order to be successfully generated. Please see <a href=":fork_documentation_url">the documentation <i class="fa fa-external-link"></i></a> for more details. ',
     'asset_id'              => '資産ID',
     'data'               => 'Data',
     'default'               => 'デフォルト',

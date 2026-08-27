@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Importer',
     'import_this_file'      => 'Kartfelter og behandle denne filen',
     'importing'         	=> 'Importerer',
-    'importing_help'        => 'Du kan importere eiendeler, tilbehør, lisenser, komponenter, forbruksvarer og brukere via CSV-fil. <br><br>CSV-en må være kommaseparert og formatert med overskrifter som stemmer overens med de i <a href="https://snipe-it.readme.io/docs/importing" target="_new">eksempel-CSV i dokumentasjonen</a>.',
+    'importing_help'        => 'Du kan importere eiendeler, tilbehør, lisenser, komponenter, forbruksvarer og brukere via CSV-fil. <br><br>CSV-en må være kommaseparert og formatert med overskrifter som stemmer overens med de i <a href=":fork_documentation_url" target="_new">eksempel-CSV i dokumentasjonen</a>.',
     'import-history'        => 'Importhistorikk',
     'asset_maintenance'        => 'Vedlikehold av eiendeler',
     'asset_maintenance_report' => 'Rapport Vedlikehold av eiendeler',

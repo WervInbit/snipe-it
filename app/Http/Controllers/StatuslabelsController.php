@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
 use \Illuminate\Contracts\View\View;
+use Illuminate\Validation\Rule;
 
 /**
  * This controller handles all actions related to Status Labels for
@@ -43,7 +44,8 @@ class StatuslabelsController extends Controller
 
         return view('statuslabels/edit')
             ->with('item', new Statuslabel)
-            ->with('statuslabel_types', Helper::statusTypeList());
+            ->with('statuslabel_types', Helper::statusTypeList())
+            ->with('lifecycle_stages', Statuslabel::lifecycleStageOptions());
     }
 
     /**
@@ -61,6 +63,10 @@ class StatuslabelsController extends Controller
             return redirect()->back()->withInput()->withErrors(['statuslabel_types' => trans('validation.statuslabel_type')]);
         }
 
+        $request->validate([
+            'lifecycle_stage' => ['nullable', Rule::in(array_filter(array_keys(Statuslabel::lifecycleStageOptions())))],
+        ]);
+
         $statusType = Statuslabel::getStatuslabelTypesForDB($request->input('statuslabel_types'));
 
         // Save the Statuslabel data
@@ -73,6 +79,7 @@ class StatuslabelsController extends Controller
         $statusLabel->color = $request->input('color');
         $statusLabel->show_in_nav = $request->input('show_in_nav', 0);
         $statusLabel->default_label = $request->input('default_label', 0);
+        $statusLabel->lifecycle_stage = $request->input('lifecycle_stage') ?: null;
 
         if ($statusLabel->save()) {
             // Redirect to the new Statuslabel  page
@@ -95,7 +102,8 @@ class StatuslabelsController extends Controller
 
         return view('statuslabels/edit', compact('statuslabel_types'))
             ->with('item', $statuslabel)
-            ->with('use_statuslabel_type', $statuslabel);
+            ->with('use_statuslabel_type', $statuslabel)
+            ->with('lifecycle_stages', Statuslabel::lifecycleStageOptions());
     }
 
     /**
@@ -111,6 +119,10 @@ class StatuslabelsController extends Controller
             return redirect()->back()->withInput()->withErrors(['statuslabel_types' => trans('validation.statuslabel_type')]);
         }
 
+        $request->validate([
+            'lifecycle_stage' => ['nullable', Rule::in(array_filter(array_keys(Statuslabel::lifecycleStageOptions())))],
+        ]);
+
         // Update the Statuslabel data
         $statustype = Statuslabel::getStatuslabelTypesForDB($request->input('statuslabel_types'));
         $statuslabel->name = $request->input('name');
@@ -121,6 +133,7 @@ class StatuslabelsController extends Controller
         $statuslabel->color = $request->input('color');
         $statuslabel->show_in_nav = $request->input('show_in_nav', 0);
         $statuslabel->default_label = $request->input('default_label', 0);
+        $statuslabel->lifecycle_stage = $request->input('lifecycle_stage') ?: null;
 
         // Was the asset created?
         if ($statuslabel->save()) {

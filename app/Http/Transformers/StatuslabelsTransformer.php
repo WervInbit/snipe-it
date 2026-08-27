@@ -25,6 +25,7 @@ class StatuslabelsTransformer
             'id' => (int) $statuslabel->id,
             'name' => e($statuslabel->name),
             'type' => $statuslabel->getStatuslabelType(),
+            'lifecycle_stage' => $statuslabel->lifecycle_stage,
             'color' => ($statuslabel->color) ? e($statuslabel->color) : null,
             'show_in_nav' => ($statuslabel->show_in_nav == '1') ? true : false,
             'default_label' => ($statuslabel->default_label == '1') ? true : false,

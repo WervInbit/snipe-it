@@ -21,10 +21,7 @@ class AssetCountForSidebar
          * This needs to be set for the /setup process, since the tables might not exist yet
          */
         $total_assets = 0;
-        $total_due_for_checkin = 0;
-        $total_overdue_for_checkin = 0;
-        $total_due_for_audit = 0;
-        $total_overdue_for_audit = 0;
+        $settings = null;
 
         try {
             $settings = Setting::getSettings();
@@ -84,37 +81,6 @@ class AssetCountForSidebar
         } catch (\Exception $e) {
             Log::debug($e);
         }
-
-        try {
-            $total_due_for_audit = Asset::DueForAudit($settings)->count();
-            view()->share('total_due_for_audit', $total_due_for_audit);
-        } catch (\Exception $e) {
-            Log::debug($e);
-        }
-
-        try {
-            $total_overdue_for_audit = Asset::OverdueForAudit()->count();
-            view()->share('total_overdue_for_audit', $total_overdue_for_audit);
-        } catch (\Exception $e) {
-            Log::debug($e);
-        }
-
-        try {
-            $total_due_for_checkin = Asset::DueForCheckin($settings)->count();
-            view()->share('total_due_for_checkin', $total_due_for_checkin);
-        } catch (\Exception $e) {
-            Log::debug($e);
-        }
-
-        try {
-            $total_overdue_for_checkin = Asset::OverdueForCheckin()->count();
-            view()->share('total_overdue_for_checkin', $total_overdue_for_checkin);
-        } catch (\Exception $e) {
-            Log::debug($e);
-        }
-
-        view()->share('total_due_and_overdue_for_checkin', ($total_due_for_checkin + $total_overdue_for_checkin));
-        view()->share('total_due_and_overdue_for_audit', ($total_due_for_audit + $total_overdue_for_audit));
 
         return $next($request);
     }

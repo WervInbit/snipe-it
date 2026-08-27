@@ -379,7 +379,7 @@ return [
     'purge_barcodes' => 'Barcodes löschen',
     'help_asterisk_bold'    => 'Der eingegebene Text <code>**text**</code> wird in Fettschrift angezeigt',
     'help_blank_to_use'     => 'Leer lassen, um den Wert von <code>:setting_name</code> zu verwenden',
-    'help_default_will_use' => '<code>:default</code> verwendet den Wert von <code>:setting_name</code>. <br>Beachte, dass der Wert der Barcodes mit der jeweiligen Strichcode-Spezifikation übereinstimmen muss, um erfolgreich generiert zu werden. Bitte lese <a href="https://snipe-it.readme.io/docs/barcodes">die Dokumentation <i class="fa fa-external-link"></i></a> für weitere Details. ',
+    'help_default_will_use' => '<code>:default</code> verwendet den Wert von <code>:setting_name</code>. <br>Beachte, dass der Wert der Barcodes mit der jeweiligen Strichcode-Spezifikation übereinstimmen muss, um erfolgreich generiert zu werden. Bitte lese <a href=":fork_documentation_url">die Dokumentation <i class="fa fa-external-link"></i></a> für weitere Details. ',
     'asset_id'              => 'Asset-ID',
     'data'               => 'Daten',
     'default'               => 'Standard',

@@ -46,12 +46,18 @@
     <div class="form-group{{ $errors->has('status') ? ' has-error' : '' }}">
         <label class="col-md-3 control-label" for="status">{{ __('Status') }}</label>
         <div class="col-md-7">
-            <select name="status" id="status" class="form-control">
-                @php($currentStatus = old('status', $modelNumber->isDeprecated() ? 'deprecated' : 'active'))
-                <option value="active" {{ $currentStatus === 'active' ? 'selected' : '' }}>{{ __('Active') }}</option>
-                <option value="deprecated" {{ $currentStatus === 'deprecated' ? 'selected' : '' }}>{{ __('Deprecated') }}</option>
-            </select>
-            <span class="help-block">{{ __('Deprecated presets remain for legacy assets but are hidden from new selections.') }}</span>
+            @can('manageLifecycle', $model)
+                <select name="status" id="status" class="form-control">
+                    @php($currentStatus = old('status', $modelNumber->isDeprecated() ? 'deprecated' : 'active'))
+                    <option value="active" {{ $currentStatus === 'active' ? 'selected' : '' }}>{{ __('Active') }}</option>
+                    <option value="deprecated" {{ $currentStatus === 'deprecated' ? 'selected' : '' }}>{{ __('Deprecated') }}</option>
+                </select>
+                <span class="help-block">{{ __('Deprecated presets remain for legacy assets but are hidden from new selections.') }}</span>
+            @else
+                <p class="form-control-static">{{ $modelNumber->isDeprecated() ? __('Deprecated') : __('Active') }}</p>
+                <input type="hidden" name="status" value="{{ $modelNumber->isDeprecated() ? 'deprecated' : 'active' }}">
+                <span class="help-block">{{ __('Lifecycle changes require Admin approval.') }}</span>
+            @endcan
             {!! $errors->first('status', '<span class="alert-msg">:message</span>') !!}
         </div>
     </div>

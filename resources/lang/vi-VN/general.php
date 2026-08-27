@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Nhập',
     'import_this_file'      => 'Các trường bản đồ và quá trình xử lý tệp này',
     'importing'         	=> 'Đang nhập',
-    'importing_help'        => 'Bạn có thể nhập nội dung, phụ kiện, giấy phép, linh kiện, vật tư tiêu hao và người dùng qua tệp CSV. <br> <br> CSV phải được phân cách bằng dấu phẩy và được định dạng với các tiêu đề khớp với các tiêu đề trong <a href="https://snipe-it.readme.io/docs/importing" target="_new"> CSV trong tài liệu mẫu </a>.',
+    'importing_help'        => 'Bạn có thể nhập nội dung, phụ kiện, giấy phép, linh kiện, vật tư tiêu hao và người dùng qua tệp CSV. <br> <br> CSV phải được phân cách bằng dấu phẩy và được định dạng với các tiêu đề khớp với các tiêu đề trong <a href=":fork_documentation_url" target="_new"> CSV trong tài liệu mẫu </a>.',
     'import-history'        => 'Lịch sử Nhập khẩu',
     'asset_maintenance'        => 'Tài sản đang bảo trì',
     'asset_maintenance_report' => 'Báo cáo tài sản bảo trì',

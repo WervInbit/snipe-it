@@ -24,14 +24,17 @@ class CloneAssetTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function testAssetCanBeCloned()
+    public function testCloneFormKeepsModelButOmitsRetiredCreateNameField()
     {
         $asset_to_clone = Asset::factory()->create(['name'=>'Asset to clone']);
         $this->actingAs(User::factory()->createAssets()->create())
             ->get(route('clone/hardware', $asset_to_clone))
             ->assertOk()
-            ->assertSee([
-                'Asset to clone'
-            ], false);
+            ->assertSee(
+                '<input type="hidden" name="model_id" id="model_id_hidden" value="'.$asset_to_clone->model_id.'">',
+                false
+            )
+            ->assertDontSee('name="name"', false)
+            ->assertDontSee('Asset to clone', false);
     }
 }

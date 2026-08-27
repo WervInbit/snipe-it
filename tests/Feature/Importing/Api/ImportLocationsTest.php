@@ -92,7 +92,7 @@ class ImportLocationsTest extends ImportDataTestCase implements TestsPermissions
                     '' => [
                         'Location ""' => [
                             'name' =>
-                                ['The name field is required.'],
+                                [trans('validation.required', ['attribute' => 'name'])],
                         ],
                     ]
 

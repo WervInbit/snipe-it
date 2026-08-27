@@ -40,14 +40,6 @@ Route::group(['prefix' => 'users', 'middleware' => ['auth']], function () {
     )->name('users.clone.show')->withTrashed();
 
     Route::post(
-        '{user}/clone',
-        [
-            Users\UsersController::class, 
-            'postCreate'
-        ]
-    )->name('users.clone.store')->withTrashed();
-
-    Route::post(
         '{userId}/restore',
         [
             Users\UsersController::class, 
@@ -55,21 +47,13 @@ Route::group(['prefix' => 'users', 'middleware' => ['auth']], function () {
         ]
     )->name('users.restore.store');
 
-    Route::get(
-        '{userId}/unsuspend',
-        [
-            Users\UsersController::class, 
-            'getUnsuspend'
-        ]
-    )->name('unsuspend/user');
-
     Route::post(
         '{userId}/password',
         [
             Users\UsersController::class, 
             'sendPasswordReset'
         ]
-    )->name('users.password');
+    )->name('users.password')->middleware('throttle:forgotten_password');
 
     Route::get(
         '{userId}/print',
@@ -93,7 +77,7 @@ Route::group(['prefix' => 'users', 'middleware' => ['auth']], function () {
             Users\BulkUsersController::class, 
             'edit'
         ]
-    )->name('users/bulkedit');
+    )->name('users/bulkedit')->middleware('throttle:forgotten_password');
 
     Route::post(
         'merge',

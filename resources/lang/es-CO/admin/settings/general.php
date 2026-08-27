@@ -379,7 +379,7 @@ return [
     'purge_barcodes' => 'Purge Barcodes',
     'help_asterisk_bold'    => 'Texto introducido como <code>**texto**</code> se mostrará como negrita',
     'help_blank_to_use'     => 'Deje en blanco para usar el valor de <code>:setting_name</code>',
-    'help_default_will_use' => '<code>:default</code> usará el valor de <code>:setting_name</code>. <br>Tenga en cuenta que el valor de los códigos de barras debe cumplir la especificación respectiva para que sean generados exitosamente. Por favor lea <a href="https://snipe-it.readme.io/docs/barcodes">la documentación <i class="fa fa-external-link"></i></a> para más detalles. ',
+    'help_default_will_use' => '<code>:default</code> usará el valor de <code>:setting_name</code>. <br>Tenga en cuenta que el valor de los códigos de barras debe cumplir la especificación respectiva para que sean generados exitosamente. Por favor lea <a href=":fork_documentation_url">la documentación <i class="fa fa-external-link"></i></a> para más detalles. ',
     'asset_id'              => 'ID del activo',
     'data'               => 'Datos',
     'default'               => 'Por defecto',

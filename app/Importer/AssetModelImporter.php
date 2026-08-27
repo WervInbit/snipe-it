@@ -40,12 +40,15 @@ class AssetModelImporter extends ItemImporter
     {
 
         $editingAssetModel = false;
+        $importedModelNumber = trim($this->findCsvMatch($row, 'model_number'));
         $assetModel = AssetModel::where('name', '=', $this->findCsvMatch($row, 'name'))->first();
 
         if ($assetModel) {
             if (! $this->updating) {
                 $this->log('A matching Model '.$this->item['name'].' already exists');
-                return;
+                $this->resolveModelNumberForAsset($assetModel, $importedModelNumber);
+
+                return $assetModel;
             }
 
             $this->log('Updating Model');
@@ -60,7 +63,7 @@ class AssetModelImporter extends ItemImporter
         $this->item['category'] = trim($this->findCsvMatch($row, 'category'));
         $this->item['manufacturer'] = trim($this->findCsvMatch($row, 'manufacturer'));
         $this->item['min_amt'] = trim($this->findCsvMatch($row, 'min_amt'));
-        $this->item['model_number'] = trim($this->findCsvMatch($row, 'model_number'));
+        $this->item['model_number'] = $importedModelNumber;
         $this->item['eol'] = trim($this->findCsvMatch($row, 'eol'));
         $this->item['notes'] = trim($this->findCsvMatch($row, 'notes'));
         $this->item['fieldset'] = trim($this->findCsvMatch($row, 'fieldset'));
@@ -104,6 +107,12 @@ class AssetModelImporter extends ItemImporter
         }
 
         if ($assetModel->save()) {
+            if (! $editingAssetModel || $importedModelNumber !== '') {
+                $assetModel->syncPrimaryModelNumber(
+                    $importedModelNumber !== '' ? $importedModelNumber : null,
+                );
+            }
+
             $this->log('AssetModel '.$assetModel->name.' created or updated from CSV import');
             return $assetModel;
 

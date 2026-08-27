@@ -2,7 +2,7 @@
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          backupGlobals="false"
          backupStaticProperties="false"
-         bootstrap="bootstrap/autoload.php"
+         bootstrap="tests/phpunit-bootstrap.php"
          cacheDirectory=".phpunit.cache"
          colors="true"
          processIsolation="false"
@@ -15,6 +15,30 @@
     </testsuite>
     <testsuite name="Feature">
       <directory suffix="Test.php">./tests/Feature</directory>
+      <exclude>./tests/Feature/ApiRateLimitTest.php</exclude>
+      <exclude>./tests/Feature/Accessories/Api</exclude>
+      <exclude>./tests/Feature/AssetModels/Api</exclude>
+      <exclude>./tests/Feature/Assets/Api</exclude>
+      <exclude>./tests/Feature/Categories/Api</exclude>
+      <exclude>./tests/Feature/Checkins/Api</exclude>
+      <exclude>./tests/Feature/Checkouts/Api</exclude>
+      <exclude>./tests/Feature/Companies/Api</exclude>
+      <exclude>./tests/Feature/Components/Api</exclude>
+      <exclude>./tests/Feature/Consumables/Api</exclude>
+      <exclude>./tests/Feature/CustomFields/Api</exclude>
+      <exclude>./tests/Feature/CustomFieldsets/Api</exclude>
+      <exclude>./tests/Feature/Departments/Api</exclude>
+      <exclude>./tests/Feature/Depreciations/Api</exclude>
+      <exclude>./tests/Feature/Groups/Api</exclude>
+      <exclude>./tests/Feature/Importing/Api</exclude>
+      <exclude>./tests/Feature/Licenses/Api</exclude>
+      <exclude>./tests/Feature/Locations/Api</exclude>
+      <exclude>./tests/Feature/Maintenances/Api</exclude>
+      <exclude>./tests/Feature/Manufacturers/Api</exclude>
+      <exclude>./tests/Feature/PredefinedKits/Api</exclude>
+      <exclude>./tests/Feature/StatusLabels/Api</exclude>
+      <exclude>./tests/Feature/Suppliers/Api</exclude>
+      <exclude>./tests/Feature/Users/Api</exclude>
     </testsuite>
     <testsuite name="API">
       <file>./tests/Feature/ApiRateLimitTest.php</file>
@@ -44,15 +68,16 @@
     </testsuite>
   </testsuites>
   <php>
-    <env name="APP_ENV" value="testing"/>
-    <env name="BCRYPT_ROUNDS" value="4"/>
-    <env name="CACHE_DRIVER" value="array"/>
-    <env name="MAIL_FROM_ADDR" value="app@example.com"/>
-    <env name="MAIL_MAILER" value="array"/>
-    <env name="QUEUE_DRIVER" value="sync"/>
+    <env name="SNIPEIT_PHPUNIT_GUARD" value="1" force="true"/>
+    <env name="APP_ENV" value="testing" force="true"/>
+    <env name="BCRYPT_ROUNDS" value="4" force="true"/>
+    <env name="CACHE_DRIVER" value="array" force="true"/>
+    <env name="MAIL_FROM_ADDR" value="app@example.com" force="true"/>
+    <env name="MAIL_MAILER" value="array" force="true"/>
+    <env name="QUEUE_CONNECTION" value="sync" force="true"/>
     <env name="DB_CONNECTION" value="sqlite"/>
     <env name="DB_DATABASE" value=":memory:"/>
-    <env name="SESSION_DRIVER" value="array"/>
+    <env name="SESSION_DRIVER" value="array" force="true"/>
     <ini name="display_errors" value="true"/>
   </php>
   <source>

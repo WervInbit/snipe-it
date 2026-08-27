@@ -82,7 +82,9 @@ class ItemImporter extends Importer
         $this->item['model_number'] = trim($this->findCsvMatch($row, 'model_number'));
         $this->item['min_amt'] = $this->findCsvMatch($row, 'min_amt');
         $this->item['qty'] = $this->findCsvMatch($row, 'quantity');
-        $this->item['requestable'] = $this->findCsvMatch($row, 'requestable');
+        if (! $this instanceof AssetImporter) {
+            $this->item['requestable'] = $this->findCsvMatch($row, 'requestable');
+        }
         $this->item['created_by'] = auth()->id();
         $this->item['serial'] = $this->findCsvMatch($row, 'serial');
         $this->item['item_no'] = trim($this->findCsvMatch($row, 'item_no'));
@@ -90,13 +92,14 @@ class ItemImporter extends Importer
 
         $this->item['purchase_date'] = null;
         if ($this->findCsvMatch($row, 'purchase_date') != '') {
-            $this->item['purchase_date'] = date('Y-m-d', strtotime($this->findCsvMatch($row, 'purchase_date')));
+            $this->item['purchase_date'] = $this->findCsvMatch($row, 'purchase_date');
+            $this->item['purchase_date'] = $this->parseOrNullDate('purchase_date');
         }
 
         // NO need to call this method if we're running the user import.
         // TODO: Merge these methods.
         $this->item['checkout_class'] = $this->findCsvMatch($row, 'checkout_class');
-        if (get_class($this) !== UserImporter::class) {
+        if (! in_array(get_class($this), [UserImporter::class, AssetImporter::class], true)) {
             // $this->item["user"] = $this->createOrFetchUser($row);
             $this->item['checkout_target'] = $this->determineCheckout($row);
         }
@@ -191,10 +194,9 @@ class ItemImporter extends Importer
      */
     public function createOrFetchAssetModel(array $row)
     {
-        $condition = array();
         $asset_model_name = $this->findCsvMatch($row, 'asset_model');
         $asset_model_category = $this->findCsvMatch($row, 'category');
-        $asset_modelNumber = $this->findCsvMatch($row, 'model_number');
+        $asset_modelNumber = trim($this->findCsvMatch($row, 'model_number'));
 
         // TODO: At the moment, this means  we can't update the model number if the model name stays the same.
         if (! $this->shouldUpdateField($asset_model_name)) {
@@ -207,39 +209,47 @@ class ItemImporter extends Importer
             $asset_model_name = 'Unknown';
         }
 
-        $asset_model = AssetModel::select('id');
+        $matchingModels = AssetModel::query()->where('name', '=', $asset_model_name);
+        $asset_model = null;
 
-        if (!empty($asset_model_name)) {
-            $asset_model = $asset_model->where('name', '=', $asset_model_name);
-
-            if (!empty($asset_modelNumber)) {
-                $asset_model = $asset_model->where('model_number', '=', $asset_modelNumber);
-            }
+        if ($asset_modelNumber !== '') {
+            $asset_model = (clone $matchingModels)
+                ->where(function ($query) use ($asset_modelNumber) {
+                    $query->where('model_number', '=', $asset_modelNumber)
+                        ->orWhereHas('modelNumbers', function ($modelNumbers) use ($asset_modelNumber) {
+                            $modelNumbers->where('code', '=', $asset_modelNumber);
+                        });
+                })
+                ->first();
         }
 
-        $editingModel = $this->updating;
-        $asset_model = $asset_model->first();
+        $asset_model ??= $matchingModels->first();
 
         if ($asset_model) {
-
             if (! $this->updating) {
                 $this->log('A matching model already exists, returning it.');
+                $this->item['model_number_id'] = $this->resolveModelNumberForAsset(
+                    $asset_model,
+                    $asset_modelNumber,
+                );
+
                 return $asset_model->id;
             }
 
             $this->log('Matching Model found, updating it.');
-            $item = $this->sanitizeItemForStoring($asset_model, $editingModel);
+            $item = $this->sanitizeItemForStoring($asset_model, true);
+            unset($item['model_number'], $item['primary_model_number_id']);
             $item['name'] = $asset_model_name;
             $item['notes'] = $this->findCsvMatch($row, 'model_notes');
 
-            if (!empty($asset_modelNumber)){
-                $item['model_number'] = $asset_modelNumber;
-            }
-
             $asset_model->update($item);
             $asset_model->save();
+            $this->item['model_number_id'] = $this->resolveModelNumberForAsset(
+                $asset_model,
+                $asset_modelNumber,
+            );
             $this->log('Asset Model Updated');
-            
+
             return $asset_model->id;
 
         }
@@ -247,7 +257,7 @@ class ItemImporter extends Importer
         $this->log('No Matching Model, Creating a new one');
         $asset_model = new AssetModel();
         $asset_model->created_by = auth()->id();
-        $item = $this->sanitizeItemForStoring($asset_model, $editingModel);
+        $item = $this->sanitizeItemForStoring($asset_model);
         $item['name'] = $asset_model_name;
         $item['model_number'] = $asset_modelNumber;
         $item['notes'] = $this->findCsvMatch($row, 'model_notes');
@@ -257,6 +267,10 @@ class ItemImporter extends Importer
         $item = null;
 
         if ($asset_model->save()) {
+            $this->item['model_number_id'] = $this->resolveModelNumberForAsset(
+                $asset_model,
+                $asset_modelNumber,
+            );
             $this->log('Asset Model '.$asset_model_name.' with model number '.$asset_modelNumber.' was created');
 
             return $asset_model->id;
@@ -265,6 +279,56 @@ class ItemImporter extends Importer
         $this->logError($asset_model, 'Asset Model "'.$asset_model_name.'"');
 
         return null;
+    }
+
+    /**
+     * Resolve the exact model-number preset selected by an asset import row.
+     */
+    protected function resolveModelNumberForAsset(
+        AssetModel $assetModel,
+        string $modelNumberCode,
+    ): ?int {
+        $modelNumberCode = trim($modelNumberCode);
+
+        if ($modelNumberCode === '') {
+            if ($assetModel->primary_model_number_id) {
+                return (int) $assetModel->primary_model_number_id;
+            }
+
+            if ($assetModel->model_number) {
+                return $assetModel->ensurePrimaryModelNumber()->id;
+            }
+
+            return null;
+        }
+
+        $modelNumber = $assetModel->modelNumbers()
+            ->whereRaw('LOWER(code) = ?', [strtolower($modelNumberCode)])
+            ->first();
+
+        if ($modelNumber) {
+            return $modelNumber->id;
+        }
+
+        if (! $assetModel->primary_model_number_id
+            && ($assetModel->model_number === null
+                || $assetModel->model_number === ''
+                || strcasecmp($assetModel->model_number, $modelNumberCode) === 0)
+        ) {
+            $assetModel->syncPrimaryModelNumber($modelNumberCode);
+
+            return (int) $assetModel->fresh()->primary_model_number_id;
+        }
+
+        if (! $assetModel->primary_model_number_id) {
+            $assetModel->ensurePrimaryModelNumber();
+        }
+
+        $modelNumber = $assetModel->modelNumbers()->create([
+            'code' => $modelNumberCode,
+        ]);
+
+        return $modelNumber->id;
     }
 
     /**

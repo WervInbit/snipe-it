@@ -73,4 +73,19 @@ class DeleteComponentTest extends TestCase implements TestsFullMultipleCompanies
             ->deleteJson(route('api.components.destroy', $component))
             ->assertStatusMessageIs('error');
     }
+
+    public function testCannotDeleteOffAssetParentWhileChildRemainsLinked(): void
+    {
+        $parent = ComponentInstance::factory()->create();
+        $child = ComponentInstance::factory()->asChildOf($parent)->create();
+
+        $this->actingAsForApi(User::factory()->deleteComponents()->create())
+            ->deleteJson(route('api.components.destroy', $parent))
+            ->assertUnprocessable()
+            ->assertStatusMessageIs('error');
+
+        $this->assertNotSoftDeleted($parent);
+        $this->assertNotSoftDeleted($child);
+        $this->assertSame($parent->id, $child->fresh()->parent_component_instance_id);
+    }
 }

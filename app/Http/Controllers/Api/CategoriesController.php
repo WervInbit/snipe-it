@@ -144,7 +144,8 @@ class CategoriesController extends Controller
         $this->authorize('create', Category::class);
         $category = new Category;
         $category->fill($request->all());
-        $category->category_type = strtolower($request->input('category_type'));
+        $categoryType = $request->input('category_type');
+        $category->category_type = is_string($categoryType) ? strtolower($categoryType) : $categoryType;
         $category = $request->handleImages($category);
 
         if ($category->save()) {

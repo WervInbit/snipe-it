@@ -27,18 +27,7 @@ class LicenseSeatsTransformer
             'id' => (int) $seat->id,
             'license_id' => (int) $seat->license->id,
             'updated_at' => Helper::getFormattedDateObject($seat->updated_at, 'datetime'), // we use updated_at here because the record gets updated when it's checked in or out
-            'assigned_user' => ($seat->user) ? [
-                'id' => (int) $seat->user->id,
-                'name'=> e($seat->user->present()->fullName),
-                'email' => e($seat->user->email),
-                'department'=> ($seat->user->department) ?
-                        [
-                            'id' => (int) $seat->user->department->id,
-                            'name' => e($seat->user->department->name),
-
-                        ] : null,
-                'created_at' => Helper::getFormattedDateObject($seat->created_at, 'datetime'),
-            ] : null,
+            'assigned_user' => $this->transformAssignedUser($seat),
             'assigned_asset' => ($seat->asset) ? [
                 'id' => (int) $seat->asset->id,
                 'name'=> e($seat->asset->present()->fullName),
@@ -65,5 +54,33 @@ class LicenseSeatsTransformer
         $array += $permissions_array;
 
         return $array;
+    }
+
+    private function transformAssignedUser(LicenseSeat $seat): ?array
+    {
+        if (! $seat->user) {
+            return null;
+        }
+
+        if (Gate::denies('view', $seat->user)) {
+            return [
+                'id' => (int) $seat->user->id,
+                'type' => 'user',
+                'name' => e($seat->user->getFullNameAttribute()),
+            ];
+        }
+
+        return [
+            'id' => (int) $seat->user->id,
+            'name'=> e($seat->user->present()->fullName),
+            'email' => e($seat->user->email),
+            'department'=> ($seat->user->department) ?
+                [
+                    'id' => (int) $seat->user->department->id,
+                    'name' => e($seat->user->department->name),
+
+                ] : null,
+            'created_at' => Helper::getFormattedDateObject($seat->created_at, 'datetime'),
+        ];
     }
 }

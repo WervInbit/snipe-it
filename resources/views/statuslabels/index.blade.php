@@ -39,7 +39,9 @@
 
       <div class="box">
           <div class="box-body">
-              <p>{!!  trans('admin/statuslabels/table.info') !!}</p>
+              <p>{!! trans('admin/statuslabels/table.info', [
+                  'fork_documentation_url' => route('help.api-compatibility'),
+              ]) !!}</p>
           </div>
       </div>
 

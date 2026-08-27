@@ -15,6 +15,7 @@ use App\Models\Location;
 use Illuminate\Http\Request;
 use App\Http\Requests\ImageUploadRequest;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\JsonResponse;
 
 class ConsumablesController extends Controller
@@ -264,7 +265,18 @@ class ConsumablesController extends Controller
 
         $this->authorize('checkout', $consumable);
 
-        $consumable->checkout_qty = $request->input('checkout_qty', 1);
+        $quantity = $request->input('checkout_qty', 1);
+        if (!ctype_digit((string) $quantity) || (int) $quantity < 1) {
+            return response()->json(Helper::formatStandardApiResponse(
+                'error',
+                null,
+                trans('admin/consumables/message.checkout.unavailable', [
+                    'requested' => $quantity,
+                    'remaining' => $consumable->numRemaining(),
+                ])
+            ));
+        }
+        $consumable->checkout_qty = (int) $quantity;
 
         // Make sure there is at least one available to checkout
         if ($consumable->numRemaining() <= 0) {
@@ -289,18 +301,46 @@ class ConsumablesController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, 'No user found'));
         }
 
+        if (! $consumable->canCheckoutTo($user)) {
+            return response()->json(Helper::formatStandardApiResponse(
+                'error',
+                null,
+                trans('general.error_user_company')
+            ));
+        }
+
         // Update the consumable data
         $consumable->assigned_to = $request->input('assigned_to');
 
-        for ($i = 0; $i < $consumable->checkout_qty; $i++) {
-            $consumable->users()->attach($consumable->id,
-                [
-                    'consumable_id' => $consumable->id,
-                    'created_by' => $user->id,
-                    'assigned_to' => $request->input('assigned_to'),
+        $checkedOut = DB::transaction(function () use ($consumable, $user, $request): bool {
+            $locked = Consumable::query()
+                ->whereKey($consumable->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$locked || $locked->numRemaining() < $consumable->checkout_qty) {
+                return false;
+            }
+
+            for ($i = 0; $i < $consumable->checkout_qty; $i++) {
+                $locked->users()->attach($user->id, [
+                    'created_by' => auth()->id(),
                     'note' => $request->input('note'),
-                ]
-            );
+                ]);
+            }
+
+            return true;
+        });
+
+        if (!$checkedOut) {
+            return response()->json(Helper::formatStandardApiResponse(
+                'error',
+                null,
+                trans('admin/consumables/message.checkout.unavailable', [
+                    'requested' => $consumable->checkout_qty,
+                    'remaining' => max(0, $consumable->fresh()->numRemaining()),
+                ])
+            ));
         }
 
 
@@ -317,6 +357,8 @@ class ConsumablesController extends Controller
     */
     public function selectlist(Request $request) : array
     {
+        $this->authorize('view.selectlists');
+
         $consumables = Consumable::select([
             'consumables.id',
             'consumables.name',

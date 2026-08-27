@@ -12,7 +12,7 @@ class LicenseCheckInTest extends TestCase {
         $authUser = User::factory()->superuser()->create();
         $this->actingAsForApi($authUser);
 
-        $license = License::factory()->create();
+        $license = License::factory()->create(['reassignable' => true]);
         $oldUser = User::factory()->create();
 
         $licenseSeat = LicenseSeat::factory()->for($license)->create([

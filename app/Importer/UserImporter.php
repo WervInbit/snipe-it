@@ -7,6 +7,7 @@ use App\Models\Department;
 use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\WelcomeNotification;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Password;
@@ -60,7 +61,9 @@ class UserImporter extends ItemImporter
         $this->item['state'] = trim($this->findCsvMatch($row, 'state'));
         $this->item['country'] = trim($this->findCsvMatch($row, 'country'));
         $this->item['start_date'] = trim($this->findCsvMatch($row, 'start_date'));
+        $this->item['start_date'] = $this->parseOrNullDate('start_date');
         $this->item['end_date'] = trim($this->findCsvMatch($row, 'end_date'));
+        $this->item['end_date'] = $this->parseOrNullDate('end_date');
         $this->item['zip'] = trim($this->findCsvMatch($row, 'zip'));
         $this->item['activated'] = ($this->fetchHumanBoolean(trim($this->findCsvMatch($row, 'activated'))) == 1) ? '1' : 0;
         $this->item['employee_num'] = trim($this->findCsvMatch($row, 'employee_num'));
@@ -69,8 +72,6 @@ class UserImporter extends ItemImporter
         $this->item['remote'] = ($this->fetchHumanBoolean(trim($this->findCsvMatch($row, 'remote'))) == 1 ) ? '1' : 0;
         $this->item['vip'] = ($this->fetchHumanBoolean(trim($this->findCsvMatch($row, 'vip'))) ==1 ) ? '1' : 0;
         $this->item['autoassign_licenses'] = ($this->fetchHumanBoolean(trim($this->findCsvMatch($row, 'autoassign_licenses'))) ==1 ) ? '1' : 0;
-
-        $this->handleEmptyStringsForDates();
 
         $user_department = trim($this->findCsvMatch($row, 'department'));
         if ($this->shouldUpdateField($user_department)) {
@@ -101,12 +102,13 @@ class UserImporter extends ItemImporter
 
             $this->log('Updating User');
 
-            // Todo - check that this works
-            if (!Gate::allows('canEditAuthFields', $user)) {
-                unset($user->username);
-                unset($user->email);
-                unset($user->password);
-                unset($user->activated);
+            // CLI imports run unauthenticated and are fully trusted; only restrict web-initiated imports.
+            // sanitizeItemForUpdating() reads from $this->item, so protected fields must be removed there.
+            if (Auth::check() && (! Auth::user()->hasAccess('users.edit') || ! Gate::allows('canEditAuthFields', $user))) {
+                unset($this->item['username']);
+                unset($this->item['email']);
+                unset($this->item['password']);
+                unset($this->item['activated']);
             }
 
             $user->update($this->sanitizeItemForUpdating($user));
@@ -143,7 +145,7 @@ class UserImporter extends ItemImporter
 
             if (($user->email) && ($user->activated == '1')) {
 
-                if ($this->send_welcome) {
+                if ($this->send_welcome && config('mail.enabled', true)) {
 
                     try {
                         $user->notify(new WelcomeNotification($user));
@@ -203,21 +205,4 @@ class UserImporter extends ItemImporter
         $this->send_welcome = $send;
     }
 
-    /**
-     * Since the findCsvMatch() method will set '' for columns that are present but empty,
-     * we need to set those empty strings to null to avoid passing bad data to the database
-     * (ie ending up with 0000-00-00 instead of the intended null).
-     *
-     * @return void
-     */
-    private function handleEmptyStringsForDates(): void
-    {
-        if ($this->item['start_date'] === '') {
-            $this->item['start_date'] = null;
-        }
-
-        if ($this->item['end_date'] === '') {
-            $this->item['end_date'] = null;
-        }
-    }
 }

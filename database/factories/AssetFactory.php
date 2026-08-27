@@ -45,7 +45,7 @@ class AssetFactory extends Factory
             'purchase_cost' => $this->faker->randomFloat(2, '299.99', '2999.99'),
             'order_number' => (string) $this->faker->numberBetween(1000000, 50000000),
             'supplier_id' => Supplier::factory(),
-            'requestable' => $this->faker->boolean(),
+            'requestable' => false,
             'is_sellable' => true,
             'assigned_to' => null,
             'assigned_type' => null,
@@ -61,7 +61,7 @@ class AssetFactory extends Factory
         return $this->afterMaking(function (Asset $asset) {
             $model = $asset->model ?? ($asset->model_id ? AssetModel::find($asset->model_id) : null);
 
-            if ($model) {
+            if ($model && is_null($asset->model_number_id)) {
                 $asset->model_number_id = $model->ensurePrimaryModelNumber()->id;
             }
         })->afterCreating(function (Asset $asset) {
@@ -305,33 +305,38 @@ class AssetFactory extends Factory
 
     public function assignedToUser(User $user = null)
     {
-        return $this->state(function () use ($user) {
-            return [
-                'assigned_to' => $user->id ?? User::factory(),
+        return $this->afterCreating(function (Asset $asset) use ($user) {
+            $assignedUser = $user ?? User::factory()->create();
+
+            $asset->forceFill([
+                'assigned_to' => $assignedUser->id,
                 'assigned_type' => User::class,
                 'last_checkout' => now()->subDay(),
-            ];
+            ])->saveQuietly();
         });
     }
 
     public function assignedToLocation(Location $location = null)
     {
-        return $this->state(function () use ($location) {
-            return [
-                'assigned_to' => $location->id ?? Location::factory(),
+        return $this->afterCreating(function (Asset $asset) use ($location) {
+            $assignedLocation = $location ?? Location::factory()->create();
+
+            $asset->forceFill([
+                'assigned_to' => $assignedLocation->id,
                 'assigned_type' => Location::class,
-            ];
+            ])->saveQuietly();
         });
     }
 
-    public function assignedToAsset()
+    public function assignedToAsset(Asset $assignedAsset = null)
     {
-        return $this->state(function () {
-            return [
-                'model_id' => 1,
-                'assigned_to' => Asset::factory(),
+        return $this->afterCreating(function (Asset $asset) use ($assignedAsset) {
+            $target = $assignedAsset ?? Asset::factory()->create();
+
+            $asset->forceFill([
+                'assigned_to' => $target->id,
                 'assigned_type' => Asset::class,
-            ];
+            ])->saveQuietly();
         });
     }
 

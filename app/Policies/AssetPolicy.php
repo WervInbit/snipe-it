@@ -12,13 +12,51 @@ class AssetPolicy extends CheckoutablePermissionsPolicy
         return 'assets';
     }
 
-    public function viewRequestable(User $user, Asset $asset = null)
+    protected function deniedAbilities(): array
     {
-        return $user->hasAccess('assets.view.requestable');
+        return ['checkout', 'checkin', 'audit'];
+    }
+
+    public function checkout(User $user, $item = null)
+    {
+        return false;
+    }
+
+    public function checkin(User $user, $item = null)
+    {
+        return false;
     }
 
     public function audit(User $user, Asset $asset = null)
     {
-        return $user->hasAccess('assets.audit');
+        return false;
+    }
+
+    public function viewFiles(User $user, $item = null)
+    {
+        return $user->hasAccess('assets.files.view');
+    }
+
+    public function createFiles(User $user, $item = null)
+    {
+        return $user->hasAccess('assets.files.upload');
+    }
+
+    public function deleteFiles(User $user, $item = null)
+    {
+        return $user->hasAccess('assets.files.manage');
+    }
+
+    public function uploadImages(User $user, $item = null): bool
+    {
+        return $user->hasAccess('assets.images.upload')
+            || $user->hasAccess('senior-refurbisher')
+            || $user->hasAccess('refurbisher');
+    }
+
+    public function manageImages(User $user, $item = null): bool
+    {
+        return $user->hasAccess('assets.images.manage')
+            || $user->hasAccess('senior-refurbisher');
     }
 }

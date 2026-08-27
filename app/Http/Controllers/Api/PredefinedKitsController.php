@@ -5,6 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Transformers\PredefinedKitsTransformer;
+use App\Models\Accessory;
+use App\Models\AssetModel;
+use App\Models\Consumable;
+use App\Models\License;
 use App\Models\PredefinedKit;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -184,6 +188,9 @@ class PredefinedKitsController extends Controller
         }
 
         $license_id = $request->get('license');
+        $license = License::findOrFail($license_id);
+        $this->authorize('view', $license);
+
         $relation = $kit->licenses();
         if ($relation->find($license_id)) {
             return response()->json(Helper::formatStandardApiResponse('error', null, ['license' => trans('admin/kits/general.license_error')]));
@@ -204,6 +211,9 @@ class PredefinedKitsController extends Controller
     {
         $this->authorize('update', PredefinedKit::class);
         $kit = PredefinedKit::findOrFail($kit_id);
+        $license = License::findOrFail($license_id);
+        $this->authorize('view', $license);
+
         $quantity = $request->input('quantity', 1);
         if ($quantity < 1) {
             $quantity = 1;
@@ -254,6 +264,9 @@ class PredefinedKitsController extends Controller
         $kit = PredefinedKit::findOrFail($kit_id);
 
         $model_id = $request->get('model');
+        $model = AssetModel::findOrFail($model_id);
+        $this->authorize('view', $model);
+
         $quantity = $request->input('quantity', 1);
         if ($quantity < 1) {
             $quantity = 1;
@@ -278,6 +291,9 @@ class PredefinedKitsController extends Controller
     {
         $this->authorize('update', PredefinedKit::class);
         $kit = PredefinedKit::findOrFail($kit_id);
+        $model = AssetModel::findOrFail($model_id);
+        $this->authorize('view', $model);
+
         $quantity = $request->input('quantity', 1);
         if ($quantity < 1) {
             $quantity = 1;
@@ -332,6 +348,9 @@ class PredefinedKitsController extends Controller
         }
 
         $consumable_id = $request->get('consumable');
+        $consumable = Consumable::findOrFail($consumable_id);
+        $this->authorize('view', $consumable);
+
         $relation = $kit->consumables();
         if ($relation->find($consumable_id)) {
             return response()->json(Helper::formatStandardApiResponse('error', null, ['consumable' => trans('admin/kits/general.consumable_error')]));
@@ -352,6 +371,9 @@ class PredefinedKitsController extends Controller
     {
         $this->authorize('update', PredefinedKit::class);
         $kit = PredefinedKit::findOrFail($kit_id);
+        $consumable = Consumable::findOrFail($consumable_id);
+        $this->authorize('view', $consumable);
+
         $quantity = $request->input('quantity', 1);
         if ($quantity < 1) {
             $quantity = 1;
@@ -406,6 +428,9 @@ class PredefinedKitsController extends Controller
         }
 
         $accessory_id = $request->get('accessory');
+        $accessory = Accessory::findOrFail($accessory_id);
+        $this->authorize('view', $accessory);
+
         $relation = $kit->accessories();
         if ($relation->find($accessory_id)) {
             return response()->json(Helper::formatStandardApiResponse('error', null, ['accessory' => trans('admin/kits/general.accessory_error')]));
@@ -426,6 +451,9 @@ class PredefinedKitsController extends Controller
     {
         $this->authorize('update', PredefinedKit::class);
         $kit = PredefinedKit::findOrFail($kit_id);
+        $accessory = Accessory::findOrFail($accessory_id);
+        $this->authorize('view', $accessory);
+
         $quantity = $request->input('quantity', 1);
         if ($quantity < 1) {
             $quantity = 1;

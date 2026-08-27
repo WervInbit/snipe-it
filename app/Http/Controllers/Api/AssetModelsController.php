@@ -218,13 +218,16 @@ class AssetModelsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(StoreAssetModelRequest $request, $id) : JsonResponse
+    public function update(StoreAssetModelRequest $request, $id): JsonResponse
     {
         $this->authorize('update', AssetModel::class);
         $assetmodel = AssetModel::findOrFail($id);
         $payload = $request->all();
-        $modelNumberInput = trim((string) ($payload['model_number'] ?? ''));
-        $payload['model_number'] = $modelNumberInput !== '' ? $modelNumberInput : null;
+        $modelNumberWasSubmitted = array_key_exists('model_number', $payload);
+        if ($modelNumberWasSubmitted) {
+            $modelNumberInput = trim((string) $payload['model_number']);
+            $payload['model_number'] = $modelNumberInput !== '' ? $modelNumberInput : null;
+        }
 
         $assetmodel->fill($payload);
         $assetmodel = $request->handleImages($assetmodel);
@@ -243,8 +246,17 @@ class AssetModelsController extends Controller
 
 
         if ($assetmodel->save()) {
-            $assetmodel->syncPrimaryModelNumber($payload['model_number'] ?? null);
-            return response()->json(Helper::formatStandardApiResponse('success', (new AssetModelsTransformer)->transformAssetModel($assetmodel), trans('admin/models/message.update.success')));
+            if ($modelNumberWasSubmitted) {
+                $assetmodel->syncPrimaryModelNumber($payload['model_number']);
+            }
+
+            return response()->json(
+                Helper::formatStandardApiResponse(
+                    'success',
+                    (new AssetModelsTransformer())->transformAssetModel($assetmodel),
+                    trans('admin/models/message.update.success')
+                )
+            );
         }
 
         return response()->json(Helper::formatStandardApiResponse('error', null, $assetmodel->getErrors()));

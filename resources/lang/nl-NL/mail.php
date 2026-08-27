@@ -2,6 +2,9 @@
 
 return [
 
+    'delivery_disabled' => 'Uitgaande e-mail is uitgeschakeld voor deze omgeving en is niet gevalideerd voor V1.',
+    'password_reset_disabled' => 'E-mail voor wachtwoordherstel is niet beschikbaar. Neem contact op met een beheerder; die kan via de beveiligde gebruikerseditor een tijdelijk wachtwoord instellen.',
+
     'Accessory_Checkin_Notification' => 'Accessoire ingecheckt',
     'Accessory_Checkout_Notification' => 'Accessoire uitgecheckt',
     'Asset_Checkin_Notification' => 'Asset ingecheckt',
@@ -71,7 +74,7 @@ return [
     'license_expiring_alert' => 'Er is :count licentie die afloopt in de volgende :threshold dagen.|Er zijn :count licenties die vervallen in de volgende :threshold dagen.',
     'link_to_update_password' => 'Klik op de volgende link om je :web wachtwoord te vernieuwen:',
     'login' => 'Inloggen',
-    'login_first_admin' => 'Meld u aan op uw nieuwe Snipe-IT installatie met onderstaande inloggegevens:',
+    'login_first_admin' => 'Meld u aan bij uw nieuwe installatie van het Inbit Device Refurbishment Platform met onderstaande inloggegevens:',
     'low_inventory_alert' => 'Er is :count item dat onder de minimumvoorraad ligt of binnenkort laag zal zijn.|Er zijn :count items die onder de minimumvoorraad zijn of binnenkort laag zullen zijn.',
     'min_QTY' => 'Minimale hoeveelheid',
     'name' => 'Naam',
@@ -88,12 +91,12 @@ return [
     'reset_password' => 'Klik hier om uw wachtwoord opnieuw in te stellen:',
     'rights_reserved' => 'Alle rechten voorbehouden.',
     'serial' => 'Serienummer',
-    'snipe_webhook_test' => 'Snipe-IT integratietest',
-    'snipe_webhook_summary' => 'Samenvatting Snipe-IT-integratie Test',
+    'snipe_webhook_test' => 'Integratietest voor :app',
+    'snipe_webhook_summary' => 'Samenvatting van de integratietest voor :app',
     'supplier' => 'Leverancier',
     'tag' => 'Tag',
-    'test_email' => 'Test e-mail van Snipe-IT',
-    'test_mail_text' => 'Dit is een test van het Asset Management Systeem. Als je dit hebt ontvangen, werkt de mail :)',
+    'test_email' => 'Test-e-mail van :app',
+    'test_mail_text' => 'Dit is een test van :app. Als u dit bericht hebt ontvangen, werkt de e-mailbezorging.',
     'the_following_item' => 'Het volgende item is ingecheckt: ',
     'to_reset' => 'Vul dit formulier in om je :web wachtwoord te resetten:',
     'type' => 'Type',
@@ -104,6 +107,6 @@ return [
     'welcome' => 'Welkom :name',
     'welcome_to' => 'Welkom bij :web!',
     'your_assets' => 'Bekijk je activa',
-    'your_credentials' => 'Je Snipe-IT inloggegevens',
+    'your_credentials' => 'Uw inloggegevens voor het Inbit Device Refurbishment Platform',
     'mail_sent' => 'Mail is succesvol verstuurd!',
 ];

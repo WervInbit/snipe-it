@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use App\Rules\CssColor;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
@@ -109,6 +111,36 @@ class Setting extends Model
     }
 
     /**
+     * Whether this runtime is allowed to contact an LDAP directory.
+     */
+    public static function ldapIntegrationAvailable(): bool
+    {
+        return (bool) config('auth.ldap_integration_enabled', true);
+    }
+
+    /**
+     * Whether LDAP is both permitted by the runtime and enabled by an admin.
+     */
+    public static function ldapIsActive(): bool
+    {
+        return self::ldapIntegrationAvailable()
+            && (string) (self::getSettings()?->ldap_enabled ?? '0') === '1';
+    }
+
+    public function webhookBotName(): string
+    {
+        $configuredName = trim((string) $this->webhook_botname);
+
+        if ($configuredName !== '') {
+            return $configuredName;
+        }
+
+        $applicationName = trim((string) config('app.name'));
+
+        return ($applicationName !== '' ? $applicationName : 'Inbit Device Refurbishment') . ' Bot';
+    }
+
+    /**
      * Check to see if setup process is complete.
      *  Cache is expired on Setting model saved in EventServiceProvider.
      *
@@ -192,6 +224,13 @@ class Setting extends Model
      *
      * @author A. Gianotto <snipe@snipe.net>
      */
+    protected function headerColor(): Attribute
+    {
+        return Attribute::make(
+            get: fn (?string $value): string => CssColor::sanitize($value, '#3c8dbc'),
+        );
+    }
+
     public function show_custom_css(): string
     {
         $custom_css = self::getSettings()->custom_css;

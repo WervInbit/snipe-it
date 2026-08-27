@@ -57,7 +57,7 @@
 @if($snipeSettings::setupCompleted())
 © {{ date('Y') }} {{ $snipeSettings->site_name }}. All rights reserved.
 @else
-© {{ date('Y') }} Snipe-IT. All rights reserved.
+© {{ date('Y') }} {{ config('app.name') }}. All rights reserved.
 @endif
 
 @if ($snipeSettings->privacy_policy_link!='')

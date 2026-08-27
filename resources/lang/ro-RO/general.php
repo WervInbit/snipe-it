@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Import',
     'import_this_file'      => 'Harta câmpuri și procesarea acestui fișier',
     'importing'         	=> 'Importul',
-    'importing_help'        => 'Puteți importa active, accesorii, licențe, componente, consumabile și utilizatori prin fișierul CSV. <br><br>CSV ar trebui să fie delimitat prin virgulă și formatat cu antete care se potrivesc cu cele din eșantionul <a href="https://snipe-it.readme.io/docs/importing" target="_new">din documentația</a>.',
+    'importing_help'        => 'Puteți importa active, accesorii, licențe, componente, consumabile și utilizatori prin fișierul CSV. <br><br>CSV ar trebui să fie delimitat prin virgulă și formatat cu antete care se potrivesc cu cele din eșantionul <a href=":fork_documentation_url" target="_new">din documentația</a>.',
     'import-history'        => 'Istoricul importurilor',
     'asset_maintenance'        => 'Mentenanta produs',
     'asset_maintenance_report' => 'Raport privind mentenanta produsului',

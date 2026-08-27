@@ -255,7 +255,7 @@ class AccessoryPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('accessories.show', $this->name, $this->id);
+        return \App\Support\RouteLink::to('accessories.show', $this->name, $this->id);
     }
 
     /**

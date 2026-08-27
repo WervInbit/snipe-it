@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Importálás',
     'import_this_file'      => 'Mezők leképezése és a fájl feldolgozása',
     'importing'         	=> 'Importálás',
-    'importing_help'        => 'Eszközöket, tartozékokat, szoftverlicenceket, alkatrészeket, fogyóeszközöket és felhasználókat importálhat CSV fájl segítségével. <br><br>A CSV-ben az értékeket kettőspontal kell elválasztani és minden fejlécnévnek meg kell egyeznie az <a href="https://snipe-it.readme.io/docs/importing" target="_new">alap CSV dokumentációban szereplőkkel.</a>.',
+    'importing_help'        => 'Eszközöket, tartozékokat, szoftverlicenceket, alkatrészeket, fogyóeszközöket és felhasználókat importálhat CSV fájl segítségével. <br><br>A CSV-ben az értékeket kettőspontal kell elválasztani és minden fejlécnévnek meg kell egyeznie az <a href=":fork_documentation_url" target="_new">alap CSV dokumentációban szereplőkkel.</a>.',
     'import-history'        => 'Import történet',
     'asset_maintenance'        => 'Eszköz karbantartás',
     'asset_maintenance_report' => 'Eszköz Karbantartás Riport',

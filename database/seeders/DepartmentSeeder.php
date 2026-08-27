@@ -5,12 +5,11 @@ namespace Database\Seeders;
 use App\Models\Department;
 use App\Models\Location;
 use App\Models\User;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Schema;
 
-class DepartmentSeeder extends Seeder
+class DepartmentSeeder extends DestructiveFixtureSeeder
 {
-    public function run()
+    protected function seedFixtures(): void
     {
         Schema::disableForeignKeyConstraints();
         Department::truncate();

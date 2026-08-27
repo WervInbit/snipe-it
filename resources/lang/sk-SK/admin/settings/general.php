@@ -379,7 +379,7 @@ return [
     'purge_barcodes' => 'Purge Barcodes',
     'help_asterisk_bold'    => 'Text zadaný ako <code>**text**</code> bude zobrazený ako tučný',
     'help_blank_to_use'     => 'Ponechajte prázdne pre použitie hodnoty z <code>:setting_name</code>',
-    'help_default_will_use' => '<code>:default</code> použije hodnotu z <code>:setting_name</code>. <br>Upozorňujeme, že hodnota čiarových kódov musí byť v súlade s príslušnými špecifikáciami čiarových kódov, aby sa úspešne vygenerovali. Pozrite <a href="https://snipe-it.readme.io/docs/barcodes">dokumentáciu <i class="fa fa-external-link"></i></a> pre ďalšie podrobnosti. ',
+    'help_default_will_use' => '<code>:default</code> použije hodnotu z <code>:setting_name</code>. <br>Upozorňujeme, že hodnota čiarových kódov musí byť v súlade s príslušnými špecifikáciami čiarových kódov, aby sa úspešne vygenerovali. Pozrite <a href=":fork_documentation_url">dokumentáciu <i class="fa fa-external-link"></i></a> pre ďalšie podrobnosti. ',
     'asset_id'              => 'ID majetku',
     'data'               => 'Dáta',
     'default'               => 'Predvolený',

@@ -379,7 +379,7 @@ return [
     'purge_barcodes' => 'Cancella codici a barre',
     'help_asterisk_bold'    => 'Il testo inserito <code>**così**</code> verrà visualizzato in grassetto',
     'help_blank_to_use'     => 'Lascia vuoto per usare il valore in <code>:setting_name</code>',
-    'help_default_will_use' => '<code>:default</code> userà il valore di <code>:setting_name</code>. <br>Nota che il valore dei codici a barre deve essere conforme alla rispettiva specifica per essere generati correttamente. Per maggiori dettagli consultare <a href="https://snipe-it.readme.io/docs/barcodes">la documentazione <i class="fa fa-external-link"></i></a>. ',
+    'help_default_will_use' => '<code>:default</code> userà il valore di <code>:setting_name</code>. <br>Nota che il valore dei codici a barre deve essere conforme alla rispettiva specifica per essere generati correttamente. Per maggiori dettagli consultare <a href=":fork_documentation_url">la documentazione <i class="fa fa-external-link"></i></a>. ',
     'asset_id'              => 'ID Bene',
     'data'               => 'Dati',
     'default'               => 'Predefinito',

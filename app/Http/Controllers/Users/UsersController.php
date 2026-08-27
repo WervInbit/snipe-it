@@ -8,13 +8,17 @@ use App\Http\Requests\DeleteUserRequest;
 use App\Http\Requests\ImageUploadRequest;
 use App\Http\Requests\SaveUserRequest;
 use App\Models\Actionlog;
-use App\Models\Asset;
 use App\Models\Company;
+use App\Models\CompanyableScope;
 use App\Models\Group;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\Users\PrintableUserInventoryService;
+use App\Services\Users\UserPrivilegeService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
+use League\Csv\EscapeFormula;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Notifications\CurrentInventory;
 
@@ -81,9 +85,15 @@ class UsersController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function store(SaveUserRequest $request)
+    public function store(SaveUserRequest $request, UserPrivilegeService $userPrivileges)
     {
         $this->authorize('create', User::class);
+        $userPrivileges->authorizeSubmittedPrivileges(
+            $request->user(),
+            $request->exists('permission'),
+            $request->exists('groups')
+        );
+
         $user = new User;
         //Username, email, and password need to be handled specially because the need to respect config values on an edit.
         $user->email = trim($request->input('email'));
@@ -116,13 +126,11 @@ class UsersController extends Controller
         $user->end_date = $request->input('end_date', null);
         $user->autoassign_licenses = $request->input('autoassign_licenses', 0);
 
-        // Strip out the superuser permission if the user isn't a superadmin
-        $permissions_array = $request->input('permission');
-
-        if (! auth()->user()->isSuperUser()) {
-            unset($permissions_array['superuser']);
+        if ($request->exists('permission')) {
+            $user->permissions = json_encode(
+                $userPrivileges->permissionsForWrite($request->user(), $request->input('permission'))
+            );
         }
-        $user->permissions = json_encode($permissions_array);
 
         // we have to invoke the form request here to handle image uploads
         app(ImageUploadRequest::class)->handleImages($user, 600, 'avatar', 'avatars', 'avatar');
@@ -134,13 +142,19 @@ class UsersController extends Controller
         }
 
 
-        if ($user->save()) {
-            if ($request->filled('groups')) {
-                $user->groups()->sync($request->input('groups'));
-            } else {
-                $user->groups()->sync([]);
+        $saved = DB::transaction(function () use ($request, $user): bool {
+            if (! $user->save()) {
+                return false;
             }
 
+            if ($request->user()->isSuperUser()) {
+                $user->groups()->sync($request->input('groups', []));
+            }
+
+            return true;
+        });
+
+        if ($saved) {
             return Helper::getRedirectOption($request, $user->id, 'Users')
                 ->with('success', trans('admin/users/message.success.create'));
         }
@@ -206,7 +220,11 @@ class UsersController extends Controller
      * @return \Illuminate\Http\RedirectResponse
      * @throws \Illuminate\Auth\Access\AuthorizationException
      */
-    public function update(SaveUserRequest $request, User $user)
+    public function update(
+        SaveUserRequest $request,
+        User $user,
+        UserPrivilegeService $userPrivileges
+    )
     {
         $this->authorize('update', User::class);
 
@@ -225,15 +243,11 @@ class UsersController extends Controller
         $user->load(['assets', 'assets.model', 'consumables', 'accessories', 'licenses', 'userloc'])->withTrashed();
 
         $this->authorize('update', $user);
-
-        // Figure out of this user was an admin before this edit
-        $orig_permissions_array = $user->decodePermissions();
-        $orig_superuser = '0';
-        if (is_array($orig_permissions_array)) {
-            if (array_key_exists('superuser', $orig_permissions_array)) {
-                $orig_superuser = $orig_permissions_array['superuser'];
-            }
-        }
+        $userPrivileges->authorizeSubmittedPrivileges(
+            $request->user(),
+            $request->exists('permission'),
+            $request->exists('groups')
+        );
 
 
         // Update the user fields
@@ -267,11 +281,6 @@ class UsersController extends Controller
         $user->activated = $request->input('activated', auth()->user()->is($user) ? 1 : $user->activated);
 
 
-        // Update the location of any assets checked out to this user
-        Asset::where('assigned_type', User::class)
-            ->where('assigned_to', $user->id)
-            ->update(['location_id' => $request->input('location_id', null)]);
-
         // check for permissions related fields and only set them if the user has permission to edit them
         if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
 
@@ -284,34 +293,38 @@ class UsersController extends Controller
                 $user->password = bcrypt($request->input('password'));
             }
 
-            $permissions_array = $request->input('permission');
-
-            // Strip out the superuser permission if the user isn't a superadmin
-            if (! auth()->user()->isSuperUser()) {
-                unset($permissions_array['superuser']);
-                $permissions_array['superuser'] = $orig_superuser;
-            }
-
-            $user->permissions = json_encode($permissions_array);
-
-            // Only save groups if the user is a superuser
-            if (auth()->user()->isSuperUser()) {
-                $user->groups()->sync($request->input('groups'));
+            if (
+                $request->exists('permission')
+                && $userPrivileges->canManageDirectPermissions($request->user(), $user)
+            ) {
+                $user->permissions = json_encode(
+                    $userPrivileges->permissionsForWrite(
+                        $request->user(),
+                        $request->input('permission'),
+                        $user
+                    )
+                );
             }
         }
-
-
-        // Update the location of any assets checked out to this user
-        Asset::where('assigned_type', User::class)
-            ->where('assigned_to', $user->id)
-            ->update(['location_id' => $user->location_id]);
 
 
         // Handle uploaded avatar
         app(ImageUploadRequest::class)->handleImages($user, 600, 'avatar', 'avatars', 'avatar');
         session()->put(['redirect_option' => $request->get('redirect_option')]);
 
-        if ($user->save()) {
+        $saved = DB::transaction(function () use ($request, $user): bool {
+            if (! $user->save()) {
+                return false;
+            }
+
+            if ($request->user()->isSuperUser()) {
+                $user->groups()->sync($request->input('groups', []));
+            }
+
+            return true;
+        });
+
+        if ($saved) {
             // Redirect to the user page
             return Helper::getRedirectOption($request, $user->id, 'Users')
                 ->with('success', trans('admin/users/message.success.update'));
@@ -335,6 +348,14 @@ class UsersController extends Controller
         if ($user = User::find($id)) {
 
             $this->authorize('delete', $user);
+
+            if (
+                ! $request->user()->can('canEditAuthFields', $user)
+                || ! $request->user()->can('editableOnDemo')
+            ) {
+                return redirect()->route('users.index')
+                    ->with('error', trans('general.insufficient_permissions'));
+            }
 
             if ($user->delete()) {
                 return redirect()->route('users.index')->with('success', trans('admin/users/message.success.delete'));
@@ -494,6 +515,32 @@ class UsersController extends Controller
         $response = new StreamedResponse(function () {
             // Open output stream
             $handle = fopen('php://output', 'w');
+            $formatter = new EscapeFormula('`');
+            $headers = [
+                // strtolower to prevent Excel from trying to open it as a SYLK file
+                strtolower(trans('general.id')),
+                trans('admin/companies/table.title'),
+                trans('admin/users/table.title'),
+                trans('general.employee_number'),
+                trans('admin/users/table.first_name'),
+                trans('admin/users/table.last_name'),
+                trans('admin/users/table.name'),
+                trans('admin/users/table.username'),
+                trans('admin/users/table.email'),
+                trans('admin/users/table.manager'),
+                trans('admin/users/table.location'),
+                trans('general.department'),
+                trans('general.assets'),
+                trans('general.licenses'),
+                trans('general.accessories'),
+                trans('general.consumables'),
+                trans('general.groups'),
+                trans('general.permissions'),
+                trans('general.notes'),
+                trans('admin/users/table.activated'),
+                trans('general.created_at'),
+            ];
+            fputcsv($handle, $headers);
 
             $users = User::with(
                 'assets',
@@ -506,34 +553,7 @@ class UsersController extends Controller
                 'userloc',
                 'company'
             )->orderBy('created_at', 'DESC')
-                ->chunk(500, function ($users) use ($handle) {
-                    $headers = [
-                        // strtolower to prevent Excel from trying to open it as a SYLK file
-                        strtolower(trans('general.id')),
-                        trans('admin/companies/table.title'),
-                        trans('admin/users/table.title'),
-                        trans('general.employee_number'),
-                        trans('admin/users/table.first_name'),
-                        trans('admin/users/table.last_name'),
-                        trans('admin/users/table.name'),
-                        trans('admin/users/table.username'),
-                        trans('admin/users/table.email'),
-                        trans('admin/users/table.manager'),
-                        trans('admin/users/table.location'),
-                        trans('general.department'),
-                        trans('general.assets'),
-                        trans('general.licenses'),
-                        trans('general.accessories'),
-                        trans('general.consumables'),
-                        trans('general.groups'),
-                        trans('general.permissions'),
-                        trans('general.notes'),
-                        trans('admin/users/table.activated'),
-                        trans('general.created_at'),
-                    ];
-
-                    fputcsv($handle, $headers);
-
+                ->chunk(500, function ($users) use ($handle, $formatter) {
                     foreach ($users as $user) {
                         $user_groups = '';
 
@@ -579,7 +599,12 @@ class UsersController extends Controller
                             $user->created_at,
                         ];
 
-                        fputcsv($handle, $values);
+                        fputcsv(
+                            $handle,
+                            config('app.escape_formulas') === false
+                                ? $values
+                                : $formatter->escapeRecord($values)
+                        );
                     }
                 });
 
@@ -599,30 +624,11 @@ class UsersController extends Controller
      * @since [v1.8]
      * @author Aladin Alaily
      */
-    public function printInventory($id)
+    public function printInventory($id, PrintableUserInventoryService $printableInventory)
     {
         $this->authorize('view', User::class);
 
-        $user = User::where('id', $id)
-            ->with([
-                'assets.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
-                'assets.assignedAssets.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
-                'assets.assignedAssets.defaultLoc',
-                'assets.assignedAssets.location',
-                'assets.assignedAssets.model.category',
-                'assets.defaultLoc',
-                'assets.location',
-                'assets.model.category',
-                'accessories.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
-                'accessories.category',
-                'accessories.manufacturer',
-                'consumables.log' => fn($query) => $query->withTrashed()->where('target_type', User::class)->where('target_id', $id)->where('action_type', 'accepted'),
-                'consumables.category',
-                'consumables.manufacturer',
-                'licenses.category',
-            ])
-            ->withTrashed()
-            ->first();
+        $user = $printableInventory->findFor(auth()->user(), (int) $id);
 
         if ($user) {
             $this->authorize('view', $user);
@@ -646,6 +652,10 @@ class UsersController extends Controller
     public function emailAssetList($id)
     {
         $this->authorize('view', User::class);
+
+        if (! config('mail.enabled', true)) {
+            return redirect()->back()->with('error', trans('mail.delivery_disabled'));
+        }
 
         $user = User::find($id);
 
@@ -675,9 +685,17 @@ class UsersController extends Controller
      */
     public function sendPasswordReset($id)
     {
-        $this->authorize('view', User::class);
+        $this->authorize('update', User::class);
 
-        if (($user = User::find($id)) && ($user->activated == '1') && ($user->email != '') && ($user->ldap_import == '0')) {
+        if (! config('mail.enabled', true)) {
+            return redirect()->back()->with('error', trans('mail.password_reset_disabled'));
+        }
+
+        if ($user = User::withoutGlobalScope(CompanyableScope::class)->find($id)) {
+            $this->authorize('update', $user);
+        }
+
+        if ($user && ($user->activated == '1') && ($user->email != '') && ($user->ldap_import == '0')) {
             $credentials = ['email' => trim($user->email)];
 
             try {

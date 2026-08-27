@@ -7,6 +7,7 @@ use App\Models\Setting;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Storage;
 
 class AcceptanceAssetAcceptedToUserNotification extends Notification
 {
@@ -55,7 +56,6 @@ class AcceptanceAssetAcceptedToUserNotification extends Notification
      */
     public function toMail()
     {
-        $pdf_path = storage_path('private_uploads/eula-pdfs/'.$this->file);
         $message = (new MailMessage)->markdown('notifications.markdown.asset-acceptance',
             [
                 'item_tag'      => $this->item_tag,
@@ -68,8 +68,15 @@ class AcceptanceAssetAcceptedToUserNotification extends Notification
                 'company_name'  => $this->company_name,
                 'intro_text'    => trans('mail.acceptance_asset_accepted_to_user', ['site_name' => $this->company_name ?? $this->settings->site_name]),
             ])
-            ->attach($pdf_path)
             ->subject(trans('mail.acceptance_asset_accepted_to_user', ['site_name' => $this->settings->site_name]));
+
+        $path = 'private_uploads/eula-pdfs/'.$this->file;
+        $disk = Storage::disk(config('filesystems.default'));
+        if ($this->file && $disk->exists($path)) {
+            $message->attachData($disk->get($path), $this->file, [
+                'mime' => 'application/pdf',
+            ]);
+        }
 
         return $message;
     }

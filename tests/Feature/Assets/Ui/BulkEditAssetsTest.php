@@ -10,10 +10,29 @@ use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class BulkEditAssetsTest extends TestCase
 {
+    public function testBulkEditNeverKeepsAnExternalRefererAsTheReturnTarget(): void
+    {
+        $user = User::factory()->viewAssets()->editAssets()->create();
+        $asset = Asset::factory()->create();
+
+        $this->actingAs($user)
+            ->withHeader('referer', 'https://example.invalid/steal')
+            ->post('/hardware/bulkedit', [
+                'ids' => [$asset->id],
+                'order' => 'asc',
+                'bulk_actions' => 'edit',
+                'sort' => 'id',
+            ])
+            ->assertOk();
+
+        $this->assertSame(route('hardware.index'), session('bulk_back_url'));
+    }
+
     public function testUserWithPermissionsCanAccessPage()
     {
         $user = User::factory()->viewAssets()->editAssets()->create();
@@ -59,7 +78,6 @@ class BulkEditAssetsTest extends TestCase
         $assets = Asset::factory()->count(10)->create([
             'name'             => 'Old Asset Name',
             'purchase_date'    => '2023-01-01',
-            'expected_checkin' => '2023-01-01',
             'status_id'        => $status1->id,
             'model_id'         => $model1->id,
             // skipping locations on this test, it deserves it's own test
@@ -68,8 +86,6 @@ class BulkEditAssetsTest extends TestCase
             'company_id'       => $company1->id,
             'order_number'     => '123456',
             'warranty_months'  => 24,
-            'next_audit_date'  => '2024-06-01',
-            'requestable'      => false
         ]);
 
         // gets the ids together to submit to the endpoint
@@ -80,7 +96,6 @@ class BulkEditAssetsTest extends TestCase
             'ids'              => $id_array,
             'name'             => 'New Asset Name',
             'purchase_date'    => '2024-01-01',
-            'expected_checkin' => '2024-01-01',
             'status_id'        => $status2->id,
             'model_id'         => $model2->id,
             'purchase_cost'    => 5678.92,
@@ -88,8 +103,6 @@ class BulkEditAssetsTest extends TestCase
             'company_id'       => $company2->id,
             'order_number'     => '7890',
             'warranty_months'  => 36,
-            'next_audit_date'  => '2025-01-01',
-            'requestable'      => true
         ])
             ->assertStatus(302)
             ->assertSessionHasNoErrors();
@@ -97,7 +110,6 @@ class BulkEditAssetsTest extends TestCase
         // asserts that each asset has the updated values
         Asset::findMany($id_array)->each(function (Asset $asset) use ($status2, $model2, $supplier2, $company2) {
             $this->assertEquals('2024-01-01', $asset->purchase_date->format('Y-m-d'));
-            $this->assertEquals('2024-01-01', $asset->expected_checkin->format('Y-m-d'));
             $this->assertEquals($status2->id, $asset->status_id);
             $this->assertEquals('New Asset Name', $asset->name);
             $this->assertEquals($model2->id, $asset->model_id);
@@ -106,9 +118,6 @@ class BulkEditAssetsTest extends TestCase
             $this->assertEquals($company2->id, $asset->company_id);
             $this->assertEquals(7890, $asset->order_number);
             $this->assertEquals(36, $asset->warranty_months);
-            $this->assertEquals('2025-01-01', $asset->next_audit_date);
-            // shouldn't requestable be cast as a boolean??? it's not.
-            $this->assertEquals(1, $asset->requestable);
         });
     }
 
@@ -120,24 +129,15 @@ class BulkEditAssetsTest extends TestCase
         $status2 = Statuslabel::factory()->create();
         $model1 = AssetModel::factory()->create();
         $model2 = AssetModel::factory()->create();
-        $supplier1 = Supplier::factory()->create();
-        $supplier2 = Supplier::factory()->create();
-        $company1 = Company::factory()->create();
-        $company2 = Company::factory()->create();
         $assets = Asset::factory()->count(10)->create([
             'name'             => 'Old Asset Name',
             'purchase_date'    => '2023-01-01',
-            'expected_checkin' => '2023-01-01',
             'status_id'        => $status1->id,
             'model_id'         => $model1->id,
             // skipping locations on this test, it deserves it's own test
             'purchase_cost'    => 1234.90,
-            'supplier_id'      => $supplier1->id,
-            'company_id'       => $company1->id,
             'order_number'     => '123456',
             'warranty_months'  => 24,
-            'next_audit_date'  => '2024-06-01',
-            'requestable'      => false
         ]);
 
         // gets the ids together to submit to the endpoint
@@ -148,8 +148,6 @@ class BulkEditAssetsTest extends TestCase
             'ids'              => $id_array,
             'null_name'        => '1',
             'null_purchase_date'    => '1',
-            'null_expected_checkin_date' => '1',
-            'null_next_audit_date'        => '1',
             'status_id'        => $status2->id,
             'model_id'         => $model2->id,
         ])
@@ -157,18 +155,88 @@ class BulkEditAssetsTest extends TestCase
             ->assertSessionHasNoErrors();
 
         // asserts that each asset has the updated values
-        Asset::findMany($id_array)->each(function (Asset $asset) use ($status2, $model2, $supplier2, $company2) {
+        Asset::findMany($id_array)->each(function (Asset $asset) {
             $this->assertNull($asset->name);
             $this->assertNull($asset->purchase_date);
-            $this->assertNull($asset->expected_checkin);
-            $this->assertNull($asset->next_audit_date);
         });
+    }
+
+    public function testBulkSaveCannotMoveAssetsOutsideTheActorsFmcsCompany(): void
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+        $actor = User::factory()
+            ->for($companyA)
+            ->editAssets()
+            ->create();
+        $asset = Asset::factory()->for($companyA)->create();
+
+        foreach ([$companyB->id, 'clear'] as $craftedCompanyId) {
+            $this->actingAs($actor)
+                ->post(route('hardware/bulksave'), [
+                    'ids' => [$asset->id],
+                    'company_id' => $craftedCompanyId,
+                ])
+                ->assertRedirect()
+                ->assertSessionHasNoErrors();
+
+            $this->assertSame(
+                $companyA->id,
+                Asset::withoutGlobalScopes()->findOrFail($asset->id)->company_id
+            );
+        }
+    }
+
+    public function testBulkSaveRejectsLegacyMetadataAndPreservesHistoricalValues(): void
+    {
+        $asset = Asset::factory()->create(['name' => 'Historical Asset']);
+        $legacyValues = [
+            'requestable' => 1,
+            'last_checkin' => '2024-01-02 03:04:05',
+            'last_checkout' => '2024-01-03 04:05:06',
+            'expected_checkin' => '2024-02-01',
+            'last_audit_date' => '2024-01-04 05:06:07',
+            'next_audit_date' => '2024-03-01',
+        ];
+        $legacyBulkValues = array_merge($legacyValues, [
+            'null_expected_checkin_date' => '1',
+            'null_next_audit_date' => '1',
+        ]);
+        $actor = User::factory()->editAssets()->create();
+
+        DB::table('assets')->where('id', $asset->id)->update($legacyValues);
+        $historicalSnapshot = (array) DB::table('assets')
+            ->where('id', $asset->id)
+            ->first(Asset::LEGACY_READ_ONLY_FIELDS);
+
+        foreach ($legacyBulkValues as $field => $value) {
+            $this->actingAs($actor)
+                ->from(route('hardware.index'))
+                ->post(route('hardware/bulksave'), [
+                    'ids' => [$asset->id],
+                    'name' => 'Must Not Be Written',
+                    $field => $value,
+                ])
+                ->assertRedirect(route('hardware.index'))
+                ->assertSessionHas(
+                    'error',
+                    trans('admin/hardware/message.legacy_metadata_read_only'),
+                );
+
+            $this->assertSame('Historical Asset', $asset->fresh()->name);
+            $this->assertSame(
+                $historicalSnapshot,
+                (array) DB::table('assets')
+                    ->where('id', $asset->id)
+                    ->first(Asset::LEGACY_READ_ONLY_FIELDS),
+                "Bulk field [{$field}] changed historical asset metadata.",
+            );
+        }
     }
 
     public function test_bulk_edit_assets_accepts_and_updates_unencrypted_custom_fields()
     {
-        $this->markIncompleteIfMySQL('Custom Fields tests do not work on MySQL');
-
         CustomField::factory()->ram()->create();
         CustomField::factory()->cpu()->create();
 
@@ -199,8 +267,6 @@ class BulkEditAssetsTest extends TestCase
 
     public function test_bulk_edit_assets_nulls_custom_fields_if_selected()
     {
-        $this->markIncompleteIfMySQL('Custom Fields tests do not work on MySQL');
-
         CustomField::factory()->ram()->create();
         CustomField::factory()->cpu()->create();
         CustomField::factory()->phone()->create();
@@ -240,8 +306,6 @@ class BulkEditAssetsTest extends TestCase
 
     public function test_bulk_edit_assets_accepts_and_updates_encrypted_custom_fields()
     {
-        $this->markIncompleteIfMySQL('Custom Fields tests do not work on MySQL');
-
         CustomField::factory()->testEncrypted()->create();
 
         $encrypted = CustomField::where('name', 'Test Encrypted')->first();
@@ -264,7 +328,6 @@ class BulkEditAssetsTest extends TestCase
 
     public function test_bulk_edit_assets_requires_admin_to_update_encrypted_custom_fields()
     {
-        $this->markIncompleteIfMySQL('Custom Fields tests do not work on mysql');
         $edit_user = User::factory()->editAssets()->create();
         $admin_user = User::factory()->admin()->create();
 

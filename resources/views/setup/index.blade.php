@@ -53,7 +53,7 @@ Create a User ::
         @if ($start_settings['url_valid'])
           That URL looks right! Good job!
         @else
-          Uh oh! Snipe-IT thinks your URL is {{ $start_settings['url_config'] }}, but your real URL is {{ $start_settings['real_url'] }}
+          Uh oh! {{ config('app.name') }} thinks your URL is {{ $start_settings['url_config'] }}, but your real URL is {{ $start_settings['real_url'] }}
           Please update your <code>APP_URL</code> settings in your  <code>.env</code> file
         @endif
       </td>
@@ -108,7 +108,7 @@ Create a User ::
         @if ($start_settings['prod'])
           Your app is set to production mode. Rock on!
         @else
-          Your app is set <code>{{ $start_settings['env'] }}</code> instead of <code>production</code> mode. If you're not planning on developing on Snipe-IT, please update your <code>APP_ENV</code> settings in your  <code>.env</code> file to <code>production</code>.
+          Your app is set <code>{{ $start_settings['env'] }}</code> instead of <code>production</code> mode. If you're not planning on developing this fork, please update your <code>APP_ENV</code> settings in your <code>.env</code> file to <code>production</code>.
         @endif
       </td>
     </tr>
@@ -188,8 +188,12 @@ Create a User ::
     <tr id="mailtestrow" class="warning">
       <td>Email</td>
       <td>
+        @if (config('mail.enabled'))
             <a class="btn btn-default btn-sm pull-left" id="mailtest" style="margin-right: 10px;">
                 Send Test</a>
+        @else
+            <span class="label label-default">Disabled</span>
+        @endif
       </td>
         <td>
             <span id="mailtesticon"></span>
@@ -199,7 +203,9 @@ Create a User ::
                 <div id="mailteststatus-error" class="text-danger"></div>
             </div>
             <div class="col-md-12">
-                <p class="help-block">This will attempt to send a test mail to {{ config('mail.from.address') }}.</p>
+                <p class="help-block">
+                    {{ config('mail.enabled') ? 'This will attempt to send a test mail to '.config('mail.from.address').'.' : trans('mail.delivery_disabled') }}
+                </p>
             </div>
       </td>
     </tr>

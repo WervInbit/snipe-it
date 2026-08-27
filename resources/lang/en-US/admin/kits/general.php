@@ -2,8 +2,7 @@
 
 return [
     'about_kits_title'                  => 'About Predefined Kits',
-    'about_kits_text'                   => 'Predefined Kits let you quickly check out a collection of items (assets, licenses, etc) to a user. This can be helpful when your onboarding process is consistent across many users and all users receive the same items.',
-    'checkout'                          => 'Checkout Kit ',
+    'about_kits_text'                   => 'Predefined Kits are retained as compatibility templates. Kit checkout is not available in the refurbishment V1 contract.',
     'create_success'                    => 'Kit was successfully created.',
     'create'                            => 'Create Predefined Kit',
     'update'                            => 'Update Predefined Kit',
@@ -38,9 +37,6 @@ return [
     'accessory_error'                   => 'Accessory already attached to kit',
     'accessory_deleted'                 => 'Delete was successful',
     'accessory_none'                    => 'The accessory does not exist',
-    'checkout_success'                  => 'Checkout was successful',
-    'checkout_error'                    => 'Checkout error',
-    'checkout_disabled'               => 'Kit checkout is disabled in this fork.',
     'kit_none'                          => 'Kit does not exist',
     'kit_created'                       => 'Kit was successfully created',
     'kit_updated'                       => 'Kit was successfully updated',

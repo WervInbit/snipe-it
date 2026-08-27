@@ -23,6 +23,50 @@ class LicenseViewTest extends TestCase
             ->get(route('licenses.show', License::factory()->create()->id))
             ->assertOk();
     }
+
+    public function testProductKeyVisibilityUsesTheDedicatedKeyPermission(): void
+    {
+        $license = License::factory()->create(['serial' => 'SENSITIVE-LICENSE-KEY']);
+
+        $this->actingAs(User::factory()->viewLicenses()->create())
+            ->get(route('licenses.show', $license))
+            ->assertOk()
+            ->assertDontSee('SENSITIVE-LICENSE-KEY');
+
+        $this->actingAs(User::factory()->viewLicenses()->viewKeysLicenses()->create())
+            ->get(route('licenses.show', $license))
+            ->assertOk()
+            ->assertSee('SENSITIVE-LICENSE-KEY');
+    }
+
+    public function testLicenseUploadControlsUseTheDedicatedFilePermission(): void
+    {
+        $license = License::factory()->create();
+        $ordinaryEditor = User::factory()->create([
+            'permissions' => json_encode([
+                'licenses.view' => '1',
+                'licenses.edit' => '1',
+            ]),
+        ]);
+        $fileManager = User::factory()->create([
+            'permissions' => json_encode([
+                'licenses.view' => '1',
+                'licenses.files' => '1',
+            ]),
+        ]);
+
+        $this->actingAs($ordinaryEditor)
+            ->get(route('licenses.show', $license))
+            ->assertOk()
+            ->assertDontSee('data-target="#uploadFileModal"', false)
+            ->assertDontSee('id="files"', false);
+
+        $this->actingAs($fileManager)
+            ->get(route('licenses.show', $license))
+            ->assertOk()
+            ->assertSee('data-target="#uploadFileModal"', false)
+            ->assertSee('id="files"', false);
+    }
     
     public function testLicenseWithPurchaseDateDepreciatesCorrectly()
     {

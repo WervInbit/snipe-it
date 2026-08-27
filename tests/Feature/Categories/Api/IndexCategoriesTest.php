@@ -45,12 +45,12 @@ class IndexCategoriesTest extends TestCase
 
     public function testCategoryIndexReturnsExpectedCategories()
     {
-        $this->markTestIncomplete('Not sure why the category factory is generating one more than expected here.');
         Category::factory()->count(3)->create();
 
         $this->actingAsForApi(User::factory()->superuser()->create())
             ->getJson(
                 route('api.categories.index', [
+                    'category_type' => 'asset',
                     'sort' => 'id',
                     'order' => 'asc',
                     'offset' => '0',

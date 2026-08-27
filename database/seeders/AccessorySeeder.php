@@ -6,15 +6,14 @@ use App\Models\Accessory;
 use App\Models\Location;
 use App\Models\Supplier;
 use App\Models\User;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 
-class AccessorySeeder extends Seeder
+class AccessorySeeder extends DestructiveFixtureSeeder
 {
-    public function run()
+    protected function seedFixtures(): void
     {
         Schema::disableForeignKeyConstraints();
         Accessory::truncate();

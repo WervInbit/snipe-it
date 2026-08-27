@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Asset;
 use App\Models\Department;
 use App\Models\Group;
 use Illuminate\Console\Command;
@@ -47,9 +46,9 @@ class LdapSync extends Command
     {
 
         // If LDAP enabled isn't set to 1 (ldap_enabled!=1) then we should cut this short immediately without going any further
-        if (Setting::getSettings()->ldap_enabled!='1') {
-            $this->error('LDAP is not enabled. Aborting. See Settings > LDAP to enable it.');
-            exit();
+        if (! Setting::ldapIsActive()) {
+            $this->error('LDAP is disabled for this environment. Aborting without contacting a directory.');
+            return self::FAILURE;
         }
 
         ini_set('max_execution_time', env('LDAP_TIME_LIM', 600)); //600 seconds = 10 minutes
@@ -439,16 +438,6 @@ class LdapSync extends Command
                 $user->groups()->attach($ldap_default_group);
                     }
                 }
-                
-                //updates assets location based on user's location
-                if ($user->wasChanged('location_id')) {
-                    foreach ($user->assets as $asset) {
-                        $asset->location_id = $user->location_id;
-                        // TODO: somehow add note? "Asset Location Changed because of thing"
-                        $asset->save();
-                    }
-                }
-
             } else {
                 foreach ($user->getErrors()->getMessages() as $key => $err) {
                     $errors .= $err[0];

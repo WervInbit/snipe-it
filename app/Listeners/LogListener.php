@@ -4,8 +4,6 @@ namespace App\Listeners;
 
 use App\Events\AccessoryCheckedIn;
 use App\Events\AccessoryCheckedOut;
-use App\Events\AssetCheckedIn;
-use App\Events\AssetCheckedOut;
 use App\Events\CheckoutableCheckedIn;
 use App\Events\CheckoutableCheckedOut;
 use App\Events\CheckoutAccepted;
@@ -18,6 +16,7 @@ use App\Events\ItemDeclined;
 use App\Events\LicenseCheckedIn;
 use App\Events\LicenseCheckedOut;
 use App\Models\Actionlog;
+use App\Models\Asset;
 use App\Models\User;
 use App\Models\LicenseSeat;
 use App\Events\UserMerged;
@@ -34,6 +33,10 @@ class LogListener
      */
     public function onCheckoutableCheckedIn(CheckoutableCheckedIn $event)
     {
+        if ($event->checkoutable instanceof Asset) {
+            return;
+        }
+
         $event->checkoutable->logCheckin($event->checkedOutTo, $event->note, $event->action_date, $event->originalValues);
     }
 
@@ -47,6 +50,10 @@ class LogListener
      */
     public function onCheckoutableCheckedOut(CheckoutableCheckedOut $event)
     {
+        if ($event->checkoutable instanceof Asset) {
+            return;
+        }
+
         $event->checkoutable->logCheckout($event->note, $event->checkedOutTo, $event->checkoutable->last_checkout, $event->originalValues);
     }
 
@@ -72,7 +79,9 @@ class LogListener
             $logaction->item()->associate($event->acceptance->checkoutable->license);
         }
 
-        $logaction->save();
+        if (! $logaction->save()) {
+            throw new \RuntimeException('Unable to persist the accepted checkout action log.');
+        }
     }
 
     public function onCheckoutDeclined(CheckoutDeclined $event)
@@ -90,7 +99,9 @@ class LogListener
             $logaction->item()->associate($event->acceptance->checkoutable->license);
         }
 
-        $logaction->save();
+        if (! $logaction->save()) {
+            throw new \RuntimeException('Unable to persist the declined checkout action log.');
+        }
     }
 
 

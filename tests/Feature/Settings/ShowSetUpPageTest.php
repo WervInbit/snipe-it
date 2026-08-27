@@ -3,9 +3,9 @@
 namespace Tests\Feature\Settings;
 
 use PHPUnit\Framework\Attributes\DataProvider;
-use App\Http\Controllers\SettingsController;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Request;
 use Illuminate\Http\Client\Response;
 use Illuminate\Log\Events\MessageLogged;
@@ -16,13 +16,22 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Testing\TestResponse;
+use GuzzleHttp\Psr7\Response as PsrResponse;
+use Mockery;
 use PDOException;
 use Tests\TestCase;
 
 class ShowSetUpPageTest extends TestCase
 {
+    protected static ?TestResponse $latestResponse;
 
-    static ?TestResponse $latestResponse;
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        config(['app.allow_web_setup' => true]);
+    }
+
     /**
      * We do not want to make actual http request on every test to check .env file
      * visibility because that can be really slow especially in some cases where an
@@ -38,6 +47,15 @@ class ShowSetUpPageTest extends TestCase
 
         self::$latestResponse = $this->get('/setup');
         return self::$latestResponse;
+    }
+
+    public function testWebSetupCanBeDisabledBeforeAnyUserExists(): void
+    {
+        config(['app.allow_web_setup' => false]);
+
+        $this->get('/setup/migrate')
+            ->assertServiceUnavailable()
+            ->assertSee('Web setup is disabled');
     }
 
     public function testView(): void
@@ -245,7 +263,11 @@ class ShowSetUpPageTest extends TestCase
     {
         $url = URL::to('setup');
 
-        $errorMessage = "Uh oh! Snipe-IT thinks your URL is http://www.github.com/setup, but your real URL is {$url}";
+        $errorMessage = sprintf(
+            'Uh oh! %s thinks your URL is http://www.github.com/setup, but your real URL is %s',
+            config('app.name'),
+            $url,
+        );
         $successMessage = 'That URL looks right! Good job!';
 
         if ($shouldSee) {
@@ -274,7 +296,7 @@ class ShowSetUpPageTest extends TestCase
 
     public function testWillSeeDirectoryPermissionErrorWhenStoragePathIsNotWritable(): void
     {
-        File::shouldReceive('isWritable')->andReturn(false);
+        File::partialMock()->shouldReceive('isWritable')->andReturn(false);
 
         $this->getSetUpPageResponse()->assertOk();
 
@@ -293,22 +315,40 @@ class ShowSetUpPageTest extends TestCase
             return;
         }
 
-        self::$latestResponse->assertSee($successMessage, false)->assertDontSee($errorMessage,false);
+        self::$latestResponse->assertSee($successMessage, false)->assertDontSee($errorMessage, false);
     }
 
     public function testWillNotSeeDirectoryPermissionErrorWhenStoragePathIsWritable(): void
     {
-        File::shouldReceive('isWritable')->andReturn(true);
+        File::partialMock()->shouldReceive('isWritable')->andReturn(true);
 
         $this->getSetUpPageResponse()->assertOk();
 
         $this->assertSeeDirectoryPermissionError(false);
     }
 
-    public function testInvalidTLSCertsOkWhenCheckingForEnvFile()
+    public function testDotEnvVisibilityCheckAllowsInvalidTlsCertificates(): void
     {
-        //set the weird bad SSL cert place - https://self-signed.badssl.com
-        $this->markTestIncomplete("Not yet sure how to write this test, it requires messing with .env ...");
-        $this->assertTrue((new SettingsController())->dotEnvFileIsExposed());
+        $this->preventStrayRequest = false;
+
+        $pendingRequest = Mockery::mock(PendingRequest::class);
+        Http::shouldReceive('withoutVerifying')
+            ->once()
+            ->andReturn($pendingRequest);
+        $pendingRequest->shouldReceive('timeout')
+            ->once()
+            ->with(10)
+            ->andReturnSelf();
+        $pendingRequest->shouldReceive('accept')
+            ->once()
+            ->with('*/*')
+            ->andReturnSelf();
+        $pendingRequest->shouldReceive('get')
+            ->once()
+            ->with(URL::to('.env'))
+            ->andReturn(new Response(new PsrResponse(404)));
+
+        $this->getSetUpPageResponse()->assertOk();
+        $this->assertSeeDotEnvFileExposedErrorMessage(false);
     }
 }

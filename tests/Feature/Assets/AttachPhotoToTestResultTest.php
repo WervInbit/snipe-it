@@ -9,12 +9,15 @@ use App\Models\TestType;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class AttachPhotoToTestResultTest extends TestCase
 {
     public function test_photo_can_be_attached_to_result(): void
     {
+        Storage::fake(config('filesystems.default'));
+
         $asset = Asset::factory()->create();
         $type = TestType::factory()->create();
         $user = User::factory()->superuser()->create();
@@ -37,8 +40,8 @@ class AttachPhotoToTestResultTest extends TestCase
 
         $result->refresh();
         $this->assertNotNull($result->photo_path);
-        $this->assertFileExists(public_path($result->photo_path));
-
-        File::delete(public_path($result->photo_path));
+        $this->assertStringStartsWith('private_uploads/workflow_evidence/results/'.$result->id.'/', $result->photo_path);
+        Storage::disk(config('filesystems.default'))->assertExists($result->photo_path);
+        $this->assertFalse(File::exists(public_path($result->photo_path)));
     }
 }

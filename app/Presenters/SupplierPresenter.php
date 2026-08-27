@@ -194,7 +194,7 @@ class SupplierPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('suppliers.show', $this->name, $this->id);
+        return \App\Support\RouteLink::to('suppliers.show', $this->name, $this->id);
     }
 
     /**

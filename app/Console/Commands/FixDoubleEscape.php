@@ -18,7 +18,7 @@ class FixDoubleEscape extends Command
      *
      * @var string
      */
-    protected $description = 'This should be run to fix some double-escaping issues from earlier versions of Snipe-IT.';
+    protected $description = 'Fix double-escaping issues created by earlier application versions.';
 
     /**
      * Create a new command instance.

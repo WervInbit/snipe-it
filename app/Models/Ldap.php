@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Setting;
 use App\Models\User;
 use Exception;
+use RuntimeException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Crypt;
@@ -36,6 +37,10 @@ class Ldap extends Model
      */
     public static function connectToLdap()
     {
+        if (! Setting::ldapIsActive()) {
+            throw new RuntimeException('LDAP integration is disabled for this environment.');
+        }
+
         $ldap_host = Setting::getSettings()->ldap_server;
         $ldap_version = Setting::getSettings()->ldap_version ?: 3;
         $ldap_server_cert_ignore = Setting::getSettings()->ldap_server_cert_ignore;
@@ -68,8 +73,10 @@ class Ldap extends Model
             ldap_set_option(null, LDAP_OPT_X_TLS_KEYFILE, Setting::get_client_side_key_path());
         }
 
-        if ($ldap_use_tls=='1') {
-            ldap_start_tls($connection);
+        if ($ldap_use_tls == '1') {
+            if (! ldap_start_tls($connection)) {
+                throw new Exception('STARTTLS failed.');
+            }
         }
 
 
@@ -95,7 +102,7 @@ class Ldap extends Model
         $connection = self::connectToLdap();
         $ldap_username_field = $settings->ldap_username_field;
         $baseDn = $settings->ldap_basedn;
-        $userDn = $ldap_username_field.'='.$username.','.$settings->ldap_basedn;
+        $userDn = $ldap_username_field.'='.ldap_escape($username, '', LDAP_ESCAPE_DN).','.$settings->ldap_basedn;
 
         if ($settings->is_ad == '1') {
             // Check if they are using the userprincipalname for the username field.
@@ -113,7 +120,7 @@ class Ldap extends Model
             }
         }
 
-        $filterQuery = $settings->ldap_auth_filter_query.$username;
+        $filterQuery = $settings->ldap_auth_filter_query.ldap_escape($username, '', LDAP_ESCAPE_FILTER);
         $filter = Setting::getSettings()->ldap_filter; //FIXME - this *does* respect the ldap filter, but I believe that AdLdap2 did *not*.
         $filterQuery = "({$filter}({$filterQuery}))";
 

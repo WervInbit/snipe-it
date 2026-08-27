@@ -6,8 +6,12 @@ use App\Models\AssetModel;
 use App\Http\Controllers\Admin\ModelNumberController;
 use App\Models\ModelNumber;
 use App\Models\User;
+use App\Services\SafeRasterImageService;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class ModelNumberManagementTest extends TestCase
@@ -164,6 +168,58 @@ class ModelNumberManagementTest extends TestCase
             ->assertOk()
             ->assertSee($componentsAnchor, false)
             ->assertSeeText('Edit Unified Specification');
+    }
+
+    public function test_model_update_rolls_back_metadata_when_raster_sync_fails(): void
+    {
+        Storage::fake('public');
+        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+
+        $user = User::factory()->superuser()->create();
+        $model = AssetModel::factory()->create();
+        $primary = $model->ensurePrimaryModelNumber();
+        $modelNumber = $model->modelNumbers()->create([
+            'code' => 'ROLLBACK-OLD',
+            'label' => 'Before',
+        ]);
+
+        $failingRasterImages = new class extends SafeRasterImageService {
+            public function storePublic(
+                UploadedFile $file,
+                string $directory,
+                string $filenamePrefix,
+                string $field = 'image'
+            ): array {
+                throw ValidationException::withMessages([
+                    $field => 'Simulated raster normalization failure.',
+                ]);
+            }
+        };
+        $this->app->instance(SafeRasterImageService::class, $failingRasterImages);
+
+        $response = $this->actingAs($user)->put(
+            route('models.numbers.update', [$model, $modelNumber]),
+            [
+                'code' => 'rollback-new',
+                'label' => 'After',
+                'status' => 'active',
+                'make_primary' => 1,
+                'new_image' => [
+                    'caption' => 'Front',
+                    'image' => UploadedFile::fake()->image('front.jpg'),
+                ],
+            ]
+        );
+
+        $response->assertSessionHasErrors('new_image.image');
+
+        $this->assertDatabaseHas('model_numbers', [
+            'id' => $modelNumber->id,
+            'code' => 'ROLLBACK-OLD',
+            'label' => 'Before',
+        ]);
+        $this->assertSame($primary->id, $model->fresh()->primary_model_number_id);
+        $this->assertSame([], Storage::disk('public')->allFiles());
     }
 
     public function test_admin_cannot_delete_primary_model_number(): void

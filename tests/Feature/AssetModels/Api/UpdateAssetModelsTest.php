@@ -9,7 +9,6 @@ use Tests\TestCase;
 
 class UpdateAssetModelsTest extends TestCase
 {
-
     public function testRequiresPermissionToEditAssetModel()
     {
         $model = AssetModel::factory()->create();
@@ -18,11 +17,30 @@ class UpdateAssetModelsTest extends TestCase
             ->assertForbidden();
     }
 
-    public function testCanUpdateAssetModelViaPatch()
+    public function testCreatePermissionDoesNotAllowEditingAssetModels()
     {
         $model = AssetModel::factory()->create();
 
-        $this->actingAsForApi(User::factory()->superuser()->create())
+        $this->actingAsForApi(User::factory()->create([
+            'permissions' => json_encode(['models.create' => '1']),
+        ]))
+            ->patchJson(route('api.models.update', $model), [
+                'name' => 'Create-only update',
+                'category_id' => $model->category_id,
+            ])
+            ->assertForbidden();
+
+        $this->assertNotSame('Create-only update', $model->fresh()->name);
+    }
+
+    public function testCanUpdateAssetModelViaPatch()
+    {
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+
+        $this->actingAsForApi(User::factory()->create([
+            'permissions' => json_encode(['models.edit' => '1']),
+        ]))
             ->patchJson(route('api.models.update', $model), [
                 'name' => 'Test Model',
                 'category_id' => Category::factory()->forAssets()->create()->id,
@@ -34,7 +52,34 @@ class UpdateAssetModelsTest extends TestCase
 
         $model->refresh();
         $this->assertEquals('Test Model', $model->name, 'Name was not updated');
+        $this->assertSame($modelNumber->id, $model->primary_model_number_id);
+        $this->assertSame($modelNumber->code, $model->model_number);
+        $this->assertDatabaseHas('model_numbers', [
+            'id' => $modelNumber->id,
+            'code' => $modelNumber->code,
+        ]);
+    }
 
+    public function testExplicitModelNumberUpdateKeepsPrimaryPresetInSync(): void
+    {
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->patchJson(route('api.models.update', $model), [
+                'name' => $model->name,
+                'category_id' => $model->category_id,
+                'model_number' => 'UPDATED-PRIMARY',
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('success');
+
+        $model->refresh();
+        $modelNumber->refresh();
+
+        $this->assertSame('UPDATED-PRIMARY', $model->model_number);
+        $this->assertSame($modelNumber->id, $model->primary_model_number_id);
+        $this->assertSame('UPDATED-PRIMARY', $modelNumber->code);
     }
 
     public function testCannotUpdateAssetModelViaPatchWithAccessoryCategory()
@@ -116,5 +161,4 @@ class UpdateAssetModelsTest extends TestCase
         $this->assertNotEquals('Test Model', $model->name, 'Name was not updated');
         $this->assertNotEquals('category_id', $category->id, 'Category ID was not updated');
     }
-
 }

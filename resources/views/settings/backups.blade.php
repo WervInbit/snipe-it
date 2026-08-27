@@ -21,6 +21,7 @@
 {{-- Page content --}}
 @section('content')
 
+    @if (config('app.allow_backup_restore'))
     <div class="modal modal-warning fade" tabindex="-1" role="dialog" id="backupRestoreModal">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -51,6 +52,7 @@
             </div>
         </div>
     </div>
+    @endif
 
     <div class="row">
 
@@ -113,6 +115,7 @@
                           </a>
                       @endif
 
+                      @if (config('app.allow_backup_restore'))
                           <a data-html="true"
                              href="{{ route('settings.backups.restore', $file['filename']) }}"
                              class="btn btn-warning btn-sm restore-backup {{ (config('app.lock_passwords')) ? ' disabled': '' }}"
@@ -122,6 +125,7 @@
                       <i class="fas fa-retweet" aria-hidden="true"></i>
                       <span class="sr-only">{{ trans('general.restore') }}</span>
                     </a>
+                      @endif
                      
                   @endcan
               </td>
@@ -153,7 +157,9 @@
           {!! trans('admin/settings/general.backups_path', ['path'=> 'storage/app/backup']) !!}
         </p>
 
-        @if (config('app.lock_passwords')===true)
+        @if (! config('app.allow_backup_restore'))
+        <p class="alert alert-warning"><i class="fas fa-lock"></i> {{ trans('admin/settings/message.backup.restore_disabled') }}</p>
+        @elseif (config('app.lock_passwords')===true)
         <p class="alert alert-warning"><i class="fas fa-lock"></i> {{ trans('general.feature_disabled') }}</p>
           @else
 
@@ -193,6 +199,7 @@
       </div>
     </div>
 
+    @if (config('app.allow_backup_restore'))
     <div class="box box-warning">
       <div class="box-header with-border">
         <h2 class="box-title">
@@ -217,6 +224,7 @@
       
     </div>
   </div>
+    @endif
     
         </div> <!-- end col-md-12 form div -->
    </div> <!-- end form group div -->
@@ -256,6 +264,7 @@
         });
       });
 
+      @if (config('app.allow_backup_restore'))
       // due to dynamic loading, we have to use the below 'weird' way of adding event handlers instead of just saying
       // $('.restore-backup').on( .....
       $('table').on('click', '.restore-backup', function (event) {
@@ -268,6 +277,7 @@
           });
           return false;
       })
+      @endif
   </script>
 @stop
 

@@ -1,7 +1,6 @@
 @extends('layouts/edit-form', [
-    'createText' => {{ trans('admin/kits/general.append_license') }},
-    'updateText' => {{ trans('admin/kits/general.update_appended_license') }},
-    'formAction' => (isset($item->id)) ? route('kits.licenses.update', ['kit_id' => $kit->id, 'license_id' => $item->license_id]) : route('kits.licenses.store', ['kit_id' => $kit->id]),
+    'updateText' => trans('admin/kits/general.update_appended_license'),
+    'formAction' => route('kits.licenses.update', ['kit' => $kit->id, 'license_id' => $item->license_id]),
 ])
 
 {{-- Page content --}}

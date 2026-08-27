@@ -3,6 +3,7 @@
 namespace Tests\Feature\Checkouts\Ui;
 
 use App\Models\Asset;
+use App\Models\Company;
 use App\Models\License;
 use App\Models\LicenseSeat;
 use App\Models\User;
@@ -122,5 +123,91 @@ class LicenseCheckoutTest extends TestCase
             ])
             ->assertStatus(302)
             ->assertRedirect(route('hardware.show', $asset));
+    }
+
+    public function testExpiredLicenseCannotOpenCheckoutPage(): void
+    {
+        $license = License::factory()->create([
+            'expiration_date' => now()->subDay(),
+            'termination_date' => null,
+        ]);
+
+        $this->actingAs(User::factory()->checkoutLicenses()->create())
+            ->get(route('licenses.checkout', $license))
+            ->assertRedirect(route('licenses.index'))
+            ->assertSessionHas('error', trans('admin/licenses/message.checkout.license_is_inactive'));
+    }
+
+    public function testTerminatedLicenseCannotBeCheckedOut(): void
+    {
+        $license = License::factory()->create([
+            'seats' => 1,
+            'expiration_date' => now()->addYear(),
+            'termination_date' => now(),
+        ]);
+
+        $this->actingAs(User::factory()->checkoutLicenses()->create())
+            ->post(route('licenses.checkout', $license), [
+                'assigned_to' => User::factory()->create()->id,
+            ])
+            ->assertRedirect(route('licenses.index'))
+            ->assertSessionHas('error', trans('admin/licenses/message.checkout.license_is_inactive'));
+
+        $this->assertNull($license->licenseseats()->first()->assigned_to);
+    }
+
+    public function testSequentialCheckoutsUseDistinctSeats(): void
+    {
+        $license = License::factory()->create(['seats' => 2]);
+        $actor = User::factory()->checkoutLicenses()->create();
+        $targets = User::factory()->count(2)->create();
+
+        foreach ($targets as $target) {
+            $this->actingAs($actor)
+                ->post(route('licenses.checkout', $license), ['assigned_to' => $target->id])
+                ->assertSessionHas('success');
+        }
+
+        $assignedTo = $license->licenseseats()->orderBy('id')->pluck('assigned_to');
+        $this->assertSame($targets->pluck('id')->sort()->values()->all(), $assignedTo->sort()->values()->all());
+    }
+
+    public function testOccupiedSpecificSeatCannotBeOverwrittenWhileAnotherSeatIsFree(): void
+    {
+        $license = License::factory()->create(['seats' => 2]);
+        $seats = $license->licenseseats()->orderBy('id')->get();
+        $currentHolder = User::factory()->create();
+        $seats->first()->update(['assigned_to' => $currentHolder->id]);
+
+        $this->actingAs(User::factory()->checkoutLicenses()->create())
+            ->post(route('licenses.checkout', [
+                'license' => $license,
+                'seatId' => $seats->first()->id,
+            ]), [
+                'assigned_to' => User::factory()->create()->id,
+            ])
+            ->assertRedirect(route('licenses.index'))
+            ->assertSessionHas('error', trans('admin/licenses/message.checkout.unavailable'));
+
+        $this->assertSame($currentHolder->id, $seats->first()->fresh()->assigned_to);
+        $this->assertNull($seats->last()->fresh()->assigned_to);
+    }
+
+    public function testLicenseCannotBeCheckedOutAcrossCompanyBoundary(): void
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+        $licenseCompany = Company::factory()->create();
+        $targetCompany = Company::factory()->create();
+        $license = License::factory()->for($licenseCompany)->create(['seats' => 1]);
+        $target = User::factory()->for($targetCompany)->create();
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->post(route('licenses.checkout', $license), [
+                'assigned_to' => $target->id,
+            ])
+            ->assertRedirect(route('licenses.index'))
+            ->assertSessionHas('error', trans('general.error_user_company'));
+
+        $this->assertNull($license->licenseseats()->first()->assigned_to);
     }
 }

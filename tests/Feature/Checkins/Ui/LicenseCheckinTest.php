@@ -3,7 +3,9 @@
 namespace Tests\Feature\Checkins\Ui;
 
 use App\Events\CheckoutableCheckedIn;
+use App\Models\Actionlog;
 use App\Models\Asset;
+use App\Models\License;
 use App\Models\LicenseSeat;
 use App\Models\User;
 use Illuminate\Support\Facades\Event;
@@ -27,7 +29,7 @@ class LicenseCheckinTest extends TestCase
             ->assignedToUser()
             ->create();
 
-        $this->actingAs(User::factory()->checkoutLicenses()->create())
+        $this->actingAs(User::factory()->checkinLicenses()->create())
             ->post(route('licenses.checkin.save', $licenseSeat), [
                 'notes' => 'my note',
                 'redirect_option' => 'index',
@@ -46,7 +48,7 @@ class LicenseCheckinTest extends TestCase
         $this->assertNull($licenseSeat->assigned_to);
         $this->assertNull($licenseSeat->asset_id);
 
-        $this->actingAs(User::factory()->checkoutLicenses()->create())
+        $this->actingAs(User::factory()->checkinLicenses()->create())
             ->post(route('licenses.checkin.save', $licenseSeat), [
                 'notes' => 'my note',
                 'redirect_option' => 'index',
@@ -65,7 +67,7 @@ class LicenseCheckinTest extends TestCase
             ->assignedToAsset($asset)
             ->create();
 
-        $actor = User::factory()->checkoutLicenses()->create();
+        $actor = User::factory()->checkinLicenses()->create();
 
         $this->actingAs($actor)
             ->post(route('licenses.checkin.save', $licenseSeat), [
@@ -98,7 +100,7 @@ class LicenseCheckinTest extends TestCase
             ->assignedToUser($user)
             ->create();
 
-        $actor = User::factory()->checkoutLicenses()->create();
+        $actor = User::factory()->checkinLicenses()->create();
 
         $this->actingAs($actor)
             ->post(route('licenses.checkin.save', $licenseSeat), [
@@ -127,5 +129,81 @@ class LicenseCheckinTest extends TestCase
             ->get(route('licenses.checkin', LicenseSeat::factory()->assignedToUser()->create()->id))
             ->assertOk();
 
+    }
+
+    public function testAssetAssignmentRemainsTheCheckinTargetWhenTheSeatAlsoTracksTheAssetUser(): void
+    {
+        Event::fake([CheckoutableCheckedIn::class]);
+
+        $asset = Asset::factory()->create();
+        $assetUser = User::factory()->create();
+        $licenseSeat = LicenseSeat::factory()
+            ->reassignable()
+            ->assignedToAsset($asset)
+            ->create(['assigned_to' => $assetUser->id]);
+
+        $this->actingAs(User::factory()->checkinLicenses()->create())
+            ->post(route('licenses.checkin.save', $licenseSeat), [
+                'redirect_option' => 'index',
+            ])
+            ->assertRedirect(route('licenses.index'));
+
+        Event::assertDispatched(CheckoutableCheckedIn::class, function (CheckoutableCheckedIn $event) use ($asset) {
+            return $event->checkedOutTo->is($asset);
+        });
+    }
+
+    public function testBulkCheckinProcessesEachSeatOnceIncludingAssetSeatsWithAnOwner(): void
+    {
+        $license = License::factory()->create([
+            'seats' => 3,
+            'reassignable' => true,
+        ]);
+        $seats = $license->licenseseats()->orderBy('id')->get();
+        $user = User::factory()->create();
+        $asset = Asset::factory()->create();
+        $otherAsset = Asset::factory()->create();
+
+        $seats[0]->update(['assigned_to' => $user->id]);
+        $seats[1]->update(['asset_id' => $asset->id, 'assigned_to' => $user->id]);
+        $seats[2]->update(['asset_id' => $otherAsset->id]);
+
+        $this->actingAs(User::factory()->checkinLicenses()->create())
+            ->from(route('licenses.show', $license))
+            ->post(route('licenses.bulkcheckin', $license))
+            ->assertRedirect(route('licenses.show', $license))
+            ->assertSessionHas('success');
+
+        foreach ($seats as $seat) {
+            $this->assertNull($seat->fresh()->assigned_to);
+            $this->assertNull($seat->fresh()->asset_id);
+        }
+
+        $checkins = Actionlog::query()
+            ->where('item_type', License::class)
+            ->where('item_id', $license->id)
+            ->where('action_type', 'checkin from')
+            ->get();
+
+        $this->assertCount(3, $checkins);
+        $this->assertTrue($checkins->contains(fn (Actionlog $log) =>
+            $log->target_type === Asset::class && $log->target_id === $asset->id
+        ));
+    }
+
+    public function testCheckoutPermissionDoesNotAuthorizeLicenseCheckin(): void
+    {
+        $licenseSeat = LicenseSeat::factory()
+            ->reassignable()
+            ->assignedToUser()
+            ->create();
+
+        $this->actingAs(User::factory()->checkoutLicenses()->create())
+            ->post(route('licenses.checkin.save', $licenseSeat), [
+                'redirect_option' => 'index',
+            ])
+            ->assertForbidden();
+
+        $this->assertNotNull($licenseSeat->fresh()->assigned_to);
     }
 }

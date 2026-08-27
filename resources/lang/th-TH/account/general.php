@@ -9,7 +9,7 @@ return array(
     'api_base_url' => 'Your API base url is located at:',
     'api_base_url_endpoint' => '/&lt;endpoint&gt;',
     'api_token_expiration_time' => 'API tokens are set to expire in:',
-    'api_reference' => 'Please check the <a href="https://snipe-it.readme.io/reference" target="_blank">API reference</a> to find specific API endpoints and additional API documentation.',
+    'api_reference' => 'Please check the <a href=":fork_documentation_url" target="_blank">API reference</a> to find specific API endpoints and additional API documentation.',
     'profile_updated' => 'อัปเดตบัญชีสำเร็จแล้ว',
     'no_tokens' => 'คุณไม่ได้สร้างโทเค็น การเข้าถึงส่วนตัวใด ๆ',
     'enable_sounds' => 'เปิดใช้งานเอฟเฟกต์เสียง',

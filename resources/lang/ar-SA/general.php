@@ -157,7 +157,7 @@ return [
     'import'         	    => 'استيراد',
     'import_this_file'      => 'حقول الخريطة ومعالجة هذا الملف',
     'importing'         	=> 'الاستيراد',
-    'importing_help'        => 'يمكنك استيراد الأصول، الملحقات، التراخيص، المكونات، المواد الاستهلاكية، والمستخدمين عبر ملف CSV. <br><br>يجب أن تكون CSV محددة بفواصل وأن يتم تنسيقها مع رؤوس تطابق تلك الموجودة في <a href="https://snipe-it.readme.io/docs/importing" target="_new">عينة CSVs في الوثائق</a>.',
+    'importing_help'        => 'يمكنك استيراد الأصول، الملحقات، التراخيص، المكونات، المواد الاستهلاكية، والمستخدمين عبر ملف CSV. <br><br>يجب أن تكون CSV محددة بفواصل وأن يتم تنسيقها مع رؤوس تطابق تلك الموجودة في <a href=":fork_documentation_url" target="_new">عينة CSVs في الوثائق</a>.',
     'import-history'        => 'استيراد الأرشيف',
     'asset_maintenance'        => 'صيانة الأصول',
     'asset_maintenance_report' => 'تقرير صيانة الأصول',

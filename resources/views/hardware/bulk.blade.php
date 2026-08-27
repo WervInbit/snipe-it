@@ -72,25 +72,6 @@
             </div>
           </div>
 
-          <!-- Expected Checkin Date -->
-          <div class="form-group {{ $errors->has('expected_checkin') ? ' has-error' : '' }}">
-             <label for="expected_checkin" class="col-md-3 control-label">{{ trans('admin/hardware/form.expected_checkin') }}</label>
-             <div class="col-md-4">
-                  <div class="input-group date" data-provide="datepicker" data-date-format="yyyy-mm-dd"  data-autoclose="true">
-                      <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="expected_checkin" id="expected_checkin" value="{{ old('expected_checkin') }}">
-                      <span class="input-group-addon"><x-icon type="calendar" /></span>
-                 </div>
-
-                 {!! $errors->first('expected_checkin', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-             </div>
-              <div class="col-md-5">
-                <label class="form-control">
-                  <input type="checkbox" name="null_expected_checkin_date" value="1">
-                  {{ trans_choice('general.set_to_null', count($assets), ['selection_count' => count($assets)]) }}
-                </label>
-              </div>
-          </div>
-
           <!-- EOL Date -->
           <div class="form-group {{ $errors->has('asset_eol_date') ? ' has-error' : '' }}">
             <label for="eol_date" class="col-md-3 control-label">{{ trans('admin/hardware/form.eol_date') }}</label>
@@ -223,52 +204,6 @@
                 <span class="input-group-addon">{{ trans('admin/hardware/form.months') }}</span>
                 {!! $errors->first('warranty_months', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
               </div>
-            </div>
-          </div>
-
-          <!-- Next audit Date -->
-          <div class="form-group {{ $errors->has('next_audit_date') ? ' has-error' : '' }}">
-            <label for="next_audit_date" class="col-md-3 control-label">{{ trans('general.next_audit_date') }}</label>
-            <div class="col-md-4">
-              <div class="input-group date" data-provide="datepicker" data-date-format="yyyy-mm-dd"  data-autoclose="true">
-                <input type="text" class="form-control" placeholder="{{ trans('general.select_date') }}" name="next_audit_date" id="next_audit_date" value="{{ old('next_audit_date') }}">
-                <span class="input-group-addon"><x-icon type="calendar" /></span>
-              </div>
-
-              {!! $errors->first('next_audit_date', '<span class="alert-msg" aria-hidden="true">
-                <i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
-
-
-            </div>
-            <div class="col-md-5">
-              <label class="form-control">
-                <input type="checkbox" name="null_next_audit_date" value="1">
-                {{ trans_choice('general.set_to_null', count($assets), ['selection_count' => count($assets)]) }}
-              </label>
-            </div>
-            <div class="col-md-8 col-md-offset-3">
-              <p class="help-block">{!! trans('general.next_audit_date_help') !!}</p>
-            </div>
-          </div>
-
-          <!-- Requestable -->
-          <div class="form-group {{ $errors->has('requestable') ? ' has-error' : '' }}">
-            <div class="control-label col-md-3">
-              <strong>{{ trans('admin/hardware/form.requestable') }}</strong>
-            </div>
-            <div class="col-md-7">
-              <label class="form-control">
-                <input type="radio" name="requestable" value="1">
-                {{ trans('general.yes')}}
-              </label>
-              <label class="form-control">
-                <input type="radio" name="requestable" value="0">
-                {{ trans('general.no')}}
-              </label>
-              <label class="form-control">
-                <input type="radio" name="requestable" value="" checked>
-                {{ trans('general.do_not_change')}}
-              </label>
             </div>
           </div>
 

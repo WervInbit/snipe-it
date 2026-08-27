@@ -146,24 +146,12 @@ class UserFactory extends Factory
         return $this->appendPermission(['assets.delete' => '1']);
     }
 
-    public function checkinAssets()
-    {
-        return $this->appendPermission(['assets.checkin' => '1']);
-    }
-
-    public function checkoutAssets()
-    {
-        return $this->appendPermission(['assets.checkout' => '1']);
-    }
-
-    public function viewRequestableAssets()
-    {
-        return $this->appendPermission(['assets.view.requestable' => '1']);
-    }
-
     public function deleteAssetModels()
     {
-        return $this->appendPermission(['models.delete' => '1']);
+        return $this->appendPermission([
+            'models.delete' => '1',
+            'models.manage_lifecycle' => '1',
+        ]);
     }
 
     public function viewAssetModels()
@@ -266,6 +254,11 @@ class UserFactory extends Factory
         return $this->appendPermission(['licenses.checkout' => '1']);
     }
 
+    public function checkinLicenses()
+    {
+        return $this->appendPermission(['licenses.checkin' => '1']);
+    }
+
     public function viewKeysLicenses()
     {
         return $this->appendPermission(['licenses.keys' => '1']);
@@ -326,9 +319,19 @@ class UserFactory extends Factory
         return $this->appendPermission(['components.verify' => '1']);
     }
 
+    public function destroyComponents()
+    {
+        return $this->appendPermission(['components.destroy' => '1']);
+    }
+
     public function manageComponentDefinitions()
     {
         return $this->appendPermission(['components.manage_definitions' => '1']);
+    }
+
+    public function manageComponentDefinitionLifecycle()
+    {
+        return $this->appendPermission(['components.manage_definition_lifecycle' => '1']);
     }
 
     public function manageComponentStorageLocations()
@@ -476,12 +479,6 @@ class UserFactory extends Factory
     {
         return $this->appendPermission(['suppliers.delete' => '1']);
     }
-
-    public function auditAssets()
-    {
-        return $this->appendPermission(['assets.audit' => '1']);
-    }
-
 
     private function appendPermission(array $permission)
     {

@@ -105,6 +105,10 @@ class ComponentDefinitionSettingsController extends Controller
     {
         $this->authorize('update', $componentDefinition);
 
+        if ($this->requiresLifecycleChange($request, $componentDefinition)) {
+            $this->authorize('manageLifecycle', $componentDefinition);
+        }
+
         $data = $this->validatedData($request);
         DB::transaction(function () use ($request, $componentDefinition, $data): void {
             $componentDefinition->fill($data);
@@ -121,7 +125,7 @@ class ComponentDefinitionSettingsController extends Controller
 
     public function deactivate(ComponentDefinition $componentDefinition): RedirectResponse
     {
-        $this->authorize('update', $componentDefinition);
+        $this->authorize('manageLifecycle', $componentDefinition);
 
         $componentDefinition->forceFill([
             'is_active' => false,
@@ -135,7 +139,7 @@ class ComponentDefinitionSettingsController extends Controller
 
     public function activate(ComponentDefinition $componentDefinition): RedirectResponse
     {
-        $this->authorize('update', $componentDefinition);
+        $this->authorize('manageLifecycle', $componentDefinition);
 
         $componentDefinition->forceFill([
             'is_active' => true,
@@ -214,5 +218,42 @@ class ComponentDefinitionSettingsController extends Controller
                 ->orderBy('label')
                 ->get(),
         ];
+    }
+
+    private function requiresLifecycleChange(Request $request, ComponentDefinition $componentDefinition): bool
+    {
+        if ($request->has('is_active') && $request->boolean('is_active') !== (bool) $componentDefinition->is_active) {
+            return true;
+        }
+
+        $submittedAttributeIds = collect($request->input('attribute_contributions', []))
+            ->filter(fn ($row) => is_array($row))
+            ->pluck('attribute_definition_id')
+            ->filter(fn ($id) => $id !== null && $id !== '')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $existingAttributeIds = $componentDefinition->attributeContributions()
+            ->pluck('attribute_definition_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        if (array_diff($existingAttributeIds, $submittedAttributeIds) !== []) {
+            return true;
+        }
+
+        $submittedTemplateIds = collect($request->input('expected_subcomponents', []))
+            ->filter(fn ($row) => is_array($row))
+            ->pluck('id')
+            ->filter(fn ($id) => $id !== null && $id !== '')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $existingTemplateIds = $componentDefinition->subcomponentTemplates()
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        return array_diff($existingTemplateIds, $submittedTemplateIds) !== [];
     }
 }

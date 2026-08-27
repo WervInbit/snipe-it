@@ -14,7 +14,11 @@ class StoreConsumableRequest extends ImageUploadRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('create', new Consumable);
+        $ability = $this->isMethod('put') || $this->isMethod('patch')
+            ? 'update'
+            : 'create';
+
+        return Gate::allows($ability, Consumable::class);
     }
 
     public function prepareForValidation(): void

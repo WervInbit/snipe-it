@@ -26,7 +26,6 @@
             @can('update', \App\Models\Asset::class)
                 <option value="edit">{{ trans('button.edit') }}</option>
                 <option value="batch-edit">{{ trans('general.batch_edit') }}</option>
-                <option value="maintenance">{{ trans('button.add_maintenance') }}</option>
             @endcan
 
             @can('delete', \App\Models\Asset::class)

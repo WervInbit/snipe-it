@@ -4,12 +4,11 @@ namespace Database\Seeders;
 
 use App\Models\Depreciation;
 use App\Models\User;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Schema;
 
-class DepreciationSeeder extends Seeder
+class DepreciationSeeder extends DestructiveFixtureSeeder
 {
-    public function run()
+    protected function seedFixtures(): void
     {
         Schema::disableForeignKeyConstraints();
         Depreciation::truncate();

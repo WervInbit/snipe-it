@@ -11,6 +11,7 @@ use App\Models\Asset;
 use App\Models\Setting;
 use App\Models\Statuslabel;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Http\Transformers\PieChartTransformer;
 use Illuminate\Http\JsonResponse;
 
@@ -93,6 +94,10 @@ class StatuslabelsController extends Controller
         $this->authorize('create', Statuslabel::class);
         $request->except('deployable', 'pending', 'archived');
 
+        $request->validate([
+            'lifecycle_stage' => ['nullable', Rule::in(array_filter(array_keys(Statuslabel::lifecycleStageOptions())))],
+        ]);
+
         if (! $request->filled('type')) {
 
             return response()->json(Helper::formatStandardApiResponse('error', null, ['type' => ['Status label type is required.']]));
@@ -108,12 +113,16 @@ class StatuslabelsController extends Controller
         $statuslabel->color             =  $request->input('color');
         $statuslabel->show_in_nav       =  $request->input('show_in_nav', 0);
         $statuslabel->default_label     =  $request->input('default_label', 0);
+        $statuslabel->lifecycle_stage   =  $request->input('lifecycle_stage') ?: null;
 
 
         if ($statuslabel->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', $statuslabel, trans('admin/statuslabels/message.create.success')));
         }
-        return response()->json(Helper::formatStandardApiResponse('error', null, $statuslabel->getErrors()));
+        return response()->json(
+            Helper::formatStandardApiResponse('error', null, $statuslabel->getErrors()),
+            422
+        );
 
     }
 
@@ -148,6 +157,9 @@ class StatuslabelsController extends Controller
         
         $request->except('deployable', 'pending', 'archived');
 
+        $request->validate([
+            'lifecycle_stage' => ['nullable', Rule::in(array_filter(array_keys(Statuslabel::lifecycleStageOptions())))],
+        ]);
 
         if (! $request->filled('type')) {
             return response()->json(Helper::formatStandardApiResponse('error', null, 'Status label type is required.'));
@@ -162,12 +174,27 @@ class StatuslabelsController extends Controller
         $statuslabel->color             =  $request->input('color');
         $statuslabel->show_in_nav       =  $request->input('show_in_nav', 0);
         $statuslabel->default_label     =  $request->input('default_label', 0);
+        $statuslabel->lifecycle_stage   =  $request->input('lifecycle_stage') ?: null;
+
+        if ($statuslabel->hasInUseAssetSemanticChanges()) {
+            return response()->json(
+                Helper::formatStandardApiResponse('error', null, [
+                    'lifecycle_stage' => [
+                        trans('admin/statuslabels/message.semantic_fields_in_use'),
+                    ],
+                ]),
+                422
+            );
+        }
 
         if ($statuslabel->save()) {
             return response()->json(Helper::formatStandardApiResponse('success', $statuslabel, trans('admin/statuslabels/message.update.success')));
         }
 
-        return response()->json(Helper::formatStandardApiResponse('error', null, $statuslabel->getErrors()));
+        return response()->json(
+            Helper::formatStandardApiResponse('error', null, $statuslabel->getErrors()),
+            422
+        );
     }
 
     /**

@@ -137,6 +137,7 @@ class EffectiveAttributeResolver
 
             if (!$calculated && $baseline && $definition->isNumericDatatype() && ($baseline->meta['resolves_to_spec'] ?? false)) {
                 $calculated = $this->componentAggregator->zeroAggregate($definition, 'calculated_components', [
+                    'resolves_to_spec' => true,
                     'expected_component_baseline_value' => $baseline->value,
                     'current_component_value' => '0',
                     'reduced_expected_baseline' => true,

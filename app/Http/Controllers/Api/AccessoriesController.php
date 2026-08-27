@@ -141,6 +141,8 @@ class AccessoriesController extends Controller
     {
         $accessory = new Accessory;
         $accessory->fill($request->all());
+        $accessory->company_id = Company::getIdForCurrentUser($request->input('company_id'));
+        $accessory->created_by = $request->user()->id;
         $accessory = $request->handleImages($accessory);
 
         if ($accessory->save()) {
@@ -277,20 +279,48 @@ class AccessoriesController extends Controller
     {
         $this->authorize('checkout', $accessory);
         $target = $this->determineCheckoutTarget();
+
+        if (! $accessory->canCheckoutTo($target)) {
+            return response()->json(Helper::formatStandardApiResponse(
+                'error',
+                null,
+                trans('general.error_user_company')
+            ));
+        }
+
         $accessory->checkout_qty = $request->input('checkout_qty', 1);
 
-        for ($i = 0; $i < $accessory->checkout_qty; $i++) {
+        $checkedOut = DB::transaction(function () use ($accessory, $request, $target): bool {
+            $locked = Accessory::query()
+                ->whereKey($accessory->id)
+                ->lockForUpdate()
+                ->first();
 
-            $accessory_checkout = new AccessoryCheckout([
-                'accessory_id' => $accessory->id,
-                'created_at' => Carbon::now(),
-                'assigned_to' => $target->id,
-                'assigned_type' => $target::class,
-                'note' => $request->input('note'),
-            ]);
+            if (!$locked || $locked->numRemaining() < $accessory->checkout_qty) {
+                return false;
+            }
 
-            $accessory_checkout->created_by = auth()->id();
-            $accessory_checkout->save();
+            for ($i = 0; $i < $accessory->checkout_qty; $i++) {
+                $checkout = new AccessoryCheckout([
+                    'accessory_id' => $locked->id,
+                    'created_at' => Carbon::now(),
+                    'assigned_to' => $target->id,
+                    'assigned_type' => $target::class,
+                    'note' => $request->input('note'),
+                ]);
+                $checkout->created_by = auth()->id();
+                $checkout->save();
+            }
+
+            return true;
+        });
+
+        if (!$checkedOut) {
+            return response()->json(Helper::formatStandardApiResponse(
+                'error',
+                null,
+                trans('admin/accessories/message.checkout.unavailable')
+            ));
         }
 
         // Set this value to be able to pass the qty through to the event
@@ -344,6 +374,7 @@ class AccessoriesController extends Controller
     */
     public function selectlist(Request $request)
     {
+        $this->authorize('view.selectlists');
 
         $accessories = Accessory::select([
             'accessories.id',

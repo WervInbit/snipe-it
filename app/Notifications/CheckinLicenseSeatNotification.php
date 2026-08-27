@@ -72,7 +72,7 @@ class CheckinLicenseSeatNotification extends Notification
         $admin = $this->admin;
         $item = $this->item;
         $note = $this->note;
-        $botname = ($this->settings->webhook_botname) ? $this->settings->webhook_botname : 'Snipe-Bot';
+        $botname = $this->settings->webhookBotName();
         $channel = ($this->settings->webhook_channel) ? $this->settings->webhook_channel : '';
 
         if ($admin) {

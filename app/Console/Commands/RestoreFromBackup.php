@@ -2,9 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Support\BackupRestoreFilePlanner;
+use enshrined\svgSanitize\Sanitizer;
 use Illuminate\Console\Command;
-use ZipArchive;
 use Illuminate\Support\Facades\Log;
+use RuntimeException;
+use ZipArchive;
 
 class SQLStreamer {
     private $input;
@@ -108,15 +111,13 @@ class SQLStreamer {
         $guessed_prefix = null;
         foreach ($check_tables as $clean_table => $prefix_guess) {
             if(is_null($prefix_guess)) {
-                print("Couldn't find table $clean_table\n");
-                die();
+                throw new RuntimeException("Could not find required table {$clean_table} while guessing the backup prefix.");
             }
             if(is_null($guessed_prefix)) {
                 $guessed_prefix = $prefix_guess;
             } else {
                 if ($guessed_prefix != $prefix_guess) {
-                    print("Prefix mismatch! Had guessed $guessed_prefix but got $prefix_guess\n");
-                    die();
+                    throw new RuntimeException("Backup table prefix mismatch: guessed {$guessed_prefix}, then found {$prefix_guess}.");
                 }
             }
         }
@@ -138,10 +139,13 @@ class SQLStreamer {
                 // Log::debug("Buffer is: '$buffer'");
                 $cleaned_buffer = $this->parse_sql($buffer);
                 if ($this->output) {
-                    $bytes_written = fwrite($this->output, $cleaned_buffer);
-
-                    if ($bytes_written === false) {
-                        throw new \Exception("Unable to write to pipe");
+                    $write_offset = 0;
+                    while ($write_offset < strlen($cleaned_buffer)) {
+                        $bytes_written = fwrite($this->output, substr($cleaned_buffer, $write_offset));
+                        if ($bytes_written === false || $bytes_written === 0) {
+                            throw new RuntimeException('Unable to write to pipe');
+                        }
+                        $write_offset += $bytes_written;
                     }
                 }
             }
@@ -181,7 +185,7 @@ class RestoreFromBackup extends Command
      *
      * @var string
      */
-    protected $description = 'Restore from a previously created Snipe-IT backup file';
+    protected $description = 'Restore from a previously created application backup file';
 
     /**
      * Create a new command instance.
@@ -209,15 +213,15 @@ class RestoreFromBackup extends Command
         $filename = $this->argument('filename');
 
         if (! $filename) {
-            return $this->error('Missing required filename');
+            return $this->commandFailure('Missing required filename');
         }
 
         if (! $this->option('force') && ! $this->option('sanitize-guess-prefix') && ! $this->confirm('Are you sure you wish to restore from the given backup file? This can lead to MASSIVE DATA LOSS!')) {
-            return $this->error('Data loss not confirmed');
+            return $this->commandFailure('Data loss not confirmed');
         }
 
         if (config('database.default') != 'mysql') {
-            return $this->error('DB_CONNECTION must be MySQL in order to perform a restore. Detected: '.config('database.default'));
+            return $this->commandFailure('DB_CONNECTION must be MySQL in order to perform a restore. Detected: '.config('database.default'));
         }
 
         $za = new ZipArchive();
@@ -236,45 +240,14 @@ class RestoreFromBackup extends Command
                 ZipArchive::ER_SEEK => 'Seek error.',
             ];
 
-            return $this->error('Could not access file: '.$filename.' - '.array_key_exists($errcode, $errors) ? $errors[$errcode] : " Unknown reason: $errcode");
+            return $this->commandFailure(
+                'Could not access file: '.$filename.' - '.($errors[$errcode] ?? "Unknown reason: $errcode")
+            );
         }
 
-
-        $private_dirs = [
-            'storage/private_uploads/accessories',
-            'storage/private_uploads/assetmodels',
-            'storage/private_uploads/maintenances',
-            'storage/private_uploads/models',
-            'storage/private_uploads/assets', // these are asset _files_, not the pictures.
-            'storage/private_uploads/audits',
-            'storage/private_uploads/components',
-            'storage/private_uploads/consumables',
-            'storage/private_uploads/eula-pdfs',
-            'storage/private_uploads/imports',
-            'storage/private_uploads/locations',
-            'storage/private_uploads/licenses',
-            'storage/private_uploads/signatures',
-            'storage/private_uploads/users',
-        ];
         $private_files = [
             'storage/oauth-private.key',
             'storage/oauth-public.key',
-        ];
-        $public_dirs = [
-            'public/uploads/accessories',
-            'public/uploads/assetmodels',
-            'public/uploads/maintenances',
-            'public/uploads/assets', // these are asset _pictures_, not asset files
-            'public/uploads/avatars',
-            'public/uploads/categories',
-            'public/uploads/companies',
-            'public/uploads/components',
-            'public/uploads/consumables',
-            'public/uploads/departments',
-            'public/uploads/locations',
-            'public/uploads/manufacturers',
-            'public/uploads/models',
-            'public/uploads/suppliers',
         ];
 
         $public_files = [
@@ -286,17 +259,20 @@ class RestoreFromBackup extends Command
             'public/uploads/favicon-uploaded.*',
         ];
 
-        $all_files = $private_dirs + $public_dirs;
-
         $sqlfiles = [];
         $sqlfile_indices = [];
 
         $interesting_files = [];
         $boring_files = [];
         $unsafe_files = [];
+        $good_extensions = (array) config('filesystems.allowed_upload_extensions_array', []);
 
         for ($i = 0; $i < $za->numFiles; $i++) {
             $stat_results = $za->statIndex($i);
+            if ($stat_results === false || ! isset($stat_results['name'])) {
+                return $this->commandFailure("Unable to read ZIP entry metadata at index {$i}.");
+            }
+
             // echo "index: $i\n";
             // print_r($stat_results);
 
@@ -309,53 +285,59 @@ class RestoreFromBackup extends Command
             // skip macOS resource fork files (?!?!?!)
             if (strpos($raw_path, '__MACOSX') !== false && strpos($raw_path, '._') !== false) {
                 //print "SKIPPING macOS Resource fork file: $raw_path\n";
-                $boring_files[] = $raw_path;
                 continue;
             }
-            if (@pathinfo($raw_path, PATHINFO_EXTENSION) == 'sql') {
-                Log::debug("Found a sql file!");
+
+            if (str_ends_with($raw_path, '/')
+                || in_array(basename($raw_path), ['.gitkeep', '.gitignore', '.DS_Store'], true)
+            ) {
+                continue;
+            }
+
+            if (strtolower(pathinfo($raw_path, PATHINFO_EXTENSION)) === 'sql') {
+                Log::debug('Found a sql file!');
                 $sqlfiles[] = $raw_path;
                 $sqlfile_indices[] = $i;
                 continue;
             }
 
-            foreach (array_merge($private_dirs, $public_dirs) as $dir) {
-                $last_pos = strrpos($raw_path, $dir . '/');
-                if ($last_pos !== false) {
-                    //print("INTERESTING - last_pos is $last_pos when searching $raw_path for $dir - last_pos+strlen(\$dir) is: ".($last_pos+strlen($dir))." and strlen(\$rawpath) is: ".strlen($raw_path)."\n");
-                    //print("We would copy $raw_path to $dir.\n"); //FIXME append to a path?
-                    $interesting_files[$raw_path] = ['dest' => $dir, 'index' => $i];
-                    continue 2;
-                    if ($last_pos + strlen($dir) + 1 == strlen($raw_path)) {
-                        // we don't care about that; we just want files with the appropriate prefix
-                        //print("FOUND THE EXACT DIRECTORY: $dir AT: $raw_path!!!\n");
-                    }
+            $restore_target = BackupRestoreFilePlanner::targetForArchivePath($raw_path);
+            if ($restore_target !== null) {
+                if (BackupRestoreFilePlanner::hasAllowedExtension($restore_target, $good_extensions)) {
+                    $interesting_files[$raw_path] = ['target' => $restore_target, 'index' => $i];
+                } else {
+                    $unsafe_files[] = $raw_path;
+                    Log::debug('Potentially unsafe file '.$raw_path.' is being skipped');
                 }
+
+                continue;
             }
 
-            $good_extensions = config('filesystems.allowed_upload_extensions_array');
-
-            foreach (array_merge($private_files, $public_files) as $file) {
-                $has_wildcard = (strpos($file, '*') !== false);
-                if ($has_wildcard) {
-                    $file = substr($file, 0, -1); //trim last character (which should be the wildcard)
-                }
-                $last_pos = strrpos($raw_path, $file); // no trailing slash!
-                if ($last_pos !== false) {
-                    $extension = strtolower(pathinfo($raw_path, PATHINFO_EXTENSION));
-                    if (!in_array($extension, $good_extensions)) {
-                        // gathering potentially unsafe files here to return at exit
-                        $unsafe_files[] = $raw_path;
-                        Log::debug('Potentially unsafe file '.$raw_path.' is being skipped');
-                        $boring_files[] = $raw_path;
-                        continue 2;
+            foreach (['private' => $private_files, 'public' => $public_files] as $files) {
+                foreach ($files as $file) {
+                    $has_wildcard = (strpos($file, '*') !== false);
+                    if ($has_wildcard) {
+                        $file = substr($file, 0, -1); //trim last character (which should be the wildcard)
                     }
-                    //print("INTERESTING - last_pos is $last_pos when searching $raw_path for $file - last_pos+strlen(\$file) is: ".($last_pos+strlen($file))." and strlen(\$rawpath) is: ".strlen($raw_path)."\n");
-                    //no wildcards found in $file, process 'normally'
-                    if ($last_pos + strlen($file) == strlen($raw_path) || $has_wildcard) { //again, no trailing slash. or this is a wildcard and we just take it.
-                        // print("FOUND THE EXACT FILE: $file AT: $raw_path!!!\n"); //we *do* care about this, though.
-                        $interesting_files[$raw_path] = ['dest' => dirname($file), 'index' => $i];
-                        continue 2;
+                    $last_pos = strrpos($raw_path, $file); // no trailing slash!
+                    if ($last_pos !== false) {
+                        //print("INTERESTING - last_pos is $last_pos when searching $raw_path for $file - last_pos+strlen(\$file) is: ".($last_pos+strlen($file))." and strlen(\$rawpath) is: ".strlen($raw_path)."\n");
+                        //no wildcards found in $file, process 'normally'
+                        if ($last_pos + strlen($file) == strlen($raw_path) || $has_wildcard) { //again, no trailing slash. or this is a wildcard and we just take it.
+                            // print("FOUND THE EXACT FILE: $file AT: $raw_path!!!\n"); //we *do* care about this, though.
+                            $restore_target = dirname($file).'/'.basename($raw_path);
+                            if (BackupRestoreFilePlanner::hasAllowedExtension($restore_target, $good_extensions)) {
+                                $interesting_files[$raw_path] = [
+                                    'target' => $restore_target,
+                                    'index' => $i,
+                                ];
+                            } else {
+                                $unsafe_files[] = $raw_path;
+                                Log::debug('Potentially unsafe file '.$raw_path.' is being skipped');
+                            }
+
+                            continue 3;
+                        }
                     }
                 }
             }
@@ -364,7 +346,7 @@ class RestoreFromBackup extends Command
         // print_r($interesting_files);exit(-1);
 
         if (count($sqlfiles) != 1) {
-            return $this->error('There should be exactly *one* sql backup file found, found: '.(count($sqlfiles) == 0 ? 'None' : implode(', ', $sqlfiles)));
+            return $this->commandFailure('There should be exactly *one* sql backup file found, found: '.(count($sqlfiles) == 0 ? 'None' : implode(', ', $sqlfiles)));
         }
 
         if (strpos($sqlfiles[0], 'db-dumps') === false) {
@@ -373,8 +355,15 @@ class RestoreFromBackup extends Command
         }
 
         $sql_stat = $za->statIndex($sqlfile_indices[0]);
+        if ($sql_stat === false || ! isset($sql_stat['name'])) {
+            return $this->commandFailure('Unable to read SQL file metadata from the backup.');
+        }
+
         //$this->info("SQL Stat is: ".print_r($sql_stat,true));
         $sql_contents = $za->getStream($sql_stat['name']); // maybe copy *THIS* thing?
+        if ($sql_contents === false) {
+            return $this->commandFailure('Unable to open SQL file: '.$sql_stat['name']);
+        }
 
         // OKAY, now that we *found* the sql file if we're doing just the guess-prefix thing, we can do that *HERE* I think?
         if ($this->option('sanitize-guess-prefix')) {
@@ -402,15 +391,21 @@ class RestoreFromBackup extends Command
         //             we unilaterally prepend a slash to the `mysql` command. This might mean your path could look like /blah/blah/blah//mysql - which should be fine. But maybe in some environments it isn't?
         $mysql_binary = config('database.connections.mysql.dump.dump_binary_path').\DIRECTORY_SEPARATOR.'mysql'.(\DIRECTORY_SEPARATOR == '\\' ? ".exe" : "");
         if( ! file_exists($mysql_binary) ) {
-            return $this->error("mysql tool at: '$mysql_binary' does not exist, cannot restore. Please edit DB_DUMP_PATH in your .env to point to a directory that contains the mysqldump and mysql binary");
+            return $this->commandFailure("mysql tool at: '$mysql_binary' does not exist, cannot restore. Please edit DB_DUMP_PATH in your .env to point to a directory that contains the mysqldump and mysql binary");
         }
-        $proc_results = proc_open("$mysql_binary -h ".escapeshellarg(config('database.connections.mysql.host')).' -u '.escapeshellarg(config('database.connections.mysql.username')).' '.escapeshellarg(config('database.connections.mysql.database')), // yanked -p since we pass via ENV
-                                  [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
-                                  $pipes,
-                                  null,
-                                  $env_vars); // this is not super-duper awesome-secure, but definitely more secure than showing it on the CLI, or dropping temporary files with passwords in them.
+        $mysql_command = escapeshellarg($mysql_binary)
+            .' --batch --binary-mode'
+            .' -h '.escapeshellarg(config('database.connections.mysql.host'))
+            .' -P '.escapeshellarg(config('database.connections.mysql.port'))
+            .' -u '.escapeshellarg(config('database.connections.mysql.username'))
+            .' '.escapeshellarg(config('database.connections.mysql.database'));
+        $proc_results = proc_open($mysql_command, // yanked -p since we pass via ENV
+                                   [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
+                                   $pipes,
+                                   null,
+                                   $env_vars); // this is not super-duper awesome-secure, but definitely more secure than showing it on the CLI, or dropping temporary files with passwords in them.
         if ($proc_results === false) {
-            return $this->error('Unable to invoke mysql via CLI');
+            return $this->commandFailure('Unable to invoke mysql via CLI');
         }
 
         // I'm not sure about these?
@@ -424,18 +419,6 @@ class RestoreFromBackup extends Command
 
         //$sql_contents = fopen($sqlfiles[0], "r"); //NOPE! This isn't a real file yet, silly-billy!
 
-        // FIXME - this feels like it wants to go somewhere else?
-        // and it doesn't seem 'right' - if you can't get a stream to the .sql file,
-        // why do we care what's happening with pipes and stdout and stderr?!
-        if ($sql_contents === false) {
-            $stdout = fgets($pipes[1]);
-            $this->info($stdout);
-            $stderr = fgets($pipes[2]);
-            $this->info($stderr);
-
-            return false;
-        }
-
         try {
             if ( $this->option('sanitize-with-prefix') === null) {
                 // "Legacy" direct-piping
@@ -443,10 +426,13 @@ class RestoreFromBackup extends Command
                 while (($buffer = fgets($sql_contents, SQLStreamer::$buffer_size)) !== false) {
                     $bytes_read += strlen($buffer);
                     // Log::debug("Buffer is: '$buffer'");
-                    $bytes_written = fwrite($pipes[0], $buffer);
-
-                    if ($bytes_written === false) {
-                        throw new Exception("Unable to write to pipe");
+                    $write_offset = 0;
+                    while ($write_offset < strlen($buffer)) {
+                        $bytes_written = fwrite($pipes[0], substr($buffer, $write_offset));
+                        if ($bytes_written === false || $bytes_written === 0) {
+                            throw new RuntimeException('Unable to write to pipe');
+                        }
+                        $write_offset += $bytes_written;
                     }
                 }
             } else {
@@ -465,7 +451,7 @@ class RestoreFromBackup extends Command
             throw $e;
         }
         if (!feof($sql_contents) || $bytes_read == 0) {
-            return $this->error("Not at end of file for sql file, or zero bytes read. aborting!");
+            return $this->commandFailure('Not at end of file for sql file, or zero bytes read. aborting!');
         }
     
         fclose($pipes[0]);
@@ -480,7 +466,7 @@ class RestoreFromBackup extends Command
         //wait, have to do fclose() on all pipes first?
         $close_results = proc_close($proc_results);
         if ($close_results != 0) {
-            return $this->error('There may have been a problem with the database import: Error number '.$close_results);
+            return $this->commandFailure('There may have been a problem with the database import: Error number '.$close_results);
         }
 
         //and now copy the files over too (right?)
@@ -490,20 +476,61 @@ class RestoreFromBackup extends Command
         } else {
             $bar = $this->output->createProgressBar(count($interesting_files));
         }
-        foreach ($interesting_files as $pretty_file_name => $file_details) {
-            $ugly_file_name = $za->statIndex($file_details['index'])['name'];
-            $fp = $za->getStream($ugly_file_name);
-            //$this->info("Weird problem, here are file details? ".print_r($file_details,true));
-            if (!is_dir($file_details['dest'])) {
-                mkdir($file_details['dest'], 0755, true); //0755 is what Laravel uses, so we do that
+        $sanitizer = new Sanitizer();
+
+        foreach ($interesting_files as $file_details) {
+            $file_stat = $za->statIndex($file_details['index']);
+            if ($file_stat === false || ! isset($file_stat['name'])) {
+                return $this->commandFailure('Unable to read file metadata from the backup.');
             }
-            $migrated_file = fopen($file_details['dest'].'/'.basename($pretty_file_name), 'w');
-            while (($buffer = fgets($fp, SQLStreamer::$buffer_size)) !== false) {
-                fwrite($migrated_file, $buffer);
+
+            $ugly_file_name = $file_stat['name'];
+            $destination_directory = dirname($file_details['target']);
+            if (! is_dir($destination_directory)
+                && ! mkdir($destination_directory, 0755, true)
+                && ! is_dir($destination_directory)
+            ) {
+                return $this->commandFailure('Unable to create restore directory: '.$destination_directory);
             }
-            fclose($migrated_file);
-            fclose($fp);
-            //$this->info("Wrote $ugly_file_name to $pretty_file_name");
+
+            if (strtolower(pathinfo($file_details['target'], PATHINFO_EXTENSION)) === 'svg') {
+                $svg_contents = $za->getFromIndex($file_details['index']);
+                if ($svg_contents === false) {
+                    return $this->commandFailure('Unable to read SVG from the backup: '.$ugly_file_name);
+                }
+
+                $cleaned_svg = $sanitizer->sanitize($svg_contents);
+                if ($cleaned_svg === false) {
+                    return $this->commandFailure('Unsafe or invalid SVG was rejected: '.$ugly_file_name);
+                }
+
+                $bytes_written = file_put_contents($file_details['target'], $cleaned_svg, LOCK_EX);
+                if ($bytes_written === false || $bytes_written !== strlen($cleaned_svg)) {
+                    return $this->commandFailure('Unable to write restored SVG: '.$file_details['target']);
+                }
+            } else {
+                $source_stream = $za->getStream($ugly_file_name);
+                if ($source_stream === false) {
+                    return $this->commandFailure('Unable to read file from the backup: '.$ugly_file_name);
+                }
+
+                $destination_stream = fopen($file_details['target'], 'wb');
+                if ($destination_stream === false) {
+                    fclose($source_stream);
+
+                    return $this->commandFailure('Unable to open restore target: '.$file_details['target']);
+                }
+
+                $bytes_written = stream_copy_to_stream($source_stream, $destination_stream);
+                $flushed = fflush($destination_stream);
+                fclose($destination_stream);
+                fclose($source_stream);
+
+                if ($bytes_written === false || ! $flushed) {
+                    return $this->commandFailure('Unable to completely restore file: '.$file_details['target']);
+                }
+            }
+
             if ($bar) {
                 $bar->advance();
             }
@@ -512,7 +539,7 @@ class RestoreFromBackup extends Command
             $bar->finish();
             $this->line('');
         } else {
-            $this->info(count($interesting_files).' files were succesfully transferred');
+            $this->info(count($interesting_files).' files were successfully transferred');
         }
         if (count($unsafe_files) > 0) {
             foreach ($unsafe_files as $unsafe_file) {
@@ -522,5 +549,16 @@ class RestoreFromBackup extends Command
         foreach ($boring_files as $boring_file) {
             $this->warn($boring_file.' was skipped.');
         }
+
+        $za->close();
+
+        return self::SUCCESS;
+    }
+
+    private function commandFailure(string $message): int
+    {
+        $this->error($message);
+
+        return self::FAILURE;
     }
 }

@@ -12,7 +12,9 @@ class IndexAssetModelsTest extends TestCase
 {
     public function testViewingAssetModelIndexRequiresAuthentication()
     {
-        $this->getJson(route('api.models.index'))->assertRedirect();
+        User::factory()->create();
+
+        $this->getJson(route('api.models.index'))->assertUnauthorized();
     }
 
     public function testViewingAssetModelIndexRequiresPermission()

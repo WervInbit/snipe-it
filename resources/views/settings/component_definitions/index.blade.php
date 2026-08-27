@@ -80,19 +80,21 @@
                                     <td class="text-right">
                                         <div class="btn-group btn-group-sm">
                                             <a href="{{ route('settings.component_definitions.edit', $definition) }}" class="btn btn-default">{{ __('Edit') }}</a>
-                                            @if ($definition->is_active)
-                                                <form method="POST" action="{{ route('settings.component_definitions.deactivate', $definition) }}" style="display:inline;">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <button type="submit" class="btn btn-warning">{{ __('Deactivate') }}</button>
-                                                </form>
-                                            @else
-                                                <form method="POST" action="{{ route('settings.component_definitions.activate', $definition) }}" style="display:inline;">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <button type="submit" class="btn btn-success">{{ __('Activate') }}</button>
-                                                </form>
-                                            @endif
+                                            @can('manageLifecycle', $definition)
+                                                @if ($definition->is_active)
+                                                    <form method="POST" action="{{ route('settings.component_definitions.deactivate', $definition) }}" style="display:inline;">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="btn btn-warning">{{ __('Deactivate') }}</button>
+                                                    </form>
+                                                @else
+                                                    <form method="POST" action="{{ route('settings.component_definitions.activate', $definition) }}" style="display:inline;">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="btn btn-success">{{ __('Activate') }}</button>
+                                                    </form>
+                                                @endif
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>

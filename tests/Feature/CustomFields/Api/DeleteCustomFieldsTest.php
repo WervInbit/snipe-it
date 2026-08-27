@@ -12,8 +12,6 @@ class DeleteCustomFieldsTest extends TestCase implements TestsPermissionsRequire
 {
     public function testRequiresPermission()
     {
-        $this->markIncompleteIfMySQL('Custom Fields tests do not work on MySQL');
-
         $customField = CustomField::factory()->create();
 
         $this->actingAsForApi(User::factory()->create())
@@ -25,8 +23,6 @@ class DeleteCustomFieldsTest extends TestCase implements TestsPermissionsRequire
 
     public function testCustomFieldsCannotBeDeletedIfTheyHaveAssociatedFieldsets()
     {
-        $this->markIncompleteIfMySQL('Custom Fields tests do not work on MySQL');
-
         $customField = CustomField::factory()->create();
         $customFieldset = CustomFieldset::factory()->create();
 
@@ -41,8 +37,6 @@ class DeleteCustomFieldsTest extends TestCase implements TestsPermissionsRequire
 
     public function testCustomFieldsCanBeDeleted()
     {
-        $this->markIncompleteIfMySQL('Custom Fields tests do not work on MySQL');
-
         $customField = CustomField::factory()->create();
 
         $this->actingAsForApi(User::factory()->deleteCustomFields()->create())

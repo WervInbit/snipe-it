@@ -4,6 +4,7 @@ namespace Tests\Feature\Assets\Ui;
 
 use App\Http\Middleware\VerifyCsrfToken;
 use App\Models\Asset;
+use App\Models\CheckoutAcceptance;
 use App\Models\ComponentInstance;
 use App\Models\Statuslabel;
 use App\Models\User;
@@ -87,6 +88,7 @@ class SellingStateComponentWarningTest extends TestCase
                 'asset_tags' => $asset->asset_tag,
                 'status_id' => $readyForSale->id,
                 'model_id' => $asset->model_id,
+                'model_number_id' => $asset->model_number_id,
                 'redirect_option' => 'item',
                 'ack_failed_tests' => 1,
             ])
@@ -107,6 +109,7 @@ class SellingStateComponentWarningTest extends TestCase
                 'asset_tags' => $asset->asset_tag,
                 'status_id' => $readyForSale->id,
                 'model_id' => $asset->model_id,
+                'model_number_id' => $asset->model_number_id,
                 'redirect_option' => 'item',
                 'ack_failed_tests' => 1,
                 'ack_component_issues' => 1,
@@ -220,10 +223,46 @@ class SellingStateComponentWarningTest extends TestCase
         $this->assertSame($readyForSale->id, $cleanAsset->fresh()->status_id);
     }
 
+    public function testBulkNonDeployableStatusClearsRetiredAssignmentState(): void
+    {
+        $assignedUser = User::factory()->create();
+        $asset = Asset::factory()->assignedToUser($assignedUser)->create([
+            'status_id' => $this->pendingStatus()->id,
+            'accepted' => 'pending',
+            'expected_checkin' => now()->addDay(),
+        ]);
+        $acceptance = CheckoutAcceptance::factory()->pending()->create([
+            'checkoutable_type' => Asset::class,
+            'checkoutable_id' => $asset->id,
+            'assigned_to_id' => $assignedUser->id,
+        ]);
+        $retired = Statuslabel::factory()->archived()->create([
+            'name' => 'Bulk retired ' . Str::uuid(),
+            'default_label' => 0,
+        ]);
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->from(route('hardware/bulkedit'))
+            ->post(route('hardware/bulksave'), [
+                'ids' => [$asset->id],
+                'status_id' => $retired->id,
+            ])
+            ->assertRedirect();
+
+        $asset->refresh();
+        $this->assertSame($retired->id, $asset->status_id);
+        $this->assertNull($asset->assigned_to);
+        $this->assertNull($asset->assigned_type);
+        $this->assertNull($asset->accepted);
+        $this->assertNull($asset->expected_checkin);
+        $this->assertSoftDeleted($acceptance);
+    }
+
     private function readyForSaleStatus(): Statuslabel
     {
         return Statuslabel::factory()->rtd()->create([
             'name' => 'Ready for Sale ' . Str::uuid(),
+            'lifecycle_stage' => Statuslabel::LIFECYCLE_READY_FOR_SALE,
             'default_label' => 0,
         ]);
     }

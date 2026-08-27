@@ -14,6 +14,9 @@ class ExpiringLicenseMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public mixed $licenses;
+    public mixed $threshold;
+
     /**
      * Create a new message instance.
      */

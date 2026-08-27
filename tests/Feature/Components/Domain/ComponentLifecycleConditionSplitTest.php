@@ -208,4 +208,35 @@ class ComponentLifecycleConditionSplitTest extends TestCase
         $this->assertSame(ComponentInstance::CONDITION_BROKEN, $component->condition_code);
         $this->assertSame(ComponentInstance::CONDITION_STATUS_DAMAGED, $component->condition_status);
     }
+
+    public function testCurrentConditionStatusIsAuthoritativeForLabelsAndBadges(): void
+    {
+        $damaged = new ComponentInstance([
+            'condition_status' => ComponentInstance::CONDITION_STATUS_DAMAGED,
+            'condition_code' => ComponentInstance::CONDITION_BROKEN,
+        ]);
+        $good = new ComponentInstance([
+            'condition_status' => ComponentInstance::CONDITION_STATUS_GOOD,
+            'condition_code' => ComponentInstance::CONDITION_BROKEN,
+        ]);
+
+        $this->assertSame('Damaged', $damaged->displayConditionLabel());
+        $this->assertSame('Damaged', $damaged->conditionBadgeLabel());
+        $this->assertSame('label-danger', $damaged->conditionBadgeClass());
+        $this->assertSame('Good', $good->displayConditionLabel());
+        $this->assertNull($good->conditionBadgeLabel());
+        $this->assertNull($good->conditionBadgeClass());
+    }
+
+    public function testConditionLabelsFallBackToLegacyCodeWhenCurrentStatusIsMissing(): void
+    {
+        $legacy = new ComponentInstance([
+            'condition_status' => null,
+            'condition_code' => ComponentInstance::CONDITION_BROKEN,
+        ]);
+
+        $this->assertSame('Broken', $legacy->displayConditionLabel());
+        $this->assertSame('Broken', $legacy->conditionBadgeLabel());
+        $this->assertSame('label-danger', $legacy->conditionBadgeClass());
+    }
 }

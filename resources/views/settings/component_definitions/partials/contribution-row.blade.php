@@ -10,6 +10,10 @@
     if ($pickerValue === '' && $selectedDefinition) {
         $pickerValue = $selectedDefinition->label . ' (' . $selectedDefinition->key . ')';
     }
+
+    $persistedContributionDefinitionIds = $persistedContributionDefinitionIds ?? [];
+    $canRemoveContribution = ($canManageDefinitionLifecycle ?? false)
+        || !in_array((int) ($row['attribute_definition_id'] ?? 0), $persistedContributionDefinitionIds, true);
 @endphp
 
 <div class="panel panel-default" data-contribution-row>
@@ -59,7 +63,11 @@
 
             <div class="col-md-2 form-group">
                 <label>&nbsp;</label>
-                <button type="button" class="btn btn-default btn-block" data-remove-contribution>{{ __('Remove') }}</button>
+                @if($canRemoveContribution)
+                    <button type="button" class="btn btn-default btn-block" data-remove-contribution>{{ __('Remove') }}</button>
+                @else
+                    <span class="text-muted small">{{ __('Admin only') }}</span>
+                @endif
             </div>
         </div>
     </div>

@@ -81,7 +81,8 @@ class Label implements View
         $pdf->SetMargins(0, 0, null, true);
         $pdf->SetCellMargins(0, 0, 0, 0);
         $pdf->SetCellPaddings(0, 0, 0, 0);
-        $pdf->setCreator('Snipe-IT');
+        $creator = trim((string) config('app.name'));
+        $pdf->setCreator($creator !== '' ? $creator : 'Inbit Device Refurbishment');
         $pdf->SetSubject('Asset Labels');
         $template->preparePDF($pdf);
 

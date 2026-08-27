@@ -21,6 +21,14 @@ class EventServiceProvider extends ServiceProvider
         'Illuminate\Auth\Events\Failed' => [
             \App\Listeners\LogFailedLogin::class,
         ],
+
+        'Illuminate\Mail\Events\MessageSending' => [
+            \App\Listeners\RejectUnsafeMailAddresses::class,
+        ],
+
+        'Illuminate\Notifications\Events\NotificationSending' => [
+            \App\Listeners\SuppressDisabledMailNotifications::class,
+        ],
     ];
 
     /**

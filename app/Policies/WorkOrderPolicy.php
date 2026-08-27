@@ -7,6 +7,15 @@ use App\Models\WorkOrder;
 
 class WorkOrderPolicy extends SnipePermissionsPolicy
 {
+    public function before(User $user, $ability, $item)
+    {
+        if ($ability === 'viewPortal') {
+            return null;
+        }
+
+        return parent::before($user, $ability, $item);
+    }
+
     protected function columnName()
     {
         return 'workorders';
@@ -23,6 +32,13 @@ class WorkOrderPolicy extends SnipePermissionsPolicy
             return true;
         }
 
+        return $item instanceof WorkOrder
+            && $user->hasAccess('portal.view')
+            && $item->isVisibleTo($user);
+    }
+
+    public function viewPortal(User $user, $item = null)
+    {
         return $item instanceof WorkOrder
             && $user->hasAccess('portal.view')
             && $item->isVisibleTo($user);

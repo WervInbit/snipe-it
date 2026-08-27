@@ -380,7 +380,7 @@ return [
     'purge_barcodes' => 'Barkodları Temizle',
     'help_asterisk_bold'    => 'Text entered as <code>**text**</code> will be displayed as bold',
     'help_blank_to_use'     => '<code>:setting_name</code> değerini kullanmak için boş bırakın',
-    'help_default_will_use' => '<code>:default</code> <code>:setting_name</code> değerini kullanır. <br>Barkodların başarıyla oluşturulabilmesi için değerlerinin ilgili barkod spesifikasyonlarına uygun olması gerektiğini unutmayın. Daha fazla bilgi için lütfen <a href="https://snipe-it.readme.io/docs/barcodes">belgelere <i class="fa fa-external-link"></i></a> bakın.',
+    'help_default_will_use' => '<code>:default</code> <code>:setting_name</code> değerini kullanır. <br>Barkodların başarıyla oluşturulabilmesi için değerlerinin ilgili barkod spesifikasyonlarına uygun olması gerektiğini unutmayın. Daha fazla bilgi için lütfen <a href=":fork_documentation_url">belgelere <i class="fa fa-external-link"></i></a> bakın.',
     'asset_id'              => 'Varlık ID',
     'data'               => 'Veri',
     'default'               => 'Varsayılan',

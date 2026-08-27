@@ -54,17 +54,6 @@ class PredefinedKitPresenter extends Presenter
         ];
 
         $layout[] = [
-            'field' => 'checkincheckout',
-            'searchable' => false,
-            'sortable' => false,
-            'switchable' => true,
-            'title' => trans('general.checkin').'/'.trans('general.checkout'),
-            'visible' => true,
-            'formatter' => 'kitsInOutFormatter',
-            'printIgnore' => true,
-        ];
-
-        $layout[] = [
             'field' => 'actions',
             'searchable' => false,
             'sortable' => false,
@@ -295,7 +284,7 @@ class PredefinedKitPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('kits.show', $this->name, $this->id);
+        return \App\Support\RouteLink::to('kits.show', $this->name, $this->id);
     }
 
     /**

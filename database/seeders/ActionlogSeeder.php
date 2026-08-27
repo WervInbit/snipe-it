@@ -7,7 +7,6 @@ use App\Models\Asset;
 use App\Models\Location;
 use App\Models\License;
 use App\Models\User;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -15,9 +14,9 @@ use Illuminate\Support\Facades\Schema;
  * Seeder for the action_logs table.
  * Clears existing logs safely, ensures prerequisites, and then seeds new logs.
  */
-class ActionlogSeeder extends Seeder
+class ActionlogSeeder extends DestructiveFixtureSeeder
 {
-    public function run(): void
+    protected function seedFixtures(): void
     {
         // Safely clear existing logs; truncate would fail if other tables reference action_logs
         Schema::disableForeignKeyConstraints();

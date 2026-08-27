@@ -194,13 +194,19 @@ class AssetTest extends TestCase
 
     }
 
-    public function testAssignedTypeWithoutAssignTo()
+    public function testLegacyAssignmentFieldsAreNotMassAssignable()
     {
         $user = User::factory()->create();
-        $asset = Asset::factory()->create([
-            'assigned_to' => $user->id
+        $asset = Asset::factory()->create();
+
+        $asset->fill([
+            'assigned_to' => $user->id,
+            'assigned_type' => User::class,
         ]);
-        $this->assertModelMissing($asset);
+        $asset->save();
+
+        $this->assertNull($asset->fresh()->assigned_to);
+        $this->assertNull($asset->fresh()->assigned_type);
     }
 
     public function testGetImageUrlMethod()

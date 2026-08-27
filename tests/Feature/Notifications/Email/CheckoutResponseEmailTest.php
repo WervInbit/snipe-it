@@ -22,6 +22,7 @@ class CheckoutResponseEmailTest extends TestCase
         $initiator = User::factory()->create();
 
         $checkoutAcceptance = CheckoutAcceptance::factory()
+            ->forAccessory()
             ->pending()
             ->withAlertingTo($initiator)
             ->create();
@@ -36,6 +37,7 @@ class CheckoutResponseEmailTest extends TestCase
         $initiator = User::factory()->create();
 
         $checkoutAcceptance = CheckoutAcceptance::factory()
+            ->forAccessory()
             ->pending()
             ->withAlertingTo($initiator)
             ->create();
@@ -50,6 +52,7 @@ class CheckoutResponseEmailTest extends TestCase
         $initiator = User::factory()->create();
 
         $checkoutAcceptance = CheckoutAcceptance::factory()
+            ->forAccessory()
             ->pending()
             ->withoutAlerting()
             ->create();
@@ -64,6 +67,7 @@ class CheckoutResponseEmailTest extends TestCase
         $initiator = User::factory()->create();
 
         $checkoutAcceptance = CheckoutAcceptance::factory()
+            ->forAccessory()
             ->pending()
             ->withoutAlerting()
             ->create();
@@ -76,7 +80,17 @@ class CheckoutResponseEmailTest extends TestCase
     private function assertEmailSentTo(User $user, string $type): void
     {
         Mail::assertSent(CheckoutAcceptanceResponseMail::class, function (CheckoutAcceptanceResponseMail $mail) use ($type, $user) {
-            return $mail->hasTo($user->email) && $mail->assertHasSubject('A checkout you initiated was ' . $type);
+            if (! $mail->hasTo($user->email)) {
+                return false;
+            }
+
+            $mail->assertHasSubject(
+                $type === 'accepted'
+                    ? trans('mail.initiated_accepted')
+                    : trans('mail.initiated_declined')
+            );
+
+            return true;
         });
     }
 

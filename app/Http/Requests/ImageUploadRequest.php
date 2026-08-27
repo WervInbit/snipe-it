@@ -3,15 +3,14 @@
 namespace App\Http\Requests;
 
 use App\Models\SnipeModel;
+use App\Services\SafeRasterImageService;
 use enshrined\svgSanitize\Sanitizer;
 use Intervention\Image\Facades\Image;
 use App\Http\Traits\ConvertsBase64ToFiles;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Exception\NotReadableException;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use RuntimeException;
 
 class ImageUploadRequest extends Request
 {
@@ -34,13 +33,20 @@ class ImageUploadRequest extends Request
      */
     public function rules()
     {
-       
-            return [
-                'image' => 'mimes:png,gif,jpg,jpeg,svg,bmp,svg+xml,webp,avif',
-                'avatar' => 'mimes:png,gif,jpg,jpeg,svg,bmp,svg+xml,webp,avif',
-                'favicon' => 'mimes:png,gif,jpg,jpeg,svg,bmp,svg+xml,webp,image/x-icon,image/vnd.microsoft.icon,ico',
-                'qr_logo' => 'mimes:png,gif,jpg,jpeg,svg,bmp,svg+xml,webp,avif',
-            ];
+        $safeImage = ['nullable', 'file', 'mimes:png,gif,jpg,jpeg,svg', 'max:5120'];
+
+        return [
+            'image' => $safeImage,
+            'image_source' => $safeImage,
+            'avatar' => $safeImage,
+            'favicon' => $safeImage,
+            'qr_logo' => $safeImage,
+            'logo' => $safeImage,
+            'email_logo' => $safeImage,
+            'label_logo' => $safeImage,
+            'acceptance_pdf_logo' => $safeImage,
+            'default_avatar' => $safeImage,
+        ];
     }
 
     public function response(array $errors)
@@ -89,10 +95,6 @@ class ImageUploadRequest extends Request
         }
 
 
-        if (!Storage::disk('public')->exists($path)) {
-            Storage::disk('public')->makeDirectory($path);
-        }
-
         if ($this->offsetGet($form_fieldname) instanceof UploadedFile) {
            $image = $this->offsetGet($form_fieldname);
         } elseif ($this->hasFile($form_fieldname)) {
@@ -100,57 +102,63 @@ class ImageUploadRequest extends Request
         }
 
         if (isset($image)) {
+            if (! Storage::disk('public')->exists($path)
+                && ! Storage::disk('public')->makeDirectory($path)
+            ) {
+                throw new RuntimeException('Unable to create the image storage directory.');
+            }
 
+            if (! $image->isValid() || $image->getSize() > SafeRasterImageService::MAX_BYTES) {
+                throw ValidationException::withMessages([
+                    $form_fieldname => __('The image could not be uploaded or is larger than 5 MB.'),
+                ]);
+            }
 
-                $ext = $image->guessExtension();
-                $file_name = $type.'-'.$form_fieldname.($item->id ?? '-'.$item->id).'-'.str_random(10).'.'.$ext;
-                
-                if (($image->getMimeType() == 'image/vnd.microsoft.icon') || ($image->getMimeType() == 'image/x-icon') || ($image->getMimeType() == 'image/avif') || ($image->getMimeType() == 'image/webp')) {
-                    // If the file is an icon, webp or avif, we need to just move it since gd doesn't support resizing
-                    // icons or avif, and webp support and needs to be compiled into gd for resizing to be available
-                    Storage::disk('public')->put($path.'/'.$file_name, file_get_contents($image));
+            if ($image->getMimeType() === 'image/svg+xml') {
+                $dirtySvg = @file_get_contents($image->getRealPath());
+                $cleanSvg = is_string($dirtySvg)
+                    ? (new Sanitizer())->sanitize($dirtySvg)
+                    : false;
 
-                } elseif($image->getMimeType() == 'image/svg+xml') {
-                    // If the file is an SVG, we need to clean it and NOT encode it
-                    $sanitizer = new Sanitizer();
-                    $dirtySVG = file_get_contents($image->getRealPath());
-                    $cleanSVG = $sanitizer->sanitize($dirtySVG);
-
-                    try {
-                        Storage::disk('public')->put($path . '/' . $file_name, $cleanSVG);
-                    } catch (\Exception $e) {
-                        Log::debug($e);
-                    }
-                } else {
-
-                    try {
-                        $upload = Image::make($image->getRealPath())->setFileInfoFromPath($image->getRealPath())->resize(null, $w, function ($constraint) {
-                            $constraint->aspectRatio();
-                            $constraint->upsize();
-                        })->orientate();
-
-                    } catch(NotReadableException $e) {
-                        Log::debug($e);
-                        $validator = Validator::make([], []);
-                        $validator->errors()->add($form_fieldname, trans('general.unaccepted_image_type', ['mimetype' => $image->getClientMimeType()]));
-
-                        throw new \Illuminate\Validation\ValidationException($validator);
-                    }
-
-                    // This requires a string instead of an object, so we use ($string)
-                    Storage::disk('public')->put($path.'/'.$file_name, (string) $upload->encode());
-
+                if (! is_string($cleanSvg) || trim($cleanSvg) === '') {
+                    throw ValidationException::withMessages([
+                        $form_fieldname => __('The SVG image could not be sanitized safely.'),
+                    ]);
                 }
 
-                 // Remove Current image if exists
-                $item = $this->deleteExistingImage($item, $path, $db_fieldname);
-                $item->{$db_fieldname} = $file_name;
+                $contents = $cleanSvg;
+                $extension = 'svg';
+            } else {
+                $prepared = app(SafeRasterImageService::class)->prepare($image, $form_fieldname);
+                $resized = Image::make($prepared['contents'])->resize(null, $w, function ($constraint) {
+                    $constraint->aspectRatio();
+                    $constraint->upsize();
+                });
+                $resizedContents = (string) $resized->encode($prepared['extension']);
+                $normalized = app(SafeRasterImageService::class)
+                    ->prepareContents($resizedContents, $form_fieldname);
+                $contents = $normalized['contents'];
+                $extension = $normalized['extension'];
+            }
+
+            $itemId = $item->getKey() ?: 'new';
+            $fileName = $type.'-'.$form_fieldname.'-'.$itemId.'-'.str_random(10).'.'.$extension;
+            $storagePath = trim($path, '/\\');
+            $filePath = $storagePath === '' ? $fileName : $storagePath.'/'.$fileName;
+
+            if (! Storage::disk('public')->put($filePath, $contents)) {
+                throw new RuntimeException('Unable to store the normalized image.');
+            }
+
+            // Keep the previous file until the caller persists the new pointer.
+            // The helper cannot safely know whether a later model save succeeds.
+            $item->{$db_fieldname} = $fileName;
 
 
 
         // If the user isn't uploading anything new but wants to delete their old image, do so
         } elseif ($this->input('image_delete') == '1') {
-            $item = $this->deleteExistingImage($item, $path, $db_fieldname);
+            $item->{$db_fieldname} = null;
         }
 
         return $item;
@@ -158,14 +166,7 @@ class ImageUploadRequest extends Request
 
     public function deleteExistingImage($item, $path = null, $db_fieldname = 'image') {
 
-        if ($item->{$db_fieldname}!='') {
-            try {
-                Storage::disk('public')->delete($path.'/'.$item->{$db_fieldname});
-                $item->{$db_fieldname} = null;
-            } catch (\Exception $e) {
-                Log::debug($e);
-            }
-        }
+        $item->{$db_fieldname} = null;
 
         return $item;
     }

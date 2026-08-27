@@ -71,41 +71,41 @@ return [
             'display'    => true,
         ],
         [
-            'permission' => 'assets.checkin',
-            'label'      => 'Checkin ',
-            'note'       => '',
-            'display'    => true,
-        ],
-
-        [
-            'permission' => 'assets.checkout',
-            'label'      => 'Checkout ',
-            'note'       => '',
-            'display'    => true,
-        ],
-
-        [
-            'permission' => 'assets.audit',
-            'label'      => 'Audit ',
-            'note'       => 'Allows the user to mark an asset as physically inventoried.',
-            'display'    => true,
-        ],
-
-        [
             'permission' => 'assets.sale_transition',
             'label'      => 'Move Ready/Sold',
             'note'       => 'Allows the user to move assets into ready-for-sale and sold lifecycle statuses.',
             'display'    => true,
         ],
-
-
         [
-            'permission' => 'assets.view.requestable',
-            'label'      => 'View Requestable Assets',
-            'note'       => '',
+            'permission' => 'assets.images.upload',
+            'label'      => 'Upload Images',
+            'note'       => 'Allows the user to upload and caption asset images.',
             'display'    => true,
         ],
-
+        [
+            'permission' => 'assets.images.manage',
+            'label'      => 'Manage Images',
+            'note'       => 'Allows the user to remove asset images.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'assets.files.view',
+            'label'      => 'View Files',
+            'note'       => 'Allows the user to view and download private files attached to assets.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'assets.files.upload',
+            'label'      => 'Upload Files',
+            'note'       => 'Allows the user to upload private files to assets.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'assets.files.manage',
+            'label'      => 'Manage Files',
+            'note'       => 'Allows the user to delete private files attached to assets.',
+            'display'    => true,
+        ],
         [
             'permission' => 'assets.view.encrypted_custom_fields',
             'label'      => 'View and Modify Encrypted Custom Fields',
@@ -233,6 +233,12 @@ return [
             'display'    => true,
         ],
         [
+            'permission' => 'licenses.checkin',
+            'label'      => 'Checkin ',
+            'note'       => '',
+            'display'    => true,
+        ],
+        [
             'permission' => 'licenses.keys',
             'label'      => 'View License Keys',
             'note'       => '',
@@ -297,9 +303,21 @@ return [
             'display'    => true,
         ],
         [
+            'permission' => 'components.destroy',
+            'label'      => 'Destroy',
+            'note'       => 'Mark tracked components for destruction and record irreversible destruction.',
+            'display'    => true,
+        ],
+        [
             'permission' => 'components.manage_definitions',
             'label'      => 'Manage Definitions',
             'note'       => '',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'components.manage_definition_lifecycle',
+            'label'      => 'Manage Definition Lifecycle',
+            'note'       => 'Allows activating, deactivating, and removing saved definition contributions or expected subcomponents.',
             'display'    => true,
         ],
         [
@@ -351,7 +369,7 @@ return [
         [
             'permission' => 'kits.view',
             'label'      => 'View ',
-            'note'       => 'These are predefined kits that can be used to quickly checkout assets, licenses, etc.',
+            'note'       => 'Compatibility templates only; kit checkout is outside the refurbishment V1 contract.',
             'display'    => true,
         ],
         [
@@ -422,12 +440,75 @@ return [
             'display'    => true,
         ],
         [
+            'permission' => 'models.manage_lifecycle',
+            'label'      => 'Manage Model Lifecycle',
+            'note'       => 'Allows changing the primary/default model number and deprecating or restoring model numbers.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'models.manage_specification_cleanup',
+            'label'      => 'Clean Up Model Specifications',
+            'note'       => 'Allows removing saved model-number attributes and expected-component rows, including affected asset overrides.',
+            'display'    => true,
+        ],
+        [
             'permission' => 'models.delete',
             'label'      => 'Delete ',
             'note'       => '',
             'display'    => true,
         ],
+        [
+            'permission' => 'models.files.view',
+            'label'      => 'View Model Files',
+            'note'       => 'Allows the user to view model-level files exposed as model resources.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'models.files.upload',
+            'label'      => 'Upload Model Files',
+            'note'       => 'Allows the user to upload model-level files.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'models.files.manage',
+            'label'      => 'Manage Model Files',
+            'note'       => 'Allows the user to delete model-level files.',
+            'display'    => true,
+        ],
 
+    ],
+
+    'Catalog Attributes' => [
+        [
+            'permission' => 'attributes.view',
+            'label'      => 'View Attributes',
+            'note'       => 'Allows viewing reusable catalog attribute definitions.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'attributes.create',
+            'label'      => 'Create Attributes',
+            'note'       => 'Allows creating reusable catalog attribute definitions and their initial options.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'attributes.edit',
+            'label'      => 'Edit Attributes',
+            'note'       => 'Allows editing attribute definitions and adding or updating options.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'attributes.lifecycle',
+            'label'      => 'Manage Attribute Lifecycle',
+            'note'       => 'Allows hiding, restoring, and removing saved attribute options.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'attributes.delete',
+            'label'      => 'Delete Attributes',
+            'note'       => 'Allows archiving attribute definitions that are not in use.',
+            'display'    => true,
+        ],
     ],
 
     'Categories' => [
@@ -698,6 +779,33 @@ return [
         ],
     ],
 
+    'Workflow Configuration' => [
+        [
+            'permission' => 'workflows.view',
+            'label'      => 'View Workflow Configuration',
+            'note'       => 'Allows viewing workflow items and profiles.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'workflows.create',
+            'label'      => 'Create Workflow Configuration',
+            'note'       => 'Allows creating workflow items and profiles.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'workflows.edit',
+            'label'      => 'Edit Workflow Configuration',
+            'note'       => 'Allows editing and ordering workflow items, profiles, and profile composition.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'workflows.delete',
+            'label'      => 'Delete Workflow Configuration',
+            'note'       => 'Allows deleting workflow items and profiles.',
+            'display'    => true,
+        ],
+    ],
+
     'Audits' => [
         [
             'permission' => 'audits.view',
@@ -741,13 +849,6 @@ return [
             'permission' => 'self.edit_location',
             'label'      => 'Profile Edit Location',
             'note'       => 'The user may update their own location in their profile. Note that this is not affected by any additional Users permissions you grant to this user or group.',
-            'display'    => true,
-        ],
-
-        [
-            'permission' => 'self.checkout_assets',
-            'label'      => 'Self-Checkout',
-            'note'       => 'This user may check out assets that are marked for self-checkout.',
             'display'    => true,
         ],
 

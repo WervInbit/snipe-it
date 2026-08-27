@@ -22,14 +22,14 @@ trait Searchable
      * @param  string                                $search
      * @return \Illuminate\Database\Eloquent\Builder A query with added "where" clauses
      */
-    public function scopeTextSearch($query, $search)
+    public function scopeTextSearch($query, $search, array $excludedAttributes = [])
     {
         $terms = $this->prepeareSearchTerms($search);
 
         /**
          * Search the attributes of this model
          */
-        $query = $this->searchAttributes($query, $terms);
+        $query = $this->searchAttributes($query, $terms, $excludedAttributes);
 
         /**
          * Search through the custom fields of the model
@@ -67,13 +67,13 @@ trait Searchable
      * @param  array                                $terms
      * @return Illuminate\Database\Eloquent\Builder
      */
-    private function searchAttributes(Builder $query, array $terms)
+    private function searchAttributes(Builder $query, array $terms, array $excludedAttributes = [])
     {
         $table = $this->getTable();
 
         $firstConditionAdded = false;
 
-        foreach ($this->getSearchableAttributes() as $column) {
+        foreach (array_diff($this->getSearchableAttributes(), $excludedAttributes) as $column) {
             foreach ($terms as $term) {
                 /**
                  * Making sure to only search in date columns if the search term consists of characters that can make up a MySQL timestamp!

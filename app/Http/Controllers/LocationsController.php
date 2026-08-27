@@ -11,6 +11,7 @@ use App\Models\ComponentInstance;
 use App\Models\Location;
 use App\Models\Setting;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -92,17 +93,15 @@ class LocationsController extends Controller
         $location->phone = request('phone');
         $location->fax = request('fax');
         $location->notes = $request->input('notes');
-        $location->company_id = Company::getIdForCurrentUser($request->input('company_id'));
 
-        // Only scope the location if the setting is enabled
         if (Setting::getSettings()->scope_locations_fmcs) {
             $location->company_id = Company::getIdForCurrentUser($request->input('company_id'));
-            // check if parent is set and has a different company
-            if ($location->parent_id && Location::find($location->parent_id)->company_id != $location->company_id) {
-                return redirect()->back()->withInput()->withInput()->with('error', 'different company than parent');
-            }                
         } else {
             $location->company_id = $request->input('company_id');
+        }
+
+        if ($response = $this->rejectMismatchedParentCompany($location)) {
+            return $response;
         }
 
         if ($request->has('use_cloned_image')) {
@@ -170,15 +169,18 @@ class LocationsController extends Controller
         $location->manager_id = $request->input('manager_id');
         $location->notes = $request->input('notes');
 
-        // Only scope the location if the setting is enabled
         if (Setting::getSettings()->scope_locations_fmcs) {
             $location->company_id = Company::getIdForCurrentUser($request->input('company_id'));
-            // check if there are related objects with different company
+
             if (Helper::test_locations_fmcs(false, $location->id, $location->company_id)) {
-                return redirect()->back()->withInput()->withInput()->with('error', 'error scoped locations');
-            }            
+                return redirect()->back()->withInput()->with('error', 'error scoped locations');
+            }
         } else {
             $location->company_id = $request->input('company_id');
+        }
+
+        if ($response = $this->rejectMismatchedParentCompany($location)) {
+            return $response;
         }
 
         $location = $request->handleImages($location);
@@ -187,7 +189,32 @@ class LocationsController extends Controller
             return redirect()->route('locations.index')->with('success', trans('admin/locations/message.update.success'));
         }
 
-        return redirect()->back()->withInput()->withInput()->withErrors($location->getErrors());
+        return redirect()->back()->withInput()->withErrors($location->getErrors());
+    }
+
+    private function rejectMismatchedParentCompany(Location $location): ?RedirectResponse
+    {
+        if (! Setting::getSettings()->full_multiple_companies_support || ! $location->parent_id) {
+            return null;
+        }
+
+        $parent = Location::find($location->parent_id);
+
+        if (! $parent) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', trans('admin/locations/message.does_not_exist'));
+        }
+
+        if ($parent->company_id === $location->company_id) {
+            return null;
+        }
+
+        return redirect()->back()->withInput()->with('error', trans('general.error_location_parent_company', [
+            'parent' => $parent->name,
+            'parent_company' => $parent->company?->name ?? trans('general.unassigned'),
+            'location_company' => $location->company?->name ?? trans('general.unassigned'),
+        ]));
     }
 
     /**
@@ -266,18 +293,7 @@ class LocationsController extends Controller
         $this->authorize('view', Location::class);
 
         if ($location = Location::where('id', $id)->first()) {
-            $parent = Location::where('id', $location->parent_id)->first();
-            $manager = User::where('id', $location->manager_id)->first();
-            $company = Company::where('id', $location->company_id)->first();
-            $users = User::where('location_id', $id)->with('company', 'department', 'location')->get();
-            $assets = Asset::where('assigned_to', $id)->where('assigned_type', Location::class)->with('model', 'model.category')->get();
-            return view('locations/print')
-                ->with('assets', $assets)
-                ->with('users',$users)
-                ->with('location', $location)
-                ->with('parent', $parent)
-                ->with('manager', $manager)
-                ->with('company', $company);
+            return view('locations/print', $this->printPayload($location, assigned: true));
         }
 
         return redirect()->route('locations.index')->with('error', trans('admin/locations/message.does_not_exist'));
@@ -350,21 +366,67 @@ class LocationsController extends Controller
     public function print_all_assigned($id) : View | RedirectResponse
     {
         $this->authorize('view', Location::class);
+
         if ($location = Location::where('id', $id)->first()) {
-            $parent = Location::where('id', $location->parent_id)->first();
-            $manager = User::where('id', $location->manager_id)->first();
-            $company = Company::where('id', $location->company_id)->first();
-            $users = User::where('location_id', $id)->with('company', 'department', 'location')->get();
-            $assets = Asset::where('location_id', $id)->with('model', 'model.category')->get();
-            return view('locations/print')
-                ->with('assets', $assets)
-                ->with('users',$users)
-                ->with('location', $location)
-                ->with('parent', $parent)
-                ->with('manager', $manager)
-                ->with('company', $company);
+            return view('locations/print', $this->printPayload($location, assigned: false));
         }
+
         return redirect()->route('locations.index')->with('error', trans('admin/locations/message.does_not_exist'));
+    }
+
+    /**
+     * Build a print payload without loading related model data the actor cannot view.
+     *
+     * @return array<string, mixed>
+     */
+    private function printPayload(Location $location, bool $assigned): array
+    {
+        $actor = auth()->user();
+        $canViewUsers = $actor->can('view', User::class);
+        $canViewAssets = $actor->can('view', Asset::class);
+        $canViewCompanies = $actor->can('view', Company::class);
+        $users = new EloquentCollection;
+        $assets = new EloquentCollection;
+
+        if ($canViewUsers) {
+            $userRelations = ['department', 'location'];
+            if ($canViewCompanies) {
+                $userRelations[] = 'company';
+            }
+
+            $users = User::where('location_id', $location->id)
+                ->with($userRelations)
+                ->get();
+
+            if (! $canViewCompanies) {
+                $users->each(fn (User $user) => $user->setRelation('company', null));
+            }
+        }
+
+        if ($canViewAssets) {
+            $assetsQuery = Asset::query();
+
+            if ($assigned) {
+                $assetsQuery
+                    ->where('assigned_to', $location->id)
+                    ->where('assigned_type', Location::class);
+            } else {
+                $assetsQuery->where('location_id', $location->id);
+            }
+
+            $assets = $assetsQuery
+                ->with('model', 'model.category', 'model.manufacturer', 'location')
+                ->get();
+        }
+
+        return [
+            'assets' => $assets,
+            'users' => $users,
+            'location' => $location,
+            'parent' => Location::find($location->parent_id),
+            'manager' => $canViewUsers ? User::find($location->manager_id) : null,
+            'company' => $canViewCompanies ? Company::find($location->company_id) : null,
+        ];
     }
 
 

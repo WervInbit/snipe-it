@@ -12,6 +12,7 @@ use Illuminate\Validation\Rule;
 class UpdateAssetRequest extends ImageUploadRequest
 {
     use MayContainCustomFields;
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -31,7 +32,7 @@ class UpdateAssetRequest extends ImageUploadRequest
     {
         $rules = array_merge(
             parent::rules(),
-            (new Asset)->getRules(),
+            (new Asset())->getRules(),
             // this is to overwrite rulesets that include required, and rewrite unique_undeleted
             [
                 'model_id'  => ['integer', 'exists:models,id,deleted_at,NULL', 'not_array'],
@@ -73,11 +74,17 @@ class UpdateAssetRequest extends ImageUploadRequest
         $currentModelNumberId = $this->asset?->model_number_id;
         if ($currentModelNumberId && $model) {
             $currentModelNumber = $model->modelNumbers()->whereKey($currentModelNumberId)->first();
-            if ($currentModelNumber && $availableModelNumbers->doesntContain(fn ($number) => $number->id === $currentModelNumber->id)) {
+            if (
+                $currentModelNumber
+                && $availableModelNumbers->doesntContain(
+                    fn ($number) => $number->id === $currentModelNumber->id
+                )
+            ) {
                 $availableModelNumbers->push($currentModelNumber);
             }
         }
-        $requireModelNumber = $activeModelNumbers->count() > 1;
+        $modelSelectionSubmitted = $this->has('model_id') || $this->has('model_number_id');
+        $requireModelNumber = $activeModelNumbers->isNotEmpty() && $modelSelectionSubmitted;
 
         $rules['model_number_id'] = $modelId
             ? array_filter([
@@ -98,12 +105,19 @@ class UpdateAssetRequest extends ImageUploadRequest
         $rules['attribute_overrides'] = ['nullable', 'array'];
         $rules['attribute_overrides.*'] = ['nullable'];
         $rules['status_change_note'] = ['nullable', 'string', 'max:65535'];
+        foreach (Asset::LEGACY_READ_ONLY_FIELDS as $legacyField) {
+            $rules[$legacyField] = ['missing'];
+        }
 
         return $rules;
     }
 
     private function shouldAllowDuplicateSerial(): bool
     {
+        if (!(bool) (Setting::getSettings()?->unique_serial ?? false)) {
+            return true;
+        }
+
         if ($this->boolean('allow_duplicate_serial')) {
             return true;
         }

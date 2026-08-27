@@ -379,7 +379,7 @@ return [
     'purge_barcodes' => 'Purge Barcodes',
     'help_asterisk_bold'    => 'Text inlagd som <code>**text**</code> kommer att visas som fetstilad',
     'help_blank_to_use'     => 'Lämna tomt för att använda värdet från <code>:setting_name</code>',
-    'help_default_will_use' => '<code>:default</code> will use the value from <code>:setting_name</code>. <br>Note that the value of the barcodes must comply with the respective barcode spec in order to be successfully generated. Please see <a href="https://snipe-it.readme.io/docs/barcodes">the documentation <i class="fa fa-external-link"></i></a> for more details. ',
+    'help_default_will_use' => '<code>:default</code> will use the value from <code>:setting_name</code>. <br>Note that the value of the barcodes must comply with the respective barcode spec in order to be successfully generated. Please see <a href=":fork_documentation_url">the documentation <i class="fa fa-external-link"></i></a> for more details. ',
     'asset_id'              => 'Tillgångs-ID',
     'data'               => 'Data',
     'default'               => 'Standard',

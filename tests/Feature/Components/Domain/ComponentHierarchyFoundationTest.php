@@ -90,6 +90,7 @@ class ComponentHierarchyFoundationTest extends TestCase
 
         $installed = $service->installIntoAsset($removed, $targetAsset, [
             'performed_by' => $actor,
+            'condition_warning_confirmed' => true,
         ]);
 
         $this->assertSame($targetAsset->id, $installed->current_asset_id);

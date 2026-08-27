@@ -6,10 +6,25 @@ use App\Http\Traits\UniqueUndeletedTrait;
 use App\Models\Traits\Searchable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Validation\ValidationException;
 use Watson\Validating\ValidatingTrait;
 
 class Statuslabel extends SnipeModel
 {
+    public const LIFECYCLE_READY_FOR_SALE = 'ready_for_sale';
+    public const LIFECYCLE_SOLD = 'sold';
+    public const LIFECYCLE_BROKEN_PARTS = 'broken_parts';
+    public const LIFECYCLE_RETURNED = 'returned';
+    public const LIFECYCLE_DESTRUCTION_PENDING = 'destruction_pending';
+    public const LIFECYCLE_DESTROYED = 'destroyed';
+
+    private const ASSET_SEMANTIC_ATTRIBUTES = [
+        'archived',
+        'deployable',
+        'pending',
+        'lifecycle_stage',
+    ];
+
     use HasFactory;
     use SoftDeletes;
     use ValidatingTrait;
@@ -26,6 +41,7 @@ class Statuslabel extends SnipeModel
         'deployable' => 'required',
         'pending' => 'required',
         'archived' => 'required',
+        'lifecycle_stage' => 'nullable|in:ready_for_sale,sold,broken_parts,returned,destruction_pending,destroyed',
     ];
 
     protected $fillable = [
@@ -38,6 +54,7 @@ class Statuslabel extends SnipeModel
         'show_in_nav',
         'color',
         'created_by',
+        'lifecycle_stage',
     ];
 
     use Searchable;
@@ -55,6 +72,17 @@ class Statuslabel extends SnipeModel
      * @var array
      */
     protected $searchableRelations = [];
+
+    protected static function booted(): void
+    {
+        static::updating(function (Statuslabel $statuslabel): void {
+            if ($statuslabel->hasInUseAssetSemanticChanges()) {
+                throw ValidationException::withMessages([
+                    'lifecycle_stage' => trans('admin/statuslabels/message.semantic_fields_in_use'),
+                ]);
+            }
+        });
+    }
 
     /**
      * Establishes the status label -> assets relationship
@@ -169,6 +197,42 @@ class Statuslabel extends SnipeModel
         }
 
         return $statustype;
+    }
+
+    /**
+     * Stable lifecycle semantics used by asset transition policy.
+     *
+     * Display names remain freely editable and must never be used as policy keys.
+     *
+     * @return array<string,string>
+     */
+    public static function lifecycleStageOptions(): array
+    {
+        return [
+            '' => trans('admin/statuslabels/table.lifecycle_none'),
+            self::LIFECYCLE_READY_FOR_SALE => trans('admin/statuslabels/table.lifecycle_ready_for_sale'),
+            self::LIFECYCLE_SOLD => trans('admin/statuslabels/table.lifecycle_sold'),
+            self::LIFECYCLE_BROKEN_PARTS => trans('admin/statuslabels/table.lifecycle_broken_parts'),
+            self::LIFECYCLE_RETURNED => trans('admin/statuslabels/table.lifecycle_returned'),
+            self::LIFECYCLE_DESTRUCTION_PENDING => trans('admin/statuslabels/table.lifecycle_destruction_pending'),
+            self::LIFECYCLE_DESTROYED => trans('admin/statuslabels/table.lifecycle_destroyed'),
+        ];
+    }
+
+    public function hasInUseAssetSemanticChanges(): bool
+    {
+        if (! $this->exists || ! $this->isDirty(self::ASSET_SEMANTIC_ATTRIBUTES)) {
+            return false;
+        }
+
+        return Asset::withoutGlobalScope(CompanyableScope::class)
+            ->where('status_id', $this->getKey())
+            ->exists();
+    }
+
+    public function hasLifecycleStage(string ...$stages): bool
+    {
+        return in_array($this->lifecycle_stage, $stages, true);
     }
 
     public function scopeOrderByCreatedBy($query, $order)

@@ -6,20 +6,19 @@ use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ItemImportRequest;
 use App\Http\Transformers\ImportsTransformer;
-use App\Models\Asset;
-use App\Models\Company;
 use App\Models\Import;
+use Illuminate\Database\Eloquent\JsonEncodingException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Database\Eloquent\JsonEncodingException;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use League\Csv\Reader;
 use Onnov\DetectEncoding\EncodingDetector;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Http\JsonResponse;
 
 class ImportController extends Controller
 {
@@ -30,7 +29,13 @@ class ImportController extends Controller
     public function index() : JsonResponse | array
     {
         $this->authorize('import');
-        $imports = Import::with('adminuser')->latest()->get();
+
+        $imports = Import::query()
+            ->visibleTo(auth()->user())
+            ->with('adminuser')
+            ->latest()
+            ->get();
+
         return (new ImportsTransformer)->transformImports($imports);
     }
 
@@ -46,10 +51,11 @@ class ImportController extends Controller
             $files = Request::file('files');
             $path = config('app.private_uploads').'/imports';
             $results = [];
-            $import = new Import;
             $detector = new EncodingDetector();
 
             foreach ($files as $file) {
+                $import = new Import;
+
                 if (! in_array($file->getMimeType(), [
                     'application/vnd.ms-excel',
                     'text/csv',
@@ -148,10 +154,12 @@ class ImportController extends Controller
                     );
                 }
 
-                $date = date('Y-m-d-his');
-                $fixed_filename = str_slug($file->getClientOriginalName());
+                $baseFilename = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
+                $baseFilename = $baseFilename !== '' ? $baseFilename : 'import';
+                $file_name = now()->format('Y-m-d-His').'-'.Str::uuid().'-'.$baseFilename.'.csv';
+
                 try {
-                    $file->move($path, $date.'-'.$fixed_filename);
+                    $file->move($path, $file_name);
                 } catch (FileException $exception) {
                     $results['error'] = trans('admin/hardware/message.upload.error');
                     if (config('app.debug')) {
@@ -160,17 +168,25 @@ class ImportController extends Controller
 
                     return response()->json(Helper::formatStandardApiResponse('error', null, $results['error']), 500);
                 }
-                $file_name = date('Y-m-d-his').'-'.$fixed_filename;
+
                 $import->file_path = $file_name;
                 $import->filesize = null;
 
-                if (!file_exists($path.'/'.$file_name)) {
+                if (! file_exists($path.'/'.$file_name)) {
                     return response()->json(Helper::formatStandardApiResponse('error', null, trans('general.file_not_found')), 500);
                 }
 
                 $import->filesize = filesize($path.'/'.$file_name);
                 $import->created_by = auth()->id();
-                $import->save();
+
+                try {
+                    $import->saveOrFail();
+                } catch (\Throwable $exception) {
+                    Storage::delete('private_uploads/imports/'.$file_name);
+
+                    throw $exception;
+                }
+
                 $results[] = $import;
             }
             $results = (new ImportsTransformer)->transformImports($results);
@@ -192,19 +208,50 @@ class ImportController extends Controller
     {
         $this->authorize('import');
 
-        // Run a backup immediately before processing
-        if ($request->get('run-backup')) {
-            Log::debug('Backup manually requested via importer');
-            Artisan::call('snipeit:backup', ['--filename' => 'pre-import-backup-'.date('Y-m-d-H:i:s')]);
-        } else {
-            Log::debug('NO BACKUP requested via importer');
+        if (config('app.lock_passwords')) {
+            return response()->json(
+                Helper::formatStandardApiResponse('error', null, trans('general.feature_disabled')),
+                422
+            );
         }
 
-        $import = Import::find($import_id);
+        $import = Import::query()
+            ->visibleTo($request->user())
+            ->find($import_id);
 
-        if(is_null($import)){
-            $error[0][0] = trans("validation.exists", ["attribute" => "file"]);
-            return response()->json(Helper::formatStandardApiResponse('import-errors', null, $error), 500);
+        if (is_null($import)) {
+            $error[0][0] = trans('validation.exists', ['attribute' => 'file']);
+
+            return response()->json(
+                Helper::formatStandardApiResponse('import-errors', null, $error),
+                404
+            );
+        }
+
+        // Run a backup immediately before processing
+        if ($request->boolean('run-backup')) {
+            Log::debug('Backup manually requested via importer');
+            $backupExitCode = Artisan::call('snipeit:backup', [
+                '--filename' => 'pre-import-backup-'.date('Y-m-d-H-i-s'),
+            ]);
+
+            if ($backupExitCode !== 0) {
+                Log::error('Pre-import backup failed; import processing was not started.', [
+                    'import_id' => $import->id,
+                    'exit_code' => $backupExitCode,
+                ]);
+
+                return response()->json(
+                    Helper::formatStandardApiResponse(
+                        'error',
+                        null,
+                        trans('admin/hardware/message.import.backup_failed')
+                    ),
+                    500
+                );
+            }
+        } else {
+            Log::debug('NO BACKUP requested via importer');
         }
 
         $errors = $request->import($import);
@@ -261,23 +308,60 @@ class ImportController extends Controller
      */
     public function destroy($import_id) : JsonResponse
     {
-        $this->authorize('create', Asset::class);
+        $this->authorize('import');
 
-        if ($import = Import::find($import_id)) {
-            try {
-                // Try to delete the file
-                Storage::delete('imports/'.$import->file_path);
-                $import->delete();
-
-                return response()->json(Helper::formatStandardApiResponse('success', null, trans('admin/hardware/message.import.file_delete_success')));
-            } catch (\Exception $e) {
-                // If the file delete didn't work, remove it from the database anyway and return a warning
-                $import->delete();
-
-                return response()->json(Helper::formatStandardApiResponse('warning', null, trans('admin/hardware/message.import.file_not_deleted_warning')));
-            }
-
+        if (config('app.lock_passwords')) {
+            return response()->json(
+                Helper::formatStandardApiResponse('error', null, trans('general.feature_disabled')),
+                422
+            );
         }
-        return response()->json(Helper::formatStandardApiResponse('warning', null, trans('admin/hardware/message.import.file_not_deleted_warning')));
+
+        $import = Import::query()
+            ->visibleTo(auth()->user())
+            ->find($import_id);
+
+        if (! $import) {
+            return response()->json(
+                Helper::formatStandardApiResponse(
+                    'error',
+                    null,
+                    trans('admin/hardware/message.import.file_missing')
+                ),
+                404
+            );
+        }
+
+        try {
+            $deleted = Storage::delete('private_uploads/imports/'.$import->file_path);
+        } catch (\Throwable $exception) {
+            Log::warning('Import file deletion failed; retaining the import record for retry.', [
+                'import_id' => $import->id,
+                'error' => $exception->getMessage(),
+            ]);
+
+            $deleted = false;
+        }
+
+        if (! $deleted) {
+            return response()->json(
+                Helper::formatStandardApiResponse(
+                    'error',
+                    null,
+                    trans('admin/hardware/message.import.file_delete_error')
+                ),
+                500
+            );
+        }
+
+        $import->delete();
+
+        return response()->json(
+            Helper::formatStandardApiResponse(
+                'success',
+                null,
+                trans('admin/hardware/message.import.file_delete_success')
+            )
+        );
     }
 }

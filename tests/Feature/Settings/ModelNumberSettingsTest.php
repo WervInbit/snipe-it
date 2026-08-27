@@ -45,7 +45,12 @@ class ModelNumberSettingsTest extends TestCase
             'make_primary' => '1',
         ]);
 
-        $response->assertRedirect(route('settings.model_numbers.index'))
+        $createdNumber = ModelNumber::query()
+            ->where('model_id', $model->id)
+            ->where('code', 'NX-101')
+            ->firstOrFail();
+
+        $response->assertRedirect(route('settings.model_numbers.edit', $createdNumber))
             ->assertSessionHasNoErrors();
 
         $this->assertDatabaseHas('model_numbers', [
@@ -68,6 +73,7 @@ class ModelNumberSettingsTest extends TestCase
         $response = $this->from(route('settings.model_numbers.index'))->put(route('settings.model_numbers.update', $number), [
             'code' => 'NEW-CODE',
             'label' => 'Updated Label',
+            'status' => 'active',
         ]);
 
         $response->assertRedirect(route('settings.model_numbers.index'))

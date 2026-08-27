@@ -92,7 +92,7 @@ class ImportCategoriesTest extends ImportDataTestCase implements TestsPermission
                     '' => [
                         'Category ""' => [
                             'name' =>
-                                ['The name field is required.'],
+                                [trans('validation.required', ['attribute' => 'name'])],
                         ],
                     ]
 

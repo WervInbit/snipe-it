@@ -54,12 +54,14 @@ class ImportAssetModelsTest extends ImportDataTestCase implements TestsPermissio
             ]);
 
         $newAssetModel = AssetModel::query()
-            ->with(['category'])
+            ->with(['category', 'primaryModelNumber', 'modelNumbers'])
             ->where('name', $row['name'])
             ->sole();
 
         $this->assertEquals($row['name'], $newAssetModel->name);
         $this->assertEquals($row['model_number'], $newAssetModel->model_number);
+        $this->assertEquals($row['model_number'], $newAssetModel->primaryModelNumber->code);
+        $this->assertCount(1, $newAssetModel->modelNumbers);
 
     }
 
@@ -76,6 +78,36 @@ class ImportAssetModelsTest extends ImportDataTestCase implements TestsPermissio
         $import = Import::factory()->assetmodel()->create(['file_path' => $importFileBuilder->saveToImportsDirectory()]);
 
         $this->importFileResponse(['import' => $import->id])->assertOk();
+    }
+
+    #[Test]
+    public function rowsWithTheSameModelNameCreateMultipleModelNumberPresets(): void
+    {
+        $modelName = 'Shared Model '.Str::random();
+        $rows = ImportFileBuilder::times(2)
+            ->replace(['name' => $modelName])
+            ->all();
+        $rows[0]['model_number'] = 'VARIANT-A';
+        $rows[1]['model_number'] = 'VARIANT-B';
+        $importFileBuilder = new ImportFileBuilder($rows);
+        $import = Import::factory()->assetmodel()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse(['import' => $import->id])->assertOk();
+
+        $model = AssetModel::query()
+            ->with(['modelNumbers', 'primaryModelNumber'])
+            ->where('name', $modelName)
+            ->sole();
+
+        $this->assertSame(
+            ['VARIANT-A', 'VARIANT-B'],
+            $model->modelNumbers->pluck('code')->sort()->values()->all(),
+        );
+        $this->assertSame('VARIANT-A', $model->primaryModelNumber->code);
+        $this->assertSame('VARIANT-A', $model->model_number);
     }
 
 
@@ -96,7 +128,7 @@ class ImportAssetModelsTest extends ImportDataTestCase implements TestsPermissio
                     '' => [
                         'name' => [
                             'name' =>
-                                ['The name field is required.'],
+                                [trans('validation.required', ['attribute' => 'name'])],
                         ],
                     ]
                 ]
@@ -123,13 +155,18 @@ class ImportAssetModelsTest extends ImportDataTestCase implements TestsPermissio
         $this->actingAsForApi(User::factory()->superuser()->create());
         $this->importFileResponse(['import' => $import->id, 'import-update' => true])->assertOk();
 
-        $updatedAssetmodel = AssetModel::query()->find($assetmodel->id);
+        $updatedAssetmodel = AssetModel::query()
+            ->with(['primaryModelNumber', 'modelNumbers'])
+            ->find($assetmodel->id);
         $updatedAttributes = [
             'name',
-            'model_number'
+            'model_number',
+            'primary_model_number_id',
         ];
 
         $this->assertEquals($row['model_number'], $updatedAssetmodel->model_number);
+        $this->assertEquals($row['model_number'], $updatedAssetmodel->primaryModelNumber->code);
+        $this->assertCount(1, $updatedAssetmodel->modelNumbers);
 
         $this->assertEquals(
             Arr::except($assetmodel->attributesToArray(), array_merge($updatedAttributes, $assetmodel->getDates())),

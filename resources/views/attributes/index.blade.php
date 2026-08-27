@@ -92,19 +92,21 @@
                                 <td>{{ $definition->options_count }}</td>
                                 <td class="text-right" style="white-space: nowrap;">
                                     <a href="{{ route('attributes.edit', $definition) }}" class="btn btn-xs btn-default">{{ __('Edit') }}</a>
-                                    @if($definition->isHidden())
-                                        <form action="{{ route('attributes.unhide', $definition) }}" method="POST" style="display:inline-block;">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="btn btn-xs btn-success">{{ __('Unhide') }}</button>
-                                        </form>
-                                    @else
-                                        <form action="{{ route('attributes.hide', $definition) }}" method="POST" style="display:inline-block;">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="btn btn-xs btn-warning">{{ __('Hide') }}</button>
-                                        </form>
-                                    @endif
+                                    @can('manageLifecycle', $definition)
+                                        @if($definition->isHidden())
+                                            <form action="{{ route('attributes.unhide', $definition) }}" method="POST" style="display:inline-block;">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="btn btn-xs btn-success">{{ __('Unhide') }}</button>
+                                            </form>
+                                        @else
+                                            <form action="{{ route('attributes.hide', $definition) }}" method="POST" style="display:inline-block;">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="btn btn-xs btn-warning">{{ __('Hide') }}</button>
+                                            </form>
+                                        @endif
+                                    @endcan
                                 </td>
                             </tr>
                         @empty

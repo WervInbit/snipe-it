@@ -100,11 +100,11 @@
                                 </button>
                             @endif
 
-                            @if ($snipeSettings->custom_forgot_pass_url)
+                            @if ($snipeSettings->custom_forgot_pass_url && config('auth.ldap_integration_enabled'))
                                 <div class="col-md-12 text-right" style="padding-top: 15px;">
                                     <a href="{{ $snipeSettings->custom_forgot_pass_url  }}" rel="noopener">{{ trans('auth/general.forgot_password')  }}</a>
                                 </div>
-                            @elseif (!config('app.require_saml'))
+                            @elseif (!config('app.require_saml') && config('mail.enabled'))
                                 <div class="col-md-12 text-right" style="padding-top: 15px;">
                                     <a href="{{ route('password.request')  }}">{{ trans('auth/general.forgot_password')  }}</a>
                                 </div>

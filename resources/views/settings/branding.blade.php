@@ -64,12 +64,12 @@
                                 </div>
                                 <div class="col-md-7 required">
                                     @if (config('app.lock_passwords')===true)
-                                        <input class="form-control" disabled="disabled" placeholder="Snipe-IT Asset Management" name="site_name" type="text" value="{{ old('site_name', $setting->site_name) }}" id="site_name">
+                                        <input class="form-control" disabled="disabled" placeholder="{{ config('app.name') }}" name="site_name" type="text" value="{{ old('site_name', $setting->site_name) }}" id="site_name">
                                         <p class="text-warning">
                                             <x-icon type="locked" />
                                             {{ trans('general.feature_disabled') }}</p>
                                     @else
-                                        <input class="form-control" placeholder="Snipe-IT Asset Management" required="required" name="site_name" type="text" value="{{ old('site_name', $setting->site_name) }}" id="site_name">
+                                        <input class="form-control" placeholder="{{ config('app.name') }}" required="required" name="site_name" type="text" value="{{ old('site_name', $setting->site_name) }}" id="site_name">
                                     @endif
                                     {!! $errors->first('site_name', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
                                 </div>

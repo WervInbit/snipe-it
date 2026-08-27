@@ -108,6 +108,22 @@ a.accordion-header {
   padding: 0px 5px 0px 15px;
 }
 
+// At the narrow desktop breakpoint the full logo/name combination crowds the
+// wrapped navigation, and fractional button sizing can leave a visible strip
+// below the asset search action. Keep wider desktop and mobile presentation
+// unchanged while tightening only the affected 768-899px range.
+@media (min-width: 768px) and (max-width: 899px) {
+  .main-header .navbar-brand-name {
+    display: none;
+  }
+
+  #tagSearch,
+  #topSearchButton {
+    box-sizing: border-box;
+    height: 34px;
+  }
+}
+
 
 .sidebar-toggle {
   margin-left: -48px;

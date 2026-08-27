@@ -6,15 +6,16 @@ use App\Exceptions\ComponentConditionWarningException;
 use App\Http\Controllers\Concerns\BuildsComponentWorkflowOptions;
 use App\Http\Controllers\Concerns\HandlesComponentSerialChanges;
 use App\Http\Controllers\Controller;
-use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\ComponentDefinition;
 use App\Models\ComponentDefinitionSubcomponentTemplate;
 use App\Models\ComponentInstance;
+use App\Models\Supplier;
 use App\Services\Components\ComponentExpectedSubcomponentService;
 use App\Services\ComponentLifecycleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -160,26 +161,45 @@ class ComponentsController extends Controller
         ]);
     }
 
-    public function edit(ComponentInstance $component_id): RedirectResponse
+    public function edit(ComponentInstance $component_id): View|RedirectResponse
     {
         $this->authorize('update', $component_id);
 
-        return redirect()
-            ->route('components.show', $component_id)
-            ->with('info', 'Component editing UI is not implemented yet.');
+        if ($component_id->isTerminalLifecycle()) {
+            return redirect()
+                ->route('components.show', $component_id)
+                ->with('error', __('Terminal components cannot be edited.'));
+        }
+
+        $componentDefinitions = ComponentDefinition::query()
+            ->with(['category', 'manufacturer'])
+            ->where(function ($query) use ($component_id): void {
+                $query->where('is_active', true);
+
+                if ($component_id->component_definition_id) {
+                    $query->orWhere('id', $component_id->component_definition_id);
+                }
+            })
+            ->orderBy('name')
+            ->get();
+
+        return view('components.edit', [
+            'component' => $component_id->loadMissing(['componentDefinition', 'supplier']),
+            'componentDefinitions' => $componentDefinitions,
+            'conditionOptions' => $this->conditionOptions(),
+            'suppliers' => Supplier::query()->orderBy('name')->get(),
+        ]);
     }
 
     public function update(Request $request, ComponentInstance $component_id): RedirectResponse
     {
         $this->authorize('update', $component_id);
 
-        $data = $request->validate([
-            'notes' => ['nullable', 'string'],
-            'storage_location_id' => ['nullable', 'integer', 'exists:component_storage_locations,id'],
-            'storage_location_note' => ['nullable', 'string'],
-        ]);
-
-        if ($request->has('storage_location_id')) {
+        if ($request->exists('storage_location_id')) {
+            $data = $request->validate([
+                'storage_location_id' => ['nullable', 'integer', 'exists:component_storage_locations,id'],
+                'storage_location_note' => ['nullable', 'string'],
+            ]);
             $locationId = $data['storage_location_id'] ?? null;
 
             try {
@@ -200,16 +220,83 @@ class ComponentsController extends Controller
                 ->with('success', __('Component storage location updated.'));
         }
 
-        $notes = trim((string) ($data['notes'] ?? ''));
+        $finalComponentDefinitionId = $request->exists('component_definition_id')
+            ? $request->input('component_definition_id')
+            : $component_id->component_definition_id;
+        $finalDisplayName = $request->exists('display_name')
+            ? $request->input('display_name')
+            : $component_id->display_name;
 
-        $component_id->forceFill([
-            'notes' => $notes !== '' ? $notes : null,
-            'updated_by' => $request->user()->id,
-        ])->save();
+        $data = $request->validate([
+            'component_definition_id' => [
+                'nullable',
+                'integer',
+                Rule::exists('component_definitions', 'id')->where(function ($query) use ($component_id): void {
+                    $query->where('is_active', true);
+
+                    if ($component_id->component_definition_id) {
+                        $query->orWhere('id', $component_id->component_definition_id);
+                    }
+                }),
+            ],
+            'display_name' => [
+                Rule::requiredIf(
+                    empty($finalComponentDefinitionId)
+                    && trim((string) $finalDisplayName) === ''
+                ),
+                'nullable',
+                'string',
+                'max:255',
+            ],
+            'serial' => ['nullable', 'string', 'max:255'],
+            'condition_code' => ['nullable', Rule::in(array_keys($this->conditionOptions()))],
+            'supplier_id' => ['nullable', 'integer', 'exists:suppliers,id'],
+            'purchase_cost' => ['nullable', 'numeric', 'gte:0'],
+            'received_at' => ['nullable', 'date'],
+            'notes' => ['nullable', 'string'],
+        ]);
+
+        try {
+            DB::transaction(function () use ($request, $component_id, $data): void {
+                if ($request->exists('serial')) {
+                    $this->lifecycle->updateSerial($component_id, $data['serial'] ?? null, [
+                        'performed_by' => $request->user(),
+                        'note' => __('Updated from the component edit form.'),
+                    ]);
+                }
+
+                if ($request->filled('condition_code')
+                    && $data['condition_code'] !== $component_id->condition_code
+                ) {
+                    $this->lifecycle->updateCondition($component_id, $data['condition_code'], [
+                        'performed_by' => $request->user(),
+                        'note' => __('Updated from the component edit form.'),
+                    ]);
+                }
+
+                $this->lifecycle->updateMetadata(
+                    $component_id,
+                    array_intersect_key($data, array_flip([
+                        'component_definition_id',
+                        'display_name',
+                        'supplier_id',
+                        'purchase_cost',
+                        'received_at',
+                        'notes',
+                    ])),
+                    [
+                        'performed_by' => $request->user(),
+                        'note' => __('Updated from the component edit form.'),
+                    ]
+                );
+            });
+        } catch (InvalidArgumentException $exception) {
+            return redirect()->back()->withInput()->with('error', $exception->getMessage());
+        }
 
         return redirect()
             ->route('components.show', ['component_id' => $component_id])
-            ->with('success', __('Component note updated.'));
+            ->with('success', __('Component updated.'));
     }
 
     public function updateSerial(Request $request, ComponentInstance $component_id): RedirectResponse
@@ -356,21 +443,13 @@ class ComponentsController extends Controller
     {
         $this->authorize('delete', $component_id);
 
-        if ($component_id->effectiveLifecycleStatus() === ComponentInstance::LIFECYCLE_ATTACHED) {
+        try {
+            $this->lifecycle->deleteInstance($component_id, auth()->user());
+        } catch (InvalidArgumentException $exception) {
             return redirect()
                 ->route('components.show', $component_id)
-                ->with('error', 'Installed components must be removed before deletion.');
+                ->with('error', $exception->getMessage());
         }
-
-        $logAction = new Actionlog();
-        $logAction->item_type = ComponentInstance::class;
-        $logAction->item_id = $component_id->id;
-        $logAction->created_at = date('Y-m-d H:i:s');
-        $logAction->action_date = date('Y-m-d H:i:s');
-        $logAction->created_by = auth()->id();
-        $logAction->logaction('delete');
-
-        $component_id->delete();
 
         return redirect()
             ->route('components.index')

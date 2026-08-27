@@ -82,7 +82,8 @@
     </div>
 </div>
 
-<div class="box box-default">
+@if(auth()->user()?->can('manageVisibility', $workOrder))
+<div class="box box-default" data-testid="work-order-visibility-controls">
     <div class="box-header with-border">
         <h3 class="box-title">{{ __('Portal Visibility') }}</h3>
     </div>
@@ -119,7 +120,6 @@
             </label>
         </div>
 
-        @if(auth()->user()?->can('manageVisibility', $workOrder ?: \App\Models\WorkOrder::class))
         <div class="form-group">
             <label for="visible_user_ids">{{ __('Explicit Visible Users') }}</label>
             <select name="visible_user_ids[]" id="visible_user_ids" class="form-control" multiple size="8">
@@ -131,6 +131,6 @@
             </select>
             <p class="help-block">{{ __('Portal users added here can see this work order even without a company match.') }}</p>
         </div>
-        @endif
     </div>
 </div>
+@endif

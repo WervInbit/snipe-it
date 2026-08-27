@@ -46,6 +46,9 @@ $config = [
         'local' => [
             'driver' => 'local',
             'root' => storage_path(),
+            // Laravel 11 has no patched local temporary-URL implementation.
+            // Private local files are streamed through authorized controllers.
+            'serve' => false,
         ],
 
         // This applies the LOCAL public only, not S3/FTP/etc
@@ -54,6 +57,7 @@ $config = [
             'root' => public_path('uploads'),
             'url' => env('APP_URL').'/uploads',
             'visibility' => 'public',
+            'serve' => false,
         ],
 
         's3_public' => [
@@ -93,8 +97,13 @@ $config = [
         ],
 
         'backup' => [
-            'driver' => env('PRIVATE_FILESYSTEM_DISK', 'local'),
-            'root' => storage_path('app'),
+            'driver' => env('BACKUP_FILESYSTEM_DRIVER', 'local'),
+            'key' => env('PRIVATE_AWS_ACCESS_KEY_ID'),
+            'secret' => env('PRIVATE_AWS_SECRET_ACCESS_KEY'),
+            'region' => env('PRIVATE_AWS_DEFAULT_REGION'),
+            'bucket' => env('PRIVATE_AWS_BUCKET'),
+            'root' => env('BACKUP_FILESYSTEM_ROOT', storage_path('app')),
+            'visibility' => 'private',
         ],
 
     ],

@@ -499,13 +499,6 @@
 
 
 
-    function hardwareAuditFormatter(value, row) {
-        return '<a href="{{ config('app.url') }}/hardware/' + row.id + '/audit" class="actions btn btn-sm btn-primary" data-tooltip="true" title="{{ trans('general.audit') }}"><x-icon type="audit" /><span class="sr-only">{{ trans('general.audit') }}</span></a>&nbsp;';
-    }
-
-
-
-
     // Make the edit/delete buttons
     function genericActionsFormatter(owner_name, element_name) {
         if (!element_name) {
@@ -687,6 +680,9 @@
 
     function genericCheckinCheckoutFormatter(destination) {
         return function (value, row) {
+            if ((destination === 'hardware') || (destination === 'kits')) {
+                return '';
+            }
 
             // The user is allowed to check items out, AND the item is deployable
             if ((row.available_actions.checkout == true) && (row.user_can_checkout == true) && ((!row.asset_id) && (!row.assigned_to))) {
@@ -696,13 +692,7 @@
             // The user is allowed to check items out, but the item is not able to be checked out
             } else if (((row.user_can_checkout == false)) && (row.available_actions.checkout == true) && (!row.assigned_to)) {
 
-                // We use slightly different language for assets versus other things, since they are the only
-                // item that has a status label
-                if (destination =='hardware') {
-                    return '<span  data-tooltip="true" title="{{ trans('admin/hardware/general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
-                } else {
-                    return '<span  data-tooltip="true" title="{{ trans('general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
-                }
+                return '<span  data-tooltip="true" title="{{ trans('general.undeployable_tooltip') }}"><a class="btn btn-sm bg-maroon disabled">{{ trans('general.checkout') }}</a></span>';
 
             // The user is allowed to check items in
             } else if (row.available_actions.checkin == true)  {
@@ -718,20 +708,6 @@
 
 
     }
-
-
-    // This is only used by the requestable assets section
-    function assetRequestActionsFormatter (row, value) {
-        if (value.assigned_to_self == true){
-            return '<button class="btn btn-danger btn-sm btn-block disabled" data-tooltip="true" title="{{ trans('admin/hardware/message.requests.cancel') }}">{{ trans('button.cancel') }}</button>';
-        } else if (value.available_actions.cancel == true)  {
-            return '<form action="{{ config('app.url') }}/account/request-asset/' + value.id + '/cancel" method="POST">@csrf<button class="btn btn-danger btn-block btn-sm" data-tooltip="true" title="{{ trans('admin/hardware/message.requests.cancel') }}">{{ trans('button.cancel') }}</button></form>';
-        } else if (value.available_actions.request == true)  {
-            return '<form action="{{ config('app.url') }}/account/request-asset/'+ value.id + '" method="POST">@csrf<button class="btn btn-block btn-primary btn-sm" data-tooltip="true" title="{{ trans('general.request_item') }}">{{ trans('button.request') }}</button></form>';
-        }
-
-    }
-
 
 
     var formatters = [
@@ -1619,20 +1595,6 @@
         },
         @endcan
 
-        @can('update', \App\Models\Asset::class)
-        btnAddMaintenance: {
-            text: '{{ trans('button.add_maintenance') }}',
-            icon: 'fa-solid fa-screwdriver-wrench',
-            event () {
-                window.location.href = '{{ route('maintenances.create', ['asset_id' => (isset($asset)) ? $asset->id :'' ]) }}';
-            },
-            attributes: {
-                title: '{{ trans('general.create') }}',
-            }
-        },
-        @endcan
-
-
         btnExport: {
             text: '{{ trans('admin/hardware/general.custom_export') }}',
             icon: 'fa-solid fa-file-csv',
@@ -1873,25 +1835,6 @@
             icon: 'fa fa-plus',
             event () {
                 window.location.href = '{{ route('departments.create') }}';
-            },
-            attributes: {
-                title: '{{ trans('general.create') }}',
-                @if ($snipeSettings->shortcuts_enabled == 1)
-                accesskey: 'n'
-                @endif
-            }
-        },
-    });
-    @endcan
-
-    @can('update', \App\Models\Asset::class)
-    // Custom Field table buttons
-    window.maintenanceButtons = () => ({
-        btnAdd: {
-            text: '{{ trans('general.create') }}',
-            icon: 'fa fa-plus',
-            event () {
-                window.location.href = '{{ route('maintenances.create', ['asset_id' => (isset($asset)) ? $asset->id :'' ]) }}';
             },
             attributes: {
                 title: '{{ trans('general.create') }}',

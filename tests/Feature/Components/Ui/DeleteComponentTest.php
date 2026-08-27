@@ -58,6 +58,24 @@ class DeleteComponentTest extends TestCase implements TestsFullMultipleCompanies
             ->assertRedirect(route('components.show', $component));
     }
 
+    public function testCannotDeleteOffAssetParentWhileChildRemainsLinked(): void
+    {
+        $parent = ComponentInstance::factory()->create();
+        $child = ComponentInstance::factory()->asChildOf($parent)->create();
+
+        $this->actingAs(User::factory()->deleteComponents()->create())
+            ->delete(route('components.destroy', $parent))
+            ->assertSessionHas(
+                'error',
+                'Components with child components cannot be deleted. Detach or delete the child components first.'
+            )
+            ->assertRedirect(route('components.show', $parent));
+
+        $this->assertNotSoftDeleted($parent);
+        $this->assertNotSoftDeleted($child);
+        $this->assertSame($parent->id, $child->fresh()->parent_component_instance_id);
+    }
+
     public function testDeletingComponentIsLogged(): void
     {
         $user = User::factory()->deleteComponents()->create();

@@ -39,7 +39,7 @@ class CreateLicenseTest extends TestCase
         $response->assertRedirect(route('licenses.create'));
         $response->assertInvalid(['purchase_date']);
         $response->assertSessionHasErrors(['purchase_date']);
-        $this->followRedirects($response)->assertSee(trans('general.error'));
+        $this->followRedirects($response)->assertSee('alert-danger');
         $this->assertFalse(License::where('name', 'Test Invalid License')->exists());
 
     }

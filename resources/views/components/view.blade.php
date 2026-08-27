@@ -34,6 +34,7 @@
     $isDestroyed = $lifecycleStatus === \App\Models\ComponentInstance::LIFECYCLE_DESTROYED;
     $isSoldReturned = $lifecycleStatus === \App\Models\ComponentInstance::LIFECYCLE_SOLD_RETURNED;
     $isLifecycleManaged = !$isDestroyed && !$isSoldReturned;
+    $canDestroyComponent = \Illuminate\Support\Facades\Gate::allows('destroy', $component);
     $returnTo = route('components.show', $component);
     $statusTransitions = [];
 
@@ -66,12 +67,12 @@
             ];
         }
 
-        if (!$isInstalled && !$isDestructionPending) {
+        if ($canDestroyComponent && !$isInstalled && !$isDestructionPending) {
             $statusTransitions[] = [
                 'label' => \App\Models\ComponentInstance::lifecycleStatusLabel(\App\Models\ComponentInstance::LIFECYCLE_DESTRUCTION_PENDING),
                 'target' => '#componentDestructionPendingModal',
             ];
-        } elseif ($isDestructionPending) {
+        } elseif ($canDestroyComponent && $isDestructionPending) {
             $statusTransitions[] = [
                 'label' => \App\Models\ComponentInstance::lifecycleStatusLabel(\App\Models\ComponentInstance::LIFECYCLE_DESTROYED),
                 'target' => '#componentDestroyedModal',
@@ -700,7 +701,7 @@
             </div>
         @endif
 
-        @if (!$isDestroyed && !$isDestructionPending)
+        @if ($canDestroyComponent && !$isDestroyed && !$isDestructionPending)
             <div class="modal fade" id="componentDestructionPendingModal" data-component-status-modal tabindex="-1" role="dialog" aria-labelledby="componentDestructionPendingModalLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
@@ -730,7 +731,7 @@
             </div>
         @endif
 
-        @if ($isDestructionPending)
+        @if ($canDestroyComponent && $isDestructionPending)
             <div class="modal fade" id="componentDestroyedModal" data-component-status-modal tabindex="-1" role="dialog" aria-labelledby="componentDestroyedModalLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">

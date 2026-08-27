@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Asset;
 use App\Models\AssetImage;
-use App\Models\User;
+use App\Services\SafeRasterImageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -16,41 +17,21 @@ use Symfony\Component\HttpFoundation\Response;
 
 class AssetImageController extends Controller
 {
-    /**
-     * Determine if the given user is allowed to upload images.
-     */
-    private function canUpload(User $user): bool
-    {
-        return $user->hasAccess('superuser') ||
-            $user->hasAccess('admin') ||
-            $user->hasAccess('supervisor') ||
-            $user->hasAccess('senior-refurbisher') ||
-            $user->hasAccess('refurbisher');
-    }
-
-    /**
-     * Determine if the given user is allowed to delete images.
-     */
-    private function canDelete(User $user): bool
-    {
-        return $user->hasAccess('superuser') ||
-            $user->hasAccess('admin') ||
-            $user->hasAccess('supervisor') ||
-            $user->hasAccess('senior-refurbisher');
+    public function __construct(
+        private SafeRasterImageService $rasterImages,
+    ) {
     }
 
     public function store(Request $request, Asset $asset): Response|JsonResponse
     {
         $this->authorize('update', $asset);
-
-        $user = $request->user();
-        abort_unless($this->canUpload($user), 403);
+        $this->authorize('uploadImages', $asset);
 
         $request->validate([
             'image' => ['required', 'array'],
             'image.*' => ['image', 'mimes:jpeg,jpg,png,gif', 'max:5120'],
             'caption' => ['required', 'array'],
-            'caption.*' => ['required', 'string'],
+            'caption.*' => ['required', 'string', 'max:255'],
         ]);
 
         if (count($request->file('image')) !== count($request->input('caption'))) {
@@ -59,23 +40,32 @@ class AssetImageController extends Controller
             ]);
         }
 
-        if ($asset->images()->count() + count($request->file('image')) > 30) {
-            throw ValidationException::withMessages([
-                'image' => trans('general.too_many_asset_images'),
-            ]);
-        }
-
         $stored = [];
         $paths = [];
         $firstRelativePath = null;
-        $nextSortOrder = (int) $asset->images()->max('sort_order');
 
         DB::beginTransaction();
 
         try {
+            Asset::query()->whereKey($asset->getKey())->lockForUpdate()->firstOrFail();
+
+            if ($asset->images()->count() + count($request->file('image')) > 30) {
+                throw ValidationException::withMessages([
+                    'image' => trans('general.too_many_asset_images'),
+                ]);
+            }
+
+            $nextSortOrder = (int) $asset->images()->max('sort_order');
+
             foreach ($request->file('image') as $index => $file) {
-                $filename = $asset->id.'_'.Str::uuid().'.'.$file->getClientOriginalExtension();
-                $path = $file->storeAs('assets/'.$asset->id, $filename, 'public');
+                $storedImage = $this->rasterImages->storePublic(
+                    $file,
+                    'assets/'.$asset->id,
+                    $asset->id.'_',
+                    'image.'.$index
+                );
+                $path = $storedImage['path'];
+                $paths[] = $path;
 
                 $image = $asset->images()->create([
                     'file_path' => $path,
@@ -88,8 +78,6 @@ class AssetImageController extends Controller
                     $firstRelativePath = Str::after($path, 'assets/');
                 }
 
-                $paths[] = $path;
-
                 $stored[] = [
                     'id' => $image->id,
                     'url' => Storage::disk('public')->url($path),
@@ -101,7 +89,9 @@ class AssetImageController extends Controller
                     $asset->image = $firstRelativePath;
                 }
                 $asset->image_override_enabled = true;
-                $asset->save();
+                if (! $asset->save()) {
+                    throw new \RuntimeException('Unable to persist the asset image pointer.');
+                }
             }
 
             DB::commit();
@@ -113,12 +103,35 @@ class AssetImageController extends Controller
             return redirect()
                 ->route('hardware.show', $asset)
                 ->with('success', trans('general.file_upload_success'));
+        } catch (ValidationException $e) {
+            DB::rollBack();
+
+            foreach ($paths as $path) {
+                if (! Storage::disk('public')->delete($path)) {
+                    Log::critical('Unable to remove a rejected normalized asset image.', [
+                        'asset_id' => $asset->getKey(),
+                        'path' => $path,
+                    ]);
+                }
+            }
+
+            throw $e;
         } catch (\Throwable $e) {
             DB::rollBack();
 
             foreach ($paths as $path) {
-                Storage::disk('public')->delete($path);
+                if (! Storage::disk('public')->delete($path)) {
+                    Log::critical('Unable to remove an asset image after persistence failed.', [
+                        'asset_id' => $asset->getKey(),
+                        'path' => $path,
+                    ]);
+                }
             }
+
+            Log::error('Asset image upload failed and was rolled back.', [
+                'asset_id' => $asset->getKey(),
+                'exception' => $e,
+            ]);
 
             if ($request->expectsJson()) {
                 return response()->json(['message' => trans('general.image_upload_failed')], 500);
@@ -137,41 +150,43 @@ class AssetImageController extends Controller
         }
 
         $this->authorize('update', $asset);
-
-        $user = $request->user();
-        abort_unless($this->canUpload($user), 403);
+        $this->authorize('uploadImages', $asset);
 
         $request->validate([
-            'caption' => ['required', 'string'],
+            'caption' => ['required', 'string', 'max:255'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'make_cover' => ['nullable', 'boolean'],
             'image_override_enabled' => ['nullable', 'boolean'],
         ]);
 
-        $assetImage->caption = $request->input('caption');
+        DB::transaction(function () use ($asset, $assetImage, $request): void {
+            $assetImage->caption = $request->input('caption');
 
-        if ($request->filled('sort_order')) {
-            $assetImage->sort_order = (int) $request->input('sort_order');
-        }
+            if ($request->filled('sort_order')) {
+                $assetImage->sort_order = (int) $request->input('sort_order');
+            }
 
-        if ($request->boolean('make_cover')) {
-            DB::transaction(function () use ($asset, $assetImage) {
+            if ($request->boolean('make_cover')) {
                 $asset->images()->where('id', '!=', $assetImage->id)->increment('sort_order');
                 $assetImage->sort_order = 0;
-                $assetImage->save();
 
                 $asset->image = Str::after($assetImage->file_path, 'assets/');
                 $asset->image_override_enabled = true;
-                $asset->save();
-            });
-        } else {
-            $assetImage->save();
-        }
 
-        if ($request->has('image_override_enabled')) {
-            $asset->image_override_enabled = $request->boolean('image_override_enabled');
-            $asset->save();
-        }
+            }
+
+            if (! $assetImage->save()) {
+                throw new \RuntimeException('Unable to persist the asset image metadata.');
+            }
+
+            if ($request->has('image_override_enabled')) {
+                $asset->image_override_enabled = $request->boolean('image_override_enabled');
+            }
+
+            if ($asset->isDirty() && ! $asset->save()) {
+                throw new \RuntimeException('Unable to persist the asset image settings.');
+            }
+        });
 
         return back()->with('success', trans('general.image_caption_updated'));
     }
@@ -184,20 +199,50 @@ class AssetImageController extends Controller
         }
 
         $this->authorize('update', $asset);
-
-
-        $user = $request->user();
-        abort_unless($this->canDelete($user), 403);
+        $this->authorize('manageImages', $asset);
 
         $relative = Str::after($assetImage->file_path, 'assets/');
+        $disk = Storage::disk('public');
+        $contents = null;
 
-        Storage::disk('public')->delete($assetImage->file_path);
-        $assetImage->delete();
+        try {
+            if ($disk->exists($assetImage->file_path)) {
+                $contents = $disk->get($assetImage->file_path);
 
-        if ($asset->image === $relative || $asset->images()->count() === 0) {
-            $asset->syncImageOverridePointers();
+                if (! $disk->delete($assetImage->file_path)) {
+                    throw new \RuntimeException('Unable to delete the asset image from storage.');
+                }
+            }
+
+            DB::transaction(function () use ($asset, $assetImage, $relative) {
+                if (! $assetImage->delete()) {
+                    throw new \RuntimeException('Unable to delete the asset image record.');
+                }
+
+                if ($asset->image === $relative || $asset->images()->count() === 0) {
+                    $asset->syncImageOverridePointers();
+                }
+            });
+
+            return back()->with('success', trans('general.image_deleted'));
+        } catch (\Throwable $exception) {
+            if (is_string($contents) && ! $disk->exists($assetImage->file_path)) {
+                if (! $disk->put($assetImage->file_path, $contents)) {
+                    Log::critical('Unable to restore an asset image after database rollback.', [
+                        'asset_id' => $asset->getKey(),
+                        'asset_image_id' => $assetImage->getKey(),
+                        'path' => $assetImage->file_path,
+                    ]);
+                }
+            }
+
+            Log::error('Asset image deletion failed and was rolled back.', [
+                'asset_id' => $asset->getKey(),
+                'asset_image_id' => $assetImage->getKey(),
+                'exception' => $exception,
+            ]);
+
+            return back()->with('error', trans('general.image_delete_failed'));
         }
-
-        return back()->with('success', trans('general.image_deleted'));
     }
 }

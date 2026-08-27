@@ -46,4 +46,9 @@ class ComponentInstancePolicy extends SnipePermissionsPolicy
     {
         return $user->hasAccess('components.verify');
     }
+
+    public function destroy(User $user, ?ComponentInstance $item = null)
+    {
+        return $user->hasAccess('components.destroy');
+    }
 }

@@ -5,26 +5,28 @@ namespace App\Http\Transformers;
 use App\Helpers\Helper;
 use App\Helpers\StorageHelper;
 use App\Models\Actionlog;
+use App\Models\Maintenance;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
 class UploadedFilesTransformer
 {
-    public function transformFiles(Collection $files, $total)
+    public function transformFiles(Collection $files, $total, ?Model $parent = null)
     {
         $array = [];
         foreach ($files as $file) {
-            $array[] = self::transformFile($file);
+            $array[] = self::transformFile($file, $parent);
         }
 
         return (new DatatablesTransformer)->transformDatatables($array, $total);
     }
 
 
-    public function transformFile(Actionlog $file)
+    public function transformFile(Actionlog $file, ?Model $parent = null)
     {
-        $snipeModel = $file->item_type;
+        $parent ??= $file->item;
 
         $array = [
             'id' => (int) $file->id,
@@ -50,7 +52,10 @@ class UploadedFilesTransformer
         ];
 
         $permissions_array['available_actions'] = [
-            'delete' => (Gate::allows('update', $snipeModel) && ($file->deleted_at == '')),
+            'delete' => ($parent
+                && ! ($parent instanceof Maintenance)
+                && Gate::allows('deleteFiles', $parent)
+                && ($file->deleted_at == '')),
         ];
 
         $array += $permissions_array;

@@ -62,7 +62,7 @@ class ModelNumberComponentTemplateController extends Controller
         ModelNumber $modelNumber,
         ModelNumberComponentTemplate $componentTemplate
     ): RedirectResponse {
-        $this->authorize('update', $model);
+        $this->authorize('manageSpecificationCleanup', $model);
         $this->ensureModelNumber($model, $modelNumber);
         $this->ensureTemplate($modelNumber, $componentTemplate);
 

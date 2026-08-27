@@ -155,7 +155,7 @@ class CompanyPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('companies.show', $this->name, $this->id);
+        return \App\Support\RouteLink::to('companies.show', $this->name, $this->id);
     }
 
     /**

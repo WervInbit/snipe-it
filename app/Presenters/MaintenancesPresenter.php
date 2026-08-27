@@ -151,15 +151,6 @@ class MaintenancesPresenter extends Presenter
                 'title' => trans('general.updated_at'),
                 'visible' => false,
                 'formatter' => 'dateDisplayFormatter',
-            ],[
-                'field' => 'actions',
-                'searchable' => false,
-                'sortable' => false,
-                'switchable' => false,
-                'title' => trans('table.actions'),
-                'visible' => true,
-                'formatter' => 'maintenancesActionsFormatter',
-                'printIgnore' => true,
             ],
         ];
 

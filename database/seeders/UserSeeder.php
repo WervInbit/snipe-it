@@ -7,19 +7,18 @@ use App\Models\User;
 use App\Models\TestAudit;
 use App\Models\TestRun;
 use Illuminate\Database\Eloquent\Factories\Sequence;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
-class UserSeeder extends Seeder
+class UserSeeder extends DestructiveFixtureSeeder
 {
     /**
      * Run the database seeds.
      *
      * @return void
      */
-    public function run()
+    protected function seedFixtures(): void
     {
 
         // Disable foreign key checks temporarily

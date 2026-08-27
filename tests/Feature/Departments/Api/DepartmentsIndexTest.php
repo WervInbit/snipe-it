@@ -12,7 +12,9 @@ class DepartmentsIndexTest extends TestCase
 {
     public function testViewingDepartmentIndexRequiresAuthentication()
     {
-        $this->getJson(route('api.departments.index'))->assertRedirect();
+        User::factory()->create();
+
+        $this->getJson(route('api.departments.index'))->assertUnauthorized();
     }
 
     public function testViewingDepartmentIndexRequiresPermission()

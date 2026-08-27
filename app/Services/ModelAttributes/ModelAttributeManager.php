@@ -4,8 +4,9 @@ namespace App\Services\ModelAttributes;
 
 use App\Models\Asset;
 use App\Models\AssetAttributeOverride;
-use App\Models\ModelNumber;
 use App\Models\AttributeDefinition;
+use App\Models\ComponentDefinitionAttribute;
+use App\Models\ModelNumber;
 use App\Models\ModelNumberAttribute;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -366,60 +367,76 @@ class ModelAttributeManager
      */
     public function componentResolvedSpecDefinitionIds(ModelNumber $modelNumber): array
     {
-        $modelNumber->loadMissing([
-            'componentTemplates.componentDefinition.attributeContributions.definition',
-            'componentTemplates.componentDefinition.subcomponentTemplates.childComponentDefinition.attributeContributions.definition',
-        ]);
-
-        return $modelNumber->componentTemplates
-            ->flatMap(function ($template) {
-                $attributes = collect($template->componentDefinition?->attributeContributions ?? []);
-
-                foreach ($template->componentDefinition?->subcomponentTemplates ?? [] as $subcomponentTemplate) {
-                    $attributes = $attributes->merge(
-                        $subcomponentTemplate->childComponentDefinition?->attributeContributions ?? collect()
-                    );
-                }
-
-                return $attributes;
-            })
-            ->filter(fn ($contribution) => $contribution->definition && $contribution->resolves_to_spec)
-            ->pluck('attribute_definition_id')
-            ->map(fn ($id) => (int) $id)
-            ->unique()
-            ->values()
-            ->all();
+        return $this->componentResolvedDefinitionIds($modelNumber, numericOnly: false);
     }
 
     public function componentResolvedNumericDefinitionIds(ModelNumber $modelNumber): array
+    {
+        return $this->componentResolvedDefinitionIds($modelNumber, numericOnly: true);
+    }
+
+    /**
+     * Keep this traversal explicit. Deeply nested dynamic Collection pipelines
+     * over Eloquent relations caused PHPStan to exhaust 2 GiB while inferring
+     * the possible generic types for this service.
+     *
+     * @return array<int, int>
+     */
+    private function componentResolvedDefinitionIds(ModelNumber $modelNumber, bool $numericOnly): array
     {
         $modelNumber->loadMissing([
             'componentTemplates.componentDefinition.attributeContributions.definition',
             'componentTemplates.componentDefinition.subcomponentTemplates.childComponentDefinition.attributeContributions.definition',
         ]);
 
-        $numericIds = $modelNumber->componentTemplates
-            ->flatMap(function ($template) {
-                $attributes = collect($template->componentDefinition?->attributeContributions ?? []);
+        $definitionIds = [];
 
-                foreach ($template->componentDefinition?->subcomponentTemplates ?? [] as $subcomponentTemplate) {
-                    $attributes = $attributes->merge(
-                        $subcomponentTemplate->childComponentDefinition?->attributeContributions ?? collect()
-                    );
+        foreach ($modelNumber->componentTemplates as $template) {
+            $componentDefinition = $template->componentDefinition;
+            if (! $componentDefinition) {
+                continue;
+            }
+
+            $this->appendResolvedDefinitionIds(
+                $definitionIds,
+                $componentDefinition->attributeContributions,
+                $numericOnly
+            );
+
+            foreach ($componentDefinition->subcomponentTemplates as $subcomponentTemplate) {
+                $childDefinition = $subcomponentTemplate->childComponentDefinition;
+                if (! $childDefinition) {
+                    continue;
                 }
 
-                return $attributes;
-            })
-            ->filter(fn ($contribution) => $contribution->definition
-                && $contribution->definition->isNumericDatatype()
-                && $contribution->resolves_to_spec)
-            ->pluck('attribute_definition_id')
-            ->map(fn ($id) => (int) $id)
-            ->unique()
-            ->values()
-            ->all();
+                $this->appendResolvedDefinitionIds(
+                    $definitionIds,
+                    $childDefinition->attributeContributions,
+                    $numericOnly
+                );
+            }
+        }
 
-        return $numericIds;
+        return array_values($definitionIds);
+    }
+
+    /**
+     * @param array<int, int> $definitionIds
+     * @param iterable<mixed> $contributions
+     */
+    private function appendResolvedDefinitionIds(array &$definitionIds, iterable $contributions, bool $numericOnly): void
+    {
+        foreach ($contributions as $contribution) {
+            if (! $contribution instanceof ComponentDefinitionAttribute
+                || ! $contribution->resolves_to_spec
+                || ! $contribution->definition
+                || ($numericOnly && ! $contribution->definition->isNumericDatatype())) {
+                continue;
+            }
+
+            $definitionId = (int) $contribution->attribute_definition_id;
+            $definitionIds[$definitionId] = $definitionId;
+        }
     }
 }
 

@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * SnipePermissionsPolicy provides methods for handling the granular permissions used throughout Snipe-IT.
@@ -35,6 +36,10 @@ abstract class SnipePermissionsPolicy
 
     public function before(User $user, $ability, $item)
     {
+        if (in_array($ability, $this->deniedAbilities(), true)) {
+            return false;
+        }
+
         /**
          * If an admin, they can do all item related tasks, but ARE constrained by FMCSA company access.
          * That scoping happens on the model level (except for the Users model) via the Companyable trait.
@@ -45,7 +50,7 @@ abstract class SnipePermissionsPolicy
          *
          * The *superuser* global permission gets handled in the AuthServiceProvider before() method.
          *
-         * @see https://snipe-it.readme.io/docs/permissions
+         * @see config/permissions.php and docs/v1-operational-role-capability-matrix.md
          */
 
         if ($user->hasAccess('admin') || $user->hasAccess('supervisor')) {
@@ -98,6 +103,50 @@ abstract class SnipePermissionsPolicy
     public function files(User $user, $item = null)
     {
         return $user->hasAccess($this->columnName().'.files');
+    }
+
+    /**
+     * Abilities that remain denied even for administrators.
+     *
+     * @return array<int, string>
+     */
+    protected function deniedAbilities(): array
+    {
+        return [];
+    }
+
+    /**
+     * File reads and mutations are intentionally separate abilities. Most
+     * resources use their normal view/edit permissions, while the legacy
+     * accessory, consumable, and license policies opt into their dedicated
+     * "*.files" permission.
+     */
+    public function viewFiles(User $user, $item = null)
+    {
+        if ($this->usesDedicatedFilePermission()) {
+            return $this->files($user, $item);
+        }
+
+        return $this->view($user, $item) || $this->update($user, $item);
+    }
+
+    public function createFiles(User $user, $item = null)
+    {
+        return $this->usesDedicatedFilePermission()
+            ? $this->files($user, $item)
+            : $this->update($user, $item);
+    }
+
+    public function deleteFiles(User $user, $item = null)
+    {
+        return $this->usesDedicatedFilePermission()
+            ? $this->files($user, $item)
+            : $this->update($user, $item);
+    }
+
+    protected function usesDedicatedFilePermission(): bool
+    {
+        return false;
     }
 
     /**

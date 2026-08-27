@@ -18,6 +18,14 @@ class CheckoutAccessoryMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public mixed $item;
+    public mixed $admin;
+    public mixed $note;
+    public mixed $checkout_qty;
+    public mixed $target;
+    public mixed $acceptance;
+    public mixed $settings;
+
     /**
      * Create a new message instance.
      */

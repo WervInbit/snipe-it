@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Importér',
     'import_this_file'      => 'Kortfelter og behandl denne fil',
     'importing'         	=> 'Importerer',
-    'importing_help'        => 'Du kan importere assets, tilbehør, licenser, komponenter, forbrugsvarer og brugere via CSV-fil. <br><br>CSV skal være kommasepareret og formateret med overskrifter, der matcher dem i <a href="https://snipe-it.readme.io/docs/importing" target="_new">sample CSV\'er i dokumentationen</a>.',
+    'importing_help'        => 'Du kan importere assets, tilbehør, licenser, komponenter, forbrugsvarer og brugere via CSV-fil. <br><br>CSV skal være kommasepareret og formateret med overskrifter, der matcher dem i <a href=":fork_documentation_url" target="_new">sample CSV\'er i dokumentationen</a>.',
     'import-history'        => 'Importhistorik',
     'asset_maintenance'        => 'Vedligeholdelse af aktiv',
     'asset_maintenance_report' => 'Aktiv vedligeholdelsesrapport',

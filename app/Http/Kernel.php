@@ -16,7 +16,7 @@ class Kernel extends HttpKernel
     protected $middleware = [
         \App\Http\Middleware\TrustProxies::class,
         \App\Http\Middleware\NoSessionStore::class,
-        \Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance::class,
+        \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
         \Illuminate\Session\Middleware\StartSession::class,
         \Illuminate\View\Middleware\ShareErrorsFromSession::class,
         \App\Http\Middleware\CheckForSetup::class,
@@ -42,7 +42,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\CheckLocale::class,
             \App\Http\Middleware\CheckUserIsActivated::class,
             \App\Http\Middleware\CheckForTwoFactor::class,
-            \Laravel\Passport\Http\Middleware\CreateFreshApiToken::class,
+            \App\Http\Middleware\IssueFreshApiTokenIfTwoFactorComplete::class,
             \App\Http\Middleware\AssetCountForSidebar::class,
             \Illuminate\Session\Middleware\AuthenticateSession::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
@@ -50,6 +50,8 @@ class Kernel extends HttpKernel
 
         'api' => [
             'auth:api',
+            \App\Http\Middleware\CheckUserIsActivated::class,
+            \App\Http\Middleware\EnforceApiTwoFactorEnrollment::class,
             \App\Http\Middleware\CheckLocale::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],

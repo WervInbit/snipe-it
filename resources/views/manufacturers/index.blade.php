@@ -15,23 +15,6 @@
       <div class="box box-default">
         <div class="box-body">
 
-    @if ($manufacturer_count == 0)
-
-            <form action="{{ route('manufacturers.seed') }}" method="POST">
-              {{ csrf_field() }}
-            <div class="callout callout-info">
-              <p>
-                  {{ trans('general.seeding.manufacturers.prompt') }}
-                <button class="btn btn-sm btn-primary hidden-print" rel="noopener">
-                  {{ trans('general.seeding.manufacturers.button') }}
-                </button>
-              </p>
-            </div>
-            </form>
-
-      @else
-
-
             <table
               data-columns="{{ \App\Presenters\ManufacturerPresenter::dataTableLayout() }}"
               data-cookie-id-table="manufacturersTable"
@@ -48,8 +31,6 @@
                 }'>
             </table>
 
-
-  @endif
         </div><!-- /.box-body -->
       </div><!-- /.box -->
     </div>

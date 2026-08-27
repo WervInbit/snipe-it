@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Import',
     'import_this_file'      => 'Mapiraj polja i obradi ovu datoteku',
     'importing'         	=> 'Uvoženje',
-    'importing_help'        => 'Možete uvesti imovinu, opremu, licence, komponente, potrošnu robu i korisnike uz pomoć CSV datoteke. <br><br>Podaci u CSV datoteci trebaju biti odvojeni zarezom i formatirani sa zaglavljima koji se poklapaju sa <a href="https://snipe-it.readme.io/docs/importing" target="_new">primerima CSV-a u dokumentaciji</a>.',
+    'importing_help'        => 'Možete uvesti imovinu, opremu, licence, komponente, potrošnu robu i korisnike uz pomoć CSV datoteke. <br><br>Podaci u CSV datoteci trebaju biti odvojeni zarezom i formatirani sa zaglavljima koji se poklapaju sa <a href=":fork_documentation_url" target="_new">primerima CSV-a u dokumentaciji</a>.',
     'import-history'        => 'Import History',
     'asset_maintenance'        => 'Održavanje imovine',
     'asset_maintenance_report' => 'Izveštaj o održavanju imovine',

@@ -470,6 +470,8 @@ class Actionlog extends SnipeModel
             $object = 'models';
         } elseif ($this->item_type == ComponentInstance::class) {
             $object = 'component-instances';
+        } elseif ($this->item_type == ModelNumber::class) {
+            $object = 'model-numbers';
         } elseif ($this->item_type == WorkOrder::class) {
             $object = 'work-orders';
         }
@@ -508,6 +510,8 @@ class Actionlog extends SnipeModel
             return 'private_uploads/locations/'.$this->filename;
         case Maintenance::class:
              return 'private_uploads/maintenances/'.$this->filename;
+        case ModelNumber::class:
+            return 'private_uploads/model_numbers/'.$this->filename;
         case User::class:
             return 'private_uploads/users/'.$this->filename;
         case WorkOrder::class:

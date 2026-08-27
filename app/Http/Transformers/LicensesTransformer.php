@@ -26,7 +26,7 @@ class LicensesTransformer
             'name' => e($license->name),
             'company' => ($license->company) ? ['id' => (int) $license->company->id, 'name'=> e($license->company->name)] : null,
             'manufacturer' =>  ($license->manufacturer) ? ['id' => (int) $license->manufacturer->id, 'name'=> e($license->manufacturer->name)] : null,
-            'product_key' => (Gate::allows('viewKeys', License::class)) ? e($license->serial) : '------------',
+            'product_key' => Gate::allows('viewKeys', $license) ? e($license->serial) : '------------',
             'order_number' => ($license->order_number) ? e($license->order_number) : null,
             'purchase_order' => ($license->purchase_order) ? e($license->purchase_order) : null,
             'purchase_date' => Helper::getFormattedDateObject($license->purchase_date, 'date'),

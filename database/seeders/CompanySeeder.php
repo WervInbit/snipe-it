@@ -3,19 +3,18 @@
 namespace Database\Seeders;
 
 use App\Models\Company;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 
-class CompanySeeder extends Seeder
+class CompanySeeder extends DestructiveFixtureSeeder
 {
     /**
      * Run the database seeds.
      *
      * @return void
      */
-    public function run()
+    protected function seedFixtures(): void
     {
         Log::debug('Seed companies');
         Schema::disableForeignKeyConstraints();

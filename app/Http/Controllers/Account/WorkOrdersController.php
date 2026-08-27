@@ -30,7 +30,7 @@ class WorkOrdersController extends Controller
     public function show(Request $request, WorkOrder $workOrder): View
     {
         Gate::authorize('portal.view');
-        $this->authorize('view', $workOrder);
+        $this->authorize('viewPortal', $workOrder);
 
         $workOrder->load([
             'company',

@@ -3,6 +3,13 @@
 return [
 
     /*
+    | The database setting remains the administrator preference. This runtime
+    | gate can disable every LDAP entry point for an environment whose
+    | directory integration has not been validated.
+    */
+    'ldap_integration_enabled' => env('LDAP_INTEGRATION_ENABLED', true),
+
+    /*
     |--------------------------------------------------------------------------
     | Authentication Defaults
     |--------------------------------------------------------------------------

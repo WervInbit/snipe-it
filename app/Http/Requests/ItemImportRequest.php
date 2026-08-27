@@ -4,8 +4,8 @@ namespace App\Http\Requests;
 
 use App\Models\Import;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class ItemImportRequest extends FormRequest
 {
@@ -27,7 +27,11 @@ class ItemImportRequest extends FormRequest
     public function rules()
     {
         return [
-            'import-type' => 'required',
+            'import-type' => [
+                'required',
+                'string',
+                Rule::in(Import::SUPPORTED_TYPES),
+            ],
         ];
     }
 
@@ -42,7 +46,6 @@ class ItemImportRequest extends FormRequest
         $classString = "App\\Importer\\{$class}Importer";
         $importer = new $classString($filename);
         $import->field_map = request('column-mappings');
-        $import->created_by = auth()->id();
         $import->save();
         $fieldMappings = [];
 

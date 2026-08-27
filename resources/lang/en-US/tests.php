@@ -87,4 +87,5 @@ return [
     'add_photo_cta' => 'Add photo',
     'note_cta' => 'Note',
     'photo_cta' => 'Photo',
+    'evidence_privacy_notice' => 'Private workflow evidence: access is controlled. Do not photograph passwords, recovery codes, or customer/repair credentials.',
 ];

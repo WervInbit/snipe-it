@@ -21,8 +21,8 @@ class GoogleAuthController extends Controller
         parent::__construct();
         $setting = Setting::getSettings();
         config(['services.google.redirect' => config('app.url').'/google/callback']);
-        config(['services.google.client_id' => $setting->google_client_id]);
-        config(['services.google.client_secret' => $setting->google_client_secret]);
+        config(['services.google.client_id' => $setting?->google_client_id]);
+        config(['services.google.client_secret' => $setting?->google_client_secret]);
     }
 
     public function redirectToGoogle()
@@ -48,17 +48,27 @@ class GoogleAuthController extends Controller
         }
 
 
-        $user = User::where('username', $socialUser->getEmail())->first();
+        $user = User::where('username', $socialUser->getEmail())
+            ->whereNull('deleted_at')
+            ->first();
 
+        $user = User::verifyExactUsernameMatch($user, (string) $socialUser->getEmail());
 
         if ($user) {
+            if (! $user->activated) {
+                Log::debug('Google user '.$socialUser->getEmail().' is deactivated in Snipe-IT');
+
+                return redirect()->route('login')
+                    ->withErrors(['username' => [trans('auth/message.account_not_activated')]]);
+            }
+
             Log::debug('Google user '.$socialUser->getEmail().' found in Snipe-IT');
             $user->update([
                 'avatar'   => $socialUser->avatar,
             ]);
 
             Auth::login($user, true);
-            return redirect()->route('home');
+            return redirect()->intended(route('home'));
         }
 
         Log::debug('Google user '.$socialUser->getEmail().' NOT found in Snipe-IT');

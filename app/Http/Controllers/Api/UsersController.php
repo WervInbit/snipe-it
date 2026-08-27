@@ -21,19 +21,47 @@ use App\Models\Consumable;
 use App\Models\License;
 use App\Models\User;
 use App\Notifications\CurrentInventory;
+use App\Services\Users\UserPrivilegeService;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\DeleteUserRequest;
 use Illuminate\Http\JsonResponse;
 
 class UsersController extends Controller
 {
+    private const MUTABLE_PROFILE_FIELDS = [
+        'address',
+        'city',
+        'country',
+        'department_id',
+        'employee_num',
+        'first_name',
+        'gravatar',
+        'jobtitle',
+        'last_name',
+        'locale',
+        'location_id',
+        'manager_id',
+        'mobile',
+        'notes',
+        'phone',
+        'remote',
+        'state',
+        'start_date',
+        'end_date',
+        'scim_externalid',
+        'vip',
+        'autoassign_licenses',
+        'website',
+        'zip',
+    ];
+
     /**
      * Display a listing of the resource.
      *
@@ -349,6 +377,8 @@ class UsersController extends Controller
      */
     public function selectlist(Request $request) : array
     {
+        $this->authorize('view.selectlists');
+
         $users = User::select(
             [
                 'users.id',
@@ -405,23 +435,30 @@ class UsersController extends Controller
      * @since [v4.0]
      * @param  \Illuminate\Http\Request  $request
      */
-    public function store(SaveUserRequest $request) : JsonResponse
+    public function store(SaveUserRequest $request, UserPrivilegeService $userPrivileges) : JsonResponse
     {
         $this->authorize('create', User::class);
+        $userPrivileges->authorizeSubmittedPrivileges(
+            $request->user(),
+            $request->exists('permissions'),
+            $request->exists('groups')
+        );
 
         $user = new User;
-        $user->fill($request->all());
+        $user->fill($request->only(array_merge(self::MUTABLE_PROFILE_FIELDS, [
+            'activated',
+            'email',
+            'ldap_import',
+            'username',
+        ])));
         $user->company_id = Company::getIdForCurrentUser($request->input('company_id'));
         $user->created_by = auth()->id();
 
-        if ($request->has('permissions')) {
-            $permissions_array = $request->input('permissions');
-
-            // Strip out the superuser permission if the API user isn't a superadmin
-            if (! auth()->user()->isSuperUser()) {
-                unset($permissions_array['superuser']);
-            }
-            $user->permissions = $permissions_array;
+        if ($request->exists('permissions')) {
+            $user->permissions = $userPrivileges->permissionsForWrite(
+                $request->user(),
+                $request->input('permissions')
+            );
         }
 
         // 
@@ -433,13 +470,19 @@ class UsersController extends Controller
 
         app('App\Http\Requests\ImageUploadRequest')->handleImages($user, 600, 'image', 'avatars', 'avatar');
         
-        if ($user->save()) {
-            if ($request->filled('groups')) {
-                $user->groups()->sync($request->input('groups'));
-            } else {
-                $user->groups()->sync([]);
+        $saved = DB::transaction(function () use ($request, $user): bool {
+            if (! $user->save()) {
+                return false;
             }
 
+            if ($request->exists('groups') && $request->user()->isSuperUser()) {
+                $user->groups()->sync($request->input('groups', []));
+            }
+
+            return true;
+        });
+
+        if ($saved) {
             return response()->json(Helper::formatStandardApiResponse('success', (new UsersTransformer)->transformUser($user), trans('admin/users/message.success.create')));
         }
 
@@ -474,11 +517,20 @@ class UsersController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
      */
-    public function update(SaveUserRequest $request, User $user): JsonResponse
+    public function update(
+        SaveUserRequest $request,
+        User $user,
+        UserPrivilegeService $userPrivileges
+    ): JsonResponse
     {
         $this->authorize('update', User::class);
 
             $this->authorize('update', $user);
+            $userPrivileges->authorizeSubmittedPrivileges(
+                $request->user(),
+                $request->exists('permissions'),
+                $request->exists('groups')
+            );
 
             /**
              * This is a janky hack to prevent people from changing admin demo user data on the public demo.
@@ -491,7 +543,7 @@ class UsersController extends Controller
                 return response()->json(Helper::formatStandardApiResponse('error', null, 'Permission denied. You cannot update user information via API on the demo.'));
             }
 
-            $user->fill($request->all());
+            $user->fill($request->only(self::MUTABLE_PROFILE_FIELDS));
 
             if ($request->filled('company_id')) {
                 $user->company_id = Company::getIdForCurrentUser($request->input('company_id'));
@@ -502,7 +554,10 @@ class UsersController extends Controller
             }
 
             // check for permissions related fields and pull them out if the current user cannot edit them
-            if (auth()->user()->can('canEditAuthFields', $user) && auth()->user()->can('editableOnDemo')) {
+            $canEditAuthFields = auth()->user()->can('canEditAuthFields', $user)
+                && auth()->user()->can('editableOnDemo');
+
+            if ($canEditAuthFields) {
 
                 if ($request->filled('password')) {
                     $user->password = bcrypt($request->input('password'));
@@ -520,44 +575,39 @@ class UsersController extends Controller
                     $user->activated = $request->input('activated');
                 }
 
-            }
-
-            // We need to use has()  instead of filled()
-            // here because we need to overwrite permissions
-            // if someone needs to null them out
-            if ($request->has('permissions')) {
-                $permissions_array = $request->input('permissions');
-
-                // Strip out the individual superuser permission if the API user isn't a superadmin
-                if (!auth()->user()->isSuperUser()) {
-                    unset($permissions_array['superuser']);
+                if ($request->has('ldap_import')) {
+                    $user->ldap_import = $request->input('ldap_import');
                 }
 
-                $user->permissions = $permissions_array;
+                // We need to use has() instead of filled() here because an
+                // authorized caller must be able to clear permissions.
+                if (
+                    $request->exists('permissions')
+                    && $userPrivileges->canManageDirectPermissions($request->user(), $user)
+                ) {
+                    $user->permissions = $userPrivileges->permissionsForWrite(
+                        $request->user(),
+                        $request->input('permissions'),
+                        $user
+                    );
+                }
             }
 
-            if($request->has('location_id')) {
-                // Update the location of any assets checked out to this user
-                Asset::where('assigned_type', User::class)
-                    ->where('assigned_to', $user->id)->update(['location_id' => $request->input('location_id', null)]);
-            }
             app('App\Http\Requests\ImageUploadRequest')->handleImages($user, 600, 'image', 'avatars', 'avatar');
 
-            if ($user->save()) {
-                // Check if the request has groups passed and has a value, AND that the user us a superuser
-                if (($request->has('groups')) && (auth()->user()->isSuperUser())) {
+            $saved = DB::transaction(function () use ($request, $user): bool {
+                if (! $user->save()) {
+                    return false;
+                }
 
-                    $validator = Validator::make($request->only('groups'), [
-                        'groups.*' => 'integer|exists:permission_groups,id',
-                    ]);
-
-                    if ($validator->fails()) {
-                        return response()->json(Helper::formatStandardApiResponse('error', null, $validator->errors()));
-                    }
-
-                    // Sync the groups since the user is a superuser and the groups pass validation
+                if ($request->exists('groups') && $request->user()->isSuperUser()) {
                     $user->groups()->sync($request->input('groups'));
                 }
+
+                return true;
+            });
+
+            if ($saved) {
                 return response()->json(Helper::formatStandardApiResponse('success', (new UsersTransformer)->transformUser($user), trans('admin/users/message.success.update')));
             }
             return response()->json(Helper::formatStandardApiResponse('error', null, $user->getErrors()));
@@ -577,6 +627,17 @@ class UsersController extends Controller
         if ($user = User::withTrashed()->find($id)) {
 
             $this->authorize('delete', $user);
+
+            if (
+                ! $request->user()->can('canEditAuthFields', $user)
+                || ! $request->user()->can('editableOnDemo')
+            ) {
+                return response()->json(Helper::formatStandardApiResponse(
+                    'error',
+                    null,
+                    trans('admin/users/message.insufficient_permissions')
+                ));
+            }
 
             if ($user->delete()) {
 
@@ -658,6 +719,13 @@ class UsersController extends Controller
 
     {
         $this->authorize('update', User::class);
+
+        if (! config('mail.enabled', true)) {
+            return response()->json(
+                Helper::formatStandardApiResponse('error', null, trans('mail.delivery_disabled')),
+                503
+            );
+        }
 
         if ($user = User::find($id)) {
             $this->authorize('update', $user);
@@ -743,9 +811,22 @@ class UsersController extends Controller
         $this->authorize('update', User::class);
 
         if ($request->filled('id')) {
+            $user = User::find($request->get('id'));
+
+            if ($user === null) {
+                return response()->json(['message' => trans('admin/settings/general.two_factor_reset_error')], 500);
+            }
+
+            $this->authorize('update', $user);
+
+            if (
+                ! $request->user()->can('canEditAuthFields', $user)
+                || ! $request->user()->can('editableOnDemo')
+            ) {
+                return response()->json(['message' => trans('general.unauthorized')], 403);
+            }
+
             try {
-                $user = User::find($request->get('id'));
-                $this->authorize('update', $user);
                 $user->two_factor_secret = null;
                 $user->two_factor_enrolled = 0;
                 $user->saveQuietly();

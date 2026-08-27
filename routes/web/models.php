@@ -22,22 +22,6 @@ Route::group(['prefix' => 'models', 'middleware' => ['auth']], function () {
             ->push(trans('admin/models/table.clone'), route('models.index')));
 
     Route::post(
-        '{model}/clone',
-        [
-            AssetModelsController::class, 
-            'postCreate'
-        ]
-    )->name('models.clone.store')->withTrashed();
-
-    Route::get(
-        '{modelId}/view',
-        [
-            AssetModelsController::class, 
-            'getView'
-        ]
-    )->name('view/model');
-
-    Route::post(
         '{modelID}/restore',
         [
             AssetModelsController::class, 

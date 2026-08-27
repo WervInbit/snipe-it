@@ -21,7 +21,7 @@ class BrandingSettingsTest extends TestCase
             ->assertStatus(302)
             ->assertRedirect(route('settings.branding.index'));
 
-        $this->followRedirects($response)->assertSee(trans('general.error'));
+        $this->followRedirects($response)->assertSee('alert-danger');
     }
 
     public function testSiteNameCanBeSaved()
@@ -40,23 +40,23 @@ class BrandingSettingsTest extends TestCase
     public function testLogoCanBeUploaded()
     {
         Storage::fake('public');
-        $setting = Setting::factory()->create(['logo' => null]);
+        $setting = Setting::getSettings();
+        $setting->forceFill(['logo' => null])->save();
 
         $response = $this->actingAs(User::factory()->superuser()->create())
-            ->post(route('settings.branding.save',
-                ['logo' => UploadedFile::fake()->image('test_logo.png')]
-            ))
+            ->post(route('settings.branding.save'), [
+                'logo' => UploadedFile::fake()->image('test_logo.png'),
+            ])
             ->assertValid('logo')
             ->assertStatus(302)
             ->assertRedirect(route('settings.index'))
             ->assertSessionHasNoErrors();
 
-        // Assert files was stored...
-        Storage::disk('public')->assertExists( $setting->logo);
-
-        $this->followRedirects($response)->assertSee('alert-success');
-
         $setting->refresh();
+
+        $this->assertNotNull($setting->logo);
+        Storage::disk('public')->assertExists($setting->logo);
+        $this->followRedirects($response)->assertSee('alert-success');
     }
 
 
@@ -64,61 +64,61 @@ class BrandingSettingsTest extends TestCase
     {
         Storage::fake('public');
 
-        UploadedFile::fake()->image('new_test_logo.png')->storeAs('uploads', 'new_test_logo.png', 'public');
-        $setting = Setting::factory()->create(['logo' => 'new_test_logo.png']);
-        Storage::disk('public')->assertExists('uploads/'.$setting->logo);
+        $oldLogo = 'new_test_logo.png';
+        Storage::disk('public')->put($oldLogo, 'logo contents');
+        $setting = Setting::getSettings();
+        $setting->forceFill(['logo' => $oldLogo])->save();
+        Storage::disk('public')->assertExists($setting->logo);
 
         $this->assertNotNull($setting->logo);
 
         $response = $this->actingAs(User::factory()->superuser()->create())
             ->from(route('settings.branding.index'))
-            ->post(route('settings.branding.save',
-                ['clear_logo' => '1']
-            ))
+            ->post(route('settings.branding.save'), ['clear_logo' => '1'])
             ->assertValid('logo')
             ->assertStatus(302)
             ->assertRedirect(route('settings.index'));
 
         $this->followRedirects($response)->assertSee(trans('alert-success'));
         $this->assertDatabaseHas('settings', ['logo' => null]);
-        Storage::disk('public')->assertMissing($setting->logo);
+        Storage::disk('public')->assertMissing($oldLogo);
     }
 
     public function testEmailLogoCanBeUploaded()
     {
         Storage::fake('public');
-        Setting::factory()->create(['email_logo' => null]);
+        $setting = Setting::getSettings();
+        $setting->forceFill(['email_logo' => null])->save();
 
         $response = $this->actingAs(User::factory()->superuser()->create())
             ->from(route('settings.branding.index'))
-            ->post(route('settings.branding.save',
-                [
-                    'email_logo' => UploadedFile::fake()->image('new_test_email_logo.png')->storeAs('', 'new_test_email_logo.png', 'public')
-                ]
-            ))
+            ->post(route('settings.branding.save'), [
+                'email_logo' => UploadedFile::fake()->image('new_test_email_logo.png'),
+            ])
             ->assertValid('email_logo')
             ->assertStatus(302)
             ->assertRedirect(route('settings.index'));
 
         $this->followRedirects($response)->assertSee(trans('alert-success'));
 
-        Storage::disk('public')->assertExists('new_test_email_logo.png');
+        $setting->refresh();
+        $this->assertNotNull($setting->email_logo);
+        Storage::disk('public')->assertExists($setting->email_logo);
     }
 
     public function testEmailLogoCanBeDeleted()
     {
         Storage::fake('public');
-        UploadedFile::fake()->image('new_test_logo.png')->storeAs('uploads', 'new_test_logo.png', 'public');
-        $setting = Setting::factory()->create(['email_logo' => 'new_test_logo.png']);
-        Storage::disk('public')->assertExists('uploads/'.$setting->email_logo);
+        Storage::disk('public')->put('new_test_email_logo.png', 'email logo contents');
+        $setting = Setting::getSettings();
+        $setting->forceFill(['email_logo' => 'new_test_email_logo.png'])->save();
+        Storage::disk('public')->assertExists($setting->email_logo);
 
         $this->assertNotNull($setting->email_logo);
 
         $response = $this->actingAs(User::factory()->superuser()->create())
             ->from(route('settings.branding.index'))
-            ->post(route('settings.branding.save',
-                ['clear_email_logo' => '1']
-            ))
+            ->post(route('settings.branding.save'), ['clear_email_logo' => '1'])
             ->assertValid('email_logo')
             ->assertStatus(302)
             ->assertRedirect(route('settings.index'));
@@ -137,26 +137,28 @@ class BrandingSettingsTest extends TestCase
 
         Storage::fake('public');
 
-        $original_file = UploadedFile::fake()->image('before_test_label_logo.png')->storeAs('', 'before_test_label_logo.png', 'public');
+        $original_file = 'before_test_label_logo.png';
+        Storage::disk('public')->put($original_file, 'old label logo contents');
 
         Storage::disk('public')->assertExists($original_file);
-        Setting::factory()->create(['label_logo' => $original_file]);
+        $setting = Setting::getSettings();
+        $setting->forceFill(['label_logo' => $original_file])->save();
 
         $response = $this->actingAs(User::factory()->superuser()->create())
             ->from(route('settings.branding.index'))
-            ->post(route('settings.branding.save',
-                [
-                    'label_logo' => UploadedFile::fake()->image('new_test_label_logo.png')->storeAs('', 'new_test_label_logo.png', 'public')
-                ]
-            ))
+            ->post(route('settings.branding.save'), [
+                'label_logo' => UploadedFile::fake()->image('new_test_label_logo.png'),
+            ])
             ->assertValid('label_logo')
             ->assertStatus(302)
             ->assertRedirect(route('settings.index'));
 
         $this->followRedirects($response)->assertSee(trans('alert-success'));
 
-        Storage::disk('public')->assertExists('new_test_label_logo.png');
-        // Storage::disk('public')->assertMissing($original_file);
+        $setting->refresh();
+        $this->assertNotNull($setting->label_logo);
+        Storage::disk('public')->assertExists($setting->label_logo);
+        Storage::disk('public')->assertMissing($original_file);
 
 
     }
@@ -166,23 +168,23 @@ class BrandingSettingsTest extends TestCase
 
         Storage::fake('public');
 
-        UploadedFile::fake()->image('new_test_label_logo.png')->storeAs('uploads', 'new_test_label_logo.png', 'public');
-        $setting = Setting::factory()->create(['label_logo' => 'new_test_label_logo.png']);
-        Storage::disk('public')->assertExists('uploads/'.$setting->label_logo);
+        Storage::disk('public')->put('new_test_label_logo.png', 'label logo contents');
+        $setting = Setting::getSettings();
+        $setting->forceFill(['label_logo' => 'new_test_label_logo.png'])->save();
+        Storage::disk('public')->assertExists($setting->label_logo);
 
         $this->assertNotNull($setting->label_logo);
 
         $response = $this->actingAs(User::factory()->superuser()->create())
             ->from(route('settings.branding.index'))
-            ->post(route('settings.branding.save',
-                ['label_logo' => '1']
-            ))
+            ->post(route('settings.branding.save'), ['clear_label_logo' => '1'])
             ->assertValid('label_logo')
             ->assertStatus(302)
             ->assertRedirect(route('settings.index'));
 
         $setting->refresh();
         $this->followRedirects($response)->assertSee(trans('alert-success'));
+        $this->assertNull($setting->label_logo);
         Storage::disk('public')->assertMissing('new_test_label_logo.png');
 
     }
@@ -190,14 +192,14 @@ class BrandingSettingsTest extends TestCase
     public function testDefaultAvatarCanBeUploaded()
     {
         Storage::fake('public');
+        $setting = Setting::getSettings();
+        $setting->forceFill(['default_avatar' => null])->save();
 
         $response = $this->actingAs(User::factory()->superuser()->create())
             ->from(route('settings.branding.index'))
-            ->post(route('settings.branding.save',
-                [
-                    'default_avatar' => UploadedFile::fake()->image('default_avatar.png')->storeAs('', 'default_avatar.png', 'public')
-                ]
-            ))
+            ->post(route('settings.branding.save'), [
+                'default_avatar' => UploadedFile::fake()->image('default_avatar.png'),
+            ])
             ->assertValid('default_avatar')
             ->assertStatus(302)
             ->assertRedirect(route('settings.index'))
@@ -205,53 +207,49 @@ class BrandingSettingsTest extends TestCase
 
         $this->followRedirects($response)->assertSee(trans('alert-success'));
 
-        Storage::disk('public')->assertExists('default_avatar.png');
-        // Storage::disk('public')->assertMissing($original_file);
+        $setting->refresh();
+        $this->assertNotNull($setting->default_avatar);
+        Storage::disk('public')->assertExists('avatars/'.$setting->default_avatar);
     }
 
     public function testDefaultAvatarCanBeDeleted()
     {
         Storage::fake('public');
 
-        $setting = Setting::factory()->create(['default_avatar' => 'new_test_label_logo.png']);
-        $original_file = UploadedFile::fake()->image('default_avatar.png')->storeAs('', 'default_avatar.png', 'public');
+        $setting = Setting::getSettings();
+        $setting->forceFill(['default_avatar' => 'custom-avatar.png'])->save();
+        $original_file = 'avatars/custom-avatar.png';
+        Storage::disk('public')->put($original_file, 'avatar contents');
         Storage::disk('public')->assertExists($original_file);
 
         $this->assertNotNull($setting->default_avatar);
 
         $response = $this->actingAs(User::factory()->superuser()->create())
             ->from(route('settings.branding.index'))
-            ->post(route('settings.branding.save',
-                ['clear_default_avatar' => '1']
-            ))
+            ->post(route('settings.branding.save'), ['clear_default_avatar' => '1'])
             ->assertValid('default_avatar')
             ->assertStatus(302)
             ->assertRedirect(route('settings.index'));
 
         $setting->refresh();
         $this->followRedirects($response)->assertSee(trans('alert-success'));
-         // $this->assertNull($setting->refresh()->default_avatar);
-        // Storage::disk('public')->assertMissing($original_file);
+        $this->assertNull($setting->default_avatar);
+        Storage::disk('public')->assertMissing($original_file);
     }
 
     public function testSnipeDefaultAvatarCanBeDeleted()
     {
 
-        $setting = Setting::getSettings()->first();
+        $setting = Setting::getSettings();
         Storage::fake('public');
 
-        $this->actingAs(User::factory()->superuser()->create())
-            ->post(route('settings.branding.save',
-                ['default_avatar' => UploadedFile::fake()->image('default.png')->storeAs('avatars', 'default.png', 'public')]
-            ));
-
+        $setting->forceFill(['default_avatar' => 'default.png'])->save();
+        Storage::disk('public')->put('avatars/default.png', 'bundled default avatar contents');
         Storage::disk('public')->assertExists('avatars/default.png');
 
 
         $this->actingAs(User::factory()->superuser()->create())
-            ->post(route('settings.branding.save',
-                ['clear_default_avatar' => '1']
-            ));
+            ->post(route('settings.branding.save'), ['clear_default_avatar' => '1']);
 
         $this->assertNull($setting->refresh()->default_avatar);
         $this->assertDatabaseHas('settings', ['default_avatar' => null]);
@@ -261,50 +259,50 @@ class BrandingSettingsTest extends TestCase
 
     public function testFaviconCanBeUploaded()
     {
-        $this->markTestIncomplete('This fails mimetype validation on the mock');
         Storage::fake('public');
+        $setting = Setting::getSettings();
+        $setting->forceFill(['favicon' => null])->save();
 
         $response = $this->actingAs(User::factory()->superuser()->create())
             ->from(route('settings.branding.index'))
-            ->post(route('settings.branding.save',
-                [
-                    'favicon' =>UploadedFile::fake()->image('favicon.svg')->storeAs('', 'favicon.svg', 'public')
-                ]
-            ))
+            ->post(route('settings.branding.save'), [
+                'favicon' => UploadedFile::fake()->image('favicon.png', 32, 32),
+            ])
             ->assertValid('favicon')
             ->assertStatus(302)
             ->assertRedirect(route('settings.index'));
 
         $this->followRedirects($response)->assertSee(trans('alert-success'));
 
-        Storage::disk('public')->assertExists('favicon.png');
+        $setting->refresh();
+
+        $this->assertNotNull($setting->favicon);
+        Storage::disk('public')->assertExists($setting->favicon);
     }
 
     public function testFaviconCanBeDeleted()
     {
-        $this->markTestIncomplete('This fails mimetype validation on the mock');
         Storage::fake('public');
 
-        $setting = Setting::factory()->create(['favicon' => 'favicon.png']);
-        $original_file = UploadedFile::fake()->image('favicon.png')->storeAs('', 'favicon.png', 'public');
-        Storage::disk('public')->assertExists($original_file);
+        $setting = Setting::getSettings();
+        $setting->forceFill(['favicon' => 'favicon.png'])->save();
+        Storage::disk('public')->put('favicon.png', 'favicon contents');
+        Storage::disk('public')->assertExists('favicon.png');
 
         $this->assertNotNull($setting->favicon);
 
         $response = $this->actingAs(User::factory()->superuser()->create())
             ->from(route('settings.branding.index'))
-            ->post(route('settings.branding.save',
-                ['clear_favicon' => '1']
-            ))
+            ->post(route('settings.branding.save'), ['clear_favicon' => '1'])
             ->assertValid('favicon')
             ->assertStatus(302)
             ->assertRedirect(route('settings.index'));
+
         $setting->refresh();
         $this->followRedirects($response)->assertSee(trans('alert-success'));
-        $this->assertDatabaseHas('settings', ['favicon' => null]);
 
-        // This fails for some reason - the file is not being deleted, or at least the test doesn't think it is
-        // Storage::disk('public')->assertMissing('favicon.png');
+        $this->assertNull($setting->favicon);
+        Storage::disk('public')->assertMissing('favicon.png');
     }
 
 

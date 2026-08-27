@@ -87,7 +87,7 @@
                                    <label for="email_format">{{ trans('admin/settings/general.email_formats.email_format') }}</label>
                                </div>
                                <div class="col-md-8">
-                                   {!! Form::email_format('email_format', old('email_format', $setting->email_format), 'select2') !!}
+                                   {!! \App\Support\FormSelect::emailFormat('email_format', old('email_format', $setting->email_format), 'select2') !!}
                                    {!! $errors->first('email_format', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
                                </div>
                            </div>
@@ -98,7 +98,7 @@
                                    <label for="username_format">{{ trans('admin/settings/general.username_formats.username_format') }}</label>
                                </div>
                                <div class="col-md-8">
-                                   {!! Form::username_format('username_format', old('username_format', $setting->username_format), 'select2') !!}
+                                   {!! \App\Support\FormSelect::usernameFormat('username_format', old('username_format', $setting->username_format), 'select2') !!}
                                    {!! $errors->first('username_format', '<span class="alert-msg" aria-hidden="true">:message</span>') !!}
 
                                    <p class="help-block">
@@ -265,6 +265,12 @@
                            </legend>
 
                            <!-- Mail test -->
+                           @if (!config('mail.enabled'))
+                               <div class="alert alert-warning">
+                                   <x-icon type="warning" />
+                                   {{ trans('mail.delivery_disabled') }}
+                               </div>
+                           @else
                            <div class="form-group">
                                <div class="col-md-3">
                                    <label for="login_note">{{trans('admin/settings/general.test_mail')}}</label>
@@ -286,6 +292,7 @@
                                </div>
 
                            </div>
+                           @endif
 
 
                            <!-- Load images in emails -->

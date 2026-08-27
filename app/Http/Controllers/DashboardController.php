@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\RedirectResponse;
 use \Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Collection;
 use App\Models\ComponentInstance;
@@ -53,8 +53,11 @@ class DashboardController extends Controller
         $counts['grand_total'] = $counts['asset'] + $counts['accessory'] + $counts['license'] + $counts['consumable'] + $counts['component'];
 
         if ((! file_exists(storage_path().'/oauth-private.key')) || (! file_exists(storage_path().'/oauth-public.key'))) {
-            Artisan::call('migrate', ['--force' => true]);
-            Artisan::call('passport:install', ['--no-interaction' => true]);
+            Log::critical('Laravel Passport signing keys are unavailable.');
+
+            if (app()->environment('production')) {
+                abort(503, 'OAuth signing keys are unavailable. Contact the system administrator.');
+            }
         }
 
         $refurbFilters = $this->buildRefurbFilters();
@@ -90,16 +93,19 @@ class DashboardController extends Controller
             ],
             [
                 'status' => 'Ready for Sale',
+                'lifecycle_stage' => Statuslabel::LIFECYCLE_READY_FOR_SALE,
                 'icon' => 'box-open',
                 'description' => 'Goedgekeurd en klaar voor verkoop of uitlevering.',
             ],
             [
                 'status' => 'Sold',
+                'lifecycle_stage' => Statuslabel::LIFECYCLE_SOLD,
                 'icon' => 'check',
                 'description' => 'Reeds verkocht of uit voorraad verwijderd.',
             ],
             [
                 'status' => 'Broken / Parts',
+                'lifecycle_stage' => Statuslabel::LIFECYCLE_BROKEN_PARTS,
                 'icon' => 'tools',
                 'description' => 'Niet verkoopbaar; gebruikt voor onderdelen of diagnose.',
             ],
@@ -115,19 +121,23 @@ class DashboardController extends Controller
             ],
             [
                 'status' => 'Returned / RMA',
+                'lifecycle_stage' => Statuslabel::LIFECYCLE_RETURNED,
                 'icon' => 'undo-alt',
                 'description' => 'Retour ontvangen en wacht op opnieuw beoordelen.',
             ],
         ]);
 
-        $statusLabels = Statuslabel::select(['id', 'name', 'color'])
-            ->whereIn('name', $definitions->pluck('status')->all())
-            ->get()
-            ->keyBy('name');
+        $statusLabels = Statuslabel::select(['id', 'name', 'color', 'lifecycle_stage'])->get();
+        $statusLabelsByName = $statusLabels->keyBy('name');
+        $statusLabelsByStage = $statusLabels
+            ->whereNotNull('lifecycle_stage')
+            ->keyBy('lifecycle_stage');
 
-        return $definitions->map(function (array $definition) use ($statusLabels) {
-            $status = $statusLabels->get($definition['status']);
-            $label = RefurbStatus::displayName($definition['status']);
+        return $definitions->map(function (array $definition) use ($statusLabelsByName, $statusLabelsByStage) {
+            $status = isset($definition['lifecycle_stage'])
+                ? $statusLabelsByStage->get($definition['lifecycle_stage'])
+                : $statusLabelsByName->get($definition['status']);
+            $label = $status?->name ?? RefurbStatus::displayName($definition['status']);
 
             return [
                 'label' => $label,

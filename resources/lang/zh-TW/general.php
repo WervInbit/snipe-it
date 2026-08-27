@@ -157,7 +157,7 @@ return [
     'import'         	    => '匯入',
     'import_this_file'      => 'Map fields and process this file',
     'importing'         	=> '匯入中',
-    'importing_help'        => '您可透過 CSV 格式檔案匯入資產、授權、配件、耗材以及使用者。<br><br> CSV檔案必須以逗號分格，並依照<a href="https://snipe-it.readme.io/docs/importing" target="_new">說明文件中的CSV範例</a>保留首部及格式。',
+    'importing_help'        => '您可透過 CSV 格式檔案匯入資產、授權、配件、耗材以及使用者。<br><br> CSV檔案必須以逗號分格，並依照<a href=":fork_documentation_url" target="_new">說明文件中的CSV範例</a>保留首部及格式。',
     'import-history'        => '匯入歷史記錄',
     'asset_maintenance'        => '資產維護',
     'asset_maintenance_report' => '資產維護報告',

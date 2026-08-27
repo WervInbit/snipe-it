@@ -1,6 +1,7 @@
 @php($searchText = strtolower($definition->label.' '.$definition->key))
 @php($fieldKey = 'attributes.'.$definition->id)
 @php($hasFieldError = $errors->has($fieldKey))
+@php($canRemoveAssigned = $canRemoveAssigned ?? false)
 <li class="list-group-item selected-attribute-item{{ $hasFieldError ? ' selected-attribute-item--error' : '' }}"
     data-attribute-id="{{ $definition->id }}"
     data-search-text="{{ $searchText }}"
@@ -29,9 +30,11 @@
             <button type="button" class="btn btn-default js-move-down" title="{{ __('Move Down') }}">
                 <i class="fa fa-arrow-down"></i>
             </button>
-            <button type="button" class="btn btn-danger js-remove-assigned" title="{{ __('Remove Attribute') }}">
-                <i class="fa fa-times"></i>
-            </button>
+            @if($canRemoveAssigned)
+                <button type="button" class="btn btn-danger js-remove-assigned" title="{{ __('Remove Attribute') }}">
+                    <i class="fa fa-times"></i>
+                </button>
+            @endif
         </div>
     </div>
     <input type="hidden" name="attribute_order[]" value="{{ $definition->id }}" class="js-attribute-order-input">

@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Importing\Ui;
 
+use App\Models\Import;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -64,5 +66,42 @@ class ImportTest extends TestCase
             ->assertStatus(422)
             ->assertStatusMessageIs('error')
             ->assertMessagesAre(trans('admin/hardware/message.import.transliterate_failure', ["encoding" => "windows-1251"]));
+    }
+
+    public function testStoreCreatesOneDistinctImportAndFilePerUpload(): void
+    {
+        $disk = config('filesystems.default');
+        Storage::fake($disk);
+        Storage::makeDirectory('private_uploads/imports');
+        config([
+            'app.private_uploads' => Storage::disk($disk)->path('private_uploads'),
+        ]);
+
+        $actor = User::factory()->superuser()->create();
+        $this->actingAsForApi($actor);
+
+        $response = $this->post(route('api.imports.store'), [
+            'files' => [
+                UploadedFile::fake()->createWithContent(
+                    'inventory.csv',
+                    "asset_tag,serial\nASSET-1,SERIAL-1\n"
+                ),
+                UploadedFile::fake()->createWithContent(
+                    'inventory.csv',
+                    "asset_tag,serial\nASSET-2,SERIAL-2\n"
+                ),
+            ],
+        ])
+            ->assertOk()
+            ->assertJsonCount(2, 'files');
+
+        $filePaths = collect($response->json('files'))->pluck('file_path');
+
+        $this->assertCount(2, $filePaths->unique());
+        $this->assertCount(2, Import::query()->where('created_by', $actor->id)->get());
+
+        foreach ($filePaths as $filePath) {
+            Storage::assertExists('private_uploads/imports/'.$filePath);
+        }
     }
 }

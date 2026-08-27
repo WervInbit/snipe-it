@@ -1,9 +1,10 @@
 {
-  "name": "grokability/snipe-it",
-  "description": "Open source asset management system built on Laravel.",
+  "name": "wervinbit/inbit-device-refurbishment-platform",
+  "description": "Inbit device intake, refurbishment, workflow, and component traceability platform derived from Snipe-IT.",
   "keywords": [
     "assets",
     "asset-management",
+    "device-refurbishment",
     "it-tools",
     "inventory",
     "laravel"
@@ -14,10 +15,6 @@
     {
       "type": "vcs",
       "url": "https://github.com/grokability/laravel-scim-server"
-    },
-    {
-      "type": "vcs",
-      "url": "https://github.com/grokability/html"
     }
   ],
   "require": {
@@ -31,7 +28,8 @@
     "alek13/slack": "^2.0",
     "arietimmerman/laravel-scim-server": "dev-laravel_11_compatibility",
     "barryvdh/laravel-debugbar": "^3.13",
-    "barryvdh/laravel-dompdf": "^2.0",
+    "barryvdh/laravel-dompdf": "^3.1",
+    "cweagans/composer-patches": "~2.0",
     "doctrine/cache": "^1.10",
     "doctrine/dbal": "^3.1",
     "doctrine/instantiator": "^1.3",
@@ -45,14 +43,13 @@
     "javiereguiluz/easyslugger": "^1.0",
     "laravel-notification-channels/google-chat": "^3.0",
     "laravel-notification-channels/microsoft-teams": "^1.2",
-    "laravel/framework": "^11.0",
+    "laravel/framework": "^11.55",
     "laravel/helpers": "^1.4",
     "laravel/passport": "^12.0",
     "laravel/slack-notification-channel": "^3.4",
     "laravel/socialite": "^5.6",
     "laravel/tinker": "^2.6",
     "laravel/ui": "^4.0",
-    "laravelcollective/html": "6.x-dev",
     "league/csv": "^9.7",
     "league/flysystem-aws-s3-v3": "^3.0",
     "livewire/livewire": "^3.5",
@@ -60,7 +57,7 @@
     "nesbot/carbon": "^3.0",
     "nunomaduro/collision": "^8.1",
     "okvpn/clock-lts": "^1.0",
-    "onelogin/php-saml": "^3.4",
+    "onelogin/php-saml": "^3.8.2",
     "onnov/detect-encoding": "^2.0",
     "osa-eg/laravel-teams-notification": "^2.1",
     "paragonie/constant_time_encoding": "^2.3",
@@ -89,15 +86,29 @@
     "mockery/mockery": "^1.4",
     "nunomaduro/phpinsights": "^2.11",
     "php-mock/php-mock-phpunit": "^2.10",
-    "phpunit/phpunit": "^10.0",
-    "squizlabs/php_codesniffer": "^3.5",
-    "symfony/css-selector": "^4.4",
-    "symfony/dom-crawler": "^4.4"
+    "phpunit/phpunit": "^10.5.64",
+    "squizlabs/php_codesniffer": "^3.5"
   },
   "extra": {
     "laravel": {
       "dont-discover": [
         "rollbar/rollbar-laravel"
+      ]
+    },
+    "patches": {
+      "laravel/framework": [
+        {
+          "description": "Backport Laravel f336ba7 CRLF email validation to Laravel 11",
+          "url": "patches/laravel-framework-crlf-email-backport.patch",
+          "sha256": "7e27478c12b2a711282fa0b1d87395a8550bab42d95e4b8c78ac6e596a6bc467",
+          "depth": 1
+        },
+        {
+          "description": "Backport Laravel 12df688 local temporary URL path encoding to Laravel 11",
+          "url": "patches/laravel-framework-local-temporary-url-backport.patch",
+          "sha256": "e437bce6327481c0edd7627ad4240f3ae92e1d041aae8b6e6102cae04c69e682",
+          "depth": 1
+        }
       ]
     }
   },
@@ -138,7 +149,16 @@
     "optimize-autoloader": true,
     "discard-changes": true,
     "process-timeout": 3000,
+    "audit": {
+      "ignore": {
+        "CVE-2026-48019": "Official Laravel f336ba7 CRLF validation fix is pinned by checksum in patches.lock.json and covered by framework-level regression tests.",
+        "GHSA-5vg9-5847-vvmq": "Official Laravel f336ba7 CRLF validation fix is pinned by checksum in patches.lock.json and covered by framework-level regression tests.",
+        "GHSA-crmm-hgp2-wgrp": "Official Laravel 12df688 local temporary URL path fix is pinned by checksum in patches.lock.json; local serving also remains disabled by default."
+      },
+      "abandoned": "report"
+    },
     "allow-plugins": {
+      "cweagans/composer-patches": true,
       "dealerdirect/phpcodesniffer-composer-installer": true
     }
   }

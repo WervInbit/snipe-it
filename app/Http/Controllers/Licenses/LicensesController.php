@@ -11,6 +11,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
+use League\Csv\EscapeFormula;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
@@ -303,11 +305,44 @@ class LicensesController extends Controller
     public function getExportLicensesCsv()
     {
         $this->authorize('view', License::class);
+        $canViewKeys = Gate::allows('viewKeys', License::class);
         \Debugbar::disable();
 
-        $response = new StreamedResponse(function () {
+        $response = new StreamedResponse(function () use ($canViewKeys) {
             // Open output stream
             $handle = fopen('php://output', 'w');
+            $formatter = new EscapeFormula('`');
+            $headers = [
+                // strtolower to prevent Excel from trying to open it as a SYLK file
+                strtolower(trans('general.id')),
+                trans('general.company'),
+                trans('general.name'),
+                trans('general.serial_number'),
+                trans('general.purchase_date'),
+                trans('general.purchase_cost'),
+                trans('general.order_number'),
+                trans('general.licenses_available'),
+                trans('admin/licenses/table.seats'),
+                trans('general.created_by'),
+                trans('general.depreciation'),
+                trans('general.updated_at'),
+                trans('admin/licenses/table.deleted_at'),
+                trans('general.email'),
+                trans('admin/hardware/form.fully_depreciated'),
+                trans('general.supplier'),
+                trans('admin/licenses/form.expiration'),
+                trans('admin/licenses/form.purchase_order'),
+                trans('admin/licenses/form.termination_date'),
+                trans('admin/licenses/form.maintained'),
+                trans('general.manufacturer'),
+                trans('general.category'),
+                trans('general.min_amt'),
+                trans('admin/licenses/form.reassignable'),
+                trans('general.notes'),
+                trans('general.created_at'),
+            ];
+            fputcsv($handle, $headers);
+
             $licenses = License::with('company',
                           'manufacturer',
                           'category',
@@ -319,46 +354,14 @@ class LicensesController extends Controller
             }
             $licenses = $licenses->orderBy('created_at', 'DESC');
             Company::scopeCompanyables($licenses)
-                ->chunk(500, function ($licenses) use ($handle) {
-                    $headers = [
-                        // strtolower to prevent Excel from trying to open it as a SYLK file
-                        strtolower(trans('general.id')),
-                        trans('general.company'),
-                        trans('general.name'),
-                        trans('general.serial_number'),
-                        trans('general.purchase_date'),
-                        trans('general.purchase_cost'),
-                        trans('general.order_number'),
-                        trans('general.licenses_available'),
-                        trans('admin/licenses/table.seats'),
-                        trans('general.created_by'),
-                        trans('general.depreciation'),
-                        trans('general.updated_at'),
-                        trans('admin/licenses/table.deleted_at'),
-                        trans('general.email'),
-                        trans('admin/hardware/form.fully_depreciated'),
-                        trans('general.supplier'),
-                        trans('admin/licenses/form.expiration'),
-                        trans('admin/licenses/form.purchase_order'),
-                        trans('admin/licenses/form.termination_date'),
-                        trans('admin/licenses/form.maintained'),
-                        trans('general.manufacturer'),
-                        trans('general.category'),
-                        trans('general.min_amt'),
-                        trans('admin/licenses/form.reassignable'),
-                        trans('general.notes'),
-                        trans('general.created_at'),
-                    ];
-
-                    fputcsv($handle, $headers);
-
+                ->chunk(500, function ($licenses) use ($handle, $formatter, $canViewKeys) {
                     foreach ($licenses as $license) {
                         // Add a new row with data
                         $values = [
                             $license->id,
                             $license->company ? $license->company->name: '',
                             $license->name,
-                            $license->serial,
+                            $canViewKeys ? $license->serial : '',
                             $license->purchase_date,
                             $license->purchase_cost,
                             $license->order_number,
@@ -383,7 +386,12 @@ class LicensesController extends Controller
                             $license->created_at,
                         ];
 
-                        fputcsv($handle, $values);
+                        fputcsv(
+                            $handle,
+                            config('app.escape_formulas') === false
+                                ? $values
+                                : $formatter->escapeRecord($values)
+                        );
                     }
                 });
 

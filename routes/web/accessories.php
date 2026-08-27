@@ -31,10 +31,6 @@ Route::group(['prefix' => 'accessories', 'middleware' => ['auth']], function () 
             [Accessories\AccessoriesController::class, 'getClone']
         )->name('clone/accessories');
 
-    Route::post('{accessoryId}/clone', 
-        [Accessories\AccessoriesController::class, 'postCreate']
-    );
-
 });
 
 Route::resource('accessories', Accessories\AccessoriesController::class, [

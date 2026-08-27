@@ -28,7 +28,13 @@ class SettingsController extends Controller
     {
         $settings = Setting::getSettings();
 
-        if ($settings->ldap_enabled!='1') {
+        if (! Setting::ldapIntegrationAvailable()) {
+            return response()->json([
+                'message' => trans('admin/settings/general.ldap_runtime_disabled'),
+            ], 503);
+        }
+
+        if (! Setting::ldapIsActive()) {
             Log::debug('LDAP is not enabled cannot test.');
             return response()->json(['message' => 'LDAP is not enabled, cannot test.'], 400);
         }
@@ -87,7 +93,13 @@ class SettingsController extends Controller
     public function ldaptestlogin(Request $request) : JsonResponse
     {
 
-        if (Setting::getSettings()->ldap_enabled != '1') {
+        if (! Setting::ldapIntegrationAvailable()) {
+            return response()->json([
+                'message' => trans('admin/settings/general.ldap_runtime_disabled'),
+            ], 503);
+        }
+
+        if (! Setting::ldapIsActive()) {
             Log::debug('LDAP is not enabled. Cannot test.');
             return response()->json(['message' => 'LDAP is not enabled, cannot test.'], 400);
         }
@@ -147,6 +159,10 @@ class SettingsController extends Controller
      */
     public function ajaxTestEmail() : JsonResponse
     {
+        if (! config('mail.enabled', true)) {
+            return response()->json(['message' => trans('mail.delivery_disabled')], 503);
+        }
+
         if (!config('app.lock_passwords')) {
             try {
                 Notification::send(Setting::first(), new MailTest());

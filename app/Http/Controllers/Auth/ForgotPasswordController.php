@@ -50,6 +50,10 @@ class ForgotPasswordController extends Controller
      */
     public function sendResetLinkEmail(Request $request)
     {
+        if (! config('mail.enabled', true)) {
+            return redirect()->route('login')->with('error', trans('mail.password_reset_disabled'));
+        }
+
         /**
          * Let's set a max character count here to prevent potential
          * buffer overflow issues with attackers sending very large

@@ -14,6 +14,9 @@ class ExpiringAssetsMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public mixed $assets;
+    public mixed $threshold;
+
     /**
      * Create a new message instance.
      */

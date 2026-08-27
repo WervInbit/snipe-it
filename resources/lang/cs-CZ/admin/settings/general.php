@@ -383,7 +383,7 @@ Tím zabráníte systému Snipe-IT v pokusu načítat avatary z Gravataru nebo j
     'help_asterisk_bold'    => 'Text zadaný jako <code>**text**</code> bude zobrazen tučně',
     'help_blank_to_use'     => 'Ponechte prázdné pro použití hodnoty z <code>:setting_name</code>',
     'help_default_will_use' => '<code>:default</code> použije hodnotu z <code>:setting_name</code>.<br>
-Upozorňujeme, že hodnota čárového kódu musí odpovídat specifikaci daného typu čárového kódu, aby bylo možné jej úspěšně vygenerovat. Podrobnosti najdete v <a href="https://snipe-it.readme.io/docs/barcodes">dokumentaci <i class="fa fa-external-link"></i></a>.
+Upozorňujeme, že hodnota čárového kódu musí odpovídat specifikaci daného typu čárového kódu, aby bylo možné jej úspěšně vygenerovat. Podrobnosti najdete v <a href=":fork_documentation_url">dokumentaci <i class="fa fa-external-link"></i></a>.
 ',
     'asset_id'              => 'ID zařízení',
     'data'               => 'Data',

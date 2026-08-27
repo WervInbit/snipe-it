@@ -10,7 +10,7 @@ use Tests\TestCase;
 class StoreAssetWithMinimalDataTest extends TestCase
 {
     #[Test]
-    public function asset_can_be_created_with_minimal_data()
+    public function assetCanBeCreatedWithMinimalData()
     {
         $admin = User::factory()->admin()->create();
 
@@ -24,11 +24,10 @@ class StoreAssetWithMinimalDataTest extends TestCase
         $this->assertEquals(1, Asset::count());
         $asset = Asset::first();
         $response->assertRedirect(route('hardware.show', $asset));
-        $this->assertMatchesRegularExpression('/^ASSET-[A-Z]{2}\d{4}$/', $asset->asset_tag);
+        $this->assertMatchesRegularExpression('/^INBIT-[A-Z]{2}\d{4}$/', $asset->asset_tag);
         $this->assertNull($asset->model_id);
-        $this->assertNull($asset->status_id);
+        $this->assertNotNull($asset->status_id);
+        $this->assertTrue((bool) $asset->assetstatus->default_label);
         $this->assertFalse($asset->is_sellable);
     }
 }
-
-

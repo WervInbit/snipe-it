@@ -264,13 +264,11 @@
                                     $definition = $result->attributeDefinition;
                                     $label = $definition?->label ?? optional($result->type)->name;
                                     $instructions = trim((string) (optional($result->type)->instructions ?: ($definition?->instructions ?? $definition?->help_text)));
-                                    $photoItems = $result->photos->map(function ($photo) {
-                                        return ['url' => url($photo->path)];
+                                    $photoItems = $result->photos->map(function ($photo) use ($asset, $run, $result) {
+                                        return [
+                                            'url' => route('test-results.photos.show', [$asset, $run, $result, $photo]),
+                                        ];
                                     });
-
-                                    if ($photoItems->isEmpty() && $result->photo_path) {
-                                        $photoItems = collect([['url' => url($result->photo_path)]]);
-                                    }
                                 @endphp
                                 <li class="test-result-item">
                                     <div class="test-result-meta">

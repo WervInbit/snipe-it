@@ -7,13 +7,12 @@ use App\Models\Location;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Sequence;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 
-class AssetSeeder extends Seeder
+class AssetSeeder extends DestructiveFixtureSeeder
 {
     private $adminuser;
     private $locationIds;
@@ -24,7 +23,7 @@ class AssetSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    protected function seedFixtures(): void
     {
         /*
          * Safely clear assets and their dependent tables.

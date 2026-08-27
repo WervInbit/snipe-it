@@ -11,6 +11,7 @@ use App\Models\LicenseSeat;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class LicenseSeatsController extends Controller
 {
@@ -76,7 +77,8 @@ class LicenseSeatsController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, 'Seat not found'));
         }
         // 2. does the seat belong to the specified license?
-        if (! $license = $licenseSeat->license()->first() || $license->id != intval($licenseId)) {
+        $license = $licenseSeat->license()->first();
+        if (! $license || $license->id !== (int) $licenseId) {
             return response()->json(Helper::formatStandardApiResponse('error', null, 'Seat does not belong to the specified license'));
         }
 
@@ -92,9 +94,6 @@ class LicenseSeatsController extends Controller
      */
     public function update(Request $request, $licenseId, $seatId) : JsonResponse | array
     {
-        $this->authorize('checkout', License::class);
-
-
         if (! $licenseSeat = LicenseSeat::find($seatId)) {
             return response()->json(Helper::formatStandardApiResponse('error', null, 'Seat not found'));
         }
@@ -104,51 +103,103 @@ class LicenseSeatsController extends Controller
             return response()->json(Helper::formatStandardApiResponse('error', null, 'Seat does not belong to the specified license'));
         }
 
-        $oldUser = $licenseSeat->user()->first();
-        $oldAsset = $licenseSeat->asset()->first();
-
-        // attempt to update the license seat
-        $licenseSeat->fill($request->all());
-        $licenseSeat->created_by = auth()->id();
-
-        // check if this update is a checkin operation
-        // 1. are relevant fields touched at all?
-        $touched = $licenseSeat->isDirty('assigned_to') || $licenseSeat->isDirty('asset_id');
-        // 2. are they cleared? if yes then this is a checkin operation
-        $is_checkin = ($touched && $licenseSeat->assigned_to === null && $licenseSeat->asset_id === null);
-
-        if (! $touched) {
-            // nothing to update
-            return response()->json(Helper::formatStandardApiResponse('success', $licenseSeat, trans('admin/licenses/message.update.success')));
-        }
-
-        // the logging functions expect only one "target". if both asset and user are present in the request,
-        // we simply let assets take precedence over users...
-        if ($licenseSeat->isDirty('assigned_to')) {
-            $target = $is_checkin ? $oldUser : User::find($licenseSeat->assigned_to);
-        }
-        if ($licenseSeat->isDirty('asset_id')) {
-            $target = $is_checkin ? $oldAsset : Asset::find($licenseSeat->asset_id);
-        }
-
-        if (is_null($target)){
-            return response()->json(Helper::formatStandardApiResponse('error', null, 'Target not found'));
-        }
-
-        if ($licenseSeat->save()) {
-
-            if ($is_checkin) {
-                $licenseSeat->logCheckin($target, $request->input('notes'));
-
-                return response()->json(Helper::formatStandardApiResponse('success', $licenseSeat, trans('admin/licenses/message.update.success')));
+        return DB::transaction(function () use ($request, $licenseId, $seatId): JsonResponse|array {
+            $licenseSeat = LicenseSeat::query()->whereKey($seatId)->lockForUpdate()->first();
+            if (!$licenseSeat) {
+                return response()->json(Helper::formatStandardApiResponse('error', null, 'Seat not found'));
             }
 
-            // in this case, relevant fields are touched but it's not a checkin operation. so it must be a checkout operation.
-            $licenseSeat->logCheckout($request->input('notes'), $target);
+            $license = $licenseSeat->license;
+            if (!$license || $license->id !== (int) $licenseId) {
+                return response()->json(Helper::formatStandardApiResponse('error', null, 'Seat does not belong to the specified license'));
+            }
 
-            return response()->json(Helper::formatStandardApiResponse('success', $licenseSeat, trans('admin/licenses/message.update.success')));
-        }
+            $oldUser = $licenseSeat->user;
+            $oldAsset = $licenseSeat->asset;
+            $wasAssigned = $oldUser !== null || $oldAsset !== null;
 
-        return Helper::formatStandardApiResponse('error', null, $licenseSeat->getErrors());
+            $licenseSeat->fill($request->only(['assigned_to', 'asset_id', 'notes']));
+            $licenseSeat->created_by = auth()->id();
+
+            $touched = $licenseSeat->isDirty('assigned_to') || $licenseSeat->isDirty('asset_id');
+            if (!$touched) {
+                $this->authorize('checkout', $license);
+
+                return response()->json(Helper::formatStandardApiResponse(
+                    'success',
+                    $licenseSeat,
+                    trans('admin/licenses/message.update.success')
+                ));
+            }
+
+            $isCheckin = $licenseSeat->assigned_to === null && $licenseSeat->asset_id === null;
+            $this->authorize($isCheckin ? 'checkin' : 'checkout', $license);
+
+            if ($isCheckin && ! $license->reassignable) {
+                return response()->json(Helper::formatStandardApiResponse(
+                    'error',
+                    null,
+                    trans('admin/licenses/message.checkin.not_reassignable').'.'
+                ));
+            }
+
+            if (!$isCheckin && $license->isInactive()) {
+                return response()->json(Helper::formatStandardApiResponse(
+                    'error',
+                    null,
+                    trans('admin/licenses/message.checkout.license_is_inactive')
+                ));
+            }
+
+            if (!$isCheckin && $wasAssigned) {
+                return response()->json(Helper::formatStandardApiResponse(
+                    'error',
+                    null,
+                    trans('admin/licenses/message.checkout.unavailable')
+                ));
+            }
+
+            if (!$isCheckin && $licenseSeat->assigned_to !== null && $licenseSeat->asset_id !== null) {
+                return response()->json(Helper::formatStandardApiResponse(
+                    'error',
+                    null,
+                    trans('admin/licenses/message.select_asset_or_person')
+                ));
+            }
+
+            $target = $isCheckin
+                ? ($oldAsset ?? $oldUser)
+                : ($licenseSeat->asset_id !== null
+                    ? Asset::find($licenseSeat->asset_id)
+                    : User::find($licenseSeat->assigned_to));
+
+            if (!$target) {
+                return response()->json(Helper::formatStandardApiResponse('error', null, 'Target not found'));
+            }
+
+            if (! $isCheckin && ! $license->canCheckoutTo($target)) {
+                return response()->json(Helper::formatStandardApiResponse(
+                    'error',
+                    null,
+                    trans('general.error_user_company')
+                ));
+            }
+
+            if (!$licenseSeat->save()) {
+                return Helper::formatStandardApiResponse('error', null, $licenseSeat->getErrors());
+            }
+
+            if ($isCheckin) {
+                $licenseSeat->logCheckin($target, $request->input('notes'));
+            } else {
+                $licenseSeat->logCheckout($request->input('notes'), $target);
+            }
+
+            return response()->json(Helper::formatStandardApiResponse(
+                'success',
+                $licenseSeat,
+                trans('admin/licenses/message.update.success')
+            ));
+        });
     }
 }

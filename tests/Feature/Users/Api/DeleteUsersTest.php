@@ -152,4 +152,39 @@ class DeleteUsersTest extends TestCase implements TestsFullMultipleCompaniesSupp
 
         $this->assertSoftDeleted($user);
     }
+
+    public function testGranularUserDeleterCannotDeleteAnAdmin(): void
+    {
+        $actor = User::factory()->deleteUsers()->create();
+        $target = User::factory()->admin()->create();
+
+        $this->assertHierarchyProtectedUserCannotBeDeleted($actor, $target);
+    }
+
+    public function testGranularUserDeleterCannotDeleteASuperuser(): void
+    {
+        $actor = User::factory()->deleteUsers()->create();
+        $target = User::factory()->superuser()->create();
+
+        $this->assertHierarchyProtectedUserCannotBeDeleted($actor, $target);
+    }
+
+    public function testAdminCannotDeleteASuperuser(): void
+    {
+        $actor = User::factory()->admin()->create();
+        $target = User::factory()->superuser()->create();
+
+        $this->assertHierarchyProtectedUserCannotBeDeleted($actor, $target);
+    }
+
+    private function assertHierarchyProtectedUserCannotBeDeleted(User $actor, User $target): void
+    {
+        $this->actingAsForApi($actor)
+            ->deleteJson(route('api.users.destroy', $target))
+            ->assertOk()
+            ->assertStatusMessageIs('error')
+            ->assertJsonPath('messages', trans('admin/users/message.insufficient_permissions'));
+
+        $this->assertNotSoftDeleted($target);
+    }
 }

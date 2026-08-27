@@ -17,7 +17,7 @@
 
 <div class="row">
   <div class="col-md-9">
-    @if ($snipeSettings->ldap_enabled == 0)
+    @if (! \App\Models\Setting::ldapIsActive())
       {{ trans('admin/users/message.ldap_not_configured') }}
     @else
     <form class="form-horizontal" role="form" method="post" action="" id="ldap-form">

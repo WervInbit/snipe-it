@@ -2,9 +2,12 @@
 
 namespace Tests\Feature\Assets\Api;
 
+use App\Events\CheckoutableCheckedIn;
 use App\Models\Asset;
+use App\Models\CheckoutAcceptance;
 use App\Models\Company;
 use App\Models\User;
+use Illuminate\Support\Facades\Event;
 use Tests\Concerns\TestsFullMultipleCompaniesSupport;
 use Tests\Concerns\TestsPermissionsRequirement;
 use Tests\TestCase;
@@ -53,9 +56,43 @@ class DeleteAssetsTest extends TestCase implements TestsFullMultipleCompaniesSup
         $this->assertSoftDeleted($assetC);
     }
 
-    public function testCannotDeleteAssetThatIsCheckedOut()
+    public function testDeletingLegacyAssignedAssetClearsStaleStateWithoutCreatingCheckinHistory()
     {
-        $this->markTestSkipped('This behavior is not functioning yet.');
+        Event::fake([CheckoutableCheckedIn::class]);
+
+        $assignedUser = User::factory()->create();
+        $asset = Asset::factory()->assignedToUser($assignedUser)->create([
+            'accepted' => 'pending',
+            'expected_checkin' => now()->addDay(),
+        ]);
+        $pendingAcceptance = CheckoutAcceptance::factory()->pending()->create([
+            'checkoutable_type' => Asset::class,
+            'checkoutable_id' => $asset->id,
+            'assigned_to_id' => $assignedUser->id,
+        ]);
+
+        $this->actingAsForApi(User::factory()->deleteAssets()->create())
+            ->deleteJson(route('api.assets.destroy', $asset))
+            ->assertStatusMessageIs('success');
+
+        $asset->refresh();
+        $this->assertSoftDeleted($asset);
+        $this->assertNull($asset->assigned_to);
+        $this->assertNull($asset->assigned_type);
+        $this->assertNull($asset->accepted);
+        $this->assertNull($asset->expected_checkin);
+        $this->assertSoftDeleted($pendingAcceptance);
+        $this->assertDatabaseHas('action_logs', [
+            'item_type' => Asset::class,
+            'item_id' => $asset->id,
+            'action_type' => 'delete',
+        ]);
+        $this->assertDatabaseMissing('action_logs', [
+            'item_type' => Asset::class,
+            'item_id' => $asset->id,
+            'action_type' => 'checkin from',
+        ]);
+        Event::assertNotDispatched(CheckoutableCheckedIn::class);
     }
 
     public function testCanDeleteAsset()

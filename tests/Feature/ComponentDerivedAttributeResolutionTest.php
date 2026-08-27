@@ -16,9 +16,11 @@ use App\Models\ModelNumberAttribute;
 use App\Models\ModelNumberComponentTemplate;
 use App\Models\User;
 use App\Services\Components\AssetComponentRosterService;
+use App\Services\Components\AssetExpectedComponentService;
 use App\Services\Components\AttachedComponentIssueService;
 use App\Services\Components\ComponentExpectedSubcomponentService;
 use App\Services\ComponentLifecycleService;
+use App\Services\ModelAttributes\ComponentAttributeAggregator;
 use App\Services\ModelAttributes\ComponentInstanceAttributeManager;
 use App\Services\ModelAttributes\EffectiveAttributeResolver;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -27,6 +29,60 @@ use Tests\TestCase;
 class ComponentDerivedAttributeResolutionTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_removed_expected_top_level_component_does_not_contribute_to_resolved_attributes(): void
+    {
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $capacity = AttributeDefinition::create([
+            'key' => 'removed_ram_capacity_gb',
+            'label' => 'Removed RAM Capacity',
+            'datatype' => AttributeDefinition::DATATYPE_INT,
+        ]);
+        $componentDefinition = ComponentDefinition::factory()->create([
+            'name' => 'Removable RAM',
+        ]);
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $componentDefinition->id,
+            'attribute_definition_id' => $capacity->id,
+            'value' => '16',
+            'raw_value' => '16',
+            'resolves_to_spec' => true,
+        ]);
+        $template = ModelNumberComponentTemplate::create([
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $componentDefinition->id,
+            'expected_name' => 'Removable RAM',
+            'expected_qty' => 1,
+            'is_required' => true,
+            'sort_order' => 0,
+        ]);
+        $asset = Asset::factory()->for($model, 'model')->create([
+            'model_number_id' => $modelNumber->id,
+        ]);
+
+        app(AssetExpectedComponentService::class)->materializeToTray(
+            $asset,
+            $template,
+            User::factory()->superuser()->create(),
+            ['note' => 'Removed from this asset.']
+        );
+
+        $roster = app(AssetComponentRosterService::class)->buildForAsset($asset->fresh());
+        $aggregates = app(ComponentAttributeAggregator::class)->aggregateRosterRows($roster->rows);
+
+        $this->assertSame(['removed'], $roster->rows->pluck('classification')->all());
+        $this->assertFalse($aggregates->has($capacity->id));
+
+        $resolved = app(EffectiveAttributeResolver::class)
+            ->resolveForAsset($asset->fresh())
+            ->keyBy(fn ($attribute) => $attribute->definition->key);
+
+        $this->assertSame('0', $resolved['removed_ram_capacity_gb']->value);
+        $this->assertTrue($resolved['removed_ram_capacity_gb']->hasReducedExpectedBaseline());
+        $this->assertNull($resolved['removed_ram_capacity_gb']->calculatedExpectedContributorSummary());
+        $this->assertNull($resolved['removed_ram_capacity_gb']->calculatedExtraContributorSummary());
+    }
 
     public function test_expected_components_drive_numeric_model_values_when_resolved_to_spec(): void
     {

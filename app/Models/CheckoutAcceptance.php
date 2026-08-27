@@ -136,4 +136,15 @@ class CheckoutAcceptance extends Model
     {
         return $query->whereNull('accepted_at')->whereNull('declined_at');
     }
+
+    /**
+     * Limit response workflows to checkoutable types still supported by this fork.
+     */
+    public function scopeActionable(Builder $query)
+    {
+        return $query->whereNotIn('checkoutable_type', array_values(array_unique([
+            (new Asset())->getMorphClass(),
+            Asset::class,
+        ])));
+    }
 }

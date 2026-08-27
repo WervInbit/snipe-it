@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Importar',
     'import_this_file'      => 'Asociar campos y procesar este archivo',
     'importing'         	=> 'Importar datos',
-    'importing_help'        => 'Puede importar activos, accesorios, licencias, componentes, consumibles y usuarios a través del archivo CSV. <br><br>El CSV debe estar delimitado por comas y formateado con encabezados que coincidan con los de los <a href="https://snipe-it.readme.io/docs/importing" target="_new">archivos CSV de muestra en la documentación</a>.',
+    'importing_help'        => 'Puede importar activos, accesorios, licencias, componentes, consumibles y usuarios a través del archivo CSV. <br><br>El CSV debe estar delimitado por comas y formateado con encabezados que coincidan con los de los <a href=":fork_documentation_url" target="_new">archivos CSV de muestra en la documentación</a>.',
     'import-history'        => 'Importar historial',
     'asset_maintenance'        => 'Mantenimiento de activos',
     'asset_maintenance_report' => 'Informe mantenimiento de activos',

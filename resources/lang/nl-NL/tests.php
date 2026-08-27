@@ -87,6 +87,7 @@ return [
     'complete_confirm_failed' => 'Mislukte tests',
     'complete_confirm_incomplete' => 'Niet uitgevoerd',
     'complete_confirm_continue' => 'Doorgaan',
+    'evidence_privacy_notice' => 'Privéworkflowbewijs: toegang wordt beheerd. Fotografeer geen wachtwoorden, herstelcodes of klant-/reparatiegegevens.',
 ];
 
 

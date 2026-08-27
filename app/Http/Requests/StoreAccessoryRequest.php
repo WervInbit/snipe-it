@@ -14,7 +14,7 @@ class StoreAccessoryRequest extends ImageUploadRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('create', new Accessory);
+        return Gate::allows('create', Accessory::class);
     }
 
     public function prepareForValidation(): void

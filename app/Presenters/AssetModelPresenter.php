@@ -255,7 +255,7 @@ class AssetModelPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return  (string) link_to_route('models.show', $this->name, $this->id);
+        return \App\Support\RouteLink::to('models.show', $this->name, $this->id);
     }
 
     /**

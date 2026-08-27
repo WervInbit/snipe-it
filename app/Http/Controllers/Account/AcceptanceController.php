@@ -20,6 +20,8 @@ use App\Models\Accessory;
 use App\Models\License;
 use App\Models\Component;
 use App\Models\Consumable;
+use App\Services\Assets\LegacyAssetAssignmentCleanupService;
+use App\Services\SafeRasterImageService;
 use App\Notifications\AcceptanceAssetAcceptedNotification;
 use App\Notifications\AcceptanceAssetAcceptedToUserNotification;
 use App\Notifications\AcceptanceAssetDeclinedNotification;
@@ -34,7 +36,10 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use \Illuminate\Contracts\View\View;
 use \Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
+use RuntimeException;
 
 class AcceptanceController extends Controller
 {
@@ -43,7 +48,11 @@ class AcceptanceController extends Controller
      */
     public function index() : View
     {
-        $acceptances = CheckoutAcceptance::forUser(auth()->user())->pending()->get();
+        $acceptances = CheckoutAcceptance::forUser(auth()->user())
+            ->pending()
+            ->actionable()
+            ->get();
+
         return view('account/accept.index', compact('acceptances'));
     }
 
@@ -52,7 +61,10 @@ class AcceptanceController extends Controller
      *
      * @param  int  $id
      */
-    public function create($id) : View | RedirectResponse
+    public function create(
+        $id,
+        LegacyAssetAssignmentCleanupService $legacyAssignmentCleanup
+    ) : View | RedirectResponse
     {
         $acceptance = CheckoutAcceptance::find($id);
 
@@ -73,6 +85,11 @@ class AcceptanceController extends Controller
             return redirect()->route('account.accept')->with('error', trans('general.error_user_company'));
         }
 
+        if ($legacyAssignmentCleanup->retirePendingAcceptance($acceptance)) {
+            return redirect()->route('account.accept')
+                ->with('error', trans('admin/hardware/message.legacy_assignment_disabled'));
+        }
+
         return view('account/accept.create', compact('acceptance'));
     }
 
@@ -82,7 +99,11 @@ class AcceptanceController extends Controller
      * @param  Request $request
      * @param  int  $id
      */
-    public function store(Request $request, $id) : RedirectResponse
+    public function store(
+        Request $request,
+        $id,
+        LegacyAssetAssignmentCleanupService $legacyAssignmentCleanup
+    ) : RedirectResponse
     {
         $acceptance = CheckoutAcceptance::find($id);
 
@@ -102,56 +123,58 @@ class AcceptanceController extends Controller
             return redirect()->route('account.accept')->with('error', trans('general.insufficient_permissions'));
         }
 
+        if ($legacyAssignmentCleanup->retirePendingAcceptance($acceptance)) {
+            return redirect()->route('account.accept')
+                ->with('error', trans('admin/hardware/message.legacy_assignment_disabled'));
+        }
+
         if (! $request->filled('asset_acceptance')) {
             return redirect()->back()->with('error', trans('admin/users/message.error.accept_or_decline'));
         }
 
-        /**
-         * Get the signature and save it
-         */
-        if (! Storage::exists('private_uploads/signatures')) {
-            Storage::makeDirectory('private_uploads/signatures', 775);
+        if (! in_array($request->input('asset_acceptance'), ['accepted', 'declined'], true)) {
+            return redirect()->back()->with('error', trans('admin/users/message.error.accept_or_decline'));
         }
 
 
 
         $item = $acceptance->checkoutable_type::find($acceptance->checkoutable_id);
+        if (! $item) {
+            return redirect()->route('account.accept')
+                ->with('error', trans('admin/hardware/message.does_not_exist'));
+        }
+
         $display_model = '';
         $pdf_view_route = '';
-        $pdf_filename = 'accepted-eula-'.date('Y-m-d-h-i-s').'.pdf';
+        $pdf_filename = 'accepted-eula-'.Str::uuid().'-'.date('Y-m-d-h-i-s').'.pdf';
         $sig_filename='';
+        $signatureDataUri = null;
+        $responsePersisted = false;
+
+        try {
+            if (Setting::getSettings()->require_accept_signature == '1') {
+                if (! $request->filled('signature_output')) {
+                    return redirect()->back()->with('error', trans('general.shitty_browser'));
+                }
+
+                $sig_filename = $this->storeValidatedSignature(
+                    (string) $request->input('signature_output')
+                );
+                $signatureDataUri = 'data:image/png;base64,'.base64_encode(
+                    Storage::get('private_uploads/signatures/'.$sig_filename)
+                );
+            }
 
         if ($request->input('asset_acceptance') == 'accepted') {
 
             /**
              * Check for the eula-pdfs directory
              */
-            if (! Storage::exists('private_uploads/eula-pdfs')) {
-                Storage::makeDirectory('private_uploads/eula-pdfs', 775);
+            if (! Storage::exists('private_uploads/eula-pdfs')
+                && ! Storage::makeDirectory('private_uploads/eula-pdfs', 775)
+            ) {
+                throw new RuntimeException('Unable to create the stored-EULA directory.');
             }
-
-            if (Setting::getSettings()->require_accept_signature == '1') {
-                
-                // Check if the signature directory exists, if not create it
-                if (!Storage::exists('private_uploads/signatures')) {
-                    Storage::makeDirectory('private_uploads/signatures', 775);
-                }
-
-                // The item was accepted, check for a signature
-                if ($request->filled('signature_output')) {
-                    $sig_filename = 'siglog-' . Str::uuid() . '-' . date('Y-m-d-his') . '.png';
-                    $data_uri = $request->input('signature_output');
-                    $encoded_image = explode(',', $data_uri);
-                    $decoded_image = base64_decode($encoded_image[1]);
-                    Storage::put('private_uploads/signatures/' . $sig_filename, (string)$decoded_image);
-
-                    // No image data is present, kick them back.
-                    // This mostly only applies to users on super-duper crapola browsers *cough* IE *cough*
-                } else {
-                    return redirect()->back()->with('error', trans('general.shitty_browser'));
-                }
-            }
-
 
             $assigned_user = User::find($acceptance->assigned_to_id);
             // this is horrible
@@ -229,7 +252,7 @@ class AcceptanceController extends Controller
                 'accepted_date' => Carbon::parse($acceptance->accepted_at)->format('Y-m-d'),
                 'assigned_to' => $assigned_user->present()->fullName,
                 'company_name' => $branding_settings->site_name,
-                'signature' => ($sig_filename) ? storage_path() . '/private_uploads/signatures/' . $sig_filename : null,
+                'signature' => $signatureDataUri,
                 'logo' => $path_logo,
                 'date_settings' => $branding_settings->date_display_format,
                 'admin' => auth()->user()->present()?->fullName,
@@ -238,10 +261,37 @@ class AcceptanceController extends Controller
             if ($pdf_view_route!='') {
                 Log::debug($pdf_filename.' is the filename, and the route was specified.');
                 $pdf = Pdf::loadView($pdf_view_route, $data);
-                Storage::put('private_uploads/eula-pdfs/' .$pdf_filename, $pdf->output());
+                if (! Storage::put('private_uploads/eula-pdfs/'.$pdf_filename, $pdf->output())) {
+                    throw new RuntimeException('Unable to store the accepted EULA PDF.');
+                }
             }
 
-            $acceptance->accept($sig_filename, $item->getEula(), $pdf_filename, $request->input('note'));
+            DB::transaction(function () use (
+                &$acceptance,
+                $item,
+                $pdf_filename,
+                $request,
+                $sig_filename
+            ): void {
+                $acceptance = CheckoutAcceptance::query()
+                    ->lockForUpdate()
+                    ->findOrFail($acceptance->getKey());
+
+                if (! $acceptance->isPending()) {
+                    throw ValidationException::withMessages([
+                        'asset_acceptance' => trans('admin/users/message.error.asset_already_accepted'),
+                    ]);
+                }
+
+                $acceptance->accept(
+                    $sig_filename,
+                    $item->getEula(),
+                    $pdf_filename,
+                    $request->input('note')
+                );
+                event(new CheckoutAccepted($acceptance));
+            });
+            $responsePersisted = true;
 
             // Send the PDF to the signing user
             if (($request->input('send_copy') == '1') && ($assigned_user->email !='')) {
@@ -260,8 +310,6 @@ class AcceptanceController extends Controller
             } catch (\Exception $e) {
                 Log::warning($e);
             }
-            event(new CheckoutAccepted($acceptance));
-
             $return_msg = trans('admin/users/message.accepted');
 
         } else {
@@ -269,32 +317,12 @@ class AcceptanceController extends Controller
             /**
              * Check for the eula-pdfs directory
              */
-            if (! Storage::exists('private_uploads/eula-pdfs')) {
-                Storage::makeDirectory('private_uploads/eula-pdfs', 775);
+            if (! Storage::exists('private_uploads/eula-pdfs')
+                && ! Storage::makeDirectory('private_uploads/eula-pdfs', 775)
+            ) {
+                throw new RuntimeException('Unable to create the stored-EULA directory.');
             }
 
-            if (Setting::getSettings()->require_accept_signature == '1') {
-                
-                // Check if the signature directory exists, if not create it
-                if (!Storage::exists('private_uploads/signatures')) {
-                    Storage::makeDirectory('private_uploads/signatures', 775);
-                }
-
-                // The item was accepted, check for a signature
-                if ($request->filled('signature_output')) {
-                    $sig_filename = 'siglog-' . Str::uuid() . '-' . date('Y-m-d-his') . '.png';
-                    $data_uri = $request->input('signature_output');
-                    $encoded_image = explode(',', $data_uri);
-                    $decoded_image = base64_decode($encoded_image[1]);
-                    Storage::put('private_uploads/signatures/' . $sig_filename, (string)$decoded_image);
-
-                    // No image data is present, kick them back.
-                    // This mostly only applies to users on super-duper crapola browsers *cough* IE *cough*
-                } else {
-                    return redirect()->back()->with('error', trans('general.shitty_browser'));
-                }
-            }
-            
             // Format the data to send the declined notification
             $branding_settings = SettingsController::getPDFBranding();
 
@@ -334,7 +362,7 @@ class AcceptanceController extends Controller
                 'item_status' => $item->assetstatus?->name,
                 'note' => $request->input('note'),
                 'declined_date' => Carbon::parse($acceptance->declined_at)->format('Y-m-d'),
-                'signature' => ($sig_filename) ? storage_path() . '/private_uploads/signatures/' . $sig_filename : null,
+                'signature' => $signatureDataUri,
                 'assigned_to' => $assigned_to,
                 'company_name' => $branding_settings->site_name,
                 'date_settings' => $branding_settings->date_display_format,
@@ -346,10 +374,23 @@ class AcceptanceController extends Controller
                 Storage::put('private_uploads/eula-pdfs/' .$pdf_filename, $pdf->output());
             }
 
-            $acceptance->decline($sig_filename, $request->input('note'));
+            DB::transaction(function () use (&$acceptance, $request, $sig_filename): void {
+                $acceptance = CheckoutAcceptance::query()
+                    ->lockForUpdate()
+                    ->findOrFail($acceptance->getKey());
+
+                if (! $acceptance->isPending()) {
+                    throw ValidationException::withMessages([
+                        'asset_acceptance' => trans('admin/users/message.error.asset_already_accepted'),
+                    ]);
+                }
+
+                $acceptance->decline($sig_filename, $request->input('note'));
+                event(new CheckoutDeclined($acceptance));
+            });
+            $responsePersisted = true;
             $acceptance->notify(new AcceptanceAssetDeclinedNotification($data));
             Log::debug('New event acceptance.');
-            event(new CheckoutDeclined($acceptance));
             $return_msg = trans('admin/users/message.declined');
         }
 
@@ -372,8 +413,72 @@ class AcceptanceController extends Controller
             }
         }
 
-        return redirect()->to('account/accept')->with('success', $return_msg);
+            return redirect()->to('account/accept')->with('success', $return_msg);
+        } catch (\Throwable $exception) {
+            if (! $responsePersisted) {
+                if ($sig_filename !== '') {
+                    $signaturePath = 'private_uploads/signatures/'.$sig_filename;
+                    if (Storage::exists($signaturePath) && ! Storage::delete($signaturePath)) {
+                        Log::critical('Unable to remove an uncommitted acceptance signature.', [
+                            'acceptance_id' => $acceptance->getKey(),
+                            'path' => $signaturePath,
+                        ]);
+                    }
+                }
 
+                $eulaPath = 'private_uploads/eula-pdfs/'.$pdf_filename;
+                if (Storage::exists($eulaPath) && ! Storage::delete($eulaPath)) {
+                    Log::critical('Unable to remove an uncommitted accepted-EULA PDF.', [
+                        'acceptance_id' => $acceptance->getKey(),
+                        'path' => $eulaPath,
+                    ]);
+                }
+            }
+
+            throw $exception;
+        }
+
+    }
+
+    private function storeValidatedSignature(string $dataUri): string
+    {
+        $maximumEncodedBytes = (int) ceil(SafeRasterImageService::MAX_BYTES * 4 / 3) + 128;
+        if (strlen($dataUri) > $maximumEncodedBytes
+            || ! preg_match('/\Adata:image\/png;base64,([A-Za-z0-9+\/\r\n]+={0,2})\z/', $dataUri, $matches)
+        ) {
+            throw ValidationException::withMessages([
+                'signature_output' => __('The signature must be a valid PNG image.'),
+            ]);
+        }
+
+        $decoded = base64_decode($matches[1], true);
+        if (! is_string($decoded) || $decoded === '' || strlen($decoded) > SafeRasterImageService::MAX_BYTES) {
+            throw ValidationException::withMessages([
+                'signature_output' => __('The signature must be a valid PNG image no larger than 5 MB.'),
+            ]);
+        }
+
+        $prepared = app(SafeRasterImageService::class)
+            ->prepareContents($decoded, 'signature_output');
+
+        if ($prepared['mime'] !== 'image/png') {
+            throw ValidationException::withMessages([
+                'signature_output' => __('The signature must be a valid PNG image.'),
+            ]);
+        }
+
+        if (! Storage::exists('private_uploads/signatures')
+            && ! Storage::makeDirectory('private_uploads/signatures', 775)
+        ) {
+            throw new RuntimeException('Unable to create the signature storage directory.');
+        }
+
+        $filename = 'siglog-'.Str::uuid().'-'.date('Y-m-d-his').'.png';
+        if (! Storage::put('private_uploads/signatures/'.$filename, $prepared['contents'])) {
+            throw new RuntimeException('Unable to store the normalized signature.');
+        }
+
+        return $filename;
     }
 
 }

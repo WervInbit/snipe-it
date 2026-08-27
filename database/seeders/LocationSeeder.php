@@ -3,14 +3,13 @@
 namespace Database\Seeders;
 
 use App\Models\Location;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
 
-class LocationSeeder extends Seeder
+class LocationSeeder extends DestructiveFixtureSeeder
 {
-    public function run()
+    protected function seedFixtures(): void
     {
         Schema::disableForeignKeyConstraints();
         Location::truncate();

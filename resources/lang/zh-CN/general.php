@@ -157,7 +157,7 @@ return [
     'import'         	    => '导入',
     'import_this_file'      => '映射字段并处理此文件',
     'importing'         	=> '正在导入…',
-    'importing_help'        => '您可以使用 CSV 文件导入资产、配件、许可证、组件、耗材以及用户等数据。<br><br>请确保 CSV 文件是逗号分隔的，并且文件格式的标题行应与<a href="https://snipe-it.readme.io/docs/importing" target="_new">文档中提供的 CSV 示例</a>中的标题完全一致。',
+    'importing_help'        => '您可以使用 CSV 文件导入资产、配件、许可证、组件、耗材以及用户等数据。<br><br>请确保 CSV 文件是逗号分隔的，并且文件格式的标题行应与<a href=":fork_documentation_url" target="_new">文档中提供的 CSV 示例</a>中的标题完全一致。',
     'import-history'        => '导入历史记录',
     'asset_maintenance'        => '资产维护',
     'asset_maintenance_report' => '资产维护报表',

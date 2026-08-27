@@ -8,7 +8,8 @@ use App\Models\TestResult;
 use App\Models\TestType;
 use App\Models\WorkflowProfile;
 use App\Models\WorkflowProfileItem;
-use App\Services\ModelAttributes\EffectiveAttributeResolver;
+use App\Services\WorkflowEvidencePhotoService;
+use App\Services\WorkflowRunDefinitionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -36,7 +37,7 @@ class TestRunController extends Controller
         return view('tests.index', compact('asset', 'runs', 'workflowProfiles', 'manualWorkflowItems'));
     }
 
-    public function store(Request $request, Asset $asset, EffectiveAttributeResolver $resolver): RedirectResponse
+    public function store(Request $request, Asset $asset, WorkflowRunDefinitionService $definitions): RedirectResponse
     {
         Gate::authorize('tests.execute');
         $this->authorize('view', $asset);
@@ -62,7 +63,8 @@ class TestRunController extends Controller
                 ]);
         }
 
-        $resolved = $resolver->resolveForAsset($asset);
+        $definition = $definitions->forProfile($asset, $profile);
+        $resolved = $definition['resolved_attributes'];
 
         $missing = $resolved->filter(function ($attribute) {
             return $attribute->definition->required_for_category && $attribute->value === null;
@@ -78,22 +80,8 @@ class TestRunController extends Controller
                 ]);
         }
 
-        $run = new TestRun();
-        $run->asset()->associate($asset);
-        $run->user()->associate($request->user());
-        $run->model_number_id = $asset->model_number_id;
-        $run->workflow_profile_id = $profile->id;
-        $run->profile_name_snapshot = $profile->name;
-        $run->profile_slug_snapshot = $profile->slug;
-        $run->started_at = now();
-        $run->save();
-
-        $resolvedByDefinition = $resolved->keyBy(fn ($attribute) => $attribute->definition->id);
-        $applicableItemIds = TestType::forAsset($asset)->pluck('id')->all();
-        $profile->load(['items.item.attributeDefinition']);
-        $profileItems = $profile->items
-            ->filter(fn ($profileItem) => $profileItem->item && in_array($profileItem->workflow_item_id, $applicableItemIds, true))
-            ->values();
+        $profileItems = $definition['profile_items'];
+        $resolvedByDefinition = $definition['resolved_by_definition'];
         $extraItems = TestType::query()
             ->whereIn('id', array_values($data['extra_workflow_item_ids'] ?? []))
             ->ordered()
@@ -102,14 +90,23 @@ class TestRunController extends Controller
             ->values();
 
         if ($profileItems->isEmpty() && $extraItems->isEmpty()) {
-            $run->delete();
-
             return redirect()
                 ->route('test-runs.index', $asset->id)
                 ->withErrors([
                     'workflow_profile_id' => __('This workflow profile has no applicable items for this asset.'),
                 ]);
         }
+
+        $run = new TestRun();
+        $run->asset()->associate($asset);
+        $run->user()->associate($request->user());
+        $run->model_number_id = $asset->model_number_id;
+        $run->workflow_profile_id = $profile->id;
+        $run->profile_name_snapshot = $profile->name;
+        $run->profile_slug_snapshot = $profile->slug;
+        $run->readiness_context_hash = $definition['readiness_context_hash'];
+        $run->started_at = now();
+        $run->save();
 
         foreach ($profileItems as $profileItem) {
             $testType = $profileItem->item;
@@ -133,7 +130,6 @@ class TestRunController extends Controller
                 'expected_raw_value' => $attribute?->rawValue,
                 'is_required' => $testType->is_required,
                 'result_label_mode' => $testType->result_label_mode
-                    ?: $profileItem->result_label_mode
                     ?: WorkflowProfileItem::LABEL_MODE_PASS_FAIL,
                 'sort_order' => $profileItem->sort_order,
             ]);
@@ -164,11 +160,29 @@ class TestRunController extends Controller
         return redirect()->route('test-results.active', ['asset' => $asset->id, 'run' => $run->id]);
     }
 
-    public function destroy(Asset $asset, TestRun $testRun)
+    public function destroy(
+        Asset $asset,
+        TestRun $testRun,
+        WorkflowEvidencePhotoService $workflowEvidencePhotos
+    )
     {
         $this->authorize('delete', $testRun);
         abort_unless($testRun->asset_id === $asset->id, 404);
+
+        $evidencePaths = $testRun->results()
+            ->with('photos:id,workflow_result_id,path')
+            ->get()
+            ->flatMap(fn (TestResult $result) => $result->photos->pluck('path'))
+            ->filter()
+            ->unique()
+            ->values();
+
         $testRun->delete();
+
+        foreach ($evidencePaths as $path) {
+            $workflowEvidencePhotos->delete($path);
+        }
+
         $asset->refreshTestCompletionFlag();
         return redirect()->route('test-runs.index', $asset->id)
             ->with('success', trans('general.deleted'));

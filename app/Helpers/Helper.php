@@ -13,6 +13,7 @@ use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\License;
 use App\Models\Location;
+use App\Support\SameOriginRedirect;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Contracts\Encryption\DecryptException;
@@ -1539,7 +1540,9 @@ class Helper
         $checkout_to_type = Session::get('checkout_to_type') ?? null;
         $checkedInFrom = Session::get('checkedInFrom');
         $other_redirect = Session::get('other_redirect');
-        $backUrl = Session::pull('back_url', route('home'));
+        $backUrl = SameOriginRedirect::sanitize(
+            Session::pull('back_url', route('home'))
+        ) ?? route('home');
 
        // return to previous page
         if ($redirect_option === 'back') {
@@ -1582,7 +1585,6 @@ class Helper
         // return to somewhere else
         if ($redirect_option == 'other_redirect') {
             return match ($other_redirect) {
-                'audit' => redirect()->route('assets.audit.due'),
                 'model' => redirect()->route('models.show', $request->model_id),
             };
 

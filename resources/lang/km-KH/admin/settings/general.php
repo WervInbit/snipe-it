@@ -381,7 +381,7 @@ return [
     'purge_barcodes' => 'Purge Barcodes',
     'help_asterisk_bold'    => 'អត្ថបទដែលបានបញ្ចូលជា <code>**text**</code> នឹងត្រូវបានបង្ហាញជាដិត',
     'help_blank_to_use'     => 'ទុកទទេដើម្បីប្រើតម្លៃពី <code>:setting_name</code>',
-    'help_default_will_use' => '<code>:default</code> នឹងប្រើតម្លៃពី <code>:setting_name</code>។ <br>ចំណាំថាតម្លៃនៃ barcodes ត្រូវតែគោរពតាម barcode spec រៀងៗខ្លួន ដើម្បីអាចបង្កើតបានដោយជោគជ័យ។ សូមមើល <a href="https://snipe-it.readme.io/docs/barcodes">ឯកសារ <i class="fa fa-external-link"></i></a> សម្រាប់ព័ត៌មានលម្អិតបន្ថែម. ',
+    'help_default_will_use' => '<code>:default</code> នឹងប្រើតម្លៃពី <code>:setting_name</code>។ <br>ចំណាំថាតម្លៃនៃ barcodes ត្រូវតែគោរពតាម barcode spec រៀងៗខ្លួន ដើម្បីអាចបង្កើតបានដោយជោគជ័យ។ សូមមើល <a href=":fork_documentation_url">ឯកសារ <i class="fa fa-external-link"></i></a> សម្រាប់ព័ត៌មានលម្អិតបន្ថែម. ',
     'asset_id'              => 'លេខសម្គាល់ទ្រព្យសកម្ម',
     'data'               => 'ទិន្នន័យ',
     'default'               => 'លំនាំដើម',

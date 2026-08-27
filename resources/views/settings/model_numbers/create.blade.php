@@ -39,16 +39,18 @@
         </div>
     </div>
 
-    <div class="form-group">
-        <div class="col-md-7 col-md-offset-3">
-            <div class="checkbox">
-                <label>
-                    <input type="checkbox" name="make_primary" value="1" {{ old('make_primary', $hasExistingNumbers ? null : '1') ? 'checked' : '' }}>
-                    {{ __('Make this the default selection for new assets.') }}
-                </label>
+    @if(!$hasExistingNumbers || $canManageLifecycle)
+        <div class="form-group">
+            <div class="col-md-7 col-md-offset-3">
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="make_primary" value="1" {{ old('make_primary', $hasExistingNumbers ? null : '1') ? 'checked' : '' }}>
+                        {{ __('Make this the default selection for new assets.') }}
+                    </label>
+                </div>
             </div>
         </div>
-    </div>
+    @endif
 @endsection
 
 @push('scripts')

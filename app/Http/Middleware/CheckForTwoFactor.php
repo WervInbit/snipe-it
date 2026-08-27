@@ -3,8 +3,8 @@
 namespace App\Http\Middleware;
 
 use App\Models\Setting;
-use Illuminate\Support\Facades\Auth;
 use Closure;
+use Illuminate\Http\Request;
 
 class CheckForTwoFactor
 {
@@ -14,6 +14,36 @@ class CheckForTwoFactor
     public const IGNORE_ROUTES = ['two-factor', 'two-factor-enroll', 'setup', 'logout'];
 
     /**
+     * Determine whether this request's authenticated session has completed
+     * the configured two-factor challenge.
+     */
+    public static function isComplete(Request $request): bool
+    {
+        $user = $request->user();
+
+        if ($user === null) {
+            return true;
+        }
+
+        $settings = Setting::getSettings();
+        if ($settings === null) {
+            return true;
+        }
+
+        $mode = (string) $settings->two_factor_enabled;
+        if ($mode !== '1' && $mode !== '2') {
+            return true;
+        }
+
+        if ($mode === '1' && (string) $user->two_factor_optin !== '1') {
+            return true;
+        }
+
+        return $request->hasSession()
+            && (string) $request->session()->get('2fa_authed') === (string) $user->getAuthIdentifier();
+    }
+
+    /**
      * Handle an incoming request.
      *
      * @param \Illuminate\Http\Request $request
@@ -21,7 +51,7 @@ class CheckForTwoFactor
      *
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next)
     {
         // Skip the logic if the user is on the two factor pages or the setup pages
 
@@ -34,28 +64,29 @@ class CheckForTwoFactor
             return $next($request);
         }
 
-        // Two-factor is enabled (either optional or required)
-        if ($settings = Setting::getSettings()) {
-            if (Auth::check() && ($settings->two_factor_enabled != '')) {
-                // This user is already 2fa-authed
-                if ($request->session()->get('2fa_authed')==auth()->id()) {
-                    return $next($request);
-                }
+        if (! self::isComplete($request)) {
+            $user = $request->user();
 
-                // Two-factor is optional and the user has NOT opted in, let them through
-                if (($settings->two_factor_enabled == '1') && (auth()->user()->two_factor_optin != '1')) {
-                    return $next($request);
-                }
+            self::rememberIntendedUrl($request);
 
-                // Otherwise make sure they're enrolled and show them the 2FA code screen
-                if ((auth()->user()->two_factor_secret != '') && (auth()->user()->two_factor_enrolled == '1')) {
-                    return redirect()->route('two-factor')->with('info', trans('auth/message.two_factor.enter_two_factor_code'));
-                }
-
-                return redirect()->route('two-factor-enroll')->with('success', trans('auth/message.two_factor.please_enroll'));
+            // Otherwise make sure they're enrolled and show them the 2FA code screen
+            if (($user->two_factor_secret != '') && ($user->two_factor_enrolled == '1')) {
+                return redirect()->route('two-factor')->with('info', trans('auth/message.two_factor.enter_two_factor_code'));
             }
+
+            return redirect()->route('two-factor-enroll')->with('success', trans('auth/message.two_factor.please_enroll'));
         }
 
         return $next($request);
+    }
+
+    /**
+     * Preserve an interactive deep link until the two-factor step completes.
+     */
+    private static function rememberIntendedUrl(Request $request): void
+    {
+        if ($request->isMethod('GET') && ! $request->expectsJson()) {
+            $request->session()->put('url.intended', $request->fullUrl());
+        }
     }
 }

@@ -379,7 +379,7 @@ return [
     'purge_barcodes' => 'Purge Barcodes',
     'help_asterisk_bold'    => 'Tekst wprowadzony jako <code>**text**</code> będzie wyświetlany jako pogrubiony',
     'help_blank_to_use'     => 'Pozostaw puste, aby użyć wartości z <code>:setting_name</code>',
-    'help_default_will_use' => '<code>:default</code> użyje wartości z <code>:setting_name</code>. <br>Zauważ, że wartość kodów kreskowych musi być zgodna z odpowiednią specyfikacją kodu kreskowego, aby mogła zostać wygenerowana. Aby uzyskać więcej informacji, zobacz <a href="https://snipe-it.readme.io/docs/barcodes">dokumentację <i class="fa fa-external-link"></i></a>. ',
+    'help_default_will_use' => '<code>:default</code> użyje wartości z <code>:setting_name</code>. <br>Zauważ, że wartość kodów kreskowych musi być zgodna z odpowiednią specyfikacją kodu kreskowego, aby mogła zostać wygenerowana. Aby uzyskać więcej informacji, zobacz <a href=":fork_documentation_url">dokumentację <i class="fa fa-external-link"></i></a>. ',
     'asset_id'              => 'ID Aktywa',
     'data'               => 'Dane',
     'default'               => 'Domyślny',

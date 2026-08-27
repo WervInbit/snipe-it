@@ -157,7 +157,7 @@ return [
     'import'         	    => 'インポート',
     'import_this_file'      => 'フィールドをマップし、このファイルを処理します',
     'importing'         	=> 'インポートしています',
-    'importing_help'        => 'アセット、アクセサリ、ライセンス、コンポーネント、消耗品、およびユーザーをCSVファイルからインポートできます。 <br><br>CSVは、ドキュメント <a href="https://snipe-it.readme.io/docs/importing" target="_new"></a> のサンプルCSVに一致するヘッダーでカンマ区切りでフォーマットする必要があります。',
+    'importing_help'        => 'アセット、アクセサリ、ライセンス、コンポーネント、消耗品、およびユーザーをCSVファイルからインポートできます。 <br><br>CSVは、ドキュメント <a href=":fork_documentation_url" target="_new"></a> のサンプルCSVに一致するヘッダーでカンマ区切りでフォーマットする必要があります。',
     'import-history'        => 'インポート履歴',
     'asset_maintenance'        => '資産管理',
     'asset_maintenance_report' => '資産管理レポート',

@@ -4,15 +4,20 @@ namespace Database\Seeders;
 
 use App\Models\Group;
 use App\Models\User;
+use Database\Seeders\Concerns\GuardsDisposableDataSeeding;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class ProductionDemoUserSeeder extends Seeder
 {
+    use GuardsDisposableDataSeeding;
+
     private const PASSWORD = 'password';
 
     public function run(): void
     {
+        $this->assertDisposableDataSeedingAllowed();
+
         $this->call(ProductionPermissionGroupSeeder::class);
 
         $admin = $this->upsertUser([

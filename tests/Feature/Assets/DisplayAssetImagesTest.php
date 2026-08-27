@@ -20,7 +20,7 @@ class DisplayAssetImagesTest extends TestCase
         $this->actingAs($user)->post(route('asset-images.store', $asset), [
             'image' => [UploadedFile::fake()->image('front.jpg')],
             'caption' => ['Front'],
-        ])->assertStatus(201);
+        ])->assertRedirect(route('hardware.show', $asset));
 
         $asset->refresh();
         $storedPath = $asset->images()->first()->file_path;
@@ -51,14 +51,67 @@ class DisplayAssetImagesTest extends TestCase
         $this->actingAs($supervisor)->post(route('asset-images.store', $asset), [
             'image' => [UploadedFile::fake()->image('front.jpg')],
             'caption' => ['Front'],
-        ])->assertStatus(201);
+        ])->assertRedirect(route('hardware.show', $asset));
 
-        $image = $asset->images()->first();
+        $asset->images()->firstOrFail();
 
-        $refurbisher = User::factory()->refurbisher()->editAssets()->create();
+        $refurbisher = User::factory()->refurbisher()->viewAssets()->editAssets()->create();
         $this->actingAs($refurbisher)
             ->get(route('hardware.show', $asset))
+            ->assertOk()
             ->assertSee('name="caption"', false)
-            ->assertDontSee(route('asset-images.destroy', [$asset, $image]));
+            ->assertDontSee('asset-image-delete-form');
+    }
+
+    public function test_explicit_image_permissions_display_image_management_controls(): void
+    {
+        Storage::fake('public');
+
+        $asset = Asset::factory()->create();
+        $user = User::factory()->create([
+            'permissions' => json_encode([
+                'assets.view' => '1',
+                'assets.edit' => '1',
+                'assets.images.upload' => '1',
+                'assets.images.manage' => '1',
+            ]),
+        ]);
+
+        $this->actingAs($user)->post(route('asset-images.store', $asset), [
+            'image' => [UploadedFile::fake()->image('explicit.jpg')],
+            'caption' => ['Explicit'],
+        ])->assertRedirect(route('hardware.show', $asset));
+
+        $asset->images()->firstOrFail();
+
+        $this->actingAs($user)
+            ->get(route('hardware.show', $asset))
+            ->assertOk()
+            ->assertSee('name="caption"', false)
+            ->assertSee('asset-image-delete-form');
+    }
+
+    public function test_explicit_manage_permission_displays_delete_without_upload_permission(): void
+    {
+        $asset = Asset::factory()->create();
+        $asset->images()->create([
+            'file_path' => 'assets/'.$asset->id.'/existing.jpg',
+            'caption' => 'Existing',
+            'sort_order' => 1,
+            'source' => 'asset_upload',
+        ]);
+        $user = User::factory()->create([
+            'permissions' => json_encode([
+                'assets.view' => '1',
+                'assets.edit' => '1',
+                'assets.images.manage' => '1',
+            ]),
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('hardware.show', $asset))
+            ->assertOk()
+            ->assertDontSee('name="caption"', false)
+            ->assertSee('asset-image-delete-form');
     }
 }

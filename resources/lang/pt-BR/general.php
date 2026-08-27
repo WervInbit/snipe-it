@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Importar',
     'import_this_file'      => 'Mapear os campos e processar este arquivo',
     'importing'         	=> 'Importando',
-    'importing_help'        => 'Você pode importar ativos, acessórios, licenças, componentes, consumíveis e usuários via arquivo CSV. <br><br>O CSV deve ser delimitado por vírgula e formatado com cabeçalhos que correspondem aos dos <a href="https://snipe-it.readme.io/docs/importing" target="_new">CSVs de amostra na documentação</a>.',
+    'importing_help'        => 'Você pode importar ativos, acessórios, licenças, componentes, consumíveis e usuários via arquivo CSV. <br><br>O CSV deve ser delimitado por vírgula e formatado com cabeçalhos que correspondem aos dos <a href=":fork_documentation_url" target="_new">CSVs de amostra na documentação</a>.',
     'import-history'        => 'Importar Histórico',
     'asset_maintenance'        => 'Manutenção de Ativo',
     'asset_maintenance_report' => 'Relatório de Manutenção em Ativo',

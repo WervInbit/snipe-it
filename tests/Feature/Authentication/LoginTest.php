@@ -3,6 +3,7 @@
 namespace Tests\Feature\Authentication;
 
 use App\Models\User;
+use Illuminate\Support\Facades\RateLimiter;
 use Tests\TestCase;
 
 class LoginTest extends TestCase
@@ -31,12 +32,11 @@ class LoginTest extends TestCase
 
     public function testLoginThrottleConfigIsRespected()
     {
-
-       $this->markTestIncomplete("This test is flaky and needs to be fixed. Passes and fails seemingly at random.");
        User::factory()->create(['username' => 'username_here']);
 
        config(['auth.passwords.users.throttle.max_attempts' => 1]);
-       config(['auth.passwords.users.throttle.lockout_duration' => 1]);
+       config(['auth.passwords.users.throttle.lockout_duration' => 60]);
+       RateLimiter::clear('invalid username|127.0.0.100');
 
         for ($i = 0; $i < 2; ++$i) {
             $this->from('/login')
@@ -63,7 +63,6 @@ class LoginTest extends TestCase
 
     public function testLogsSuccessfulLogin()
     {
-        $this->markTestIncomplete("This test is flaky and needs to be fixed. Passes and fails seemingly at random.");
         User::factory()->create(['username' => 'username_here']);
 
         $this->withServerVariables(['REMOTE_ADDR' => '127.0.0.100'])

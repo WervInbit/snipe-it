@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Importēt',
     'import_this_file'      => 'Kartējiet laukus un apstrādājiet šo failu',
     'importing'         	=> 'Notiek ielāde',
-    'importing_help'        => 'Jūs ar CSV failu varat ielādēt inventāru, piederumus, licences, sastāvdaļas, izlietojamus materiālus un lietotājus. <br><br>CSV failam jālieto atdalītājs - komats un jābūt formētam ar datiem galvenē, kas atbilst prasībām <a href="https://snipe-it.readme.io/docs/importing" target="_new">kas norādīta CSV dokumentācijā</a>.',
+    'importing_help'        => 'Jūs ar CSV failu varat ielādēt inventāru, piederumus, licences, sastāvdaļas, izlietojamus materiālus un lietotājus. <br><br>CSV failam jālieto atdalītājs - komats un jābūt formētam ar datiem galvenē, kas atbilst prasībām <a href=":fork_documentation_url" target="_new">kas norādīta CSV dokumentācijā</a>.',
     'import-history'        => 'Importa vēsture',
     'asset_maintenance'        => 'Aktīvu uzturēšana',
     'asset_maintenance_report' => 'Aktīvu uzturēšanas pārskats',

@@ -2,8 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Asset;
+use App\Services\Assets\LegacyAssetAssignmentCleanupService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 
 class FixUpAssignedTypeWithoutAssignedTo extends Command
 {
@@ -24,9 +25,18 @@ class FixUpAssignedTypeWithoutAssignedTo extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(LegacyAssetAssignmentCleanupService $legacyAssignmentCleanup): int
     {
-        DB::table('assets')->whereNotNull('assigned_type')->whereNull('assigned_to')->update(['assigned_type' => null]);
-        $this->info("Assets with an assigned_type but no assigned_to are fixed");
+        Asset::withTrashed()
+            ->whereNotNull('assigned_type')
+            ->whereNull('assigned_to')
+            ->orderBy('id')
+            ->eachById(function (Asset $asset) use ($legacyAssignmentCleanup): void {
+                $legacyAssignmentCleanup->clear($asset);
+            });
+
+        $this->info('Assets with an assigned_type but no assigned_to are fixed');
+
+        return self::SUCCESS;
     }
 }

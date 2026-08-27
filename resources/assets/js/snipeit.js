@@ -13,7 +13,9 @@ window.$ = jQuery
 
 require('jquery-ui'); //should we export this to the window?
 jQuery.fn.uitooltip = jQuery.fn.tooltip;
-require('bootstrap-less');
+// Bootstrap 3.4.1 is patched during npm installation by
+// scripts/patch-bootstrap3-security.cjs before it is bundled.
+require('bootstrap');
 require('select2');
 require('admin-lte');
 require('tether');

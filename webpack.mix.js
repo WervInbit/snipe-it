@@ -139,7 +139,7 @@ mix
             './node_modules/bootstrap-table/dist/extensions/custom-view/bootstrap-table-custom-view.js',
             './resources/assets/js/extensions/jquery.base64.js',
             './node_modules/tableexport.jquery.plugin/tableExport.min.js',
-            './node_modules/tableexport.jquery.plugin/libs/jsPDF/jspdf.umd.min.js',
+            './node_modules/jspdf/dist/jspdf.umd.min.js',
             './resources/assets/js/FileSaver.min.js',
             './node_modules/xlsx/dist/xlsx.core.min.js',
             './node_modules/bootstrap-table/dist/extensions/sticky-header/bootstrap-table-sticky-header.js',

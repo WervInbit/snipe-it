@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Importer',
     'import_this_file'      => 'Champs de la carte et traiter ce fichier',
     'importing'         	=> 'Importation en cours',
-    'importing_help'        => 'Vous pouvez importer des matériels, accessoires, licences, composants, consommables et utilisateurs via un fichier CSV. <br><br>Le CSV doit être délimité par des virgules et formaté avec des en-têtes qui correspondent à ceux des <a href="https://snipe-it.readme.io/docs/importing" target="_new">exemples de CSV présents dans la documentation</a>.',
+    'importing_help'        => 'Vous pouvez importer des matériels, accessoires, licences, composants, consommables et utilisateurs via un fichier CSV. <br><br>Le CSV doit être délimité par des virgules et formaté avec des en-têtes qui correspondent à ceux des <a href=":fork_documentation_url" target="_new">exemples de CSV présents dans la documentation</a>.',
     'import-history'        => 'Importer l\'historique',
     'asset_maintenance'        => 'Gestion des actifs',
     'asset_maintenance_report' => 'Rapport sur l\'entretien d\'actif',

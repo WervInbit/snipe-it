@@ -2,8 +2,7 @@
 
 return [
     'about_kits_title'                  => 'Over vooraf gedefinieerde Kits',
-    'about_kits_text'                   => 'Vooraf gedefinieerde Kits laat je snel een verzameling items bekijken (assets, licenties, enz.) voor een gebruiker. Dit kan handig zijn wanneer uw onboarding proces consistent is voor veel gebruikers en alle gebruikers dezelfde items ontvangen.',
-    'checkout'                          => 'Check uit Kit ',
+    'about_kits_text'                   => 'Vooraf gedefinieerde kits blijven beschikbaar als compatibiliteitssjablonen. Kit-uitgifte maakt geen deel uit van het V1-refurbishmentproces.',
     'create_success'                    => 'Kit was succesvol aangemaakt.',
     'create'                            => 'Aanmaken voorgedefinieerde Kit',
     'update'                            => 'Bijwerken voorgedefinieerde Kit',
@@ -38,8 +37,6 @@ return [
     'accessory_error'                   => 'Accessoire al gekoppeld aan kit',
     'accessory_deleted'                 => 'Verwijderen succesvol',
     'accessory_none'                    => 'Accessoire bestaat niet',
-    'checkout_success'                  => 'Uitchecken is gelukt',
-    'checkout_error'                    => 'Fout bij uitchecken',
     'kit_none'                          => 'Kit bestaat niet',
     'kit_created'                       => 'Kit is succesvol aangemaakt',
     'kit_updated'                       => 'Kit is succesvol bijgewerkt',

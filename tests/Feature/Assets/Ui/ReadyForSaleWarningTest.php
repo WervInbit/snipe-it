@@ -11,6 +11,7 @@ use App\Models\TestType;
 use App\Models\User;
 use App\Models\WorkflowProfile;
 use App\Models\WorkflowProfileItem;
+use App\Services\WorkflowRunDefinitionService;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -27,6 +28,7 @@ class ReadyForSaleWarningTest extends TestCase
     {
         $readyForSale = Statuslabel::factory()->rtd()->create([
             'name' => 'Ready for Sale ' . Str::uuid(),
+            'lifecycle_stage' => Statuslabel::LIFECYCLE_READY_FOR_SALE,
             'default_label' => 0,
         ]);
         $originalStatus = Statuslabel::factory()->pending()->create([
@@ -74,6 +76,7 @@ class ReadyForSaleWarningTest extends TestCase
     {
         $readyForSale = Statuslabel::factory()->rtd()->create([
             'name' => 'Ready for Sale ' . Str::uuid(),
+            'lifecycle_stage' => Statuslabel::LIFECYCLE_READY_FOR_SALE,
             'default_label' => 0,
         ]);
         $originalStatus = Statuslabel::factory()->pending()->create([
@@ -83,8 +86,8 @@ class ReadyForSaleWarningTest extends TestCase
         $asset = Asset::factory()->create(['status_id' => $originalStatus->id]);
         $user = User::factory()->superuser()->create();
 
-        $diagnosticItem = TestType::factory()->create(['name' => 'Diagnostic']);
-        $photoItem = TestType::factory()->create(['name' => 'Sale Photos']);
+        $diagnosticItem = TestType::factory()->create(['name' => 'Diagnostic', 'applies_to_all' => true]);
+        $photoItem = TestType::factory()->create(['name' => 'Sale Photos', 'applies_to_all' => true]);
         $diagnostics = WorkflowProfile::factory()->create([
             'name' => 'Diagnostics',
             'blocks_sale_readiness' => true,
@@ -104,10 +107,13 @@ class ReadyForSaleWarningTest extends TestCase
             'workflow_item_id' => $photoItem->id,
             'is_required' => true,
         ]);
+        $diagnosticHash = app(WorkflowRunDefinitionService::class)
+            ->forProfile($asset, $diagnostics)['readiness_context_hash'];
 
         $run = TestRun::factory()->create([
             'asset_id' => $asset->id,
             'workflow_profile_id' => $diagnostics->id,
+            'readiness_context_hash' => $diagnosticHash,
         ]);
         TestResult::factory()->create([
             'workflow_run_id' => $run->id,

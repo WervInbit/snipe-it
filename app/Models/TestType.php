@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Builder;
 use App\Models\Asset;
+use App\Services\Components\AssetComponentRosterRow;
+use App\Services\Components\AssetComponentRosterService;
 use App\Services\ModelAttributes\EffectiveAttributeResolver;
 use Illuminate\Support\Str;
 
@@ -262,24 +264,43 @@ class TestType extends SnipeModel
     private function componentApplicabilityIdsForAsset(Asset $asset): array
     {
         $definitions = collect();
+        $roster = app(AssetComponentRosterService::class)->buildForAsset($asset);
 
-        if ($asset->modelNumber) {
-            foreach ($asset->modelNumber->componentTemplates as $template) {
-                if ($template->componentDefinition) {
-                    $definitions->push($template->componentDefinition);
-
-                    foreach ($template->componentDefinition->subcomponentTemplates as $subcomponentTemplate) {
-                        if ($subcomponentTemplate->childComponentDefinition) {
-                            $definitions->push($subcomponentTemplate->childComponentDefinition);
-                        }
-                    }
-                }
+        foreach ($roster->rows as $row) {
+            if (!$row instanceof AssetComponentRosterRow || $row->isRemoved()) {
+                continue;
             }
-        }
 
-        foreach ($asset->trackedComponents as $component) {
-            if ($component->componentDefinition) {
-                $definitions->push($component->componentDefinition);
+            $definition = $row->component?->componentDefinition
+                ?? $row->template?->componentDefinition;
+
+            if (!$definition) {
+                continue;
+            }
+
+            $definitions->push($definition);
+
+            $stateByTemplate = $row->component
+                ? $row->component->expectedSubcomponentStates
+                    ->keyBy('component_definition_subcomponent_template_id')
+                : collect();
+
+            foreach ($definition->subcomponentTemplates as $subcomponentTemplate) {
+                $state = $stateByTemplate->get($subcomponentTemplate->id);
+                $remainingQty = max(1, (int) $subcomponentTemplate->expected_qty);
+
+                if ($row->component) {
+                    $remainingQty = max(
+                        0,
+                        $remainingQty
+                            - max(0, (int) ($state?->materialized_qty ?? 0))
+                            - max(0, (int) ($state?->removed_qty ?? 0))
+                    );
+                }
+
+                if ($remainingQty > 0 && $subcomponentTemplate->childComponentDefinition) {
+                    $definitions->push($subcomponentTemplate->childComponentDefinition);
+                }
             }
         }
 

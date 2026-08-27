@@ -20,7 +20,7 @@ return [
     | any other location as required by the application or its packages.
     */
 
-    'name' => env('SITE_NAME', 'Snipe-IT'),
+    'name' => env('SITE_NAME', 'Inbit Device Refurbishment'),
 
     /*
     |--------------------------------------------------------------------------
@@ -131,6 +131,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Maintenance Mode Driver
+    |--------------------------------------------------------------------------
+    |
+    | The cache driver allows maintenance mode to be shared by every
+    | application container in a multi-container production deployment.
+    |
+    | Supported drivers: "file", "cache"
+    |
+    */
+
+    'maintenance' => [
+        'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
+        'store' => env('APP_MAINTENANCE_STORE', 'database'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Storage path for private uploads
     |--------------------------------------------------------------------------
     | This is the path for any uploaded files that have to be run through the
@@ -213,6 +230,19 @@ return [
     'enable_csp' => env('ENABLE_CSP', true),
 
     'additional_csp_urls' => env('ADDITIONAL_CSP_URLS', ''),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Webhook Network Boundary
+    |--------------------------------------------------------------------------
+    |
+    | Webhook endpoints are public HTTP(S) targets by default. Only enable
+    | internal targets when an operator intentionally needs an on-LAN receiver
+    | and has assessed the server-side request-forgery implications.
+    |
+    */
+
+    'webhook_allow_internal_targets' => env('WEBHOOK_ALLOW_INTERNAL_TARGETS', false),
 
 
 
@@ -301,7 +331,6 @@ return [
          */
 
         Intervention\Image\ImageServiceProvider::class,
-        Collective\Html\HtmlServiceProvider::class,
         Spatie\Backup\BackupServiceProvider::class,
         PragmaRX\Google2FALaravel\ServiceProvider::class,
         Laravel\Passport\PassportServiceProvider::class,
@@ -325,7 +354,6 @@ return [
         */
         App\Providers\BladeServiceProvider::class,
         App\Providers\LivewireServiceProvider::class,
-        App\Providers\MacroServiceProvider::class,
         App\Providers\SamlServiceProvider::class,
         App\Providers\BreadcrumbsServiceProvider::class,
 
@@ -378,8 +406,6 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-        'Form'      => Collective\Html\FormFacade::class,
-        'Html'      => Collective\Html\HtmlFacade::class,
         'Google2FA' => PragmaRX\Google2FALaravel\Facade::class,
         'Image'     => Intervention\Image\ImageServiceProvider::class,
         'Carbon' => Carbon\Carbon::class,
@@ -425,6 +451,31 @@ return [
    */
 
     'allow_backup_delete' => env('ALLOW_BACKUP_DELETE', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Allow Uploaded Backup Restore
+    |--------------------------------------------------------------------------
+    |
+    | The inherited web restore is destructive and non-atomic. Keep it
+    | disabled unless an operator has explicitly accepted that recovery risk.
+    |
+    */
+
+    'allow_backup_restore' => env('ALLOW_BACKUP_RESTORE', false),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Allow Browser-Based Initial Setup
+    |--------------------------------------------------------------------------
+    |
+    | Browser setup includes unauthenticated migration and first-superuser
+    | endpoints until setup is complete. Production containers disable it and
+    | require the guarded deployment/CLI bootstrap sequence instead.
+    |
+    */
+
+    'allow_web_setup' => env('ALLOW_WEB_SETUP', false),
 
 
   /*

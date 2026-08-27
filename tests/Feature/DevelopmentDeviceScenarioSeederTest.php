@@ -8,6 +8,7 @@ use App\Models\ComponentInstance;
 use App\Services\Components\AssetComponentRosterService;
 use Database\Seeders\DevelopmentDeviceScenarioSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
 use Tests\TestCase;
 
 class DevelopmentDeviceScenarioSeederTest extends TestCase
@@ -16,6 +17,8 @@ class DevelopmentDeviceScenarioSeederTest extends TestCase
 
     public function test_development_device_scenario_seeder_creates_rerunnable_component_scenarios(): void
     {
+        Config::set('demo.allow_disposable_data_seeding', true);
+
         $this->assertSame(0, Asset::query()->where('asset_tag', 'like', 'DEV-COMP-%')->count());
 
         $this->seed(DevelopmentDeviceScenarioSeeder::class);

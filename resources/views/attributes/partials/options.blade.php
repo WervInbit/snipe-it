@@ -8,6 +8,7 @@
     $pendingOptions = collect(old('options.new', []))
         ->filter(fn ($option) => is_array($option) && ($option['value'] ?? '') !== '' && ($option['label'] ?? '') !== '');
     $shouldShow = old('datatype', $definition->datatype ?? AttributeDefinition::DATATYPE_TEXT) === AttributeDefinition::DATATYPE_ENUM;
+    $canManageLifecycle = $isEdit && auth()->user()?->can('manageLifecycle', $definition);
     $nextIndex = $pendingOptions->keys()->map(fn ($key) => (int) $key)->max();
     $nextIndex = is_null($nextIndex) ? 0 : $nextIndex + 1;
 @endphp
@@ -61,14 +62,21 @@
                             <td style="width:90px;">
                                 <label class="checkbox-inline" style="margin:0;">
                                     <input type="hidden" name="options[existing][{{ $option->id }}][active]" value="0">
-                                    <input type="checkbox" name="options[existing][{{ $option->id }}][active]" value="1" {{ $option->active ? 'checked' : '' }}>
+                                    <input type="checkbox" name="options[existing][{{ $option->id }}][active]" value="1" {{ $option->active ? 'checked' : '' }} {{ $canManageLifecycle ? '' : 'disabled' }}>
+                                    @unless($canManageLifecycle)
+                                        <input type="hidden" name="options[existing][{{ $option->id }}][active]" value="{{ $option->active ? '1' : '0' }}">
+                                    @endunless
                                 </label>
                             </td>
                             <td style="width:90px;">
-                                <label class="checkbox-inline" style="margin:0;">
-                                    <input type="hidden" name="options[existing][{{ $option->id }}][delete]" value="0">
-                                    <input type="checkbox" name="options[existing][{{ $option->id }}][delete]" value="1">
-                                </label>
+                                @if($canManageLifecycle)
+                                    <label class="checkbox-inline" style="margin:0;">
+                                        <input type="hidden" name="options[existing][{{ $option->id }}][delete]" value="0">
+                                        <input type="checkbox" name="options[existing][{{ $option->id }}][delete]" value="1">
+                                    </label>
+                                @else
+                                    <span class="text-muted" aria-label="{{ __('Admin only') }}">&mdash;</span>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

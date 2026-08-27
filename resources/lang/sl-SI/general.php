@@ -158,7 +158,7 @@ return [
     'import_this_file'      => 'Map fields and process this file',
     'importing'         	=> 'Uvažanje',
     'importing_help'        => 'Mogoč je uvoz sredstev, dodatkov, licenc, komponent, potrošnega materiala in uporabnikov preko datotek CSV.
-<br><br>Datoteka CSV mora bi ločena z vejico in oblikovana z glavami, ki se ujemajo tistim v <a href="https://snipe-it.readme.io/docs/importing" target="_new">vzorčni datoteki CSV in dokumentaciji</a>.',
+<br><br>Datoteka CSV mora bi ločena z vejico in oblikovana z glavami, ki se ujemajo tistim v <a href=":fork_documentation_url" target="_new">vzorčni datoteki CSV in dokumentaciji</a>.',
     'import-history'        => 'Uvoz zgodovine',
     'asset_maintenance'        => 'Vzdrževanje sredstev',
     'asset_maintenance_report' => 'Poročilo o vzdrževanju sredstev',

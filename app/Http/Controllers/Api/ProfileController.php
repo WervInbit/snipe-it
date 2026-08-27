@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\Helper;
 use App\Http\Controllers\Controller;
+use App\Http\Middleware\CheckForTwoFactor;
 use App\Http\Transformers\ProfileTransformer;
-use App\Models\CheckoutRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Storage;
 use Laravel\Passport\TokenRepository;
 use Illuminate\Contracts\Validation\Factory as ValidationFactory;
 use Illuminate\Support\Facades\Gate;
-use App\Models\CustomField;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -42,57 +41,6 @@ class ProfileController extends Controller
     }
 
     /**
-     * Display a listing of requested assets.
-     *
-     * @author [A. Gianotto] [<snipe@snipe.net>]
-     * @since [v4.3.0]
-     */
-    public function requestedAssets() :  array
-    {
-        $checkoutRequests = CheckoutRequest::where('user_id', '=', auth()->id())->get();
-
-        $results = array();
-        $show_field = array();
-        $showable_fields = array();
-        $results['total'] = $checkoutRequests->count();
-
-        $all_custom_fields = CustomField::all(); //used as a 'cache' of custom fields throughout this page load
-        foreach ($all_custom_fields as $field) {
-            if (($field->field_encrypted=='0') && ($field->show_in_requestable_list=='1')) {
-                $showable_fields[] = $field->db_column_name();
-            }
-        }
-
-        foreach ($checkoutRequests as $checkoutRequest) {
-
-            // Make sure the asset and request still exist
-            if ($checkoutRequest && $checkoutRequest->itemRequested()) {
-                $assets = [
-                    'image' => e($checkoutRequest->itemRequested()->present()->getImageUrl()),
-                    'name' => e($checkoutRequest->itemRequested()->present()->name()),
-                    'type' => e($checkoutRequest->itemType()),
-                    'qty' => (int) $checkoutRequest->quantity,
-                    'location' => ($checkoutRequest->location()) ? e($checkoutRequest->location()->name) : null,
-                    'expected_checkin' => Helper::getFormattedDateObject($checkoutRequest->itemRequested()->expected_checkin, 'datetime'),
-                    'request_date' => Helper::getFormattedDateObject($checkoutRequest->created_at, 'datetime'),
-                ];
-
-                foreach ($showable_fields as $showable_field_name) {
-                    $show_field['custom_fields.'.$showable_field_name] =  $checkoutRequest->itemRequested()->{$showable_field_name};
-                }
-
-                // Merge the plain asset data and the custom fields data
-                $results['rows'][] = array_merge($assets, $show_field);
-            }
-
-
-        }
-
-        return $results;
-    }
-
-
-    /**
      * Delete an API token
      *
      * @author [A. Gianotto] [<snipe@snipe.net>]
@@ -103,6 +51,10 @@ class ProfileController extends Controller
 
         if (!Gate::allows('self.api')) {
             abort(403);
+        }
+
+        if (! CheckForTwoFactor::isComplete($request)) {
+            abort(403, trans('auth/message.two_factor.enter_two_factor_code'));
         }
 
         $accessTokenName = $request->input('name', 'Auth Token');
@@ -134,6 +86,10 @@ class ProfileController extends Controller
             abort(403);
         }
 
+        if (! CheckForTwoFactor::isComplete(request())) {
+            abort(403, trans('auth/message.two_factor.enter_two_factor_code'));
+        }
+
         $token = $this->tokenRepository->findForUser(
             $tokenId, auth()->user()->getAuthIdentifier()
         );
@@ -161,7 +117,11 @@ class ProfileController extends Controller
         if (!Gate::allows('self.api')) {
             abort(403);
         }
-        
+
+        if (! CheckForTwoFactor::isComplete(request())) {
+            abort(403, trans('auth/message.two_factor.enter_two_factor_code'));
+        }
+
         $tokens = $this->tokenRepository->forUser(auth()->user()->getAuthIdentifier());
         $token_values = $tokens->load('client')->filter(function ($token) {
             return $token->client->personal_access_client && ! $token->revoked;

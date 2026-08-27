@@ -380,7 +380,7 @@ return [
     'help_asterisk_bold'    => 'Teks yang dimasukkan sebagai <code>**text**</code>  akan ditampilkan dengan huruf tebal',
     'help_blank_to_use'     => 'Biarkan kosong untuk menggunakan nilai dari <code>:setting_name</code>',
     'help_default_will_use' => '<code>:default</code> akan menggunakan nilai dari <code>:setting_name</code>.
-<br>Perhatikan bahwa nilai barcode harus mematuhi spesifikasi barcode terkait agar berhasil diger. Silakan lihat <a href="https://snipe-it.readme.io/docs/barcodes">dokumentasi <i class="fa fa-external-link"></i></a> untuk detail lebih lanjut. ',
+<br>Perhatikan bahwa nilai barcode harus mematuhi spesifikasi barcode terkait agar berhasil diger. Silakan lihat <a href=":fork_documentation_url">dokumentasi <i class="fa fa-external-link"></i></a> untuk detail lebih lanjut. ',
     'asset_id'              => 'ID Aset',
     'data'               => 'Data',
     'default'               => 'Default',

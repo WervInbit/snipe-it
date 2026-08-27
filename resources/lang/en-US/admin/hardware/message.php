@@ -14,10 +14,13 @@ return [
     'error_generating_labels' => 'Error while generating labels.',
     'no_assets_selected' => 'No assets selected.',
     'internal_use_conflict' => 'Internal-use assets cannot be marked available for sale.',
+    'legacy_assignment_disabled' => 'Asset assignment fields are disabled in this fork; change the asset lifecycle status instead.',
+    'legacy_metadata_read_only' => 'Legacy checkout, check-in, request, and audit metadata is historical and cannot be changed.',
 
     'create' => [
         'error'   		=> 'Asset was not created, please try again. :(',
         'success' 		=> 'Asset created successfully. :)',
+        'encrypted_warning' => 'Asset created successfully, but encrypted custom field input was ignored due to permissions.',
         'success_linked' => 'Asset with tag :tag was created successfully. <strong><a href=":link" style="color: white;">Click here to view</a></strong>.',
         'multi_success_linked' => 'Asset with tag :links was created successfully.|:count assets were created succesfully. :links.',
         'partial_failure' => 'An asset was unable to be created. Reason: :failures|:count assets were unable to be created. Reasons: :failures',
@@ -71,9 +74,10 @@ return [
         'file_delete_error'      => 'The file was unable to be deleted',
         'file_missing' => 'The file selected is missing',
         'file_already_deleted' => 'The file selected was already deleted',
+        'backup_failed' => 'The pre-import backup failed. The import was not started.',
         'header_row_has_malformed_characters' => 'One or more attributes in the header row contain malformed UTF-8 characters',
         'content_row_has_malformed_characters' => 'One or more attributes in the first row of content contain malformed UTF-8 characters',
-        'transliterate_failure' => 'Transliteration from :encoding to UTF-8 failed due to invalid characters in input'
+        'transliterate_failure' => 'Transliteration from :encoding to UTF-8 failed due to invalid characters in input',
     ],
 
 

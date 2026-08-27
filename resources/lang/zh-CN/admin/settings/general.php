@@ -379,7 +379,7 @@ return [
     'purge_barcodes' => '清除条形码',
     'help_asterisk_bold'    => '输入为 <code>**text**</code> 的文本将显示为粗体。',
     'help_blank_to_use'     => '留空以使用 <code>:setting_name</code> 的值',
-    'help_default_will_use' => '<code>:default</code> 将使用来自 <code>:setting_name</code>的值。 <br>请注意，条码的值必须符合各自的条码规范才能成功生成。详情请见 <a href="https://snipe-it.readme.io/docs/barcodes">文档 <i class="fa fa-external-link"></i></a> 了解更多细节。 ',
+    'help_default_will_use' => '<code>:default</code> 将使用来自 <code>:setting_name</code>的值。 <br>请注意，条码的值必须符合各自的条码规范才能成功生成。详情请见 <a href=":fork_documentation_url">文档 <i class="fa fa-external-link"></i></a> 了解更多细节。 ',
     'asset_id'              => '资产ID',
     'data'               => '数据',
     'default'               => '默认',

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Accessories\Api;
 
+use App\Models\Accessory;
 use App\Models\Category;
 use App\Models\Company;
 use App\Models\Location;
@@ -23,25 +24,71 @@ class StoreAccessoryTest extends TestCase implements TestsFullMultipleCompaniesS
 
     public function testAdheresToFullMultipleCompaniesSupportScoping()
     {
-        $this->markTestSkipped('This behavior is not implemented');
-
         [$companyA, $companyB] = Company::factory()->count(2)->create();
         $userInCompanyA = User::factory()->for($companyA)->createAccessories()->create();
 
         $this->settings->enableMultipleFullCompanySupport();
 
-        // attempt to store an accessory for company B
         $this->actingAsForApi($userInCompanyA)
             ->postJson(route('api.accessories.store'), [
                 'category_id' => Category::factory()->forAccessories()->create()->id,
                 'name' => 'My Awesome Accessory',
                 'qty' => 1,
                 'company_id' => $companyB->id,
-            ])->assertStatusMessageIs('error');
+            ])->assertStatusMessageIs('success');
 
-        $this->assertDatabaseMissing('accessories', [
-            'name' => 'My Awesome Accessory',
-        ]);
+        $accessory = Accessory::withoutGlobalScopes()
+            ->where('name', 'My Awesome Accessory')
+            ->sole();
+
+        $this->assertSame($companyA->id, $accessory->company_id);
+        $this->assertSame($userInCompanyA->id, $accessory->created_by);
+    }
+
+    public function testFullCompanySupportClearsCompanyForCompanylessUser()
+    {
+        $company = Company::factory()->create();
+        $user = User::factory()->createAccessories()->create(['company_id' => null]);
+
+        $this->settings->enableMultipleFullCompanySupport();
+
+        $this->actingAsForApi($user)
+            ->postJson(route('api.accessories.store'), [
+                'category_id' => Category::factory()->forAccessories()->create()->id,
+                'name' => 'Companyless Accessory',
+                'qty' => 1,
+                'company_id' => $company->id,
+            ])->assertStatusMessageIs('success');
+
+        $accessory = Accessory::withoutGlobalScopes()
+            ->where('name', 'Companyless Accessory')
+            ->sole();
+
+        $this->assertNull($accessory->company_id);
+        $this->assertSame($user->id, $accessory->created_by);
+    }
+
+    public function testFullCompanySupportAllowsSuperuserToSelectCompany()
+    {
+        $company = Company::factory()->create();
+        $superuser = User::factory()->superuser()->create(['company_id' => null]);
+
+        $this->settings->enableMultipleFullCompanySupport();
+
+        $this->actingAsForApi($superuser)
+            ->postJson(route('api.accessories.store'), [
+                'category_id' => Category::factory()->forAccessories()->create()->id,
+                'name' => 'Superuser Accessory',
+                'qty' => 1,
+                'company_id' => (string) $company->id,
+            ])->assertStatusMessageIs('success');
+
+        $accessory = Accessory::withoutGlobalScopes()
+            ->where('name', 'Superuser Accessory')
+            ->sole();
+
+        $this->assertSame($company->id, $accessory->company_id);
+        $this->assertSame($superuser->id, $accessory->created_by);
     }
 
     public function testValidation()

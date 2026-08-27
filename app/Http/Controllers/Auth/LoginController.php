@@ -108,16 +108,28 @@ class LoginController extends Controller
         if ($saml->isEnabled() && ! empty($samlData)) {
 
             try {
-                $user = $saml->samlLogin($samlData);
                 $notValidAfter = new \Carbon\Carbon(@$samlData['assertionNotOnOrAfter']);
-                if(\Carbon::now()->greaterThanOrEqualTo($notValidAfter)) {
-                    abort(400,"Expired SAML Assertion");
+                if (\Carbon::now()->greaterThanOrEqualTo($notValidAfter)) {
+                    abort(400, 'Expired SAML Assertion');
                 }
-                if(SamlNonce::where('nonce', @$samlData['nonce'])->count() > 0) {
-                    abort(400,"Assertion has already been used");
+
+                $nonce = (string) ($samlData['nonce'] ?? '');
+                if ($nonce === '') {
+                    abort(400, 'SAML assertion identifier is missing.');
                 }
-                Log::debug("okay, fine, this is a new nonce then. Good for you.");
-                if (!is_null($user)) {
+
+                try {
+                    SamlNonce::create([
+                        'nonce' => $nonce,
+                        'not_valid_after' => $notValidAfter,
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('Unable to reserve SAML assertion identifier.', ['exception' => $e]);
+                    abort(400, 'Assertion has already been used.');
+                }
+
+                $user = $saml->samlLogin($samlData);
+                if (! is_null($user)) {
                     Auth::login($user);
                 } else {
                     $username = $saml->getUsername();
@@ -130,10 +142,6 @@ class LoginController extends Controller
                     $user->last_login = \Carbon::now();
                     $user->saveQuietly();
                 }
-                $s = new SamlNonce();
-                $s->nonce = @$samlData['nonce'];
-                $s->not_valid_after = $notValidAfter;
-                $s->save();
 
             } catch (\Exception $e) {
                 Log::debug('There was an error authenticating the SAML user: '.$e->getMessage());
@@ -179,6 +187,7 @@ class LoginController extends Controller
 
          // Check if the user already exists in the database and was imported via LDAP
          $user = User::where('username', '=', $request->input('username'))->whereNull('deleted_at')->where('ldap_import', '=', 1)->where('activated', '=', '1')->first(); // FIXME - if we get more than one we should fail. and we sure about this ldap_import thing?
+         $user = User::verifyExactUsernameMatch($user, (string) $request->input('username'));
          Log::debug("Local auth lookup complete");
 
          // The user does not exist in the database. Try to get them from LDAP.
@@ -248,6 +257,7 @@ class LoginController extends Controller
 
             try {
                 $user = User::where('username', '=', $remote_user)->whereNull('deleted_at')->where('activated', '=', '1')->first();
+                $user = User::verifyExactUsernameMatch($user, (string) $remote_user);
                 Log::debug('Remote user auth lookup complete');
                 if (! is_null($user)) {
                     Auth::login($user, $request->input('remember'));
@@ -298,7 +308,7 @@ class LoginController extends Controller
         $user = null;
 
         // Should we even check for LDAP users?
-        if (Setting::getSettings()->ldap_enabled) { // avoid hitting the $this->ldap
+        if (Setting::ldapIsActive()) { // avoid contacting LDAP when the runtime gate is disabled
             LOG::debug('LDAP is enabled.');
             try {
                 LOG::debug('Attempting to log user in by LDAP authentication.');
@@ -367,16 +377,19 @@ class LoginController extends Controller
 
         $secret = Google2FA::generateSecretKey();
         $user->two_factor_secret = $secret;
+        $issuer = trim((string) ($settings->site_name ?: config('app.name')));
+        $issuer = $issuer !== '' ? $issuer : 'Inbit Device Refurbishment';
 
         $barcode = new Barcode();
         $barcode_obj =
             $barcode->getBarcodeObj(
                 'QRCODE',
                 sprintf(
-                    'otpauth://totp/%s:%s?secret=%s&issuer=Snipe-IT&period=30',
-                    urlencode($settings->site_name),
+                    'otpauth://totp/%s:%s?secret=%s&issuer=%s&period=30',
+                    urlencode($issuer),
                     urlencode($user->username),
-                    urlencode($secret)
+                    urlencode($secret),
+                    urlencode($issuer)
                 ),
                 300,
                 300,
@@ -414,7 +427,7 @@ class LoginController extends Controller
     }
 
     /**
-     * Redirect users to the start screen after successful authentication.
+     * Resume an intended URL, using the dashboard when none was recorded.
      */
     protected function authenticated(Request $request, User $user): RedirectResponse
     {
@@ -447,7 +460,7 @@ class LoginController extends Controller
             $user->saveQuietly();
             $request->session()->put('2fa_authed', $user->id);
 
-            return redirect()->route('home')->with('success', trans('auth/message.signin.success'));
+            return redirect()->intended(route('home'))->with('success', trans('auth/message.signin.success'));
         }
 
         return redirect()->route('two-factor')->with('error', trans('auth/message.two_factor.invalid_code'));
@@ -491,7 +504,7 @@ class LoginController extends Controller
         }
 
         $request->session()->regenerate(true);
-        $request->session()->forget('2fa_authed');
+        $request->session()->forget(['2fa_authed', 'url.intended']);
 
         if ($request->session()->has('password_hash_'.Auth::getDefaultDriver())){
             $request->session()->remove('password_hash_'.Auth::getDefaultDriver());

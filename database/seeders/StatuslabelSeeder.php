@@ -4,12 +4,11 @@ namespace Database\Seeders;
 
 use App\Models\Statuslabel;
 use App\Models\User;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Schema;
 
-class StatuslabelSeeder extends Seeder
+class StatuslabelSeeder extends DestructiveFixtureSeeder
 {
-    public function run(): void
+    protected function seedFixtures(): void
     {
         Schema::disableForeignKeyConstraints();
         Statuslabel::truncate();
@@ -50,6 +49,7 @@ class StatuslabelSeeder extends Seeder
             ],
             [
                 'name' => 'Ready for Sale',
+                'lifecycle_stage' => Statuslabel::LIFECYCLE_READY_FOR_SALE,
                 'notes' => 'Volledig getest en klaar voor verkoop.',
                 'deployable' => 1,
                 'pending' => 0,
@@ -60,6 +60,7 @@ class StatuslabelSeeder extends Seeder
             ],
             [
                 'name' => 'Sold',
+                'lifecycle_stage' => Statuslabel::LIFECYCLE_SOLD,
                 'notes' => 'Order afgerond en uit voorraad.',
                 'deployable' => 0,
                 'pending' => 0,
@@ -70,6 +71,7 @@ class StatuslabelSeeder extends Seeder
             ],
             [
                 'name' => 'Broken / Parts',
+                'lifecycle_stage' => Statuslabel::LIFECYCLE_BROKEN_PARTS,
                 'notes' => 'Niet verkoopbaar; gebruikt voor onderdelen of referentie.',
                 'deployable' => 0,
                 'pending' => 0,
@@ -100,6 +102,7 @@ class StatuslabelSeeder extends Seeder
             ],
             [
                 'name' => 'Returned / RMA',
+                'lifecycle_stage' => Statuslabel::LIFECYCLE_RETURNED,
                 'notes' => 'Retour ontvangen; wacht op herinspectie.',
                 'deployable' => 0,
                 'pending' => 1,

@@ -13,6 +13,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use \Illuminate\Contracts\View\View;
 use \Illuminate\Http\RedirectResponse;
 
@@ -71,21 +72,44 @@ class AccessoryCheckoutController extends Controller
         $this->authorize('checkout', $accessory);
 
         $target = $this->determineCheckoutTarget();
+
+        if (! $accessory->canCheckoutTo($target)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', trans('general.error_user_company'));
+        }
         
         $accessory->checkout_qty = $request->input('checkout_qty', 1);
-        
-        for ($i = 0; $i < $accessory->checkout_qty; $i++) {
 
-            $accessory_checkout = new AccessoryCheckout([
-                'accessory_id' => $accessory->id,
-                'created_at' => Carbon::now(),
-                'assigned_to' => $target->id,
-                'assigned_type' => $target::class,
-                'note' => $request->input('note'),
-            ]);
+        $checkedOut = DB::transaction(function () use ($accessory, $request, $target): bool {
+            $locked = Accessory::query()
+                ->whereKey($accessory->id)
+                ->lockForUpdate()
+                ->first();
 
-            $accessory_checkout->created_by = auth()->id();
-            $accessory_checkout->save();
+            if (!$locked || $locked->numRemaining() < $accessory->checkout_qty) {
+                return false;
+            }
+
+            for ($i = 0; $i < $accessory->checkout_qty; $i++) {
+                $checkout = new AccessoryCheckout([
+                    'accessory_id' => $locked->id,
+                    'created_at' => Carbon::now(),
+                    'assigned_to' => $target->id,
+                    'assigned_type' => $target::class,
+                    'note' => $request->input('note'),
+                ]);
+                $checkout->created_by = auth()->id();
+                $checkout->save();
+            }
+
+            return true;
+        });
+
+        if (!$checkedOut) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', trans('admin/accessories/message.checkout.unavailable'));
         }
 
         event(new CheckoutableCheckedOut($accessory,  $target, auth()->user(), $request->input('note')));

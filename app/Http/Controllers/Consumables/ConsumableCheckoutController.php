@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Consumable;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use \Illuminate\Contracts\View\View;
 use \Illuminate\Http\RedirectResponse;
 
@@ -89,16 +90,42 @@ class ConsumableCheckoutController extends Controller
             return redirect()->route('consumables.checkout.show', $consumable)->with('error', trans('admin/consumables/message.checkout.user_does_not_exist'))->withInput();
         }
 
+        if (! $consumable->canCheckoutTo($user)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', trans('general.error_user_company'));
+        }
+
         // Update the consumable data
         $consumable->assigned_to = e($request->input('assigned_to'));
 
-        for ($i = 0; $i < $quantity; $i++){
-        $consumable->users()->attach($consumable->id, [
-            'consumable_id' => $consumable->id,
-            'created_by' => $admin_user->id,
-            'assigned_to' => e($request->input('assigned_to')),
-            'note' => $request->input('note'),
-        ]);
+        $checkedOut = DB::transaction(function () use ($consumable, $user, $request, $admin_user, $quantity): bool {
+            $locked = Consumable::query()
+                ->whereKey($consumable->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$locked || $locked->numRemaining() < $quantity) {
+                return false;
+            }
+
+            for ($i = 0; $i < $quantity; $i++) {
+                $locked->users()->attach($user->id, [
+                    'created_by' => $admin_user->id,
+                    'note' => $request->input('note'),
+                ]);
+            }
+
+            return true;
+        });
+
+        if (!$checkedOut) {
+            $remaining = max(0, $consumable->fresh()->numRemaining());
+
+            return redirect()->route('consumables.index')->with('error', trans(
+                'admin/consumables/message.checkout.unavailable',
+                ['requested' => $quantity, 'remaining' => $remaining]
+            ));
         }
 
         $consumable->checkout_qty = $quantity;

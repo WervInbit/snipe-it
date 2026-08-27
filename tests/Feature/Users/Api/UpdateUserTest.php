@@ -13,13 +13,6 @@ use Tests\TestCase;
 
 class UpdateUserTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->markTestSkipped('Asset checkout functionality removed in this fork.');
-    }
-
     public function testCanUpdateUserViaPatch()
     {
         $admin = User::factory()->superuser()->create();
@@ -226,7 +219,6 @@ class UpdateUserTest extends TestCase
     public function testEditingUsersCannotEditEscalationFieldsForAdmins()
     {
         $hashed_original = Hash::make('!!094850394680980380kfejlskjfl');
-        $hashed_new = Hash::make('!ABCDEFGIJKL123!!!');
         $admin = User::factory()->editUsers()->create();
         $user = User::factory()->admin()->create(['username' => 'brandnewuser', 'email'=> 'brandnewemail@example.org', 'password' => $hashed_original, 'activated' => 1]);
 
@@ -240,15 +232,58 @@ class UpdateUserTest extends TestCase
         ]);
 
         $this->actingAsForApi($admin)
-            ->patch(route('api.users.update', $user), [
+            ->patchJson(route('api.users.update', $user), [
                 'username' => 'testnewusername',
                 'email' => 'testnewemail@example.org',
                 'activated' => 0,
-                'password' => $hashed_new,
-            ]);
+                'password' => '!ABCDEFGIJKL123!!!',
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('success');
 
-        $this->assertEquals(0, $user->refresh()->activated);
+        $user->refresh();
+        $this->assertSame('brandnewuser', $user->username);
+        $this->assertSame('brandnewemail@example.org', $user->email);
+        $this->assertSame(1, (int) $user->activated);
+        $this->assertSame($hashed_original, $user->password);
 
+    }
+
+    public function testAdminCannotMassAssignSuperuserAuthenticationFields(): void
+    {
+        $actor = User::factory()->admin()->create();
+        $target = User::factory()->superuser()->create([
+            'first_name' => 'Original profile',
+            'username' => 'protected-superuser',
+            'email' => 'protected@example.org',
+            'activated' => true,
+            'password' => Hash::make('Original-secret-123!'),
+        ]);
+        $originalPassword = $target->password;
+        $originalPermissions = $target->permissions;
+
+        $this->actingAsForApi($actor)
+            ->patchJson(route('api.users.update', $target), [
+                'first_name' => 'Allowed profile update',
+                'username' => 'attacker-controlled',
+                'email' => 'attacker@example.org',
+                'activated' => false,
+                'password' => 'Changed-secret-456!',
+                'permissions' => [
+                    'superuser' => '0',
+                    'admin' => '0',
+                ],
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('success');
+
+        $target->refresh();
+        $this->assertSame('Allowed profile update', $target->first_name);
+        $this->assertSame('protected-superuser', $target->username);
+        $this->assertSame('protected@example.org', $target->email);
+        $this->assertSame(1, (int) $target->activated);
+        $this->assertSame($originalPassword, $target->password);
+        $this->assertSame($originalPermissions, $target->permissions);
     }
     public function testUsersScopedToCompanyDuringUpdateWhenMultipleFullCompanySupportEnabled()
     {
@@ -489,7 +524,10 @@ class UpdateUserTest extends TestCase
             'company_id' => $companyB->id,
         ])->assertStatusMessageIs('success');
 
-        $asset->checkOut($user, $superUser);
+        $asset->forceFill([
+            'assigned_to' => $user->id,
+            'assigned_type' => User::class,
+        ])->saveQuietly();
 
         // asset assigned, therefore error
         $this->actingAsForApi($superUser)->patchJson(route('api.users.update', $user), [
@@ -534,7 +572,10 @@ class UpdateUserTest extends TestCase
             'company_id' => $companyB->id,
         ])->assertStatusMessageIs('success');
 
-        $asset->checkOut($user, $superUser);
+        $asset->forceFill([
+            'assigned_to' => $user->id,
+            'assigned_type' => User::class,
+        ])->saveQuietly();
 
         // asset assigned from other company, therefore error
         $this->actingAsForApi($superUser)->patchJson(route('api.users.update', $user), [
@@ -548,6 +589,27 @@ class UpdateUserTest extends TestCase
             'first_name' => 'Test',
             'company_id' => $companyB->id,
         ])->assertStatusMessageIs('error');
+    }
+
+    public function testChangingUserLocationDoesNotMoveAnAssetWithLegacyAssignmentState(): void
+    {
+        [$originalLocation, $newLocation] = Location::factory()->count(2)->create();
+        $user = User::factory()->create(['location_id' => $originalLocation->id]);
+        $asset = Asset::factory()->create(['location_id' => $originalLocation->id]);
+        $asset->forceFill([
+            'assigned_to' => $user->id,
+            'assigned_type' => User::class,
+        ])->saveQuietly();
+
+        $this->actingAsForApi(User::factory()->editUsers()->create())
+            ->patchJson(route('api.users.update', $user), [
+                'location_id' => $newLocation->id,
+            ])
+            ->assertStatusMessageIs('success');
+
+        $this->assertSame($newLocation->id, $user->fresh()->location_id);
+        $this->assertSame($originalLocation->id, $asset->fresh()->location_id);
+        $this->assertSame($user->id, $asset->fresh()->assigned_to);
     }
 
 }

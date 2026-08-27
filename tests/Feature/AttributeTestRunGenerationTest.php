@@ -17,7 +17,7 @@ use App\Models\TestRun;
 use App\Models\User;
 use App\Models\WorkflowProfile;
 use App\Models\WorkflowProfileItem;
-use App\Services\ModelAttributes\EffectiveAttributeResolver;
+use App\Services\WorkflowRunDefinitionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Tests\TestCase;
@@ -84,7 +84,7 @@ class AttributeTestRunGenerationTest extends TestCase
         ]);
         $request->setUserResolver(fn () => $user);
 
-        $response = $controller->store($request, $asset, app(EffectiveAttributeResolver::class));
+        $response = $controller->store($request, $asset, app(WorkflowRunDefinitionService::class));
 
         $run = TestRun::first();
         $this->assertNotNull($run, 'Test run was not created');
@@ -155,7 +155,7 @@ class AttributeTestRunGenerationTest extends TestCase
         ]);
         $request->setUserResolver(fn () => $user);
 
-        $response = $controller->store($request, $asset, app(EffectiveAttributeResolver::class));
+        $response = $controller->store($request, $asset, app(WorkflowRunDefinitionService::class));
 
         $run = TestRun::latest('id')->first();
         $this->assertNotNull($run, 'Test run was not created');

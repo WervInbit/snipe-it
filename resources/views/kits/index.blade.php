@@ -30,7 +30,7 @@
                 data-url="{{ route('api.kits.index') }}"
                 data-export-options='{
         "fileName": "export-kits-{{ date('Y-m-d') }}",
-            "ignoreColumn": ["actions","image","change","checkbox","checkincheckout","icon"]
+            "ignoreColumn": ["actions","image","change","checkbox","icon"]
             }'>
           </table>
       </div> <!--.box-body-->

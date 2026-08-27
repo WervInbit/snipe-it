@@ -309,7 +309,7 @@ class LicensePresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('licenses.show', $this->name, $this->id);
+        return \App\Support\RouteLink::to('licenses.show', $this->name, $this->id);
     }
 
     /**

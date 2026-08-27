@@ -3,32 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\Helper;
-use App\Mail\CheckoutAssetMail;
 use App\Models\Accessory;
 use App\Models\Actionlog;
 use App\Models\Asset;
-use App\Models\AssetModel;
-use App\Models\Category;
 use App\Models\Maintenance;
-use App\Models\CheckoutAcceptance;
-use App\Models\Company;
 use App\Models\CustomField;
 use App\Models\Depreciation;
 use App\Models\License;
 use App\Models\ReportTemplate;
 use App\Models\Setting;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Mail;
 use \Illuminate\Contracts\View\View;
 use League\Csv\Reader;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use League\Csv\EscapeFormula;
 use App\Http\Requests\CustomAssetReportRequest;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\RedirectResponse;
 
 /**
  * This controller handles all actions related to Reports for
@@ -69,36 +62,46 @@ class ReportsController extends Controller
     * @since [v1.0]
     * @return \Illuminate\Http\Response
     */
-    public function exportAccessoryReport() : Response
+    public function exportAccessoryReport() : StreamedResponse
     {
         $this->authorize('reports.view');
-        $accessories = Accessory::orderBy('created_at', 'DESC')->get();
 
-        $rows = [];
-        $header = [
-            trans('admin/accessories/table.title'),
-            trans('admin/accessories/general.accessory_category'),
-            trans('admin/accessories/general.total'),
-            trans('admin/accessories/general.remaining'),
-        ];
-        $header = array_map('trim', $header);
-        $rows[] = implode(', ', $header);
+        $response = new StreamedResponse(function () {
+            $handle = fopen('php://output', 'w');
+            $formatter = new EscapeFormula('`');
 
-        // Row per accessory
-        foreach ($accessories as $accessory) {
-            $row = [];
-            $row[] = e($accessory->accessory_name);
-            $row[] = e($accessory->accessory_category);
-            $row[] = e($accessory->total);
-            $row[] = e($accessory->remaining);
+            fputcsv($handle, [
+                trans('admin/accessories/table.title'),
+                trans('admin/accessories/general.accessory_category'),
+                trans('admin/accessories/general.total'),
+                trans('admin/accessories/general.remaining'),
+            ]);
 
-            $rows[] = implode(',', $row);
-        }
+            Accessory::with('category')
+                ->orderBy('created_at', 'DESC')
+                ->chunk(500, function ($accessories) use ($handle, $formatter) {
+                    foreach ($accessories as $accessory) {
+                        $row = [
+                            $accessory->name,
+                            $accessory->category?->name,
+                            $accessory->qty,
+                            $accessory->numRemaining(),
+                        ];
 
-        $csv = implode("\n", $rows);
-        $response = response()->make($csv, 200);
-        $response->header('Content-Type', 'text/csv');
-        $response->header('Content-disposition', 'attachment;filename=report.csv');
+                        fputcsv(
+                            $handle,
+                            config('app.escape_formulas') === false
+                                ? $row
+                                : $formatter->escapeRecord($row)
+                        );
+                    }
+                });
+
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="accessories-report-'.date('Y-m-d-his').'.csv"',
+        ]);
 
         return $response;
     }
@@ -266,46 +269,58 @@ class ReportsController extends Controller
                 ->orderBy('created_at', 'DESC')
                 ->chunk(500, function ($actionlogs) use ($handle) {
                     $executionTime = microtime(true) - $_SERVER['REQUEST_TIME_FLOAT'];
-                Log::debug('Walking results: '.$executionTime);
-                $count = 0;
+                    Log::debug('Walking results: '.$executionTime);
+                    $formatter = new EscapeFormula('`');
 
-                foreach ($actionlogs as $actionlog) {
-                    $count++;
-                    $target_name = '';
+                    foreach ($actionlogs as $actionlog) {
+                        $target_name = '';
 
-                    if ($actionlog->target) {
+                        if ($actionlog->target) {
                             if ($actionlog->targetType() == 'user') {
                                 $target_name = $actionlog->target->getFullNameAttribute();
-                        } else {
-                            $target_name = $actionlog->target->getDisplayNameAttribute();
+                            } else {
+                                $target_name = $actionlog->target->getDisplayNameAttribute();
+                            }
                         }
-                    }
 
-                    if($actionlog->item){
-                        $item_name = e($actionlog->item->getDisplayNameAttribute());
-                    } else {
-                        $item_name = '';
-                    }
+                        if ($actionlog->item) {
+                            $item_name = $actionlog->item->getDisplayNameAttribute();
+                        } else {
+                            $item_name = '';
+                        }
 
-                    $row = [
-                        $actionlog->created_at,
-                        ($actionlog->adminuser) ? e($actionlog->adminuser->getFullNameAttribute()) : '',
-                        $actionlog->present()->actionType(),
-                        e($actionlog->itemType()),
-                        ($actionlog->itemType() == 'user') ? $actionlog->filename : $item_name,
-                        ($actionlog->item) ? $actionlog->item->serial : null,
-                        (($actionlog->item) && ($actionlog->item->model)) ? htmlspecialchars($actionlog->item->model->name, ENT_NOQUOTES) : null,
-                        (($actionlog->item) && ($actionlog->item->model))  ? $actionlog->item->model->model_number : null,
-                        $target_name,
-                        ($actionlog->note) ? e($actionlog->note) : '',
-                        $actionlog->log_meta,
-                        $actionlog->remote_ip,
-                        $actionlog->user_agent,
-                        $actionlog->action_source,
-                    ];
-                    fputcsv($handle, $row);
-                }
-            });
+                        $modelNumber = null;
+                        if ($actionlog->item instanceof Asset) {
+                            $modelNumber = $actionlog->item->displayModelNumber();
+                        } elseif ($actionlog->item?->model) {
+                            $modelNumber = $actionlog->item->model->model_number;
+                        }
+
+                        $row = [
+                            $actionlog->created_at,
+                            ($actionlog->adminuser) ? $actionlog->adminuser->getFullNameAttribute() : '',
+                            $actionlog->present()->actionType(),
+                            $actionlog->itemType(),
+                            ($actionlog->itemType() == 'user') ? $actionlog->filename : $item_name,
+                            ($actionlog->item) ? $actionlog->item->serial : null,
+                            (($actionlog->item) && ($actionlog->item->model)) ? $actionlog->item->model->name : null,
+                            $modelNumber,
+                            $target_name,
+                            $actionlog->note ?: '',
+                            $actionlog->remote_ip,
+                            $actionlog->user_agent,
+                            $actionlog->action_source,
+                            $actionlog->log_meta,
+                        ];
+
+                        fputcsv(
+                            $handle,
+                            config('app.escape_formulas') === false
+                                ? $row
+                                : $formatter->escapeRecord($row)
+                        );
+                    }
+                });
 
             // Close the output stream
             fclose($handle);
@@ -330,6 +345,7 @@ class ReportsController extends Controller
     public function getLicenseReport() : View
     {
         $this->authorize('reports.view');
+        $this->authorize('view', License::class);
         $licenses = License::with('depreciation')->orderBy('created_at', 'DESC')
                            ->with('company')
                            ->get();
@@ -344,46 +360,56 @@ class ReportsController extends Controller
     * @author [A. Gianotto] [<snipe@snipe.net>]
     * @since [v1.0]
     */
-    public function exportLicenseReport() : Response
+    public function exportLicenseReport() : StreamedResponse
     {
         $this->authorize('reports.view');
-        $licenses = License::orderBy('created_at', 'DESC')->get();
+        $this->authorize('view', License::class);
+        $canViewKeys = Gate::allows('viewKeys', License::class);
 
-        $rows = [];
-        $header = [
-            trans('admin/licenses/table.title'),
-            trans('admin/licenses/table.serial'),
-            trans('admin/licenses/form.seats'),
-            trans('admin/licenses/form.remaining_seats'),
-            trans('admin/licenses/form.expiration'),
-            trans('general.purchase_date'),
-            trans('general.depreciation'),
-            trans('general.purchase_cost'),
-        ];
+        $response = new StreamedResponse(function () use ($canViewKeys) {
+            $handle = fopen('php://output', 'w');
+            $formatter = new EscapeFormula('`');
 
-        $header = array_map('trim', $header);
-        $rows[] = implode(', ', $header);
+            fputcsv($handle, [
+                trans('admin/licenses/table.title'),
+                trans('admin/licenses/table.serial'),
+                trans('admin/licenses/form.seats'),
+                trans('admin/licenses/form.remaining_seats'),
+                trans('admin/licenses/form.expiration'),
+                trans('general.purchase_date'),
+                trans('general.depreciation'),
+                trans('general.purchase_cost'),
+            ]);
 
-        // Row per license
-        foreach ($licenses as $license) {
-            $row = [];
-            $row[] = e($license->name);
-            $row[] = e($license->serial);
-            $row[] = e($license->seats);
-            $row[] = $license->remaincount();
-            $row[] = $license->expiration_date;
-            $row[] = $license->purchase_date;
-            $row[] = ($license->depreciation != '') ? '' : e($license->depreciation->name);
-            $row[] = '"'.Helper::formatCurrencyOutput($license->purchase_cost).'"';
+            License::with('depreciation')
+                ->orderBy('created_at', 'DESC')
+                ->chunk(500, function ($licenses) use ($handle, $formatter, $canViewKeys) {
+                    foreach ($licenses as $license) {
+                        $row = [
+                            $license->name,
+                            $canViewKeys ? $license->serial : '',
+                            $license->seats,
+                            $license->remaincount(),
+                            $license->expiration_date,
+                            $license->purchase_date,
+                            $license->depreciation?->name,
+                            Helper::formatCurrencyOutput($license->purchase_cost),
+                        ];
 
-            $rows[] = implode(',', $row);
-        }
+                        fputcsv(
+                            $handle,
+                            config('app.escape_formulas') === false
+                                ? $row
+                                : $formatter->escapeRecord($row)
+                        );
+                    }
+                });
 
-
-        $csv      = implode("\n", $rows);
-        $response = response()->make($csv, 200);
-        $response->header('Content-Type', 'text/csv');
-        $response->header('Content-disposition', 'attachment;filename=report.csv');
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="licenses-report-'.date('Y-m-d-his').'.csv"',
+        ]);
 
         return $response;
     }
@@ -643,7 +669,7 @@ class ReportsController extends Controller
 
             $assets = Asset::select('assets.*')->with(
                 'location', 'assetstatus', 'company', 'defaultLoc', 'assignedTo',
-                'model.category', 'model.manufacturer', 'supplier');
+                'model.category', 'model.manufacturer', 'modelNumber', 'supplier');
             
             if ($request->filled('by_location_id')) {
                 $assets->whereIn('assets.location_id', $request->input('by_location_id'));
@@ -781,7 +807,7 @@ class ReportsController extends Controller
 
                     if ($request->filled('model')) {
                         $row[] = ($asset->model) ? $asset->model->name : '';
-                        $row[] = ($asset->model) ? $asset->model->model_number : '';
+                        $row[] = $asset->displayModelNumber() ?? '';
                     }
 
                     if ($request->filled('category')) {
@@ -1049,299 +1075,62 @@ class ReportsController extends Controller
      * @author  Vincent Sposato <vincent.sposato@gmail.com>
      * @version v1.0
      */
-    public function exportMaintenancesReport() : Response
+    public function exportMaintenancesReport() : StreamedResponse
     {
         $this->authorize('reports.view');
-        // Grab all the improvements
-        $Maintenances = Maintenance::with('asset', 'supplier')
-                                             ->orderBy('created_at', 'DESC')
-                                             ->get();
 
-        $rows = [];
+        $response = new StreamedResponse(function () {
+            $handle = fopen('php://output', 'w');
+            $formatter = new EscapeFormula('`');
 
-        $header = [
-            trans('admin/hardware/table.asset_tag'),
-            trans('admin/maintenances/table.asset_name'),
-            trans('general.supplier'),
-            trans('admin/maintenances/form.asset_maintenance_type'),
-            trans('admin/maintenances/form.title'),
-            trans('admin/maintenances/form.start_date'),
-            trans('admin/maintenances/form.completion_date'),
-            trans('admin/maintenances/form.asset_maintenance_time'),
-            trans('admin/maintenances/form.cost'),
-        ];
-
-        $header = array_map('trim', $header);
-        $rows[] = implode(',', $header);
-
-        foreach ($Maintenances as $maintenance) {
-            $row = [];
-            $row[] = str_replace(',', '', e($maintenance->asset->asset_tag));
-            $row[] = str_replace(',', '', e($maintenance->asset->name));
-            $row[] = str_replace(',', '', e($maintenance->supplier->name));
-            $row[] = e($maintenance->improvement_type);
-            $row[] = e($maintenance->name);
-            $row[] = e($maintenance->start_date);
-            $row[] = e($maintenance->completion_date);
-            if (is_null($maintenance->asset_maintenance_time)) {
-                $improvementTime = (int) Carbon::now()
-                    ->diffInDays(Carbon::parse($maintenance->start_date), true);
-            } else {
-                $improvementTime = (int) $maintenance->asset_maintenance_time;
-            }
-            $row[]  = $improvementTime;
-            $row[]  = trans('general.currency') . Helper::formatCurrencyOutput($maintenance->cost);
-            $rows[] = implode(',', $row);
-        }
-
-        // spit out a csv
-        $csv      = implode("\n", $rows);
-        $response = response()->make($csv, 200);
-        $response->header('Content-Type', 'text/csv');
-        $response->header('Content-disposition', 'attachment;filename=report.csv');
-
-        return $response;
-    }
-
-    /**
-     * getAssetAcceptanceReport
-     *
-     * @author  Vincent Sposato <vincent.sposato@gmail.com>
-     * @version v1.0
-     */
-    public function getAssetAcceptanceReport($deleted = false) : View
-    {
-        $this->authorize('reports.view');
-        $showDeleted = $deleted == 'deleted';
-
-        $query = CheckoutAcceptance::pending()
-            ->where('checkoutable_type', 'App\Models\Asset')
-            ->with([
-                'checkoutable' => function (MorphTo $query) {
-                    $query->morphWith([
-                        AssetModel::class => ['model'],
-                        Company::class => ['company'],
-                        Asset::class => ['assignedTo'],
-                    ])->with('model.category');
-                },
-                'assignedTo' => function($query){
-                         $query->withTrashed();
-                    }
+            fputcsv($handle, [
+                trans('admin/hardware/table.asset_tag'),
+                trans('admin/maintenances/table.asset_name'),
+                trans('general.supplier'),
+                trans('admin/maintenances/form.asset_maintenance_type'),
+                trans('admin/maintenances/form.title'),
+                trans('admin/maintenances/form.start_date'),
+                trans('admin/maintenances/form.completion_date'),
+                trans('admin/maintenances/form.asset_maintenance_time'),
+                trans('admin/maintenances/form.cost'),
             ]);
 
-        if ($showDeleted) {
-            $query->withTrashed();
-        }
+            Maintenance::with('asset', 'supplier')
+                ->orderBy('created_at', 'DESC')
+                ->chunk(500, function ($maintenances) use ($handle, $formatter) {
+                    foreach ($maintenances as $maintenance) {
+                        $improvementTime = is_null($maintenance->asset_maintenance_time)
+                            ? (int) Carbon::now()->diffInDays(Carbon::parse($maintenance->start_date), true)
+                            : (int) $maintenance->asset_maintenance_time;
 
-        $assetsForReport = $query->get()
-                ->map(function ($acceptance) {
-                    return [
-                        'assetItem' => $acceptance->checkoutable,
-                        'acceptance' => $acceptance,
-                    ];
-            });
+                        $row = [
+                            $maintenance->asset?->asset_tag,
+                            $maintenance->asset?->name,
+                            $maintenance->supplier?->name,
+                            $maintenance->asset_maintenance_type,
+                            $maintenance->name,
+                            $maintenance->start_date,
+                            $maintenance->completion_date,
+                            $improvementTime,
+                            trans('general.currency').Helper::formatCurrencyOutput($maintenance->cost),
+                        ];
 
-        return view('reports/unaccepted_assets', compact('assetsForReport','showDeleted' ));
-    }
+                        fputcsv(
+                            $handle,
+                            config('app.escape_formulas') === false
+                                ? $row
+                                : $formatter->escapeRecord($row)
+                        );
+                    }
+                });
 
-    /**
-     * sentAssetAcceptanceReminder
-     *
-     * @param integer|null $acceptanceId
-     * @version v1.0
-     */
-    public function sentAssetAcceptanceReminder(Request $request) : RedirectResponse
-    {
-        $this->authorize('reports.view');
-
-        if (!$acceptance = CheckoutAcceptance::pending()->find($request->input('acceptance_id'))) {
-            Log::debug('No pending acceptances');
-            // Redirect to the unaccepted assets report page with error
-            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.bad_data'));
-        }
-
-        $assetItem = $acceptance->checkoutable;
-
-        Log::debug(print_r($assetItem, true));
-
-        if (is_null($acceptance->created_at)){
-            Log::debug('No acceptance created_at');
-            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.bad_data'));
-        } else {
-            $logItem_res = $assetItem->checkouts()->where('created_at', '=', $acceptance->created_at)->get();
-
-            if ($logItem_res->isEmpty()){
-                Log::debug('Acceptance date mismatch');
-                return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.bad_data'));
-            }
-            $logItem = $logItem_res[0];
-        }
-        $email = $assetItem->assignedTo?->email;
-        $locale = $assetItem->assignedTo?->locale;
-
-        if (is_null($email) || $email === '') {
-            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.no_email'));
-        }
-
-        Mail::to($email)->send((new CheckoutAssetMail($assetItem, $assetItem->assignedTo, $logItem->user, $acceptance, $logItem->note, firstTimeSending: false))->locale($locale));
-
-        return redirect()->route('reports/unaccepted_assets')->with('success', trans('admin/reports/general.reminder_sent'));
-    }
-
-    /**
-     * sentAssetAcceptanceReminder
-     *
-     * @param integer|null $acceptanceId
-     * @version v1.0
-     */
-    public function deleteAssetAcceptance($acceptanceId = null) : RedirectResponse
-    {
-        $this->authorize('reports.view');
-
-        if (!$acceptance = CheckoutAcceptance::pending()->find($acceptanceId)) {
-            // Redirect to the unaccepted assets report page with error
-            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.bad_data'));
-        }
-
-        if($acceptance->delete()) {
-            return redirect()->route('reports/unaccepted_assets')->with('success', trans('admin/reports/general.acceptance_deleted'));
-        } else {
-            return redirect()->route('reports/unaccepted_assets')->with('error', trans('general.deletion_failed'));
-        }
-    }
-
-    /**
-     * Exports the AssetAcceptance report to CSV
-     *
-     * @author  Vincent Sposato <vincent.sposato@gmail.com>
-     * @version v1.0
-     */
-    public function postAssetAcceptanceReport($deleted = false) : Response
-    {
-        $this->authorize('reports.view');
-        $showDeleted = $deleted == 'deleted';
-
-        /**
-         * Get all assets with pending checkout acceptances
-         */
-        if($showDeleted) {
-            $acceptances = CheckoutAcceptance::pending()->where('checkoutable_type', 'App\Models\Asset')->withTrashed()->with(['assignedTo', 'checkoutable.assignedTo', 'checkoutable.model'])->get();
-        } else {
-            $acceptances = CheckoutAcceptance::pending()->where('checkoutable_type', 'App\Models\Asset')->with(['assignedTo', 'checkoutable.assignedTo', 'checkoutable.model'])->get();
-        }
-
-        $assetsForReport = $acceptances
-            ->filter(function($acceptance) {
-                return $acceptance->checkoutable_type == 'App\Models\Asset';
-            })
-            ->map(function($acceptance) {
-                return ['assetItem' => $acceptance->checkoutable, 'acceptance' => $acceptance];
-            });
-
-        $rows = [];
-
-        $header = [
-            trans('general.category'),
-            trans('admin/hardware/form.model'),
-            trans('admin/hardware/form.name'),
-            trans('admin/hardware/table.asset_tag'),
-            trans('admin/hardware/table.checkoutto'),
-        ];
-
-        $header = array_map('trim', $header);
-        $rows[] = implode(',', $header);
-
-        foreach ($assetsForReport as $item) {
-
-            if ($item['assetItem'] != null){
-            
-                $row    = [ ];
-                $row[]  = str_replace(',', '', e($item['assetItem']->model->category->name));
-                $row[]  = str_replace(',', '', e($item['assetItem']->model->name));
-                $row[]  = str_replace(',', '', e($item['assetItem']->name));
-                $row[]  = str_replace(',', '', e($item['assetItem']->asset_tag));
-                $row[]  = str_replace(',', '', e(($item['acceptance']->assignedTo) ? $item['acceptance']->assignedTo->present()->name() : trans('admin/reports/general.deleted_user')));
-                $rows[] = implode(',', $row);
-            }
-        }
-
-        // spit out a csv
-        $csv      = implode("\n", $rows);
-        $response = response()->make($csv, 200);
-        $response->header('Content-Type', 'text/csv');
-        $response->header('Content-disposition', 'attachment;filename=report.csv');
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="maintenances-report-'.date('Y-m-d-his').'.csv"',
+        ]);
 
         return $response;
     }
 
-    /**
-     * getCheckedOutAssetsRequiringAcceptance
-     *
-     * @param $modelsInCategoriesThatRequireAcceptance
-     *
-     * @return array
-     * @author  Vincent Sposato <vincent.sposato@gmail.com>
-     * @version v1.0
-     */
-    protected function getCheckedOutAssetsRequiringAcceptance($modelsInCategoriesThatRequireAcceptance) : View
-    {
-        $this->authorize('reports.view');
-        $assets = Asset::deployed()
-                        ->inModelList($modelsInCategoriesThatRequireAcceptance)
-                        ->select('id')
-                        ->get()
-                        ->toArray();
-
-        return array_pluck($assets, 'id');
-    }
-
-    /**
-     * getModelsInCategoriesThatRequireAcceptance
-     *
-     * @param $assetCategoriesRequiringAcceptance
-     * @return array
-     * @author  Vincent Sposato <vincent.sposato@gmail.com>
-     * @version v1.0
-     */
-    protected function getModelsInCategoriesThatRequireAcceptance($assetCategoriesRequiringAcceptance) : array
-    {
-        $this->authorize('reports.view');
-
-        return array_pluck(AssetModel::inCategory($assetCategoriesRequiringAcceptance)
-                                 ->select('id')
-                                 ->get()
-                                 ->toArray(), 'id');
-    }
-
-    /**
-     * getCategoriesThatRequireAcceptance
-     *
-     * @return array
-     * @author  Vincent Sposato <vincent.sposato@gmail.com>
-     * @version v1.0
-     */
-    protected function getCategoriesThatRequireAcceptance() : array
-    {
-        $this->authorize('reports.view');
-
-        return array_pluck(Category::requiresAcceptance()
-                                    ->select('id')
-                                    ->get()
-                                    ->toArray(), 'id');
-    }
-
-    /**
-     * getAssetsCheckedOutRequiringAcceptance
-     *
-     * @author  Vincent Sposato <vincent.sposato@gmail.com>
-     * @version v1.0
-     */
-    protected function getAssetsCheckedOutRequiringAcceptance() : array
-    {
-        $this->authorize('reports.view');
-
-        return $this->getCheckedOutAssetsRequiringAcceptance(
-            $this->getModelsInCategoriesThatRequireAcceptance($this->getCategoriesThatRequireAcceptance())
-        );
-    }
 }

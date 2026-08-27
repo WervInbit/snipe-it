@@ -379,7 +379,7 @@ return [
     'purge_barcodes' => 'Obriši sve barkodove',
     'help_asterisk_bold'    => 'Tekst unet kao <code>**tekst**</code> biće prikazan podebljan',
     'help_blank_to_use'     => 'Ostavite prazno da bi se koristila vrednost iz <code>:setting_name</code>',
-    'help_default_will_use' => '<code>:default</code> će koristiti vrednost iz <code>:setting_name</code>. <br>Upamtite da vrednost barkoda mora da se usaglasi sa specifikacijom odgovarajućeg barkoda da bi bio uspešno generisan. Molim vas pogledajte <a href="https://snipe-it.readme.io/docs/barcodes">dokumentaciju <i class="fa fa-external-link"></i></a> za više detalja. ',
+    'help_default_will_use' => '<code>:default</code> će koristiti vrednost iz <code>:setting_name</code>. <br>Upamtite da vrednost barkoda mora da se usaglasi sa specifikacijom odgovarajućeg barkoda da bi bio uspešno generisan. Molim vas pogledajte <a href=":fork_documentation_url">dokumentaciju <i class="fa fa-external-link"></i></a> za više detalja. ',
     'asset_id'              => 'ID imovine',
     'data'               => 'Podatak',
     'default'               => 'Podrazumevano',

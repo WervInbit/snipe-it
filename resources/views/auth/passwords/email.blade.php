@@ -5,7 +5,7 @@
 @section('content')
 
 
-    @if ($snipeSettings->custom_forgot_pass_url)
+    @if ($snipeSettings->custom_forgot_pass_url && config('auth.ldap_integration_enabled'))
         <!--  The admin settings specify an LDAP password reset URL to let's send them there -->
         <div class="col-md-4 col-md-offset-4" style="margin-top: 20px;">
             <div class="box box-header text-center">
@@ -17,6 +17,13 @@
             </div>
         </div>
 
+    @elseif (!config('mail.enabled'))
+        <div class="col-md-4 col-md-offset-4" style="margin-top: 20px;">
+            <div class="alert alert-warning">
+                <x-icon type="warning" />
+                {{ trans('mail.password_reset_disabled') }}
+            </div>
+        </div>
     @else
 
 

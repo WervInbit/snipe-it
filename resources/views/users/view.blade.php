@@ -207,6 +207,7 @@
                 </div>
                 @endcan
 
+                @if (config('mail.enabled'))
                 @can('view', $user)
                   <div class="col-md-12" style="padding-top: 5px;">
                   @if(!empty($user->email) && ($user->allAssignedCount() != '0'))
@@ -251,6 +252,7 @@
                   </div>
                   @endif
                 @endcan
+                @endif
 
                 @can('create', $user)
                     <div class="col-md-12" style="padding-top: 5px;">
@@ -547,7 +549,7 @@
                         {{ trans('admin/users/table.location') }}
                       </div>
                       <div class="col-md-9">
-                        {{ link_to_route('locations.show', $user->userloc->name, [$user->userloc->id]) }}
+                        <a href="{{ route('locations.show', $user->userloc->id) }}">{{ $user->userloc->name }}</a>
                       </div>
                     </div>
                     @endif

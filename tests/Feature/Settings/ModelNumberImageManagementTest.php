@@ -5,14 +5,21 @@ namespace Tests\Feature\Settings;
 use App\Models\AssetModel;
 use App\Models\ModelNumberImage;
 use App\Models\User;
+use App\Services\SafeRasterImageService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
+use RuntimeException;
+use Tests\Support\CreatesPolyglotRasterUploads;
 use Tests\TestCase;
 
 class ModelNumberImageManagementTest extends TestCase
 {
     use RefreshDatabase;
+    use CreatesPolyglotRasterUploads;
 
     protected function setUp(): void
     {
@@ -52,6 +59,7 @@ class ModelNumberImageManagementTest extends TestCase
         $model = AssetModel::factory()->create();
         $modelNumber = $model->ensurePrimaryModelNumber();
         $this->actingAs($user);
+        $trailingPayload = '<?php echo "model-number-form-payload";';
 
         $response = $this->put(route('settings.model_numbers.update', $modelNumber), [
             'code' => $modelNumber->code,
@@ -59,7 +67,7 @@ class ModelNumberImageManagementTest extends TestCase
             'status' => 'active',
             'new_image' => [
                 'caption' => 'Front view',
-                'image' => UploadedFile::fake()->image('front.jpg'),
+                'image' => $this->makeJpegWithTrailingPayload('front.pht', $trailingPayload),
             ],
         ]);
 
@@ -69,7 +77,12 @@ class ModelNumberImageManagementTest extends TestCase
         $this->assertNotNull($image);
         $this->assertSame('Front view', $image->caption);
         $this->assertSame(0, (int) $image->sort_order);
+        $this->assertStringEndsWith('.jpg', $image->file_path);
         Storage::disk('public')->assertExists($image->file_path);
+
+        $stored = Storage::disk('public')->get($image->file_path);
+        $this->assertStringNotContainsString($trailingPayload, $stored);
+        $this->assertSame('image/jpeg', getimagesizefromstring($stored)['mime']);
     }
 
     public function test_admin_can_reorder_and_update_captions_via_main_save(): void
@@ -198,6 +211,183 @@ class ModelNumberImageManagementTest extends TestCase
         $this->assertNotSame($oldPath, $image->file_path);
         Storage::disk('public')->assertMissing($oldPath);
         Storage::disk('public')->assertExists($image->file_path);
+    }
+
+    public function test_main_save_preserves_existing_file_when_replacement_database_write_fails(): void
+    {
+        Storage::fake('public');
+
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $oldPath = 'model_numbers/'.$modelNumber->id.'/old.jpg';
+        Storage::disk('public')->put($oldPath, 'old-image');
+        $image = $modelNumber->images()->create([
+            'file_path' => $oldPath,
+            'caption' => 'Original',
+            'sort_order' => 0,
+        ]);
+        $request = \Illuminate\Http\Request::create('/model-number-image-sync', 'PUT');
+        $request->files->set('existing_images', [
+            $image->id => [
+                'image' => UploadedFile::fake()->image('replacement.jpg'),
+            ],
+        ]);
+        $validated = [
+            'existing_images' => [
+                $image->id => [
+                    'caption' => 'Updated',
+                    'delete' => 0,
+                ],
+            ],
+            'image_order' => [$image->id],
+        ];
+        $eventName = 'eloquent.saving: '.ModelNumberImage::class;
+
+        Event::listen($eventName, function () {
+            throw new RuntimeException('Simulated model-number image persistence failure.');
+        });
+
+        $exception = null;
+
+        try {
+            app(\App\Services\ModelNumberImageSyncService::class)
+                ->sync($modelNumber, $request, $validated);
+        } catch (RuntimeException $caught) {
+            $exception = $caught;
+        } finally {
+            Event::forget($eventName);
+        }
+
+        $this->assertNotNull($exception);
+        $this->assertSame($oldPath, $image->fresh()->file_path);
+        $this->assertSame('Original', $image->fresh()->caption);
+        Storage::disk('public')->assertExists($oldPath);
+        $this->assertSame([$oldPath], Storage::disk('public')->allFiles());
+    }
+
+    public function test_nested_image_sync_does_not_delete_old_file_before_outer_transaction_commits(): void
+    {
+        Storage::fake('public');
+
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $oldPath = 'model_numbers/'.$modelNumber->id.'/old.jpg';
+        Storage::disk('public')->put($oldPath, 'old-image');
+        $image = $modelNumber->images()->create([
+            'file_path' => $oldPath,
+            'caption' => 'Original',
+            'sort_order' => 0,
+        ]);
+        $request = \Illuminate\Http\Request::create('/model-number-image-sync', 'PUT');
+        $validated = [
+            'existing_images' => [
+                $image->id => [
+                    'caption' => 'Original',
+                    'delete' => 1,
+                ],
+            ],
+            'image_order' => [],
+        ];
+
+        try {
+            DB::transaction(function () use ($modelNumber, $request, $validated, $oldPath): void {
+                app(\App\Services\ModelNumberImageSyncService::class)
+                    ->sync($modelNumber, $request, $validated);
+
+                $this->assertDatabaseMissing('model_number_images', [
+                    'model_number_id' => $modelNumber->id,
+                ]);
+                Storage::disk('public')->assertExists($oldPath);
+
+                throw new RuntimeException('Simulated outer metadata rollback.');
+            });
+            $this->fail('Expected the outer metadata transaction to roll back.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('Simulated outer metadata rollback.', $exception->getMessage());
+        }
+
+        $this->assertDatabaseHas('model_number_images', [
+            'id' => $image->id,
+            'file_path' => $oldPath,
+        ]);
+        Storage::disk('public')->assertExists($oldPath);
+    }
+
+    public function test_settings_update_rolls_back_metadata_and_new_files_when_raster_sync_fails(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->superuser()->create();
+        $model = AssetModel::factory()->create();
+        $primary = $model->ensurePrimaryModelNumber();
+        $modelNumber = $model->modelNumbers()->create([
+            'code' => 'ROLLBACK-OLD',
+            'label' => 'Before',
+        ]);
+        $oldPath = 'model_numbers/'.$modelNumber->id.'/old.jpg';
+        Storage::disk('public')->put($oldPath, 'old-image');
+        $image = $modelNumber->images()->create([
+            'file_path' => $oldPath,
+            'caption' => 'Original',
+            'sort_order' => 0,
+        ]);
+
+        $failingRasterImages = new class extends SafeRasterImageService {
+            private int $storeCalls = 0;
+
+            public function storePublic(
+                UploadedFile $file,
+                string $directory,
+                string $filenamePrefix,
+                string $field = 'image'
+            ): array {
+                $this->storeCalls++;
+
+                if ($this->storeCalls === 2) {
+                    throw ValidationException::withMessages([
+                        $field => 'Simulated raster normalization failure.',
+                    ]);
+                }
+
+                return parent::storePublic($file, $directory, $filenamePrefix, $field);
+            }
+        };
+        $this->app->instance(SafeRasterImageService::class, $failingRasterImages);
+
+        $response = $this->actingAs($user)->put(
+            route('settings.model_numbers.update', $modelNumber),
+            [
+                'code' => 'ROLLBACK-NEW',
+                'label' => 'After',
+                'status' => 'active',
+                'make_primary' => 1,
+                'existing_images' => [
+                    $image->id => [
+                        'caption' => 'Replacement',
+                        'delete' => 0,
+                        'image' => UploadedFile::fake()->image('replacement.jpg'),
+                    ],
+                ],
+                'image_order' => [$image->id],
+                'new_image' => [
+                    'caption' => 'Second',
+                    'image' => UploadedFile::fake()->image('second.jpg'),
+                ],
+            ]
+        );
+
+        $response->assertSessionHasErrors('new_image.image');
+
+        $this->assertDatabaseHas('model_numbers', [
+            'id' => $modelNumber->id,
+            'code' => 'ROLLBACK-OLD',
+            'label' => 'Before',
+        ]);
+        $this->assertSame($primary->id, $model->fresh()->primary_model_number_id);
+        $this->assertSame($oldPath, $image->fresh()->file_path);
+        $this->assertSame('Original', $image->fresh()->caption);
+        Storage::disk('public')->assertExists($oldPath);
+        $this->assertSame([$oldPath], Storage::disk('public')->allFiles());
     }
 
     public function test_admin_cannot_submit_partial_existing_image_payload_via_main_save(): void

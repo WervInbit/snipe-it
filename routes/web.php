@@ -14,6 +14,7 @@ use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\DepreciationsController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\ForkDocumentationController;
 use App\Http\Controllers\LabelsController;
 use App\Http\Controllers\UploadedFilesController;
 use App\Http\Controllers\ManufacturersController;
@@ -71,19 +72,12 @@ Route::group(['middleware' => 'auth'], function () {
         [LabelsController::class, 'show']
     )->where('labelName', '.*')->name('labels.show');
 
-    Route::get('/test-email', function () {
-        $mailable = new \App\Mail\CheckoutComponentMail(
-
-        );
-        return $mailable->render(); // dumps HTML
-    });
     /*
     * Manufacturers
     */
 
     Route::group(['prefix' => 'manufacturers', 'middleware' => ['auth']], function () {
         Route::post('{manufacturers_id}/restore', [ManufacturersController::class, 'restore'] )->name('restore/manufacturer');
-        Route::post('seed', [ManufacturersController::class, 'seed'] )->name('manufacturers.seed');
 
 
     });
@@ -231,6 +225,7 @@ Route::group(['middleware' => 'auth'], function () {
       * Asset scanner
       */
       Route::get('scan', [ScanController::class, 'index'])->name('scan');
+      Route::get('scan/lookup', [ScanController::class, 'lookup'])->name('scan.lookup');
       Route::get('scan/resolve/{code}', [ScanController::class, 'resolve'])->name('scan.resolve');
   });
 
@@ -328,6 +323,53 @@ Route::group(['middleware' => 'auth'], function () {
 |
 */
 
+Route::group(['prefix' => 'admin', 'middleware' => ['auth']], function () {
+    Route::get('testtypes', [AdminTestTypeController::class, 'index'])
+        ->name('settings.testtypes.index')
+        ->breadcrumbs(fn (Trail $trail) =>
+        $trail->parent('settings.index')
+            ->push(__('Workflow Items'), route('settings.testtypes.index')));
+
+    Route::post('testtypes', [AdminTestTypeController::class, 'store'])
+        ->name('settings.testtypes.store');
+
+    Route::patch('testtypes/reorder', [AdminTestTypeController::class, 'reorder'])
+        ->name('settings.testtypes.reorder');
+
+    Route::put('testtypes/{testtype}', [AdminTestTypeController::class, 'update'])
+        ->name('settings.testtypes.update');
+
+    Route::delete('testtypes/{testtype}', [AdminTestTypeController::class, 'destroy'])
+        ->name('settings.testtypes.destroy');
+
+    Route::get('workflow-profiles', [AdminWorkflowProfileController::class, 'index'])
+        ->name('settings.workflow-profiles.index')
+        ->breadcrumbs(fn (Trail $trail) =>
+        $trail->parent('settings.index')
+            ->push(__('Workflow Profiles'), route('settings.workflow-profiles.index')));
+
+    Route::post('workflow-profiles', [AdminWorkflowProfileController::class, 'store'])
+        ->name('settings.workflow-profiles.store');
+
+    Route::get('workflow-profiles/{workflowProfile}/items', [AdminWorkflowProfileController::class, 'editItems'])
+        ->name('settings.workflow-profiles.items.edit')
+        ->breadcrumbs(fn (Trail $trail, $workflowProfile) =>
+        $trail->parent('settings.workflow-profiles.index')
+            ->push(__('Workflow Profile Items'), route('settings.workflow-profiles.items.edit', $workflowProfile)));
+
+    Route::put('workflow-profiles/{workflowProfile}', [AdminWorkflowProfileController::class, 'update'])
+        ->name('settings.workflow-profiles.update');
+
+    Route::delete('workflow-profiles/{workflowProfile}', [AdminWorkflowProfileController::class, 'destroy'])
+        ->name('settings.workflow-profiles.destroy');
+
+    Route::put('workflow-profiles/{workflowProfile}/items', [AdminWorkflowProfileController::class, 'updateItems'])
+        ->name('settings.workflow-profiles.items.update');
+
+    Route::patch('workflow-profiles/{workflowProfile}/items/reorder', [AdminWorkflowProfileController::class, 'reorderItems'])
+        ->name('settings.workflow-profiles.items.reorder');
+});
+
 Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser']], function () {
 
     Route::get('settings', [SettingsController::class, 'getSettings'])
@@ -384,9 +426,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
         $trail->parent('settings.index')
             ->push(trans('admin/settings/general.webhook_title'), route('settings.slack.index')));
 
-    Route::post('slack', [SettingsController::class, 'postSlack'])
-        ->name('settings.slack.save');
-
     Route::get('asset_tags', [SettingsController::class, 'getAssetTags'])
         ->name('settings.asset_tags.index')
         ->breadcrumbs(fn (Trail $trail) =>
@@ -404,51 +443,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth', 'authorize:superuser
 
     Route::post('labels', [SettingsController::class, 'postLabels'])
         ->name('settings.labels.save');
-
-    Route::get('testtypes', [AdminTestTypeController::class, 'index'])
-        ->name('settings.testtypes.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
-            ->push(__('Workflow Items'), route('settings.testtypes.index')));
-
-    Route::post('testtypes', [AdminTestTypeController::class, 'store'])
-        ->name('settings.testtypes.store');
-
-    Route::patch('testtypes/reorder', [AdminTestTypeController::class, 'reorder'])
-        ->name('settings.testtypes.reorder');
-
-    Route::put('testtypes/{testtype}', [AdminTestTypeController::class, 'update'])
-        ->name('settings.testtypes.update');
-
-    Route::delete('testtypes/{testtype}', [AdminTestTypeController::class, 'destroy'])
-        ->name('settings.testtypes.destroy');
-
-    Route::get('workflow-profiles', [AdminWorkflowProfileController::class, 'index'])
-        ->name('settings.workflow-profiles.index')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('settings.index')
-            ->push(__('Workflow Profiles'), route('settings.workflow-profiles.index')));
-
-    Route::post('workflow-profiles', [AdminWorkflowProfileController::class, 'store'])
-        ->name('settings.workflow-profiles.store');
-
-    Route::get('workflow-profiles/{workflowProfile}/items', [AdminWorkflowProfileController::class, 'editItems'])
-        ->name('settings.workflow-profiles.items.edit')
-        ->breadcrumbs(fn (Trail $trail, $workflowProfile) =>
-        $trail->parent('settings.workflow-profiles.index')
-            ->push(__('Workflow Profile Items'), route('settings.workflow-profiles.items.edit', $workflowProfile)));
-
-    Route::put('workflow-profiles/{workflowProfile}', [AdminWorkflowProfileController::class, 'update'])
-        ->name('settings.workflow-profiles.update');
-
-    Route::delete('workflow-profiles/{workflowProfile}', [AdminWorkflowProfileController::class, 'destroy'])
-        ->name('settings.workflow-profiles.destroy');
-
-    Route::put('workflow-profiles/{workflowProfile}/items', [AdminWorkflowProfileController::class, 'updateItems'])
-        ->name('settings.workflow-profiles.items.update');
-
-    Route::patch('workflow-profiles/{workflowProfile}/items/reorder', [AdminWorkflowProfileController::class, 'reorderItems'])
-        ->name('settings.workflow-profiles.items.reorder');
 
     Route::get('ldap', [SettingsController::class, 'getLdapSettings'])
         ->name('settings.ldap.index')
@@ -616,29 +610,6 @@ Route::group(['prefix' => 'account', 'middleware' => ['auth']], function () {
         $trail->parent('home')
             ->push(trans('general.viewassets'), route('view-assets')));
 
-    Route::get('requested', [ViewAssetsController::class, 'getRequestedAssets'])
-        ->name('account.requested')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
-            ->push(trans('general.requested_assets_menu'), route('account.requested')));
-
-    Route::get(
-        'requestable-assets', [ViewAssetsController::class, 'getRequestableIndex'])
-        ->name('requestable-assets')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
-            ->push(trans('general.requestable_items'), route('requestable-assets')));
-
-
-    Route::post('request-asset/{asset}', [ViewAssetsController::class, 'store'])
-        ->name('account.request-asset');
-
-    Route::post('request-asset/{asset}/cancel', [ViewAssetsController::class, 'destroy'])
-        ->name('account.request-asset.cancel');
-
-    Route::post('request/{itemType}/{itemId}/{cancel_by_admin?}/{requestingUser?}', [ViewAssetsController::class, 'getRequestItem'])
-        ->name('account/request-item');
-
     Route::get(
         'display-sig/{filename}',
         [ProfileController::class, 'displaySig']
@@ -735,10 +706,7 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
 
     // Is this still used?
     Route::get('export/maintenances', [ReportsController::class, 'exportMaintenancesReport'])
-        ->name('reports/export/maintenances')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
-            ->push(trans('general.asset_maintenance_report'), route('reports/export/maintenances')));
+        ->name('reports/export/maintenances');
 
     Route::get('licenses', [ReportsController::class, 'getLicenseReport'])
         ->name('reports/licenses')
@@ -805,22 +773,6 @@ Route::group(['prefix' => 'reports', 'middleware' => ['auth']], function () {
 
     Route::post('activity', [ReportsController::class, 'postActivityReport'])
         ->name('reports.activity.post');
-
-    Route::get('unaccepted_assets/{deleted?}', [ReportsController::class, 'getAssetAcceptanceReport'])
-        ->name('reports/unaccepted_assets')
-        ->breadcrumbs(fn (Trail $trail) =>
-        $trail->parent('home')
-            ->push(trans('general.unaccepted_asset_report'), route('reports/unaccepted_assets')));
-
-    Route::post('unaccepted_assets/sent_reminder', [ReportsController::class, 'sentAssetAcceptanceReminder'])
-        ->name('reports/unaccepted_assets_sent_reminder');
-
-    Route::delete('unaccepted_assets/{acceptanceId}/delete', [ReportsController::class, 'deleteAssetAcceptance'])
-        ->name('reports/unaccepted_assets_delete');
-
-    Route::post(
-        'unaccepted_assets/{deleted?}', [ReportsController::class, 'postAssetAcceptanceReport'])
-        ->name('reports/export/unaccepted_assets');
 
 });
 
@@ -924,13 +876,6 @@ Route::group(['middleware' => 'web'], function () {
         [ResetPasswordController::class, 'showResetForm']
     )->name('password.reset');
 
-
-    Route::post(
-        'password/email',
-        [ForgotPasswordController::class, 'sendResetLinkEmail']
-    )->name('password.email')->middleware('throttle:forgotten_password');
-
-
      // Socialite Google login
     Route::get('google', 'App\Http\Controllers\GoogleAuthController@redirectToGoogle')->name('google.redirect');
     Route::get('google/callback', 'App\Http\Controllers\GoogleAuthController@handleGoogleCallback')->name('google.callback');
@@ -974,7 +919,7 @@ Route::group(['middleware' => 'web'], function () {
             'store'
         ]
     )->name('ui.files.store')
-        ->where(['object_type' => 'assets|maintenances|hardware|models|model-numbers|users|locations|accessories|consumables|licenses|components|component-instances|work-orders']);
+        ->where(['object_type' => 'assets|hardware|models|model-numbers|users|locations|accessories|consumables|licenses|components|component-instances|work-orders']);
 
     // Delete files(s)
     Route::delete('{object_type}/{id}/files/{file_id}/delete',
@@ -985,6 +930,11 @@ Route::group(['middleware' => 'web'], function () {
     )->name('ui.files.destroy')
         ->where(['object_type' => 'assets|hardware|models|model-numbers|users|locations|accessories|consumables|licenses|components|component-instances|work-orders']);
 });
+
+Route::get(
+    '/help/api-compatibility',
+    [ForkDocumentationController::class, 'apiCompatibility']
+)->name('help.api-compatibility');
 
 
 /**

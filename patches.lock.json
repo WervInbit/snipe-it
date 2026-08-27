@@ -1,0 +1,27 @@
+{
+    "_hash": "1b8aed73033de889be3708f6d2d5920cf35d33b6a724c7db67c166d8847a2525",
+    "patches": {
+        "laravel/framework": [
+            {
+                "package": "laravel/framework",
+                "description": "Backport Laravel f336ba7 CRLF email validation to Laravel 11",
+                "url": "patches/laravel-framework-crlf-email-backport.patch",
+                "sha256": "7e27478c12b2a711282fa0b1d87395a8550bab42d95e4b8c78ac6e596a6bc467",
+                "depth": 1,
+                "extra": {
+                    "provenance": "root"
+                }
+            },
+            {
+                "package": "laravel/framework",
+                "description": "Backport Laravel 12df688 local temporary URL path encoding to Laravel 11",
+                "url": "patches/laravel-framework-local-temporary-url-backport.patch",
+                "sha256": "e437bce6327481c0edd7627ad4240f3ae92e1d041aae8b6e6102cae04c69e682",
+                "depth": 1,
+                "extra": {
+                    "provenance": "root"
+                }
+            }
+        ]
+    }
+}

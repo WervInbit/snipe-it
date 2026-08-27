@@ -39,9 +39,10 @@ class ImportLicenseTest extends ImportDataTestCase implements TestsPermissionsRe
     #[Test]
     public function userWithImportAssetsPermissionCanImportLicenses(): void
     {
-        $this->actingAsForApi(User::factory()->canImport()->create());
+        $actor = User::factory()->canImport()->create();
+        $this->actingAsForApi($actor);
 
-        $import = Import::factory()->license()->create();
+        $import = Import::factory()->license()->create(['created_by' => $actor->id]);
 
         $this->importFileResponse(['import' => $import->id])->assertOk();
     }
@@ -155,6 +156,33 @@ class ImportLicenseTest extends ImportDataTestCase implements TestsPermissionsRe
     }
 
     #[Test]
+    public function invalidLicenseDatesDoNotBecomeTheUnixEpoch(): void
+    {
+        $row = ImportFileBuilder::new()->firstRow();
+        $row['expirationDate'] = 'definitely-not-a-date';
+        $row['termination_date'] = 'also-not-a-date';
+        $importFileBuilder = new ImportFileBuilder([$row]);
+        $import = Import::factory()->license()->create([
+            'file_path' => $importFileBuilder->saveToImportsDirectory(),
+        ]);
+
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $this->importFileResponse([
+            'import' => $import->id,
+            'column-mappings' => [
+                'termination_date' => 'termination_date',
+            ],
+        ])->assertOk();
+
+        $license = License::query()
+            ->where('serial', $row['serialNumber'])
+            ->sole();
+
+        $this->assertNull($license->expiration_date);
+        $this->assertNull($license->termination_date);
+    }
+
+    #[Test]
     public function willNotCreateNewCompanyWhenCompanyExists(): void
     {
         $importFileBuilder = ImportFileBuilder::times(4)->replace(['companyName' => Str::random()]);
@@ -222,7 +250,7 @@ class ImportLicenseTest extends ImportDataTestCase implements TestsPermissionsRe
                 'messages' => [
                     $row['licenseName'] => [
                         "License \"{$row['licenseName']}\"" => [
-                            'seats' => ['The seats field is required.'],
+                            'seats' => [trans('validation.required', ['attribute' => 'seats'])],
                         ]
                     ]
                 ]

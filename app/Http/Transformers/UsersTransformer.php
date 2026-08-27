@@ -21,6 +21,13 @@ class UsersTransformer
 
     public function transformUser(User $user)
     {
+        if (auth()->id() !== $user->id && Gate::denies('view', $user)) {
+            return [
+                'id' => (int) $user->id,
+                'type' => 'user',
+                'name' => e($user->getFullNameAttribute()),
+            ];
+        }
 
         $role = '';
         if ($user->isSuperUser()) {
@@ -129,6 +136,13 @@ class UsersTransformer
      */
     public function transformUserCompact(User $user) : array
     {
+        if (Gate::denies('view', $user)) {
+            return [
+                'id' => (int) $user->id,
+                'type' => 'user',
+                'name' => e($user->getFullNameAttribute()),
+            ];
+        }
 
         $array = [
             'id' => (int) $user->id,

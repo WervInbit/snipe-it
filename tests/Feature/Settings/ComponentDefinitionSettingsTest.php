@@ -229,7 +229,10 @@ class ComponentDefinitionSettingsTest extends TestCase
 
     public function testDefinitionCanReorderAndDeleteExpectedSubcomponentTemplatesWithoutDeletingInstances(): void
     {
-        $user = User::factory()->manageComponentDefinitions()->create();
+        $user = User::factory()
+            ->manageComponentDefinitions()
+            ->manageComponentDefinitionLifecycle()
+            ->create();
         $parentDefinition = ComponentDefinition::factory()->create([
             'name' => 'Main Board Assembly',
         ]);

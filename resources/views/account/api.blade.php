@@ -27,7 +27,9 @@
                     <strong>{{ config('passport.expiration_years') }} {{ trans('general.years') }} </strong>.</p>
 
 
-                <p>{!! trans('account/general.api_reference') !!}</p>
+                <p>{!! trans('account/general.api_reference', [
+                    'fork_documentation_url' => route('help.api-compatibility'),
+                ]) !!}</p>
             </div>
         </div>
 

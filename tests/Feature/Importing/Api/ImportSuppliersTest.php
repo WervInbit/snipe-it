@@ -93,7 +93,7 @@ class ImportSuppliersTest extends ImportDataTestCase implements TestsPermissions
                     '' => [
                         'Supplier ""' => [
                             'name' =>
-                                ['The name field is required.'],
+                                [trans('validation.required', ['attribute' => 'name'])],
                         ],
                     ]
 

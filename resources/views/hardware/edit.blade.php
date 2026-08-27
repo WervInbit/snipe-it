@@ -158,13 +158,6 @@
             'selectedModelNumber' => $selectedModelNumber ?? null,
         ])
     </div>
-    @if (false && !$item->id)
-        @include ('partials.forms.checkout-selector', ['user_select' => 'true','asset_select' => 'true', 'location_select' => 'true', 'style' => 'display:none;'])
-        @include ('partials.forms.edit.user-select', ['translated_name' => trans('admin/hardware/form.checkout_to'), 'fieldname' => 'assigned_user', 'style' => 'display:none;', 'required' => 'false'])
-        @include ('partials.forms.edit.asset-select', ['translated_name' => trans('admin/hardware/form.checkout_to'), 'fieldname' => 'assigned_asset', 'style' => 'display:none;', 'required' => 'false'])
-        @include ('partials.forms.edit.location-cascade-select', ['translated_name' => trans('admin/hardware/form.checkout_to'), 'fieldname' => 'assigned_location', 'style' => 'display:none;', 'required' => 'false'])
-    @endif
-
     @include ('partials.forms.edit.location-cascade-select', ['translated_name' => trans('admin/hardware/form.default_location'), 'fieldname' => 'rtd_location_id', 'help_text' => trans('general.rtd_location_help')])
     <div class="form-group">
         <div class="col-md-7 col-md-offset-3">
@@ -186,16 +179,20 @@
         document.addEventListener('DOMContentLoaded', function () {
             const customCheck = document.getElementById('use_custom_location');
             const cascadeDiv = document.getElementById('rtd_location_id');
-            const hiddenLoc = document.getElementById('rtd_location_id_id');
+            const locationSelect = document.getElementById('rtd_location_id_location_select');
             const noteField = document.getElementById('location_note');
+            if (!customCheck || !cascadeDiv || !locationSelect || !noteField) {
+                return;
+            }
+
             function toggleCustom() {
                 if (customCheck.checked) {
                     cascadeDiv.style.display = 'none';
-                    hiddenLoc.disabled = true;
+                    locationSelect.disabled = true;
                     noteField.removeAttribute('disabled');
                 } else {
                     cascadeDiv.style.display = '';
-                    hiddenLoc.disabled = false;
+                    locationSelect.disabled = false;
                     noteField.setAttribute('disabled', 'disabled');
                 }
             }
@@ -449,40 +446,6 @@
         });
     }
 
-    function user_add(status_id) {
-
-        if (status_id != '') {
-            $(".status_spinner").css("display", "inline");
-            $.ajax({
-                url: "{{config('app.url') }}/api/v1/statuslabels/" + status_id + "/deployable",
-                headers: {
-                    "X-Requested-With": 'XMLHttpRequest',
-                    "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function (data) {
-                    $(".status_spinner").css("display", "none");
-                    $("#selected_status_status").fadeIn();
-
-                    if (data == true) {
-                        $("#assignto_selector").show();
-                        $("#assigned_user").show();
-
-                        $("#selected_status_status").removeClass('text-danger');
-                        $("#selected_status_status").addClass('text-success');
-                        $("#selected_status_status").html('<x-icon type="checkmark" /> {{ trans('admin/hardware/form.asset_deployable')}}');
-
-
-                    } else {
-                        $("#assignto_selector").hide();
-                        $("#selected_status_status").removeClass('text-success');
-                        $("#selected_status_status").addClass('text-danger');
-                        $("#selected_status_status").html('<x-icon type="warning" /> {{ (($item->assigned_to!='') && ($item->assigned_type!='') && ($item->deleted_at == '')) ? trans('admin/hardware/form.asset_not_deployable_checkin') : trans('admin/hardware/form.asset_not_deployable')  }} ');
-                    }
-                }
-            });
-        }
-    }
-
     var serialCheckEndpoint = '/api/v1/hardware/serial-check';
     var serialCheckAssetId = {{ $item->id ?? 'null' }};
     var serialCheckRequests = {};
@@ -662,14 +625,6 @@
         fetchCustomFields();
         var initialSelection = getModelSelectionContext();
         fetchSpecification(initialSelection.modelId, initialSelection.modelNumberId || $('#model_number_id').val());
-
-        //initialize assigned user/loc/asset based on statuslabel's statustype
-        user_add($(".status_id option:selected").val());
-
-        //whenever statuslabel changes, update assigned user/loc/asset
-        $(".status_id").on("change", function () {
-            user_add($(".status_id").val());
-        });
 
     });
 

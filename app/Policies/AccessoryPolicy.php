@@ -8,4 +8,9 @@ class AccessoryPolicy extends CheckoutablePermissionsPolicy
     {
         return 'accessories';
     }
+
+    protected function usesDedicatedFilePermission(): bool
+    {
+        return true;
+    }
 }

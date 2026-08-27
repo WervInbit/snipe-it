@@ -131,6 +131,11 @@ class LdapTroubleshooter extends Command
      */
     public function handle()
     {
+        if (! Setting::ldapIntegrationAvailable()) {
+            $this->error('LDAP is disabled for this environment. No directory connection was attempted.');
+            return self::FAILURE;
+        }
+
         if($this->option('trace')) {
     	    ldap_set_option(NULL, LDAP_OPT_DEBUG_LEVEL, 7);
         }
@@ -181,7 +186,7 @@ class LdapTroubleshooter extends Command
         //$this->line(print_r($settings,true));
         $this->info("STAGE 1: Checking settings");
         if(!$settings->ldap_enabled) {
-            $this->error("WARNING: Snipe-IT's LDAP setting is not turned on. (That may be OK if you're still trying to figure out settings)");
+            $this->error("WARNING: The application's LDAP setting is not turned on. (That may be OK if you're still configuring it)");
         }
 
         $ldap_conn = false;
@@ -230,7 +235,7 @@ class LdapTroubleshooter extends Command
                 $this->error("WARNING: Using the localhost IP as the LDAP server. This is usually wrong");
             }
             if(ip_in_range($ip['ip'],'10.0.0.0/8') || ip_in_range($ip['ip'],'192.168.0.0/16') || ip_in_range($ip['ip'], '172.16.0.0/12')) {
-                $this->error("WARNING: Using an RFC1918 Private address for LDAP server. This may be correct, but it can be a problem if your Snipe-IT instance is not hosted on your private network");
+                $this->error('WARNING: Using an RFC1918 private address for the LDAP server may fail when this application is hosted outside your private network');
             }
         }
 
@@ -348,7 +353,7 @@ class LdapTroubleshooter extends Command
             }
         }
 
-        $this->info("STAGE 6: Test LDAP Login to Snipe-IT");
+        $this->info('STAGE 6: Test LDAP login to this application');
         foreach($ldap_urls AS $ldap_url) {
             $this->info("Starting auth to ".$ldap_url[0]);
             while(true) {

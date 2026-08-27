@@ -12,12 +12,15 @@ use App\Models\ModelNumberAttribute;
 use App\Models\ModelNumberComponentTemplate;
 use App\Services\ModelAttributes\AttributeValueService;
 use App\Services\ModelAttributes\ModelAttributeManager;
+use Database\Seeders\Concerns\ProvidesDeviceCatalogData;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class DeviceComponentCatalogSeeder extends Seeder
 {
+    use ProvidesDeviceCatalogData;
+
     private const COMPONENT_DEFINITION_RENAMES = [
         'Webcam Module' => 'Webcam',
         'Wireless Module' => 'Wireless',
@@ -69,6 +72,10 @@ class DeviceComponentCatalogSeeder extends Seeder
                 'serial_tracking_mode' => $config['serial_tracking_mode'] ?? 'optional',
                 'placement_mode' => $config['placement_mode'] ?? ComponentDefinition::PLACEMENT_EITHER,
                 'is_active' => true,
+                'metadata_json' => array_replace(
+                    $this->seedMetadata('component-definition:'.$name),
+                    $definition->metadata_json ?: []
+                ),
                 'created_by' => $definition->exists ? $definition->created_by : null,
                 'updated_by' => null,
             ]);
@@ -110,12 +117,6 @@ class DeviceComponentCatalogSeeder extends Seeder
 
                 $assignedAttributeIds[] = $attribute->id;
             }
-
-            ComponentDefinitionAttribute::query()
-                ->where('component_definition_id', $definition->id)
-                ->whereNotIn('attribute_definition_id', $assignedAttributeIds)
-                ->delete();
-
             $seeded[$name] = $definition;
         }
 
@@ -144,7 +145,16 @@ class DeviceComponentCatalogSeeder extends Seeder
                     'expected_qty' => max(1, (int) ($templateConfig['qty'] ?? 1)),
                     'is_required' => (bool) ($templateConfig['required'] ?? true),
                     'sort_order' => $index,
-                    'metadata_json' => $templateConfig['metadata'] ?? null,
+                    'metadata_json' => array_replace(
+                        $template->metadata_json ?: [],
+                        $templateConfig['metadata'] ?? [],
+                        $this->seedMetadata(sprintf(
+                            'component-subcomponent:%s:%s:%s',
+                            $name,
+                            $childDefinition->name,
+                            $templateConfig['expected_name'] ?? $childDefinition->name
+                        ))
+                    ),
                     'notes' => $templateConfig['notes'] ?? null,
                 ]);
                 $template->save();
@@ -152,13 +162,7 @@ class DeviceComponentCatalogSeeder extends Seeder
                 $assignedSubcomponentTemplateIds[] = $template->id;
             }
 
-            ComponentDefinitionSubcomponentTemplate::query()
-                ->where('parent_component_definition_id', $definition->id)
-                ->when(
-                    $assignedSubcomponentTemplateIds !== [],
-                    fn ($query) => $query->whereNotIn('id', $assignedSubcomponentTemplateIds)
-                )
-                ->delete();
+            $this->deleteSeedOwnedSubcomponentTemplates($definition, $assignedSubcomponentTemplateIds);
         }
 
         return $seeded;
@@ -196,6 +200,12 @@ class DeviceComponentCatalogSeeder extends Seeder
                 continue;
             }
 
+            if (!$this->modelNumberCodeIsSeedable($modelNumberCode)) {
+                $this->deleteSeedOwnedModelTemplates($modelNumber, []);
+
+                continue;
+            }
+
             $assignedTemplateIds = [];
 
             foreach ($templates as $index => $templateConfig) {
@@ -216,7 +226,17 @@ class DeviceComponentCatalogSeeder extends Seeder
                     'expected_qty' => max(1, (int) ($templateConfig['qty'] ?? 1)),
                     'is_required' => (bool) ($templateConfig['required'] ?? true),
                     'sort_order' => $index,
-                    'metadata_json' => $templateConfig['metadata'] ?? null,
+                    'metadata_json' => array_replace(
+                        $template->metadata_json ?: [],
+                        $templateConfig['metadata'] ?? [],
+                        $this->seedMetadata(sprintf(
+                            'model-component:%s:%s:%s:%s',
+                            $modelNumberCode,
+                            $definition->name,
+                            $templateConfig['slot_name'] ?? '',
+                            $templateConfig['expected_name'] ?? $definition->name
+                        ))
+                    ),
                     'notes' => $templateConfig['notes'] ?? null,
                 ]);
                 $template->save();
@@ -224,15 +244,56 @@ class DeviceComponentCatalogSeeder extends Seeder
                 $assignedTemplateIds[] = $template->id;
             }
 
-            ModelNumberComponentTemplate::query()
-                ->where('model_number_id', $modelNumber->id)
-                ->whereNotIn('id', $assignedTemplateIds)
-                ->delete();
+            $this->deleteSeedOwnedModelTemplates($modelNumber, $assignedTemplateIds);
 
             $this->removeComponentBackedModelAttributes($modelNumber);
         }
+    }
 
-        $this->retireObsoleteComponentDefinitions();
+    /**
+     * @param array<int,int> $assignedTemplateIds
+     */
+    private function deleteSeedOwnedSubcomponentTemplates(
+        ComponentDefinition $definition,
+        array $assignedTemplateIds
+    ): void {
+        ComponentDefinitionSubcomponentTemplate::query()
+            ->where('parent_component_definition_id', $definition->id)
+            ->get()
+            ->each(function (ComponentDefinitionSubcomponentTemplate $template) use ($assignedTemplateIds): void {
+                if (in_array((int) $template->id, $assignedTemplateIds, true)) {
+                    return;
+                }
+
+                $metadata = $template->metadata_json ?: [];
+
+                if (($metadata['catalog_seed_class'] ?? null) === self::class) {
+                    $template->delete();
+                }
+            });
+    }
+
+    /**
+     * @param array<int,int> $assignedTemplateIds
+     */
+    private function deleteSeedOwnedModelTemplates(
+        ModelNumber $modelNumber,
+        array $assignedTemplateIds
+    ): void {
+        ModelNumberComponentTemplate::query()
+            ->where('model_number_id', $modelNumber->id)
+            ->get()
+            ->each(function (ModelNumberComponentTemplate $template) use ($assignedTemplateIds): void {
+                if (in_array((int) $template->id, $assignedTemplateIds, true)) {
+                    return;
+                }
+
+                $metadata = $template->metadata_json ?: [];
+
+                if (($metadata['catalog_seed_class'] ?? null) === self::class) {
+                    $template->delete();
+                }
+            });
     }
 
     /**
@@ -1013,61 +1074,6 @@ class DeviceComponentCatalogSeeder extends Seeder
         ]);
     }
 
-    private function retireObsoleteComponentDefinitions(): void
-    {
-        $replacements = [
-            '3.5mm Audio Jack' => '3.5mm Port - Headset Combo',
-            'RJ-45 Ethernet Port' => 'RJ-45 Ethernet Port - 1GbE',
-        ];
-
-        $definitions = ComponentDefinition::query()
-            ->whereIn('name', array_keys($replacements))
-            ->get();
-
-        foreach ($definitions as $definition) {
-            $replacement = ComponentDefinition::query()
-                ->where('name', $replacements[$definition->name])
-                ->first();
-
-            if ($replacement) {
-                $definition->usedAsSubcomponentTemplates()
-                    ->get()
-                    ->each(function (ComponentDefinitionSubcomponentTemplate $template) use ($definition, $replacement): void {
-                        $template->child_component_definition_id = $replacement->id;
-
-                        if ($template->expected_name === $definition->name) {
-                            $template->expected_name = $replacement->name;
-                        }
-
-                        $template->save();
-                    });
-
-                $definition->expectedTemplates()
-                    ->get()
-                    ->each(function (ModelNumberComponentTemplate $template) use ($definition, $replacement): void {
-                        $template->component_definition_id = $replacement->id;
-
-                        if ($template->expected_name === $definition->name) {
-                            $template->expected_name = $replacement->name;
-                        }
-
-                        $template->save();
-                    });
-            }
-
-            if (
-                $definition->instances()->exists()
-                || $definition->expectedTemplates()->exists()
-                || $definition->usedAsSubcomponentTemplates()->exists()
-            ) {
-                $definition->forceFill(['is_active' => false])->save();
-                continue;
-            }
-
-            $definition->delete();
-        }
-    }
-
     /**
      * @return array<string,mixed>
      */
@@ -1100,9 +1106,53 @@ class DeviceComponentCatalogSeeder extends Seeder
             return;
         }
 
+        $ownedComponentDefinitionIds = $modelNumber->componentTemplates()
+            ->with('componentDefinition:id,metadata_json')
+            ->get()
+            ->filter(function (ModelNumberComponentTemplate $template): bool {
+                $metadata = $template->componentDefinition?->metadata_json ?: [];
+
+                return ($metadata['catalog_seed_class'] ?? null) === self::class;
+            })
+            ->pluck('component_definition_id')
+            ->all();
+        $ownedDefinitionIds = ComponentDefinitionAttribute::query()
+            ->whereIn('component_definition_id', $ownedComponentDefinitionIds)
+            ->where('resolves_to_spec', true)
+            ->pluck('attribute_definition_id')
+            ->all();
+        $catalogAttributeKeys = collect($this->componentDefinitions())
+            ->flatMap(fn (array $config): array => array_keys($config['attributes'] ?? []))
+            ->unique()
+            ->all();
+        $catalogDefinitionIds = AttributeDefinition::query()
+            ->whereIn('key', $catalogAttributeKeys)
+            ->pluck('id')
+            ->all();
+        $definitionIds = array_values(array_intersect(
+            $definitionIds,
+            $ownedDefinitionIds,
+            $catalogDefinitionIds
+        ));
+
+        if ($definitionIds === []) {
+            return;
+        }
+
         ModelNumberAttribute::query()
             ->where('model_number_id', $modelNumber->id)
             ->whereIn('attribute_definition_id', $definitionIds)
             ->delete();
+    }
+
+    /**
+     * @return array<string,string>
+     */
+    private function seedMetadata(string $seedKey): array
+    {
+        return [
+            'catalog_seed_class' => self::class,
+            'catalog_seed_key' => $seedKey,
+        ];
     }
 }

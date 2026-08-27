@@ -1,4 +1,6 @@
 {
+    "name": "inbit-device-refurbishment-platform",
+    "version": "0.9.0-dev",
     "private": true,
     "scripts": {
         "contributors:add": "all-contributors add",
@@ -11,10 +13,14 @@
         "hot": "mix watch --hot",
         "prod": "npm run production",
         "build": "npm run production",
-        "production": "mix --production"
+        "postinstall": "node scripts/patch-bootstrap3-security.cjs",
+        "predevelopment": "node scripts/patch-bootstrap3-security.cjs",
+        "preproduction": "node scripts/patch-bootstrap3-security.cjs",
+        "production": "mix --production",
+        "test:node": "node --test tests/Node/*.test.cjs"
     },
     "engines": {
-        "node": ">=0.12"
+        "node": ">=20"
     },
     "devDependencies": {
         "all-contributors-cli": "^6.26.1",
@@ -22,8 +28,8 @@
         "jquery": "<3.6.0",
         "laravel-mix": "^6.0.49",
         "lodash": "^4.17.20",
-        "postcss": "^8.5.6",
-        "webpack": "^5.98.0"
+        "postcss": "^8.5.25",
+        "webpack": "5.104.1"
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "^6.7.2",
@@ -31,34 +37,44 @@
         "acorn": "^8.14.1",
         "acorn-import-assertions": "^1.9.0",
         "admin-lte": "^2.4.18",
-        "ajv": "^6.12.6",
+        "ajv": "^6.14.0",
         "blueimp-file-upload": "^9.34.0",
         "bootstrap": "^3.4.1",
         "bootstrap-colorpicker": "^2.5.3",
         "bootstrap-datepicker": "^1.10.0",
-        "bootstrap-less": "^3.3.8",
         "bootstrap-table": "1.24.2",
+        "brace-expansion": "file:packages/brace-expansion-compat",
         "canvas-confetti": "^1.9.3",
         "chart.js": "^2.9.4",
         "clipboard": "^2.0.11",
         "css-loader": "^5.0.0",
         "ekko-lightbox": "^5.1.1",
-        "imagemin": "^9.0.1",
         "jquery-slimscroll": "^1.3.8",
         "jquery-ui": "^1.14.1",
         "jquery-validation": "^1.21.0",
         "jquery.iframe-transport": "^1.0.0",
-        "jspdf-autotable": "^5.0.2",
+        "jspdf": "^4.2.1",
         "jsqr": "^1.4.0",
-        "less": "^4.2.2",
-        "less-loader": "^6.0",
+        "less": "^4.8.1",
+        "less-loader": "^12.3.3",
         "list.js": "^1.5.0",
         "morris.js": "github:morrisjs/morris.js",
         "papaparse": "5.5.2",
         "select2": "4.0.13",
-        "sheetjs": "^2.0.0",
         "signature_pad": "^4.2.0",
         "tableexport.jquery.plugin": "^1.33.0",
-        "tether": "^1.4.0"
+        "tether": "^1.4.0",
+        "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    },
+    "overrides": {
+        "brace-expansion": "$brace-expansion",
+        "admin-lte": {
+            "chart.js": "$chart.js",
+            "slimscroll": "npm:jquery-slimscroll@1.3.8"
+        },
+        "external-editor": {
+            "tmp": "0.2.7"
+        },
+        "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
     }
 }

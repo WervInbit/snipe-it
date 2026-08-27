@@ -3,11 +3,11 @@
 namespace App\Helpers;
 
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Http\Response;
 use Illuminate\Http\RedirectResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
+
 class StorageHelper
 {
     public static function downloader($filename, $disk = 'default') : BinaryFileResponse | RedirectResponse | StreamedResponse
@@ -27,18 +27,18 @@ class StorageHelper
         }
     }
 
-    public static function getMediaType($file_with_path) {
+    public static function getMediaType(string $file_with_path): ?string
+    {
 
         // The file exists and is allowed to be displayed inline
         if (Storage::exists($file_with_path)) {
-            $fileinfo = pathinfo($file_with_path);
-            $extension = strtolower($fileinfo['extension']);
+            $extension = strtolower(pathinfo($file_with_path, PATHINFO_EXTENSION));
             switch ($extension) {
                 case 'avif':
                 case 'jpg':
+                case 'jpeg':
                 case 'png':
                 case 'gif':
-                case 'svg':
                 case 'webp':
                     return 'image';
                 case 'pdf':
@@ -67,41 +67,39 @@ class StorageHelper
      * @param  $file_with_path
      * @return bool
      */
-    public static function allowSafeInline($file_with_path)
+    public static function allowSafeInline(string $file_with_path): bool
     {
-
         $allowed_inline = [
             'avif',
             'gif',
-            'gif',
             'jpg',
+            'jpeg',
             'mov',
             'mp3',
             'mp4',
             'ogg',
             'pdf',
             'png',
-            'svg',
             'wav',
             'webm',
             'webp',
         ];
 
-
         // The file exists and is allowed to be displayed inline
-        if (Storage::exists($file_with_path) && (in_array(pathinfo($file_with_path, PATHINFO_EXTENSION), $allowed_inline))) {
-            return true;
-        }
-        return false;
-
+        return Storage::exists($file_with_path)
+            && in_array(
+                strtolower(pathinfo($file_with_path, PATHINFO_EXTENSION)),
+                $allowed_inline,
+                true
+            );
     }
 
-    public static function getFiletype($file_with_path)
+    public static function getFiletype(string $file_with_path): ?string
     {
 
         // The file exists and is allowed to be displayed inline
         if (Storage::exists($file_with_path)) {
-            return pathinfo($file_with_path, PATHINFO_EXTENSION);
+            return strtolower(pathinfo($file_with_path, PATHINFO_EXTENSION));
         }
 
         return null;
@@ -112,29 +110,25 @@ class StorageHelper
     /**
      * Decide whether to show the file inline or download it.
      */
-    public static function showOrDownloadFile($file, $filename)
+    public static function showOrDownloadFile(string $file, string $filename): StreamedResponse
     {
-
-        $headers = [];
-
-        if (request('inline') == 'true') {
-
-            $headers = [
-                'Content-Disposition' => 'inline',
-            ];
-
-            // This is NOT allowed as inline - force it to be displayed as text in the browser
-            if (self::allowSafeInline($file) != true) {
-                $headers = array_merge($headers, ['Content-Type' => 'text/plain']);
-            }
-        }
-
-        // Everything else seems okay, but the file doesn't exist on the server.
         if (Storage::missing($file)) {
             throw new FileNotFoundException();
         }
 
-        return Storage::download($file, $filename, $headers);
+        $headers = [
+            'X-Content-Type-Options' => 'nosniff',
+        ];
 
+        if (request('inline') == 'true') {
+            if (self::allowSafeInline($file)) {
+                $headers['Content-Disposition'] = 'inline';
+            } elseif (strtolower(pathinfo($file, PATHINFO_EXTENSION)) === 'svg') {
+                $headers['Content-Disposition'] = 'inline';
+                $headers['Content-Type'] = 'text/plain; charset=UTF-8';
+            }
+        }
+
+        return Storage::download($file, $filename, $headers);
     }
 }

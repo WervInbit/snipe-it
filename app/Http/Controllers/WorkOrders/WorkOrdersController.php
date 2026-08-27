@@ -45,13 +45,16 @@ class WorkOrdersController extends Controller
     public function create(Request $request): View
     {
         $this->authorize('create', WorkOrder::class);
+        $canManageVisibility = $request->user()?->can('manageVisibility', new WorkOrder()) ?? false;
 
         return view('work-orders.create', [
             'workOrder' => new WorkOrder([
                 'company_id' => $this->defaultCompanyId($request),
                 'status' => WorkOrder::STATUS_DRAFT,
                 'priority' => WorkOrder::PRIORITY_NORMAL,
-                'visibility_profile' => WorkOrder::VISIBILITY_PROFILE_FULL,
+                'visibility_profile' => $canManageVisibility
+                    ? WorkOrder::VISIBILITY_PROFILE_FULL
+                    : WorkOrder::VISIBILITY_PROFILE_BASIC,
                 'intake_date' => now()->toDateString(),
             ]),
             ...$this->formOptions($request),
@@ -62,10 +65,19 @@ class WorkOrdersController extends Controller
     {
         $this->authorize('create', WorkOrder::class);
 
-        $data = $this->validatedData($request);
+        $workOrder = new WorkOrder();
+        $canManageVisibility = $request->user()?->can('manageVisibility', $workOrder) ?? false;
+        $data = $this->validatedData($request, $workOrder);
         $visibleUserIds = $this->validatedVisibleUserIds($request);
-        $workOrder = new WorkOrder($data);
-        $workOrder->portal_visibility_json = $this->portalVisibilityPayload($request);
+
+        if (!$canManageVisibility) {
+            $data['visibility_profile'] = WorkOrder::VISIBILITY_PROFILE_BASIC;
+        }
+
+        $workOrder->fill($data);
+        $workOrder->portal_visibility_json = $canManageVisibility
+            ? $this->portalVisibilityPayload($request)
+            : [];
         $workOrder->created_by = $request->user()?->id;
         $workOrder->updated_by = $request->user()?->id;
         $workOrder->save();
@@ -116,7 +128,7 @@ class WorkOrdersController extends Controller
     {
         $this->authorize('update', $workOrder);
 
-        $data = $this->validatedData($request);
+        $data = $this->validatedData($request, $workOrder);
         $visibleUserIds = $this->validatedVisibleUserIds($request);
 
         if (!$request->user()?->can('manageVisibility', $workOrder)) {
@@ -157,8 +169,11 @@ class WorkOrdersController extends Controller
             ->get();
     }
 
-    protected function validatedData(Request $request): array
+    protected function validatedData(Request $request, ?WorkOrder $workOrder = null): array
     {
+        $visibilityTarget = $workOrder ?? new WorkOrder();
+        $canManageVisibility = $request->user()?->can('manageVisibility', $visibilityTarget) ?? false;
+
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
@@ -166,7 +181,11 @@ class WorkOrdersController extends Controller
             'primary_contact_user_id' => ['nullable', 'integer', 'exists:users,id'],
             'status' => ['required', Rule::in(array_keys(WorkOrder::statusOptions()))],
             'priority' => ['nullable', Rule::in(array_keys(WorkOrder::priorityOptions()))],
-            'visibility_profile' => ['required', Rule::in(array_keys(WorkOrder::visibilityProfileOptions()))],
+            'visibility_profile' => [
+                Rule::requiredIf($canManageVisibility),
+                'nullable',
+                Rule::in(array_keys(WorkOrder::visibilityProfileOptions())),
+            ],
             'intake_date' => ['nullable', 'date'],
             'due_date' => ['nullable', 'date', 'after_or_equal:intake_date'],
         ]);

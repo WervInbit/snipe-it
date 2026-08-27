@@ -176,7 +176,7 @@ class ManufacturerPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('manufacturers.show', $this->name, $this->id);
+        return \App\Support\RouteLink::to('manufacturers.show', $this->name, $this->id);
     }
 
     /**

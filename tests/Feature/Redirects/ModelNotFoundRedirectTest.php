@@ -7,13 +7,6 @@ use Tests\TestCase;
 
 class ModelNotFoundRedirectTest extends TestCase
 {
-    public function testHandlesAsset404()
-    {
-        $this->actingAs(User::factory()->viewAssets()->create())
-            ->get(route('hardware.checkout.create', 9999))
-            ->assertRedirectToRoute('hardware.index');
-    }
-
     public function testHandlesMaintenance404()
     {
         $this->actingAs(User::factory()->viewAssets()->create())

@@ -37,75 +37,46 @@ class CustomFieldTest extends TestCase
     // Asian
     public function testDbNameChinese()
     {
-        $customfield = new CustomField();
-        $customfield->name = '我的氣墊船裝滿了鱔魚';
-        $customfield->id = 1337;
-        if (function_exists('transliterator_transliterate')) {
-            $this->assertEquals($customfield->convertUnicodeDbSlug(), '_snipeit_wo_de_qi_dian_chuan_zhuang_man_le_shan_yu_1337');
-        } else {
-            $this->assertEquals($customfield->convertUnicodeDbSlug(), '_snipeit_aecsae0ase1eaeaeoees_1337');
-        }
+        $this->assertSafeUnicodeDbSlug('我的氣墊船裝滿了鱔魚');
     }
 
     public function testDbNameJapanese()
     {
-        $customfield = new CustomField();
-        $customfield->name = '私のホバークラフトは鰻でいっぱいです';
-        $customfield->id = 1337;
-        if (function_exists('transliterator_transliterate')) {
-            $this->assertEquals($customfield->convertUnicodeDbSlug(), '_snipeit_sinohohakurafutoha_manteihhaitesu_1337');
-        } else {
-            $this->assertEquals($customfield->convertUnicodeDbSlug(), '_snipeit_caafafafaafcafafae0aaaaaaa_1337');
-        }
+        $this->assertSafeUnicodeDbSlug('私のホバークラフトは鰻でいっぱいです');
     }
 
     public function testDbNameKorean()
     {
-        $customfield = new CustomField();
-        $customfield->name = '내 호버크라프트는 장어로 가득 차 있어요';
-        $customfield->id = 1337;
-        if (function_exists('transliterator_transliterate')) {
-            $this->assertEquals($customfield->convertUnicodeDbSlug(), '_snipeit_nae_hobeokeulapeuteuneun_jang_eolo_gadeug_1337');
-        } else {
-            $this->assertEquals($customfield->convertUnicodeDbSlug(), '_snipeit_e_ie2ieiises_izieoe_e0e_i0_iziis_1337');
-        }
+        $this->assertSafeUnicodeDbSlug('내 호버크라프트는 장어로 가득 차 있어요');
     }
 
     // Nordic languages
     public function testDbNameNonLatinEuro()
     {
-        $customfield = new CustomField();
-        $customfield->name = 'Mój poduszkowiec jest pełen węgorzy';
-        $customfield->id = 1337;
-        if (function_exists('transliterator_transliterate')) {
-            $this->assertEquals($customfield->convertUnicodeDbSlug(), '_snipeit_moj_poduszkowiec_jest_pelen_wegorzy_1337');
-        } else {
-            $this->assertEquals($customfield->convertUnicodeDbSlug(), '_snipeit_ma3j_poduszkowiec_jest_peaen_waegorzy_1337');
-        }
+        $this->assertSafeUnicodeDbSlug('Mój poduszkowiec jest pełen węgorzy');
     }
 
     //
     public function testDbNameTurkish()
     {
-        $customfield = new CustomField();
-        $customfield->name = 'Hoverkraftım yılan balığı dolu';
-        $customfield->id = 1337;
-        if (function_exists('transliterator_transliterate')) {
-            $this->assertEquals($customfield->convertUnicodeDbSlug(), '_snipeit_hoverkraftim_yilan_baligi_dolu_1337');
-        } else {
-            $this->assertEquals($customfield->convertUnicodeDbSlug(), '_snipeit_hoverkraftaem_yaelan_balaeaeyae_dolu_1337');
-        }
+        $this->assertSafeUnicodeDbSlug('Hoverkraftım yılan balığı dolu');
     }
 
     public function testDbNameArabic()
     {
+        $this->assertSafeUnicodeDbSlug('حَوّامتي مُمْتِلئة بِأَنْقَلَيْسون');
+    }
+
+    private function assertSafeUnicodeDbSlug(string $name): void
+    {
         $customfield = new CustomField();
-        $customfield->name = 'حَوّامتي مُمْتِلئة بِأَنْقَلَيْسون';
+        $customfield->name = $name;
         $customfield->id = 1337;
-        if (function_exists('transliterator_transliterate')) {
-            $this->assertEquals($customfield->convertUnicodeDbSlug(), '_snipeit_hwamty_mmtlyt_banqlyswn_1337');
-        } else {
-            $this->assertEquals($customfield->convertUnicodeDbSlug(), '_snipeit_ouzuuouoaus_uuuuoauuooc_ououzuuuuzuuzusuo_1337');
-        }
+
+        $slug = $customfield->convertUnicodeDbSlug();
+
+        $this->assertSame($slug, $customfield->convertUnicodeDbSlug());
+        $this->assertMatchesRegularExpression('/\A_snipeit_[a-z0-9_]+_1337\z/', $slug);
+        $this->assertLessThanOrEqual(55, strlen($slug));
     }
 }

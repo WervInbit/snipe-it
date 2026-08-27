@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Importa',
     'import_this_file'      => 'Mappa i campi ed elabora questo file',
     'importing'         	=> 'Sto importando',
-    'importing_help'        => 'È possibile importare risorse, accessori, licenze, componenti, materiali di consumo e utenti utilizzando file CSV. <br><br>Il CSV dovrebbe essere delimitato da virgole e formattato con intestazioni che corrispondano a quelle della seguente documentazione <a href="https://snipe-it.readme.io/docs/importing" target="_new"> esempio CSV </a>.',
+    'importing_help'        => 'È possibile importare risorse, accessori, licenze, componenti, materiali di consumo e utenti utilizzando file CSV. <br><br>Il CSV dovrebbe essere delimitato da virgole e formattato con intestazioni che corrispondano a quelle della seguente documentazione <a href=":fork_documentation_url" target="_new"> esempio CSV </a>.',
     'import-history'        => 'Storico di Importazione',
     'asset_maintenance'        => 'Manutenzione Bene',
     'asset_maintenance_report' => 'Report Manutenzione Beni',

@@ -134,6 +134,10 @@ class SamsungGalaxyPhoneCatalogSeeder extends Seeder
                 'serial_tracking_mode' => $config['serial_tracking_mode'] ?? 'optional',
                 'placement_mode' => $config['placement_mode'] ?? ComponentDefinition::PLACEMENT_EITHER,
                 'is_active' => true,
+                'metadata_json' => array_replace(
+                    $this->seedMetadata('component-definition:'.$name),
+                    $definition->metadata_json ?: []
+                ),
                 'created_by' => $definition->exists ? $definition->created_by : null,
                 'updated_by' => null,
             ]);
@@ -175,12 +179,6 @@ class SamsungGalaxyPhoneCatalogSeeder extends Seeder
 
                 $assignedAttributeIds[] = $attribute->id;
             }
-
-            ComponentDefinitionAttribute::query()
-                ->where('component_definition_id', $definition->id)
-                ->whereNotIn('attribute_definition_id', $assignedAttributeIds)
-                ->delete();
-
             $seeded[$name] = $definition;
         }
 
@@ -221,7 +219,10 @@ class SamsungGalaxyPhoneCatalogSeeder extends Seeder
                     'expected_qty' => max(1, (int) ($templateConfig['qty'] ?? 1)),
                     'is_required' => (bool) ($templateConfig['required'] ?? true),
                     'sort_order' => $index,
-                    'metadata_json' => $this->seedMetadata($seedKey),
+                    'metadata_json' => array_replace(
+                        $template->metadata_json ?: [],
+                        $this->seedMetadata($seedKey)
+                    ),
                     'notes' => $templateConfig['notes'] ?? null,
                 ]);
                 $template->save();
@@ -327,7 +328,10 @@ class SamsungGalaxyPhoneCatalogSeeder extends Seeder
                     'expected_qty' => max(1, (int) ($templateConfig['qty'] ?? 1)),
                     'is_required' => (bool) ($templateConfig['required'] ?? true),
                     'sort_order' => $index,
-                    'metadata_json' => $this->seedMetadata($entryKey),
+                    'metadata_json' => array_replace(
+                        $template->metadata_json ?: [],
+                        $this->seedMetadata($entryKey)
+                    ),
                     'notes' => $templateConfig['notes'] ?? null,
                 ]);
                 $template->save();
@@ -419,6 +423,39 @@ class SamsungGalaxyPhoneCatalogSeeder extends Seeder
         $modelNumber->unsetRelation('componentTemplates');
 
         $definitionIds = app(ModelAttributeManager::class)->componentResolvedSpecDefinitionIds($modelNumber);
+
+        if ($definitionIds === []) {
+            return;
+        }
+
+        $ownedComponentDefinitionIds = $modelNumber->componentTemplates()
+            ->with('componentDefinition:id,metadata_json')
+            ->get()
+            ->filter(function (ModelNumberComponentTemplate $template): bool {
+                $metadata = $template->componentDefinition?->metadata_json ?: [];
+
+                return ($metadata['catalog_seed_class'] ?? null) === self::class;
+            })
+            ->pluck('component_definition_id')
+            ->all();
+        $ownedDefinitionIds = ComponentDefinitionAttribute::query()
+            ->whereIn('component_definition_id', $ownedComponentDefinitionIds)
+            ->where('resolves_to_spec', true)
+            ->pluck('attribute_definition_id')
+            ->all();
+        $catalogAttributeKeys = collect($this->componentDefinitions())
+            ->flatMap(fn (array $config): array => array_keys($config['attributes'] ?? []))
+            ->unique()
+            ->all();
+        $catalogDefinitionIds = AttributeDefinition::query()
+            ->whereIn('key', $catalogAttributeKeys)
+            ->pluck('id')
+            ->all();
+        $definitionIds = array_values(array_intersect(
+            $definitionIds,
+            $ownedDefinitionIds,
+            $catalogDefinitionIds
+        ));
 
         if ($definitionIds === []) {
             return;

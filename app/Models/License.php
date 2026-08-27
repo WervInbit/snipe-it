@@ -296,6 +296,23 @@ class License extends Depreciable
         }
         $this->attributes['termination_date'] = $value;
     }
+
+    public function isInactive(): bool
+    {
+        return $this->isExpired() || $this->isTerminated();
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->expiration_date !== null
+            && $this->expiration_date->copy()->startOfDay()->lessThanOrEqualTo(now()->startOfDay());
+    }
+
+    public function isTerminated(): bool
+    {
+        return $this->termination_date !== null
+            && $this->termination_date->copy()->startOfDay()->lessThanOrEqualTo(now()->startOfDay());
+    }
     /**
      * Sets free_seat_count attribute
      *
@@ -651,7 +668,7 @@ class License extends Depreciable
      * @since  [v3.0]
      * @return mixed
      */
-    public function freeSeat()
+    public function freeSeat(bool $lock = false)
     {
         return  $this->licenseseats()
             ->whereNull('deleted_at')
@@ -662,6 +679,7 @@ class License extends Depreciable
                 }
             )
             ->orderBy('id', 'asc')
+            ->when($lock, fn ($query) => $query->lockForUpdate())
             ->first();
     }
 
@@ -689,12 +707,14 @@ class License extends Depreciable
      */
     public static function getExpiringLicenses($days = 60)
     {
-        $days = (is_null($days)) ? 60 : $days;
+        $days = is_null($days) ? 60 : (int) $days;
+        $today = now()->startOfDay();
+        $cutoff = $today->copy()->addDays($days);
 
         return self::whereNotNull('expiration_date')
             ->whereNull('deleted_at')
-            ->whereRaw('DATE_SUB(`expiration_date`,INTERVAL '.$days.' DAY) <= DATE(NOW()) ')
-            ->where('expiration_date', '>', date('Y-m-d'))
+            ->where('expiration_date', '>', $today)
+            ->where('expiration_date', '<=', $cutoff)
             ->orderBy('expiration_date', 'ASC')
             ->get();
     }

@@ -14,6 +14,9 @@ return [
         'file_deleted'          => 'The backup file was successfully deleted. ',
         'generated'             => 'A new backup file was successfully created.',
         'file_not_found'        => 'That backup file could not be found on the server.',
+        'invalid_archive'       => 'That backup archive is invalid or does not contain exactly one non-empty SQL dump.',
+        'restore_backup_failed' => 'The safety backup failed. The restore was not started.',
+        'restore_disabled'      => 'Uploaded-backup restore is disabled. Use the reviewed operator restore procedure instead.',
         'restore_warning'       => 'Yes, restore it. I acknowledge that this will overwrite any existing data currently in the database. This will also log out all of your existing users (including you).',
         'restore_confirm'       => 'Are you sure you wish to restore your database from :filename?'
     ],
@@ -49,6 +52,7 @@ return [
         'success_pt2' => ' channel for your test message, and be sure to click SAVE below to store your settings.',
         '500' => '500 Server Error.',
         'error' => 'Something went wrong. :app responded with: :error_message',
+        'error_safe' => 'Something went wrong while contacting :app. Check the endpoint and application logs for details.',
         'error_redirect' => 'ERROR: 301/302 :endpoint returns a redirect. For security reasons, we don’t follow redirects. Please use the actual endpoint.',
         'error_misc' => 'Something went wrong. :( ',
         'webhook_fail' => ' webhook notification failed: Check to make sure the URL is still valid.',

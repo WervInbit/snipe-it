@@ -46,6 +46,7 @@ return array(
         'not_enough_seats' => 'Niet genoeg licentieplaatsen beschikbaar voor de kassa',
         'mismatch' => 'De opgegeven licentie werkplek komt niet overeen met de licentie',
         'unavailable' => 'Deze licentie is niet beschikbaar voor uitchecken.',
+        'license_is_inactive' => 'Deze licentie is verlopen of beeindigd.',
     ),
 
     'checkin' => array(

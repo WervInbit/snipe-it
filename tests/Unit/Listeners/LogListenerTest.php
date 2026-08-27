@@ -4,7 +4,7 @@ namespace Tests\Unit\Listeners;
 
 use App\Events\CheckoutableCheckedOut;
 use App\Listeners\LogListener;
-use App\Models\Asset;
+use App\Models\Accessory;
 use App\Models\User;
 use Tests\TestCase;
 
@@ -12,7 +12,7 @@ class LogListenerTest extends TestCase
 {
     public function testLogsEntryOnCheckoutableCheckedOut()
     {
-        $asset = Asset::factory()->create();
+        $accessory = Accessory::factory()->create();
         $checkedOutTo = User::factory()->create();
         $checkedOutBy = User::factory()->create();
 
@@ -20,7 +20,7 @@ class LogListenerTest extends TestCase
         $this->actingAs($checkedOutBy);
 
         (new LogListener())->onCheckoutableCheckedOut(new CheckoutableCheckedOut(
-            $asset,
+            $accessory,
             $checkedOutTo,
             $checkedOutBy,
             'A simple note...',
@@ -31,8 +31,8 @@ class LogListenerTest extends TestCase
             'created_by' => $checkedOutBy->id,
             'target_id' => $checkedOutTo->id,
             'target_type' => User::class,
-            'item_id' => $asset->id,
-            'item_type' => Asset::class,
+            'item_id' => $accessory->id,
+            'item_type' => Accessory::class,
             'note' => 'A simple note...',
         ]);
     }

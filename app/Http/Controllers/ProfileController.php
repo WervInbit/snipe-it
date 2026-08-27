@@ -8,6 +8,7 @@ use App\Models\Actionlog;
 use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\CurrentInventory;
+use App\Services\SafeRasterImageService;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use \Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * This controller handles all actions related to User Profiles for
@@ -224,6 +225,10 @@ class ProfileController extends Controller
     public function emailAssetList() : RedirectResponse
     {
 
+        if (! config('mail.enabled', true)) {
+            return redirect()->back()->with('error', trans('mail.delivery_disabled'));
+        }
+
         if (!$user = User::find(auth()->id())) {
             return redirect()->back()
                 ->with('error', trans('admin/users/message.user_not_found', ['id' => auth()->id()]));
@@ -241,24 +246,70 @@ class ProfileController extends Controller
         return redirect()->back()->with('success', trans('admin/users/general.user_notified'));
     }
 
-
-
-    public function getStoredEula($filename) : Response | BinaryFileResponse | RedirectResponse
+    public function displaySig(string $filename, SafeRasterImageService $images): Response | RedirectResponse
     {
+        if ($filename !== basename($filename)) {
+            abort(404);
+        }
 
-        $logentry = Actionlog::where('filename', $filename)->first();
+        $signatureLog = Actionlog::query()
+            ->where('target_type', User::class)
+            ->where('target_id', auth()->id())
+            ->where('accept_signature', $filename)
+            ->first();
 
-        // Make sure the user has permission to view this file
-        if (auth()->id() != $logentry->target_id) {
+        if (! $signatureLog) {
+            return redirect()->route('account')
+                ->with('error', trans('general.generic_model_not_found', ['model' => 'file']));
+        }
+
+        $path = 'private_uploads/signatures/'.$filename;
+        $disk = Storage::disk(config('filesystems.default'));
+
+        if (! $disk->exists($path)) {
+            return redirect()->route('account')->with('error', trans('general.file_does_not_exist'));
+        }
+
+        try {
+            $prepared = $images->prepareContents($disk->get($path), 'signature');
+        } catch (\Throwable) {
+            abort(404);
+        }
+
+        return response($prepared['contents'], 200, [
+            'Content-Type' => $prepared['mime'],
+            'Cache-Control' => 'private, no-store',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+
+
+    public function getStoredEula(string $filename): RedirectResponse | StreamedResponse
+    {
+        if ($filename !== basename($filename)) {
+            abort(404);
+        }
+
+        $logentry = Actionlog::query()
+            ->where('action_type', 'accepted')
+            ->where('filename', $filename)
+            ->where('target_type', User::class)
+            ->where('target_id', auth()->id())
+            ->first();
+
+        if (! $logentry) {
             return redirect()->route('account')->with('error', trans('general.generic_model_not_found', ['model' => 'file']));
         }
 
-        if (config('filesystems.default') == 's3_private') {
-            return redirect()->away(Storage::disk('s3_private')->temporaryUrl('private_uploads/eula-pdfs/'.$filename, now()->addMinutes(5)));
-        }
-
-        if (Storage::exists('private_uploads/eula-pdfs/'.$filename)) {
-            return response()->download(config('app.private_uploads').'/eula-pdfs/'.$filename);
+        $path = 'private_uploads/eula-pdfs/'.$filename;
+        $disk = Storage::disk(config('filesystems.default'));
+        if ($disk->exists($path)) {
+            return $disk->download($path, $filename, [
+                'Cache-Control' => 'private, no-store',
+                'Content-Type' => 'application/pdf',
+                'X-Content-Type-Options' => 'nosniff',
+            ]);
         }
 
         return redirect()->back()->with('error',  trans('general.file_does_not_exist'));

@@ -40,9 +40,10 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
     #[Test]
     public function userWithImportAccessoryPermissionCanImportAccessories(): void
     {
-        $this->actingAsForApi(User::factory()->canImport()->create());
+        $actor = User::factory()->canImport()->create();
+        $this->actingAsForApi($actor);
 
-        $import = Import::factory()->accessory()->create();
+        $import = Import::factory()->accessory()->create(['created_by' => $actor->id]);
 
         $this->importFileResponse(['import' => $import->id])->assertOk();
     }
@@ -259,9 +260,9 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
                 'messages' => [
                     '' => [
                         'Accessory' => [
-                            'name' => ['The name field is required.'],
-                            'qty' => ['The qty field must be at least 1.'],
-                            'category_id' => ['The category id field is required.']
+                            'name' => [trans('validation.required', ['attribute' => 'name'])],
+                            'qty' => [trans('validation.min.numeric', ['attribute' => 'qty', 'min' => 1])],
+                            'category_id' => [trans('validation.required', ['attribute' => 'category id'])]
                         ]
                     ]
                 ]
@@ -340,8 +341,8 @@ class ImportAccessoriesTest extends ImportDataTestCase implements TestsPermissio
                 'messages' => [
                     $importFileBuilder->firstRow()['itemName'] => [
                         'Accessory' => [
-                            'qty' => ['The qty field must be at least 1.'],
-                            'category_id' => ['The category id field is required.']
+                            'qty' => [trans('validation.min.numeric', ['attribute' => 'qty', 'min' => 1])],
+                            'category_id' => [trans('validation.required', ['attribute' => 'category id'])]
                         ]
                     ]
                 ]

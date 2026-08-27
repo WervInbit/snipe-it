@@ -16,16 +16,12 @@ class TestsActiveDrawersTest extends DuskTestCase
     {
         $baseUrl = rtrim(config('app.url'), '/');
 
-        if (parse_url($baseUrl, PHP_URL_HOST) !== 'dev.snipe.inbit') {
-            $this->markTestIncomplete('Configure APP_URL/DUSK_BASE_URL to https://dev.snipe.inbit for interactive tests.');
-        }
-
         $user = User::factory()->superuser()->create([
             'email' => 'dusk-tests-active@example.test',
             'username' => 'dusk-tests-active',
         ]);
 
-        $asset = Asset::query()->findOrFail(2);
+        $asset = Asset::factory()->create();
 
         $testType = TestType::factory()->create([
             'name' => 'Camera focus',
@@ -60,12 +56,12 @@ class TestsActiveDrawersTest extends DuskTestCase
         }
         $photoPathOne = $photoDirectory . '/dusk-photo-1.jpg';
         $photoPathTwo = $photoDirectory . '/dusk-photo-2.jpg';
-        $tinyImage = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PBqGiQAAAABJRU5ErkJggg==');
-        if (!file_exists($photoPathOne)) {
-            file_put_contents($photoPathOne, $tinyImage);
-        }
-        if (!file_exists($photoPathTwo)) {
-            file_put_contents($photoPathTwo, $tinyImage);
+        foreach ([$photoPathOne, $photoPathTwo] as $index => $photoPath) {
+            $image = imagecreatetruecolor(64, 64);
+            $color = imagecolorallocate($image, $index === 0 ? 30 : 80, 120, 180);
+            imagefill($image, 0, 0, $color);
+            imagejpeg($image, $photoPath, 90);
+            imagedestroy($image);
         }
 
         $passSelector = "{$cardSelector} [data-action=\"set-pass\"]";

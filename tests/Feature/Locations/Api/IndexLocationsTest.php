@@ -12,7 +12,9 @@ class IndexLocationsTest extends TestCase
 {
     public function testViewingLocationIndexRequiresAuthentication()
     {
-        $this->getJson(route('api.locations.index'))->assertRedirect();
+        User::factory()->create();
+
+        $this->getJson(route('api.locations.index'))->assertUnauthorized();
     }
 
     public function testViewingLocationIndexRequiresPermission()

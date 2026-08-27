@@ -195,6 +195,6 @@ class ConsumablePresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('consumables.show', e($this->name), $this->id);
+        return \App\Support\RouteLink::to('consumables.show', $this->name, $this->id);
     }
 }

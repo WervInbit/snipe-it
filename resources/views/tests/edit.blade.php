@@ -224,10 +224,10 @@
                             <textarea class="form-control note-input" rows="3" placeholder="{{ trans('general.add_note') }}">{{ $result->note }}</textarea>
                         </div>
 
-                        <input type="file" class="photo-input" accept="image/*" capture="environment" hidden>
+                        <input type="file" class="photo-input" accept="image/jpeg,image/png,image/gif" capture="environment" hidden>
                         <div class="photo-preview test-card__section" @if(!$result->photo_path) hidden @endif>
-                            @if($result->photo_path)
-                                <img src="/{{ $result->photo_path }}" alt="{{ trans('general.photo_added') }}" class="img-responsive">
+                            @if($result->photos->isNotEmpty())
+                                <img src="{{ route('test-results.photos.show', [$asset, $testRun, $result, $result->photos->last()]) }}" alt="{{ trans('general.photo_added') }}" class="img-responsive">
                             @endif
                             <button type="button" class="btn btn-link btn-sm remove-photo">{{ trans('button.remove') }}</button>
                         </div>

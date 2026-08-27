@@ -29,24 +29,6 @@ Route::group(
     
     function () {
         
-        Route::get('requested', [AssetsController::class, 'getRequestedIndex'])
-            ->name('assets.requested')
-            ->breadcrumbs(fn (Trail $trail) =>
-            $trail->parent('hardware.index')
-                ->push(trans('admin/hardware/general.requested'), route('assets.requested'))
-            );
-
-        Route::get('history', [AssetsController::class, 'getImportHistory'])
-            ->name('asset.import-history')
-            ->breadcrumbs(fn (Trail $trail) =>
-                $trail->parent('hardware.index')
-                ->push(trans('general.import-history'), route('asset.import-history'))
-            );
-
-        Route::post('history',
-            [AssetsController::class, 'postImportHistory']
-        )->name('asset.process-import-history');
-
         Route::get('bytag/{any?}',
             [AssetsController::class, 'getAssetByTag']
         )->where('any', '.*')->name('findbytag/hardware');
@@ -124,6 +106,8 @@ Route::group(
             ->name('test-results.update');
         Route::post('{asset}/tests/{testRun}/results/{result}', [TestResultController::class, 'partialUpdate'])
             ->name('test-results.partial-update');
+        Route::get('{asset}/tests/{testRun}/results/{result}/photos/{photo}', [TestResultController::class, 'showPhoto'])
+            ->name('test-results.photos.show');
         Route::post('{asset}/tests/{testRun}/results/{result}/photos/{photo}/promote', [TestResultController::class, 'promotePhoto'])
             ->name('test-results.photos.promote');
 
@@ -198,14 +182,18 @@ Route::group(
 Route::resource('hardware',
         AssetsController::class,
         ['middleware' => ['auth']
-])->parameters(['hardware' => 'asset'])->withTrashed();
+])->parameters(['hardware' => 'asset'])
+    ->where(['asset' => '[0-9]+'])
+    ->withTrashed();
 
 
 // Asset Maintenances
 Route::resource('maintenances',
     MaintenancesController::class, [
         'parameters' => ['maintenance' => 'maintenance', 'asset' => 'asset_id'],
-    ]);
+    ])
+    ->only(['index', 'show'])
+    ->where(['maintenance' => '[0-9]+']);
 
 Route::get('ht/{any?}',
     [AssetsController::class, 'getAssetByTag']

@@ -27,6 +27,30 @@ class DeleteUserTest extends TestCase
         $this->followRedirects($response)->assertSee(trans('general.notification_success'));
     }
 
+    public function testGranularUserDeleterCannotDeleteAnAdmin(): void
+    {
+        $actor = User::factory()->deleteUsers()->viewUsers()->create();
+        $target = User::factory()->admin()->create();
+
+        $this->assertHierarchyProtectedUserCannotBeDeleted($actor, $target);
+    }
+
+    public function testGranularUserDeleterCannotDeleteASuperuser(): void
+    {
+        $actor = User::factory()->deleteUsers()->viewUsers()->create();
+        $target = User::factory()->superuser()->create();
+
+        $this->assertHierarchyProtectedUserCannotBeDeleted($actor, $target);
+    }
+
+    public function testAdminCannotDeleteASuperuser(): void
+    {
+        $actor = User::factory()->admin()->create();
+        $target = User::factory()->superuser()->create();
+
+        $this->assertHierarchyProtectedUserCannotBeDeleted($actor, $target);
+    }
+
 
     public function testErrorReturnedIfUserDoesNotExist()
     {
@@ -43,9 +67,8 @@ class DeleteUserTest extends TestCase
         $response = $this->actingAs(User::factory()->deleteUsers()->viewUsers()->create())
             ->delete(route('users.destroy', $user->id))
             ->assertStatus(302)
-            ->assertRedirect(route('users.index'));
-
-          $this->followRedirects($response)->assertSee(trans('general.error'));
+            ->assertRedirect(route('users.index'))
+            ->assertSessionHasErrors();
     }
 
     public function testCanViewSoftDeletedUser()
@@ -183,14 +206,7 @@ class DeleteUserTest extends TestCase
     public function testDisallowUserDeletionIfTheyStillHaveAssets()
     {
         $user = User::factory()->create();
-        $asset = Asset::factory()->create();
-
-        $this->actingAs(User::factory()->checkoutAssets()->create())
-            ->post(route('hardware.checkout.store', $asset->id), [
-                'checkout_to_type' => 'user',
-                'assigned_user' => $user->id,
-                'name' => 'Changed Name',
-            ]);
+        Asset::factory()->assignedToUser($user)->create();
 
         $this->actingAs(User::factory()->deleteUsers()->viewUsers()->create())->assertFalse($user->isDeletable());
 
@@ -216,5 +232,13 @@ class DeleteUserTest extends TestCase
         $this->followRedirects($response)->assertSee('Error');
     }
 
+    private function assertHierarchyProtectedUserCannotBeDeleted(User $actor, User $target): void
+    {
+        $this->actingAs($actor)
+            ->delete(route('users.destroy', ['user' => $target->id]))
+            ->assertRedirect(route('users.index'))
+            ->assertSessionHas('error', trans('general.insufficient_permissions'));
 
+        $this->assertNotSoftDeleted($target);
+    }
 }

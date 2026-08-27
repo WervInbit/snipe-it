@@ -6,6 +6,8 @@ return [
     'deleted_label' => 'Verwijderd status label',
     'assoc_assets'	 => 'Dit statuslabel is tenminste met één asset gekoppeld en kan niet verwijderd worden. Zorg ervoor dat assets geen gebruik maken van dit statuslabel en probeer het nogmaals. ',
 
+    'semantic_fields_in_use' => 'De levenscyclusbetekenis en het statustype kunnen niet worden gewijzigd zolang assets dit label gebruiken. Verplaats die assets eerst naar een ander label.',
+
     'create' => [
         'error'   => 'Statuslabel is niet aangemaakt, probeer het nogmaals.',
         'success' => 'Statuslabel succesvol aangemaakt.',

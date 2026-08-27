@@ -11,6 +11,7 @@ use App\Models\ComponentStorageLocation;
 use App\Models\ModelNumber;
 use App\Models\ModelNumberComponentTemplate;
 use App\Models\User;
+use App\Presenters\ComponentPresenter;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -23,6 +24,22 @@ class ComponentBrowserWorkflowTest extends TestCase
         parent::setUp();
 
         $this->withoutMiddleware(VerifyCsrfToken::class);
+    }
+
+    public function testComponentIndexRendersTheSourceColumnWithoutLeakingATranslationKey(): void
+    {
+        $user = User::factory()->superuser()->create();
+
+        $this->actingAs($user)
+            ->get(route('components.index'))
+            ->assertOk()
+            ->assertDontSeeText('general.source');
+
+        $sourceColumn = collect(json_decode(ComponentPresenter::dataTableLayout(), true))
+            ->firstWhere('field', 'source_asset');
+
+        $this->assertSame(trans('general.source'), $sourceColumn['title'] ?? null);
+        $this->assertNotSame('general.source', $sourceColumn['title'] ?? null);
     }
 
     public function testManualCreateFormCreatesVisibleLooseComponent(): void
@@ -412,7 +429,7 @@ class ComponentBrowserWorkflowTest extends TestCase
         $this->actingAs($user)
             ->get(route('components.show', $component))
             ->assertOk()
-            ->assertSeeText('Broken');
+            ->assertSeeText('Damaged');
     }
 
     public function testWebTrayInstallRejectsComponentsHeldByAnotherUser(): void

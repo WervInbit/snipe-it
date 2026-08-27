@@ -6,6 +6,7 @@ use App\Mail\CheckoutConsumableMail;
 use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\Component;
+use App\Models\Company;
 use App\Models\Consumable;
 use App\Models\User;
 use App\Notifications\CheckoutConsumableNotification;
@@ -148,6 +149,24 @@ class ConsumableCheckoutTest extends TestCase
             ])
             ->assertStatus(302)
             ->assertRedirect(route('users.show', $user));
+    }
+
+    public function testConsumableCannotBeCheckedOutAcrossCompanyBoundary(): void
+    {
+        $this->settings->enableMultipleFullCompanySupport();
+        $itemCompany = Company::factory()->create();
+        $targetCompany = Company::factory()->create();
+        $consumable = Consumable::factory()->for($itemCompany)->create();
+        $target = User::factory()->for($targetCompany)->create();
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->from(route('consumables.checkout.show', $consumable))
+            ->post(route('consumables.checkout.store', $consumable), [
+                'assigned_to' => $target->id,
+            ])
+            ->assertSessionHas('error', trans('general.error_user_company'));
+
+        $this->assertSame(0, $consumable->consumableAssignments()->count());
     }
 
 }

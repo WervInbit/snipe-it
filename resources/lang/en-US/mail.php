@@ -2,6 +2,9 @@
 
 return [
 
+    'delivery_disabled' => 'Outgoing email is disabled for this environment and has not been validated for V1.',
+    'password_reset_disabled' => 'Password reset email is unavailable. Contact an administrator, who can set a temporary password through the protected user editor.',
+
     'Accessory_Checkin_Notification' => 'Accessory checked in',
     'Accessory_Checkout_Notification' => 'Accessory checked out',
     'Asset_Checkin_Notification' => 'Asset checked in',
@@ -71,7 +74,7 @@ return [
     'license_expiring_alert' => 'There is :count license expiring in the next :threshold days.|There are :count licenses expiring in the next :threshold days.',
     'link_to_update_password' => 'Please click on the following link to update your :web password:',
     'login' => 'Login',
-    'login_first_admin' => 'Login to your new Snipe-IT installation using the credentials below:',
+    'login_first_admin' => 'Log in to your new Inbit Device Refurbishment Platform installation using the credentials below:',
     'low_inventory_alert' => 'There is :count item that is below minimum inventory or will soon be low.|There are :count items that are below minimum inventory or will soon be low.',
     'min_QTY' => 'Min QTY',
     'name' => 'Name',
@@ -88,12 +91,12 @@ return [
     'reset_password' => 'Click here to reset your password:',
     'rights_reserved' => 'All rights reserved.',
     'serial' => 'Serial',
-    'snipe_webhook_test' => 'Snipe-IT Integration Test',
-    'snipe_webhook_summary' => 'Snipe-IT Integration Test Summary',
+    'snipe_webhook_test' => ':app Integration Test',
+    'snipe_webhook_summary' => ':app Integration Test Summary',
     'supplier' => 'Supplier',
     'tag' => 'Tag',
-    'test_email' => 'Test Email from Snipe-IT',
-    'test_mail_text' => 'This is a test from the Snipe-IT Asset Management System. If you got this, mail is working :)',
+    'test_email' => 'Test Email from :app',
+    'test_mail_text' => 'This is a test from :app. If you received it, email delivery is working.',
     'the_following_item' => 'The following item has been checked in: ',
     'to_reset' => 'To reset your :web password, complete this form:',
     'type' => 'Type',
@@ -104,6 +107,6 @@ return [
     'welcome' => 'Welcome :name',
     'welcome_to' => 'Welcome to :web!',
     'your_assets' => 'View Your Assets',
-    'your_credentials' => 'Your Snipe-IT credentials',
+    'your_credentials' => 'Your Inbit Device Refurbishment Platform credentials',
     'mail_sent' => 'Mail sent successfully!',
 ];

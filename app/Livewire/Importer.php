@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\CustomField;
 use App\Models\Import;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
@@ -220,32 +221,10 @@ class Importer extends Component
             'order_number' => trans('general.order_number'),
             'purchase_cost' => trans('general.purchase_cost'),
             'purchase_date' => trans('general.purchase_date'),
-            'requestable' => trans('admin/hardware/general.requestable'),
             'serial' => trans('general.serial_number'),
             'status' => trans('general.status'),
             'supplier' => trans('general.supplier'),
             'warranty_months' => trans('admin/hardware/form.warranty'),
-            /**
-             * Checkout fields:
-             * Assets can be checked out to other assets, people, or locations, but we currently
-             * only support checkout to people and locations in the importer
-             **/
-            'checkout_class' => trans('general.importer.checkout_type'),
-            'first_name' => trans('general.importer.checked_out_to_first_name'),
-            'last_name' => trans('general.importer.checked_out_to_last_name'),
-            'full_name' => trans('general.importer.checked_out_to_fullname'),
-            'email' => trans('general.importer.checked_out_to_email'),
-            'username' => trans('general.importer.checked_out_to_username'),
-            'checkout_location' => trans('general.importer.checkout_location'),
-            /**
-             * These are here so users can import history, to replace the dinosaur that
-             * was the history importer
-             */
-            'last_checkin' => trans('admin/hardware/table.last_checkin_date'),
-            'last_checkout' => trans('admin/hardware/table.checkout_date'),
-            'expected_checkin' => trans('admin/hardware/form.expected_checkin'),
-            'last_audit_date' => trans('general.last_audit'),
-            'next_audit_date' => trans('general.next_audit_date'),
         ];
 
         $this->consumables_fields = [
@@ -541,9 +520,10 @@ class Importer extends Component
                     'Warranty',
                     'Warranty Months'
                 ],
-            'qty' =>
+            'quantity' =>
                 [
                     'QTY',
+                    'Qty',
                     'Quantity'
                 ],
             'zip' =>
@@ -558,16 +538,6 @@ class Importer extends Component
                     'Minimum Amount',
                     'Min Quantity',
                     'Minimum Quantity',
-                ],
-            'next_audit_date' =>
-                [
-                    'Next Audit',
-                ],
-            'last_checkout' =>
-                [
-                    'Last Checkout',
-                    'Last Checkout Date',
-                    'Checkout Date',
                 ],
             'address2' =>
                 [
@@ -636,7 +606,14 @@ class Importer extends Component
     {
         $this->authorize('import');
 
-        $import = Import::find($id);
+        if (config('app.lock_passwords')) {
+            $this->message = trans('general.feature_disabled');
+            $this->message_type = 'danger';
+
+            return;
+        }
+
+        $import = $this->importsQuery()->find($id);
 
         // Check that the import wasn't deleted after while page was already loaded...
         // @todo: next up...handle the file being missing for other interactions...
@@ -672,13 +649,18 @@ class Importer extends Component
     #[Computed]
     public function files()
     {
-        return Import::orderBy('id', 'desc')->get();
+        return $this->importsQuery()->orderBy('id', 'desc')->get();
     }
 
     #[Computed]
     public function activeFile()
     {
-        return Import::find($this->activeFileId);
+        return $this->importsQuery()->find($this->activeFileId);
+    }
+
+    protected function importsQuery(): Builder
+    {
+        return Import::query()->visibleTo(auth()->user());
     }
 
     public function render()

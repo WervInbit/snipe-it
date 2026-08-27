@@ -7,13 +7,18 @@ use App\Http\Controllers\Controller;
 use App\Models\AssetModel;
 use App\Models\ModelNumber;
 use App\Models\ModelNumberImage;
+use App\Services\SafeRasterImageService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class ModelNumberImagesController extends Controller
 {
+    public function __construct(
+        private SafeRasterImageService $rasterImages,
+    ) {
+    }
+
     public function index(ModelNumber $modelNumber): JsonResponse
     {
         $this->authorize('view', AssetModel::class);
@@ -47,19 +52,28 @@ class ModelNumberImagesController extends Controller
         ]);
 
         $file = $request->file('image');
-        $filename = $modelNumber->id.'_'.Str::uuid().'.'.$file->getClientOriginalExtension();
-        $path = $file->storeAs('model_numbers/'.$modelNumber->id, $filename, 'public');
+        $storedImage = $this->rasterImages->storePublic(
+            $file,
+            'model_numbers/'.$modelNumber->id,
+            $modelNumber->id.'_'
+        );
 
         $maxSortOrder = $modelNumber->images()->max('sort_order');
         $sortOrder = $request->filled('sort_order')
             ? (int) $request->input('sort_order')
             : ($maxSortOrder === null ? 0 : ((int) $maxSortOrder + 1));
 
-        $image = $modelNumber->images()->create([
-            'file_path' => $path,
-            'caption' => $request->input('caption'),
-            'sort_order' => $sortOrder,
-        ]);
+        try {
+            $image = $modelNumber->images()->create([
+                'file_path' => $storedImage['path'],
+                'caption' => $request->input('caption'),
+                'sort_order' => $sortOrder,
+            ]);
+        } catch (\Throwable $e) {
+            Storage::disk('public')->delete($storedImage['path']);
+
+            throw $e;
+        }
 
         return response()->json(Helper::formatStandardApiResponse('success', [
             'id' => (int) $image->id,
@@ -84,12 +98,19 @@ class ModelNumberImagesController extends Controller
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
 
-        if ($request->hasFile('image')) {
-            Storage::disk('public')->delete($modelNumberImage->file_path);
+        $newPath = null;
+        $oldPath = null;
 
+        if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $filename = $modelNumber->id.'_'.Str::uuid().'.'.$file->getClientOriginalExtension();
-            $modelNumberImage->file_path = $file->storeAs('model_numbers/'.$modelNumber->id, $filename, 'public');
+            $storedImage = $this->rasterImages->storePublic(
+                $file,
+                'model_numbers/'.$modelNumber->id,
+                $modelNumber->id.'_'
+            );
+            $oldPath = $modelNumberImage->file_path;
+            $newPath = $storedImage['path'];
+            $modelNumberImage->file_path = $newPath;
         }
 
         if ($request->exists('caption')) {
@@ -100,7 +121,19 @@ class ModelNumberImagesController extends Controller
             $modelNumberImage->sort_order = (int) $request->input('sort_order');
         }
 
-        $modelNumberImage->save();
+        try {
+            $modelNumberImage->save();
+        } catch (\Throwable $e) {
+            if ($newPath) {
+                Storage::disk('public')->delete($newPath);
+            }
+
+            throw $e;
+        }
+
+        if ($oldPath) {
+            Storage::disk('public')->delete($oldPath);
+        }
 
         return response()->json(Helper::formatStandardApiResponse('success', [
             'id' => (int) $modelNumberImage->id,
@@ -119,8 +152,9 @@ class ModelNumberImagesController extends Controller
 
         $this->authorize('update', AssetModel::class);
 
-        Storage::disk('public')->delete($modelNumberImage->file_path);
+        $path = $modelNumberImage->file_path;
         $modelNumberImage->delete();
+        Storage::disk('public')->delete($path);
 
         return response()->json(Helper::formatStandardApiResponse('success', null, trans('general.saved')));
     }

@@ -156,7 +156,7 @@ class Saml
         $setting = Setting::getSettings();
         $settings = [];
 
-        $this->_enabled = $setting->saml_enabled == '1';
+        $this->_enabled = $setting?->saml_enabled == '1';
 
         if ($this->isEnabled()) {
             //Let onelogin/php-saml know to use 'X-Forwarded-*' headers if it is from a trusted proxy
@@ -313,7 +313,13 @@ class Saml
         $this->saveDataToSession($data);
         $this->loadDataFromSession();
         $username = $this->getUsername();
-        return User::where('username', '=', $username)->whereNull('deleted_at')->where('activated', '=', '1')->first();
+
+        $user = User::where('username', '=', $username)
+            ->whereNull('deleted_at')
+            ->where('activated', '=', '1')
+            ->first();
+
+        return User::verifyExactUsernameMatch($user, (string) $username);
     }
 
     /**

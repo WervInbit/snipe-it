@@ -517,7 +517,7 @@ class UserPresenter extends Presenter
      */
     public function nameUrl()
     {
-        return (string) link_to_route('users.show', $this->getFullNameAttribute(), $this->id);
+        return \App\Support\RouteLink::to('users.show', $this->getFullNameAttribute(), $this->id);
     }
 
     /**

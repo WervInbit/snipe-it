@@ -124,6 +124,10 @@
 
         <section class="collapse testing-drawer" id="photos-{{ $result['id'] }}" data-role="drawer-photos">
             <div class="testing-drawer__body">
+                <div class="alert alert-info py-2 small" role="note">
+                    <i class="fas fa-lock" aria-hidden="true"></i>
+                    {{ trans('tests.evidence_privacy_notice') }}
+                </div>
                 <div class="d-flex align-items-center gap-2 flex-nowrap overflow-auto" data-photo-gallery>
                     @forelse($photos as $photo)
                         <div class="testing-photos-thumb" data-photo-node="true" data-photo-id="{{ $photo['id'] }}">
@@ -142,7 +146,7 @@
                             <i class="fas fa-camera me-1" aria-hidden="true"></i>{{ trans('tests.add_photo_cta') }}
                             <input type="file"
                                    class="testing-photo-input d-none"
-                                   accept="image/*"
+                                   accept="image/jpeg,image/png,image/gif"
                                    data-action="upload-photo"
                                    multiple>
                         </label>

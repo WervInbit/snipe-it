@@ -7,13 +7,12 @@ use App\Models\License;
 use App\Models\LicenseSeat;
 use App\Models\Supplier;
 use App\Models\User;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
-class LicenseSeeder extends Seeder
+class LicenseSeeder extends DestructiveFixtureSeeder
 {
-    public function run()
+    protected function seedFixtures(): void
     {
         Schema::disableForeignKeyConstraints();
         License::truncate();

@@ -50,6 +50,7 @@ class StartNewTestRunTest extends TestCase
         $response->assertRedirect(route('test-results.active', ['asset' => $asset->id, 'run' => $run->id]));
         $this->assertNotNull($run->started_at);
         $this->assertEquals($profile->id, $run->workflow_profile_id);
+        $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', (string) $run->readiness_context_hash);
         $this->assertCount($types->count(), $run->results);
         $this->assertEquals($asset->model_number_id, $run->model_number_id);
         $run->results->each(function ($result) {

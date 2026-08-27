@@ -9,6 +9,10 @@ use App\Models\Manufacturer;
 
 trait ProvidesDeviceCatalogData
 {
+    protected const MODEL_NUMBER_VERIFICATION_VERIFIED = 'verified_catalog_identifier';
+
+    protected const MODEL_NUMBER_VERIFICATION_DEMO_PLACEHOLDER = 'unverified_demo_placeholder';
+
     /**
      * Attribute definitions used across laptops/phones.
      *
@@ -695,6 +699,43 @@ trait ProvidesDeviceCatalogData
     }
 
     /**
+     * Catalog presets allowed for the current seed context.
+     *
+     * Synthesized identifiers are available only to explicitly opted-in demo
+     * seed flows in local/testing environments. Production and normal additive
+     * seed runs fail closed if verification metadata is missing or unrecognized.
+     *
+     * @return array<string,array<string,mixed>>
+     */
+    protected function seedableModelBlueprints(): array
+    {
+        $includeDemoPlaceholders = app()->environment(['local', 'testing'])
+            && config('demo.allow_disposable_data_seeding') === true;
+
+        return array_filter(
+            $this->modelBlueprints(),
+            static function (array $config) use ($includeDemoPlaceholders): bool {
+                $status = $config['model_number_verification'] ?? null;
+
+                return $status === self::MODEL_NUMBER_VERIFICATION_VERIFIED
+                    || ($includeDemoPlaceholders
+                        && $status === self::MODEL_NUMBER_VERIFICATION_DEMO_PLACEHOLDER);
+            }
+        );
+    }
+
+    protected function modelNumberCodeIsSeedable(string $code): bool
+    {
+        foreach ($this->seedableModelBlueprints() as $config) {
+            if (($config['code'] ?? null) === $code) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Catalog attribute keys intentionally removed from the clean-start seed.
      *
      * Keep this list explicit so future reliance on an old key can be audited
@@ -847,6 +888,7 @@ trait ProvidesDeviceCatalogData
             'HP ProBook 450 G8' => [
                 'factory' => fn () => $this->catalogAssetModel('HP ProBook 450 G8', 'Laptops', 'HP', '36'),
                 'code' => '2E9F8EA#ABH',
+                'model_number_verification' => self::MODEL_NUMBER_VERIFICATION_VERIFIED,
                 'label' => 'HP ProBook 450 G8 - i5-1135G7 - 8GB - 256GB',
                 'attributes' => [
                     'release_year' => 2021,
@@ -896,6 +938,7 @@ trait ProvidesDeviceCatalogData
             'HP ProBook 450 G7' => [
                 'factory' => fn () => $this->catalogAssetModel('HP ProBook 450 G7', 'Laptops', 'HP', '36'),
                 'code' => '8VU81EA#ABH',
+                'model_number_verification' => self::MODEL_NUMBER_VERIFICATION_VERIFIED,
                 'label' => 'HP ProBook 450 G7 - i5-10210U - 8GB - 256GB',
                 'attributes' => [
                     'release_year' => 2020,
@@ -945,6 +988,7 @@ trait ProvidesDeviceCatalogData
             'HP ProBook 450 G6' => [
                 'factory' => fn () => $this->catalogAssetModel('HP ProBook 450 G6', 'Laptops', 'HP', '36'),
                 'code' => '5PP65EA#ABH',
+                'model_number_verification' => self::MODEL_NUMBER_VERIFICATION_VERIFIED,
                 'label' => 'HP ProBook 450 G6 - i5-8265U - 8GB - 256GB',
                 'attributes' => [
                     'release_year' => 2019,
@@ -995,6 +1039,7 @@ trait ProvidesDeviceCatalogData
             'HP ProBook 430 G7' => [
                 'factory' => fn () => $this->catalogAssetModel('HP ProBook 430 G7', 'Laptops', 'HP', '36'),
                 'code' => '8VT42EA#ABH',
+                'model_number_verification' => self::MODEL_NUMBER_VERIFICATION_VERIFIED,
                 'label' => 'HP ProBook 430 G7 - i5-10210U - 8GB - 256GB',
                 'attributes' => [
                     'release_year' => 2020,
@@ -1044,6 +1089,7 @@ trait ProvidesDeviceCatalogData
             'HP ProBook 430 G6' => [
                 'factory' => fn () => $this->catalogAssetModel('HP ProBook 430 G6', 'Laptops', 'HP', '36'),
                 'code' => '5TK76EA#ABH',
+                'model_number_verification' => self::MODEL_NUMBER_VERIFICATION_VERIFIED,
                 'label' => 'HP ProBook 430 G6 - i5 - 8GB - 128GB',
                 'attributes' => [
                     'release_year' => 2019,
@@ -1093,7 +1139,8 @@ trait ProvidesDeviceCatalogData
             'HP ProBook 430 G3' => [
                 'factory' => fn () => $this->catalogAssetModel('HP ProBook 430 G3', 'Laptops', 'HP', '24'),
                 'code' => 'HP-430G3-I3-4-128',
-                'label' => 'HP ProBook 430 G3 - i3 - 4GB - 128GB',
+                'model_number_verification' => self::MODEL_NUMBER_VERIFICATION_DEMO_PLACEHOLDER,
+                'label' => 'DEMO placeholder - HP ProBook 430 G3 - i3 - 4GB - 128GB',
                 'attributes' => [
                     'release_year' => 2016,
                     'cpu_model' => 'Intel Core i3-6100U',
@@ -1142,6 +1189,7 @@ trait ProvidesDeviceCatalogData
             'Samsung Galaxy A5' => [
                 'factory' => fn () => $this->catalogAssetModel('Samsung Galaxy A5', 'Mobile Phones', 'Samsung', '18'),
                 'code' => 'SM-A520F',
+                'model_number_verification' => self::MODEL_NUMBER_VERIFICATION_VERIFIED,
                 'label' => 'Samsung Galaxy A5 (2017) - 32GB - Zwart',
                 'attributes' => [
                     'release_year' => 2017,
@@ -1180,6 +1228,7 @@ trait ProvidesDeviceCatalogData
             'Samsung Galaxy A51' => [
                 'factory' => fn () => $this->catalogAssetModel('Samsung Galaxy A51', 'Mobile Phones', 'Samsung', '18'),
                 'code' => 'SM-A515F/DSN-4GB-128GB',
+                'model_number_verification' => self::MODEL_NUMBER_VERIFICATION_VERIFIED,
                 'label' => 'Samsung Galaxy A51 - SM-A515F/DSN - 4GB - 128GB',
                 'attributes' => [
                     'release_year' => 2020,
@@ -1205,7 +1254,8 @@ trait ProvidesDeviceCatalogData
             'Microsoft Surface Pro 4' => [
                 'factory' => fn () => $this->catalogAssetModel('Microsoft Surface Pro 4', 'Laptops', 'Microsoft', '30'),
                 'code' => 'MS-SURFPRO4-I5-4-128',
-                'label' => 'Microsoft Surface Pro 4 - i5 - 4GB - 128GB',
+                'model_number_verification' => self::MODEL_NUMBER_VERIFICATION_DEMO_PLACEHOLDER,
+                'label' => 'DEMO placeholder - Microsoft Surface Pro 4 - i5 - 4GB - 128GB',
                 'attributes' => [
                     'release_year' => 2015,
                     'cpu_model' => 'Intel Core i5-6300U',
@@ -1254,7 +1304,8 @@ trait ProvidesDeviceCatalogData
             'Microsoft Surface Pro 5' => [
                 'factory' => fn () => $this->catalogAssetModel('Microsoft Surface Pro 5', 'Laptops', 'Microsoft', '30'),
                 'code' => 'MS-SURFPRO5-I5-4-128',
-                'label' => 'Microsoft Surface Pro 5 - i5 - 4GB - 128GB',
+                'model_number_verification' => self::MODEL_NUMBER_VERIFICATION_DEMO_PLACEHOLDER,
+                'label' => 'DEMO placeholder - Microsoft Surface Pro 5 - i5 - 4GB - 128GB',
                 'attributes' => [
                     'release_year' => 2017,
                     'cpu_model' => 'Intel Core i5-7300U',
@@ -1303,7 +1354,8 @@ trait ProvidesDeviceCatalogData
             'iPhone 12' => [
                 'factory' => fn () => $this->catalogAssetModel('iPhone 12', 'Mobile Phones', 'Apple', '12'),
                 'code' => 'IP12-128-BLUE',
-                'label' => 'iPhone 12 – 128GB – Simlockvrij',
+                'model_number_verification' => self::MODEL_NUMBER_VERIFICATION_DEMO_PLACEHOLDER,
+                'label' => 'DEMO placeholder - iPhone 12 - 128GB - Simlockvrij',
                 'attributes' => [
                     'release_year' => 2020,
                     'ram_size_gb' => 4,
@@ -1342,7 +1394,8 @@ trait ProvidesDeviceCatalogData
             'Pixel 8 Pro' => [
                 'factory' => fn () => $this->catalogAssetModel('Pixel 8 Pro', 'Mobile Phones', 'Google'),
                 'code' => 'PIXEL8PRO-256-OBSIDIAN',
-                'label' => 'Pixel 8 Pro – 256GB – Obsidian',
+                'model_number_verification' => self::MODEL_NUMBER_VERIFICATION_DEMO_PLACEHOLDER,
+                'label' => 'DEMO placeholder - Pixel 8 Pro - 256GB - Obsidian',
                 'attributes' => [
                     'release_year' => 2023,
                     'ram_size_gb' => 12,

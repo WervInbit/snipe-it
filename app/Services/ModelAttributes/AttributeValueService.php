@@ -379,7 +379,7 @@ class AttributeValueService
     }
 
 
-    private function fail(AttributeDefinition $definition, string $message)
+    private function fail(AttributeDefinition $definition, string $message): never
     {
         throw ValidationException::withMessages([
             $this->contextKey . '.' . $definition->id => [$message],

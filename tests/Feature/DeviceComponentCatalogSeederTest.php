@@ -3,25 +3,42 @@
 namespace Tests\Feature;
 
 use App\Models\AttributeDefinition;
+use App\Models\AttributeOption;
 use App\Models\AssetModel;
 use App\Models\ComponentDefinition;
+use App\Models\ComponentDefinitionAttribute;
+use App\Models\ComponentDefinitionSubcomponentTemplate;
 use App\Models\Group;
 use App\Models\ModelNumber;
+use App\Models\ModelNumberAttribute;
+use App\Models\ModelNumberComponentTemplate;
 use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
+use App\Models\TestType;
+use App\Models\WorkflowProfile;
+use App\Models\WorkflowProfileItem;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\DeviceAttributeSeeder;
 use Database\Seeders\DeviceComponentCatalogSeeder;
 use Database\Seeders\DevicePresetSeeder;
 use Database\Seeders\ProductionFoundationSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class DeviceComponentCatalogSeederTest extends TestCase
 {
     use RefreshDatabase;
+
+    private const UNVERIFIED_DEMO_MODEL_NUMBERS = [
+        'HP-430G3-I3-4-128',
+        'MS-SURFPRO4-I5-4-128',
+        'MS-SURFPRO5-I5-4-128',
+        'IP12-128-BLUE',
+        'PIXEL8PRO-256-OBSIDIAN',
+    ];
 
     public function test_default_database_seeder_creates_production_catalog_without_demo_users_or_companies(): void
     {
@@ -30,7 +47,11 @@ class DeviceComponentCatalogSeederTest extends TestCase
         $this->seed(DatabaseSeeder::class);
 
         $this->assertDatabaseHas('settings', [
-            'site_name' => 'Snipe-IT',
+            'site_name' => 'Inbit Device Refurbishment',
+            'alert_email' => null,
+            'logo' => null,
+            'brand' => 1,
+            'support_footer' => 'off',
         ]);
         $this->assertSame(0, DB::table('users')->count());
         $this->assertSame(0, DB::table('companies')->count());
@@ -89,6 +110,240 @@ class DeviceComponentCatalogSeederTest extends TestCase
             'TechCycle Partners',
             'Renewed Supply Co.',
         ])->count());
+    }
+
+    public function test_production_foundation_excludes_unverified_demo_model_numbers(): void
+    {
+        Config::set('demo.allow_disposable_data_seeding', false);
+
+        $this->seed(ProductionFoundationSeeder::class);
+
+        $this->assertDatabaseHas('model_numbers', ['code' => '2E9F8EA#ABH']);
+        $this->assertDatabaseHas('model_numbers', ['code' => 'SM-A520F']);
+
+        foreach (self::UNVERIFIED_DEMO_MODEL_NUMBERS as $code) {
+            $this->assertDatabaseMissing('model_numbers', ['code' => $code]);
+        }
+    }
+
+    public function test_local_disposable_opt_in_includes_labeled_demo_model_numbers_and_templates(): void
+    {
+        Config::set('demo.allow_disposable_data_seeding', true);
+
+        $this->seed(DeviceAttributeSeeder::class);
+        $this->seed(DevicePresetSeeder::class);
+        $this->seed(DeviceComponentCatalogSeeder::class);
+
+        foreach (self::UNVERIFIED_DEMO_MODEL_NUMBERS as $code) {
+            $modelNumber = ModelNumber::query()->where('code', $code)->firstOrFail();
+
+            $this->assertStringStartsWith('DEMO placeholder - ', (string) $modelNumber->label);
+            $this->assertTrue($modelNumber->componentTemplates()->exists(), $code);
+        }
+    }
+
+    public function test_production_catalog_rerun_removes_only_seed_owned_templates_from_old_demo_placeholder(): void
+    {
+        Config::set('demo.allow_disposable_data_seeding', true);
+
+        $this->seed(DeviceAttributeSeeder::class);
+        $this->seed(DevicePresetSeeder::class);
+        $this->seed(DeviceComponentCatalogSeeder::class);
+
+        $modelNumber = ModelNumber::query()
+            ->where('code', 'PIXEL8PRO-256-OBSIDIAN')
+            ->firstOrFail();
+        $seedOwnedTemplateIds = $modelNumber->componentTemplates()
+            ->get()
+            ->filter(fn (ModelNumberComponentTemplate $template): bool => (
+                $template->metadata_json['catalog_seed_class'] ?? null
+            ) === DeviceComponentCatalogSeeder::class)
+            ->pluck('id')
+            ->all();
+        $operatorDefinition = ComponentDefinition::factory()->create([
+            'name' => 'Operator Pixel Accessory',
+            'metadata_json' => ['owner' => 'operator'],
+        ]);
+        $operatorTemplate = ModelNumberComponentTemplate::query()->create([
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $operatorDefinition->id,
+            'expected_name' => 'Operator Pixel Accessory',
+            'slot_name' => 'operator-pixel-accessory',
+            'expected_qty' => 1,
+            'is_required' => false,
+            'sort_order' => 65000,
+            'metadata_json' => ['owner' => 'operator'],
+        ]);
+        $operatorAttribute = AttributeDefinition::query()->create([
+            'key' => 'operator_pixel_note',
+            'label' => 'Operator Pixel Note',
+            'datatype' => AttributeDefinition::DATATYPE_TEXT,
+            'required_for_category' => false,
+            'allow_custom_values' => true,
+            'allow_asset_override' => true,
+            'component_spec_display_mode' => AttributeDefinition::COMPONENT_SPEC_DISPLAY_VALUE_LABELS,
+        ]);
+        $operatorValue = ModelNumberAttribute::query()->create([
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $operatorAttribute->id,
+            'value' => 'reviewed by operator',
+            'raw_value' => 'reviewed by operator',
+            'display_order' => 65000,
+        ]);
+
+        $this->assertNotEmpty($seedOwnedTemplateIds);
+
+        Config::set('demo.allow_disposable_data_seeding', false);
+        $this->seed(DeviceComponentCatalogSeeder::class);
+
+        $this->assertDatabaseHas('model_numbers', ['id' => $modelNumber->id]);
+        $this->assertDatabaseHas('model_number_component_templates', ['id' => $operatorTemplate->id]);
+        $this->assertDatabaseHas('model_number_attributes', ['id' => $operatorValue->id]);
+        $this->assertSame(
+            0,
+            ModelNumberComponentTemplate::query()->whereIn('id', $seedOwnedTemplateIds)->count()
+        );
+    }
+
+    public function test_production_foundation_rerun_preserves_operator_catalog_additions(): void
+    {
+        Setting::query()->delete();
+        $this->seed(ProductionFoundationSeeder::class);
+
+        $enumDefinition = AttributeDefinition::query()
+            ->where('datatype', AttributeDefinition::DATATYPE_ENUM)
+            ->firstOrFail();
+        $operatorOption = AttributeOption::query()->create([
+            'attribute_definition_id' => $enumDefinition->id,
+            'value' => 'operator_value',
+            'label' => 'Operator Value',
+            'active' => true,
+            'sort_order' => 65000,
+        ]);
+        $operatorDefinition = AttributeDefinition::query()->create([
+            'key' => 'operator_custom_spec',
+            'label' => 'Operator Custom Spec',
+            'datatype' => AttributeDefinition::DATATYPE_TEXT,
+            'required_for_category' => false,
+            'allow_custom_values' => true,
+            'allow_asset_override' => true,
+            'component_spec_display_mode' => AttributeDefinition::COMPONENT_SPEC_DISPLAY_VALUE_LABELS,
+        ]);
+
+        $modelNumber = ModelNumber::query()->firstOrFail();
+        $operatorPreset = $modelNumber->model->modelNumbers()->create([
+            'code' => 'OPERATOR-CUSTOM-PRESET',
+            'label' => 'Operator Custom Preset',
+        ]);
+        $modelNumber->model->forceFill([
+            'primary_model_number_id' => $operatorPreset->id,
+            'model_number' => $operatorPreset->code,
+        ])->save();
+        $operatorModelValue = ModelNumberAttribute::query()->create([
+            'model_number_id' => $modelNumber->id,
+            'attribute_definition_id' => $operatorDefinition->id,
+            'value' => 'operator-model-value',
+            'raw_value' => 'operator-model-value',
+            'display_order' => 65000,
+        ]);
+
+        $seededComponentDefinition = ComponentDefinition::query()
+            ->whereHas('expectedTemplates', fn ($query) => $query->where('model_number_id', $modelNumber->id))
+            ->firstOrFail();
+        $operatorContribution = ComponentDefinitionAttribute::query()->create([
+            'component_definition_id' => $seededComponentDefinition->id,
+            'attribute_definition_id' => $operatorDefinition->id,
+            'value' => 'operator-component-value',
+            'raw_value' => 'operator-component-value',
+            'resolves_to_spec' => true,
+            'include_in_component_label' => false,
+            'sort_order' => 65000,
+        ]);
+        $operatorChildDefinition = ComponentDefinition::factory()->create([
+            'name' => 'Operator Child Component',
+            'metadata_json' => ['owner' => 'operator'],
+        ]);
+        $operatorSubcomponent = ComponentDefinitionSubcomponentTemplate::query()->create([
+            'parent_component_definition_id' => $seededComponentDefinition->id,
+            'child_component_definition_id' => $operatorChildDefinition->id,
+            'expected_name' => 'Operator Child Component',
+            'expected_qty' => 1,
+            'is_required' => false,
+            'sort_order' => 65000,
+            'metadata_json' => ['owner' => 'operator'],
+        ]);
+        $operatorExpectedComponent = ModelNumberComponentTemplate::query()->create([
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $operatorChildDefinition->id,
+            'expected_name' => 'Operator Optional Component',
+            'slot_name' => 'operator-slot',
+            'expected_qty' => 1,
+            'is_required' => false,
+            'sort_order' => 65000,
+            'metadata_json' => ['owner' => 'operator'],
+        ]);
+
+        $operatorWorkflowItem = TestType::query()->create([
+            'name' => 'Operator Workflow Item',
+            'slug' => 'operator-workflow-item',
+            'display_order' => 65000,
+            'applies_to_all' => true,
+            'is_required' => false,
+            'result_label_mode' => WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE,
+        ]);
+        $standardProfile = WorkflowProfile::query()
+            ->where('slug', 'standard-diagnostics')
+            ->firstOrFail();
+        $operatorProfileItem = WorkflowProfileItem::query()->create([
+            'workflow_profile_id' => $standardProfile->id,
+            'workflow_item_id' => $operatorWorkflowItem->id,
+            'sort_order' => 65000,
+            'is_required' => false,
+            'result_label_mode' => WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE,
+        ]);
+        $operatorProfile = WorkflowProfile::query()->create([
+            'name' => 'Operator Profile',
+            'slug' => 'operator-profile',
+            'description' => 'Maintained by an administrator.',
+            'is_active' => true,
+            'is_default' => false,
+            'blocks_sale_readiness' => false,
+            'display_order' => 65000,
+        ]);
+        $operatorProfileOwnItem = WorkflowProfileItem::query()->create([
+            'workflow_profile_id' => $operatorProfile->id,
+            'workflow_item_id' => $operatorWorkflowItem->id,
+            'sort_order' => 0,
+            'is_required' => false,
+            'result_label_mode' => WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE,
+        ]);
+
+        $this->seed(ProductionFoundationSeeder::class);
+
+        $this->assertDatabaseHas('attribute_options', [
+            'id' => $operatorOption->id,
+            'active' => true,
+            'label' => 'Operator Value',
+        ]);
+        $this->assertDatabaseHas('attribute_definitions', ['id' => $operatorDefinition->id]);
+        $this->assertDatabaseHas('model_numbers', [
+            'id' => $operatorPreset->id,
+            'code' => 'OPERATOR-CUSTOM-PRESET',
+            'label' => 'Operator Custom Preset',
+        ]);
+        $this->assertDatabaseHas('models', [
+            'id' => $modelNumber->model_id,
+            'primary_model_number_id' => $operatorPreset->id,
+            'model_number' => 'OPERATOR-CUSTOM-PRESET',
+        ]);
+        $this->assertDatabaseHas('model_number_attributes', ['id' => $operatorModelValue->id]);
+        $this->assertDatabaseHas('component_definition_attributes', ['id' => $operatorContribution->id]);
+        $this->assertDatabaseHas('component_definition_subcomponent_templates', ['id' => $operatorSubcomponent->id]);
+        $this->assertDatabaseHas('model_number_component_templates', ['id' => $operatorExpectedComponent->id]);
+        $this->assertDatabaseHas('workflow_items', ['id' => $operatorWorkflowItem->id]);
+        $this->assertDatabaseHas('workflow_profile_items', ['id' => $operatorProfileItem->id]);
+        $this->assertDatabaseHas('workflow_profiles', ['id' => $operatorProfile->id]);
+        $this->assertDatabaseHas('workflow_profile_items', ['id' => $operatorProfileOwnItem->id]);
     }
 
     public function test_component_catalog_renames_legacy_webcam_and_wireless_component_definitions(): void
@@ -362,6 +617,8 @@ class DeviceComponentCatalogSeederTest extends TestCase
 
     public function test_catalog_seeds_structured_wireless_and_camera_details(): void
     {
+        Config::set('demo.allow_disposable_data_seeding', true);
+
         $this->seed(DeviceAttributeSeeder::class);
         $this->seed(DevicePresetSeeder::class);
         $this->seed(DeviceComponentCatalogSeeder::class);

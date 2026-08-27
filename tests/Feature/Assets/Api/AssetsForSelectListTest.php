@@ -14,7 +14,7 @@ class AssetsForSelectListTest extends TestCase
         Asset::factory()->create(['asset_tag' => '0001']);
         Asset::factory()->create(['asset_tag' => '0002']);
 
-        $response = $this->actingAsForApi(User::factory()->create())
+        $response = $this->actingAsForApi(User::factory()->editAssets()->create())
             ->getJson(route('assets.selectlist', ['search' => '000']))
             ->assertOk();
 
@@ -33,8 +33,8 @@ class AssetsForSelectListTest extends TestCase
         $assetB = Asset::factory()->for($companyB)->create(['asset_tag' => '0002']);
 
         $superUser = $companyA->users()->save(User::factory()->superuser()->make());
-        $userInCompanyA = $companyA->users()->save(User::factory()->viewAssets()->make());
-        $userInCompanyB = $companyB->users()->save(User::factory()->viewAssets()->make());
+        $userInCompanyA = $companyA->users()->save(User::factory()->editAssets()->make());
+        $userInCompanyB = $companyB->users()->save(User::factory()->editAssets()->make());
 
         $this->settings->disableMultipleFullCompanySupport();
 

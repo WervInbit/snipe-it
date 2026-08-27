@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Import',
     'import_this_file'      => 'Felder zuordnen und diese Datei bearbeiten',
     'importing'         	=> 'Importiere',
-    'importing_help'        => 'Du kannst Assets, Zubehör, Lizenzen, Komponenten, Verbrauchsmaterialien und Benutzer mittels CSV-Datei importieren. <br><br>Die CSV-Datei sollte kommagetrennt sein und eine Kopfzeile enthalten, die mit den <a href="https://snipe-it.readme.io/docs/importing" target="_new">Beispiel-CSVs aus der Dokumentation</a> übereinstimmen.',
+    'importing_help'        => 'Du kannst Assets, Zubehör, Lizenzen, Komponenten, Verbrauchsmaterialien und Benutzer mittels CSV-Datei importieren. <br><br>Die CSV-Datei sollte kommagetrennt sein und eine Kopfzeile enthalten, die mit den <a href=":fork_documentation_url" target="_new">Beispiel-CSVs aus der Dokumentation</a> übereinstimmen.',
     'import-history'        => 'Import Verlauf',
     'asset_maintenance'        => 'Wartungen',
     'asset_maintenance_report' => 'Wartungsbericht',

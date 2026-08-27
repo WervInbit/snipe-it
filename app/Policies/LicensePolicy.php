@@ -12,6 +12,11 @@ class LicensePolicy extends CheckoutablePermissionsPolicy
         return 'licenses';
     }
 
+    protected function usesDedicatedFilePermission(): bool
+    {
+        return true;
+    }
+
     /**
      * Determine whether the user can view license keys.
      * This gets a little tricky, UX/logic-wise. If a user has the ability

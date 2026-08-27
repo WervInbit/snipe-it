@@ -4,6 +4,7 @@ namespace Tests\Feature\Manufacturers\Ui;
 
 use App\Models\Manufacturer;
 use App\Models\User;
+use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
 class IndexManufacturersTest extends TestCase
@@ -15,14 +16,15 @@ class IndexManufacturersTest extends TestCase
             ->assertOk();
     }
 
-    public function testCannotSeedIfManufacturersExist()
+    public function test_empty_index_uses_normal_management_table_without_demo_seed_route(): void
     {
-        Manufacturer::factory()->create();
+        Manufacturer::query()->delete();
 
         $this->actingAs(User::factory()->superuser()->create())
-            ->post(route('manufacturers.seed'))
-            ->assertStatus(302)
-            ->assertSessionHas('error')
-            ->assertRedirect(route('manufacturers.index'));
+            ->get(route('manufacturers.index'))
+            ->assertOk()
+            ->assertSee('manufacturersTable');
+
+        $this->assertFalse(Route::has('manufacturers.seed'));
     }
 }

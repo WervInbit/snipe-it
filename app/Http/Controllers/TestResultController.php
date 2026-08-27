@@ -3,22 +3,29 @@
 namespace App\Http\Controllers;
 
 use App\Models\Asset;
-use App\Models\TestRun;
+use App\Models\AttributeDefinition;
 use App\Models\TestResult;
+use App\Models\TestResultPhoto;
+use App\Models\TestRun;
+use App\Models\WorkflowProfile;
+use App\Models\WorkflowProfileItem;
+use App\Services\WorkflowEvidencePhotoService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\File;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use App\Models\AttributeDefinition;
-use App\Models\TestResultPhoto;
-use App\Models\WorkflowProfile;
-use App\Models\WorkflowProfileItem;
+use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class TestResultController extends Controller
 {
+    public function __construct(private readonly WorkflowEvidencePhotoService $workflowEvidencePhotos)
+    {
+    }
+
     public function active(Asset $asset)
     {
         $this->authorize('view', $asset);
@@ -78,7 +85,7 @@ class TestResultController extends Controller
             ]);
         }
 
-        $results = $run->results->map(function (TestResult $result) {
+        $results = $run->results->map(function (TestResult $result) use ($asset, $run) {
             $definition = $result->attributeDefinition;
             $type = $result->type;
             $isRequired = $result->is_required;
@@ -93,19 +100,12 @@ class TestResultController extends Controller
                 $expected = $expected === '1' ? trans('general.yes') : trans('general.no');
             }
 
-            $photos = $result->photos->map(function (TestResultPhoto $photo) {
+            $photos = $result->photos->map(function (TestResultPhoto $photo) use ($asset, $run, $result) {
                 return [
                     'id' => $photo->id,
-                    'url' => url($photo->path),
+                    'url' => route('test-results.photos.show', [$asset, $run, $result, $photo]),
                 ];
             });
-
-            if ($photos->isEmpty() && $result->photo_path) {
-                $photos = collect([[
-                    'id' => null,
-                    'url' => url($result->photo_path),
-                ]]);
-            }
 
             return [
                 'id' => $result->id,
@@ -174,35 +174,105 @@ class TestResultController extends Controller
     {
         $this->authorize('update', $testRun);
         abort_unless($testRun->asset_id === $asset->id, 404);
+        $testRun->loadMissing('results.photos');
+
+        $preparedPhotos = [];
         foreach ($testRun->results as $result) {
-            $status = $request->input('status.' . $result->id);
-            if (in_array($status, TestResult::STATUSES, true)) {
-                $result->status = $status;
+            if ($request->hasFile('photo.'.$result->id)) {
+                $preparedPhotos[$result->id] = $this->workflowEvidencePhotos->prepare(
+                    $request->file('photo.'.$result->id),
+                    'photo.'.$result->id
+                );
             }
-            $result->note = $request->input('note.' . $result->id);
-
-            if ($request->hasFile('photo.' . $result->id)) {
-                $file = $request->file('photo.' . $result->id);
-                $destination = public_path('uploads/test_images');
-                File::ensureDirectoryExists($destination);
-                if ($result->photo_path && File::exists(public_path($result->photo_path))) {
-                    File::delete(public_path($result->photo_path));
-                }
-                $filename = uniqid('test_', true) . '.' . $file->getClientOriginalExtension();
-                $file->move($destination, $filename);
-                $result->photo_path = 'uploads/test_images/' . $filename;
-            }
-
-            $result->save();
         }
 
-        $testRun->finished_at = now();
-        $testRun->save();
+        $storedPaths = [];
+        try {
+            foreach ($preparedPhotos as $resultId => $preparedPhoto) {
+                $storedPaths[$resultId] = $this->workflowEvidencePhotos->storePrepared(
+                    $preparedPhoto,
+                    $resultId
+                );
+            }
+        } catch (Throwable $exception) {
+            $this->deleteEvidencePaths($storedPaths);
+            throw $exception;
+        }
+
+        $obsoletePaths = [];
+        try {
+            DB::transaction(function () use (
+                $request,
+                $testRun,
+                $storedPaths,
+                &$obsoletePaths
+            ): void {
+                foreach ($testRun->results as $result) {
+                    $status = $request->input('status.'.$result->id);
+                    if (in_array($status, TestResult::STATUSES, true)) {
+                        $result->status = $status;
+                    }
+                    $result->note = $request->input('note.'.$result->id);
+
+                    if (isset($storedPaths[$result->id])) {
+                        $obsoletePaths = array_merge(
+                            $obsoletePaths,
+                            $result->photos->pluck('path')->all()
+                        );
+
+                        if ($result->photo_path) {
+                            $obsoletePaths[] = $result->photo_path;
+                        }
+
+                        $result->photos()->delete();
+                        $result->photos()->create(['path' => $storedPaths[$result->id]]);
+                        $result->photo_path = $storedPaths[$result->id];
+                    }
+
+                    $result->save();
+                }
+
+                $testRun->finished_at = now();
+                $testRun->save();
+            });
+        } catch (Throwable $exception) {
+            $this->deleteEvidencePaths($storedPaths);
+            throw $exception;
+        }
+
+        $this->deleteEvidencePaths($obsoletePaths);
 
         $asset->refreshTestCompletionFlag();
 
         return redirect()->route('test-runs.index', $asset->id)
             ->with('success', trans('tests.run_saved'));
+    }
+
+    public function showPhoto(
+        Asset $asset,
+        TestRun $testRun,
+        TestResult $result,
+        TestResultPhoto $photo
+    ) {
+        abort_unless(
+            $testRun->asset_id === $asset->id &&
+            $result->workflow_run_id === $testRun->id &&
+            $photo->workflow_result_id === $result->id,
+            404
+        );
+        abort_unless(
+            Gate::allows('view', $asset) || Gate::allows('update', $testRun),
+            403
+        );
+
+        $safePhoto = $this->workflowEvidencePhotos->readSafe($photo);
+
+        return response($safePhoto['contents'], 200, [
+            'Content-Type' => $safePhoto['mime'],
+            'Content-Disposition' => 'inline; filename="workflow-evidence.'.$safePhoto['extension'].'"',
+            'Cache-Control' => 'private, no-store, max-age=0',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     public function promotePhoto(
@@ -213,6 +283,8 @@ class TestResultController extends Controller
         TestResultPhoto $photo
     ): JsonResponse {
         $this->authorize('update', $testRun);
+        $this->authorize('update', $asset);
+        $this->authorize('uploadImages', $asset);
         abort_unless(
             $testRun->asset_id === $asset->id &&
             $result->workflow_run_id === $testRun->id &&
@@ -227,17 +299,13 @@ class TestResultController extends Controller
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
 
-        if (!$photo->path || !File::exists(public_path($photo->path))) {
-            return response()->json([
-                'message' => trans('admin/hardware/message.import.file_missing'),
-            ], 404);
-        }
-
-        $extension = pathinfo($photo->path, PATHINFO_EXTENSION) ?: 'jpg';
-        $filename = $asset->id.'_'.Str::uuid().'.'.$extension;
+        $safePhoto = $this->workflowEvidencePhotos->readSafe($photo);
+        $filename = $asset->id.'_'.Str::uuid().'.'.$safePhoto['extension'];
         $targetPath = 'assets/'.$asset->id.'/'.$filename;
 
-        Storage::disk('public')->put($targetPath, File::get(public_path($photo->path)));
+        if (!Storage::disk('public')->put($targetPath, $safePhoto['contents'])) {
+            throw new \RuntimeException('Unable to store the promoted workflow evidence photo.');
+        }
 
         $caption = $request->input('caption');
         if ($caption === null || trim($caption) === '') {
@@ -247,31 +315,36 @@ class TestResultController extends Controller
 
         $assetImage = null;
 
-        \DB::transaction(function () use ($request, $asset, $photo, $targetPath, $caption, &$assetImage) {
-            $makeCover = $request->boolean('make_cover', true);
-            if ($makeCover) {
-                $asset->images()->increment('sort_order');
-                $sortOrder = 0;
-            } else {
-                $sortOrder = $request->filled('sort_order')
-                    ? (int) $request->input('sort_order')
-                    : ((int) $asset->images()->max('sort_order') + 1);
-            }
+        try {
+            DB::transaction(function () use ($request, $asset, $photo, $targetPath, $caption, &$assetImage) {
+                $makeCover = $request->boolean('make_cover', true);
+                if ($makeCover) {
+                    $asset->images()->increment('sort_order');
+                    $sortOrder = 0;
+                } else {
+                    $sortOrder = $request->filled('sort_order')
+                        ? (int) $request->input('sort_order')
+                        : ((int) $asset->images()->max('sort_order') + 1);
+                }
 
-            $assetImage = $asset->images()->create([
-                'file_path' => $targetPath,
-                'caption' => $caption,
-                'sort_order' => $sortOrder,
-                'source' => 'test_photo',
-                'source_photo_id' => $photo->id,
-            ]);
+                $assetImage = $asset->images()->create([
+                    'file_path' => $targetPath,
+                    'caption' => $caption,
+                    'sort_order' => $sortOrder,
+                    'source' => 'test_photo',
+                    'source_photo_id' => $photo->id,
+                ]);
 
-            if ($request->boolean('enable_override', true)) {
-                $asset->image = Str::after($targetPath, 'assets/');
-                $asset->image_override_enabled = true;
-                $asset->save();
-            }
-        });
+                if ($request->boolean('enable_override', true)) {
+                    $asset->image = Str::after($targetPath, 'assets/');
+                    $asset->image_override_enabled = true;
+                    $asset->save();
+                }
+            });
+        } catch (Throwable $exception) {
+            Storage::disk('public')->delete($targetPath);
+            throw $exception;
+        }
 
         return response()->json([
             'message' => trans('general.saved'),
@@ -292,134 +365,189 @@ class TestResultController extends Controller
             $testRun->asset_id === $asset->id && $result->workflow_run_id === $testRun->id,
             404
         );
+        $result->loadMissing('photos');
+
+        try {
+            $preparedPhotos = [];
+            if ($request->hasFile('photo')) {
+                $files = $request->file('photo');
+                $files = is_array($files) ? $files : [$files];
+
+                if ($request->filled('remove_photo_id')) {
+                    $removedPhotoCount = $result->photos->contains(
+                        'id',
+                        (int) $request->input('remove_photo_id')
+                    ) ? 1 : 0;
+                } else {
+                    $removedPhotoCount = $request->boolean('remove_photo')
+                        ? $result->photos->count()
+                        : 0;
+                }
+
+                if (
+                    $result->photos->count() - $removedPhotoCount + count($files)
+                    > WorkflowEvidencePhotoService::MAX_PHOTOS_PER_RESULT
+                ) {
+                    throw ValidationException::withMessages([
+                        'photo' => __(
+                            'A workflow result may contain at most :count evidence photos.',
+                            ['count' => WorkflowEvidencePhotoService::MAX_PHOTOS_PER_RESULT]
+                        ),
+                    ]);
+                }
+
+                foreach ($files as $index => $file) {
+                    $preparedPhotos[] = $this->workflowEvidencePhotos->prepare(
+                        $file,
+                        is_array($request->file('photo')) ? 'photo.'.$index : 'photo'
+                    );
+                }
+            }
+        } catch (ValidationException $exception) {
+            return response()->json([
+                'message' => __('The uploaded workflow evidence photo is invalid.'),
+                'errors' => $exception->errors(),
+            ], 422);
+        }
+
+        $storedPaths = [];
+        try {
+            foreach ($preparedPhotos as $preparedPhoto) {
+                $storedPaths[] = $this->workflowEvidencePhotos->storePrepared(
+                    $preparedPhoto,
+                    $result->id
+                );
+            }
+        } catch (Throwable $exception) {
+            $this->deleteEvidencePaths($storedPaths);
+            throw $exception;
+        }
 
         $updated = false;
         $response = [];
-        $photosMutated = false;
+        $obsoletePaths = [];
+        $newPhotoIds = [];
 
-        if ($request->has('status')) {
-            $status = $request->input('status');
-            if ($status === null || $status === '') {
-                $result->status = TestResult::STATUS_NVT;
-                $response['status'] = TestResult::STATUS_NVT;
-                $updated = true;
-            } elseif (in_array($status, TestResult::STATUSES, true)) {
-                $result->status = $status;
-                $response['status'] = $status;
-                $updated = true;
-            }
-        }
-
-        if ($request->exists('note')) {
-            $note = $request->input('note');
-            $result->note = $note;
-            $response['note'] = $note;
-            $updated = true;
-        }
-
-        $result->loadMissing('photos');
-
-        if ($request->filled('remove_photo_id')) {
-            $photoId = (int) $request->input('remove_photo_id');
-            $photo = $result->photos->firstWhere('id', $photoId);
-            if ($photo) {
-                if ($photo->path && File::exists(public_path($photo->path))) {
-                    File::delete(public_path($photo->path));
+        try {
+            DB::transaction(function () use (
+                $request,
+                $result,
+                $testRun,
+                $storedPaths,
+                &$updated,
+                &$response,
+                &$obsoletePaths,
+                &$newPhotoIds
+            ): void {
+                if ($request->has('status')) {
+                    $status = $request->input('status');
+                    if ($status === null || $status === '') {
+                        $result->status = TestResult::STATUS_NVT;
+                        $response['status'] = TestResult::STATUS_NVT;
+                        $updated = true;
+                    } elseif (in_array($status, TestResult::STATUSES, true)) {
+                        $result->status = $status;
+                        $response['status'] = $status;
+                        $updated = true;
+                    }
                 }
-                $photo->delete();
-                $response['removed_photo_id'] = $photoId;
-                $updated = true;
-                $photosMutated = true;
-            }
-        } elseif ($request->boolean('remove_photo')) {
-            foreach ($result->photos as $photo) {
-                if ($photo->path && File::exists(public_path($photo->path))) {
-                    File::delete(public_path($photo->path));
+
+                if ($request->exists('note')) {
+                    $note = $request->input('note');
+                    $result->note = $note;
+                    $response['note'] = $note;
+                    $updated = true;
                 }
-                $photo->delete();
-            }
-            if ($result->photo_path && File::exists(public_path($result->photo_path))) {
-                File::delete(public_path($result->photo_path));
-            }
-            $result->photo_path = null;
-            $updated = true;
-            $photosMutated = true;
-        }
 
-        if ($request->hasFile('photo')) {
-            $files = $request->file('photo');
-            if (!is_array($files)) {
-                $files = [$files];
-            }
+                $photosMutated = false;
+                if ($request->filled('remove_photo_id')) {
+                    $photoId = (int) $request->input('remove_photo_id');
+                    $photo = $result->photos->firstWhere('id', $photoId);
+                    if ($photo) {
+                        $obsoletePaths[] = $photo->path;
+                        $photo->delete();
+                        $response['removed_photo_id'] = $photoId;
+                        $updated = true;
+                        $photosMutated = true;
+                    }
+                } elseif ($request->boolean('remove_photo')) {
+                    $obsoletePaths = array_merge(
+                        $obsoletePaths,
+                        $result->photos->pluck('path')->all()
+                    );
+                    if ($result->photo_path) {
+                        $obsoletePaths[] = $result->photo_path;
+                    }
+                    $result->photos()->delete();
+                    $result->photo_path = null;
+                    $updated = true;
+                    $photosMutated = true;
+                }
 
-            $destination = public_path('uploads/test_images');
-            File::ensureDirectoryExists($destination);
+                foreach ($storedPaths as $relativePath) {
+                    $photoModel = $result->photos()->create(['path' => $relativePath]);
+                    $newPhotoIds[] = $photoModel->id;
+                    $result->photo_path = $relativePath;
+                    $updated = true;
+                    $photosMutated = true;
+                }
 
-            $newPhotos = [];
-            foreach ($files as $file) {
-                $filename = uniqid('test_', true) . '.' . $file->getClientOriginalExtension();
-                $file->move($destination, $filename);
-                $relativePath = 'uploads/test_images/' . $filename;
+                if ($photosMutated) {
+                    $latestPhoto = $result->photos()->orderByDesc('id')->first();
+                    $result->photo_path = $latestPhoto?->path;
+                }
 
-                $photoModel = $result->photos()->create(['path' => $relativePath]);
-                $newPhotos[] = [
-                    'id' => $photoModel->id,
-                    'url' => url($relativePath),
-                ];
-                $result->photo_path = $relativePath;
-            }
-
-            $response['photo'] = $newPhotos[0] ?? null;
-            $response['photos'] = $newPhotos;
-            $updated = true;
-            $photosMutated = true;
-        } elseif (!array_key_exists('photos', $response)) {
-            $response['photos'] = $result->photos->map(function (TestResultPhoto $photo) {
-                return [
-                    'id' => $photo->id,
-                    'url' => url($photo->path),
-                ];
+                if ($updated) {
+                    $result->save();
+                    $testRun->finished_at = now();
+                    $testRun->save();
+                }
             });
+        } catch (Throwable $exception) {
+            $this->deleteEvidencePaths($storedPaths);
+            throw $exception;
         }
 
-        if ($photosMutated) {
-            $result->unsetRelation('photos');
-            $result->load('photos');
-            $latestPhoto = $result->photos()->latest()->first();
-            $result->photo_path = $latestPhoto?->path;
-        }
-
-        $result->loadMissing('photos');
-
-        $response['photos'] = $result->photos->map(function (TestResultPhoto $photo) {
-            return [
-                'id' => $photo->id,
-                'url' => url($photo->path),
-            ];
-        });
-
-        if (!isset($response['photo'])) {
-            $latest = $result->photos->last();
-            $response['photo'] = $latest
-                ? ['id' => $latest->id, 'url' => url($latest->path)]
-                : false;
-        }
-
-        if (is_array($response['photo'] ?? null)) {
-            $response['photo_url'] = $response['photo']['url'];
-        } elseif (!isset($response['photo_url'])) {
-            $response['photo_url'] = null;
-        }
+        $this->deleteEvidencePaths($obsoletePaths);
 
         if ($updated) {
-            $result->save();
-            $testRun->finished_at = now();
-            $testRun->save();
             $asset->refreshTestCompletionFlag();
         }
 
+        $result->unsetRelation('photos');
+        $result->load('photos');
+
+        $response['photos'] = $result->photos->map(function (TestResultPhoto $photo) use ($asset, $testRun, $result) {
+            return [
+                'id' => $photo->id,
+                'url' => route('test-results.photos.show', [$asset, $testRun, $result, $photo]),
+            ];
+        });
+
+        $primaryPhoto = $newPhotoIds !== []
+            ? $result->photos->firstWhere('id', $newPhotoIds[0])
+            : $result->photos->last();
+        $response['photo'] = $primaryPhoto
+            ? [
+                'id' => $primaryPhoto->id,
+                'url' => route('test-results.photos.show', [$asset, $testRun, $result, $primaryPhoto]),
+            ]
+            : false;
+        $response['photo_url'] = is_array($response['photo'])
+            ? $response['photo']['url']
+            : null;
         $response['message'] = trans('general.saved');
 
         return response()->json($response);
+    }
+
+    /**
+     * @param iterable<int|string, string> $paths
+     */
+    private function deleteEvidencePaths(iterable $paths): void
+    {
+        foreach (array_unique([...$paths]) as $path) {
+            $this->workflowEvidencePhotos->delete($path);
+        }
     }
 }

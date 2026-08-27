@@ -139,6 +139,38 @@ class WorkOrdersControllerTest extends TestCase
         $this->assertCount(0, $workOrder->fresh()->assets);
     }
 
+    public function test_creator_without_visibility_permission_cannot_set_portal_visibility(): void
+    {
+        $creator = User::factory()->createWorkOrders()->create();
+        $visibleUser = User::factory()->create();
+
+        $this->actingAs($creator)
+            ->get(route('work-orders.create'))
+            ->assertOk()
+            ->assertDontSee('data-testid="work-order-visibility-controls"', false)
+            ->assertDontSee('name="visibility_profile"', false);
+
+        $this->actingAs($creator)
+            ->post(route('work-orders.store'), [
+                'title' => 'Visibility Must Stay Restricted',
+                'status' => WorkOrder::STATUS_DRAFT,
+                'priority' => WorkOrder::PRIORITY_NORMAL,
+                'visibility_profile' => WorkOrder::VISIBILITY_PROFILE_CUSTOM,
+                'portal_show_components' => '1',
+                'portal_show_notes_customer' => '1',
+                'visible_user_ids' => [$visibleUser->id],
+            ])
+            ->assertRedirect();
+
+        $workOrder = WorkOrder::query()
+            ->where('title', 'Visibility Must Stay Restricted')
+            ->firstOrFail();
+
+        $this->assertSame(WorkOrder::VISIBILITY_PROFILE_BASIC, $workOrder->visibility_profile);
+        $this->assertSame([], $workOrder->portal_visibility_json);
+        $this->assertCount(0, $workOrder->visibleUsers);
+    }
+
     public function testWorkOrderShowLinksComponentActivityBackToAssets(): void
     {
         $user = User::factory()->viewWorkOrders()->create();

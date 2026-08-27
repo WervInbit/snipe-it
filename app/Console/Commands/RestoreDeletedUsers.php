@@ -2,13 +2,14 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Actionlog;
 use App\Models\Asset;
-use App\Models\License;
 use App\Models\User;
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
+use App\Services\Assets\LegacyAssetAssignmentCleanupService;
+use App\Services\Users\UserRestoreBackupService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use RuntimeException;
 
 class RestoreDeletedUsers extends Command
 {
@@ -24,7 +25,7 @@ class RestoreDeletedUsers extends Command
      *
      * @var string
      */
-    protected $description = 'Restore users, and any associated assets and license checkouts.';
+    protected $description = 'Restore soft-deleted users without replaying retired checkout history.';
 
     /**
      * Create a new command instance.
@@ -39,67 +40,76 @@ class RestoreDeletedUsers extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return int
      */
-    public function handle()
-    {
+    public function handle(
+        UserRestoreBackupService $backupService,
+        LegacyAssetAssignmentCleanupService $legacyAssignmentCleanup
+    ): int {
         $start_date = $this->option('start_date');
         $end_date = $this->option('end_date');
-        $asset_totals = 0;
-        $license_totals = 0;
-        $user_count = 0;
 
         if (($start_date == '') || ($end_date == '')) {
-            $this->info('ERROR: All fields are required.');
+            $this->error('All fields are required.');
 
-            return false;
+            return self::FAILURE;
         }
 
-        $users = User::whereBetween('deleted_at', [$start_date, $end_date])->withTrashed()->get();
-        $this->info('There are '.$users->count().' users deleted between '.$start_date.' and '.$end_date);
+        $validator = Validator::make([
+            'start_date' => $start_date,
+            'end_date' => $end_date,
+        ], [
+            'start_date' => ['required', 'date'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+        ]);
+
+        if ($validator->fails()) {
+            $this->error($validator->errors()->first());
+
+            return self::FAILURE;
+        }
+
+        $users = User::onlyTrashed()
+            ->whereBetween('deleted_at', [$start_date, $end_date])
+            ->orderBy('id')
+            ->get();
+        $this->info(
+            'There are ' . $users->count() . ' users deleted between ' . $start_date . ' and ' . $end_date
+        );
+
+        if ($users->isEmpty()) {
+            return self::SUCCESS;
+        }
+
         $this->warn('Making a backup!');
-        Artisan::call('backup:run');
+        if (! $backupService->run()) {
+            $this->error('Backup failed; no users were restored.');
 
-        foreach ($users as $user) {
-            $user_count++;
-            $user_logs = Actionlog::where('target_id', $user->id)->where('target_type', User::class)
-                ->where('action_type', 'checkout')->with('item')->get();
+            return self::FAILURE;
+        }
 
-            $this->info($user_count.'. '.$user->username.' ('.$user->id.') was deleted at '.$user->deleted_at.' and has '.$user_logs->count().' checkouts associated.');
+        DB::transaction(function () use ($users, $legacyAssignmentCleanup): void {
+            foreach ($users as $user) {
+                $this->warn('Restoring user ' . $user->username . '!');
 
-            foreach ($user_logs as $user_log) {
-                $this->info('  * '.$user_log->item_type.': '.$user_log->item->name.' - item_id: '.$user_log->item_id);
+                Asset::withTrashed()
+                    ->where('assigned_to', $user->id)
+                    ->whereIn('assigned_type', array_values(array_unique([
+                        (new User())->getMorphClass(),
+                        User::class,
+                    ])))
+                    ->eachById(function (Asset $asset) use ($legacyAssignmentCleanup): void {
+                        $legacyAssignmentCleanup->clear($asset);
+                    });
 
-                if ($user_log->item_type == Asset::class) {
-                    $asset_totals++;
-
-                    DB::table('assets')
-                        ->where('id', $user_log->item_id)
-                        ->update(['assigned_to' => $user->id, 'assigned_type'=> User::class]);
-
-                    $this->info('      ** Asset '.$user_log->item->id.' ('.$user_log->item->asset_tag.') restored to user '.$user->id.'');
-                } elseif ($user_log->item_type == License::class) {
-                    $license_totals++;
-
-                    $avail_seat = DB::table('license_seats')->where('license_id', '=', $user_log->item->id)
-                        ->whereNull('assigned_to')->whereNull('asset_id')->whereBetween('updated_at', [$start_date, $end_date])->first();
-                    if ($avail_seat) {
-                        $this->info('      ** Allocating seat '.$avail_seat->id.' for this License');
-
-                        DB::table('license_seats')
-                            ->where('id', $avail_seat->id)
-                            ->update(['assigned_to' => $user->id]);
-                    } else {
-                        $this->warn('ERROR: No available seats for '.$user_log->item->name);
-                    }
+                if (! $user->restore()) {
+                    throw new RuntimeException('Unable to restore user ' . $user->id . '.');
                 }
             }
+        });
 
-            $this->warn('Restoring user '.$user->username.'!');
-            $user->restore();
-        }
+        $this->info($users->count() . ' users restored; historical checkout state was not replayed.');
 
-        $this->info($asset_totals.' assets affected');
-        $this->info($license_totals.' licenses affected');
+        return self::SUCCESS;
     }
 }

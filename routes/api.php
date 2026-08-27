@@ -21,10 +21,12 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
 
 
     Route::get('/', function () {
+        $documentationUrl = route('help.api-compatibility', absolute: false);
+
         return response()->json(
             [
                 'status' => 'error',
-                'message' => '404 endpoint not found. This is the base URL for the API and does not return anything itself. Please check the API reference at https://snipe-it.readme.io/reference to find a valid API endpoint.',
+                'message' => "404 endpoint not found. This API base URL does not return a resource. Fork compatibility notes are available at {$documentationUrl}; use the installed route inventory for exact endpoints.",
                 'payload' => null,
             ], 404);
     });
@@ -35,29 +37,12 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
      */
     Route::group(['prefix' => 'account'], function () {
 
-        Route::get('requests',
-            [
-                Api\ProfileController::class, 
-                'requestedAssets'
-            ]
-        )->name('api.assets.requested');
-
         Route::get('eulas',
             [
                 Api\ProfileController::class,
                 'eulas'
             ]
         )->name('api.self.eulas');
-
-        Route::post('request/{asset}', [Api\CheckoutRequest::class, 'store'])->name('api.assets.requests.store');
-        Route::post('request/{asset}/cancel', [Api\CheckoutRequest::class, 'destroy'])->name('api.assets.requests.destroy');
-
-        Route::get('requestable/hardware',
-            [
-                Api\AssetsController::class, 
-                'requestable'
-            ]
-        )->name('api.assets.requestable');
 
         Route::post('personal-access-tokens',
             [
@@ -507,20 +492,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         )->name('api.assets.show.bytag')
         ->where('any', '.*');
 
-        Route::post('bytag/{any}/checkin',
-            [
-                Api\AssetsController::class,
-                'checkinbytag'
-            ]
-        )->name('api.asset.checkinbytagPath');
-
-        Route::post('checkinbytag',
-            [
-                Api\AssetsController::class,
-                'checkinbytag'
-            ]
-        )->name('api.asset.checkinbytag');
-
         Route::get('byserial/{any}',
             [
                 Api\AssetsController::class, 
@@ -542,35 +513,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 'images'
             ]
         )->name('api.assets.images');
-
-
-
-        // This gets the "due or overdue" API endpoints for audit/audits and checkins
-        Route::get('{action}/{upcoming_status}',
-              [
-                  Api\AssetsController::class,
-                  'index'
-              ]
-        )->name('api.assets.list-upcoming')
-        ->where(['action' => 'audit|audits|checkins', 'upcoming_status' => 'due|overdue|due-or-overdue']);
-
-
-        // Legacy URL for audit
-          Route::post('audit',
-              [
-                  Api\AssetsController::class,
-                  'audit'
-              ]
-          )->name('api.asset.audit.legacy');
-
-
-          // Newer url for audit
-        Route::post('{asset}/audit',
-        [
-            Api\AssetsController::class, 
-            'audit'
-        ]
-        )->name('api.asset.audit');
 
         Route::post('{asset_id}/restore',
           [
@@ -607,8 +549,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
     Route::patch('/hardware/{asset}', [Api\AssetsController::class, 'update'])->name('api.assets.update');
     Route::put('/hardware/{asset}', [Api\AssetsController::class, 'update'])->name('api.assets.put-update');
 
-    Route::put('/hardware/{asset}', [Api\AssetsController::class, 'update'])->name('api.assets.put-update');
-
     Route::resource('hardware',
         Api\AssetsController::class,
         ['names' => [
@@ -630,14 +570,12 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         ['names' => [
                 'index' => 'api.maintenances.index',
                 'show' => 'api.maintenances.show',
-                'update' => 'api.maintenances.update',
-                'store' => 'api.maintenances.store',
-                'destroy' => 'api.maintenances.destroy',
             ],
-        'except' => ['create', 'edit'],
         'parameters' => ['maintenance' => 'maintenance_id'],
         ]
-        ); // end assets API routes
+        )
+            ->only(['index', 'show'])
+            ->where(['maintenance_id' => '[0-9]+']); // end assets API routes
 
         // Asset tests API routes
         Route::get('hardware/{asset}/asset-tests', [AssetTestController::class, 'index'])->name('api.asset-tests.index');
@@ -671,12 +609,10 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
         Api\ImportController::class,
         ['names' => [
                 'index' => 'api.imports.index',
-                'show' => 'api.imports.show',
-                'update' => 'api.imports.update',
                 'store' => 'api.imports.store',
                 'destroy' => 'api.imports.destroy',
             ],
-        'except' => ['create', 'edit'],
+        'only' => ['index', 'store', 'destroy'],
         'parameters' => ['import' => 'import_id'],
         ]
     ); // end imports API routes
@@ -746,15 +682,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                     'selectlist'
                 ]
             )->name('api.locations.selectlist');
-
-            // Users within a location
-            Route::get('{location}/users',
-                [
-                    Api\LocationsController::class, 
-                    'getDataViewUsers'
-                ]
-            )->name('api.locations.viewusers');
-
 
             // Get list of assets with a default location
             Route::get('{location}/assets',
@@ -853,13 +780,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 ]
             )->name('api.models.assets');
 
-            Route::post('{id}/restore',
-                [
-                    Api\AssetModelsController::class,
-                    'restore'
-                ]
-            )->name('api.models.restore');
-
         }); 
     
         Route::resource('models',
@@ -942,13 +862,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 ]
             )->name('api.settings.ldaptestlogin');
 
-            Route::post('slacktest',
-            [
-                Api\SettingsController::class, 
-                'slacktest'
-            ]
-            )->name('api.settings.slacktest');
-
             Route::post('mailtest',
             [
                 Api\SettingsController::class, 
@@ -979,19 +892,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
 
         }); 
         
-        Route::resource('settings', 
-        Api\SettingsController::class,
-        ['names' => [
-                'show' => 'api.settings.show',
-                'update' => 'api.settings.update',
-                'store' => 'api.settings.store',
-            ],
-        'except' => ['create', 'edit', 'index', 'destroy'],
-        'parameters' => ['setting' => 'setting_id'],
-        ]
-        ); // end settings API
-
-
         /**
         * Status labels API routes
         */
@@ -1031,13 +931,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                     'checkIfDeployable'
                 ]
             )->name('api.statuslabels.deployable');
-
-            Route::get('selectlist',
-                [
-                    Api\StatuslabelsController::class,
-                    'selectlist'
-                ]
-            )->name('api.statuslabels.selectlist');
 
         }); 
     
@@ -1126,13 +1019,6 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
                 ]
             )->name('api.user.eulas');
 
-
-            Route::get('list/{status?}',
-            [
-                Api\UsersController::class, 
-                'getDatatable'
-            ]
-            )->name('api.users.list');
 
             Route::get('{user}/assets',
             [
@@ -1255,14 +1141,14 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             Route::put('models/{model_id}',
                 [
                     Api\PredefinedKitsController::class, 
-                    'updateModels'
+                    'updateModel'
                 ]
             )->name('api.kits.models.update');
 
             Route::delete('models/{model_id}',
                 [
                     Api\PredefinedKitsController::class, 
-                    'detachModels'
+                    'detachModel'
                 ]
             )->name('api.kits.models.destroy');
 
@@ -1360,10 +1246,12 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
 
 
         Route::fallback(function () {
+            $documentationUrl = route('help.api-compatibility', absolute: false);
+
             return response()->json(
                 [
                     'status' => 'error',
-                    'message' => '404 endpoint not found. Please check the API reference at https://snipe-it.readme.io/reference to find a valid API endpoint.',
+                    'message' => "404 endpoint not found. Fork compatibility notes are available at {$documentationUrl}; use the installed route inventory for exact endpoints.",
                     'payload' => null,
                 ], 404);
         }); // end fallback routes
@@ -1406,7 +1294,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'store'
         ]
     )->name('api.files.store')
-        ->where(['object_type' => 'accessories|assets|components|component-instances|consumables|hardware|licenses|locations|maintenances|models|model-numbers|users|work-orders']);
+        ->where(['object_type' => 'accessories|assets|components|component-instances|consumables|hardware|licenses|locations|models|model-numbers|users|work-orders']);
 
     // Delete files(s)
     Route::delete('{object_type}/{id}/files/{file_id}/delete',
@@ -1415,7 +1303,7 @@ Route::group(['prefix' => 'v1', 'middleware' => ['api', 'api-throttle:api']], fu
             'destroy'
         ]
     )->name('api.files.destroy')
-        ->where(['object_type' => 'accessories|assets|components|component-instances|consumables|hardware|licenses|locations|maintenances|models|model-numbers|users|work-orders']);
+        ->where(['object_type' => 'accessories|assets|components|component-instances|consumables|hardware|licenses|locations|models|model-numbers|users|work-orders']);
 
 }); // end API routes
 

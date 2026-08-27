@@ -2,8 +2,9 @@
 
 namespace Tests\Feature\Categories\Ui;
 
-use App\Models\Category;
 use App\Models\Asset;
+use App\Models\AssetModel;
+use App\Models\Category;
 use App\Models\User;
 use Tests\TestCase;
 
@@ -95,8 +96,9 @@ class UpdateCategoriesTest extends TestCase
 
     public function testUserCannotChangeCategoryTypeIfAssetsAreAssociated()
     {
-        Asset::factory()->count(5)->laptopMbp()->create();
-        $category = Category::where('name', 'Laptops')->first();
+        $category = Category::factory()->forAssets()->create();
+        $assetModel = AssetModel::factory()->create(['category_id' => $category->id]);
+        Asset::factory()->count(5)->create(['model_id' => $assetModel->id]);
 
         $response = $this->actingAs(User::factory()->superuser()->create())
             ->from(route('categories.edit', $category))
@@ -110,7 +112,7 @@ class UpdateCategoriesTest extends TestCase
             ->assertStatus(302)
             ->assertRedirect(route('categories.edit', $category));
 
-        $this->followRedirects($response)->assertSee(trans('general.error'));
+        $this->followRedirects($response)->assertSee('alert-danger');
         $this->assertFalse(Category::where('name', 'Test Category Edited')->where('notes', 'Test Note Edited')->exists());
 
     }

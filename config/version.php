@@ -1,10 +1,10 @@
 <?php
 return array (
-  'app_version' => 'v2025.10.16-beta',
-  'full_app_version' => 'v2025.10.16-beta - build 19320-g1918b4547',
-  'build_version' => '19320',
-  'prerelease_version' => 'beta',
-  'hash_version' => 'g1918b4547',
-  'full_hash' => 'v2025.10.16-beta-19320-g1918b4547',
+  'app_version' => 'v0.9.0-dev',
+  'full_app_version' => 'v0.9.0-dev - unreleased worktree',
+  'build_version' => 'unreleased',
+  'prerelease_version' => 'dev',
+  'hash_version' => 'worktree',
+  'full_hash' => 'v0.9.0-dev-unreleased',
   'branch' => 'master',
 );

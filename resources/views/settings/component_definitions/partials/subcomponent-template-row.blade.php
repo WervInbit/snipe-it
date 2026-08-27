@@ -24,6 +24,7 @@
     $notesHasError = $showErrors && $errors->has($notesErrorKey);
     $notesExpanded = $hasNotes || $notesHasError;
     $notesCollapseId = 'expected-subcomponent-notes-' . $index;
+    $canRemoveSubcomponent = ($canManageDefinitionLifecycle ?? false) || empty($row['id']);
 @endphp
 
 <div class="panel panel-default" data-subcomponent-template-row>
@@ -95,7 +96,11 @@
                     <a href="#" class="btn btn-default" data-move-subcomponent-template="up">{{ __('Up') }}</a>
                     <a href="#" class="btn btn-default" data-move-subcomponent-template="down">{{ __('Down') }}</a>
                 </div>
-                <button type="button" class="btn btn-default btn-block btn-sm" style="margin-top:6px;" data-remove-subcomponent-template>{{ __('Remove') }}</button>
+                @if($canRemoveSubcomponent)
+                    <button type="button" class="btn btn-default btn-block btn-sm" style="margin-top:6px;" data-remove-subcomponent-template>{{ __('Remove') }}</button>
+                @else
+                    <span class="text-muted small">{{ __('Admin only') }}</span>
+                @endif
                 <button type="button"
                         class="btn btn-default btn-block btn-sm"
                         style="margin-top:6px;"

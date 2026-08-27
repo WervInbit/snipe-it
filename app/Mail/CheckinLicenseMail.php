@@ -17,6 +17,12 @@ class CheckinLicenseMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public mixed $item;
+    public mixed $target;
+    public mixed $admin;
+    public mixed $note;
+    public mixed $settings;
+
     /**
      * Create a new message instance.
      */

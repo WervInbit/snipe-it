@@ -65,7 +65,7 @@ class CreateLocationsTest extends TestCase
             ->assertStatusMessageIs('error')
             ->assertJson([
                 'messages' => [
-                    'parent_id'    => ['The parent id must not create a circular reference.'],
+                    'parent_id' => [trans('validation.non_circular', ['attribute' => 'parent id'])],
                 ],
             ])
             ->json();

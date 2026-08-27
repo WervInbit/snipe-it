@@ -1,6 +1,3 @@
-<?php
-use Carbon\Carbon;
-?>
 @extends('layouts/default')
 
 {{-- Page title --}}
@@ -37,19 +34,6 @@ use Carbon\Carbon;
             </a>
           </li>
 
-          @can('update', $maintenance)
-            <li class="pull-right">
-              <a href="#" data-toggle="modal" data-target="#uploadFileModal">
-                                <span class="hidden-lg hidden-xl hidden-md">
-                                    <x-icon type="paperclip" class="fa-2x" />
-                                </span>
-                <span class="hidden-xs hidden-sm">
-                                    <x-icon type="paperclip" />
-                                    {{ trans('button.upload') }}
-                                </span>
-              </a>
-            </li>
-          @endcan
         </ul>
           <div class="tab-content">
             <div class="tab-pane active" id="info">
@@ -215,21 +199,9 @@ use Carbon\Carbon;
           </ul>
       </div>
 
-      @can('update', $maintenance)
-        <div class="col-md-12">
-          <a href="{{ route('maintenances.edit', [$maintenance->id]) }}" style="width: 100%;" class="btn btn-sm btn-warning btn-social">
-            <x-icon type="edit" />
-            {{ trans('general.update') }}
-          </a>
-        </div>
-      @endcan
     </div>
 
     </div> <!-- row  end -->
-
-  @can('assets.files', Asset::class)
-    @include ('modals.upload-file', ['item_type' => 'maintenance', 'item_id' => $maintenance->id])
-  @endcan
 @stop
 
 @section('moar_scripts')

@@ -7,9 +7,6 @@ use App\Models\Asset;
 use App\Models\AssetModel;
 use App\Models\Company;
 use App\Models\Setting;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
-use Carbon\Exceptions\InvalidFormatException;
 use Illuminate\Support\Facades\Gate;
 use App\Rules\AssetCannotBeCheckedOutToNondeployableStatus;
 use Illuminate\Validation\Rule;
@@ -17,6 +14,7 @@ use Illuminate\Validation\Rule;
 class StoreAssetRequest extends ImageUploadRequest
 {
     use MayContainCustomFields;
+
     /**
      * Determine if the user is authorized to make this request.
      *
@@ -24,7 +22,7 @@ class StoreAssetRequest extends ImageUploadRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('create', new Asset);
+        return Gate::allows('create', Asset::class);
     }
 
     protected function prepareForValidation(): void
@@ -37,8 +35,6 @@ class StoreAssetRequest extends ImageUploadRequest
         $idForCurrentUser = is_numeric($this->company_id)
             ? Company::getIdForCurrentUser($this->company_id)
             : $this->company_id;
-
-        $this->parseLastAuditDate();
 
         $this->merge([
             'asset_tag' => $this->asset_tag,
@@ -54,7 +50,7 @@ class StoreAssetRequest extends ImageUploadRequest
      */
     public function rules(): array
     {
-        $modelRules = (new Asset)->getRules();
+        $modelRules = (new Asset())->getRules();
 
         $modelId = $this->input('model_id');
         $model = $modelId
@@ -77,7 +73,7 @@ class StoreAssetRequest extends ImageUploadRequest
             $modelRules['serial'] = $this->stripSerialUniqueness($modelRules['serial'] ?? []);
         }
 
-        $requireModelNumber = $availableModelNumbers->count() > 1;
+        $requireModelNumber = $availableModelNumbers->isNotEmpty();
 
         $modelNumberRules = $modelId
             ? array_filter([
@@ -98,6 +94,7 @@ class StoreAssetRequest extends ImageUploadRequest
                 'attribute_overrides' => ['nullable', 'array'],
                 'attribute_overrides.*' => ['nullable'],
                 'status_change_note' => ['nullable', 'string', 'max:65535'],
+                ...array_fill_keys(Asset::LEGACY_READ_ONLY_FIELDS, ['missing']),
             ],
             parent::rules(),
         );
@@ -105,6 +102,10 @@ class StoreAssetRequest extends ImageUploadRequest
 
     private function shouldAllowDuplicateSerial(): bool
     {
+        if (!(bool) (Setting::getSettings()?->unique_serial ?? false)) {
+            return true;
+        }
+
         if ($this->boolean('allow_duplicate_serial')) {
             return true;
         }
@@ -126,23 +127,6 @@ class StoreAssetRequest extends ImageUploadRequest
         return array_values(array_filter($rulesArray, function ($rule) {
             return !str_starts_with((string) $rule, 'unique_undeleted:assets,serial');
         }));
-    }
-
-    private function parseLastAuditDate(): void
-    {
-        if ($this->input('last_audit_date')) {
-            try {
-                $lastAuditDate = Carbon::parse($this->input('last_audit_date'));
-
-                $this->merge([
-                    'last_audit_date' => $lastAuditDate->startOfDay()->format('Y-m-d H:i:s'),
-                ]);
-            } catch (InvalidFormatException $e) {
-                // we don't need to do anything here...
-                // we'll keep the provided date in an
-                // invalid format so validation picks it up later
-            }
-        }
     }
 
     private function removeNumericRulesFromPurchaseCost(array $rules): array

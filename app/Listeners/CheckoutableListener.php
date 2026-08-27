@@ -7,8 +7,6 @@ use App\Mail\CheckinAccessoryMail;
 use App\Mail\CheckinComponentMail;
 use App\Mail\CheckinLicenseMail;
 use App\Mail\CheckoutAccessoryMail;
-use App\Mail\CheckoutAssetMail;
-use App\Mail\CheckinAssetMail;
 use App\Mail\CheckoutComponentMail;
 use App\Mail\CheckoutConsumableMail;
 use App\Mail\CheckoutLicenseMail;
@@ -23,11 +21,9 @@ use App\Models\Location;
 use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\CheckinAccessoryNotification;
-use App\Notifications\CheckinAssetNotification;
 use App\Notifications\CheckinComponentNotification;
 use App\Notifications\CheckinLicenseSeatNotification;
 use App\Notifications\CheckoutAccessoryNotification;
-use App\Notifications\CheckoutAssetNotification;
 use App\Notifications\CheckoutComponentNotification;
 use App\Notifications\CheckoutConsumableNotification;
 use App\Notifications\CheckoutLicenseSeatNotification;
@@ -70,6 +66,10 @@ class CheckoutableListener
      */
     public function onCheckedOut($event)
     {
+        if ($event->checkoutable instanceof Asset) {
+            return;
+        }
+
         if ($this->shouldNotSendAnyNotifications($event->checkoutable)) {
             return;
         }
@@ -141,6 +141,10 @@ class CheckoutableListener
     public function onCheckedIn($event)
     {
         Log::debug('onCheckedIn in the Checkoutable listener fired');
+
+        if ($event->checkoutable instanceof Asset) {
+            return;
+        }
 
         if ($this->shouldNotSendAnyNotifications($event->checkoutable)) {
             return;
@@ -266,9 +270,6 @@ class CheckoutableListener
             case Accessory::class:
                 $notificationClass = CheckinAccessoryNotification::class;
                 break;
-            case Asset::class:
-                $notificationClass = CheckinAssetNotification::class;
-                break;
             case LicenseSeat::class:
                 $notificationClass = CheckinLicenseSeatNotification::class;
                 break;
@@ -296,9 +297,6 @@ class CheckoutableListener
             case Accessory::class:
                 $notificationClass = CheckoutAccessoryNotification::class;
                 break;
-            case Asset::class:
-                $notificationClass = CheckoutAssetNotification::class;
-                break;
             case Consumable::class:
                 $notificationClass = CheckoutConsumableNotification::class;
                 break;
@@ -316,7 +314,6 @@ class CheckoutableListener
     private function getCheckoutMailType($event, $acceptance){
         $lookup = [
             Accessory::class => CheckoutAccessoryMail::class,
-            Asset::class => CheckoutAssetMail::class,
             LicenseSeat::class => CheckoutLicenseMail::class,
             Consumable::class => CheckoutConsumableMail::class,
             Component::class => CheckoutComponentMail::class,
@@ -330,7 +327,6 @@ class CheckoutableListener
     private function getCheckinMailType($event){
         $lookup = [
             Accessory::class => CheckinAccessoryMail::class,
-            Asset::class => CheckinAssetMail::class,
             LicenseSeat::class => CheckinLicenseMail::class,
             Component::class => CheckinComponentMail::class,
         ];
@@ -477,7 +473,6 @@ class CheckoutableListener
     private function getCategoryFromCheckoutable(Model $checkoutable): ?Category
     {
         return match (true) {
-            $checkoutable instanceof Asset => $checkoutable->model->category,
             $checkoutable instanceof Accessory,
                 $checkoutable instanceof Consumable,
                 $checkoutable instanceof Component => $checkoutable->category,

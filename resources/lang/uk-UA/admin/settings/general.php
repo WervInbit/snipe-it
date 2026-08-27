@@ -379,7 +379,7 @@ return [
     'purge_barcodes' => 'Purge Barcodes',
     'help_asterisk_bold'    => 'Введений <code>**текст**</code> буде відображатися як жирний',
     'help_blank_to_use'     => 'Залиште порожнім, щоб використовувати значення від <code>:setting_name</code>',
-    'help_default_will_use' => '<code>:default</code> використовуватиме значення з <code>:setting_name</code>. <br>Зверніть увагу, що значення штрих-кодів повинні відповідати відповідним стандартам штрих-кодів, щоб вони могли бути успішно згенеровані. Для отримання додаткової інформації перегляньте <a href="https://snipe-it.readme.io/docs/barcodes">документацію <i class="fa fa-external-link"></i></a>. ',
+    'help_default_will_use' => '<code>:default</code> використовуватиме значення з <code>:setting_name</code>. <br>Зверніть увагу, що значення штрих-кодів повинні відповідати відповідним стандартам штрих-кодів, щоб вони могли бути успішно згенеровані. Для отримання додаткової інформації перегляньте <a href=":fork_documentation_url">документацію <i class="fa fa-external-link"></i></a>. ',
     'asset_id'              => 'ID Активу',
     'data'               => 'Дані',
     'default'               => 'Типово',

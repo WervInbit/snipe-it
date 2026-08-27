@@ -12,6 +12,7 @@ use App\Models\Supplier;
 use App\Models\User;
 use App\Models\CustomField;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class UpdateAssetTest extends TestCase
@@ -48,8 +49,9 @@ class UpdateAssetTest extends TestCase
     {
         $asset = Asset::factory()->create();
         $originalTag = $asset->asset_tag;
+        $originalRequestable = $asset->getRawOriginal('requestable');
+        $originalLastAuditDate = $asset->getRawOriginal('last_audit_date');
         $user = User::factory()->editAssets()->create();
-        $userAssigned = User::factory()->create();
         $company = Company::factory()->create();
         $location = Location::factory()->create();
         $model = AssetModel::factory()->create();
@@ -61,9 +63,7 @@ class UpdateAssetTest extends TestCase
             ->patchJson(route('api.assets.update', $asset->id), [
                 'asset_eol_date' => '2024-06-02',
                 'asset_tag' => $originalTag,
-                'assigned_user' => $userAssigned->id,
                 'company_id' => $company->id,
-                'last_audit_date' => '2023-09-03 12:23:45',
                 'location_id' => $location->id,
                 'model_id' => $model->id,
                 'name' => 'A New Asset',
@@ -71,7 +71,6 @@ class UpdateAssetTest extends TestCase
                 'order_number' => '5678',
                 'purchase_cost' => '123.45',
                 'purchase_date' => '2023-09-02',
-                'requestable' => true,
                 'is_sellable' => false,
                 'rtd_location_id' => $rtdLocation->id,
                 'serial' => '1234567890',
@@ -87,7 +86,6 @@ class UpdateAssetTest extends TestCase
 
         $this->assertEquals('2024-06-02', $updatedAsset->asset_eol_date);
         $this->assertEquals($originalTag, $updatedAsset->asset_tag);
-        $this->assertEquals($userAssigned->id, $updatedAsset->assigned_to);
         $this->assertTrue($updatedAsset->company->is($company));
         $this->assertTrue($updatedAsset->location->is($location));
         $this->assertTrue($updatedAsset->model->is($model));
@@ -96,14 +94,52 @@ class UpdateAssetTest extends TestCase
         $this->assertEquals('5678', $updatedAsset->order_number);
         $this->assertEquals('123.45', $updatedAsset->purchase_cost);
         $this->assertTrue($updatedAsset->purchase_date->is('2023-09-02'));
-        $this->assertEquals('1', $updatedAsset->requestable);
+        $this->assertSame($originalRequestable, $updatedAsset->getRawOriginal('requestable'));
         $this->assertTrue($updatedAsset->defaultLoc->is($rtdLocation));
         $this->assertEquals('1234567890', $updatedAsset->serial);
         $this->assertTrue($updatedAsset->assetstatus->is($status));
         $this->assertTrue($updatedAsset->supplier->is($supplier));
         $this->assertEquals(10, $updatedAsset->warranty_months);
-        $this->assertEquals('2023-09-03 00:00:00', $updatedAsset->last_audit_date);
+        $this->assertSame($originalLastAuditDate, $updatedAsset->getRawOriginal('last_audit_date'));
         $this->assertFalse($updatedAsset->is_sellable);
+    }
+
+    public function testLegacyReadOnlyFieldsAreRejectedAndHistoricalValuesRemainUnchanged(): void
+    {
+        $asset = Asset::factory()->create(['name' => 'Historical Asset']);
+        $legacyValues = [
+            'requestable' => 1,
+            'last_checkin' => '2024-01-02 03:04:05',
+            'last_checkout' => '2024-01-03 04:05:06',
+            'expected_checkin' => '2024-02-01',
+            'last_audit_date' => '2024-01-04 05:06:07',
+            'next_audit_date' => '2024-03-01',
+        ];
+
+        DB::table('assets')->where('id', $asset->id)->update($legacyValues);
+        $historicalSnapshot = (array) DB::table('assets')
+            ->where('id', $asset->id)
+            ->first(Asset::LEGACY_READ_ONLY_FIELDS);
+
+        $response = $this->actingAsForApi(User::factory()->editAssets()->create())
+            ->patchJson(route('api.assets.update', $asset), [
+                ...$legacyValues,
+                'name' => 'Must Not Be Written',
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('error');
+
+        foreach (Asset::LEGACY_READ_ONLY_FIELDS as $field) {
+            $this->assertNotNull($response->json("messages.{$field}"));
+        }
+
+        $this->assertSame(
+            $historicalSnapshot,
+            (array) DB::table('assets')
+                ->where('id', $asset->id)
+                ->first(Asset::LEGACY_READ_ONLY_FIELDS),
+        );
+        $this->assertSame('Historical Asset', $asset->fresh()->name);
     }
 
     public function testNonAdminCannotChangeAssetTag(): void
@@ -135,7 +171,7 @@ class UpdateAssetTest extends TestCase
 
     }
 
-    public function testModelNumberIsRequiredForLaptopAndDesktopCategories()
+    public function testModelNumberIsRequiredWhenModelSelectionHasAnActivePreset()
     {
         $category = Category::factory()->assetLaptopCategory()->create();
         $model = AssetModel::factory()->create(['category_id' => $category->id]);
@@ -413,8 +449,6 @@ class UpdateAssetTest extends TestCase
 
     public function testEncryptedCustomFieldCanBeUpdated()
     {
-        $this->markIncompleteIfMySQL('Custom Fields tests do not work on MySQL');
-
         $field = CustomField::factory()->testEncrypted()->create();
         $asset = Asset::factory()->hasEncryptedCustomField($field)->create();
         $superuser = User::factory()->superuser()->create();
@@ -432,8 +466,6 @@ class UpdateAssetTest extends TestCase
 
     public function testPermissionNeededToUpdateEncryptedField()
     {
-        $this->markIncompleteIfMySQL('Custom Fields tests do not work on MySQL');
-
         $field = CustomField::factory()->testEncrypted()->create();
         $asset = Asset::factory()->hasEncryptedCustomField($field)->create();
         $normal_user = User::factory()->editAssets()->create();
@@ -448,49 +480,49 @@ class UpdateAssetTest extends TestCase
             ])
             ->assertStatusMessageIs('success')
             ->assertOk()
-            ->assertMessagesAre('Asset updated successfully, but encrypted custom fields were not due to permissions');
+            ->assertMessagesAre(trans('admin/hardware/message.update.encrypted_warning'));
 
         $asset->refresh();
         $this->assertEquals("encrypted value should not change", Crypt::decrypt($asset->{$field->db_column_name()}));
     }
 
-    public function testCheckoutToUserOnAssetUpdate()
+    public function testLegacyAssignedUserFieldIsRejectedOnAssetUpdate()
     {
         $asset = Asset::factory()->create();
         $user = User::factory()->editAssets()->create();
         $assigned_user = User::factory()->create();
 
-        $response = $this->actingAsForApi($user)
+        $this->actingAsForApi($user)
             ->patchJson(route('api.assets.update', $asset->id), [
                 'assigned_user' => $assigned_user->id,
             ])
-            ->assertOk()
-            ->assertStatusMessageIs('success')
-            ->json();
+            ->assertUnprocessable()
+            ->assertStatusMessageIs('error')
+            ->assertJsonPath('messages', trans('admin/hardware/message.legacy_assignment_disabled'));
 
         $asset->refresh();
-        $this->assertEquals($assigned_user->id, $asset->assigned_to);
-        $this->assertEquals($asset->assigned_type, 'App\Models\User');
+        $this->assertNull($asset->assigned_to);
+        $this->assertNull($asset->assigned_type);
     }
 
-    public function testCheckoutToUserWithAssignedToAndAssignedType()
+    public function testLegacyAssignedToAndTypeFieldsAreRejectedOnAssetUpdate()
     {
         $asset = Asset::factory()->create();
         $user = User::factory()->editAssets()->create();
         $assigned_user = User::factory()->create();
 
-        $response = $this->actingAsForApi($user)
+        $this->actingAsForApi($user)
             ->patchJson(route('api.assets.update', $asset->id), [
                 'assigned_to' => $assigned_user->id,
                 'assigned_type' => User::class
             ])
-            ->assertOk()
-            ->assertStatusMessageIs('success')
-            ->json();
+            ->assertUnprocessable()
+            ->assertStatusMessageIs('error')
+            ->assertJsonPath('messages', trans('admin/hardware/message.legacy_assignment_disabled'));
 
         $asset->refresh();
-        $this->assertEquals($assigned_user->id, $asset->assigned_to);
-        $this->assertEquals($asset->assigned_type, 'App\Models\User');
+        $this->assertNull($asset->assigned_to);
+        $this->assertNull($asset->assigned_type);
     }
 
     public function testCheckoutToUserWithAssignedToWithoutAssignedType()
@@ -499,18 +531,18 @@ class UpdateAssetTest extends TestCase
         $user = User::factory()->editAssets()->create();
         $assigned_user = User::factory()->create();
 
-        $response = $this->actingAsForApi($user)
+        $this->actingAsForApi($user)
             ->patchJson(route('api.assets.update', $asset->id), [
                 'assigned_to' => $assigned_user->id,
 //                'assigned_type' => User::class //deliberately omit assigned_type
             ])
-            ->assertOk()
-            ->assertStatusMessageIs('error');
+            ->assertUnprocessable()
+            ->assertStatusMessageIs('error')
+            ->assertJsonPath('messages', trans('admin/hardware/message.legacy_assignment_disabled'));
 
         $asset->refresh();
         $this->assertNotEquals($assigned_user->id, $asset->assigned_to);
         $this->assertNotEquals($asset->assigned_type, 'App\Models\User');
-        $this->assertNotNull($response->json('messages.assigned_type'));
     }
 
     public function testCheckoutToUserWithAssignedToWithBadAssignedType()
@@ -519,18 +551,18 @@ class UpdateAssetTest extends TestCase
         $user = User::factory()->editAssets()->create();
         $assigned_user = User::factory()->create();
 
-        $response = $this->actingAsForApi($user)
+        $this->actingAsForApi($user)
             ->patchJson(route('api.assets.update', $asset->id), [
                 'assigned_to'   => $assigned_user->id,
                 'assigned_type' => 'more_deliberate_nonsense' //deliberately bad assigned_type
             ])
-            ->assertOk()
-            ->assertStatusMessageIs('error');
+            ->assertUnprocessable()
+            ->assertStatusMessageIs('error')
+            ->assertJsonPath('messages', trans('admin/hardware/message.legacy_assignment_disabled'));
 
         $asset->refresh();
         $this->assertNotEquals($assigned_user->id, $asset->assigned_to);
         $this->assertNotEquals($asset->assigned_type, 'App\Models\User');
-        $this->assertNotNull($response->json('messages.assigned_type'));
     }
 
     public function testCheckoutToUserWithoutAssignedToWithAssignedType()
@@ -539,18 +571,18 @@ class UpdateAssetTest extends TestCase
         $user = User::factory()->editAssets()->create();
         $assigned_user = User::factory()->create();
 
-        $response = $this->actingAsForApi($user)
+        $this->actingAsForApi($user)
             ->patchJson(route('api.assets.update', $asset->id), [
                 //'assigned_to'   => $assigned_user->id, // deliberately omit assigned_to
                 'assigned_type' => User::class
             ])
-            ->assertOk()
-            ->assertStatusMessageIs('error');
+            ->assertUnprocessable()
+            ->assertStatusMessageIs('error')
+            ->assertJsonPath('messages', trans('admin/hardware/message.legacy_assignment_disabled'));
 
         $asset->refresh();
         $this->assertNotEquals($assigned_user->id, $asset->assigned_to);
         $this->assertNotEquals($asset->assigned_type, 'App\Models\User');
-        $this->assertNotNull($response->json('messages.assigned_to'));
     }
 
     public function testCheckoutToDeletedUserFailsOnAssetUpdate()
@@ -572,7 +604,7 @@ class UpdateAssetTest extends TestCase
         $this->assertNull($asset->assigned_type);
     }
 
-    public function testCheckoutToLocationOnAssetUpdate()
+    public function testLegacyAssignedLocationFieldIsRejectedOnAssetUpdate()
     {
         $asset = Asset::factory()->create();
         $user = User::factory()->editAssets()->create();
@@ -582,13 +614,13 @@ class UpdateAssetTest extends TestCase
             ->patchJson(route('api.assets.update', $asset->id), [
                 'assigned_location' => $assigned_location->id,
             ])
-            ->assertOk()
-            ->assertStatusMessageIs('success')
-            ->json();
+            ->assertUnprocessable()
+            ->assertStatusMessageIs('error')
+            ->assertJsonPath('messages', trans('admin/hardware/message.legacy_assignment_disabled'));
 
         $asset->refresh();
-        $this->assertEquals($assigned_location->id, $asset->assigned_to);
-        $this->assertEquals($asset->assigned_type, 'App\Models\Location');
+        $this->assertNull($asset->assigned_to);
+        $this->assertNull($asset->assigned_type);
 
     }
 
@@ -611,7 +643,7 @@ class UpdateAssetTest extends TestCase
         $this->assertNull($asset->assigned_type);
     }
 
-    public function testCheckoutAssetOnAssetUpdate()
+    public function testLegacyAssignedAssetFieldIsRejectedOnAssetUpdate()
     {
         $asset = Asset::factory()->create();
         $user = User::factory()->editAssets()->create();
@@ -622,13 +654,13 @@ class UpdateAssetTest extends TestCase
                 'assigned_asset'   => $assigned_asset->id,
                 'checkout_to_type' => 'user',
             ])
-            ->assertOk()
-            ->assertStatusMessageIs('success')
-            ->json();
+            ->assertUnprocessable()
+            ->assertStatusMessageIs('error')
+            ->assertJsonPath('messages', trans('admin/hardware/message.legacy_assignment_disabled'));
 
         $asset->refresh();
-        $this->assertEquals($assigned_asset->id, $asset->assigned_to);
-        $this->assertEquals($asset->assigned_type, 'App\Models\Asset');
+        $this->assertNull($asset->assigned_to);
+        $this->assertNull($asset->assigned_type);
 
     }
 
@@ -709,8 +741,6 @@ class UpdateAssetTest extends TestCase
 
     public function testCustomFieldCannotBeUpdatedIfNotOnCurrentAssetModel()
     {
-        $this->markIncompleteIfMySQL('Custom Field Tests do not work in MySQL');
-
         $customField = CustomField::factory()->create();
         $customField2 = CustomField::factory()->create();
         $asset = Asset::factory()->hasMultipleCustomFields([$customField])->create();

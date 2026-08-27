@@ -145,29 +145,42 @@ class CustomField extends Model
 
                 // Update the db_column property in the custom fields table
                 $custom_field->db_column = $custom_field->convertUnicodeDbSlug();
-                $custom_field->save();
+                $custom_field->saveQuietly();
             }
         );
 
         self::updating(
             function ($custom_field) {
 
-                // Column already exists on the assets table - nothing to do here.
                 if ($custom_field->isDirty('name')) {
-                    if (Schema::hasColumn(self::$table_name, $custom_field->convertUnicodeDbSlug())) {
+                    $sourceColumn = $custom_field->sourceDbColumnForRename();
+                    $targetColumn = $custom_field->convertUnicodeDbSlug();
+
+                    if ($sourceColumn === $targetColumn) {
+                        $custom_field->db_column = $targetColumn;
+
                         return true;
+                    }
+
+                    if (Schema::hasColumn(self::$table_name, $targetColumn)) {
+                        throw new \RuntimeException(
+                            sprintf(
+                                'Cannot rename custom field %s: target database column "%s" already exists.',
+                                $custom_field->getKey() ?? 'unknown',
+                                $targetColumn
+                            )
+                        );
                     }
 
                     // Rename the field if the name has changed
                     Schema::table(
-                        self::$table_name, function ($table) use ($custom_field) {
-                            $table->renameColumn($custom_field->convertUnicodeDbSlug($custom_field->getOriginal('name')), $custom_field->convertUnicodeDbSlug());
+                        self::$table_name, function ($table) use ($sourceColumn, $targetColumn) {
+                            $table->renameColumn($sourceColumn, $targetColumn);
                         }
                     );
 
-                    // Save the updated column name to the custom fields table
-                    $custom_field->db_column = $custom_field->convertUnicodeDbSlug();
-                    $custom_field->save();
+                    // The outer update persists this alongside the changed name.
+                    $custom_field->db_column = $targetColumn;
 
                     return true;
                 }
@@ -185,6 +198,38 @@ class CustomField extends Model
                     }
                 );
             }
+        );
+    }
+
+    private function sourceDbColumnForRename(): string
+    {
+        $storedColumn = trim((string) $this->getOriginal('db_column'));
+
+        if ($storedColumn !== '') {
+            if (Schema::hasColumn(self::$table_name, $storedColumn)) {
+                return $storedColumn;
+            }
+
+            throw new \RuntimeException(
+                sprintf(
+                    'Cannot rename custom field %s: stored database column "%s" does not exist.',
+                    $this->getKey() ?? 'unknown',
+                    $storedColumn
+                )
+            );
+        }
+
+        $legacyColumn = $this->convertUnicodeDbSlug($this->getOriginal('name'));
+
+        if (Schema::hasColumn(self::$table_name, $legacyColumn)) {
+            return $legacyColumn;
+        }
+
+        throw new \RuntimeException(
+            sprintf(
+                'Cannot rename custom field %s: no stored or legacy database column could be resolved.',
+                $this->getKey() ?? 'unknown'
+            )
         );
     }
 
@@ -409,10 +454,21 @@ class CustomField extends Model
         $id = $this->id ? $this->id : 'xx';
 
         if (! function_exists('transliterator_transliterate')) {
-            $long_slug = '_snipeit_'.str_slug(mb_convert_encoding(trim($name), "UTF-8"), '_');
+            $slug = str_slug(mb_convert_encoding(trim($name), "UTF-8"), '_');
         } else {
-            $long_slug = '_snipeit_'.Utf8Slugger::slugify($name, '_');
+            $slug = Utf8Slugger::slugify($name, '_');
         }
+
+        $slug = trim((string) $slug, '_');
+
+        // Some valid scripts cannot be transliterated by the installed ICU data.
+        // Keep the column deterministic and non-empty instead of producing the
+        // ambiguous `_snipeit__<id>` fallback for every such field name.
+        if ($slug === '') {
+            $slug = 'field_'.substr(hash('sha256', (string) $name), 0, 16);
+        }
+
+        $long_slug = '_snipeit_'.$slug;
 
         return substr($long_slug, 0, 50).'_'.$id;
     }

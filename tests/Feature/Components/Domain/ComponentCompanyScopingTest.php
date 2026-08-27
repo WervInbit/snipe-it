@@ -68,4 +68,59 @@ class ComponentCompanyScopingTest extends TestCase
             'storage_location_id' => $location->id,
         ], $actor);
     }
+
+    public function testCreateInstanceRejectsExplicitCrossCompanyScopeForNonSuperuser(): void
+    {
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+        $actor = User::factory()->for($companyA)->create();
+        $definition = ComponentDefinition::factory()->create();
+
+        $this->settings->enableMultipleFullCompanySupport();
+
+        try {
+            app(ComponentLifecycleService::class)->createInstance([
+                'component_definition_id' => $definition->id,
+                'company_id' => $companyB->id,
+                'display_name' => 'Cross-company component',
+                'status' => ComponentInstance::STATUS_IN_STOCK,
+            ], $actor);
+
+            $this->fail('A non-superuser must not be able to choose another company explicitly.');
+        } catch (InvalidArgumentException $exception) {
+            $this->assertStringContainsString('outside', $exception->getMessage());
+        }
+
+        $this->assertDatabaseMissing('component_instances', [
+            'display_name' => 'Cross-company component',
+        ]);
+        $this->assertDatabaseCount('component_events', 0);
+    }
+
+    public function testCreateInstanceRejectsCompanyInferredFromCrossCompanyAsset(): void
+    {
+        [$companyA, $companyB] = Company::factory()->count(2)->create();
+        $actor = User::factory()->for($companyA)->create();
+        $asset = Asset::factory()->create(['company_id' => $companyB->id]);
+        $definition = ComponentDefinition::factory()->create();
+
+        $this->settings->enableMultipleFullCompanySupport();
+
+        try {
+            app(ComponentLifecycleService::class)->createInstance([
+                'component_definition_id' => $definition->id,
+                'source_asset_id' => $asset->id,
+                'display_name' => 'Cross-company inferred component',
+                'status' => ComponentInstance::STATUS_IN_STOCK,
+            ], $actor);
+
+            $this->fail('A non-superuser must not inherit another company through an asset.');
+        } catch (InvalidArgumentException $exception) {
+            $this->assertStringContainsString('outside', $exception->getMessage());
+        }
+
+        $this->assertDatabaseMissing('component_instances', [
+            'display_name' => 'Cross-company inferred component',
+        ]);
+        $this->assertDatabaseCount('component_events', 0);
+    }
 }

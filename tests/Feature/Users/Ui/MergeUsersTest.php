@@ -2,28 +2,123 @@
 
 namespace Tests\Feature\Users\Ui;
 
+use App\Events\UserMerged;
 use App\Models\Accessory;
 use App\Models\Asset;
 use App\Models\Consumable;
 use App\Models\LicenseSeat;
 use App\Models\User;
 use App\Models\Actionlog;
+use Illuminate\Support\Facades\Event;
+use RuntimeException;
 use Tests\TestCase;
 
 
 class MergeUsersTest extends TestCase
 {
-    public function testAssetsAreTransferredOnUserMerge()
+    public function testUserEditPermissionCannotBypassDeletePermissionDuringMerge(): void
+    {
+        $source = User::factory()->create();
+        $destination = User::factory()->create();
+
+        $this->actingAs(User::factory()->editUsers()->viewUsers()->create())
+            ->post(route('users.merge.save'), [
+                'ids_to_merge' => [$source->id],
+                'merge_into_id' => $destination->id,
+            ])
+            ->assertForbidden();
+
+        $this->assertNotSoftDeleted($source);
+    }
+
+    public function testGranularUserManagerCannotMergeAnAdminSource(): void
+    {
+        $source = User::factory()->admin()->create();
+        $destination = User::factory()->create();
+
+        $this->assertMergeDenied(
+            User::factory()->editUsers()->deleteUsers()->viewUsers()->create(),
+            $source,
+            $destination
+        );
+    }
+
+    public function testGranularUserManagerCannotMergeIntoAnAdminDestination(): void
+    {
+        $source = User::factory()->create();
+        $destination = User::factory()->admin()->create();
+
+        $this->assertMergeDenied(
+            User::factory()->editUsers()->deleteUsers()->viewUsers()->create(),
+            $source,
+            $destination
+        );
+    }
+
+    public function testAdminCannotMergeASuperuserSource(): void
+    {
+        $source = User::factory()->superuser()->create();
+        $destination = User::factory()->create();
+
+        $this->assertMergeDenied(
+            User::factory()->admin()->create(),
+            $source,
+            $destination
+        );
+    }
+
+    public function testAdminCannotMergeIntoASuperuserDestination(): void
+    {
+        $source = User::factory()->create();
+        $destination = User::factory()->superuser()->create();
+
+        $this->assertMergeDenied(
+            User::factory()->admin()->create(),
+            $source,
+            $destination
+        );
+    }
+
+    public function testMergeRollsBackEveryChangeWhenAListenerFails(): void
+    {
+        $source = User::factory()->create();
+        $destination = User::factory()->create();
+        $asset = Asset::factory()->assignedToUser($source)->create();
+
+        Event::listen(UserMerged::class, function (): void {
+            throw new RuntimeException('forced merge failure');
+        });
+
+        $this->withoutExceptionHandling();
+
+        try {
+            $this->actingAs(User::factory()->editUsers()->deleteUsers()->viewUsers()->create())
+                ->post(route('users.merge.save'), [
+                    'ids_to_merge' => [$source->id],
+                    'merge_into_id' => $destination->id,
+                ]);
+
+            $this->fail('The forced merge failure was not raised.');
+        } catch (RuntimeException $exception) {
+            $this->assertSame('forced merge failure', $exception->getMessage());
+        }
+
+        $this->assertNotSoftDeleted($source);
+        $this->assertSame($source->id, $asset->fresh()->assigned_to);
+        $this->assertSame(User::class, $asset->fresh()->assigned_type);
+    }
+
+    public function testLegacyAssetAssignmentsAreClearedInsteadOfTransferredOnUserMerge()
     {
         $user1 = User::factory()->create();
         $user2 = User::factory()->create();
         $user_to_merge_into = User::factory()->create();
 
-        Asset::factory()->count(3)->assignedToUser($user1)->create();
-        Asset::factory()->count(3)->assignedToUser($user2)->create();
-        Asset::factory()->count(3)->assignedToUser($user_to_merge_into)->create();
+        $sourceAssets = Asset::factory()->count(3)->assignedToUser($user1)->create()
+            ->merge(Asset::factory()->count(3)->assignedToUser($user2)->create());
+        $destinationAssets = Asset::factory()->count(3)->assignedToUser($user_to_merge_into)->create();
 
-        $response = $this->actingAs(User::factory()->editUsers()->viewUsers()->create())
+        $response = $this->actingAs(User::factory()->editUsers()->deleteUsers()->viewUsers()->create())
             ->post(route('users.merge.save', $user1->id),
                 [
                     'ids_to_merge' => [$user1->id, $user2->id],
@@ -33,10 +128,25 @@ class MergeUsersTest extends TestCase
             ->assertRedirect(route('users.index'));
 
         $this->followRedirects($response)->assertSee('Success');
-        $this->assertEquals(9, $user_to_merge_into->refresh()->assets->count());
+        $this->assertEquals(3, $user_to_merge_into->refresh()->assets->count());
         $this->assertEquals(0, $user1->refresh()->assets->count());
         $this->assertEquals(0, $user2->refresh()->assets->count());
 
+        foreach ($sourceAssets as $asset) {
+            $this->assertDatabaseHas('assets', [
+                'id' => $asset->id,
+                'assigned_to' => null,
+                'assigned_type' => null,
+            ]);
+        }
+
+        foreach ($destinationAssets as $asset) {
+            $this->assertDatabaseHas('assets', [
+                'id' => $asset->id,
+                'assigned_to' => $user_to_merge_into->id,
+                'assigned_type' => User::class,
+            ]);
+        }
     }
 
     public function testLicensesAreTransferredOnUserMerge()
@@ -51,7 +161,7 @@ class MergeUsersTest extends TestCase
 
         $this->assertEquals(3, $user_to_merge_into->refresh()->licenses->count());
 
-        $response = $this->actingAs(User::factory()->editUsers()->viewUsers()->create())
+        $response = $this->actingAs(User::factory()->editUsers()->deleteUsers()->viewUsers()->create())
             ->post(route('users.merge.save', $user1->id),
                 [
                     'ids_to_merge' => [$user1->id, $user2->id],
@@ -79,7 +189,7 @@ class MergeUsersTest extends TestCase
 
         $this->assertEquals(3, $user_to_merge_into->refresh()->accessories->count());
 
-        $response = $this->actingAs(User::factory()->editUsers()->viewUsers()->create())
+        $response = $this->actingAs(User::factory()->editUsers()->deleteUsers()->viewUsers()->create())
             ->post(route('users.merge.save', $user1->id),
                 [
                     'ids_to_merge' => [$user1->id, $user2->id],
@@ -107,7 +217,7 @@ class MergeUsersTest extends TestCase
 
         $this->assertEquals(3, $user_to_merge_into->refresh()->consumables->count());
 
-        $response = $this->actingAs(User::factory()->editUsers()->viewUsers()->create())
+        $response = $this->actingAs(User::factory()->editUsers()->deleteUsers()->viewUsers()->create())
             ->post(route('users.merge.save', $user1->id),
                 [
                     'ids_to_merge' => [$user1->id, $user2->id],
@@ -135,7 +245,7 @@ class MergeUsersTest extends TestCase
 
         $this->assertEquals(3, $user_to_merge_into->refresh()->uploads->count());
 
-        $response = $this->actingAs(User::factory()->editUsers()->viewUsers()->create())
+        $response = $this->actingAs(User::factory()->editUsers()->deleteUsers()->viewUsers()->create())
             ->post(route('users.merge.save', $user1->id),
                 [
                     'ids_to_merge' => [$user1->id, $user2->id],
@@ -157,13 +267,18 @@ class MergeUsersTest extends TestCase
         $user2 = User::factory()->create();
         $user_to_merge_into = User::factory()->create();
 
-        Actionlog::factory()->count(3)->acceptedSignature()->create(['target_id' => $user1->id]);
+        $sourceAcceptances = Actionlog::factory()->count(3)->acceptedSignature()->create([
+            'target_id' => $user1->id,
+        ]);
         Actionlog::factory()->count(3)->acceptedSignature()->create(['target_id' => $user2->id]);
         Actionlog::factory()->count(3)->acceptedSignature()->create(['target_id' => $user_to_merge_into->id]);
+        $preservedAcceptance = $sourceAcceptances->first();
+        $originalItemId = $preservedAcceptance->item_id;
+        $originalItemType = $preservedAcceptance->item_type;
 
         $this->assertEquals(3, $user_to_merge_into->refresh()->acceptances->count());
 
-        $response = $this->actingAs(User::factory()->editUsers()->viewUsers()->create())
+        $response = $this->actingAs(User::factory()->editUsers()->deleteUsers()->viewUsers()->create())
             ->post(route('users.merge.save', $user1->id),
                 [
                     'ids_to_merge' => [$user1->id, $user2->id],
@@ -176,6 +291,10 @@ class MergeUsersTest extends TestCase
         $this->assertEquals(9, $user_to_merge_into->refresh()->acceptances->count());
         $this->assertEquals(0, $user1->refresh()->acceptances->count());
         $this->assertEquals(0, $user2->refresh()->acceptances->count());
+        $preservedAcceptance->refresh();
+        $this->assertSame($user_to_merge_into->id, $preservedAcceptance->target_id);
+        $this->assertSame($originalItemId, $preservedAcceptance->item_id);
+        $this->assertSame($originalItemType, $preservedAcceptance->item_type);
 
     }
 
@@ -191,7 +310,7 @@ class MergeUsersTest extends TestCase
 
         $this->assertEquals(3, $user_to_merge_into->refresh()->userlog->count());
 
-        $response = $this->actingAs(User::factory()->editUsers()->viewUsers()->create())
+        $response = $this->actingAs(User::factory()->editUsers()->deleteUsers()->viewUsers()->create())
             ->post(route('users.merge.save', $user1->id),
                 [
                     'ids_to_merge' => [$user1->id, $user2->id],
@@ -209,5 +328,18 @@ class MergeUsersTest extends TestCase
 
     }
 
+    private function assertMergeDenied(User $actor, User $source, User $destination): void
+    {
+        $this->actingAs($actor)
+            ->post(route('users.merge.save'), [
+                'ids_to_merge' => [$source->id],
+                'merge_into_id' => $destination->id,
+            ])
+            ->assertRedirect(route('users.index'))
+            ->assertSessionHas('error', trans('general.insufficient_permissions'));
+
+        $this->assertNotSoftDeleted($source);
+        $this->assertNotSoftDeleted($destination);
+    }
 
 }

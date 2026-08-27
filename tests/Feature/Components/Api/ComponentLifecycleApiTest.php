@@ -122,6 +122,36 @@ class ComponentLifecycleApiTest extends TestCase
         ]);
     }
 
+    public function testAssetToAssetTransferRequiresMoveRatherThanInstallPermission(): void
+    {
+        $source = Asset::factory()->create();
+        $destination = Asset::factory()->create();
+        $component = ComponentInstance::factory()->installed($source->id)->create();
+
+        $this->actingAsForApi(User::factory()->installComponents()->create())
+            ->postJson(route('api.components.install', $component), [
+                'asset_id' => $destination->id,
+            ])
+            ->assertForbidden();
+
+        $this->assertSame($source->id, $component->fresh()->current_asset_id);
+
+        $this->actingAsForApi(User::factory()->moveComponents()->create())
+            ->postJson(route('api.components.install', $component), [
+                'asset_id' => $destination->id,
+            ])
+            ->assertOk()
+            ->assertStatusMessageIs('success');
+
+        $this->assertSame($destination->id, $component->fresh()->current_asset_id);
+        $this->assertDatabaseHas('component_events', [
+            'component_instance_id' => $component->id,
+            'event_type' => 'installed',
+            'from_asset_id' => $source->id,
+            'to_asset_id' => $destination->id,
+        ]);
+    }
+
     public function testMarkDestroyedEndpointRequiresPendingStateAndEvidence(): void
     {
         $actor = User::factory()->superuser()->create();

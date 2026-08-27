@@ -7,9 +7,17 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (DB::getDriverName() === 'sqlite') {
+        $driver = DB::getDriverName();
+
+        if ($driver === 'sqlite') {
             // SQLite cannot alter NOT NULL constraints without rebuilding the table.
             // Skip; models created in tests already accept NULL via schema builder defaults.
+            return;
+        }
+
+        if ($driver === 'pgsql') {
+            DB::statement('ALTER TABLE "models" ALTER COLUMN "model_number" DROP NOT NULL');
+
             return;
         }
 
@@ -18,7 +26,16 @@ return new class extends Migration
 
     public function down(): void
     {
-        if (DB::getDriverName() === 'sqlite') {
+        $driver = DB::getDriverName();
+
+        if ($driver === 'sqlite') {
+            return;
+        }
+
+        if ($driver === 'pgsql') {
+            DB::statement('UPDATE "models" SET "model_number" = \'\' WHERE "model_number" IS NULL');
+            DB::statement('ALTER TABLE "models" ALTER COLUMN "model_number" SET NOT NULL');
+
             return;
         }
 

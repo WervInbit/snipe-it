@@ -11,6 +11,7 @@ use App\Models\Asset;
 use App\Models\ComponentInstance;
 use App\Models\ComponentStorageLocation;
 use App\Services\ComponentLifecycleService;
+use App\Support\SameOriginRedirect;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -270,7 +271,7 @@ class ComponentWorkflowController extends Controller
 
     public function createMarkDestructionPending(Request $request, ComponentInstance $component_id): View
     {
-        $this->authorize('move', $component_id);
+        $this->authorize('destroy', $component_id);
 
         abort_if(in_array($component_id->effectiveLifecycleStatus(), [
             ComponentInstance::LIFECYCLE_ATTACHED,
@@ -291,7 +292,7 @@ class ComponentWorkflowController extends Controller
 
     public function markDestructionPending(Request $request, ComponentInstance $component_id): RedirectResponse
     {
-        $this->authorize('move', $component_id);
+        $this->authorize('destroy', $component_id);
 
         $data = $request->validate([
             'storage_location_id' => ['nullable', 'integer', 'exists:component_storage_locations,id'],
@@ -316,7 +317,7 @@ class ComponentWorkflowController extends Controller
 
     public function createMarkDestroyed(Request $request, ComponentInstance $component_id): View
     {
-        $this->authorize('move', $component_id);
+        $this->authorize('destroy', $component_id);
 
         abort_unless($component_id->effectiveLifecycleStatus() === ComponentInstance::LIFECYCLE_DESTRUCTION_PENDING, 404);
 
@@ -330,7 +331,7 @@ class ComponentWorkflowController extends Controller
 
     public function markDestroyed(Request $request, ComponentInstance $component_id): RedirectResponse
     {
-        $this->authorize('move', $component_id);
+        $this->authorize('destroy', $component_id);
 
         $data = $request->validate([
             'note' => ['nullable', 'string'],
@@ -381,18 +382,7 @@ class ComponentWorkflowController extends Controller
     {
         $returnTo = trim((string) $request->input('return_to', $request->query('return_to', '')));
 
-        if ($returnTo === '') {
-            return route('components.show', $component);
-        }
-
-        if (str_starts_with($returnTo, '/')) {
-            return url($returnTo);
-        }
-
-        if (str_starts_with($returnTo, url('/'))) {
-            return $returnTo;
-        }
-
-        return route('components.show', $component);
+        return SameOriginRedirect::sanitize($returnTo)
+            ?? route('components.show', $component);
     }
 }

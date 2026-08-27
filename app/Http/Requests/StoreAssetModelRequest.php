@@ -14,7 +14,11 @@ class StoreAssetModelRequest extends ImageUploadRequest
      */
     public function authorize(): bool
     {
-        return Gate::allows('create', new AssetModel);
+        $ability = $this->isMethod('put') || $this->isMethod('patch')
+            ? 'update'
+            : 'create';
+
+        return Gate::allows($ability, AssetModel::class);
     }
 
     public function prepareForValidation(): void

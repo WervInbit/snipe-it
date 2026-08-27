@@ -61,6 +61,7 @@ class ModelNumberAttributeController extends Controller
 
         $selectedItem = view('models.model_numbers.partials.selected-attribute-item', [
             'definition' => $definition,
+            'canRemoveAssigned' => true,
         ])->render();
 
         $detail = view('models.model_numbers.partials.attribute-detail', [
@@ -80,18 +81,23 @@ class ModelNumberAttributeController extends Controller
 
     public function destroy(AssetModel $model, ModelNumber $modelNumber, AttributeDefinition $attributeDefinition): JsonResponse
     {
+        $this->authorize('manageSpecificationCleanup', $model);
         $this->ensureModelNumber($model, $modelNumber);
         $definition = $this->resolveDefinitionForModel($model, $attributeDefinition->id);
 
-        $deleted = ModelNumberAttribute::query()
-            ->where('model_number_id', $modelNumber->id)
-            ->where('attribute_definition_id', $definition->id)
-            ->delete();
+        $deleted = DB::transaction(function () use ($modelNumber, $definition): int {
+            $deleted = ModelNumberAttribute::query()
+                ->where('model_number_id', $modelNumber->id)
+                ->where('attribute_definition_id', $definition->id)
+                ->delete();
 
-        AssetAttributeOverride::query()
-            ->where('attribute_definition_id', $definition->id)
-            ->whereHas('asset', fn ($query) => $query->where('model_number_id', $modelNumber->id))
-            ->delete();
+            AssetAttributeOverride::query()
+                ->where('attribute_definition_id', $definition->id)
+                ->whereHas('asset', fn ($query) => $query->where('model_number_id', $modelNumber->id))
+                ->delete();
+
+            return $deleted;
+        });
 
         return response()->json([
             'status' => $deleted ? 'removed' : 'skipped',

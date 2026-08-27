@@ -157,7 +157,7 @@ return [
     'import'         	    => 'Importavimas',
     'import_this_file'      => 'Susieti laukus ir apdoroti šį failą',
     'importing'         	=> 'Importuojama',
-    'importing_help'        => 'Galite importuoti turtą, priedus, licencijas, komponentus, eksploatacines medžiagas ir naudotojus, naudodami CSV failą. <br><br>CSV reikšmės turėtų būti atskirtos kableliais, o failas suformuotas su antraštėmis, kurios sutampa su esančiomis <a href="https://snipe-it.readme.io/docs/importing" target="_new">CSV pavyzdžiuose</a>.',
+    'importing_help'        => 'Galite importuoti turtą, priedus, licencijas, komponentus, eksploatacines medžiagas ir naudotojus, naudodami CSV failą. <br><br>CSV reikšmės turėtų būti atskirtos kableliais, o failas suformuotas su antraštėmis, kurios sutampa su esančiomis <a href=":fork_documentation_url" target="_new">CSV pavyzdžiuose</a>.',
     'import-history'        => 'Importuoti istoriją',
     'asset_maintenance'        => 'Turto aptarnavimas',
     'asset_maintenance_report' => 'Turto aptarnavimo ataskaita',
