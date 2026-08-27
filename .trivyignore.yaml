@@ -1,0 +1,33 @@
+vulnerabilities:
+  - id: CVE-2026-48019
+    statement: >-
+      The official Laravel f336ba7 CRLF email-validation fix is applied from a
+      checksum-pinned local patch and covered by direct framework regression
+      tests while this fork remains on Laravel 11.
+    expired_at: 2026-10-01
+  - id: GHSA-5vg9-5847-vvmq
+    statement: >-
+      The official Laravel f336ba7 CRLF email-validation fix is applied from a
+      checksum-pinned local patch and covered by direct framework regression
+      tests while this fork remains on Laravel 11.
+    expired_at: 2026-10-01
+  - id: GHSA-crmm-hgp2-wgrp
+    statement: >-
+      The official Laravel 12df688 local temporary-URL path fix is applied from
+      a checksum-pinned local patch; local serving also remains disabled by
+      default.
+    expired_at: 2026-10-01
+
+misconfigurations:
+  - id: AVD-DS-0002
+    paths:
+      - Dockerfile
+      - Dockerfile.alpine
+      - Dockerfile.fpm-alpine
+      - docker/app/Dockerfile
+    statement: >-
+      These are legacy, intentionally unsupported, or local-development
+      images whose startup paths require root for mounted-volume preparation.
+      Releasable V1 images use docker/production/Dockerfile, whose app workers
+      and web process run as unprivileged users and remain unignored.
+    expired_at: 2027-02-01

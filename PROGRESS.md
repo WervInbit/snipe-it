@@ -1,3 +1,654 @@
+# Session Progress (2026-08-27)
+
+## Addendum (2026-08-27 Workflow Capability Review)
+- Began a read-only review of the implemented workflow engine, seeded workflow
+  catalogue, and current environments for Windows installation, device wiping,
+  diagnostic execution, and ordered workflow items.
+- No database mutation or implementation change is part of this review.
+- Session notes:
+  `docs/agents/agents-addendum-2026-08-27-workflow-capability-review-session-init.md`.
+- Development and populated rehearsal each contain four active profiles:
+  Standard Diagnostics, Pre-Sale Check, Cleaning, and Shipping Laptop. Neither
+  contains a Windows-installation or secure-wipe profile/item.
+- Standard Diagnostics contains 20 ordered, asset-applicability-filtered
+  pass/fail items. The engine records external/manual diagnostic results,
+  notes, and private photo evidence; it does not launch the diagnostic tools.
+- Workflow items and per-profile membership have persisted drag-and-drop order,
+  and new runs snapshot that order. The current run screen does not enforce
+  strict step prerequisites: operators may complete cards out of order.
+- Release-control check: `master`, cached `origin/master`, and the live remote
+  `master` all point to
+  `91a6db797496`, but the qualified runtime candidate is not represented by
+  that commit. The worktree has zero staged paths, 953 tracked changes, and
+  204 untracked paths; roughly 1,148 of those paths are outside the manuals.
+  Production deployment from repository history is therefore blocked until
+  the runtime, migrations, container profile, and tests are reviewed and
+  captured in a reproducible release commit. No commit or deployment was made.
+
+# Session Progress (2026-08-25)
+
+## Addendum (2026-08-25 Portable Unaccepted Review Package)
+- Added `resources/manuals/operator-guides/drafts/` as a committed, portable
+  collection for the latest unaccepted guide PDFs. Its README and checksum
+  manifest state explicitly that these artifacts are for review and
+  environment transfer only and are not approved operator instructions.
+- Preserved 17 latest unaccepted PDFs across 30 A4 pages. Seven entries record
+  their exact accepted predecessor while the accepted nine-PDF package remains
+  isolated and unchanged under `resources/manuals/operator-guides/pdf/`.
+- Kept the 24 newly added canonical screenshots in the existing evidence
+  package; the evidence manifest now verifies 72 portable sources.
+- Extended portable path handling, handoff documentation, registry paths, and
+  package validation for the draft root. Validation passes checksums, explicit
+  status, predecessor links, page counts, A4 dimensions, text extraction, URL
+  hygiene, and Markdown/evidence integrity for both accepted and unaccepted
+  artifacts.
+
+## Addendum (2026-08-25 CAT-00 Structural Rewrite)
+- Rebuilt CAT-00 v4 as an eight-page reference chapter instead of a pseudo-
+  task sequence. It now teaches identities, attribute definitions and values,
+  component definitions, expected and placed components, model-number
+  baselines, physical asset deviations, and effective-value precedence before
+  presenting the CAT-01 through CAT-06 route map.
+- Added a canonical scrolled model-specification capture for the expected-
+  component explanation and registered its stable evidence ID and checksum.
+- Strengthened the shared context-reference component so prerequisite and
+  contextual handoffs render the complete registered guide name and fail QA
+  when a shorthand label is incomplete.
+- Removed the leaked layout prompt from the example area and replaced invented
+  umbrella terminology with the operator-facing attribute/component terms.
+- Generated `output/pdf/CAT-00-catalogus-begrijpen-v4-draft.pdf` as the active
+  working draft. CAT-01 and all exact accepted guide artifacts were left
+  unchanged.
+
+## Addendum (2026-08-25 Supervisor Product Setup Authorization)
+- Implemented the V1 Supervisor product/catalog setup contract.
+- Scope: explicit registered permissions, least-privilege foundation-role
+  upgrades, policy-backed routes and navigation, negative authorization tests,
+  aligned role/readiness documentation, and renewed release-candidate gates.
+- Destructive catalog lifecycle and cleanup remain Admin-only; the shared
+  development database and populated rehearsal will not be destructively reset.
+- Session notes:
+  `docs/agents/agents-addendum-2026-08-25-supervisor-product-setup-session-init.md`.
+- Supervisor now has explicit ordinary model, model-number/specification,
+  attribute-definition, component-definition, and workflow-definition setup
+  permissions. Destructive lifecycle/delete/cleanup operations remain
+  Admin-only, and existing custom grants survive additive role upgrades.
+- Policies, controller guards, routes, navigation, forms, the production
+  upgrade runbook, and the operational role matrix now share that contract.
+- Promotion exposed a migrated legacy edge: Supervisor already carried
+  `models.delete`. Asset-model/model-number deletion and model restoration now
+  require both that legacy grant and the new Admin-only lifecycle grant, so
+  additive upgrades cannot silently widen destructive access.
+- Validation is green: focused surfaces (79 tests/503 assertions; 97/1,205;
+  17/200; legacy-grant 11/204; broader catalog 88/586), guarded full SQLite
+  (2,166/10,553 in 14:32.95), guarded full MariaDB 11.4.7 (2,166/10,553 in
+  16:17.02), syntax, Blade compilation, routes, Composer, npm high/critical
+  audits, four Node security regressions, production assets, and
+  `git diff --check`.
+- Built, content-verified, and blocking-scanned exact app/web images at
+  `sha256:bc1e29d8d9a40a4048e3642419c2b7bbd2555b754bedff37bfc7c6456df8fe33`
+  and
+  `sha256:c8bd31489fb6d22ade4579ecd911515ef676f292954c33757fb7c325073df4b2`;
+  both have zero fixable high/critical findings and zero embedded secrets.
+- Promoted the exact digests into the populated rehearsal, ran the additive
+  role seeder, and proved the actual migrated Supervisor/Admin Gate boundary.
+  Full-profile cold restart retained 17 active / 19 total users, 12 assets, 14
+  models, 477 migrations, zero failed jobs, and identical 294-public / 14-
+  private upload manifests. All seven services are healthy and HTTPS login is
+  200 with the required security headers.
+- PHPStan and real LDAP/SMTP were intentionally not run. Remaining V1 gates
+  are owner browser/credential acceptance, managed-environment rehearsal, and
+  release ownership/metadata.
+
+# Session Progress (2026-08-25)
+
+## Addendum (2026-08-25 Operator Guide Visual Corrections)
+- Started a focused correction pass for AC-02, USR-01 through USR-04,
+  AST-03 through AST-05, and CMP-02 based on owner review.
+- CAT guides remain unchanged in this pass and will be reviewed separately.
+- Planned checks cover focus alignment and shape, inline warnings, reusable
+  guide-reference styling, text containment, screenshot framing, and AST-04
+  task clarity before the revised PDFs are offered for review.
+- Completed nine corrected drafts across eleven A4 pages: AC-02 v3, USR-01
+  v11, USR-02 v9, USR-03 v3, USR-04 v3, AST-03 v14, AST-04 v5, AST-05 v5,
+  and CMP-02 v4. Existing accepted versions and all CAT artifacts remain
+  unchanged.
+- Added the unsaved `USR-EDIT-PASSWORD-GENERATED-DESKTOP-01` evidence source
+  so USR-03 shows what `Genereer` produces without retaining a final password.
+- Updated the guide specifications, registry, screenshot catalog, inventory,
+  decisions, handoff tracker, project index, and per-version review records.
+- Validation passed: generator syntax, shared guide-system tests, evidence and
+  accepted-package verification, exact A4/page counts, required-text checks,
+  and full-page raster inspection of all eleven output pages.
+- User explicitly accepted exact AST-03 v14. Preserved its two-page PDF in the
+  repository internal-review package with SHA-256
+  `e557fc77c7e4b5b2249cdc3b4a9ec2dd3e67a6fcfdea368664d585d7eca74390`;
+  the package now contains nine accepted PDFs across eleven pages.
+
+# Session Progress (2026-08-25)
+
+## Addendum (2026-08-25 V1 Qualification Resume And Populated Rehearsal Completion)
+- Resumed the August 20 MariaDB qualification after workstation suspension;
+  the paused test and database containers remained healthy and the exact-
+  candidate suite completed green: 2,160 tests, 10,448 assertions, 48:28.
+- The exact-candidate guarded SQLite suite passes 2,160 tests with 10,445
+  assertions in 34:40. Focused rehearsal configuration coverage passes 2 tests
+  with 32 assertions, and Node security regressions pass 4 of 4.
+- Updated `paragonie/sodium_compat` from v1.24.0 to v1.24.2 for the August 18
+  Ed25519 validation advisory. Strict Composer validation, locked dry-run
+  installation, and the current audit pass; only the three checksum-patched
+  Laravel exceptions remain ignored.
+- Rebuilt and verified sodium-fixed local production images at app digest
+  `sha256:530c699587cfbc9c1f309ef63a4312cafeb20e1cd1e667eeec2c52598d429e0c`
+  and web digest
+  `sha256:a824b2e5fdbf045d043f17c9e4ce3f141373920519b2a0de8c57293f0c2d165c`.
+  Production content policy, pinned framework patches, assets, and the current
+  zero-fixable-high/critical plus zero-secret image gate pass.
+- Promoted those digests into the populated beta-derived rehearsal. All seven
+  production-profile services are healthy; HTTPS login is 200 with the
+  required security headers; 477 migrations are applied with none pending.
+- Verified exact promotion and cold-restart parity: 19 users, 12 assets, 14
+  models, zero failed jobs, 294 public uploads, 14 private uploads, and stable
+  upload manifest hashes.
+- Restored the immutable export into a separately named clone at its 468-
+  migration/17-user baseline. Applied nine migrations in 2.654 seconds,
+  rolled back exact batch 2 in 2.024 seconds with row/upload fingerprint parity,
+  and reapplied in 3.078 seconds. Removed the disposable clone afterward.
+- Added a fail-closed overwrite guard to `prepare-runtime.ps1`; existing
+  managed runtime/secret files now require explicit `-Force` before rotation.
+- Removed 16 disposable test volumes, the final MariaDB test container/network,
+  the rollback clone and its generated secrets. The immutable export and
+  populated primary rehearsal remain intact.
+- Current no-go: owner direction now requires Supervisor to complete normal
+  new-product/catalog setup, but the seeded role, model permissions, workflow
+  configuration routes/keys, and destructive lifecycle separation do not yet
+  implement that contract. Browser role acceptance, one migrated-password
+  login, managed-environment rehearsal, release metadata, and owner sign-off
+  also remain open.
+- Current status: `docs/v1-release-readiness-status-2026-08-25.md`.
+- Session notes:
+  `docs/agents/agents-addendum-2026-08-25-v1-qualification-resume-session-init.md`.
+
+# Session Progress (2026-08-20)
+
+## Addendum (2026-08-20 CAT Guide Review)
+- Reworked all 12 guides that failed or conditionally passed the cold-start
+  audit: AC-02 v2, AST-03 v13, AST-04/05 v4, CMP-02 v3, CMP-04 v6, USR-01
+  v10, USR-02 v8, USR-03/04 v2, and CAT-00/01 v2.
+- Kept all eight exact internal-review PDFs byte-protected. USR-01 v8 and
+  USR-02 v7 remain accepted predecessors; every revised artifact is still a
+  working draft pending exact-version review.
+- Standardized refreshed AST evidence on the screenshot-only
+  `INBIT-HG0421` / `HP ProBook 450 G8` / `5CD1234ABC` identity and updated all
+  affected manifest hashes. No server record was created or renamed.
+- Updated latest-version generator defaults and gave filtered AST/component
+  runs distinct aggregate filenames, so ordinary regeneration now matches the
+  registry without overwriting another focused proof.
+- Synchronized the registry, guide specifications, evidence catalog, decision
+  log, README, inventory, layouts, handoff, TODOs, and 12 exact-version review
+  records with the corrected drafts.
+- Validation passed: five changed scripts parse; `scripts/manuals/npm test`
+  reports 25 registry entries, 70 evidence files, eight accepted PDFs, nine
+  accepted pages, two baselines, and 16 active scripts; all 12 PDFs contain
+  the expected 21 A4 pages and required text; all pages render nonblank at
+  827 x 1170 with inset content.
+- Full grouped visual inspection passed with no clipped title, overlapping
+  target, unreadable crop, broken page transition, or footer drift. The retest
+  result is 19 PASS, 0 conditional, 0 fail, and 6 not testable planned guides.
+- Started a review-only pass on CAT-00/CAT-01 after owner feedback about the
+  Supervisor role, minimum-rights wording, basismodel terminology, catalogue
+  object decisions, source precedence, navigation, and screenshot clarity.
+- Verified that one basismodel can have several manufacturer model numbers and
+  that many physical assets can share one model number; current RAM/storage is
+  represented by installed components and does not redefine that identifier.
+- Confirmed that `Primary` is a single default/fallback model number rather
+  than a lifecycle status, component-derived specifications take precedence
+  over manual values, and installed-component values take precedence over
+  component-definition defaults.
+- Found that the seeded Supervisor role can create assets but cannot currently
+  create/edit basismodellen. Global attribute definitions remain Admin-only,
+  while component definitions require `components.manage_definitions`.
+- Found no browser form for component-instance attributes; the current write
+  path is API-only, so CAT-00 must not present it as an ordinary operator route.
+- Confirmed that `Primary` still has runtime effects as the fallback for asset
+  forms, imports, model-level specification resolution, component rosters, and
+  model-number images. It should be de-emphasized as a system-managed default,
+  not described as an obsolete or operator-facing lifecycle decision.
+- Owner direction: operator guides use `Admin`, not `Superadmin`, and
+  Supervisors must be able to complete the full new-product setup process with
+  explicit minimum permissions rather than a broad administrator marker.
+- Identified a missing guide tranche for reusable workflow items,
+  applicability, workflow profiles, profile-item linking, and final sample-
+  asset validation. The old CFG-09 through CFG-12 entries are brainstorming
+  only and are not active guides.
+- Found implementation blockers for that Supervisor workflow: workflow routes
+  are currently inside a superuser-only route group, `test_types.*` permissions
+  are not registered, and attribute-definition policy remains Admin-only.
+- Recommended a UI-only Dutch terminology pass (`Basismodellen`, `Basismodel`,
+  `Naam basismodel`), a task-oriented CAT-00 index and chapter strip, clearer
+  user-facing precedence language, and compact label/value pairs in CAT-01.
+- Preserved the current v1 draft PDFs and application labels during this
+  review. No runtime tests were required because no behavior was changed.
+- Completed a first-time-operator pass across the active guide set. The review
+  now separates structurally sound task guides, focused cold-start corrections,
+  major catalogue rewrites, and visible current-draft export regressions.
+- Defined the cold-start usability boundary for the next revision pass: an
+  employee may know the physical work but is assumed to have no Snipe-IT or
+  programming knowledge; each guide must expose its starting screen, exact UI
+  actions, consistent example identity, save/result state, plain-language
+  choices, and complete next-guide handoff.
+- No guide, generator, accepted artifact, application behavior, or production
+  data changed during the cross-guide review.
+- Completed the exact cold-start gate for all 25 active registry entries. All
+  19 current PDFs rendered as 29 nonblank A4 pages with intact boundaries, and
+  the guide package plus structural checks passed after resolving the bundled
+  Poppler executable path.
+- Manual outcomes are 7 pass, 6 conditional pass, 6 fail, and 6 not testable.
+  The exact versions, criteria, and correction order are recorded in
+  `docs/manuals/operator-guides/reviews/2026-08-20-cold-start-audit.md`.
+- Exact rerendering did not reproduce the earlier suspected current-draft
+  clipping in WF-02, CMP-04, AC-02, or USR-04; the full audit supersedes that
+  initial visual-scan finding.
+- Session notes:
+  `docs/agents/agents-addendum-2026-08-20-cat-guide-review-session-init.md`.
+
+# Session Progress (2026-08-18)
+
+## Addendum (2026-08-20 Populated V1 Rehearsal And Qualification)
+- Started the authorized full V1 rehearsal using the verified beta export in
+  `C:\dev\snipeit-rehearsal-data`, outside Git and Docker build contexts.
+- The shared development database and source beta server remain out of scope
+  for writes. All migration, account creation, browser mutation, interruption,
+  and rollback work will use uniquely named disposable rehearsal resources.
+- Real LDAP and SMTP/TLS remain post-V1; V1 qualification will prove their
+  disabled modes and all current supported local paths instead.
+- Verified all six export checksums, gzip readability, and safe archive paths;
+  the immutable export has not been changed or imported yet.
+- Added an isolated production-profile rehearsal overlay, TLS edge proxy,
+  outside-repository secret/runtime generator, and focused configuration test.
+  The focused gate passes 2 tests with 22 assertions under explicit in-memory
+  SQLite isolation.
+- Built current-source immutable candidate images successfully:
+  `local/inbit-app@sha256:e4add80570154436b6107f25e80f7ecbec8e3f85ada3b1110c7fe1ee7513541f`
+  and
+  `local/inbit-web@sha256:ec379d8fe46e26d66d7bdc0a39b326f9d1be8ed8c54be161a748b9f365f0731c`.
+- Compose preflight found that PowerShell array expression precedence emitted
+  secret path keys and values on separate lines. The generator has been fixed
+  and regression assertions added, but regeneration and Compose validation
+  remain the first checkpoint after the device restart.
+- Paused cleanly before any rehearsal container, Docker volume, database
+  restore, migration, account mutation, or browser mutation was created.
+- Session notes:
+  `docs/agents/agents-addendum-2026-08-20-populated-v1-rehearsal-session-init.md`.
+
+## Addendum (2026-08-18 Narrow Dashboard Header Regression)
+- Reproduced the reported dashboard header overlap at the 768px narrow-desktop
+  breakpoint and confirmed the adjacent 767px mobile and 900px desktop layouts
+  remain outside the correction.
+- Wrapped the combined-brand site name in a dedicated element, hid only that
+  redundant text between 768px and 899px, and normalized the asset-search input
+  and button to the same 34px border-box height in that range.
+- Rebuilt production assets successfully. Live browser evidence at 768px shows
+  the duplicate brand text removed and both search controls ending at the same
+  pixel; the focused dashboard suite passes 5 tests with 24 assertions, Blade
+  compilation succeeds, and focused diff hygiene passes.
+- This is a source-level responsive regression, not a database or security
+  side effect of the audit. The audit's asset rebuild may only have exposed a
+  previously stale compiled stylesheet.
+
+## Addendum (2026-08-18 Catalog Guide Foundation)
+- Started the catalogue-management guide tranche with a standards-first audit.
+- Initial implementation scope is `CAT-00 Catalogus begrijpen` and `CAT-01
+  Model en modelnummer aanmaken`; existing accepted guide artifacts remain
+  untouched.
+- Session notes:
+  `docs/agents/agents-addendum-2026-08-18-catalog-guide-session-init.md`.
+- Verified the deployed base-model, exact model-number, attribute, expected
+  component, component-definition, precedence, lifecycle, and partial-copy
+  behavior before writing the guides.
+- Added detailed CAT-00 through CAT-06 specifications, shared CAT family
+  registration, a controlled read-only capture script, eight canonical
+  evidence files, and the reusable catalogue guide generator.
+- Generated `CAT-00 Catalogus begrijpen` v1 as a four-page reference chapter
+  and `CAT-01 Model en modelnummer aanmaken` v1 as a five-page procedure with
+  continuous steps 1-8. Both are working drafts awaiting exact-version review.
+- Validation passed for generator syntax, shared component tests, A4 page
+  count/dimensions, context-column and title/version geometry, component
+  bounds, extracted-text/stale-URL checks, and full-page raster inspection of
+  all nine final PDF pages.
+- CAT-02 is the next evidence-and-generation target. CAT-06 remains dependent
+  on an operational decision about where catalogue source verification is
+  recorded.
+
+## Addendum (2026-08-18 AST-03 v12 Focus And Recovery Correction)
+- Preserved AST-03 v11 as review history and created v12 after owner review of
+  the remaining step-1 target drift and damaged-label recovery wording.
+- Kept 1A unchanged, contained 1B around `Nieuwe aanmaken`, and shifted 1C
+  left to center it on the toolbar `+`.
+- Replaced the incorrect replacement-print instruction with manual search by
+  the unique Inbit asset tag or serial number when a label is not scannable.
+- Retained the real 7A underside photo, continuous steps 1-8, and all prior
+  registration, save, and post-save verification corrections.
+
+## Addendum (2026-08-18 AST-03 v11 Real Placement Photo)
+- Preserved AST-03 v10 as review history and created v11 after the owner
+  supplied a real full-underside placement photo.
+- Added canonical `AST-LABEL-PLACEMENT-PHOTO-01` and replaced the numbered 7A
+  gap. The photo keeps the full device, front edge, ventilation, service
+  markings, and lower-right QR label visible.
+- Added one generated focus frame around the physical QR label and retained
+  the established single post-scan result as 8A.
+- AST-03 now has no explicit evidence gap and is ready for exact-version review.
+
+## Addendum (2026-08-18 V1 Authorization And Media Implementation)
+- Continued the release implementation plan without changing the shared
+  database or the separate manual agent's artifacts.
+- Hardened license keys, reports/exports, file controls, and seat check-in
+  behavior; focused license/resource coverage is green.
+- Separated private workflow evidence from explicit public gallery publishing,
+  added user-facing privacy warnings, cleaned private evidence when its run is
+  deleted, and preserved both gallery and evidence files across asset soft
+  delete/restore.
+- Guarded in-memory SQLite evidence is recorded in
+  `docs/agents/agents-addendum-2026-08-18-v1-implementation-session-init.md`.
+- Final consolidation passes 110 tests with 1,122 assertions; Blade cache
+  compilation, focused diff hygiene, and the running HTTPS health check pass.
+- PHPStan remains deferred by owner decision and was not run.
+
+## Addendum (2026-08-18 AST-03 v10 Continuous Numbering)
+- Preserved AST-03 v9 as review history and created v10 after owner feedback
+  that the second page incorrectly restarted a continuous guide at step 1.
+- Page 2 now continues with steps 5-8 and image identifiers 5A, 6A/6B, 7A,
+  and 8A.
+- Kept the rejected generated underside image out of the guide. Its replacement
+  remains an explicit numbered 7A slot for the owner-supplied real photo.
+- Retained all v9 target geometry and v6 save/status corrections.
+
+## Addendum (2026-08-18 AST-03 v9 Tight Focus Targets)
+- Preserved AST-03 v8 as review history and created v9 after owner feedback on
+  the remaining 1B/1C target padding.
+- Kept the correct 1A target unchanged, tightened 1B around the blue
+  `Nieuwe aanmaken` control, and reduced/recentered 1C around the toolbar `+`.
+- All later guide content remains unchanged. The real underside placement
+  photo remains pending on page 2.
+
+## Addendum (2026-08-18 AST-03 v8 Step-1 Target Alignment)
+- Preserved AST-03 v7 as review history and created v8 after owner feedback on
+  the dashboard-to-create focus geometry.
+- Recalculated the 1A target to enclose the complete `Apparaten` tile, inset
+  1B so its stroke remains visible around `Nieuwe aanmaken`, and tightened 1C
+  around the toolbar `+` button.
+- Kept the v7 step sequence, v6 save/status checks, and all later evidence
+  unchanged. The real underside placement photo remains pending on page 2.
+
+## Addendum (2026-08-18 AST-03 v7 Dashboard Entry)
+- Preserved AST-03 v6 as review history and created v7 after identifying that
+  the guide assumed the user had already opened the hardware index.
+- Step 1 now starts from the dashboard: 1A highlights `Apparaten`, while 1B
+  and 1C show `Nieuwe aanmaken` and the toolbar `+` as grouped alternatives.
+- Reused canonical dashboard and hardware-index evidence. No new capture or
+  server-side change was required.
+- Retained the v6 `Status`, complete `Opslaan`, and four-field post-save
+  verification corrections. The real underside placement photo remains
+  pending on page 2.
+
+## Addendum (2026-08-18 AST-03 v6 Save And Verification)
+- Preserved AST-03 v5 as review history and created v6 after owner feedback on
+  the final registration step.
+- Replaced `werkstatus` with the deployed interface label `Status`; 4A now
+  includes `Being Processed` and the complete `Opslaan` button.
+- Added canonical `AST-REGISTER-SAVED-CHECK-01` evidence from an existing
+  development record. Screenshot-only identity substitution and row filtering
+  produced a compact 4B check without changing server data.
+- 4B now visibly verifies asset tag, status, asset name/model, and serial
+  number. The step body and caption name the same checks.
+- Published the photo-pending review artifact as
+  `output/pdf/AST-03-register-label-v6-draft.pdf`; page 2 still waits for the
+  owner-supplied full-underside placement photo.
+
+## Addendum (2026-08-18 AST-03 v5 Alignment And Photo Reset)
+- Preserved AST-03 v4 as rejected review history and created v5 after owner
+  feedback.
+- Recalculated the 1A toolbar `+` and 1B `Nieuwe aanmaken` focus rectangles
+  from the canonical source dimensions and rendered crop geometry. The 1B
+  image badge now uses the opposite corner so it does not obscure the target.
+- Removed the rejected generated underside image from the active draft. The
+  official HP ProBook 450 G8 parts locator confirms the bottom orientation and
+  service-tag area, but not Inbit QR placement, so v5 keeps a bounded slot for
+  the owner's real placement photo.
+- Removed the repeated scanner photo from step 4. The remaining result capture
+  verifies the asset opened after scanning.
+- Published the photo-pending review artifact as
+  `output/pdf/AST-03-register-label-v5-draft.pdf`; exact-version review waits
+  for the real placement photo.
+
+## Addendum (2026-08-18 AST-03 v4 Focus And Placement)
+- Preserved AST-03 v3 as review history and created v4 after owner feedback.
+- Enlarged/recentered the 1A toolbar `+` and 1B `Nieuwe aanmaken` focus frames
+  so each frame surrounds the complete control.
+- Generated and cataloged `AST-LABEL-PLACEMENT-GENERATED-01` as an explicit
+  instructional example showing the entire laptop underside, front edge
+  facing the reader, and safe lower-right QR placement. It is not live
+  evidence and its QR is not intended for scanning; step 4 retains the real
+  mobile scanner capture.
+- Regenerated and visually inspected both v4 A4 pages. Package validation
+  passes with 18 guide records, 60 evidence hashes, 8 accepted PDFs over 9
+  pages, 2 baselines, and 14 active scripts. PDF-content checks also pass.
+- Published the review artifact as
+  `output/pdf/AST-03-register-label-v4-draft.pdf`; exact-version owner review
+  remains pending.
+
+## Addendum (2026-08-18 AST Lifecycle v3 Feedback)
+- Created new AST-03/04/05 v3 branches from owner review without overwriting
+  the v2 proof history or any accepted artifact.
+- AST-03 now shows both create controls, explains `Unlock`, automatic uppercase
+  behavior and `Aa`, uses a realistic unsubmitted `5CD1234ABC` S/N example,
+  separates exact category/model/type selection, removes location from the
+  primary path, splits print evidence, and shows lower-right QR placement with
+  more physical context.
+- AST-04 now uses three full-width rows with separate workflow context/result
+  and asset/component checks. AST-05 retains its two-column decision layout.
+  Status and workflow focus rectangles now surround controls instead of
+  crossing their text.
+- Promoted warning hierarchy to the shared guide system: amber for recoverable
+  correction and red `STOP` only for genuine halt conditions.
+- Reopened the operator-facing status/next-action design as product work. v3
+  describes the currently deployed labels but does not treat them as final.
+- Refreshed six AST-03 captures without submitting the create form or changing
+  a server asset.
+- Regenerated and visually inspected all four v3 A4 pages, then published the
+  exact review PDFs under `output/pdf/`. The guide-system/package checks pass
+  with 18 registry entries, 59 verified evidence files, 8 accepted PDFs over
+  9 pages, 2 baselines, and 14 active scripts. PDF text checks confirm the
+  expected page counts and required terminology, with no development URL,
+  placeholder capture text, provisional-status placeholder, or `STOP` label.
+
+## Addendum (2026-08-18 AST Lifecycle Guide Drafts)
+- Replaced the AST-03, AST-04, and AST-05 placeholder branches with focused
+  evidence-ready v2 review drafts while preserving the historical v1 defaults.
+- AST-03 is two A4 pages; AST-04 and AST-05 are one page each. The lifecycle
+  state route is now explicit: register as `Being Processed`, hand off as
+  `QA Hold`, release as `Ready for Sale`, or return rejected work to
+  `Being Processed`.
+- Added 11 canonical mobile captures and a reusable controlled capture script.
+  The fictional `INBIT-QH0001`/`INBIT-QH0002` identities are screenshot-only
+  DOM substitutions; no application record was created or renamed.
+- Updated guide specifications, review records, registry, handoff, screenshot
+  catalog, evidence manifest, decisions, inventory, README, and TODO tracking.
+- Generated four A4 pages with no missing evidence source. Full-page raster
+  inspection, extracted-text checks, lifecycle-term checks, and placeholder /
+  development-URL checks passed for all three PDFs.
+- The portable guide package passed: 18 registry entries, 59 canonical
+  evidence files, eight frozen review PDFs across nine pages, two baselines,
+  and 14 maintained scripts.
+- Supporting notes:
+  `docs/agents/agents-addendum-2026-08-18-ast-lifecycle-guide-session-init.md`.
+
+## Addendum (2026-08-18 Operator Guide Feedback)
+- Revised AC-01 again as v8 after follow-up wording feedback: `Nodig` now says
+  `Inbit-telefoon + account`. This keeps the expected phone explicit while the
+  guide specification still identifies Snipe-IT as a browser shortcut rather
+  than an installed application. AC-01 v7 remains review history and accepted
+  v6 remains unchanged.
+- Started a focused six-guide correction set from floor/user feedback.
+- New review versions are AC-01 v8, AST-02 v6, CMP-01 v5, USR-01 v9,
+  WF-01 v10, and WF-02 v11; the accepted repository PDFs remain unchanged.
+- Reused canonical evidence is sufficient. No browser capture, application
+  state, database, service, or accepted artifact will be changed.
+- Generated the six review PDFs under `output/pdf/` and updated the guide
+  specifications, review records, registry, decisions, inventory, handoff,
+  README, TODO, and reusable generators.
+- PDF checks passed for page count, A4 size, required and stale wording, and
+  full-page rendering. USR-01 geometry passed for 12 badges and five guide
+  chips; WF-01 image 3B now targets the first unfinished-run `Bewerk` button.
+- Regenerated all six accepted defaults and compared seven rendered pages;
+  every page is byte-identical to its committed accepted PDF. Accepted
+  artifacts and checksums remain unchanged.
+- Generator syntax checks passed. The operator-guide package `npm test` passed
+  from `scripts/manuals` with the bundled Poppler `pdfinfo` and Python runtime:
+  18 registry entries, 48 evidence files, eight accepted PDFs across nine
+  pages, two baselines, and 13 active scripts.
+- Supporting notes:
+  `docs/agents/agents-addendum-2026-08-18-operator-guide-feedback-session-init.md`.
+
+## Addendum (2026-08-18 V1 Gate Recovery)
+- Recovered the interrupted 2026-08-13 V1 gate session after the workstation
+  lost power. Retained logs confirm the guarded non-LDAP SQLite and disposable
+  MariaDB suites both passed 2,128 tests with 10,198 assertions.
+- Retained Composer validation, patch-doctor, and locked-audit evidence is
+  green. The interruption occurred while classifying 97 PHPStan findings;
+  Node/asset gates and final production-image verification still need reruns.
+- No application, configuration, database, test, or documentation file has a
+  filesystem modification time newer than the retained 2026-08-13 PHPStan
+  evidence. Shared development services remain up and were not restarted or
+  migrated during recovery.
+- Recovery notes:
+  `docs/agents/agents-addendum-2026-08-18-v1-gate-recovery-session-init.md`.
+- Reproduced the PHPStan failure on a clean PHP 8.2.32 native-Linux container.
+  A baseline-free measurement showed current level 4 debt had fallen from
+  5,817 to 2,779 errors; refreshing those stale mappings makes the exact CI
+  command green, and a temporary removed negative control still fails.
+- Composer strict validation, patch diagnostics, locked audit, full/production
+  npm high-severity audits, four Node tests, and the production asset build
+  pass. The clean release-context source scan reports zero high/critical
+  dependency findings, secrets, or unignored misconfigurations.
+- Rebuilt final local production targets as app
+  `sha256:9413662024b27618c52932c42b435e131d43bc5c34e177654b8c73ec77e59a80`
+  and web
+  `sha256:cd6162c6b0c397aae770d87b744c9397a04bd6b462de808107c55b8a3af662d4`.
+  Both pass content verification and blocking fixable-high/critical scans.
+  Full inventories retain 71 unfixed app findings and zero web findings, with
+  no image secrets; SBOM and license reports were retained.
+- Scoped Trivy's root-user exception to legacy, unsupported, and local-dev
+  Dockerfiles only. The production Dockerfile remains checked without an
+  exception. The final release configuration slice passes 42 tests with 848
+  assertions.
+- Removed all verified `snipeit-v1-*` containers, volumes, and networks plus
+  the orphaned no-port production-test container. Shared `snipeit_app`,
+  `snipeit_web`, and healthy `snipeit_db` remain running and unchanged; final
+  app/web candidate images remain available locally.
+- Investigated the intermittent report that an administrator can appear to
+  land in Settings after login. The current default and fallback routes both
+  resolve to the dashboard; no role-based Settings redirect remains. Laravel
+  only records `/admin/settings` as `url.intended` after an unauthenticated
+  browser requests that protected URL, so a bookmark, restored tab, or expired
+  session on Settings can legitimately produce that result.
+- Read-only nginx history for the current development container contains 18
+  successful login redirect sequences: 17 landed on `/` and one resumed the
+  deliberately requested `/hardware/1`; none landed on `/admin/settings`.
+  No redirect behavior was changed and no test/database command was run.
+- Fixed intended redirects without changing the direct-login contract. Direct
+  regular-user and superuser logins still fall back to the dashboard;
+  deliberately requested protected Settings and QR/scan URLs resume after
+  login. The two-factor middleware now preserves interactive GET targets until
+  either challenge or enrollment completes, successful 2FA and Google login
+  consume the intended target with a dashboard fallback, and logout clears
+  obsolete intended/2FA session state.
+- The guarded in-memory SQLite authentication directory passes 44 tests with
+  158 assertions. The new intended-redirect regression class passes 6 tests
+  with 41 assertions and covers direct user/admin login, protected Settings,
+  QR plus required 2FA, 2FA enrollment, and logout cleanup. PHP syntax checks
+  pass for every changed PHP file; no shared database operation was run.
+- Static-analysis follow-up: the exact PHPStan command was rerun in both the
+  shared development container and a read-only, network-isolated testing
+  container. Both reported 3,037 pre-existing ORM dynamic-property findings
+  that are not represented by the 2,779-entry baseline; focused output found
+  no redirect-specific type/control-flow error. Treat baseline reproducibility
+  as open and standardize its schema-aware execution context before V1 rather
+  than refreshing the baseline from this unrelated authentication change.
+- Because authentication source changed after the retained full-suite and
+  production-image gates, repeat those expensive gates once the current code
+  change batch is frozen; do not run the 40-50 minute MariaDB suite after each
+  small development change.
+- Reconciled the V1 go/no-go checklist after the authentication delta. The
+  retained SQLite and MariaDB passes remain useful prior evidence, but their
+  frozen-candidate entries and the non-reproducible PHPStan gate are now
+  correctly unchecked rather than overstating current release readiness.
+
+## Addendum (2026-08-18 V1 Product Scope And Private Attachments)
+- Verified that the configurable domain is Workflow Profiles plus reusable
+  Workflow Items. Legacy `Test*` models/routes and diagnostic-specific "test"
+  labels remain for compatibility; there is no separate general task subsystem
+  except the unrelated work-order task feature.
+- Confirmed `scripts/hw-inventory.ps1` already contains a preliminary battery
+  health calculation based on full-charge/design capacity. The owner deferred
+  validation, smarter diagnostics, and agent/workflow ingestion to post-V1,
+  alongside the printer/sticker/resolution-aware QR label builder. The current
+  QR layout is accepted for V1.
+- Classified inherited/fork asset surfaces: Licenses manage software
+  entitlements and seats; Images are the public device gallery; Files are
+  private asset attachments; Extra files are private asset-model resources;
+  workflow photos/results/notes remain run-bound evidence.
+- Added independent `assets.files.view/upload/manage` and
+  `models.files.view/upload/manage` permissions. Ordinary asset/model view or
+  edit no longer grants attachment access through direct UI/API routes. The
+  asset detail tab and upload form use the same abilities, and the license tab
+  hides check-in unless `licenses.checkin` is allowed.
+- Guarded in-memory SQLite attachment, license, group-permission, role-matrix,
+  and asset-page coverage passes 45 tests with 456 assertions after one focused
+  expectation correction. A final asset-page follow-up covering the model-file
+  tab passes 4 tests with 33 assertions. PHP syntax passes for every changed PHP
+  file. No shared database, migration, seed, or service mutation occurred.
+- Documented that production upgrades preserve the complete user table,
+  password hashes, IDs, groups, direct permissions, history, matching APP key,
+  and uploads. CSV recreation or production reseeding would not preserve that
+  contract. Active session/token continuity remains a separate cutover choice.
+- Clarified that real LDAP can be deferred only by excluding and disabling it
+  in the V1 support matrix. The current production profile requires SMTP; SMTP
+  can be deferred only after an explicit mail-disabled profile is implemented,
+  rehearsed, and documented with password-reset/notification limitations.
+- Repair/customer passwords are excluded from generic notes, photos, workflow
+  evidence, and attachments. Any future storage needs a dedicated encrypted,
+  audited, expiring secret flow or an external vault.
+- Consolidated the remaining release work into
+  `docs/plans/v1-remaining-implementation-plan-2026-08-18.md`. The plan keeps
+  the accepted QR and diagnostic work post-V1, defines the license/media/file
+  boundaries, and makes support decisions, a recent production-clone migration
+  rehearsal, browser role acceptance, and a single frozen-candidate gate the
+  V1 critical path.
+- Expanded the plan for the current lack of representative LDAP and SMTP
+  infrastructure. Both integrations now have implementable disabled-mode and
+  automated-test work, separate deferred real-service acceptance checklists,
+  and an explicit rule that mocks or local mail capture cannot promote an
+  integration into the supported V1 matrix.
+- Per owner direction, removed PHPStan from the V1 critical path, candidate
+  gates, and go/no-go checklist. Its existing configuration and baseline were
+  not changed, and no analyzer command was run. Reproducibility investigation
+  is now isolated post-V1 work; runtime, migration, browser, dependency, build,
+  and production-profile gates remain required.
+- Started WP4 implementation. The production profile now explicitly disables
+  LDAP and outgoing mail, uses the non-logging array mail transport, and no
+  longer requires SMTP host/sender/password inputs. Runtime LDAP guards cover
+  login, connections, settings, imports, sync/troubleshooting, and related UI;
+  mail guards cover notifications, direct mail, reset, inventory, test-mail,
+  and visible actions while preserving protected administrator password edits.
+- The new disabled-integration suite passes 5 tests with 38 assertions. A
+  broader focused batch passed 45 tests with 386 assertions; its sole attempted
+  failure was the known shared container's missing PHP LDAP constants in an
+  extension-dependent mocked test, not a disabled-mode regression. PHP and
+  production-entrypoint syntax checks pass. No shared database, migration,
+  seed, or external LDAP/SMTP connection was used.
+
 # Session Progress (2026-08-13)
 
 ## Addendum (2026-08-13 Portable Operator Guide Package)
@@ -31,6 +682,702 @@
 - Documentation-only work; no guide PDF or generator was changed.
 - Supporting notes:
   `docs/agents/agents-addendum-2026-08-13-operator-guide-continuation-handoff-session-init.md`.
+
+## Addendum (2026-08-13 USR-02 v7 Internal Acceptance)
+- Recorded the user's explicit acceptance of the exact USR-02 v7 PDF as an
+  `Internal review candidate for V1`.
+- Updated the runtime guide registry, generator metadata, guide specification,
+  review decision, production registry, decision log, project index, source
+  inventory, and remaining user-guide review list.
+- Added USR-02 v7 to the exact internal review candidate list. The older
+  six-guide package remains unchanged; USR-01 v8 and USR-02 v7 will be added
+  only when that package is deliberately refreshed.
+- Status-only work: the accepted v7 PDF was not regenerated or modified.
+- Supporting notes:
+  `docs/agents/agents-addendum-2026-08-13-usr02-v7-acceptance-session-init.md`.
+
+## Addendum (2026-08-13 V1 Production Profile Rehearsal)
+- Ran an isolated production-profile rehearsal under project
+  `snipeit-v1-prodtest-20260813`; the existing development containers and
+  database were not restarted, migrated, seeded, or modified.
+- Built the final local app candidate at
+  `sha256:495763177d2270b8df50fa452c9d9d2a929d097d10db65d72a89096601664c63`
+  and reused the verified web candidate at
+  `sha256:341f2e0b5993145dc20e1af8a1cc2105764bc6f174aac52ee95f2cede3f9846d`.
+- A pristine disposable MariaDB database migrated in 63.47 seconds, the
+  production foundation seeder and bootstrap-admin flow succeeded, HTTPS
+  login/dashboard and security headers passed, and public/private volumes
+  persisted across forced app/web replacement.
+- The application backup produced a readable 20-entry archive containing the
+  database dump and both upload markers. Its dump restored into a separate
+  MariaDB volume with 1 user, 1 settings row, and all 476 pre-change
+  migrations; both upload trees restored into new volumes with byte-identical
+  markers.
+- Shared Redis maintenance mode, writer shutdown, maintenance-safe health,
+  forward deployment, immediate prior-image rollback, and return to the final
+  image all passed. Root stayed 503 in maintenance while `/health` stayed 200.
+- An actual queued expiry email was consumed by the `www-data` worker and
+  delivered to Mailpit with an empty queue and zero failed jobs. The scheduler
+  loaded all seven expected entries and ran as `www-data`.
+- Fixed three release defects found by the rehearsal: PHP-FPM master startup,
+  dead custom maintenance middleware/503 health checks, and queued mailable
+  serialization plus the absent `failed_jobs` table. Focused regression
+  evidence is 47 tests with 213 assertions; PHP syntax and image-content
+  verification pass.
+- Trivy's blocking high/critical `ignore-unfixed` scan passes for both images.
+  The app report still lists the checksum-pinned Laravel mail-header advisory
+  as scanner status `fixed`; the image verifier proves the maintained backport
+  is present. The web image reports zero high/critical findings.
+- A final maintenance/documentation regression slice passes 25 tests with 593
+  assertions, including a live middleware test proving `/health` remains 200
+  while `/login` returns 503. Before cleanup all eight rehearsal services,
+  including queue and scheduler, reported healthy.
+- Full evidence, limitations, and remaining gates are recorded in
+  `docs/v1-production-profile-rehearsal-2026-08-13.md`. V1 remains no-go until
+  the current tree receives full SQLite/MariaDB gates and the external LDAP,
+  real SMTP/TLS, recent production-clone interruption/restore, frozen artifact,
+  product, and owner gates close.
+
+## Addendum (2026-08-13 USR-02 v7 Focus Containment)
+- Generated USR-02 v7 after tightening the 3A direct-rights target to the three
+  permission rows actually visible in its screenshot frame.
+- The complete lower red stroke is now visibly inset from the image edge;
+  screenshot crop, step content, and the v6 help-row correction are unchanged.
+- Promoted complete focus-stroke visibility to the component contract so a
+  clipped ring or rectangle is corrected through the target or crop.
+- Preserved v6 as review history and left accepted USR-01 v8 unchanged.
+- Supporting notes:
+  `docs/agents/agents-addendum-2026-08-13-usr02-v7-focus-containment-session-init.md`.
+
+## Addendum (2026-08-13 USR-02 v6 Help Containment)
+- Generated USR-02 v6 with a guide-specific 19 mm help row so the complete
+  `USR-05 Groepen beheren` reference remains fully inside its help tile.
+- Kept all four help tiles equal in height and moved the reference line down
+  slightly, preserving a visible lower border margin without moving the
+  completion or related-guide rows off the one-page A4 layout.
+- Preserved v5 as review history and left accepted USR-01 v8 unchanged even
+  though it shares the generator.
+- Promoted the containment rule to the component contract: guide handoffs get
+  a dedicated line and the aligned help row grows when the normal height is
+  insufficient.
+- Supporting notes:
+  `docs/agents/agents-addendum-2026-08-13-usr02-v6-help-containment-session-init.md`.
+
+## Addendum (2026-08-13 USR-02 v5 Help Reference)
+- Generated USR-02 v5 after converting the `Meerdere gebruikers` help handoff
+  from unstyled body text into a complete `USR-05 Groepen beheren` reference
+  with the USR marker and family color.
+- Promoted the treatment to the shared guide-reference contract so future help
+  tiles do not reduce guide handoffs to plain codes.
+- Preserved USR-02 v4 as a superseded review artifact and updated the guide
+  specification, registry, review record, decisions, project index, inventory,
+  and TODO entry to the focused v5 draft.
+- Generation geometry passed with 11 badges and four footer references; the
+  one-page A4 proof was inspected at full resolution without overlap or
+  crowding.
+- Supporting notes:
+  `docs/agents/agents-addendum-2026-08-13-usr02-v5-help-reference-session-init.md`.
+
+## Addendum (2026-08-13 USR-02 v4 Review)
+- Verified from `UserPrivilegeService`, individual user updates, and bulk user
+  updates that adding or removing group membership is Superadmin-only; ordinary
+  direct per-user permissions remain available to Admin and Superadmin within
+  the enforced boundary.
+- Generated USR-02 v4 with separate 1A search/user-result evidence and 1B
+  `Gebruiker aanpassen` evidence. Search and edit use separate measured focus
+  targets rather than implying an edit control exists on the user-list page.
+- Clarified that direct `Toestaan` or `Weigeren` choices take priority over
+  inherited group rights and renamed the second help item to
+  `Effect van recht onduidelijk`.
+- Updated the guide specification, layout assignment, registry, evidence
+  catalog, review history, decisions, project index, inventory, and TODO entry.
+- Existing screenshots were reused. No application state, database, service,
+  accepted artifact, Git index, or branch was changed.
+- Supporting notes:
+  `docs/agents/agents-addendum-2026-08-13-usr02-v4-review-session-init.md`.
+
+## Addendum (2026-08-13 Operator Guide Maintenance Contract)
+- Audited all seven Internal review candidates and confirmed that their exact
+  accepted layouts remain reproducible through preserved guide-specific
+  generators, while the shared component system did not yet register those
+  layout variations.
+- Added named base layout recipes and step patterns covering compact horizontal
+  sequences, stacked and asymmetric flows, two-column grids, route lists,
+  troubleshooting grids, alternatives, mixed screenshot widths, reused
+  evidence, inline stops, help alternatives, and two-sided continuation.
+- Added a human-readable production registry mapping every active guide to its
+  current version, review state, page model, layout, generator, and artifact
+  root.
+- Added a maintenance and change-impact contract for global styles, family
+  identity, layouts, evidence, application behavior, policy, guide content,
+  and small review corrections. Visible changes now explicitly require new
+  versions for every affected guide while accepted artifacts remain immutable.
+- Standardized maintenance metadata across all guide specifications and linked
+  the new sources into the system precedence, project index, component
+  contract, review instructions, decision log, inventory, and TODO list.
+- Documentation-only work: no guide PDF, screenshot, generator, application,
+  database, service, accepted artifact, Git index, or branch was changed.
+- Supporting notes:
+  `docs/agents/agents-addendum-2026-08-13-operator-guide-maintenance-contract-session-init.md`.
+
+## Addendum (2026-08-13 V1 Audit MariaDB Resumption)
+- Resumed from the clean 2026-08-11 shutdown checkpoint after re-reading the
+  agent handbook, current progress, fork notes, and retained MariaDB evidence.
+- Confirmed committed base `51208bff3166` on `master` and preserved all 1,078
+  dirty-worktree entries, including the separate operator-guide scope.
+- Docker is reachable, but all shared application/database services are
+  stopped and will remain untouched. The complete strict MariaDB gate will be
+  recreated only on a private ephemeral MariaDB 11.4.7 `snipeit_test` target.
+- Resume evidence and safety contract:
+  `docs/agents/agents-addendum-2026-08-13-v1-audit-mariadb-resumption-session-init.md`.
+- Completed the definitive clean supported-database run on private disposable
+  MariaDB 11.4.7: 2,139 tests and 10,238 assertions pass in 14:01. No shared
+  database was migrated, reset, seeded, or modified.
+- Reproduced the preceding run's two residual failures. The importer custom
+  mapping fixture failed nondeterministically when Faker selected `Archived`;
+  it now selects `Ready to Deploy`. The throttle failure was a valid 59-second
+  clock-boundary result; the test now accepts a positive value no greater than
+  60 and requires JSON/header equality. The affected MariaDB classes pass 28
+  tests with 227 assertions, and the current SQLite risk slice passes 50 tests
+  with 421 assertions.
+- Generated and adopted `phpstan-baseline.neon` for 5,817 level 4 errors across
+  3,635 counted patterns. Corrected the two unbaselined return-contract errors
+  by declaring `AttributeValueService::fail()` as `never` and added focused
+  exception tests. The exact CI PHPStan command passes with no errors; a
+  temporary negative control proved a new return-type error still fails.
+- Refreshed dependency advisories. Updated `league/commonmark` from 2.8.3 to
+  2.10.0 and PHP_CodeSniffer from 3.13.2 to 3.13.6 after seven new Composer
+  advisories appeared. Composer audit now has no unignored findings, the lock
+  installs cleanly, strict validation/patch diagnostics pass, and the affected
+  42 application tests pass with 253 assertions.
+- Updated Less/less-loader, DOMPurify, and Nano ID and replaced AdminLTE's
+  obsolete transitive `slimscroll` with the existing `jquery-slimscroll`
+  implementation. Full and production npm audits have no critical/high
+  findings; clean `npm ci`, Node tests, and the production asset build pass.
+- Exercised the CommonMark-backed fork help page after the Composer update.
+  Its documentation boundary exposed stale August 4 current-status links in
+  CONTRIBUTING, SECURITY, TESTING, and the test itself; all now point to the
+  August 13 status. The help/boundary slice passes 12 tests with 454 assertions,
+  bringing post-Composer focused evidence to 54 tests and 707 assertions.
+- Added `docs/v1-release-readiness-status-2026-08-13.md` and refreshed the
+  README/fork notes. The public V1 decision remains no-go pending real LDAP,
+  browser/operator, populated upgrade/rollback, production-profile, frozen
+  artifact scan, product-decision, and release-owner evidence.
+- Removed only the verified private MariaDB, PHPStan, and Node audit containers,
+  the private audit network, and all audit-only dependency/work volumes.
+  Shared `snipeit_app`, `snipeit_web`, and `snipeit_db` remain running and were
+  not restarted or modified by cleanup.
+- `git diff --check` is clean for this session's code, test, dependency, and
+  documentation paths. The repository-wide command still reports the
+  pre-existing unrelated blank line at EOF in
+  `resources/views/users/confirm-bulk-delete.blade.php`; it was preserved.
+- Continued the V1 audit with production-image builds and scans. The app image
+  now refreshes the PHP 8.2 Bookworm index and purges retained compiler and
+  development packages after compiling extensions; required PHP modules,
+  PHP-FPM, MariaDB client, fail-closed startup, and image-content checks pass.
+- The app image's high/critical scan count fell from 286 to 69, all without a
+  vendor-fixed version. Composer/Node metadata and secret checks are clean.
+  The V1 workflow now uploads complete app/web security JSON reports and uses
+  `ignore-unfixed` only for its blocking image scans, so fixable findings and
+  secrets remain release failures while unfixed OS risk stays reviewable.
+- Replaced the vulnerable pinned NGINX 1.27 / Alpine 3.21 web base with
+  immutable NGINX 1.30.4 / Alpine 3.24.1 inputs. The rebuilt web target passes
+  repository-content and live-upstream `nginx -t` checks and has zero current
+  high/critical Trivy findings.
+- CycloneDX SBOM and full-license inventory generation also completes for both
+  local candidate images. Local smoke output was discarded; the workflow owns
+  retention for frozen-candidate reports.
+- The final combined production/release configuration, workflow-upgrade,
+  required-schema, and fork-documentation slice passes 41 tests with 772
+  assertions. Workflow YAML also parses successfully.
+- Read-only inspection of the populated running MariaDB environment confirmed
+  the already-cut-over upgrade path: absent legacy source/checkpoint, previous
+  and current asset-image photo FK target `workflow_result_photos`, and
+  preserved counts of 29 workflow items, 11 runs, and 51 results. This does not
+  close the isolated recent production-clone rehearsal gate.
+
+# Session Progress (2026-08-11)
+
+## Addendum (2026-08-11 V1 Audit MariaDB Continuation)
+- Resumed from the 2026-08-04 supported-database pause checkpoint after
+  re-reading `AGENTS.md`, current progress, fork notes, readiness status, and
+  the retained SQLite/LDAP/MariaDB evidence.
+- Preserved the separate operator-guide scope and all existing dirty-worktree
+  changes. No branch, index, commit, database, container, or application change
+  was made during initialization.
+- Committed base remains `51208bff3166` on `master`. The retained MariaDB log
+  still identifies seven failure classes before the paused run ended:
+  importer safe-status selection, LDAP, company ID resolution, and four
+  accessory company-boundary UI classes.
+- Docker Desktop is currently stopped, so no shared or isolated service is
+  running or reachable. Static failure analysis will precede any decision to
+  start Docker and recreate the exact disposable `snipeit_test` environment.
+- Supporting session notes:
+  `docs/agents/agents-addendum-2026-08-11-v1-audit-continuation-session-init.md`.
+- Reproduced the retained MariaDB failure slice on a clean disposable database
+  and repaired two test-isolation defects: importer tests now delete status
+  rows without violating the status-event foreign key, and the test settings
+  helper replaces stale singleton rows while caching database-loaded defaults.
+  The original seven-class slice plus the new settings regression passed 46
+  tests with 121 assertions.
+- A strict full MariaDB run then exposed 63 failures. A focused rerun after
+  refreshing the created settings model reduced this to three: two real demo
+  seeder readiness failures and one read-only audit-upload fixture failure.
+- Changed `DemoAssetsSeeder` to create sale-lifecycle demo assets in `Being
+  Processed`, build current complete readiness runs, recompute the readiness
+  flag, and only then perform the guarded `Ready for Sale`/`Sold` transition.
+  The residual seeder/photo slice passes 16 tests with 177 assertions using a
+  writable temporary upload mount.
+- Diagnosed a subsequent full-run harness attempt: 626 errors and five
+  assertion failures were caused by missing test-only Passport keys, while
+  seven errors and two failures came from using the stale local image without
+  the LDAP extension. The extension-enabled audit image plus generated
+  test-only Passport keys passes the complete LDAP class and representative
+  protected API classes: 27 tests with 109 assertions.
+- The corrected definitive MariaDB run was intentionally stopped for device
+  shutdown at 488 of 2,139 tests (22%); every executed test was passing. Resume
+  by recreating a private MariaDB 11.4.7 container with the exact database
+  `snipeit_test`, using `snipe-it-fork:v1-audit-20260728`, running
+  `passport:install`, and retaining the writable `public/uploads` tmpfs and
+  512 MB PHPUnit memory limit. Evidence:
+  `storage/logs/v1-mariadb-full-definitive-20260811.log`.
+- Pause cleanup removed only the five explicitly verified audit containers and
+  private `snipeit_audit_20260811` network. Shared `snipeit_app`,
+  `snipeit_web`, and `snipeit_db` remain running and untouched.
+
+## Addendum (2026-08-11 Operator Guide Continuation)
+- Reinitialized from the current operator-guide index, decisions, evidence
+  catalog, generated proofs, and guide specifications.
+- Confirmed six exact V1-approved bases: AC-01 v6, SC-01 v10, AST-02 v5,
+  WF-01 v9, WF-02 v10, and CMP-01 v4.
+- Confirmed three evidence-complete drafts awaiting explicit review: CMP-02 v2,
+  CMP-04 v5, and HELP-01 v6.
+- Confirmed AST-03, AST-04, and AST-05 remain generated v1 placeholders with
+  missing controlled captures and unresolved handoff/release status wording.
+- No generator, screenshot, PDF, application state, database, test, Git index,
+  branch, or commit was changed during this status pass.
+- Continued with USR-01 as the first focused user-management guide. Added a
+  two-sided specification covering duplicate checks, the approved username
+  convention, generated initial access, Refurbisher/Admin group assignment,
+  approved direct-rights exceptions, reset links, generated temporary
+  passwords, and immediate user self-change.
+- Verified from source that group membership is Superadmin-only, direct
+  `Weigeren` overrides group grants, reset links require an active local user
+  with email, LDAP passwords remain external, and the application has no
+  force-change-at-next-login setting.
+- Real screenshot capture is blocked because `https://dev.inbit/` refused
+  connections repeatedly. The only running Docker services belong to the
+  separate MariaDB audit; they were left untouched. No placeholder PDF,
+  account, permission, password, database, container, or Git operation was
+  performed.
+- Split the overloaded user-management scope into five focused specifications:
+  USR-01 add user, USR-02 change role/rights, USR-03 administrator password
+  reset, AC-02 user self-change, and two-sided USR-04
+  deactivate/delete/restore. Updated the active guide index, decision record,
+  capture manifest, and production order.
+- Source verification confirmed the exact reset-link and destructive
+  check-in/delete labels, self-service password fields, logout of other
+  devices after self-change, deletion guards for assigned records and managed
+  relationships, and restoration behavior. The controlled site remained
+  offline, so no real screenshot or generated PDF was attempted.
+
+# Session Progress (2026-08-06)
+
+## Addendum (2026-08-06 Commitability Audit)
+- Inspected the complete dirty worktree without staging or committing changes.
+- The tree began this review with 890 tracked changes (815 modified and 75
+  deleted), 213 untracked files, and no staged files or merge conflicts.
+- Identified the operator-guide documentation as a coherent candidate scope,
+  but its generators still contain workstation-specific absolute paths and
+  should be made portable or explicitly classified as local tooling before a
+  repository commit.
+- The repository-wide V1 audit remains a separate high-risk scope. Its retained
+  status records an incomplete supported-MariaDB matrix, and `git diff --check`
+  still reports the known extra blank line at EOF in
+  `resources/views/users/confirm-bulk-delete.blade.php`.
+- No application code, generator, PDF, database, service, test, Git index, or
+  branch was changed during this audit.
+
+# Session Progress (2026-08-04)
+
+## Addendum (2026-08-04 Operator Guide Capture Retry)
+- Retried the controlled `dev.inbit` workflow page before resuming WF-01/WF-02 screenshot work.
+- The previous generic 500 response is gone, but the application now blocks all content with `Application upgrade required: database migrations are incomplete`.
+- Stopped browser work immediately. No migration, workflow run, screenshot substitution, database write, or guide-file change was attempted.
+- The V1 audit session diagnosed seven pending fork migrations against
+  `local|mysql|snipeit_prod_work`. Read-only preflight found no SAML nonce
+  duplicates, no legacy test tables, no asset photo references requiring
+  cutover, no legacy status-history rows, and no configured webhook endpoint.
+- Created the verified pre-migration SQL snapshot
+  `C:\dev\snipe-it-fork-db-backups\snipeit_prod_work-pre-migrate-20260804-094302.sql`
+  (346,890 bytes; SHA-256
+  `06647D7325F6594AB1D4521FAD0FA87CEE4545D89DED44447498C7B80A45018A`).
+- Applied all seven pending migrations normally with `php artisan migrate
+  --force --no-interaction`, then cleared Laravel caches. No reset, refresh,
+  wipe, restore, or seed command was used.
+- Postflight verified all seven migration records, the required readiness,
+  lifecycle, and legacy-history columns, the nonce unique index, and workflow
+  migration checkpoints. The database canary remained
+  `settings=1|users=5|assets=10|workflow_runs=10|workflow_results=36`.
+- HTTP verification now reaches `https://dev.inbit/login` with status 200 and
+  no upgrade-required message. Operator-guide screenshot work may resume.
+- The expected `codex` screenshot account was absent rather than inactive or
+  soft-deleted. Recreated it as an active non-personal user, attached the
+  existing `Admin` permission group, retained the established screenshot
+  credentials, and verified an application-level authentication attempt. The
+  active user canary is now 6 because this intentionally adds one account.
+- Diagnosed the subsequent authenticated `/hardware/1` HTTP 500 as a remaining
+  Laravel Collective `link_to_route()` call in the new status-event actor row.
+  The package/helper had already been retired while 20 call sites remained.
+- Replaced all remaining helper calls across Blade views and presenters with
+  standard escaped anchors backed by `App\Support\RouteLink`; added focused
+  escaping and asset status-event actor rendering regressions. Both tests pass
+  against guarded in-memory SQLite (2 tests, 6 assertions), and all changed PHP
+  files pass syntax checks.
+- Live browser verification with the active `codex` session now renders
+  `https://dev.inbit/hardware/1` as `Bekijk Asset DEMO-001 :: Snipe-IT`, with
+  the asset heading present and no server-error response. The asset page was
+  left open for operator-guide screenshot handoff.
+- Resumed the authenticated browser handoff and created exactly one blank
+  `Standard Diagnostics` workflow run (`run=11`) on the controlled asset.
+  Captured neutral mobile states for the card list, expanded instructions,
+  open note panel, open photo panel, and the Tests/profile/run-list entry view
+  under `C:\Users\Gebruiker\Documents\snipe-it manuals\screenshot-source\2026-08-04-workflow-neutral`.
+- Rebuilt the focused workflow batch with
+  `scripts/manuals/generate-workflow-guide-review.mjs`. The current review
+  folder is `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-08-04-workflow-review-batch-v3`:
+  WF-01 v7 is one A4 page and WF-02 v5 is two A4 pages.
+- WF-01 now keeps the new-run path as four numbered steps and presents
+  `Doorgaan met bestaande workflow` as an unnumbered alternative. WF-02 uses
+  breadcrumb-only validation, complete neutral cards before result selection,
+  collapsed-instruction note/photo states, and a complete saved run row.
+- Replaced percentage/object-fit annotations with exact source-pixel SVG
+  viewboxes and source-pixel targets. The controlled `DEMO-001` title is
+  consistently shown as synthetic example `INBIT-HG0421` in the generated
+  proofs; printed guide content contains no development URL.
+- Visually inspected all three rendered pages. Poppler reports WF-01=1 A4
+  page, WF-02=2 A4 pages, and combined=3 A4 pages; extracted PDF text is clean
+  of `dev.inbit`, `DEMO-001`, and obsolete English action labels.
+- Applied the next workflow review corrections as batch v4. WF-01 v8 removes
+  the redundant asset-validation screenshot because SC-01 owns that
+  prerequisite, places `Doorgaan met bestaande workflow` inside step 3, shows
+  complete cards in 4A, and names `WF-02 Workflow uitvoeren` in full.
+- WF-02 v6 replaces the chopped breadcrumb crop with one complete readable
+  context, aligns the 2A/3A targets directly to their controls, and removes
+  non-critical stop text from steps 2 and 3 because the help blocks already
+  carry escalation guidance.
+- Generated batch v4 under
+  `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-08-04-workflow-review-batch-v4`
+  and copied `workflow-guides-review-batch-v4-2026-08-04.pdf` to `output/pdf`.
+  Visual inspection and Poppler verification again confirm 1/2/3 A4 pages;
+  extracted text remains clean of development URLs, the controlled source tag,
+  and obsolete English action labels.
+- Generated workflow review batch v5 after the next focused correction. WF-01
+  v9 now separates the two routes inside step 3 with a centered `OF` divider
+  and gives `Doorgaan met bestaande workflow` the same heading hierarchy as
+  the primary route. WF-02 v7 centers 2A and 3A on measured source-pixel
+  control bounds rather than approximate card coordinates.
+- Batch v5 is under
+  `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-08-04-workflow-review-batch-v5`;
+  the combined PDF was copied to `output/pdf`. All three pages were visually
+  inspected after rendering.
+- Generated batch v6 with WF-01 v9 unchanged and WF-02 advanced to v8. The
+  page-two 4A and 5A targets now use measured bounds for the active `Notitie`
+  control and complete `Foto toevoegen` action instead of approximate offsets.
+- Batch v6 is under
+  `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-08-04-workflow-review-batch-v6`;
+  the combined PDF was copied to `output/pdf` and the corrected second page
+  received a fresh visual check.
+- Generated batch v7 with WF-01 v9 unchanged and WF-02 advanced to v9. WF-02
+  step 1 now says `Valideer de actieve workflow`, and the front-page
+  completion handoff says `Ga verder op de volgende pagina.`
+- Batch v7 is under
+  `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-08-04-workflow-review-batch-v7`;
+  both WF-02 pages were visually inspected, Poppler confirmed 1/2/3 A4 page
+  counts, and extracted text remained clean of development-only labels.
+- Verified the exact approved bases remain saved as AC-01 v6, SC-01 v10, and
+  AST-02 v5. WF-01 v9 and WF-02 v9 are saved review drafts and are not marked
+  approved without exact-version confirmation.
+- Recorded the user's exact approval of WF-01 v9 as `Base approved for V1`.
+  The generated PDF remains unchanged and saved with the batch.
+- Generated workflow batch v8 with WF-02 v10. In screenshot 4A, the native
+  yellow outline continues to identify `Notitie` as active, while the red
+  target now identifies the note-entry field instead of duplicating the tab
+  outline. WF-01 v9 remains unchanged in the combined batch.
+- Recorded the user's exact approval of WF-02 v10 as `Base approved for V1`.
+  The existing two-page artifact is unchanged. The verified in-app `Foto` and
+  `Foto toevoegen` states are accepted as sufficient evidence for this base;
+  a device-native picker capture is not required.
+- Created controlled CMP-01 evidence by materializing expected RAM 8GB DDR4
+  into the Codex tray as component `INBIT-C-UW4626`, assigning serial
+  `CMP01-RAM-0001`, setting condition `Good`, and installing it back into
+  controlled asset `DEMO-001`. The component remains installed on that asset.
+- Generated CMP-01 v2 with
+  `scripts/manuals/generate-component-guide-review.mjs` under
+  `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-08-04-component-review-batch-v1`.
+  The one-page draft replaces two placeholders and five planned steps with the
+  actual four-step interface flow. Selection and installation reuse one real
+  mobile screenshot with different target marks; the final image shows the
+  matching tracked tag and serial on the asset.
+- Generated CMP-01 v3 in the same focused review folder after visual feedback.
+  Target marks now use measured source-pixel bounds: step 1 separately marks
+  the component icon and add/install action, steps 2 and 3 tightly mark their
+  controls, and step 4 separates the tracked state from the tag/serial check.
+- Generated CMP-01 v4 after exact pixel-bound review. The component icon is
+  horizontally centered, the Install target uses symmetric vertical padding,
+  the Tracked target is centered on the badge, and the tag/serial target no
+  longer crosses either heading.
+- Recorded the user's exact acceptance of CMP-01 v4 as `Base approved for V1`.
+- Verified the current live CMP-02 and CMP-04 interfaces with one controlled
+  component. Definition-backed RAM 4GB DDR4 was created and installed once as
+  `INBIT-C-HH9376` / `CMP02-RAM-0001`; the custom route was opened for evidence
+  but not submitted. The same tracked component was then moved to tray and now
+  ends in `Status: In Tray` with no asset attached.
+- Generated the component follow-up review batch with CMP-02 v2, CMP-04 v4,
+  and HELP-01 v6 under
+  `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-08-04-component-followup-review-batch-v1`.
+  Each guide is one A4 page; the combined review PDF is three pages. All target
+  overlays use source-pixel coordinates, and every rendered page was visually
+  inspected before handoff.
+- Superseded that batch with component follow-up review batch v2. CMP-04 v5
+  centers the 1B target on the measured `Naar tray` action; CMP-02 v2 and
+  HELP-01 v6 are unchanged. Clarified that CMP-01 installs an already tracked
+  tray/storage record, while CMP-02 route 2A creates a new tracked component
+  from an existing catalog definition.
+- Packaged the six exact `Base approved for V1` PDFs for internal review under
+  `C:\Users\Gebruiker\Documents\snipe-it manuals\internal-review\accepted-guides-v1-2026-08-04`.
+  The package contains AC-01 v6, SC-01 v10, AST-02 v5, WF-01 v9, WF-02 v10,
+  CMP-01 v4, and a manifest. Hash and A4 page-count checks confirmed every
+  PDF is an exact copy of its approved source; unapproved guides are excluded.
+- Added exact copies of the five generator scripts used for the accepted set to
+  the package's `scripts` folder. Added a guide-to-script map, required
+  generation order, and a warning that absolute evidence/runtime paths make
+  the script bundle traceable but not self-contained.
+- Supporting session notes: `docs/agents/agents-addendum-2026-08-04-operator-guides-retry-session-init.md`.
+
+## Addendum (2026-08-04 V1 Audit Status Recovery)
+- Resumed in read-only status-review mode after the user-requested July 28
+  pause; re-read `AGENTS.md`, current progress, fork notes, and the exact pause
+  checkpoint before evaluating drift.
+- Current task focus: report implemented, verified, failing, and open V1 work
+  before implementation resumes. No test, migration, reset, restore, seed, or
+  application change is part of this opening status review.
+- Supporting session notes:
+  `docs/agents/agents-addendum-2026-08-04-session-init.md`.
+- Status result: committed HEAD is unchanged at `51208bff3166`; audited source,
+  configuration, and test files have not changed since the July 28 pause. The
+  preserved worktree has 1,067 status entries and is not yet a clean candidate.
+- Runtime safety is unchanged: no audit process/subagent is active; Docker
+  `app`, `db`, and `web` are running; the read-only shared database canary is
+  still `local|mysql|snipeit_prod_work` with
+  `settings=1|users=5|assets=10|workflow_runs=10|workflow_results=36`.
+- Release status remains no-go. The 56-test matrix slice is green, while the
+  storage/import corrections need a narrow rerun and the identity lane retains
+  15 failures. Checkout concurrency, inactive-license behavior, root focused
+  tests, PHPStan, clean SQLite/MariaDB suites, image scans/SBOMs, deployment and
+  restore rehearsal, current docs, and product/ownership decisions remain.
+- No implementation or test was run during this status review.
+
+## Addendum (2026-08-04 V1 Audit Implementation and Full-Suite Recovery)
+- Continued the interrupted implementation audit while preserving the shared
+  screenshot runtime. No live database migration, reset, restore, seed,
+  container restart, or image rebuild was performed by this audit block.
+- Completed the supported checkout and company-boundary repair lane, including
+  row-lock/recheck behavior, inactive/expired license rejection, and
+  cross-company assignment denial. The focused lane passes 79 tests with 220
+  assertions against guarded in-memory SQLite.
+- Ran the repository-wide non-LDAP SQLite suite. The diagnostic run exposed 31
+  failures after 2,087 passes; each failure was classified as a product defect,
+  stale fork test contract, or cross-test state leak rather than suppressed.
+- Fixed deterministic custom-field column naming for non-transliterable names,
+  the bulk asset QR/PDF response union, partial component note validation,
+  ExternalUrl validation placeholders, Slack Livewire/page Blade section
+  ownership, and suite-level cache/locale isolation.
+- Updated stale tests to the current fork contract for archived assignments,
+  cloning, workflow definition generation, installation/authentication
+  boundaries, component notes, and locale-independent translated responses.
+- The resolved focused failure set passes 161 tests with 724 assertions.
+- The final full non-LDAP run passes **2,120 tests with 10,153 assertions** in
+  1,308.38 seconds with no failures, warnings, or risky tests. LDAP remains a
+  separate gate because the current shared image lacks its extension and was
+  intentionally not rebuilt during manual/screenshot work.
+- Full serial PHPStan now completes and reports a measured baseline of 5,887
+  errors across 549 files. A focused audit over the four product repair files
+  completes with 50 existing Eloquent/PHPDoc baseline errors and no new issue
+  in the repaired contracts. Static analysis is therefore measured but not a
+  release pass.
+- Rechecked current dependency state: Composer has no unignored production
+  advisories (three checksum-pinned/reasoned Laravel patch ignores), npm
+  production has 0 critical/high, 1 moderate, and 4 low findings, and the
+  production asset build passes.
+- Refreshed the fork README and published
+  `docs/v1-release-readiness-status-2026-08-04.md`. The release decision remains
+  no-go pending LDAP/MariaDB, populated upgrade/rollback, browser-role,
+  production-profile/restore, artifact-scan, static-baseline, product-decision,
+  and release-ownership evidence.
+- Retained evidence:
+  `storage/logs/v1-full-sqlite-nonldap-20260804.log`,
+  `storage/logs/v1-focused-failures-resolved-20260804.log`,
+  `storage/logs/v1-full-sqlite-nonldap-after-fixes-20260804.log`,
+  `storage/logs/v1-phpstan-serial-after-refactor-20260804.log`, and
+  `storage/logs/v1-phpstan-audit-fixes-20260804.log`.
+- Proved a non-disruptive LDAP path with the extension-enabled audit image,
+  read-only source/dependency mounts, temporary cache/storage, no network, and
+  guarded in-memory SQLite. After replacing an extension-incompatible
+  namespace mock with real DN/filter escape expectations, the complete LDAP
+  group passes 18 tests with 75 assertions. Evidence:
+  `storage/logs/v1-ldap-sqlite-20260804.log`.
+- Started the exact MariaDB 11.4.7 matrix in a private disposable network with
+  no published port, no shared named database volume, and only `snipeit_test`.
+  Migration/bootstrap completed and the strict suite advanced into feature
+  tests before the user-requested pause.
+- The preserved partial MariaDB log contains 70 passing test classes and seven
+  failing classes: `AssetImportTest`, `LdapTest`,
+  `GetIdForCurrentUserTest`, and four accessory company-boundary UI classes.
+  The run was stopped before PHPUnit emitted final stack traces, so these are a
+  resumption inventory, not a complete matrix result. Evidence:
+  `storage/logs/v1-mariadb-full-20260804.log`.
+- Pause cleanup removed only the temporary test app/database containers, their
+  anonymous database volume, and private network. Shared `app`, `db`, and
+  `web` services remain running; `snipeit_prod_work` was never connected to or
+  mutated by the matrix run.
+
+# Session Progress (2026-07-28)
+
+## Addendum (2026-07-28 V1 Audit Recovery)
+- Recovered the interrupted July 23 V1 implementation audit after the development device lost power.
+- Re-read `AGENTS.md`, the current progress log, `docs/fork-notes.md`, the V1 readiness status, and the surviving dirty worktree before resuming.
+- Confirmed that the route, retired-lifecycle, user-integrity, raster-image, attachment, signature, migration, production-profile, and release-document changes remain present in the worktree; no reset, wipe, migration, seed, or shared-database write was used during recovery.
+- Docker Desktop is offline at recovery time, so PHPUnit and runtime verification are paused until the engine is available. Static review and non-container checks can continue meanwhile.
+- Supporting session notes: `docs/agents/agents-addendum-2026-07-28-v1-audit-recovery-session-init.md`.
+- Docker later became available. The recovered diagnostic suite completed with
+  1,873 passes, 61 failures, and 11,839 assertions, but remains non-release
+  evidence because it loaded the old overlapping Feature/API suite definition
+  and implementation changed while it ran.
+- Guarded focused evidence before the user-requested pause: the
+  category/license/mail/report/branding/user-import slice passed 56 tests and
+  342 assertions; the storage/import slice ran 115 tests and 570 assertions
+  with one error/seven failures followed by unverified corrections; the
+  identity/auth slice ran 77 tests and 218 assertions with 62 passes/15
+  failures awaiting triage.
+- Hardened the release path further: immutable Dockerfile inputs and
+  repository-plus-digest Compose deployment, pinned database CI services,
+  production SMTP and optional agent-token secret plumbing, strict trusted
+  proxy parsing, bounded CI suites, source/image scans, and retained
+  SBOM/license inventories.
+- Pause safety check: all subagents were interrupted, no test/static-analysis
+  process remains active, and the read-only shared database canary is unchanged
+  at `local|mysql|snipeit_prod_work`,
+  `settings=1|users=5|assets=10|workflow_runs=10|workflow_results=36`.
+- Detailed remaining failures and exact resume order are recorded in the
+  supporting session addendum. No implementation continued after the pause
+  request.
+
+# Session Progress (2026-07-23)
+
+## Addendum (2026-07-23 HP ProBook 450 Comparison)
+- Session kickoff: reviewed `AGENTS.md`, current progress, `docs/fork-notes.md`, and the dirty worktree before researching the exact Dutch HP ProBook 450 G8/G9/G10 product numbers.
+- Current task focus: compare `2E9F9EA#ABH`, `6A140EA#ABH`, and `816H4EA#ABH` from verified configuration-level sources and provide a practical buying recommendation.
+- Supporting session notes: `docs/agents/agents-addendum-2026-07-23-hp-probook-450-comparison-session-init.md`.
+- Research outcome: all three exact SKUs are 15.6-inch FHD IPS 250-nit, 8 GB single-DIMM, 256 GB NVMe business configurations. The important progression is i5-1135G7 (4C/8T) to i5-1235U and i5-1335U (10C/12T), Wi-Fi 6 to Wi-Fi 6E, HDMI 1.4 to 2.1, and a G10 change from the older 3x USB-A/1x USB-C layout to 2x USB-A/2x USB-C.
+- Recommendation: G10 is the best overall choice when condition and price are close; G9 is the strongest value because it captures the large G8-to-G9 CPU improvement and retains an IR camera/privacy shutter; G8 remains suitable for basic office work when materially cheaper. A matching second 8 GB SODIMM is the highest-value upgrade on every model.
+- No application, database, deployment, or network state was changed. No tests were applicable to this research-only task.
+
+## Addendum (2026-07-23 HP 430 G8 Network Boot Guidance)
+- Session kickoff: reviewed `AGENTS.md`, current progress, `docs/fork-notes.md`, and the dirty worktree before researching the HP 430 G8 USB-Ethernet preboot path.
+- Current task focus: explain the firmware/adapter boundary and provide a practical UEFI PXE/iPXE/TFTP setup that works with FOG now and a raw iPXE environment later.
+- Supporting session notes: `docs/agents/agents-addendum-2026-07-23-hp-430-g8-network-boot-session-init.md`.
+- Research outcome: the 430 G8 should use x86-64 UEFI network boot rather than legacy PXE. Preboot networking first requires a firmware-recognized/PXE-capable USB Ethernet adapter; operating-system or FOG kernel drivers cannot create that initial network path.
+- Recommended staged path: update the HP T70-family BIOS, validate a PXE-advertised HP USB-C or USB-A Ethernet G2 adapter in the F9 UEFI IPv4 menu, serve `snponly.efi` to x64 UEFI clients, and use a locally booted full/driver-specific iPXE EFI image only as the fallback for an adapter the firmware cannot start.
+- Driver boundaries and troubleshooting were documented in the response: firmware/SNP before TFTP, iPXE after the EFI loader starts, FOS/Linux after the FOG menu, and WinPE/full-OS drivers only inside their respective environments. No network, application, database, or deployment configuration was changed.
+- Follow-up covered OS-independent BIOS servicing: create an HP BIOS recovery/update USB on another computer, then apply the matching image through Esc/F2 Hardware Diagnostics UEFI `Firmware Management`/`BIOS Management`; the 430 G8's HP Sure Start generation makes the normal F2 update path preferable to Windows+B crisis-recovery instructions.
+- Proposed the raw deployment layout: TFTP only for the small UEFI iPXE loader, HTTP(S) for menus/kernels/initramfs/WinPE and installation repositories, native kernel/initrd or `wimboot` entries instead of assuming arbitrary ISO SAN boot will work, and an authorization-gated Linux wipe environment that selects device-native sanitize capabilities and records verifiable results.
+- User correction: YouWipe, not HP Secure Erase or a custom Linux wiping implementation, is the required erasure standard. Revised the recommendation around YouWipe's vendor-provided iPXE package and WipeCenter/reporting flow; HP tooling is limited to the offline BIOS update needed for reliable UEFI PXE.
+
+## Addendum (2026-07-23 Operator Guides)
+- Session kickoff: reviewed `AGENTS.md`, current progress, `docs/fork-notes.md`, and the active AST-02 generator/specification before continuing the generated-guide review.
+- Current task focus: move the unregistered-asset branch below AST-02's yellow alternative routes so it cannot be read as a successful final step in the green primary path.
+- Supporting session notes: `docs/agents/agents-addendum-2026-07-23-operator-guides-session-init.md`.
+- Revised AST-02 to v5: the six-step registered-asset sequence is now the complete primary path, while `Asset nog niet geregistreerd?` is a full-width yellow alternative beneath the component/mismatch alternatives and points to AST-03.
+- Regenerated the individual proof and combined v2 review package. Poppler reports one A4 page for AST-02 and 13 A4 pages for the combined PDF; generated HTML has no `dev.inbit` references, and the external/repo-local combined PDFs have matching SHA-256 hashes.
+- User explicitly approved AC-01 v6, SC-01 v10, and AST-02 v5 as the exact generated bases for the V1 guide set. Updated the guide specifications, project index, and approval record accordingly.
+- Created focused workflow review folder `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-07-23-workflow-review-batch` containing WF-01 v5, WF-02 v3, their PNG proofs, and the two-page `workflow-guides-review-batch-2026-07-23.pdf`; copied the combined batch to `output/pdf/`.
+- Visually inspected both rendered batch pages. Poppler reports two unencrypted A4 pages, the external/repo-local combined PDFs have matching SHA-256 hashes, and PDF text extraction contains no `dev.inbit` reference.
+- A second agent is concurrently changing application code. No browser navigation, live capture, or application-state change was attempted for this batch; any unavailable site or broken screenshot source is now a hard stop requiring user notification.
+- Subsequent user-authorized capture retry succeeded against the controlled development environment. Saved current read-only mobile states under `C:\Users\Gebruiker\Documents\snipe-it manuals\screenshot-source\2026-07-23-workflow-refresh`: workflow entry/profile/existing-run, active cards, expanded instructions, open note, and open photo panel. No result, note, photo, or workflow-run data was changed.
+- Added `scripts/manuals/generate-workflow-guide-review.mjs` and generated the superseding focused batch `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-07-23-workflow-review-batch-v2`.
+- WF-01 v6 is one A4 page with stacked 1A/1B entry visuals, a targeted Tests icon, explicit `Doorgaan met bestaande workflow` branch, targeted profile/start controls, and no orange workflow-attention banner.
+- WF-02 v4 is intentionally two-sided. Its three A4 pages across the combined batch use vertically contextual screenshots for the active run, expanded instructions, result controls, note field, photo/Add photo action, and saved run counts.
+- Visually inspected all three rendered pages after two correction passes. Poppler reports WF-01=1 A4 page, WF-02=2 A4 pages, and combined=3 A4 pages; extracted text contains no `dev.inbit`, workflow-attention banner copy, stale photo-omission note, or missing-evidence placeholder.
+- Updated the WF-01/WF-02 specifications, canonical screenshot catalog, decision log, project index, and source inventory. Both workflow versions remain generated drafts awaiting user review; neither is marked approved.
+
+## Addendum (2026-07-23 V1 Release Sequencing)
+- Session kickoff: reviewed `AGENTS.md`, the current release-readiness audit, `PROGRESS.md`, `docs/fork-notes.md`, `TODO.md`, and the working-tree state.
+- Current task focus: turn the open V1 findings into a dependency-ordered implementation and verification sequence without touching the separately owned operator-guide work.
+- No application, database, or runtime changes were made during this planning step.
+- Supporting session notes: `docs/agents/agents-addendum-2026-07-23-session-init.md`.
+
+# Session Progress (2026-07-21)
+
+## Addendum (2026-07-21 Release Readiness Audit)
+- Session kickoff: reinitialized on `AGENTS.md`, current progress, fork notes, repository state, and release-facing documentation before a broad V1 implementation audit.
+- Current task focus: validate implemented fork behavior, identify incomplete or undocumented work, compare the fork with current upstream Snipe-IT, and establish the evidence needed for a fork-specific README and V1 release gate.
+- Scope coordination: another active agent owns the operator-guide work; this audit will not edit `docs/manuals/operator-guides/` or its generated assets.
+- Initial hygiene finding: the worktree contains untracked environment backup files whose names indicate production-derived configuration. Their contents will not be inspected or logged; repository exclusion/removal from the release workspace is a security/release follow-up.
+- Supporting session notes: `docs/agents/agents-addendum-2026-07-21-release-readiness-session-init.md`.
+- Release decision: the audited revision is not V1-ready. Added `docs/v1-release-readiness-audit-2026-07-21.md` with the evidence, P0/P1 findings, upstream divergence, deployment gaps, and an explicit go/no-go checklist.
+- Replaced the inherited upstream README with a fork-specific pre-V1 README covering actual product scope, local-only Docker setup, safe test preflight, production requirements, documentation ownership, upstream relationship, and AGPL attribution. Replaced the inaccurate upstream `SECURITY.md` support/contact claims with a fork-specific pre-V1 policy.
+- Confirmed P0 release blockers at audit start: executable workflow-photo upload under the bundled PHP-capable public upload tree; invalid agent reports persisting empty completed runs that readiness can treat as passing; critical/high Composer and npm advisories; Docker build contexts that include local environment, certificate, upload, database, and backup material; and a test guard that could accept the local MySQL runtime before `LazilyRefreshDatabase`. The test guard and Docker build-context containment were remediated in this worktree; the first three remain open, while historical-image credential review and automated image secret scanning are still required.
+- The original focused commands produced diagnostic but invalid release evidence: the separate Artisan preflight reported testing/SQLite, while the old direct PHPUnit bootstrap resolved the local profile. Asset/workflow/scan batch: 71 tests, 215 assertions, 4 errors, 9 failures. Work-order/component/catalog batch: 75 tests, 455 assertions, 1 failure. A full-suite attempt did not complete within the audit window and was stopped without a result.
+- Guarded reruns supplied trustworthy evidence: asset/workflow/scan batch had 71 tests and 222 assertions with 4 stale agent-fixture errors plus 7 failures; the two earlier redirect failures disappeared under the correct test environment. Work-order/component/catalog batch had 75 tests and 455 assertions with one damaged/broken component-label failure. Local MySQL counts remained unchanged after both runs.
+- Upstream audit baseline: fork HEAD `51208bff3166f37eac9452c646e7f89303d2321e`, official master `0099a1a975f4e6c98ece9a30743baa595a94323a`, merge base `4fe7bfb8510a03eb8987a0b0f6845ab6ecaafe6a`; divergence was 326 fork-only and 4,477 upstream-only commits, with 287 paths modified on both sides. Direct bulk merging is not considered a safe V1 strategy.
+- Audit incident: the direct focused PHPUnit invocation inherited an unsafe effective local/MySQL configuration; `Tests\TestCase::guardAgainstUnsafeTestingConfig()` checked the text of `.env.testing` rather than the effective runtime, then Laravel's `LazilyRefreshDatabase` implicitly refreshed `snipeit_prod_work`. A later custom diagnostic wrapper repeated the unsafe bootstrap path before the mismatch was recognized. A read-only check confirmed the data was erased. DB-dependent work stopped immediately.
+- Recovery: MariaDB binary logging was off and the newest SQL snapshot found by filename/metadata was from 2026-06-09. The user explicitly chose a clean reseed instead of restoring it. After the required preflight, `ProductionFoundationSeeder`, `ProductionDemoUserSeeder`, and `DemoAssetsSeeder` completed; counts are `settings=1`, `users=5`, `assets=10`, and `workflow_runs=10`. Seeded administrator login and dashboard rendering passed in the browser.
+- Test-safety remediation: added the dependency-free `tests/phpunit-bootstrap.php` and shared environment guard, synchronized `getenv`/`$_ENV`/`$_SERVER`, rechecked booted Laravel config before refresh traits, restricted local PHPUnit to in-memory SQLite, explicitly rejected the persistent `database/database.sqlite`, restricted external CI databases to explicit `snipeit_test`, and guarded Dusk's `migrate:fresh` behind its dedicated SQLite target. The Dusk guard now creates that exact empty non-symlink file for clean clones after validation. A hostile `mysql/snipeit_prod_work` invocation aborted in bootstrap; forced SQLite verification passed and the reseeded MySQL counts remained unchanged afterward.
+- Documentation alignment: replaced the stale demo reset instructions with the actual three-stage local seed sequence and five demo accounts; rewrote `TESTING.md` around the executable guard, forced Docker SQLite preflight, CI external-database marker, and Dusk boundary.
+- Correctness remediation: updated the agent-report fixtures to current component applicability, rejected disabled legacy assignment fields with a controlled asset API 422, removed the dead update checkout call, enforced active model-number selection without breaking unrelated PATCH requests, preserved explicit factory presets, localized API expectations/messages, and made current component condition status authoritative over its legacy code.
+- Demo reset safety: replaced foreign-key-disabled truncation with constraint-aware deletion, removed runtime component hierarchies instead of leaving invalid attached-without-asset rows, retained work-order snapshots with null live-asset links, preserved non-reused asset IDs, and added a regression proving SQLite and current schema behavior.
+- Final consolidated guarded repair slice: explicit preflight `testing|sqlite|sqlite|:memory:`; 93 tests and 320 assertions passed across the environment guard, agent reports, the complete asset update class, component resolution/condition lifecycle, demo reset, and workflow start. Guard coverage includes missing markers, conflicting PHP environment representations, persistent SQLite rejection, clean-clone Dusk file creation, and the explicit PostgreSQL CI path. A read-only post-test check confirmed `local|mysql|snipeit_prod_work|settings=1|users=5|assets=10|workflow_runs=10`.
+- Docker release containment: expanded `.dockerignore`, rebuilt `snipeit-fork:v1-audit`, caught and corrected non-recursive SQLite patterns, then verified zero environment, backup/database, certificate, `prodbak`, OAuth-key, and non-allowlisted runtime-upload files in the rebuilt image. The legacy root Dockerfile now removes filtered storage paths defensively. Local/test entrypoints retain Composer development dependencies while other environments use `--no-dev`.
+- README installation correction: documented a non-overwriting clean-clone sequence with the actual Compose database settings, one-off Composer/application/Passport key initialization, and the local HTTP profile. This sequence still needs a clean new-volume rehearsal before V1.
+
+## Addendum (2026-07-21 Codex)
+- Session kickoff: reinitialized on the Affinity/operator-guide work, reviewed the guide planning and design-foundation documents, and began a visual comparison of the current AC-01, SC-01, AST-01, and remaining initial-guide proof outputs.
+- Current task focus: assess whether the present proof-to-Affinity production method is converging on a reusable guide system, identify remaining structural risks, and recommend a guide-by-guide implementation method before further layout work.
+- Review outcome: the design grammar is broadly sound, but the current generated-proof workflow is not yet a production system. AC-01/SC-01/AST-01 show a coherent visual direction; the later six-page batch is still a wireframe set with missing or unusably cropped evidence.
+- PDF-level inspection found unintended blank second pages in the current AC-01 v5 and SC-01 v6 exports. The remaining combined batch has the intended six pages, while AST-01 v12 has one page.
+- The SVG generators commonly use body/caption sizes around 2.25-2.9 mm (roughly 6.4-8.2 pt), below the 11.5-12 pt critical-body target in the design foundation and Affinity research. This is a print-readability blocker even when screen previews look orderly.
+- Current scope also drifts: SC-01 and AST-01 duplicate most of the same scan/search/verification flow; AST-02B duplicates unfinished WF-02 detail; several pages were laid out before their required captures existed. AST-01 still prints stale `dev.inbit` source text, and current QR marks are placeholders rather than maintained, scannable guide links.
+- Recommended production correction: use generated artifacts for content/crop planning and QA only; create one clean native Affinity template with master/page shell, named text styles, swatches, and reusable block assets; require a complete content brief and visual-purpose manifest before layout; export and render-check each guide before starting the next.
+- Recommended build order: AC-01 baseline/template, then resolve SC-01 versus AST-01 ownership and finish both, then HELP-01, WF-01, WF-02, CMP-04, and finally AST-02 as the route/overview guide. Live-state changes needed for final workflow/component screenshots require a controlled test record rather than an unplanned production mutation.
+- Direction correction from the user: generated base guides are now the active production method, and Affinity is fully deferred until every guide in the active set is confirmed or the user gives an explicit green light. AC-01 v5 and SC-01 v6 are near-final bases whose current appearance/text scale should be preserved rather than redesigned.
+- Consolidated guide work under `docs/manuals/operator-guides/`: added one project/status index, current shared system rules, a decision/approval log, a classified source inventory, and specifications for the nine active guides (`AC-01`, `SC-01`, `AST-01`, `AST-02`, `AST-03`, `WF-01`, `WF-02`, `CMP-04`, and `HELP-01`).
+- Added current-status banners to the six older planning/design/Affinity documents. No historical document, proof, screenshot, or Affinity file was deleted or moved; older sources now identify themselves as historical, supporting, or Affinity-deferred.
+- Fixed the unintended blank second PDF page in the AC-01 v5 and SC-01 v6 generators by constraining the HTML/SVG print box and using the CSS A4 page size. Regenerated both current output sets without changing their guide layout or wording.
+- PDF verification with Poppler now reports exactly one A4 page for both `AC-01-login-snipe-v5-proof.pdf` and `SC-01-scan-asset-snipe-v6-proof.pdf`; rendered-page visual inspection found no layout shift from the export correction. Remaining near-final review items are real QR destination/omission, footer/source wording, and user review at actual A4 size.
+- Revised AC-01 to v6 after focused review: the 1A app callout ring is slightly larger with a substantially thinner stroke, and the `Wachtwoord kwijt` help tile now directs the user to ask their supervisor for a password reset. The existing open v5 PDF was preserved as version history.
+- Revised SC-01 to v7 after focused review: image 1A now reuses AC-01 3A with the Scan QR card outlined, image 1B targets the camera icon using source-image coordinates, step 2 keeps its header/copy/note above one contained image, duplicate scan copy was removed, and manual search now includes serial numbers.
+- Revised SC-01 to v8 by moving the QR-location hint out of the step instructions and attaching it as a subtle caption directly below image 2A.
+- Established canonical screenshot reuse for the remaining guides. Identical application states should use the same source evidence with guide-specific crops/callouts; `https://dev.inbit/` is approved for controlled missing or state-changing captures, while printed operator instructions continue to use `https://snipe.inbit/`.
+- Added the canonical screenshot catalog and remapped AC-01, SC-01, and the pending AST-01 rebuild to stable source IDs so shared dashboard, scanner, search, and asset-detail evidence is reused intentionally.
+- Generated the next three guide drafts with `scripts/manuals/generate-next-guide-drafts.mjs`: `AST-01-open-asset-v13-draft`, `HELP-01-problems-v3-draft`, and `WF-01-start-workflow-v3-draft`. Outputs are under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-07-21-next-guide-drafts`.
+- AST-01 now reuses the canonical AC/SC scanner evidence and visibly supports title/model, asset tag, and status verification inside the attached stop step. HELP-01 uses non-sequential troubleshooting tiles and supervisor-only password reset wording. WF-01 uses existing controlled workflow captures without exposing the development URL to operators.
+- Verified all three exported PDFs with Poppler: each is exactly one A4 page. Rendered-PDF inspection found no page overflow or layout shift; guide versions remain `Generated draft` pending user review, live WF-01 label validation, and final QR handling.
+- Revised HELP-01 to `HELP-01-problems-v4-draft` by raising the related-guide chips within each problem tile so their bottom margin no longer appears cramped.
+- Revised WF-01 to `WF-01-start-workflow-v4-draft`: step 1 now uses separate asset-title and Tests-tab crops, step 2 begins below the workflow-attention banner, and no guide screenshot contains the orange `Workflowstatus heeft aandacht nodig` banner.
+- Confirmed the current SC-01 and AST-01 drafts duplicate both acquisition and verification. Recorded the recommended boundary for approval: SC-01 owns scan/search through opening the asset, while AST-01 begins after opening and owns identity/status verification; merging remains the alternative decision.
+- Poppler verification reports one A4 page for both corrected v4 PDFs, and rendered-page inspection matches the PNG proofs.
+- Replanned the active guide set to 12 guides: AC-01, SC-01, AST-02 through AST-05, WF-01/WF-02, CMP-01/CMP-02/CMP-04, and HELP-01. Retired AST-01 into SC-01 and CMP-03 into CMP-02; split operator handoff from supervisor release as AST-04 and AST-05.
+- Added current specifications for the expanded set and the reusable generators `scripts/manuals/generate-revised-guide-set.mjs` and `scripts/manuals/capture-revised-guide-evidence.mjs`.
+- Generated the complete review package under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-07-21-revised-guide-set`: 12 individual guides, 13 A4 pages, a combined PDF/HTML, rendered PNGs, manifest, and review summary. A repo-local combined PDF is available at `output/pdf/operator-guides-revised-set-draft.pdf`.
+- The generated set uses the shared page shell, overlapping step/image markers, attached stop text, compact help blocks, related-guide chips, 22 mm draft QR area, canonical screenshot reuse, and the live operator URL. SC-01 1A reuses AC-01 3A as agreed; no generated HTML contains `dev.inbit`.
+- Visual inspection covered all 13 rendered pages and corrected title overflow, HELP-01 footer overlap, scanner/camera callouts, workflow crop targets, orange warning-banner leakage, and the CMP-04 `Naar tray` action crop. Poppler reports the intended page count and A4 dimensions for every individual and combined PDF.
+- Seven evidence gaps remain explicit in orange rather than being fabricated: AST-03 registration fields, AST-04 handoff status/review location, AST-05 release end state, WF-02 completion state, CMP-01 install form/end state, CMP-02 definition/custom form, and CMP-04 post-confirm tray state. No version is marked `Base approved`.
+- The read-only capture harness could not authenticate with the previously supplied controlled account, and the Computer Use browser session was stopped when its current URL could not be established confidently. No state-changing submission was made.
+- User review rejected the first combined package at page one: the generic grid stretched AC-01 away from its tested v6 layout, crowded SC-01, moved image labels inside screenshot bounds, and used a desktop-specific camera crop; AST-02's route-card concept was useful but too card-heavy.
+- Built corrected package `2026-07-21-revised-guide-set-v2`. AC-01 now embeds the tested v6 SVG baseline, SC-01 v10 restores the accepted asymmetric layout with mobile dashboard evidence for both scanner choices and corner-overlap labels, and AST-02 v4 is a compact ordered route list. The original full-set folder is retained as a superseded review artifact.
+- Verified the corrected v2 package as 13 unencrypted A4 pages with no `dev.inbit` references in its generated HTML. Both generators pass `node --check`, and the external combined PDF is byte-identical to `output/pdf/operator-guides-revised-set-v2-draft.pdf`.
+- Updated the generic screenshot marker implementation so later draft pages also place their smaller translucent image identifiers across screenshot corners instead of clipping them inside the image frame.
 
 # Session Progress (2026-06-09)
 
@@ -2809,3 +4156,175 @@ there are multiple duplicate functions that still need to be removed, sku will b
 - Recorded asset-page tab cleanup decisions in `docs/plans/asset-page-tab-cleanup-2026-06-23.md` and `TODO.md`: Licenses, Images, Files, and Extra files need later feature planning/rework; Devices, Maintenance, and the Send/Upload paperclip nav action are marked for deprecation/removal planning.
 - Created `docs/manuals/operator-guide-planning.md` to track guide decisions, guide-code families, draft guide inventory, open questions, and follow-up investigation needed before producing final laminated manuals.
 - Clarified that `docs/manuals/operator-guide-planning.md` is brainstorming/planning material, not foundational truth; future agents should only treat entries marked `Final` as locked decisions.
+
+### 2026-06-25
+- Reinitialized on `codex/inactivity-timeout-serial-ocr-plan` and fetched remote refs without pulling or switching branches.
+- Current `HEAD` is `c4a5f8128` (`Clarify Operator Guide Planning Status`) and matches `origin/codex/inactivity-timeout-serial-ocr-plan`.
+- `origin/master` has advanced to `51208bff3` (`Merge pull request #66 from WervInbit/codex/inactivity-timeout-serial-ocr-plan`), so this branch's committed work is already included upstream. Local `master` has not been fast-forwarded yet.
+- Reviewed `PROGRESS.md`, `docs/fork-notes.md`, `TODO.md`, the 2026-06-18 and 2026-06-23 session addenda, `docs/plans/follow-up-investigation-2026-06-16.md`, `docs/plans/asset-page-tab-cleanup-2026-06-23.md`, and `docs/manuals/operator-guide-planning.md`.
+- Local-only dirty state remains intentionally untouched: upload placeholder `.gitignore` line-ending changes, `.env.before-prodclone.2026-04-30`, `.env.prodclone.prodkey`, and `prodbak/`.
+- No Docker, database, browser, Laravel, PHPUnit, migration, seeder, or asset-build commands were run during this reinitialization.
+
+### 2026-06-25
+- Reinitialized on `codex/inactivity-timeout-serial-ocr-plan` for continued laminated operator-guide planning. Current `HEAD` is `c4a5f8128` (`Clarify Operator Guide Planning Status`) and matches `origin/codex/inactivity-timeout-serial-ocr-plan`.
+- Reviewed `AGENTS.md`, recent `PROGRESS.md`, `docs/fork-notes.md`, and `docs/manuals/operator-guide-planning.md`; the manual planning document remains brainstorming-only unless entries are explicitly marked `Final`.
+- Startup doc drift scan found the manual planning doc under `docs/manuals/` and related planning references; no README/CONTRIBUTING updates were made during reinitialization.
+- Local-only dirty state remains intentionally untouched: upload placeholder `.gitignore` line-ending changes, `.env.before-prodclone.2026-04-30`, `.env.prodclone.prodkey`, and `prodbak/`.
+- No fetch, pull, branch switch, Docker, database, browser, PHPUnit, or asset-build commands were run during this reinitialization step.
+- Continued guide brainstorming in `docs/manuals/operator-guide-planning.md`: kept the draft color/icon/reference style, set first-pass floor guides to Dutch, added QR links to latest digital guides/index as a draft direction, deferred work-order guides from the first pass, recorded operator-facing terms (`Asset`, `Workflow`, `Component`, `Model`, `Tray`, `Storage`), and added a later research-model/best-practice review phase.
+- Added an out-of-thread product follow-up to the guide planning doc: workflow readiness/asset-list visibility may need to support multiple relevant workflows beyond a single base/test workflow before final guide language is locked.
+- Clarified Affinity production expectations in the guide planning doc: automation can help with master-page recommendations, layout specs, screenshot checklists, importable SVG/PDF/PNG assets, and review PDFs, but native Affinity `.afpub`/`.afdesign` output should not be assumed unless a reliable workflow is proven.
+- Moved the research-model/best-practice review earlier in the guide planning flow: before real guide drafting/layout, prepare a package with the planning doc, example PDF/images, print constraints, target viewing context, and questions about A4 print readability, screenshot sizing, QR sizing, contrast, color-blind/black-and-white fallback, and lamination glare.
+- Updated the research-review package inputs to include the operator planning guide, the initial rough Affinity design sketch, and a photo of the actual printed page for realistic print/readability analysis.
+- Created `docs/agents/session-handoff-2026-06-25-affinity-guide-setup.md` for a fresh Computer Use session. The current thread could see the Computer Use plugin after enablement but did not receive callable desktop screenshot/click/type tools, so Affinity GUI setup should continue in a refreshed session.
+- Continued the Affinity proof in a Computer Use-enabled session. Current local checkout was verified on `master` at `51208bff3` (`Merge pull request #66 from WervInbit/codex/inactivity-timeout-serial-ocr-plan`).
+- Created a two-page `AST-02` proof/template from the operator guide plan and Affinity research report: `C:\Users\Gebruiker\Documents\snipe-it manuals\AST-02 Affinity proof template.pdf` and imported/saved it through Affinity as `C:\Users\Gebruiker\Documents\snipe-it manuals\AST-02 Affinity proof template.af`.
+- The Affinity proof is layout/template validation only, not final guide copy. It uses the research-recommended double-sided A4 structure, 10 mm live margins, five front-side step bands, back-side workitem detail flow, image rail placeholders, finished-when boxes, and QR placeholders.
+- No app code, Docker, database, Laravel, PHPUnit, migrations, seeders, browser tests, or asset-build commands were run during the Affinity proof creation.
+- Created `docs/manuals/affinity-development-blocks-2026-06-25.md` to split the operator-guide/Affinity work into reusable page blocks, page-specific build chunks, a Computer Use build queue, screenshot source mapping, and a missing-screenshot backlog.
+- Captured additional read-only Playwright screenshots in `C:\Users\Gebruiker\Documents\snipe-it manuals\screenshot-source\2026-06-25-blocks`, including the filled login form, asset-level Tests / Workflows tab, and asset-level Components tab. The earlier admin Workflow Profiles and global Components captures were marked as unsuitable for the asset-tab guide blocks.
+- No Snipe-IT app code, Docker, database, Laravel, PHPUnit, migrations, seeders, or asset-build commands were run for the development-block spec.
+
+### 2026-06-30
+- Reinitialized on `master` at `51208bff3` (`Merge pull request #66 from WervInbit/codex/inactivity-timeout-serial-ocr-plan`) for continued operator-guide creation/planning feedback.
+- Reviewed `AGENTS.md`, recent `PROGRESS.md`, `docs/fork-notes.md`, `docs/manuals/operator-guide-planning.md`, `docs/manuals/affinity-development-blocks-2026-06-25.md`, and the 2026-06-25 guide addendum.
+- Current guide-planning status remains draft/brainstorming unless entries are explicitly marked `Final`; the smaller Affinity block spec remains the working implementation guide for page-by-page guide creation.
+- Existing local guide artifacts remain under `C:\Users\Gebruiker\Documents\snipe-it manuals`, including the AST-02 Affinity proof, screenshot source folder, and the generated `AC-01`, `AST-01`, `WF-01`, and combined draft PDFs under `draft-guides\2026-06-25-login-asset-test`.
+- Local dirty state remains intentionally untouched: guide planning/session docs, upload placeholder `.gitignore` line-ending changes, `.env.before-prodclone.2026-04-30`, `.env.prodclone.prodkey`, and `prodbak/`.
+- No Docker, database, browser, Laravel, PHPUnit, migrations, seeders, asset-build commands, fetch, pull, or branch changes were run during this reinitialization.
+- Sorted the first draft guide feedback into `docs/manuals/operator-guide-feedback-replan-2026-06-30.md`. The new direction keeps guide codes, related-guide chips, footer/source/version, larger bottom-right QR, and old right-side help information, but changes the next drafts to step-first layouts with smaller screenshot crops per action and inline stop warnings at the relevant step.
+- Updated the guide planning and Affinity block docs to reference the June 30 replan. `AC-01 Login` should become a compact block instead of a full-page default; `AST-01 Asset openen` should put the mismatch warning at the title/model/device check step; serial-number search is recorded as desired but blocked until supported by the product.
+- Clarified that compacting `AC-01 Login` is a preference, not a hard requirement; use more space if print readability suffers. Screenshot crops should be smaller than the current `AC-01`/`AST-01` proofs but not as small as the smallest screenshot in the initial example photo.
+- Follow-up broad reinitialization fetched remote refs while staying on `master`; local `HEAD` remains `51208bff3` and matches `origin/master`. Reviewed `AGENTS.md`, `TODO.md`, `docs/fork-notes.md`, recent progress/addenda, and the current operator-guide planning/replan docs before the planned ChatGPT-website research alignment.
+- Prepared the next guide-layout iteration by rereading the operator guide plan, June 30 feedback replan, Affinity block spec, Affinity research report, and guide session addenda. Updated the guide docs so screenshot use is no longer defined by a fixed quantity or screenshot-per-step rule; each visual should instead have a job such as primary path, alternative path, physical context, verification, or stop support.
+- Confirmed Computer Use is reachable in this session and can target the running Affinity app. The existing `AST-02 Affinity proof template` window was inspected successfully without changing the document. Next Affinity proof should be a small visual-fit test before rebuilding a full guide.
+- Created the `PASS-00A Visual Fit Proof` artifacts under `C:\Users\Gebruiker\Documents\snipe-it manuals\visual-fit-tests\2026-06-30`. The final test files are `operator-guide-visual-fit-proof-v3.pdf`, `operator-guide-visual-fit-proof-v3-rendered-1.png`, and the imported/saved Affinity file `operator-guide-visual-fit-proof-v3.af`.
+- The proof follows the liked concept structure while testing revised visual priorities: a larger primary QR-scan visual, smaller manual-search fallback, physical QR-location placeholder, inline mismatch stop, retained help rail, related guides/footer, and larger latest-version QR. The physical QR photo and live camera state remain placeholders, not final guide evidence.
+- User rejected the `PASS-00A Visual Fit Proof` as visually unacceptable. Treat `operator-guide-visual-fit-proof-v3.*` as a negative test artifact only, not as a pattern for future guide pages.
+- Follow-up correction: stopped the generated-image/PDF proof route and used Computer Use inside the original-plan Affinity working copy instead. Saved the native checkpoint to `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-06-30-ac01-ast01-native\operator-guides-ac01-ast01-native-affinity-v2-feedback-pass.af`, with `operator-guides-ac01-ast01-native-affinity-v1-before-feedback-pass.af` kept as the pre-edit backup.
+- The native Affinity pass now adds a rough combined `AST-01 Asset openen v2` / `AC-01 Login v2 compact` block on page 2 over the original plan artwork, with real placed screenshots for the login form, dashboard, scan page, and hardware index/search fallback. This is a direction marker, not a polished guide; missing evidence remains the physical QR-location photo, a phone/browser start state, and successful live-camera scan state.
+- User reviewed the native Affinity output and correctly flagged it as unusable. Created `docs/manuals/operator-guide-clean-design-plan-2026-06-30.md` to make the next step plan-first and clean-document-first: do not continue from the failed native `.af`, prepare real screenshot crops before Affinity placement, build only `PASS-00B Clean Style Strip` first, and export/inspect a proof after each small pass.
+- Built a focused clean `AC-01 Login` test from fresh `https://dev.inbit/` mobile-sized screenshots using the `codex` / `codexcodex` dev account. The login flow verified successfully: the capture summary records `Dashboard :: Inbit Snipe-IT` at `https://dev.inbit/`.
+- Created and inspected the clean proof artifacts under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-06-30-ac01-clean-login`: `AC-01-login-clean-v1-proof.png`, `AC-01-login-clean-v1-proof.pdf`, and source `AC-01-login-clean-v1.svg` / `.html`. The proof uses three distinct phone-state visuals: login page, filled login form, and dashboard/Scan QR visible after login.
+- Opened the clean SVG in Affinity through Computer Use and saved it as native file `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-06-30-ac01-clean-login\AC-01-login-clean-v1.af`. Self-check note: the dashboard screenshot still shows the app's real untranslated `general.scan` footer on the Scan QR card; this is product UI evidence to fix separately, not a guide-layout fabrication.
+- Built the matching clean `AST-01 Asset openen` proof from fresh mobile-sized `https://dev.inbit/` screenshots using real asset `INBIT-HG0001` / `HP ProBook 450 G8`. The proof artifacts are under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-06-30-ast01-clean-open-asset`, with final proof `AST-01-open-asset-clean-v3-proof.png` / `.pdf` and native Affinity file `AST-01-open-asset-clean-v3.af`.
+- AST-01 self-check corrections: shortened the fallback and verification captions after proof inspection to remove column overlap, kept the mismatch warning inline with the verification step, and labelled physical QR-location evidence as `Foto nodig` instead of faking a device photo. The screenshot still shows the real app's `general.scan` footer on the dashboard Scan QR card.
+- Updated the clean `AST-01 Asset openen` proof after receiving a real phone camera/QR screenshot. The new `v4` splits the scan entry into separate dashboard `Scan QR` card and top camera-icon visual blocks, uses the submitted camera/QR photo as the scan/QR-location evidence, keeps search fallback and asset verification blocks, and saves proof/native files as `AST-01-open-asset-clean-v4-proof.png`, `AST-01-open-asset-clean-v4-proof.pdf`, and `AST-01-open-asset-clean-v4.af` under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-06-30-ast01-clean-open-asset`.
+
+### 2026-07-02
+- Reinitialized for continued operator-guide planning/detail refinement. Reviewed recent `PROGRESS.md`, `docs/fork-notes.md`, and the active manual planning docs before updating guide rules; created `docs/agents/agents-addendum-2026-07-02-session-init.md`.
+- Tightened the guide planning docs so step-specific stop warnings are a hard attached rule: the stop block must be inside or visibly attached to the step block it references, and must not be moved into a detached help rail, lower help tile strip, or footer area. This applies directly to the `AST-01` verification/mismatch warning.
+- Created the clean `AST-01 Asset openen` v5 proof/native Affinity pass under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-06-30-ast01-clean-open-asset`: `AST-01-open-asset-clean-v5-proof.png`, `.pdf`, `.svg`, `.html`, and `AST-01-open-asset-clean-v5.af`. This pass keeps the lower area as small help info tiles and moves the mismatch `STOP` warning into the referenced verification block so it cannot be missed while following the steps.
+- Completed a deeper design-foundation investigation across the guide planning docs, Affinity research report, rejected visual-fit proof, clean `AC-01` proof, clean `AST-01` v4/v5 proofs, and the user's current manual Affinity edits. Created `docs/manuals/operator-guide-design-foundation-2026-07-02.md` as the current reusable guide grammar for all next proofs, including actual step numbering, `1A`/`1B` screenshot labels for alternatives, `OF` instead of arrows for equivalent choices, mandatory tiny screenshot captions, attached stop warnings, help-tile behavior, visual-purpose planning, and the recommended `AST-01` v6 structure.
+- Clarified the foundation as a flexible design system rather than a fixed page template: guides may vary in step count, screenshot count, split-step patterns, and help-tile count, while consistency comes from the shared shell, numbering/caption grammar, visual-purpose rule, attached warnings, and footer/reference patterns.
+- Recreated `AST-01 Asset openen` as a v6 test of the new flexible design foundation. The v6 proof uses four actual workflow steps, an explicit `1A`/`1B` `OF` choice for opening the scanner, numbered/captioned screenshots, the submitted physical QR/camera photo, manual search fallback limited to currently supported asset tag/QR-code behavior, and the mismatch `STOP` warning attached inside the verification step.
+- Generated v6 artifacts under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-06-30-ast01-clean-open-asset`: `AST-01-open-asset-clean-v6.svg`, `.html`, `-proof.png`, `-proof.pdf`, and native Affinity file `AST-01-open-asset-clean-v6.af`. The imported Affinity tab was saved separately, leaving the older edited AST-01 tab open and untouched.
+- Added a proof generator so the `AST-01` layout can be regenerated consistently while iterating on the shared guide layout grammar; the current script is `scripts/manuals/generate-ast01-v8-proof.mjs`.
+- Iterated the `AST-01` proof to v8 after feedback on prerequisite references, image badges, and warning density. The v8 proof makes `Telefoon met camera` explicit in `Nodig`, renders `Ingelogd (AC-01 Login)` as blue text with an `AC` icon in the `Vooraf` area, uses much more transparent image identifier circles, and changes the verification warning from a separate stop column into inline red step text.
+- Generated v8 artifacts under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-06-30-ast01-clean-open-asset`: `AST-01-open-asset-clean-v8.svg`, `.html`, `-proof.png`, and `-proof.pdf`. The v8 Affinity-native file was not created in this pass because Computer Use had been stopped earlier by the user.
+- Iterated the `AST-01` proof to v9 after feedback on wasted image space and help copy. The v9 proof enlarges the two `Open de scanner` option screenshots, keeps the `AC` icon plus blue `Ingelogd` reference with smaller `(AC-01 Login)` bracket text, removes duplicate step 2 wording, enlarges/reframes the physical QR photo, keeps the digital guide QR at a 22 mm target size in the lower-right corner, and replaces placeholder help text with concrete short draft text.
+- Generated v9 artifacts under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-06-30-ast01-clean-open-asset`: `AST-01-open-asset-clean-v9.svg`, `.html`, `-proof.png`, and `-proof.pdf`. The current generator is `scripts/manuals/generate-ast01-v9-proof.mjs`.
+- Iterated the `AST-01` proof to v10 after feedback that the step 1 scanner-option crops still lacked enough surrounding page context and that screenshot identifiers should behave as corner markers. The v10 proof widens the `Dashboard` and `Bovenbalk` option crops so surrounding UI is visible, enlarges the image identifier circles, uses thicker outlines with very transparent fill, and centers those identifiers on image corners.
+- Generated v10 artifacts under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-06-30-ast01-clean-open-asset`: `AST-01-open-asset-clean-v10.svg`, `.html`, `-proof.png`, and `-proof.pdf`. The current generator is `scripts/manuals/generate-ast01-v10-proof.mjs`.
+- Iterated the `AST-01` proof to v11 after feedback that step 1 still used red screenshot target lines and the image identifiers did not read as corner overlays. The v11 proof removes the red callouts from the scanner-option screenshots, loosens the step 1 crops so context is visible, and uses larger/thicker transparent corner identifier rings centered on the screenshot corners.
+- Generated v11 artifacts under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-06-30-ast01-clean-open-asset`: `AST-01-open-asset-clean-v11.svg`, `.html`, `-proof.png`, and `-proof.pdf`. The current generator is `scripts/manuals/generate-ast01-v11-proof.mjs`.
+- Iterated the `AST-01` proof to v12 after feedback that step 2 wasted space beside the QR photo and that the corner identifier rings were too faint. The v12 proof moves the `QR-locatie` hint into the upper-right of the step 2 card, widens the physical QR photo across most of the card, and increases the screenshot identifier ring size, stroke, and fill opacity.
+- Generated v12 artifacts under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-06-30-ast01-clean-open-asset`: `AST-01-open-asset-clean-v12.svg`, `.html`, `-proof.png`, and `-proof.pdf`. The current generator is `scripts/manuals/generate-ast01-v12-proof.mjs`.
+- Opened the v12 SVG in Affinity through Computer Use and saved it as native file `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-06-30-ast01-clean-open-asset\AST-01-open-asset-clean-v12.af`.
+- Built the first-batch operator-guide draft proofs with reusable generator `scripts/manuals/generate-first-batch-guides.mjs`. Outputs are under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-07-02-first-batch`, including individual PDF/PNG/SVG/HTML drafts for `AC-01`, `SC-01`, `AST-01`, `AST-02` front/back, `WF-01`, `WF-02`, `CMP-04`, and `HELP-01`, plus combined proof `first-batch-operator-guides-proof.pdf`, contact sheet `first-batch-contact-sheet.png`, and `first-batch-summary.md`.
+- First-batch self-check: real screenshots are used where available; placeholders remain for the completed workflow summary, `WF-02` final saved state, and `CMP-04` confirmed tray/storage result. No Docker, database, Laravel, PHPUnit, migration, seeder, or asset-build commands were run.
+- Captured a live `https://dev.inbit/` screenshot refresh set under `C:\Users\Gebruiker\Documents\snipe-it manuals\screenshot-source\2026-07-02-first-batch-refresh` using the `codex` dev account. The refresh includes live dashboard, scan, asset detail, Tests/Workflow, Components, and remove-to-tray modal states; no workflow start/complete or tray confirmation was submitted.
+- Regenerated the first-batch drafts from the refresh set and corrected the most visible crop/position problems in `WF-01` and `CMP-04`. Remaining generator-reported capture gaps are states that would require changing dev data: completed workflow summary, final saved workflow result, and post-confirm tray/storage result.
+- Created a new Affinity-ready first-batch pass under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-07-02-first-batch-affinity-v1` after correcting additional workflow crop behavior in `scripts/manuals/generate-first-batch-guides.mjs`. The batch includes regenerated individual SVG/HTML/PDF/PNG proofs, combined PDF/contact sheet, and native Affinity file `first-batch-operator-guides-affinity-v1.af` saved through Computer Use from a 9-page PDF import.
+
+### 2026-07-07
+- Reinitialized on `master` at `51208bff3` (`Merge pull request #66 from WervInbit/codex/inactivity-timeout-serial-ocr-plan`) to continue operator-guide file creation.
+- Reviewed `AGENTS.md`, recent `PROGRESS.md`, `docs/fork-notes.md`, `TODO.md`, `docs/manuals/operator-guide-planning.md`, `docs/manuals/operator-guide-design-foundation-2026-07-02.md`, and the latest first-batch Affinity summary.
+- Current guide source of truth for layout grammar remains `docs/manuals/operator-guide-design-foundation-2026-07-02.md`; the latest generated/native batch is under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-07-02-first-batch-affinity-v1`.
+- Known guide capture gaps remain: `AST-02B` completed workflow summary, `WF-02` final saved/completed workflow state, and `CMP-04` post-confirm tray/storage result. Capturing these requires either approved dev-data changes or intentionally labelled placeholders.
+- Investigated the current first-batch Affinity/generator output against the planning docs. Conclusion: the batch is useful as a rough inventory/proof artifact, but most pages should not be treated as usable laminated guides because it expanded from available screenshot slices before each guide had a locked visual-purpose plan; several crops are too narrow/contextless, later workflow/component pages still contain missing-state placeholders, and the native Affinity file was created from a 9-page PDF import rather than a clean per-guide Affinity layout.
+- Created a focused `AC-01 Login` proof for the guide-by-guide rebuild using the live `https://snipe.inbit/` login page plus the existing phone launcher screenshot. Outputs are under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-07-07-ac01-snipe-login`: `AC-01-login-snipe-v1-proof.png`, `.pdf`, `.svg`, `.html`, summary, and live login capture. The proof starts with the phone shortcut circled, includes a browser fallback with `https://snipe.inbit/`, then login and dashboard checks; the output folder was checked for old development URL references.
+- Revised `AC-01 Login` to `v2` after feedback: the normal step flow now starts only from the phone shortcut, the browser/no-phone fallback moved into the `Geen telefoon` help tile, the context strip no longer lists browser as a normal requirement, and the main step numbers now overlap the step-card corners like the screenshot identifier circles. Updated outputs are `AC-01-login-snipe-v2-proof.png`, `.pdf`, `.svg`, `.html`, and summary in the same proof folder.
+- Tuned the `AC-01` marker hierarchy in the `v2` proof: main step-number circles are larger and heavier, while image-number circles are smaller, lighter, and more transparent so they no longer compete visually.
+- Reworked `AC-01` step 1 to remove leftover browser-fallback spacing and duplicate copy. The step now uses a larger portrait phone screenshot showing most of the phone interface, with the Inbit Snipe-IT shortcut circled, and keeps the instruction in the step line.
+- Reworked `AC-01` into a compact `v3` proof after feedback that step 1 still consumed too much empty width. The three workflow steps now sit side by side in equal-width cards: phone shortcut, login form, and dashboard check. Browser access remains only in the `Geen telefoon` help tile, and the generated summary/HTML were checked for stale `dev.inbit` references.
+- Reworked `AC-01` into a `v4` proof using one shared workflow frame with three internal mini-steps instead of three separate cards. This keeps the short login guide closer to the earlier compact design, reduces the visible empty-card effect, preserves the consistent help/footer area, and keeps the browser URL only in the `Geen telefoon` help tile. Outputs are `AC-01-login-snipe-v4.svg`, `.html`, `-proof.png`, `-proof.pdf`, and summary under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-07-07-ac01-snipe-login`.
+- Revised `AC-01` to `v5` after feedback that the footer/support area floated too high. The shared workflow frame now sits slightly lower in the middle of the page, while help tiles, `Klaar als`, related guides, digital guide QR, and source text are anchored back near the bottom for consistency with longer guides. Outputs are `AC-01-login-snipe-v5.svg`, `.html`, `-proof.png`, `-proof.pdf`, and summary in the same proof folder.
+- Created a focused `SC-01 Scan asset` proof generator, `scripts/manuals/generate-sc01-snipe-proof.mjs`, and iterated the proof to `v6`. The guide uses the live `https://snipe.inbit/` dashboard capture for scanner entry, the earlier mobile camera/QR screenshot for the scan step because the current laptop camera prompt is not useful guide evidence, clean existing search/result/detail screenshots for fallback and verification, and keeps the stop warning attached to the verification step. Outputs are under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-07-07-sc01-snipe-scan`: `SC-01-scan-asset-snipe-v6.svg`, `.html`, `-proof.png`, `-proof.pdf`, and summary. The v6 summary/HTML were checked for stale `dev.inbit` references.
+- Created `scripts/manuals/generate-initial-guides-v2.mjs` to regenerate the remaining initial guide drafts after the focused `AC-01` and `SC-01` passes. Outputs are under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-07-07-initial-guides-v2`, with individual drafts for `AST-02` front/back, `WF-01`, `WF-02`, `CMP-04`, and `HELP-01`, plus `initial-guides-v2-remaining-proof.pdf`, `initial-guides-v2-contact-sheet.png`, and `initial-guides-v2-summary.md`.
+- Fixed the obvious `HELP-01` draft layout defects in the v2 batch: the title now fits and the `QR beschadigd` related-guide chip no longer overflows its tile. The v2 batch summary/HTML and generator source were checked for stale `dev.inbit` references.
+- Current initial guide set for review is `AC-01 Login` v5, `SC-01 Scan asset` v6, `AST-01 Asset openen` v12, and the remaining v2 batch. Remaining evidence gaps are still `AST-02B` completed workflow summary, `WF-02` final saved/completed workflow state, and `CMP-04` post-confirm tray/storage result.
+- No Docker, database, Laravel, PHPUnit, migration, seeder, asset-build, pull, or branch-change commands were run during this reinitialization.
+
+### 2026-08-11 - User-Account Guide Review Batch
+- Continued the focused operator-guide work after the desktop app/browser interruption and brought the local `db`, `app`, and `web` services online without running migrations, resets, or seeders.
+- Added idempotent evidence-state helper `scripts/manuals/prepare-user-account-guide-evidence.php`, reproducible real-UI capture helper `scripts/manuals/capture-user-account-guide-evidence.mjs`, and focused guide generator `scripts/manuals/generate-user-account-guide-review.mjs`.
+- Captured unannotated Dutch desktop evidence for user creation, standard groups, direct permissions, password reset/self-change entry, assignment review, deactivation, deletion, and restoration under `C:\Users\Gebruiker\Documents\snipe-it manuals\screenshot-source\2026-08-11-user-management`.
+- Used only the reversible fictional `Mila de Boer` / `Miladb` record for lifecycle evidence. Final state is restored, not deleted, with login disabled. Returned the demo administrator locale from temporary Dutch capture mode to `en-US`.
+- Generated five review guides across six A4 pages: USR-01 add user, USR-02 role/rights, USR-03 password reset, AC-02 own password change, and two-sided USR-04 deactivate/delete/restore. The combined review PDF is `output/pdf/operator-guides-user-account-review-v1.pdf`; editable SVG/HTML, individual PDFs, and PNG proofs are under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-08-11-user-account-review-batch-v1`.
+- Corrected combined-PDF SVG clip ID collisions, aligned the USR-03 reset-link target, preserved the full USR-01 identity/password form crop, and corrected USR-02 to show the verified Superadmin prerequisite.
+- Updated the guide specifications, project index, decision record, screenshot catalog, and TODO list from evidence-blocked specifications to generated drafts awaiting review. No user-account guide was marked approved.
+- Verification passed: both Node scripts parse, the PHP helper passes `php -l`, individual PDFs have page counts `1/1/1/1/2`, the combined PDF has six A4 pages, all expected titles extract, no `dev.inbit` or test credential appears in generated outputs, and every latest combined-PDF page was rendered and visually inspected.
+
+### 2026-08-27 - CAT-00 v5 Review
+- Started a focused CAT-00 v5 pass from the immutable v4 working draft.
+- Scope is limited to the owner-reviewed overview, identity, attribute,
+  component, and asset-comparison sections; pages 5, 7, and 8 remain
+  conceptually unchanged unless required for layout consistency.
+- Session notes:
+  `docs/agents/agents-addendum-2026-08-27-cat00-v5-session-init.md`.
+- Generated `output/pdf/CAT-00-catalogus-begrijpen-v5-draft.pdf` as an
+  eight-page A4 working draft while preserving the portable v4 review copy.
+- Rebuilt parts 1, 2, 3, 4, and 6 around one integrated catalogue map, the
+  current attribute-form labels, a branching component-definition model, and
+  an evidence-aligned baseline-versus-asset comparison.
+- Validation passes generator component/geometry checks, shared component
+  tests, the complete portable guide-package verifier, PDF metadata and text
+  checks, and a full eight-page 180-DPI visual inspection.
+- Replaced the v5 page 1 lanes with the v6 relationship graph after owner
+  feedback. Direct attributes and expected components now connect to the
+  model number, definitions connect to their uses, and orange distinguishes
+  physical Asset/Placed Component instances from reusable catalogue records.
+- Preserved v6 as review history and generated CAT-00 v7 after the complete
+  visual/flow audit. The chapter now uses CMP amber consistently for component
+  definitions, expected components, and placed components, and AST green for
+  asset identity and asset-specific state. Labels and fill/border treatment
+  distinguish definitions, baselines, and physical records.
+- Corrected the page 1 relationship direction and connector readability,
+  clarified page 2 multiplicity, enlarged and reorganized page 3, replaced the
+  mutable operating-system example, cleaned page 6 evidence crops, rebuilt the
+  page 7 priority flow, and marked planned CAT routes as `In voorbereiding`.
+- Generated `output/pdf/CAT-00-catalogus-begrijpen-v7-draft.pdf`. Focused
+  component/geometry checks, the complete shared guide-package tests, PDFInfo,
+  extracted-text checks, and full eight-page 180-DPI visual inspection pass.
+  CAT-00 v7 remains a working draft awaiting exact-version review; v4 remains
+  the portable review copy.
+
+### 2026-08-13 - USR-01 Review Corrections
+- Started a focused USR-01 review pass for step hierarchy, temporary-password policy, group/permissions guidance, and image-label/title alignment.
+- Preserve the other four user-account guide drafts while producing a separately reviewable USR-01 v2 draft.
+- Extended `scripts/manuals/generate-user-account-guide-review.mjs` with an optional focused-guide mode so one guide can be regenerated without overwriting the combined v1 review batch.
+- Generated `output/pdf/usr-01-gebruiker-toevoegen-v2-draft.pdf` and editable/proof artifacts under `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-08-13-usr01-review-v2`.
+- USR-01 v2 makes the add-user action primary and duplicate search secondary, replaces the generated-password wording with username plus current year, requires personal handoff and immediate AC-02 replacement, identifies `Groepen` at the bottom, and identifies the second top `Machtigingen` tab plus `Global: Super User` for Superadmin.
+- Repositioned the visual columns and shortened step headings so 1A through 4A no longer cover title text. Tightened the login-checkbox target and shortened the step 3 warning so focus marks, warnings, and screenshot captions do not collide.
+- Updated the USR-01 specification, project index, decision record, and TODO entries. USR-01 v2 remains a generated draft awaiting review; the earlier v1 combined PDF and the other four user-account guides were not regenerated.
+- Verification passed: generator syntax, one-page A4 geometry, required extracted text, forbidden development URL/credential/old `Genereer` wording checks, final PDF rasterization, and full-resolution visual inspection.
+- Refined USR-01 v2 after detailed review: recentered the 1A add-user target, removed the broad 2A identity/password focus while retaining the login target, rendered the step 2 AC-02 handoff with its blue family icon and full guide name, converted the step 3 warning into ordinary bold minimum-rights guidance, removed the 4A detail focus, and added the exact navigation from Save through the user list.
+- Replaced the irrelevant LDAP and incorrect role-permission help tiles with `Minimale rechten` and `Maatwerk nodig`. USR-02 is now explicitly named as the guide for user-specific rights through `Machtigingen`.
+- Prepared USR-01 v4 with explicit navigation through the left-side person icon to `Gebruikers`, a vertically centered completion row, and a separate planned USR-05 reference for creating or editing reusable groups. USR-02 remains the guide for per-user group assignment and direct-rights exceptions.
+- Generated and visually verified the one-page A4 `usr-01-gebruiker-toevoegen-v4-draft.pdf`. PDF text and geometry checks passed; the repository PDF render has no header, step, completion-row, related-guide, or QR overlap.
+- Prepared USR-01 v5 after review: account creation now names Admin and Superadmin, the AC-01 prerequisite includes its blue family icon, and the footer uses two full guide names instead of forcing three abbreviated references.
+- Generated and visually verified `usr-01-gebruiker-toevoegen-v5-draft.pdf`; the one-page A4, required-text, stale-version, and URL checks passed, and full-resolution header/footer crops show no clipping or overlap.
+- Prepared USR-01 v6 with a guide-specific second reference row. The footer now offers five full guide names while retaining the AC-01 prerequisite only in the top context row.
+- Generated and visually verified `usr-01-gebruiker-toevoegen-v6-draft.pdf`. The five complete references fit in two rows without clipping, QR overlap, source-line overlap, stale version text, or development URLs.
+- Re-rendered and inspected the final one-page PDF at 180 DPI; required content and absence of removed help/stop wording were verified from the final PDF.
+- Exported the refined page under a new immutable v3 path after the v2 filename was found to be ambiguous for review caching. The new deliverable is `output/pdf/usr-01-gebruiker-toevoegen-v3-draft.pdf`; the earlier v2 file remains untouched.
+- Implemented `scripts/manuals/lib/guide-system.mjs` as the reusable generated-guide component layer. It now owns guide statuses and registry data, visual tokens, true-center family/step/image badges, symmetric focus normalization, context/completion/reference components, zero-to-five related guides over two rows, definition validation, and rendered geometry checks.
+- Added `scripts/manuals/test-guide-system.mjs` and `scripts/manuals/generate-guide-component-proof.mjs`. The regression proof exposed and then verified the correction of a USR-03 chip overflow; the final component proof passes 10 badge and 5 reference checks.
+- Migrated focused USR-01 to shared components as v7 and generated `output/pdf/usr-01-gebruiker-toevoegen-v7-draft.pdf`. Its rendered geometry report passes 11 badge checks and all 5 full related-guide references without overflow.
+- Added `docs/manuals/operator-guides/components.md` and versioned review records so minor review corrections are classified as global, family, guide, or version-specific and promoted into shared rules when reusable.
+- Replaced ambiguous current artifact status wording in the operator-guide documentation: the six internally accepted versions are `Internal review candidate`; no guide becomes `Third-party approved` without an exact-version third-party review record.
+- Added the missing USR-01 navigation evidence as v8. Captured the controlled Dutch dashboard with expanded `Personen` and `Toon Alles`, registered it as `USR-DASHBOARD-PEOPLE-NAV-DESKTOP-01`, and rendered it as 1A beside the existing add-user toolbar relabelled 1B. The layout supports unequal visual widths so a narrow sidebar route and wider toolbar can coexist without forcing both into the same crop size.
+- User explicitly accepted USR-01 v8. Updated its specification, review record, decision record, registry status, project index, and TODO entry to `Internal review candidate for V1`; acceptance remains exact-version only.
+- Prepared focused USR-02 v2 as the next user-account review page. The role/rights policy and real v1 evidence remain unchanged; the page now uses shared components, true-center badges, an AC-01 prerequisite marker, measured focus padding, non-overlapping long headings, and four full related-guide references over two rows.
+- Revised focused USR-02 to v3 from detailed review. Removed redundant identity and Superadmin/unclear-role stops, removed the separate-approval model, documented selecting/deselecting multiple groups with Ctrl+click, changed the audience to Admin / Superadmin, and explained the effective Overnemen/Toestaan/Weigeren semantics. Local code verification confirmed only Superadmin can sync groups or change `Global: Super User`, while Admin can manage ordinary direct user permissions.

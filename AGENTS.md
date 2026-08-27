@@ -19,6 +19,7 @@ This guide keeps automation agents and human contributors aligned on the expecta
 - Destructive database commands (`migrate:fresh`, `migrate:refresh`, `migrate:reset`, `db:wipe`) are forbidden on shared dev environments unless the user explicitly approves them in the current message.
 - Before any destructive DB command, print a DB preflight summary (`APP_ENV`, `DB_CONNECTION`, `DB_DATABASE`) and state the impact in plain language.
 - Before running PHPUnit inside Docker, clear cached Laravel config first (`php artisan optimize:clear`) and verify tests are resolving to the isolated testing DB; cached local config can override PHPUnit env vars and accidentally target the dev MySQL database.
+- Pass `APP_ENV=testing`, `DB_CONNECTION=sqlite`, and `DB_DATABASE=:memory:` explicitly at the Docker command boundary for local PHPUnit runs. The executable test guard must remain enabled; external MySQL/PostgreSQL tests require `SNIPEIT_ALLOW_EXTERNAL_TEST_DATABASE=1` and the exact disposable database name `snipeit_test`.
 
 ## Documentation Touchpoints
 - `AGENTS.md` (this file) captures the ground rules for agents and contributors working in the fork.
@@ -46,7 +47,11 @@ This guide keeps automation agents and human contributors aligned on the expecta
 ### Coding Style & Naming Conventions
 - PHP follows PSR-12 with 4-space indentation; classes live under the App namespace in StudlyCase, methods in camelCase, config keys snake_case.
 - Blade templates mirror controller names and use 4-space indents; JavaScript modules under `resources/js` stay ES modules with camelCase exports.
-- Run `vendor/bin/phpstan analyse` and `vendor/bin/psalm` on complex changes; honor `phpmd.xml` for legacy hot spots.
+- Run `vendor/bin/phpstan analyse` on complex changes and use the installed
+  `vendor/bin/phpcs` or `vendor/bin/phpinsights` tools for focused style/quality
+  checks. Psalm and PHPMD are not installed release gates; do not report them
+  as evidence unless their dependencies and maintained configuration are added
+  deliberately.
 - Localized strings belong in `resources/lang/<locale>/`; reuse existing keys before adding new ones.
 
 ### Testing Guidelines

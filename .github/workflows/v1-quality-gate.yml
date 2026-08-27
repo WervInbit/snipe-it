@@ -1,0 +1,349 @@
+name: V1 Quality and Image Gate
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  sqlite-tests:
+    name: Guarded SQLite Application Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: "8.2"
+          coverage: none
+          extensions: pdo_sqlite
+          tools: composer:2.8
+
+      - name: Prepare isolated test application
+        run: |
+          cp .env.testing.example .env
+          cp .env.testing.example .env.testing
+          chmod -R u+rwX storage bootstrap/cache
+          composer install --no-ansi --no-interaction --no-progress --prefer-dist
+
+      - name: Verify guarded in-memory database target
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
+        run: |
+          php artisan optimize:clear --env=testing
+          php artisan passport:keys --force
+          php artisan tinker --env=testing --execute="throw_unless(app()->environment('testing') && config('database.default') === 'sqlite' && config('database.connections.sqlite.database') === ':memory:', new RuntimeException('Unsafe V1 test target')); dump(app()->environment(), config('database.default'), config('database.connections.sqlite.database'));"
+
+      - name: Execute strict unit and feature suite
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: sqlite
+          DB_DATABASE: ":memory:"
+        run: php artisan test --env=testing --fail-on-incomplete --fail-on-skipped
+
+  mariadb-tests:
+    name: Guarded MariaDB Application Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    services:
+      mariadb:
+        image: mariadb:11.4.7@sha256:39596f079862334be04f4231664862e55d4febe54309cc62f750f2297de85b06
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: "yes"
+          MARIADB_DATABASE: snipeit_test
+        ports:
+          - 3306/tcp
+        options: >-
+          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: "8.2"
+          coverage: none
+          extensions: pdo_mysql
+          tools: composer:2.8
+
+      - name: Prepare disposable MariaDB application
+        run: |
+          cp .env.testing.example .env
+          cp .env.testing.example .env.testing
+          chmod -R u+rwX storage bootstrap/cache
+          composer install --no-ansi --no-interaction --no-progress --prefer-dist
+
+      - name: Migrate and verify guarded MariaDB target
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: mysql
+          DB_DATABASE: snipeit_test
+          DB_HOST: 127.0.0.1
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
+          DB_USERNAME: root
+          SNIPEIT_ALLOW_EXTERNAL_TEST_DATABASE: "1"
+        run: |
+          php artisan optimize:clear --env=testing
+          php artisan migrate --force
+          php artisan passport:install --no-interaction
+          php artisan tinker --env=testing --execute="throw_unless(app()->environment('testing') && config('database.default') === 'mysql' && config('database.connections.mysql.database') === 'snipeit_test', new RuntimeException('Unsafe V1 MariaDB test target')); dump(app()->environment(), config('database.default'), config('database.connections.mysql.database'));"
+
+      - name: Execute strict MariaDB unit and feature suite
+        env:
+          APP_ENV: testing
+          DB_CONNECTION: mysql
+          DB_DATABASE: snipeit_test
+          DB_HOST: 127.0.0.1
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
+          DB_USERNAME: root
+          SNIPEIT_ALLOW_EXTERNAL_TEST_DATABASE: "1"
+        run: php artisan test --env=testing --fail-on-incomplete --fail-on-skipped
+
+  quality:
+    name: Source, Dependency, and Asset Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: "8.2"
+          coverage: none
+          tools: composer:2.8
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Prepare application configuration
+        run: |
+          cp .env.testing.example .env
+          cp .env.testing.example .env.testing
+          chmod -R u+rwX storage bootstrap/cache
+
+      - name: Verify tracked environment-file boundary
+        run: |
+          unexpected_env_files="$(
+            git ls-files -- '.env' '.env.*' |
+              grep -vE '^\.env\.(example|testing\.example|dusk\.example)$' || true
+          )"
+          if [ -n "$unexpected_env_files" ]; then
+            printf 'Tracked runtime environment files are forbidden:\n%s\n' "$unexpected_env_files"
+            exit 1
+          fi
+
+      - name: Install PHP dependencies and verify patch provenance
+        run: |
+          composer install --no-ansi --no-interaction --no-progress --prefer-dist
+          composer validate --strict
+          composer patches-doctor
+          composer audit --locked --abandoned=fail
+
+      - name: Install and audit JavaScript dependencies
+        run: |
+          npm ci --no-audit --no-fund
+          npm audit --audit-level=high
+          npm audit --omit=dev --audit-level=high
+
+      - name: Build production browser assets
+        run: |
+          npm run test:node
+          npm run prod
+
+      - name: Scan source dependencies, secrets, and configuration
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: table
+          exit-code: "1"
+          scanners: vuln,secret,misconfig
+          severity: HIGH,CRITICAL
+          trivyignores: .trivyignore.yaml
+
+      - name: Inventory source licenses
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        env:
+          TRIVY_LICENSE_FULL: "true"
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: json
+          output: source-license-report.json
+          exit-code: "0"
+          scanners: license
+          severity: UNKNOWN,MEDIUM,HIGH,CRITICAL
+
+      - name: Upload source license inventory
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: source-license-report-${{ github.sha }}
+          path: source-license-report.json
+          if-no-files-found: error
+
+      - name: Verify generated assets and source remain reproducible
+        run: |
+          git diff --check
+          git diff --exit-code -- public
+
+  production-images:
+    name: Production Images, SBOMs, and Scans
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    needs:
+      - quality
+      - sqlite-tests
+      - mariadb-tests
+    env:
+      APP_IMAGE: local/inbit-app:${{ github.sha }}
+      WEB_IMAGE: local/inbit-web:${{ github.sha }}
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+
+      - name: Build production application image
+        run: >-
+          docker buildx build
+          --load
+          --target app
+          --file docker/production/Dockerfile
+          --tag "$APP_IMAGE"
+          .
+
+      - name: Build production web image
+        run: >-
+          docker buildx build
+          --load
+          --target web
+          --file docker/production/Dockerfile
+          --tag "$WEB_IMAGE"
+          .
+
+      - name: Verify release image contents
+        run: |
+          bash scripts/ci/verify-production-image.sh "$APP_IMAGE"
+          bash scripts/ci/verify-production-image.sh "$WEB_IMAGE"
+
+      - name: Generate application image SBOM
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: ${{ env.APP_IMAGE }}
+          format: cyclonedx
+          output: app-image.cdx.json
+          scanners: vuln
+
+      - name: Generate web image SBOM
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: ${{ env.WEB_IMAGE }}
+          format: cyclonedx
+          output: web-image.cdx.json
+          scanners: vuln
+
+      - name: Inventory application image licenses
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        env:
+          TRIVY_LICENSE_FULL: "true"
+        with:
+          scan-type: image
+          image-ref: ${{ env.APP_IMAGE }}
+          format: json
+          output: app-image-license-report.json
+          exit-code: "0"
+          scanners: license
+          severity: UNKNOWN,MEDIUM,HIGH,CRITICAL
+
+      - name: Inventory web image licenses
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        env:
+          TRIVY_LICENSE_FULL: "true"
+        with:
+          scan-type: image
+          image-ref: ${{ env.WEB_IMAGE }}
+          format: json
+          output: web-image-license-report.json
+          exit-code: "0"
+          scanners: license
+          severity: UNKNOWN,MEDIUM,HIGH,CRITICAL
+
+      - name: Inventory application image security findings
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: ${{ env.APP_IMAGE }}
+          format: json
+          output: app-image-security-report.json
+          exit-code: "0"
+          scanners: vuln,secret
+          severity: HIGH,CRITICAL
+          trivyignores: .trivyignore.yaml
+
+      - name: Inventory web image security findings
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: ${{ env.WEB_IMAGE }}
+          format: json
+          output: web-image-security-report.json
+          exit-code: "0"
+          scanners: vuln,secret
+          severity: HIGH,CRITICAL
+          trivyignores: .trivyignore.yaml
+
+      - name: Upload image SBOMs and license inventories
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: production-image-sboms-${{ github.sha }}
+          path: |
+            app-image.cdx.json
+            web-image.cdx.json
+            app-image-license-report.json
+            web-image-license-report.json
+            app-image-security-report.json
+            web-image-security-report.json
+          if-no-files-found: error
+
+      - name: Scan application image
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: ${{ env.APP_IMAGE }}
+          format: table
+          exit-code: "1"
+          scanners: vuln,secret
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          trivyignores: .trivyignore.yaml
+
+      - name: Scan web image
+        uses: aquasecurity/trivy-action@a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: ${{ env.WEB_IMAGE }}
+          format: table
+          exit-code: "1"
+          scanners: vuln,secret
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          trivyignores: .trivyignore.yaml

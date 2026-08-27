@@ -17,6 +17,6 @@ notifications: ["/app/Notifications/*"]
 importer: ["/app/Importer/*","/app/Http/Livewire/Importer.php", "resources/views/livewire/importer.php"]
 cli / artisan: ["/app/Console/*"]
 LDAP: ["*Ldap*", "/app/Console/Commands/Ldap*","/app/Models/Ldap.php"]
-docker: ["*docker/*", "Dockerfile", "Dockerfile.alpine", "Dockerfile.fpm-alpine", ".dockerignore", ".env.docker"]
+docker: ["*docker/*", "Dockerfile", "Dockerfile.alpine", "Dockerfile.fpm-alpine", ".dockerignore", "docker/production.env.example"]
 tests: ["/tests/*", "/database/factories/*", "/stubs"]
 config: .github

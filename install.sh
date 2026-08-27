@@ -1,13 +1,6 @@
-# ensure running as root
-if [ "$(id -u)" != "0" ]; then
-    #Debian doesnt have sudo if root has a password.
-    if ! hash sudo 2>/dev/null; then
-        exec su -c "$0" "$@"
-    else
-        exec sudo "$0" "$@"
-    fi
-fi
+#!/bin/sh
+set -eu
 
-wget https://raw.githubusercontent.com/grokability/snipe-it/master/snipeit.sh
-chmod 744 snipeit.sh
-./snipeit.sh 2>&1 | tee -a /var/log/snipeit-install.log
+echo "Unsupported installer: this fork does not use the inherited Snipe-IT host installer." >&2
+echo "Use README.md for local development or docs/production-deployment.md for the V1 production path." >&2
+exit 1

@@ -1,5 +1,11 @@
 # Clean Catalog Mapping - 2026-05-28
 
+> Historical planning record: the model-number verification decision has since
+> changed. Five synthesized identifiers in this document are demo placeholders
+> and are no longer created by normal production/additive seeding. See
+> [`docs/catalog-model-number-verification.md`](../catalog-model-number-verification.md)
+> for the current verified-versus-demo boundary and upgrade behavior.
+
 ## Scope
 
 This document maps the current local production-work database catalog to a clean, seedable catalog foundation.
@@ -29,7 +35,8 @@ Current counts:
 | Model-number component templates | 0 | Seed new expected templates from the catalog mapping. |
 | Component-definition subcomponent templates | 1 | Do not migrate; belongs to test/example component data. |
 
-Current model numbers to preserve:
+Historical candidate model numbers (apply the current verification policy before
+using them in production):
 
 | Manufacturer | Model | Model number | Label | Category |
 | --- | --- | --- | --- | --- |

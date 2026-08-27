@@ -5,6 +5,17 @@
         Options -Indexes
     </Directory>
 
+    <Directory {{ app_path }}/public/uploads>
+        Options -ExecCGI -Indexes
+        <FilesMatch "\.(php[0-9]?|phtml|phar|cgi|pl|py|sh)$">
+            Require all denied
+        </FilesMatch>
+    </Directory>
+
+    <Directory {{ app_path }}/public/uploads/test_images>
+        Require all denied
+    </Directory>
+
     DocumentRoot {{ app_path }}/public
     ServerName {{ fqdn }}
 </VirtualHost>

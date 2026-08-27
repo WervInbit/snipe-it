@@ -6,6 +6,8 @@ WORKDIR /app
 
 # JS deps (lockfile if present)
 COPY package.json package-lock.json* ./
+COPY packages/brace-expansion-compat/ packages/brace-expansion-compat/
+COPY scripts/patch-bootstrap3-security.cjs scripts/patch-bootstrap3-security.cjs
 RUN npm ci || npm install
 
 # Mix config + sources
@@ -36,7 +38,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # PHP extensions + Composer
 COPY --from=mlocati/php-extension-installer:2 /usr/bin/install-php-extensions /usr/local/bin/
-RUN install-php-extensions @composer pdo_mysql mbstring gd zip bcmath
+RUN install-php-extensions @composer pdo_mysql mbstring gd zip bcmath ldap
 
 WORKDIR /var/www/html
 

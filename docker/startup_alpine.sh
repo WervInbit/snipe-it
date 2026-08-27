@@ -58,6 +58,7 @@ fi
 # create data directories
 for dir in \
   'data/private_uploads' \
+  'data/private_uploads/workflow_evidence' \
   'data/uploads/accessories' \
   'data/uploads/avatars' \
   'data/uploads/barcodes' \

@@ -54,12 +54,15 @@ further defined and clarified by project maintainers.
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting the project team at abuse@snipeitapp.com. All
-complaints will be reviewed and investigated and will result in a response that
-is deemed necessary and appropriate to the circumstances. The project team is
-obligated to maintain confidentiality with regard to the reporter of an incident.
-Further details of specific enforcement policies may be posted separately.
+Instances of abusive, harassing, or otherwise unacceptable behavior should be
+reported privately to the fork owner or maintainers through the organization's
+established private channel, consistent with the repository's
+[security policy](SECURITY.md). Do not send fork-specific reports to an
+upstream Snipe-IT address. A named conduct contact and response owner must be
+approved and published before V1; until then, do not disclose sensitive report
+details in a public issue. All complaints will be reviewed and investigated,
+and the project team is obligated to maintain confidentiality with regard to
+the reporter of an incident.
 
 Project maintainers who do not follow or enforce the Code of Conduct in good
 faith may face temporary or permanent repercussions as determined by other

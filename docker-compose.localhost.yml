@@ -5,6 +5,7 @@ services:
       - APP_URL=http://127.0.0.1:18080
       - APP_FORCE_TLS=false
       - APP_ALLOW_INSECURE_HOSTS=true
+      - ALLOW_WEB_SETUP=true
       - PHP_UPLOAD_LIMIT=32
 
   web:

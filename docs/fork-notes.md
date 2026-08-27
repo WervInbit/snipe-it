@@ -4,6 +4,188 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-08-25
+- Implemented the owner-approved Supervisor product-setup contract. Supervisor
+  can perform ordinary model, model-number/specification, attribute,
+  component-definition, and workflow setup, while lifecycle transitions,
+  destructive removal, and specification cleanup remain Admin-only. The
+  additive foundation-role upgrade preserves existing custom grants and is
+  now an explicit production-upgrade step.
+- Renewed guarded full-suite evidence after the permission split: SQLite and
+  MariaDB 11.4.7 each pass 2,166 tests with 10,553 assertions. Focused route,
+  policy, navigation, seeder, and denial coverage is included in those totals.
+- Hardened upgrades from legacy role data: a preserved Supervisor
+  `models.delete` grant is no longer sufficient for model or model-number
+  deletion/restoration without the new Admin-only lifecycle grant.
+- Updated `paragonie/sodium_compat` to v1.24.2 after the August 18 Ed25519
+  public-key-validation advisory. Rebuilt production images and reran current
+  Composer, npm, SQLite, MariaDB, production-content, and image-security gates.
+- Completed the first populated beta-data migration and rollback rehearsal on
+  MariaDB 11.4.7. The 468-migration baseline applies nine fork migrations,
+  rolls exact batch 2 back with row/upload parity, and reapplies to 477 ran and
+  zero pending migrations.
+- Proved candidate image promotion and controlled cold-restart persistence
+  without changing users, assets, models, failed-job state, or public/private
+  upload manifests.
+- Made rehearsal secret generation fail closed: rerunning the runtime preparer
+  against managed files now requires explicit `-Force`, preventing accidental
+  database/Redis secret rotation.
+- Recorded the updated V1 no-go boundary. Supervisor product setup is now
+  implemented, automated application/image gates are green, and the populated
+  rehearsal is promoted and cold-restart clean. The browser role matrix,
+  migrated-password login, managed release rehearsal, and release ownership/
+  metadata remain open.
+
+### 2026-08-18
+- Recovered the interrupted V1 gate session without repeating already-green
+  database work. Retained current-tree evidence confirms both guarded
+  non-LDAP SQLite and private MariaDB runs pass 2,128 tests with 10,198
+  assertions; real LDAP and SMTP/TLS remain deferred.
+- Refreshed the PHPStan level 4 baseline after the old 5,817-error baseline
+  produced stale message/count mappings. A baseline-free measurement now
+  finds 2,779 errors, the exact CI command is green, and a removed negative
+  control proves new errors still fail.
+- Rebuilt browser assets and final local production targets, reran Composer
+  and npm audits, and retained source/image security, SBOM, and license
+  evidence. Blocking app/web image scans have zero fixable high/critical
+  findings and zero secrets; the complete app inventory retains 71 unfixed
+  Debian findings while the web inventory remains at zero.
+- Scoped the root-user Dockerfile misconfiguration exception to legacy,
+  unsupported, and local-development images only. The releasable production
+  Dockerfile remains unignored and clean.
+- Preserved Laravel intended redirects across the complete authentication
+  flow. Direct regular-user and administrator logins still use the dashboard,
+  while protected Settings, QR/scan, and other deep links resume after local,
+  Google, or two-factor authentication; logout clears obsolete redirect state.
+- Follow-up PHPStan reruns in both the shared container and a clean locked
+  container exposed 3,037 existing ORM dynamic-property findings that are not
+  covered by the refreshed 2,779-entry baseline. The static-analysis gate is
+  therefore open until its schema-aware execution context is reproducible; the
+  retained earlier pass remains evidence, not the current frozen-candidate gate.
+- Owner follow-up deferred PHPStan until after V1 because its result is not
+  reproducible. The analyzer step was removed from the V1 workflow without
+  changing its configuration or baseline; runtime tests, syntax checks,
+  dependency/build checks, migration rehearsal, and operator validation remain
+  release gates.
+- Split private asset and asset-model attachments from ordinary record access.
+  New `assets.files.view/upload/manage` and `models.files.view/upload/manage`
+  permissions independently gate list/download, upload, and delete behavior in
+  the API and asset page. License-tab check-in controls now follow the existing
+  `licenses.checkin` permission instead of appearing to every license viewer.
+- Confirmed V1 product boundaries: ship the current QR layout; build the
+  printer/sticker/resolution-aware label tool and harden Windows battery/smart
+  diagnostics after V1. Workflow Profiles and Workflow Items are the canonical
+  configurable vocabulary while diagnostic-specific "test" wording and legacy
+  `Test*` compatibility remain where useful.
+- Implemented the unvalidated-integration V1 boundary. Production now defaults
+  to LDAP disabled and an in-memory mail sink with no SMTP secret requirement.
+  Runtime guards prevent directory contact even when an upgraded settings row
+  still enables LDAP; mail/reset/inventory/test actions are suppressed or
+  rejected without logging private message content. Real LDAP and SMTP remain
+  unsupported pending their external acceptance rehearsals.
+- Hardened sensitive license surfaces. Product keys no longer leak through
+  API list output, general search, forbidden key filters/sorts, reports, or CSV
+  exports without the key ability. License attachments use the dedicated file
+  ability, and web/API seat check-in behavior now agrees on assignment targets
+  and non-reassignable entitlements.
+- Made the accepted media boundary explicit in policy and UI. Publishing
+  workflow evidence into the public asset gallery requires the dedicated image
+  upload ability; private evidence is cleaned when its workflow run is deleted;
+  asset soft-delete/restore preserves gallery images and private evidence; and
+  upload surfaces warn that galleries are public while attachments/evidence
+  are controlled but are not credential vaults.
+- Corrected the dashboard header only at the affected 768-899px narrow-desktop
+  range: combined logo-and-text branding suppresses its redundant text there,
+  while the asset-search input and action now share an exact 34px height. The
+  mobile layout below 768px and wider desktop layout from 900px are unchanged.
+
+### 2026-08-13
+- Ran the first isolated end-to-end V1 production-profile rehearsal with
+  disposable MariaDB 11.4.7, authenticated Redis, file-backed secrets,
+  durable volumes, HTTPS termination, Mailpit, and immutable local image
+  digests. First deployment, CLI bootstrap, authenticated login, maintenance,
+  backup/restore, volume persistence, image rollback, queue delivery, and the
+  scheduler were exercised without changing the development stack.
+- Fixed production PHP-FPM startup: the master must retain root long enough to
+  open its configured stderr/access-log descriptors, while request workers
+  remain explicitly configured as `www-data`.
+- Kept `/health` available during shared Redis maintenance mode and registered
+  the fork middleware that owns that exception. Normal application routes
+  continue returning 503, allowing Compose to replace and validate app/web
+  containers before activation as the deployment runbook requires.
+- Declared queued mailable payload properties so they survive Laravel queue
+  serialization on PHP 8.2, and added the missing `failed_jobs` migration
+  required by the configured `database-uuids` failed-job driver.
+- Completed the guarded supported-database gate on disposable MariaDB 11.4.7:
+  the strict repository suite passes 2,139 tests with 10,238 assertions.
+- Removed two sources of nondeterministic test failure by fixing the importer
+  custom-mapping status fixture and accepting the valid clock-boundary range in
+  the API rate-limit retry contract.
+- Established an owned PHPStan level 4 baseline for 5,817 measured errors,
+  corrected the remaining `AttributeValueService` throwing return contract,
+  and proved both a green exact CI run and a failing new-error negative control.
+- Remediated newly published Composer advisories by updating
+  `league/commonmark` and PHP_CodeSniffer, and removed current npm high findings
+  by updating Less tooling and replacing AdminLTE's obsolete transitive
+  `slimscroll` package. Clean installs, affected tests, Node tests, production
+  assets, and current high-severity advisory gates pass.
+- Refreshed the fork README and current V1 readiness status. V1 remains a
+  no-go pending external LDAP/browser evidence, populated upgrade and rollback,
+  production rehearsal and artifact scans, and product/owner approvals.
+- Aligned README, CONTRIBUTING, SECURITY, TESTING, and their automated
+  documentation boundary with the August 13 readiness status after the
+  CommonMark-backed local help regression exposed stale August 4 links.
+- Hardened the production application image by refreshing its PHP 8.2 base and
+  removing compiler/development packages after extension compilation. Updated
+  the web image from NGINX 1.27 / Alpine 3.21 to immutable NGINX 1.30.4 /
+  Alpine 3.24.1 inputs, eliminating all current high/critical web-image scan
+  findings.
+- Production-image CI now retains complete high/critical security reports and
+  blocks on fixable vulnerabilities or secrets. Unfixed distribution findings
+  remain explicit release evidence rather than being silently ignored or
+  making the gate permanently unactionable.
+
+### 2026-08-04
+- Removed the remaining Laravel Collective `link_to_route()` calls after the
+  retired helper caused authenticated asset detail pages with status-event
+  actors to return HTTP 500. Blade views now use standard escaped anchors and
+  presenters use the shared escaped `RouteLink` renderer.
+- Completed the guarded repository-wide non-LDAP SQLite suite after repairing
+  31 diagnostic failures: 2,120 tests and 10,153 assertions now pass. LDAP and
+  the supported MariaDB/MySQL job remain explicit separate release gates.
+- Hardened supported checkout paths with row-lock/recheck behavior,
+  inactive/expired license rejection, and company-boundary enforcement.
+- Added deterministic hashed custom-field column fallbacks for names that
+  cannot be transliterated, corrected partial component note validation and
+  QR/PDF controller response typing, resolved external-URL message
+  placeholders, and repaired Slack settings page/component Blade ownership.
+- Isolated PHPUnit cache and locale state between cases, while retaining the
+  configured locale and within-test API rate-limit behavior.
+- Completed full serial PHPStan measurement at 5,887 errors across 549 files;
+  this is tracked as an owned-baseline release gate rather than reported as a
+  pass. Refreshed the fork README and current V1 readiness status accordingly.
+- Verified the complete LDAP test group with the real extension in isolated
+  guarded SQLite (18 tests, 75 assertions). The escape regression now checks
+  the extension's distinct DN and filter encodings instead of relying on a
+  namespace mock that is bypassed when the built-in function is loaded.
+- Began the exact disposable MariaDB 11.4.7 matrix and retained its partial
+  failure inventory at the user-requested pause; the supported database gate
+  remains open.
+
+### 2026-07-23
+- Added a separate production Compose profile with immutable PHP/frontend artifacts, external database/Redis and file-backed secrets, read-only service filesystems, durable public/private upload and backup volumes, dedicated PHP-FPM/queue/scheduler services, and service health/restart policies. Production startup now fails closed for missing or placeholder APP/Passport keys and never installs dependencies, generates keys, migrates, or seeds.
+- Removed automatic Passport key generation during application-provider boot and automatic Passport installation/database migration from dashboard requests. Missing production signing keys now return a controlled service-unavailable response.
+- Added a production deployment runbook covering CI image builds, TLS/reverse-proxy and browser-header requirements, controlled backup/migration order, off-host retention, restore drills, and image/database rollback.
+
+### 2026-07-21
+- Added a fail-closed PHPUnit bootstrap that validates and synchronizes the effective test environment before Laravel starts, then rechecks the booted database target before refresh traits can run. Local/default tests are restricted to in-memory SQLite and explicitly reject the persistent `database/database.sqlite`; external MySQL/PostgreSQL CI requires an explicit marker and the exact disposable database name `snipeit_test`.
+- Added a separate Dusk database guard so its intentional `migrate:fresh` path can run only against the dedicated `database/dusk.sqlite` target; after validating the exact non-symlink path, it creates the empty file for clean clones.
+- Removed legacy checkout behavior from the asset-update API contract: assignment fields now return a controlled 422 before mutation, model-number selection is required when an active preset applies, explicitly supplied factory presets are preserved, and localized API messages no longer depend on the current locale.
+- Component display labels and badges now treat the current lifecycle condition as authoritative while retaining legacy-code fallback, and stale agent-report fixtures now use component-backed workflow applicability.
+- Demo asset resets now keep foreign keys enabled, remove runtime component hierarchies coherently, retain work-order snapshots with null live-asset links, and delete rather than truncate assets so old numeric IDs cannot be reused by the new demo dataset.
+- Docker build filtering now excludes local environment files, backups/dumps/databases, TLS/OAuth keys, runtime uploads, and local storage. A rebuilt audit image contained zero prohibited files in the checked path classes, and the legacy root Dockerfile now handles filtered storage directories defensively. Local/test entrypoints install Composer development dependencies; other environments retain `--no-dev`.
+- Replaced the inherited upstream README and security policy with fork-specific pre-V1 documents, added a dated V1 release-readiness audit, and aligned the local demo/testing guides with the actual seed sequence and safety boundary.
+
 ### 2026-06-23
 - Component detail pages now support adding or changing a component serial after the part has already been removed to tray or otherwise opened later. The serial row is always visible, the edit modal keeps the field locked until explicitly enabled, changing a non-empty serial still requires confirmation, and changes are recorded as `serial_updated` component events.
 - Asset workflow history now labels runs by their stored workflow profile snapshot instead of a generic test-run label, and asset workflow status surfaces name missing required workflow profiles consistently.

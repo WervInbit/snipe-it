@@ -1,152 +1,318 @@
-![snipe-it-by-grok](https://github.com/grokability/snipe-it/assets/197404/b515673b-c7c8-4d9a-80f5-9fa58829a602)
+# Inbit Device Refurbishment Platform
 
-[![Crowdin](https://d322cqt584bo4o.cloudfront.net/snipe-it/localized.svg)](https://crowdin.com/project/snipe-it) [![Docker Pulls](https://img.shields.io/docker/pulls/snipe/snipe-it.svg)](https://hub.docker.com/r/snipe/snipe-it/) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/804dd1beb14a41f38810ab77d64fc4fc)](https://app.codacy.com/gh/grokability/snipe-it/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade) [![Tests](https://github.com/grokability/snipe-it/actions/workflows/tests.yml/badge.svg)](https://github.com/grokability/snipe-it/actions/workflows/tests.yml)
-[![All Contributors](https://img.shields.io/badge/all_contributors-331-orange.svg?style=flat-square)](#contributing) [![Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/yZFtShAcKk)
+This repository is an independent, refurbishment-focused fork of
+[Snipe-IT](https://github.com/grokability/snipe-it). It supports device intake,
+identification, hardware-component traceability, diagnostic and operational
+workflows, work orders, and evidence-backed sale-readiness decisions.
 
-## Snipe-IT - Open Source Asset Management System
+> [!WARNING]
+> **Status: active pre-V1 development (`v0.9.0-dev`).** Automated application
+> gates and the Supervisor product-setup authorization contract are green, but
+> final candidate promotion and owner-operated release acceptance are not.
+> No revision has been approved as a public or generally supported release.
+> See the
+> [current V1 readiness status](docs/v1-release-readiness-status-2026-08-25.md)
+> for exact evidence and remaining blockers.
 
-This is a FOSS project for asset management in IT Operations. Knowing who has which laptop, when it was purchased in order to depreciate it correctly, handling software licenses, etc.
+## Product Contract
 
-It is built on [Laravel 11](http://laravel.com).
+The fork retains useful Snipe-IT inventory foundations while defining a
+different operating model for refurbished devices:
 
-Snipe-IT is actively developed and we [release quite frequently](https://github.com/grokability/snipe-it/releases). ([Check out the live demo here](https://snipeitapp.com/demo/).)
+- assets move through explicit lifecycle statuses; legacy asset
+  checkout/checkin/audit mutation flows are not part of the refurbishment
+  contract;
+- model numbers, reusable presets, structured attributes, and expected
+  components describe the intended device configuration;
+- tracked components have serials, parent/child hierarchy, placement,
+  condition, expected-state reconciliation, lifecycle events, and calculated
+  specification contributions;
+- workflow profiles combine diagnostics and operator tasks, snapshot their
+  applicable definitions per run, retain controlled photo evidence, and feed
+  sale-readiness decisions;
+- readiness is tied to the current asset model, workflow profile, applicable
+  items, expected/attached components, and lifecycle context rather than a
+  stale pass flag;
+- scan-first asset and component navigation supports shop-floor use;
+- work orders, comments, files, visibility profiles, and role-specific
+  permissions support operational coordination;
+- production-foundation seeders are separated from explicitly disposable demo
+  and development scenarios;
+- English and Dutch operator surfaces coexist with inherited translations.
 
-See [docs/demo-guide.md](docs/demo-guide.md) for steps on seeding demo data and using sample accounts locally.
+The chronological product delta is recorded in
+[fork notes](docs/fork-notes.md). Component rules are documented in
+[component hierarchy operations](docs/component-hierarchy-operations.md), and
+the V1 role contract is summarized in the
+[role-capability matrix](docs/v1-operational-role-capability-matrix.md).
 
-> [!NOTE]
-> This fork adds contributor process docs in `AGENTS.md`, session logs in `PROGRESS.md`, and feature deltas in `docs/fork-notes.md`; review them before submitting changes.
+### Sensitive records and media
 
-> [!TIP]
-> __This is web-based software__. This means there is no executable file (aka no .exe files), and it must be run on a web server and accessed through a web browser. It runs on any Mac OSX, any flavor of Linux, as well as Windows, and we have a [Docker image](https://snipe-it.readme.io/docs/docker) available if that's what you're into.
+- Licenses hold entitlements and seats for device-bound/OEM software,
+  user- or device-assigned products such as Office, add-on software, and
+  multi-seat/volume agreements. Product keys and license attachments are
+  restricted independently from ordinary asset access.
+- Asset and model-resource attachments are private application resources with
+  separate view, upload, and manage abilities. A model resource applies to the
+  model, not only to the asset page from which it was opened.
+- Asset gallery images are public catalog/device media and may appear on
+  public or webshop surfaces. Moving controlled workflow evidence into that
+  gallery is an explicit permission-gated publish action.
+- Workflow evidence stays in private storage and is served through authorized
+  application routes. Deleting a workflow run removes its private evidence;
+  soft-deleting and restoring an asset preserves both evidence and gallery
+  media.
+- Private attachments and evidence are not a secret vault. Passwords,
+  recovery codes, customer credentials, and repair credentials must not be
+  stored in current notes, files, keys, or photos.
 
------
+## Current Readiness
 
-### Table of Contents
-* [Installation](#installation)
-* [User's Manual](#users-manual)
-* [Bug Reports & Feature Requests](#bug-reports--feature-requests)
-* [Security](#security)
-* [Upgrading](#upgrading)
-* [Translations!](#translations-)
-* [Libraries, Modules & Related Projects](#libraries-modules--related-projects)
-* [Join the Community!](#join-the-community)
-* [Contributing](#contributing)
-* [Announcement List](#announcement-list)
+The July/August V1 repair pass has implemented and tested the highest-risk
+findings from the original audit, including:
 
+- decoded-image validation and private, controlled workflow-evidence storage;
+- transactional agent reports and context-bound workflow readiness;
+- authorization and company scoping for component, attachment, model
+  attribute, work-order, asset-image, and accessory paths;
+- transactional component hierarchy mutation plus a read-only integrity audit;
+- explicit lifecycle semantics, least-privilege foundation roles, and
+  production/demo seeder boundaries;
+- resumable workflow schema/copy/cutover migrations with parity checks and
+  retained legacy tables;
+- a fail-closed PHPUnit/Dusk database guard;
+- an immutable production container profile with external secrets, database,
+  Redis, TLS termination, and durable data volumes;
+- critical/high dependency remediation, checksum-pinned upstream Laravel
+  backports, and removal of the abandoned `laravelcollective/html` package.
 
------
+The guarded repository-wide non-LDAP SQLite suite passes 2,166 tests with
+10,553 assertions. The complete strict MariaDB 11.4.7 suite also passes 2,166
+tests with 10,553 assertions on the guarded disposable `snipeit_test` database.
+Real LDAP remains outside the V1 support and qualification boundary. PHPStan has a retained experimental
+baseline, but its result is currently environment-dependent and the owner has
+deferred it until after V1. It is not invoked by the V1 quality workflow and is
+not a release gate.
 
-### Installation
+The exact production app/web images have passed content and blocking security
+checks and are running in the populated rehearsal after additive role upgrade
+and a complete cold restart with unchanged database/upload fingerprints. This
+is not yet a V1 release: the remaining gates require owner-operated evidence,
+not another code-path assertion.
 
-For instructions on installing and configuring Snipe-IT on your server, check out the [installation manual](https://snipe-it.readme.io/docs). (Please see the [requirements documentation](https://snipe-it.readme.io/docs/requirements) for full requirements.)
+- complete the browser/operator matrix, including Supervisor product setup and
+  Admin-only destructive lifecycle actions, and verify one migrated user's
+  existing password without sharing it;
+- repeat the now-green
+  [local production-profile rehearsal](docs/v1-production-profile-rehearsal-2026-08-13.md)
+  in the managed release environment with the explicit mail-disabled profile
+  (or later validated real TLS/SMTP), monitoring, and off-host
+  database/upload restore;
+- resolve the remaining catalog placeholders and the product/operator
+  decisions listed in `TODO.md`;
+- cut release metadata from a reviewed immutable commit rather than from a
+  dirty worktree.
 
-If you're having trouble with the installation, please check the [Common Issues](https://snipe-it.readme.io/docs/common-issues) and [Getting Help](https://snipe-it.readme.io/docs/getting-help) documentation, and search this repository's open *and* closed issues for help.
+Do not use the historical
+[2026-07-21 audit](docs/v1-release-readiness-audit-2026-07-21.md) as the current
+state: it records the defects as originally found. The dated current status
+maps each finding to its repair or remaining release gate.
 
------
-### User's Manual
-For help using Snipe-IT, check out the [user's manual](https://snipe-it.readme.io/docs/overview).
+## Supported V1 Target
 
------
-### Bug Reports & Feature Requests
+- PHP 8.2
+- Laravel 11
+- MariaDB/MySQL, using the exact version proven in the release rehearsal
+- Redis for production cache/session/queue operation
+- PHPUnit 10
+- Laravel Mix with the inherited AdminLTE/Bootstrap front end
+- Docker Compose v2 for the documented local and production container profiles
 
-Feel free to check out the [GitHub Issues for this project](https://github.com/grokability/snipe-it/issues) to open a bug report or see what open issues you can help with. Please search through existing issues (open *and* closed) to see if your question has already been answered before opening a new issue.
+The current V1 production profile supports local accounts and keeps LDAP and
+outgoing email explicitly disabled. LDAP login/synchronization and SMTP
+delivery remain unsupported until their real-service acceptance rehearsals
+pass. When email is disabled, self-service reset and email notification actions
+are unavailable; an authorized administrator can set a temporary password in
+the protected user editor.
 
-> [!IMPORTANT]  
-> **PLEASE see the [Getting Help Guidelines](https://snipe-it.readme.io/docs/getting-help) and [Common Issues](https://snipe-it.readme.io/docs/common-issues) before opening a ticket, and be sure to complete all of the questions in the Github Issue template to help us to help you as quickly as possible.**
+PostgreSQL test infrastructure remains useful for compatibility work, but
+PostgreSQL is outside the declared V1 production matrix until all
+database-specific migrations and a populated upgrade/rollback rehearsal pass.
 
------
+Current official Snipe-IT master has moved to Laravel 12 and PHPUnit 11. The
+fork has thousands of upstream-only commits and hundreds of fork-only commits
+since its common base, so upstream documentation and bulk-merge upgrade
+instructions do not define this product. Security and correctness changes must
+be reviewed and ported deliberately.
 
-### Security
+## Local Development
 
-> [!IMPORTANT]
-> **To report a security vulnerability, please email security@snipeitapp.com instead of using the issue tracker.**
------
+### Requirements
 
+- Git
+- Docker Engine or Docker Desktop
+- Docker Compose v2
+- sufficient disk and memory for PHP and front-end image builds
 
-### Upgrading
+Never place production secrets, database exports, private certificates, or
+production-derived uploads in the checkout.
 
-Please see the [upgrading documentation](https://snipe-it.readme.io/docs/upgrading) for instructions on upgrading Snipe-IT.
+### Clean local HTTP profile
 
-------
-### Translations!
+These commands are for a clean clone and new Docker volumes. They are not a
+reset procedure for an existing environment.
 
-Please see the [translations documentation](https://snipe-it.readme.io/docs/translations) for information about available languages and how to add translations to Snipe-IT.
+Build before creating `.env`, then create it only when it does not exist:
 
------
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.localhost.yml build app
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+```
 
-### Libraries, Modules & Related Projects
+Use local-only values in `.env`:
 
-Since the release of the JSON REST API, several third-party developers have been developing modules and libraries to work with Snipe-IT.  
+```dotenv
+APP_ENV=local
+APP_KEY=
+APP_URL=http://127.0.0.1:18080
+ALLOW_WEB_SETUP=true
+DB_CONNECTION=mysql
+DB_HOST=db
+DB_PORT=3306
+DB_DATABASE=snipeit
+DB_USERNAME=snipeituser
+DB_PASSWORD=snipeitpw
+```
 
-> [!NOTE]  
-> As these were created by third-parties, Snipe-IT cannot provide support for these project, and you should contact the developers directly if you need assistance. Additionally, Snipe-IT makes no guarantees as to the reliability, accuracy or maintainability of these libraries. Use at your own risk. :)
+Initialize dependencies and keys, start the application, and apply
+non-destructive migrations:
 
-#### Libraries & Modules
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.localhost.yml up -d --wait db
+docker compose -f docker-compose.yml -f docker-compose.localhost.yml run --rm --no-deps --entrypoint bash app -lc "mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && composer install --prefer-dist --no-interaction --no-progress && php artisan key:generate --force && php artisan passport:keys --force"
+docker compose -f docker-compose.yml -f docker-compose.localhost.yml up -d app web
+docker compose -f docker-compose.yml -f docker-compose.localhost.yml exec -T app php artisan migrate --force
+```
 
-- [SnipeSharp - .NET module in C#](https://github.com/barrycarey/SnipeSharp) by [@barrycarey](https://github.com/barrycarey)
-- [SnipeitPS](https://github.com/snazy2000/SnipeitPS) by [@snazy2000](https://github.com/snazy2000) - Powershell API Wrapper for Snipe-it
-- [jamf2snipe](https://github.com/grokability/jamf2snipe) - Python script to sync assets between a JAMFPro instance and a Snipe-IT instance
-- [jamf-snipe-rename](https://macblog.org/jamf-snipe-rename/) - Python script to rename computers in Jamf from Snipe-IT
-- [Snipe-IT plugin for Jira Service Desk](https://marketplace.atlassian.com/apps/1220964/snipe-it-for-jira)
-- [Python 3 CSV importer](https://github.com/gastamper/snipeit-csvimporter) - allows importing assets into Snipe-IT based on Item Name rather than Asset Tag.
-- [Snipe-IT Kubernetes Helm Chart](https://github.com/t3n/helm-charts/tree/master/snipeit) - For more information, [click here](https://hub.helm.sh/charts/t3n/snipeit).
-- [Snipe-IT Bulk Edit](https://github.com/bricelabelle/snipe-it-bulkedit) - Google Script files to use Google Sheets as a bulk checkout/checkin/edit tool for Snipe-IT.
-- [MosyleSnipeSync](https://github.com/RodneyLeeBrands/MosyleSnipeSync) by [@Karpadiem](https://github.com/Karpadiem) - Python script to synchronize information between Mosyle and Snipe-IT.
-- [WWW::SnipeIT](https://github.com/SEDC/perl-www-snipeit) by [@SEDC](https://github.com/SEDC) - perl module for accessing the API
-- [UniFi to Snipe-IT](https://www.edtechirl.com/p/snipe-it-and-azure-asset-management) originally by [@karpadiem](https://github.com/karpadiem) - Python script that synchronizes UniFi devices with Snipe-IT.
-- [Kandji2Snipe](https://github.com/grokability/kandji2snipe) by [@briangoldstein](https://github.com/briangoldstein) - Python script that synchronizes Kandji with Snipe-IT.
-- [SnipeAgent](https://github.com/ReticentRobot/SnipeAgent) by [@ReticentRobot](https://github.com/ReticentRobot) - Windows agent for Snipe-IT.
-- [Gate Pass Generator](https://github.com/cha7uraAE/snipe-it-gate-pass-system) by [@cha7uraAE](https://github.com/cha7uraAE) - A Streamlit application for generating gate passes based on hardware data from a Snipe-IT API.
-- [InQRy (archived)](https://github.com/Microsoft/InQRy) by [@Microsoft](https://github.com/Microsoft)
-- [Marksman (archived)](https://github.com/Scope-IT/marksman) - A Windows agent for Snipe-IT
-- [Python Module (archived)](https://github.com/jbloomer/SnipeIT-PythonAPI) by [@jbloomer](https://github.com/jbloomer)
+Open [http://127.0.0.1:18080](http://127.0.0.1:18080).
 
-We also have a handful of [Google Apps scripts](https://github.com/grokability/google-apps-scripts-for-snipe-it) to help with various tasks.
+The default `docker-compose.yml` expects the local `dev.inbit` HTTPS setup,
+bind-mounts the source tree, and includes development-only service defaults. It
+is not the production profile.
 
-#### Mobile Apps
+For known disposable sample accounts and device scenarios, use the
+[demo guide](docs/demo-guide.md). Demo/scenario seeders must never run against
+a shared, production, or production-derived database.
 
-We're currently working on our own mobile app, but in the meantime, check out these third-party apps that work with Snipe-IT:
+> [!CAUTION]
+> Never use `migrate:fresh`, `migrate:refresh`, `migrate:reset`, `db:wipe`, or a
+> destructive demo reset against an environment whose exact database target
+> has not been explicitly reviewed and approved.
 
-- [SnipeMate](https://snipemate.app/) (iOS, Google Play, Huawei AppGallery) by Mars Technology
-- [Snipe-Scan](https://apps.apple.com/do/app/snipe-scan/id6744179400?uo=2) (iOS) by Nicolas Maton
-- [Snipe-IT Assets Management](https://play.google.com/store/apps/details?id=com.diegogarciadev.assetsmanager.snipeit&hl=en&pli=1) (Google Play) by DiegoGarciaDEV
-- [AssetX](https://apps.apple.com/my/app/assetx-for-snipe-it/id6741996196?uo=2) (iOS) for Snipe-IT by Rishi Gupta
+## Testing
 
------
+Feature tests refresh their database. In Docker, clear cached configuration and
+force the isolated target at the process boundary:
 
-### Join the Community!
+```powershell
+docker compose exec -T -e APP_ENV=testing -e DB_CONNECTION=sqlite -e DB_DATABASE=:memory: app php artisan optimize:clear --env=testing
+docker compose exec -T -e APP_ENV=testing -e DB_CONNECTION=sqlite -e DB_DATABASE=:memory: app php artisan tinker --env=testing --execute="dump(app()->environment(), config('database.default'), config('database.connections.'.config('database.default').'.database'));"
+docker compose exec -T -e APP_ENV=testing -e DB_CONNECTION=sqlite -e DB_DATABASE=:memory: app php artisan test --env=testing
+```
 
-- **[Join our Discord](https://discord.gg/yZFtShAcKk)!** It’s full of great people. We even wrote about it [here](https://grokstar.dev/culture/2024/06/the-unlikely-rise-of-discord-as-a-support-channel/)!
-- **Follow us on Bluesky** at [@snipeitapp.com](https://bsky.app/profile/snipeitapp.com)
-- **Follow us on Mastodon** at [hachyderm.io/@grokability](https://hachyderm.io/@grokability)
-- **Follow our blog** at [Grokstar.Dev](https://grokstar.dev)
-- **Subscribe here** on Github for notifications about new releases. (We recommend selecting "Releases" only for most users - this repo can get noisy.)
+The preflight must print `testing`, `sqlite`, and `:memory:`. The executable
+guard rejects local PHPUnit targets other than in-memory SQLite. External
+MySQL/PostgreSQL CI is allowed only with
+`SNIPEIT_ALLOW_EXTERNAL_TEST_DATABASE=1` and the exact disposable database
+name `snipeit_test`.
 
------
+See [TESTING.md](TESTING.md) for focused runs, Dusk isolation, groups, and
+release-evidence requirements.
 
-### Contributing
+## Production
 
-**Please refrain from submitting issues or pull requests generated by fully-automated tools. Maintainers reserve the right, at their sole discretion, to close such submissions and to block any account responsible for them.** 
+`docker-compose.production.yml` is the only documented production container
+path. It builds immutable app/web artifacts, uses external file-backed secrets,
+does not bundle a database or Redis, separates PHP-FPM/queue/scheduler services,
+and performs no migration, seeding, dependency install, or key generation at
+startup.
 
-Contributions should follow from a human-to-human discussion in the form of an issue for the best chances of being merged into the core project. (Sometimes we might already be working on that feature, sometimes we've decided against )
+It is a deployable foundation, not proof of release readiness. Follow the
+[production deployment runbook](docs/production-deployment.md) and complete its
+external rehearsal before using a V1 tag.
 
-Please see the complete documentation on [contributing and developing for Snipe-IT](https://snipe-it.readme.io/docs/contributing-overview).
+The inherited `install.sh`, `snipeit.sh`, `upgrade.php`, Vagrant, Heroku, and
+alternate release-download Docker paths are not supported for this fork. The
+remaining compatibility filenames fail closed where retaining a clear error is
+safer than silently installing or pulling official Snipe-IT. Do not use an
+upstream Snipe-IT installer or upgrader against this repository.
 
-This project is released with a [Contributor Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
+Release images must be built once from the reviewed commit, scanned, pushed by
+immutable digest, and deployed with:
 
-The ERD is available [online here](https://drawsql.app/templates/snipe-it).
+- a dedicated external MariaDB/MySQL database and authenticated Redis;
+- managed TLS termination and narrowly trusted proxy addresses;
+- externally stored APP, database, Redis, and Passport keys;
+- durable public/private upload and backup volumes;
+- off-host encrypted backups and a verified restore;
+- queue/scheduler supervision, centralized logs, health monitoring, and a
+  rollback owner.
 
-Be sure to check out all of the [amazing people](CONTRIBUTORS.md) that have contributed to Snipe-IT over the years!
+## Dependency Policy
 
------
+Production Composer audits currently report no unmitigated advisories and no
+abandoned packages. Three Laravel 11 advisory identifiers remain explicitly
+listed as ignored only because the exact official fixes are stored under
+`patches/`, checksum-pinned in `patches.lock.json`, applied during production
+builds, and covered by framework-level regressions. Changing the Laravel lock
+or either patch requires revalidating those assumptions.
 
-### Star History
+The JavaScript production graph currently has no critical/high findings; its
+remaining moderate/low Bootstrap and inherited browser-build-chain debt is
+tracked in the current V1 status. Release CI must rerun both Composer and npm
+audits rather than relying on this snapshot.
 
-[![Star History Chart](https://api.star-history.com/svg?repos=grokability/snipe-it&type=Date)](https://www.star-history.com/#grokability/snipe-it&Date)
+## Documentation
 
-------
-### Announcement List
+- [Current V1 readiness status](docs/v1-release-readiness-status-2026-08-25.md)
+- [Production-profile rehearsal evidence](docs/v1-production-profile-rehearsal-2026-08-13.md)
+- [Historical V1 audit](docs/v1-release-readiness-audit-2026-07-21.md)
+- [Fork notes](docs/fork-notes.md)
+- [Production deployment](docs/production-deployment.md)
+- [Workflow migration upgrade](docs/workflow-migration-upgrade.md)
+- [Component hierarchy operations](docs/component-hierarchy-operations.md)
+- [Component integrity audit](docs/component-integrity-audit.md)
+- [Catalog model-number verification](docs/catalog-model-number-verification.md)
+- [Demo guide](docs/demo-guide.md)
+- [Testing guide](TESTING.md)
+- [Open product work](TODO.md)
+- [Session progress](PROGRESS.md)
+- [Agent handbook](AGENTS.md)
+- [Security policy](SECURITY.md)
 
-To be notified of important news (such as new releases, security advisories, etc), [sign up for our list](http://eepurl.com/XyZKz). We'll never sell or give away your info, and we'll only email you when it's important. 
+Operator guides under `docs/manuals/operator-guides/` are being developed
+separately and are not yet a versioned V1 manual.
 
-We also usually make smaller announcements on our social accounts, our Discord, and our blog, so be sure to subscribe to those if you're looking for more granular announcements.
+## Contributing
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) and [AGENTS.md](AGENTS.md) before
+changing the fork. Start from the latest `PROGRESS.md` and `docs/fork-notes.md`,
+preserve unrelated worktree changes, test the invariant you changed, and update
+the user/operator documentation when behavior changes.
+
+## Security
+
+Fork-specific vulnerabilities belong to this repository's private maintainer
+channel, not the upstream Snipe-IT issue tracker. Follow
+[SECURITY.md](SECURITY.md). Never publish credentials, production data, or an
+executable proof of concept.
+
+## License And Attribution
+
+This project derives from Snipe-IT and retains its contributor history and
+GNU Affero General Public License obligations. It is licensed under
+[AGPL-3.0-or-later](LICENSE).
+
+Upstream resources remain useful for behavior this fork still inherits, but
+they do not define this fork's support, security ownership, installation,
+upgrade, or release policy.

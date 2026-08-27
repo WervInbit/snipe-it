@@ -4,11 +4,12 @@ set -euo pipefail
 # Switch to app root
 cd /var/www/html
 
-# Apply PHP upload limits when configured.
-if [ -n "${PHP_UPLOAD_LIMIT:-}" ] && [ "$(id -u)" = "0" ]; then
+# Apply PHP resource and upload limits when configured.
+if { [ -n "${PHP_MEMORY_LIMIT:-}" ] || [ -n "${PHP_UPLOAD_LIMIT:-}" ]; } && [ "$(id -u)" = "0" ]; then
   cat > /usr/local/etc/php/conf.d/zz-upload-limits.ini <<EOF
-upload_max_filesize = ${PHP_UPLOAD_LIMIT}M
-post_max_size = ${PHP_UPLOAD_LIMIT}M
+memory_limit = ${PHP_MEMORY_LIMIT:-128}M
+upload_max_filesize = ${PHP_UPLOAD_LIMIT:-6}M
+post_max_size = ${PHP_UPLOAD_LIMIT:-6}M
 EOF
 fi
 
@@ -49,8 +50,14 @@ fi
 
 # If vendor is a mounted empty volume, install dependencies
 if [ ! -f vendor/autoload.php ]; then
-  # Composer install (no-dev) into the mounted volume
-  composer install --no-dev --prefer-dist --no-interaction --no-progress
+  composer_args=(--prefer-dist --no-interaction --no-progress)
+  if [ "${APP_ENV:-production}" != "local" ] && [ "${APP_ENV:-production}" != "testing" ]; then
+    composer_args+=(--no-dev)
+  fi
+
+  # Local/test containers need PHPUnit and the other development tools. Release
+  # environments keep the smaller no-dev install.
+  composer install "${composer_args[@]}"
 fi
 
 # Generate APP_KEY if missing

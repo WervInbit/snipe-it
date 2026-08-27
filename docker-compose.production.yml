@@ -1,0 +1,187 @@
+name: snipeit-production
+
+x-app-environment: &app-environment
+  APP_ENV: production
+  APP_DEBUG: "false"
+  APP_URL: ${APP_URL:?Set APP_URL to the public https URL}
+  APP_FORCE_TLS: "true"
+  APP_ALLOW_INSECURE_HOSTS: "false"
+  APP_TRUSTED_PROXIES: ${APP_TRUSTED_PROXIES:?Set the exact reverse-proxy address or CIDR}
+  APP_KEY_FILE: /run/secrets/app_key
+  ALLOW_BACKUP_RESTORE: "false"
+  ALLOW_WEB_SETUP: "false"
+  SECURE_COOKIES: "true"
+  ENABLE_HSTS: "true"
+  ENABLE_CSP: "true"
+  ALLOW_IFRAMING: "false"
+  WEBHOOK_ALLOW_INTERNAL_TARGETS: "false"
+  LOG_CHANNEL: stderr
+  LOG_LEVEL: ${LOG_LEVEL:-warning}
+  DB_CONNECTION: ${DB_CONNECTION:-mysql}
+  DB_HOST: ${DB_HOST:?Set the external database host}
+  DB_PORT: ${DB_PORT:-3306}
+  DB_DATABASE: ${DB_DATABASE:?Set the external database name}
+  DB_USERNAME: ${DB_USERNAME:?Set the external database user}
+  DB_PASSWORD_FILE: /run/secrets/db_password
+  DB_DUMP_PATH: ${DB_DUMP_PATH:-/usr/bin}
+  DB_DUMP_SKIP_SSL: ${DB_DUMP_SKIP_SSL:-false}
+  REDIS_HOST: ${REDIS_HOST:?Set the external Redis host}
+  REDIS_PORT: ${REDIS_PORT:-6379}
+  REDIS_DATABASE: ${REDIS_DATABASE:-0}
+  REDIS_PASSWORD_FILE: /run/secrets/redis_password
+  CACHE_DRIVER: redis
+  SESSION_DRIVER: redis
+  QUEUE_CONNECTION: redis
+  MAIL_ENABLED: "false"
+  MAIL_MAILER: array
+  MAIL_TLS_VERIFY_PEER: "true"
+  LDAP_INTEGRATION_ENABLED: "false"
+  AGENT_API_TOKEN_FILE: /run/secrets/agent_api_token
+  AGENT_ALLOWED_IPS: ${AGENT_ALLOWED_IPS:-}
+  AGENT_USER_ID: ${AGENT_USER_ID:-}
+  APP_MAINTENANCE_DRIVER: cache
+  APP_MAINTENANCE_STORE: redis
+  PASSPORT_PRIVATE_KEY_FILE: /run/secrets/passport_private_key
+  PASSPORT_PUBLIC_KEY_FILE: /run/secrets/passport_public_key
+  PRIVATE_FILESYSTEM_DISK: local
+  PUBLIC_FILESYSTEM_DISK: local_public
+
+x-app-service: &app-service
+  image: ${SNIPEIT_APP_IMAGE:?Set the application image repository}@${SNIPEIT_APP_IMAGE_DIGEST:?Set the immutable application image sha256 digest}
+  environment: *app-environment
+  secrets:
+    - app_key
+    - db_password
+    - redis_password
+    - agent_api_token
+    - passport_private_key
+    - passport_public_key
+  volumes:
+    - production_public_uploads:/var/www/html/public/uploads
+    - production_private_uploads:/var/www/html/storage/private_uploads
+    - production_backups:/var/www/html/storage/app/backups
+  tmpfs:
+    - /run:uid=33,gid=33,mode=0755
+    - /tmp:uid=33,gid=33,mode=1777
+    - /var/www/html/bootstrap/cache:uid=33,gid=33,mode=0770
+    - /var/www/html/storage/app/backup-temp:uid=33,gid=33,mode=0700
+    - /var/www/html/storage/framework:uid=33,gid=33,mode=0770
+    - /var/www/html/storage/logs:uid=33,gid=33,mode=0770
+    - /var/www/html/storage/runtime-secrets:uid=33,gid=33,mode=0700
+  read_only: true
+  init: true
+  security_opt:
+    - no-new-privileges:true
+  pids_limit: 256
+  restart: unless-stopped
+  stop_grace_period: 30s
+  networks:
+    - production
+  profiles:
+    - production
+
+services:
+  app:
+    <<: *app-service
+    expose:
+      - "9000"
+    healthcheck:
+      test:
+        - CMD
+        - php
+        - -r
+        - 'exit(@fsockopen("127.0.0.1", 9000) ? 0 : 1);'
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  web:
+    image: ${SNIPEIT_WEB_IMAGE:?Set the web image repository}@${SNIPEIT_WEB_IMAGE_DIGEST:?Set the immutable web image sha256 digest}
+    depends_on:
+      app:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${SNIPEIT_HTTP_PORT:-18081}:8080"
+    volumes:
+      - production_public_uploads:/var/www/html/public/uploads:ro
+    tmpfs:
+      - /tmp:uid=101,gid=101,mode=1777
+      - /var/cache/nginx:uid=101,gid=101,mode=0750
+      - /var/run:uid=101,gid=101,mode=0750
+    read_only: true
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    restart: unless-stopped
+    stop_grace_period: 15s
+    networks:
+      - production
+    profiles:
+      - production
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  queue:
+    <<: *app-service
+    command:
+      - php
+      - artisan
+      - queue:work
+      - redis
+      - --sleep=3
+      - --tries=3
+      - --timeout=120
+      - --max-time=3600
+      - --no-interaction
+    healthcheck:
+      test: ["CMD-SHELL", "php artisan queue:monitor redis:default --max=1000 >/dev/null 2>&1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+
+  scheduler:
+    <<: *app-service
+    command:
+      - php
+      - artisan
+      - schedule:work
+      - --no-interaction
+    healthcheck:
+      test: ["CMD-SHELL", "php artisan schedule:list --no-ansi >/dev/null 2>&1"]
+      interval: 60s
+      timeout: 15s
+      retries: 3
+      start_period: 45s
+
+networks:
+  production:
+    driver: bridge
+
+volumes:
+  production_public_uploads:
+    name: ${SNIPEIT_PUBLIC_UPLOADS_VOLUME:-snipeit-production-public-uploads}
+  production_private_uploads:
+    name: ${SNIPEIT_PRIVATE_UPLOADS_VOLUME:-snipeit-production-private-uploads}
+  production_backups:
+    name: ${SNIPEIT_BACKUPS_VOLUME:-snipeit-production-backups}
+
+secrets:
+  app_key:
+    file: ${APP_KEY_FILE:?Set APP_KEY_FILE to a host secret file}
+  db_password:
+    file: ${DB_PASSWORD_FILE:?Set DB_PASSWORD_FILE to a host secret file}
+  redis_password:
+    file: ${REDIS_PASSWORD_FILE:?Set REDIS_PASSWORD_FILE to a host secret file}
+  agent_api_token:
+    file: ${AGENT_API_TOKEN_FILE:?Set AGENT_API_TOKEN_FILE to a host secret file}
+  passport_private_key:
+    file: ${PASSPORT_PRIVATE_KEY_FILE:?Set PASSPORT_PRIVATE_KEY_FILE to a host PEM file}
+  passport_public_key:
+    file: ${PASSPORT_PUBLIC_KEY_FILE:?Set PASSPORT_PUBLIC_KEY_FILE to a host PEM file}

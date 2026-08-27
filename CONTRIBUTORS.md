@@ -1,3 +1,10 @@
+# Upstream contributor history
+
+This file preserves the contributor acknowledgements inherited from Snipe-IT.
+It does not identify the maintainers, support owners, or release approvers for
+the Inbit fork. Fork-specific contribution history remains in Git until a
+separate maintained acknowledgement is established.
+
 Thanks goes to all of these wonderful people ([emoji key](https://github.com/kentcdodds/all-contributors#emoji-key)) who have helped Snipe-IT get this far:
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->

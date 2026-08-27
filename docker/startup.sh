@@ -73,6 +73,7 @@ for dir in \
   'data/private_uploads/users' \
   'data/private_uploads/licenses' \
   'data/private_uploads/signatures' \
+  'data/private_uploads/workflow_evidence' \
   'data/uploads/accessories' \
   'data/uploads/assets' \
   'data/uploads/avatars' \

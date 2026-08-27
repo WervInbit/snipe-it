@@ -1,0 +1,86 @@
+name: Browser Tests in Dedicated SQLite
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  dusk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: sqlite
+      DB_DATABASE: database/dusk.sqlite
+      SNIPEIT_DUSK_GUARD: "1"
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: "8.2"
+          coverage: none
+          extensions: gd,pdo_sqlite
+          tools: composer:2.8
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install application dependencies
+        run: |
+          composer install --no-ansi --no-interaction --no-progress --prefer-dist
+          npm ci --no-audit --no-fund
+
+      - name: Build browser assets under test
+        run: npm run prod
+
+      - name: Prepare dedicated browser database
+        run: |
+          cp .env.dusk.example .env
+          mkdir -p database storage/logs storage/framework/testing
+          : > database/dusk.sqlite
+          chmod -R u+rwX storage bootstrap/cache database
+          php artisan optimize:clear --env=testing
+          php artisan passport:keys --force
+          php artisan migrate --seed --force
+          php artisan tinker --env=testing --execute="dump(app()->environment(), config('database.default'), config('database.connections.'.config('database.default').'.database'));"
+
+      - name: Install matching ChromeDriver
+        run: php artisan dusk:chrome-driver --detect
+
+      - name: Start isolated application server
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8000 > storage/logs/dusk-server.log 2>&1 &
+          echo $! > storage/framework/testing/dusk-server.pid
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8000/health >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat storage/logs/dusk-server.log
+          exit 1
+
+      - name: Execute guarded browser suite
+        run: php artisan dusk --env=example
+
+      - name: Upload browser failure evidence
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dusk-failure-evidence-${{ github.sha }}
+          path: |
+            tests/Browser/screenshots
+            tests/Browser/console
+            storage/logs/dusk-server.log
+          if-no-files-found: ignore

@@ -1,7 +1,9 @@
 .couscous
 .DS_Store
-.env
-.env.testing
+.env*
+!.env.example
+!.env.testing.example
+!.env.dusk.example
 phpstan.neon
 .idea
 /bin/
@@ -54,6 +56,14 @@ tests/coverage/*
 /storage/oauth-public.key
 logs/*
 *.cache
+*.bak
+*.dump
+*.sql
+*.sqlite
+*.sqlite-*
+/prodbak/
+/docker/certs/
+/secrets/
 
 .vagrant
 *.log
@@ -78,6 +88,7 @@ public/mix-manifest.json
 public/**/*.map
 docker-compose.yml
 Dockerfile
+!docker/production/Dockerfile
 Dockerfile.scheduler
 docker/nginx.conf
 public/vendor/livewire/livewire.esm.js
