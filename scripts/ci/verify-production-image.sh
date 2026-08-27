@@ -97,6 +97,13 @@ secret_files="$(
 [ -z "$secret_files" ] || fail "secret, backup, dump, database, or key files are present: $secret_files"
 
 if [ -f "$root/artisan" ]; then
+    production_entrypoint=/usr/local/bin/snipeit-production-entrypoint
+    [ -x "$production_entrypoint" ] || fail "the production entrypoint is missing or not executable"
+    if grep -q "$(printf '\r')" "$production_entrypoint"; then
+        fail "the production entrypoint contains CRLF line endings"
+    fi
+    bash -n "$production_entrypoint" || fail "the production entrypoint has invalid Bash syntax"
+
     [ -f "$root/vendor/laravel/framework/src/Illuminate/Mail/Mailables/Address.php" ] \
         || fail "Laravel mail address implementation is missing"
     grep -F "Email addresses may not contain line break characters." \

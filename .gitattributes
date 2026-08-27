@@ -1,4 +1,5 @@
 * text=auto
+*.sh text eol=lf
 public/js/** binary
 public/css/** binary
 *.patch whitespace=-blank-at-eol

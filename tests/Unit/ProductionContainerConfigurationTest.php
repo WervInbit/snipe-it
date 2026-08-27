@@ -98,7 +98,12 @@ class ProductionContainerConfigurationTest extends TestCase
     public function test_production_entrypoint_validates_enabled_mail_without_requiring_it_when_disabled(): void
     {
         $entrypoint = file_get_contents($this->basePath.'/docker/production/entrypoint.sh');
+        $attributes = file_get_contents($this->basePath.'/.gitattributes');
+        $dockerfile = file_get_contents($this->basePath.'/docker/production/Dockerfile');
 
+        $this->assertStringContainsString('*.sh text eol=lf', $attributes);
+        $this->assertStringContainsString("sed -i 's/\\r$//' /usr/local/bin/snipeit-production-entrypoint", $dockerfile);
+        $this->assertStringContainsString('bash -n /usr/local/bin/snipeit-production-entrypoint', $dockerfile);
         $this->assertStringContainsString('case "${MAIL_ENABLED:-false}"', $entrypoint);
         $this->assertStringContainsString('MAIL_MAILER must be smtp when MAIL_ENABLED is true.', $entrypoint);
         $this->assertStringContainsString('require_env MAIL_HOST', $entrypoint);

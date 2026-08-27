@@ -144,7 +144,9 @@ COPY --from=application-build --chown=www-data:www-data /var/www/html /var/www/h
 COPY --from=application-build --chown=www-data:www-data /var/www/html/public/uploads/ /opt/snipeit-default-uploads/
 COPY docker/production/entrypoint.sh /usr/local/bin/snipeit-production-entrypoint
 
-RUN chmod 0755 /usr/local/bin/snipeit-production-entrypoint
+RUN sed -i 's/\r$//' /usr/local/bin/snipeit-production-entrypoint \
+    && bash -n /usr/local/bin/snipeit-production-entrypoint \
+    && chmod 0755 /usr/local/bin/snipeit-production-entrypoint
 
 ENTRYPOINT ["/usr/local/bin/snipeit-production-entrypoint"]
 CMD ["php-fpm", "--nodaemonize"]
