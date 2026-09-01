@@ -2,8 +2,10 @@
 
 This is the V1 production container path for the fork. It is separate from
 `docker-compose.yml`, which remains the source-mounted local development stack.
-The production profile has no bundled database or Redis service and contains no
-credential defaults.
+The base production profile has no bundled database or Redis service and
+contains no credential defaults. Two optional, reviewed overlays support a
+self-contained MariaDB/Redis host and a public TLS edge without weakening the
+base external-infrastructure design.
 
 ## What this profile guarantees
 
@@ -24,25 +26,101 @@ credential defaults.
 - The public listener binds to loopback by default. TLS must terminate at a
   separately managed reverse proxy.
 
-The database, Redis, volume backend, reverse proxy, registry, monitoring, and
-off-host backup destination remain operator-managed infrastructure.
+The registry, monitoring, off-host backup destination, and storage durability
+remain operator-managed infrastructure. Database, Redis, and TLS termination
+may be externally managed or provided by the documented production overlays.
 
 ## Prerequisites
 
 - A clean release checkout and an immutable release tag, preferably a signed Git
   tag or commit SHA.
 - Docker Engine with Compose v2 and BuildKit.
-- A dedicated external MariaDB/MySQL database matching the release rehearsal.
+- Either dedicated external MariaDB/MySQL and authenticated Redis services, or
+  dedicated durable volumes for the repository-managed dependency overlay.
   PostgreSQL remains outside the declared V1 support matrix until its
   repository-wide migration gaps are fixed and the same populated
   upgrade/rollback rehearsal passes there.
-- A dedicated, authenticated Redis instance reachable only from the application
-  network.
-- A TLS reverse proxy on the same host or a private upstream network.
+- Either an externally managed TLS reverse proxy or the repository-managed TLS
+  edge overlay with a full-chain certificate and matching private key.
 - An encrypted off-host backup destination and a tested restore environment.
 
 Do not reuse the local development database, Redis instance, `.env`, APP key,
 or Passport keys.
+
+## Choose one production layout
+
+Always begin with `docker-compose.production.yml`. Add only the overlays needed
+for the target environment:
+
+- External infrastructure: use the base file alone. Provide external database,
+  Redis, and TLS proxy services.
+- Managed single-server dependencies: add
+  `docker-compose.production.dependencies.yml`. MariaDB and Redis remain
+  unexposed on a dedicated Docker subnet and use durable named volumes.
+- Managed single-server TLS: add `docker-compose.production.edge.yml`. The
+  internal web tier remains loopback-only while the edge publishes 80/443,
+  copies the host TLS material into a restricted volume, and runs unprivileged
+  with a read-only root filesystem.
+
+The dependency and edge overlays may be used together. Never combine
+`docker-compose.rehearsal.yml` with a production deployment; it has isolated
+test naming, ports, TLS behavior, and lifecycle assumptions.
+
+### Optional loopback registry for offline transfer
+
+An organization registry remains preferred. When a single deployment host
+cannot reach one, `docker-compose.production.registry.yml` provides the exact
+loopback-only registry arrangement proven during the managed migration. It is
+a transfer aid, not a public registry or an image-qualification system.
+
+The registry publishes only `127.0.0.1:5000` by default and stores its blobs in
+`snipeit-production-registry-data`. Never change that bind address to a LAN or
+public interface. Start it separately before resolving/pulling the application
+profile:
+
+```sh
+docker compose --env-file /etc/snipeit/production.env \
+  -f docker-compose.production.registry.yml \
+  --profile registry up -d registry
+```
+
+Before loading an offline application/web archive, verify its transfer hash
+against the release manifest. After loading, compare the image configuration
+IDs with the accepted release evidence, tag the images under
+`127.0.0.1:5000/...`, push them, and record the resulting local repository
+digests. Populate the production environment with those complete
+`repository@sha256:digest` identities. `docker save`/`docker load` alone does
+not retain repository digests and is not sufficient evidence.
+
+The registry image itself is digest-pinned. Keep its volume and restart policy
+under the same operational controls as the application, and back up the
+original qualified transfer archives separately; the registry volume is not
+the release archive of record.
+
+For a single-server deployment, keep one shell array for every command in the
+maintenance/cutover sequence so an overlay cannot be accidentally omitted:
+
+```sh
+compose=(docker compose)
+# If Compose v2 is installed as a standalone plugin outside Docker's search
+# path, use its reviewed absolute path instead:
+# compose=(/opt/docker/cli-plugins/docker-compose)
+
+production_compose=(
+  "${compose[@]}"
+  --env-file /etc/snipeit/production.env
+  -f docker-compose.production.yml
+  -f docker-compose.production.dependencies.yml
+  -f docker-compose.production.edge.yml
+  --profile production
+)
+
+"${production_compose[@]}" config --quiet
+```
+
+For external infrastructure, omit both overlay `-f` entries. The examples
+later in this runbook show the base file explicitly; deployments using overlays
+must retain their selected `-f` entries on every command.
 
 ## Create the secret files
 
@@ -66,11 +144,20 @@ rm -f /tmp/snipeit-passport-private.pem /tmp/snipeit-passport-public.pem
 ```
 
 Write the database and Redis passwords to `db_password` and `redis_password`
-without a trailing comment or surrounding quotes. Create `agent_api_token` as
-an empty file when agent reporting is
+without a trailing comment or surrounding quotes. When using the managed
+dependency overlay, also create a distinct `db_root_password`; the application
+never receives that root credential. Create `agent_api_token` as an empty file
+when agent reporting is
 disabled (the default), or populate it with a long random token and set a narrow
 `AGENT_ALLOWED_IPS` plus dedicated `AGENT_USER_ID` when the integration is
-enabled. Keep all six files mode `0600`.
+enabled. Keep every secret file mode `0600`.
+
+The managed edge additionally needs a full-chain certificate and matching
+private key outside the checkout. The certificate may be world-readable, but
+the key must be mode `0600`. Configure their host paths through
+`TLS_CERTIFICATE_FILE` and `TLS_PRIVATE_KEY_FILE`. Use `EDGE_NGINX_CONFIG` only
+when an operator-reviewed proxy configuration must replace the repository
+default; do not add unrelated host services to the default Snipe-IT proxy.
 
 For an upgrade, retain the existing APP key and Passport key pair. Replacing the
 APP key makes encrypted application data unreadable; replacing Passport keys
@@ -140,21 +227,54 @@ then populate `SNIPEIT_APP_IMAGE`, `SNIPEIT_APP_IMAGE_DIGEST`,
 environment file.
 
 The examples below use `/etc/snipeit/production.env`. Validate the fully
-resolved deployment and pull the exact artifacts before maintenance begins:
+resolved deployment and pull the exact artifacts before maintenance begins.
+The repository validator checks file references and permissions, rejects
+placeholder image digests and broad trusted proxies, and resolves the selected
+Compose files without printing secret contents:
+
+```sh
+# External database/Redis and external TLS proxy:
+bash scripts/production/validate-config.sh \
+  /etc/snipeit/production.env
+
+# Repository-managed database/Redis, public TLS edge, and loopback registry:
+bash scripts/production/validate-config.sh \
+  /etc/snipeit/production.env \
+  --managed-dependencies \
+  --edge \
+  --local-registry
+
+# For a standalone Compose v2 plugin outside Docker's search path:
+DOCKER_COMPOSE_BIN=/opt/docker/cli-plugins/docker-compose \
+  bash scripts/production/validate-config.sh \
+    /etc/snipeit/production.env \
+    --managed-dependencies \
+    --edge \
+    --local-registry
+```
+
+The equivalent direct Compose validation remains useful in automation. Include
+the same optional overlay files selected for the deployment:
 
 ```sh
 docker compose \
   --env-file /etc/snipeit/production.env \
   -f docker-compose.production.yml \
+  -f docker-compose.production.dependencies.yml \
+  -f docker-compose.production.edge.yml \
   --profile production \
   config --quiet
 
 docker compose \
   --env-file /etc/snipeit/production.env \
   -f docker-compose.production.yml \
+  -f docker-compose.production.dependencies.yml \
+  -f docker-compose.production.edge.yml \
   --profile production \
-  pull app web queue scheduler
+  pull app web queue scheduler db redis edge_tls_init edge
 ```
+
+Omit the overlay files and their services for externally managed deployments.
 
 Do not rebuild on deployment hosts and do not deploy a tag by itself. A
 human-readable tag may remain in the registry for discovery, but Compose
@@ -174,13 +294,10 @@ reviewed, additive foundation seeder and create the first administrator from an
 interactive deployment terminal after step 5:
 
 ```sh
-docker compose --env-file /etc/snipeit/production.env \
-  -f docker-compose.production.yml --profile production \
-  run --rm app php artisan db:seed \
+"${production_compose[@]}" run --rm app php artisan db:seed \
     --class=ProductionFoundationSeeder --force
-docker compose --env-file /etc/snipeit/production.env \
-  -f docker-compose.production.yml --profile production \
-  run --rm app php artisan snipeit:create-admin --bootstrap
+"${production_compose[@]}" run --rm app \
+  php artisan snipeit:create-admin --bootstrap
 ```
 
 The administrator command prompts for the password without echoing it. Avoid
@@ -196,12 +313,8 @@ installations retain their settings and administrators.
 2. On an upgrade, put the current application in maintenance mode:
 
    ```sh
-   docker compose --env-file /etc/snipeit/production.env \
-     -f docker-compose.production.yml --profile production \
-     exec app php artisan down --retry=60
-   docker compose --env-file /etc/snipeit/production.env \
-     -f docker-compose.production.yml --profile production \
-     stop --timeout 180 queue scheduler
+   "${production_compose[@]}" exec app php artisan down --retry=60
+   "${production_compose[@]}" stop --timeout 180 queue scheduler
    ```
 
    The production profile stores the maintenance marker in the shared Redis
@@ -215,15 +328,33 @@ installations retain their settings and administrators.
    backup volume:
 
    ```sh
-   docker compose --env-file /etc/snipeit/production.env \
-     -f docker-compose.production.yml --profile production \
-     run --rm app php artisan snipeit:backup \
+   "${production_compose[@]}" run --rm app php artisan snipeit:backup \
        --filename="pre-deploy-$(date -u +%Y%m%dT%H%M%SZ)"
    ```
 
    Also snapshot/export the database with the database platform's native tool,
    snapshot both upload volumes, and copy the artifacts off-host. Verify the
    backup inventory before continuing.
+
+   For the managed dependency overlay, create the native transaction-consistent
+   database dump from the database container without exposing its password in
+   process arguments on the host:
+
+   ```sh
+   backup_dir="/srv/snipeit/backups/pre-deploy-$(date -u +%Y%m%dT%H%M%SZ)"
+   sudo install -d -m 0700 "$backup_dir"
+   "${production_compose[@]}" exec -T db sh -ec \
+       'MYSQL_PWD="$(cat "$MARIADB_PASSWORD_FILE")" exec mariadb-dump --single-transaction --quick --routines --triggers --events --hex-blob -u"$MARIADB_USER" "$MARIADB_DATABASE"' \
+     | gzip -9 | sudo tee "$backup_dir/database.sql.gz" >/dev/null
+   sudo sha256sum "$backup_dir/database.sql.gz" \
+     | sudo tee "$backup_dir/SHA256SUMS" >/dev/null
+   sudo sh -c "cd '$backup_dir' && sha256sum -c SHA256SUMS"
+   ```
+
+   Export the matching public/private upload volumes and protected key material
+   through the operator's backup system, copy the complete set off-host, and
+   verify it there. A database dump without its matching uploads and keys is
+   not a complete restore point.
 
    An upgrade must carry the complete production database forward, not recreate
    users through CSV, bootstrap commands, or seeders. The existing
@@ -240,17 +371,13 @@ installations retain their settings and administrators.
 4. Inspect pending migrations without applying them:
 
    ```sh
-   docker compose --env-file /etc/snipeit/production.env \
-     -f docker-compose.production.yml --profile production \
-     run --rm app php artisan migrate:status
+   "${production_compose[@]}" run --rm app php artisan migrate:status
    ```
 
 5. Apply reviewed migrations once:
 
    ```sh
-   docker compose --env-file /etc/snipeit/production.env \
-     -f docker-compose.production.yml --profile production \
-     run --rm app php artisan migrate --force
+   "${production_compose[@]}" run --rm app php artisan migrate --force
    ```
 
    On a first deployment only, run the two reviewed bootstrap commands shown
@@ -258,9 +385,7 @@ installations retain their settings and administrators.
    required least-privilege grants into the four named foundation groups:
 
    ```sh
-   docker compose --env-file /etc/snipeit/production.env \
-     -f docker-compose.production.yml --profile production \
-     run --rm app php artisan db:seed \
+   "${production_compose[@]}" run --rm app php artisan db:seed \
        --class=ProductionPermissionGroupSeeder --force
    ```
 
@@ -278,12 +403,8 @@ installations retain their settings and administrators.
    maintenance marker remains active:
 
    ```sh
-   docker compose --env-file /etc/snipeit/production.env \
-     -f docker-compose.production.yml --profile production \
-     up -d --no-build app web
-   docker compose --env-file /etc/snipeit/production.env \
-     -f docker-compose.production.yml --profile production \
-     ps app
+   "${production_compose[@]}" up -d --no-build app web
+   "${production_compose[@]}" ps app
    ```
 
    Wait for `app` and `web` to report healthy. The HTTP `/health` endpoint is
@@ -296,15 +417,11 @@ installations retain their settings and administrators.
    and wait for all four services to report healthy:
 
    ```sh
-   docker compose --env-file /etc/snipeit/production.env \
-     -f docker-compose.production.yml --profile production \
-     exec app php artisan up
-   docker compose --env-file /etc/snipeit/production.env \
-     -f docker-compose.production.yml --profile production \
-     up -d --no-build queue scheduler
-   docker compose --env-file /etc/snipeit/production.env \
-     -f docker-compose.production.yml --profile production \
-     ps
+   "${production_compose[@]}" exec app php artisan up
+   "${production_compose[@]}" up -d --no-build queue scheduler
+   # Run this line only when docker-compose.production.edge.yml is selected:
+   "${production_compose[@]}" up -d --no-build edge_tls_init edge
+   "${production_compose[@]}" ps
    curl --fail --silent http://127.0.0.1:18081/health
    ```
 
@@ -349,6 +466,26 @@ disable CSP to work around a missing source.
 The bundled Nginx tier rejects legacy workflow evidence URLs and all executable
 extensions under `/uploads`. Private files are never mounted into Nginx.
 
+The optional managed edge implements this contract in
+`docker/production/edge-nginx.conf`. It overwrites forwarded headers, proxies
+only to the internal `web` service, publishes no database/Redis ports, and
+keeps the host certificate/key mounts out of the long-running unprivileged
+container. `APP_TRUSTED_PROXIES` must match the narrow production network
+subnet selected through `SNIPEIT_NETWORK_SUBNET`.
+
+After certificate renewal, recreate both the one-shot TLS initializer and the
+edge so the restricted TLS volume receives the new pair:
+
+```sh
+"${production_compose[@]}" up -d --no-build --force-recreate \
+  edge_tls_init edge
+```
+
+Then verify the served fingerprint/expiry and both the HTTP redirect and HTTPS
+health endpoint. A custom `EDGE_NGINX_CONFIG` is deployment-owned and must be
+reviewed whenever it adds another hostname or upstream; such host-specific
+routes do not belong in the reusable default.
+
 ## Durability, backups, and restore drills
 
 The named volumes are:
@@ -356,6 +493,15 @@ The named volumes are:
 - `snipeit-production-public-uploads`
 - `snipeit-production-private-uploads`
 - `snipeit-production-backups`
+
+The managed dependency and edge overlays additionally use:
+
+- `snipeit-production-db-data`
+- `snipeit-production-redis-data`
+- `snipeit-production-edge-tls`
+
+The optional loopback registry additionally uses
+`snipeit-production-registry-data`.
 
 The names can be overridden in the protected production env file. Use a volume
 driver with host/disk redundancy and monitoring. Named volumes on a single host

@@ -1,0 +1,106 @@
+services:
+  db:
+    image: mariadb:11.4.7@sha256:39596f079862334be04f4231664862e55d4febe54309cc62f750f2297de85b06
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE:?Set the production database name}
+      MARIADB_USER: ${DB_USERNAME:?Set the production database user}
+      MARIADB_PASSWORD_FILE: /run/secrets/db_password
+      MARIADB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+    command:
+      - --event-scheduler=OFF
+    secrets:
+      - db_password
+      - db_root_password
+    volumes:
+      - production_db_data:/var/lib/mysql
+    networks:
+      - production
+    profiles:
+      - production
+    restart: unless-stopped
+    stop_grace_period: 60s
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  redis:
+    image: redis@sha256:e7723ff73d963f5cc6d9c4643ea3d989527a402a319239054e9472a7fb9219a2
+    command:
+      - /bin/sh
+      - -ec
+      - exec redis-server --appendonly yes --requirepass "$$(cat /run/secrets/redis_password)"
+    secrets:
+      - redis_password
+    volumes:
+      - production_redis_data:/data
+    networks:
+      - production
+    profiles:
+      - production
+    restart: unless-stopped
+    stop_grace_period: 30s
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - REDISCLI_AUTH="$$(cat /run/secrets/redis_password)" redis-cli ping | grep -q PONG
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  app:
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+      DB_DUMP_SKIP_SSL: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  web:
+    depends_on:
+      app:
+        condition: service_healthy
+
+  queue:
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+      DB_DUMP_SKIP_SSL: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  scheduler:
+    environment:
+      DB_HOST: db
+      REDIS_HOST: redis
+      DB_DUMP_SKIP_SSL: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+networks:
+  production:
+    ipam:
+      config:
+        - subnet: ${SNIPEIT_NETWORK_SUBNET:-172.31.208.0/24}
+
+volumes:
+  production_db_data:
+    name: ${SNIPEIT_DB_VOLUME:-snipeit-production-db-data}
+  production_redis_data:
+    name: ${SNIPEIT_REDIS_VOLUME:-snipeit-production-redis-data}
+
+secrets:
+  db_root_password:
+    file: ${DB_ROOT_PASSWORD_FILE:?Set the production database root-password file}

@@ -4,6 +4,28 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-09-01
+- Converted the successful data-bearing single-host migration arrangement into
+  reusable, secret-free production configuration. The immutable base profile
+  still supports external database, Redis, and TLS infrastructure.
+- Added an optional production dependency overlay with digest-pinned MariaDB
+  and Redis, file-backed database/root/Redis credentials, internal-only
+  networking, durable volumes, service health checks, and app/writer
+  dependency wiring. Production no longer needs to borrow the isolated
+  rehearsal overlay for a self-contained host.
+- Added an optional public TLS edge overlay and generic Nginx configuration
+  based on the qualified deployment. TLS material is staged through a one-shot
+  root container into a restricted volume; the long-running edge remains
+  unprivileged, read-only, health-checked, and overwrites forwarded headers.
+- Added the qualified loopback-only registry as an optional offline artifact
+  transfer profile. It retains repository-plus-digest deployment identities
+  without exposing a registry beyond localhost and does not replace transfer
+  hashes, image-content verification, scanning, or an archive of record.
+- Expanded the production environment template and runbook with overlay
+  selection, configuration validation, managed-database native backups,
+  certificate renewal, volume inventory, and the rule that host-specific
+  secondary proxies and all live secrets/data remain outside the repository.
+
 ### 2026-08-25
 - Implemented the owner-approved Supervisor product-setup contract. Supervisor
   can perform ordinary model, model-number/specification, attribute,

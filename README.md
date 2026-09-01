@@ -231,11 +231,17 @@ release-evidence requirements.
 
 ## Production
 
-`docker-compose.production.yml` is the only documented production container
-path. It builds immutable app/web artifacts, uses external file-backed secrets,
-does not bundle a database or Redis, separates PHP-FPM/queue/scheduler services,
-and performs no migration, seeding, dependency install, or key generation at
-startup.
+`docker-compose.production.yml` is the production foundation. It builds
+immutable app/web artifacts, uses external file-backed secrets, separates
+PHP-FPM/queue/scheduler services, and performs no migration, seeding,
+dependency install, or key generation at startup. It uses external MariaDB and
+Redis by default. A reviewed `docker-compose.production.dependencies.yml`
+overlay provides a self-contained single-server MariaDB/Redis arrangement, and
+`docker-compose.production.edge.yml` optionally provides the public TLS edge.
+Production deployments must never substitute the rehearsal overlay for either
+of these supported profiles. For isolated single-host deployments without an
+organization registry, `docker-compose.production.registry.yml` provides a
+loopback-only, digest-preserving offline-transfer target.
 
 It is a deployable foundation, not proof of release readiness. Follow the
 [production deployment runbook](docs/production-deployment.md) and complete its
@@ -250,7 +256,8 @@ upstream Snipe-IT installer or upgrader against this repository.
 Release images must be built once from the reviewed commit, scanned, pushed by
 immutable digest, and deployed with:
 
-- a dedicated external MariaDB/MySQL database and authenticated Redis;
+- either dedicated external MariaDB/MySQL and authenticated Redis services, or
+  the repository-managed single-server dependency overlay with durable volumes;
 - managed TLS termination and narrowly trusted proxy addresses;
 - externally stored APP, database, Redis, and Passport keys;
 - durable public/private upload and backup volumes;
