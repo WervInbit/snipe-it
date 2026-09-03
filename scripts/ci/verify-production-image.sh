@@ -99,6 +99,8 @@ secret_files="$(
 if [ -f "$root/artisan" ]; then
     production_entrypoint=/usr/local/bin/snipeit-production-entrypoint
     [ -x "$production_entrypoint" ] || fail "the production entrypoint is missing or not executable"
+    command -v lp >/dev/null 2>&1 || fail "the CUPS lp client is missing"
+    command -v lpstat >/dev/null 2>&1 || fail "the CUPS lpstat client is missing"
     if grep -q "$(printf '\r')" "$production_entrypoint"; then
         fail "the production entrypoint contains CRLF line endings"
     fi

@@ -113,6 +113,38 @@ reviewed Compose override with SMTP settings/secret plus real relay, TLS,
 delivery, reset, queue, and failure/retry evidence. Mock LDAP and local mail
 capture are not sufficient to claim support.
 
+## Server-side QR label printing
+
+The production application image includes the CUPS command-line client used by
+the asset and component QR-label endpoints. Printing remains optional: leave
+`LABEL_PRINTER_QUEUE` and `LABEL_PRINTER_QUEUES` empty when the deployment has
+no approved printer.
+
+For a CUPS service running on the Docker host, use the stable host-gateway alias
+provided by the production Compose profile rather than copying a bridge IP:
+
+```dotenv
+LABEL_PRINTER_QUEUE=approved-queue
+LABEL_PRINTER_QUEUES=approved-queue
+LABEL_PRINT_COMMAND=lp
+LABEL_PRINT_OPTIONS="-o PageSize=w72h72 -o media=w72h72 -o scaling=100"
+CUPS_SERVER=host.docker.internal
+```
+
+Keep queue and media options environment-specific. Before exposing the print
+button, verify the configured queue without submitting a job:
+
+```sh
+docker compose --env-file /etc/snipeit/production.env \
+  -f docker-compose.production.yml --profile production \
+  run --rm --no-deps --entrypoint lpstat app -a
+```
+
+Then submit exactly one labeled test asset from the application and confirm the
+physical output, orientation, QR scan, and job completion. A successful HTTP
+response proves only that CUPS accepted the job; it does not prove that the
+printer produced a usable label.
+
 ## Build, publish, and validate
 
 Build each target once in release CI from the reviewed commit, scan the images
