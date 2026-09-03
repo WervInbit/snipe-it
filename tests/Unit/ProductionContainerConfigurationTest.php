@@ -44,6 +44,12 @@ class ProductionContainerConfigurationTest extends TestCase
         $this->assertStringContainsString('MAIL_MAILER: array', $compose);
         $this->assertStringContainsString('MAIL_TLS_VERIFY_PEER: "true"', $compose);
         $this->assertStringContainsString('LDAP_INTEGRATION_ENABLED: "false"', $compose);
+        $this->assertStringContainsString('LABEL_PRINTER_QUEUE: ${LABEL_PRINTER_QUEUE:-}', $compose);
+        $this->assertStringContainsString('LABEL_PRINTER_QUEUES: ${LABEL_PRINTER_QUEUES:-}', $compose);
+        $this->assertStringContainsString('LABEL_PRINT_COMMAND: ${LABEL_PRINT_COMMAND:-lp}', $compose);
+        $this->assertStringContainsString('LABEL_PRINT_OPTIONS: ${LABEL_PRINT_OPTIONS:-}', $compose);
+        $this->assertStringContainsString('CUPS_SERVER: ${CUPS_SERVER:-}', $compose);
+        $this->assertStringContainsString('host.docker.internal:host-gateway', $compose);
         $this->assertStringContainsString('AGENT_API_TOKEN_FILE: /run/secrets/agent_api_token', $compose);
         $this->assertStringContainsString('AGENT_ALLOWED_IPS: ${AGENT_ALLOWED_IPS:-}', $compose);
         $this->assertStringContainsString('DB_DUMP_PATH:', $compose);
@@ -87,6 +93,11 @@ class ProductionContainerConfigurationTest extends TestCase
         $this->assertStringNotContainsString('SNIPEIT_IMAGE_TAG', $example);
         $this->assertMatchesRegularExpression('/^MAIL_ENABLED=false$/m', $example);
         $this->assertMatchesRegularExpression('/^LDAP_INTEGRATION_ENABLED=false$/m', $example);
+        $this->assertMatchesRegularExpression('/^LABEL_PRINTER_QUEUE=$/m', $example);
+        $this->assertMatchesRegularExpression('/^LABEL_PRINTER_QUEUES=$/m', $example);
+        $this->assertMatchesRegularExpression('/^LABEL_PRINT_COMMAND=lp$/m', $example);
+        $this->assertMatchesRegularExpression('/^LABEL_PRINT_OPTIONS=$/m', $example);
+        $this->assertMatchesRegularExpression('/^CUPS_SERVER=host\.docker\.internal$/m', $example);
         $this->assertDoesNotMatchRegularExpression('/^MAIL_HOST=/m', $example);
         $this->assertDoesNotMatchRegularExpression('/^MAIL_PASSWORD_FILE=/m', $example);
         $this->assertMatchesRegularExpression(
@@ -233,6 +244,7 @@ class ProductionContainerConfigurationTest extends TestCase
         $this->assertTrue($bootstrapPatch < $npmInstall);
         $this->assertStringContainsString('npm ci --no-audit --no-fund', $dockerfile);
         $this->assertStringContainsString('npm run production', $dockerfile);
+        $this->assertStringContainsString('cups-client', $dockerfile);
         $this->assertStringContainsString('composer install', $dockerfile);
         $this->assertStringContainsString('--no-dev', $dockerfile);
         $this->assertStringContainsString('apt-get purge -y --auto-remove', $dockerfile);

@@ -36,6 +36,11 @@ x-app-environment: &app-environment
   MAIL_MAILER: array
   MAIL_TLS_VERIFY_PEER: "true"
   LDAP_INTEGRATION_ENABLED: "false"
+  LABEL_PRINTER_QUEUE: ${LABEL_PRINTER_QUEUE:-}
+  LABEL_PRINTER_QUEUES: ${LABEL_PRINTER_QUEUES:-}
+  LABEL_PRINT_COMMAND: ${LABEL_PRINT_COMMAND:-lp}
+  LABEL_PRINT_OPTIONS: ${LABEL_PRINT_OPTIONS:-}
+  CUPS_SERVER: ${CUPS_SERVER:-}
   AGENT_API_TOKEN_FILE: /run/secrets/agent_api_token
   AGENT_ALLOWED_IPS: ${AGENT_ALLOWED_IPS:-}
   AGENT_USER_ID: ${AGENT_USER_ID:-}
@@ -60,6 +65,8 @@ x-app-service: &app-service
     - production_public_uploads:/var/www/html/public/uploads
     - production_private_uploads:/var/www/html/storage/private_uploads
     - production_backups:/var/www/html/storage/app/backups
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
   tmpfs:
     - /run:uid=33,gid=33,mode=0755
     - /tmp:uid=33,gid=33,mode=1777

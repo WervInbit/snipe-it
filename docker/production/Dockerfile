@@ -27,6 +27,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         ca-certificates \
+        cups-client \
         curl \
         default-mysql-client \
         gosu \
