@@ -100,6 +100,13 @@ docker compose exec -T -e APP_ENV=testing -e DB_CONNECTION=sqlite -e DB_DATABASE
 docker compose exec -T -e APP_ENV=testing -e DB_CONNECTION=sqlite -e DB_DATABASE=:memory: app php artisan test --env=testing --exclude-group=ldap
 ```
 
+The complete GitHub Actions database suites explicitly install the PHP LDAP
+extension because the LDAP group uses its constants even though directory
+traffic is mocked. A long-lived local app image built before LDAP was added to
+`docker/app/Dockerfile` can fail only that group with undefined LDAP constants;
+rebuild that local image before using it as full-suite evidence. The documented
+non-LDAP command remains the local V1 gate while real LDAP support is deferred.
+
 ## Release Evidence
 
 A targeted pass is not a release signal. Record:
@@ -112,4 +119,4 @@ A targeted pass is not a release signal. Record:
 - any remaining failures and their owners.
 
 The latest known V1 verification state is tracked in the
-[current release-readiness status](docs/v1-release-readiness-status-2026-08-25.md).
+[current release-readiness status](docs/v1-release-readiness-status-2026-09-03.md).

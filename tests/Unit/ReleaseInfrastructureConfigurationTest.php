@@ -17,6 +17,31 @@ class ReleaseInfrastructureConfigurationTest extends TestCase
         );
     }
 
+    public function test_full_phpunit_ci_jobs_install_the_ldap_extension_their_tests_require(): void
+    {
+        $basePath = realpath(__DIR__ . '/../..');
+
+        foreach ([
+            '.github/workflows/tests-sqlite.yml',
+            '.github/workflows/tests-mysql.yml',
+            '.github/workflows/tests-postgres.yml',
+            '.github/workflows/v1-quality-gate.yml',
+        ] as $workflowPath) {
+            $workflow = file_get_contents($basePath . '/' . $workflowPath);
+
+            $this->assertMatchesRegularExpression(
+                '/^\s*extensions:\s*[^\r\n]*\bldap\b/m',
+                $workflow,
+                $workflowPath . ' must install LDAP before running the complete PHPUnit suite.',
+            );
+            $this->assertStringContainsString(
+                'php artisan test --env=testing --fail-on-incomplete --fail-on-skipped',
+                $workflow,
+            );
+            $this->assertStringNotContainsString('--exclude-group=ldap', $workflow);
+        }
+    }
+
     public function test_local_app_image_copies_postinstall_inputs_before_npm_install(): void
     {
         $basePath = realpath(__DIR__ . '/../..');

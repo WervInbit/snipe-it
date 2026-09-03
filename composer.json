@@ -52,7 +52,7 @@
     "laravel/ui": "^4.0",
     "league/csv": "^9.7",
     "league/flysystem-aws-s3-v3": "^3.0",
-    "livewire/livewire": "^3.5",
+    "livewire/livewire": "^3.8.3",
     "neitanod/forceutf8": "^2.0",
     "nesbot/carbon": "^3.0",
     "nunomaduro/collision": "^8.1",

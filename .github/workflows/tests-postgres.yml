@@ -35,7 +35,7 @@ jobs:
         with:
           php-version: "${{ matrix.php-version }}"
           coverage: none
-          extensions: pdo_pgsql
+          extensions: ldap,pdo_pgsql
 
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
