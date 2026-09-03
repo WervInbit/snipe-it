@@ -1,4 +1,64 @@
+# Session Progress (2026-09-03)
+
+## Addendum (2026-09-03 V1 Continuation)
+- Resumed the V1 release, deployment, and implementation track after the
+  reusable production profiles were committed and pushed as `fe4d0b4fe8`.
+- This session begins with read-only repository and temporary-production
+  checks, then will separate actual V1 blockers from accepted post-V1 work.
+- The existing CAT/manual worktree belongs to the separate guide effort and
+  remains outside this session's implementation and commit boundary.
+- No destructive database operation, reseed, legacy cleanup, or deployment
+  mutation is authorized by this checkpoint.
+- Session notes:
+  `docs/agents/agents-addendum-2026-09-03-v1-continuation-session-init.md`.
+
 # Session Progress (2026-09-01)
+
+## Addendum (2026-09-01 CAT Guide Set Plan)
+- Audited CAT-00 through CAT-06 against the current guide-system contracts,
+  review history, implemented routes/forms, and least-privilege role matrix.
+- Added `docs/manuals/operator-guides/catalog-guide-plan.md` as the current
+  working CAT-family information architecture. It assigns one owner to every
+  concept/action, separates the operator route from production order, and
+  provides page plans, terminology, evidence needs, and set-level acceptance
+  tests.
+- Confirmed ordinary catalogue setup is a Supervisor route while lifecycle and
+  saved-row cleanup remain Admin-only. The plan removes unsupported
+  component-definition tracking/placement choices, avoids a false expected-
+  component required/optional control, and keeps source recording explicitly
+  unresolved.
+- Promoted the recurring connector/text-overlap failure into the shared
+  reference-diagram component contract and linked the family plan from the
+  system precedence, project index, inventory, registry, decision log, and
+  continuation handoff.
+- Validation passes: `git diff --check`, local Markdown links, shared guide
+  component tests, and the accepted/unaccepted package verification. Existing
+  package counts remain 25 registry entries, 72 evidence files, 9 accepted
+  PDFs/11 pages, and 17 unaccepted PDFs/30 pages.
+- No CAT specification, generator, screenshot, PDF, registered version,
+  artifact status, application behavior, or accepted artifact changed in this
+  planning pass. Session notes:
+  `docs/agents/agents-addendum-2026-09-01-cat-guide-plan-session-init.md`.
+- Follow-on implementation aligned and generated CAT-00 v8 as a six-page
+  orientation chapter and CAT-01 v4 as a five-page Supervisor procedure. Both
+  remain explicitly unaccepted working drafts; no accepted artifact changed.
+- Added read-only evidence `CAT-MODEL-NUMBER-SEARCH-DESKTOP-01` for the global
+  exact-code check, registered its checksum and uses, and extended the capture
+  helper with isolated `number-search` mode.
+- Updated the CAT-00/CAT-01 specifications, generator, layouts, registry,
+  guide index, decisions, inventory, handoff, review records, and portable
+  draft manifest to v8/v4. Prior v7/v3 outputs remain review history.
+- Focused generation reports no component or geometry errors. PDFInfo confirms
+  6-page and 5-page unencrypted A4 output, extracted text contains only the
+  intended `Draft v8`/`Draft v4` labels and no printed environment URL, and all
+  eleven final pages were visually inspected.
+- Shared guide-component tests pass with 25 registry entries. The complete
+  package verifier passes against a clean mirror of the exact manifest: 73
+  evidence files, 9 accepted PDFs / 11 pages, 17 unaccepted PDFs / 28 pages,
+  2 baselines, and 16 active scripts. Direct live-directory validation remains
+  blocked only because Foxit holds the superseded portable `CAT-00 ... v7`
+  file open as one extra unlisted file beside v8. Close that document, move
+  the duplicate out of `resources/.../drafts`, and rerun the same verifier.
 
 ## Addendum (2026-09-01 Controlled Beta Migration)
 - Opened a production-grade migration session for the data-bearing temporary
@@ -4432,3 +4492,36 @@ there are multiple duplicate functions that still need to be removed, sku will b
 - User explicitly accepted USR-01 v8. Updated its specification, review record, decision record, registry status, project index, and TODO entry to `Internal review candidate for V1`; acceptance remains exact-version only.
 - Prepared focused USR-02 v2 as the next user-account review page. The role/rights policy and real v1 evidence remain unchanged; the page now uses shared components, true-center badges, an AC-01 prerequisite marker, measured focus padding, non-overlapping long headings, and four full related-guide references over two rows.
 - Revised focused USR-02 to v3 from detailed review. Removed redundant identity and Superadmin/unclear-role stops, removed the separate-approval model, documented selecting/deselecting multiple groups with Ctrl+click, changed the audience to Admin / Superadmin, and explained the effective Overnemen/Toestaan/Weigeren semantics. Local code verification confirmed only Superadmin can sync groups or change `Global: Super User`, while Admin can manage ordinary direct user permissions.
+
+### 2026-09-01 - CAT-03/CAT-04 Working Drafts
+- Aligned CAT-03 attribute management and CAT-04 component-definition
+  management with the verified least-privilege Supervisor routes and current
+  browser forms.
+- Added twelve canonical read-only catalogue captures and generated portable
+  unaccepted PDFs: CAT-03 v1 across five A4 pages and CAT-04 v1 across six A4
+  pages.
+- Registered both drafts, their evidence, review records, hashes, page models,
+  and continuation state without changing any accepted guide.
+- Validation passes script syntax, shared guide-system tests, generator
+  component/geometry checks, PDF metadata and extracted-text checks, final
+  Poppler raster inspection, and the clean-mirror package verifier (85
+  evidence files; 9 accepted PDFs / 11 pages; 19 drafts / 39 pages).
+- Direct live-root package validation remains blocked only by the known extra
+  locked CAT-00 v7 draft PDF; no application, database, Docker, or Computer Use
+  action was performed.
+
+### 2026-09-03 - Guide Continuation Checkpoint
+- Reinitialized on the operator-guide handoff and fetched `origin` without
+  merging. Local `master` and `origin/master` both resolve to `fe4d0b4f`, with
+  zero commits ahead and zero behind.
+- Preserved the existing uncommitted CAT guide specifications, evidence,
+  scripts, manifests, reviews, and PDFs unchanged during the remote check.
+- Session notes:
+  `docs/agents/agents-addendum-2026-09-03-guide-continuation-session-init.md`.
+- Reconciled the repository TODO and continuation handoff with CAT-00 v8,
+  CAT-01 v4, CAT-03 v1, CAT-04 v1, 85 canonical evidence files, and CAT-02 as
+  the next planned production guide.
+- Pre-commit guide validation passes script syntax, shared component tests,
+  diff/credential checks, and `npm test` against a clean exact-manifest mirror:
+  85 evidence files, nine accepted PDFs / 11 pages, 19 unaccepted drafts / 39
+  pages, two baselines, and 16 active scripts.

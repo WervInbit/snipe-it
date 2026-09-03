@@ -75,8 +75,8 @@ function verifyMarkdownLinks(directory) {
 }
 
 const evidenceManifest = readJson(path.join(evidenceRoot, 'manifest.json'));
-assert.equal(evidenceManifest.sources.length, 72, 'Canonical evidence count changed without review');
-assert.equal(new Set(evidenceManifest.sources.map((entry) => entry.id)).size, 72, 'Duplicate evidence source ID');
+assert.equal(evidenceManifest.sources.length, 85, 'Canonical evidence count changed without review');
+assert.equal(new Set(evidenceManifest.sources.map((entry) => entry.id)).size, 85, 'Duplicate evidence source ID');
 verifyManifestFiles(evidenceRoot, evidenceManifest.sources, 'Evidence manifest');
 
 const screenshotCatalog = fs.readFileSync(
@@ -129,8 +129,8 @@ for (const artifact of pdfManifest.artifacts) {
 }
 
 const draftManifest = readJson(path.join(draftPdfRoot, 'manifest.json'));
-assert.equal(draftManifest.artifacts.length, 17, 'Draft PDF count changed without review');
-assert.equal(new Set(draftManifest.artifacts.map((entry) => entry.code)).size, 17, 'Duplicate draft guide code');
+assert.equal(draftManifest.artifacts.length, 19, 'Draft PDF count changed without review');
+assert.equal(new Set(draftManifest.artifacts.map((entry) => entry.code)).size, 19, 'Duplicate draft guide code');
 verifyManifestFiles(draftPdfRoot, draftManifest.artifacts, 'Draft PDF manifest');
 
 for (const artifact of draftManifest.artifacts) {

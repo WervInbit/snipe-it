@@ -6,19 +6,23 @@ Status: current shared content, production, and QA rules for generated guides.
 
 Use the narrowest current document:
 
-1. A guide specification controls that guide's scope, steps, evidence, and warnings.
-2. [registry.md](registry.md) controls the current version, layout, generator,
+1. A current family plan controls information ownership and handoffs across
+   guides in that family. The CAT family uses
+   [catalog-guide-plan.md](catalog-guide-plan.md).
+2. A guide specification controls that guide's exact scope, steps, evidence,
+   and warnings within the family boundary.
+3. [registry.md](registry.md) controls the current version, layout, generator,
    page model, artifact root, and review state.
-3. [components.md](components.md) controls shared visual components and feedback promotion.
-4. [layouts.md](layouts.md) controls reusable page and step structures.
-5. This system document controls shared content and production behavior.
-6. [maintenance.md](maintenance.md) controls change impact, versioning, and
+4. [components.md](components.md) controls shared visual components and feedback promotion.
+5. [layouts.md](layouts.md) controls reusable page and step structures.
+6. This system document controls shared content and production behavior.
+7. [maintenance.md](maintenance.md) controls change impact, versioning, and
    multi-guide propagation after feedback or application changes.
-7. The decision log controls accepted and unresolved cross-guide decisions.
-8. The project index controls current status and working order.
-9. [HANDOFF.md](HANDOFF.md) controls the continuation checklist, creation-stage
+8. The decision log controls accepted and unresolved cross-guide decisions.
+9. The project index controls current status and working order.
+10. [HANDOFF.md](HANDOFF.md) controls the continuation checklist, creation-stage
    snapshot, and environment path mapping. It does not override sources above.
-10. Older files under `docs/manuals/` are supporting history only.
+11. Older files under `docs/manuals/` are supporting history only.
 
 ## Production Model
 

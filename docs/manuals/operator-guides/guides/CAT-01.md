@@ -1,21 +1,21 @@
 # CAT-01 Model en modelnummer aanmaken
 
-Status: Working draft v3; structural rewrite aligned with CAT-00 v7 and
-awaiting exact-version review.
+Status: Working draft v4; global exact-code search correction aligned with
+CAT-00 v8 and awaiting exact-version review.
 
 ## Maintenance Metadata
 
 - Family: `CAT`.
 - Type: Extended administration task.
-- Current version: v3 draft.
+- Current version: v4 draft.
 - Page model: Five-page procedure with continuous steps and page handoffs.
 - Layout recipe: `extended-admin-flow` with `single-visual`,
   `inline-route-alternative`, `inline-warning`, `reused-evidence`, and
   `two-sided-continuation`.
 - Generator: `scripts/manuals/generate-catalog-guide-review.mjs`.
-- Artifact root: `output/manuals/proofs/catalog-guide-review/cat-01-v3/`.
+- Artifact root: `output/manuals/proofs/catalog-guide-review/cat-01-v4/`.
 - Portable review package:
-  `resources/manuals/operator-guides/drafts/CAT-01-model-en-modelnummer-aanmaken-v3-draft.pdf`.
+  `resources/manuals/operator-guides/drafts/CAT-01-model-en-modelnummer-aanmaken-v4-draft.pdf`.
   Its manifest status is `Unaccepted working draft`.
 
 ## Purpose
@@ -49,21 +49,25 @@ Visual `1A`: expanded dashboard navigation with `Instellingen` and
 
 Caption: `Open Instellingen en kies Asset modellen.`
 
-### Step 2: Search name and exact code
+### Step 2: Search name and exact code in both lists
 
 Search before using the create control:
 
-1. Search manufacturer, product family, and generation, for example
-   `HP ProBook 450 G8`.
-2. Search or compare the complete printed model-number code, including its
-   suffix, for example `2E9F8EA#ABH`.
-3. Compare the visible Basismodel name, `Model Nr.`, `Model Numbers` count,
-   and category.
+1. In `Asset modellen`, search manufacturer, product family, and generation,
+   for example `HP ProBook 450 G8`.
+2. In the separate global `Model Numbers` list, search the complete printed
+   code including its suffix, for example `2E9F8EA#ABH`.
+3. Compare the returned Basismodel, code, label, status, and asset count.
 
-Visual `2A`: model list with search field, matching rows, exact codes, and
-create `+` in recognizable surrounding context.
+Visual `2A`: Basismodel list with search field and matching product/generation
+rows in recognizable surrounding context.
 
-Caption: `Zoek naam en exacte code voordat je de + gebruikt.`
+Caption: `Zoek eerst het Basismodel op fabrikant, product en generatie.`
+
+Visual `2B`: global `Model Numbers` list filtered by the complete code, showing
+the matching Basismodel, code, label, status, and asset count.
+
+Caption: `Zoek daarna de complete fabrikantcode in de globale lijst Model Numbers.`
 
 Amber warning: `Een vergelijkbare naam is niet genoeg. Controleer ook de
 volledige fabrikantcode en generatie.`
@@ -235,7 +239,8 @@ label, without a duplicate.
 | Label | Source ID | Purpose |
 | --- | --- | --- |
 | 1A | `CAT-MODEL-LIST-DESKTOP-01` | Start from the dashboard/sidebar and find Asset modellen. |
-| 2A | `CAT-MODEL-LIST-DESKTOP-01` | Search, compare existing rows, and locate the create control. |
+| 2A | `CAT-MODEL-LIST-DESKTOP-01` | Search and compare product plus generation in Basismodellen. |
+| 2B | `CAT-MODEL-NUMBER-SEARCH-DESKTOP-01` | Search the complete code globally and identify the owning Basismodel. |
 | 3A | `CAT-MODEL-DETAIL-DESKTOP-01` | Existing Basismodel and exact-code routes. |
 | 3B | `CAT-MODEL-LIST-DESKTOP-01` | Create a genuinely missing Basismodel. |
 | 4A | `CAT-MODEL-CREATE-DESKTOP-01` | Explain only the active product-identity fields and save action. |

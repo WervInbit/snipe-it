@@ -1,6 +1,6 @@
 # Operator Guide Project
 
-Status: current project entry point, updated 2026-08-20.
+Status: current project entry point, updated 2026-09-01.
 
 Use this directory to continue the laminated operator-guide work. Generated base guides are the active production format. Affinity remains a later finishing option after the complete set is confirmed or the user explicitly gives a green light.
 
@@ -18,6 +18,8 @@ Use this directory to continue the laminated operator-guide work. Generated base
 - [Continuation handoff](HANDOFF.md): current creation tracker, exact resume
   order, and environment/path migration checklist.
 - [Guide system](system.md): shared design, content, production, and QA rules.
+- [CAT guide-set plan](catalog-guide-plan.md): CAT-00 through CAT-06 topic
+  ownership, operator route, page plans, role boundaries, and evidence gaps.
 - [Component contract](components.md): reusable rendering primitives, registry,
   alignment rules, geometry checks, and review-feedback promotion.
 - [Layout recipes](layouts.md): named page structures and step patterns proven
@@ -222,28 +224,40 @@ branches remain review history; AST-03 v14 and AST-04/05 v5 are current:
 
 ### Current Catalogue Review
 
-The catalogue-management family now has a standards-first foundation and two
+The catalogue-management family now has a standards-first foundation and four
 extensive working drafts:
 
-- CAT-00 v7 is an eight-page reference chapter. It first establishes the
-  Basismodel/model-number/asset structure, then explains attribute definitions
-  and values, component definitions, expected and placed components, model-
-  number baselines, asset deviations, and effective-value precedence. The
-  final page routes the reader to CAT-01 through CAT-06.
-- CAT-01 v3 is a five-page Supervisor procedure with continuous steps 1-8. It
-  searches before creation, separates the three possible reuse/create routes,
-  teaches only the active Basismodel identity fields, distinguishes exact code
-  from its readable label, verifies the saved identity, and routes onward to
-  CAT-02 or AST-03.
-- Nine canonical catalogue captures and one reused component-roster capture
-  are registered by stable evidence IDs. The source forms were not submitted
-  and contain no production record changes.
-- Both active PDFs pass their focused A4, page-count, text, component-geometry,
-  context-column, and full-page raster gates. They remain working drafts;
-  neither has been internally accepted yet.
-- CAT-02 through CAT-06 have detailed specifications. CAT-02 is the next
-  evidence-and-generation target; CAT-06 remains blocked from approval by the
-  unresolved source-recording policy.
+- CAT-00 v8 is a six-page orientation chapter. It presents one relationship
+  map, separates Basismodel/model number/asset identity, explains reusable
+  attribute and component definitions, distinguishes expected from physical
+  component state, compares direct values with expected components, and ends
+  with a task-based guide router.
+- CAT-01 v4 is a five-page Supervisor procedure with continuous steps 1-8. It
+  searches the Basismodel list and the global Model Numbers list before
+  creation, separates the three possible reuse/create routes, teaches only the
+  active Basismodel identity fields, distinguishes exact code from its readable
+  label, verifies the saved identity, and routes onward to CAT-02 or AST-03.
+- CAT-03 v1 is a five-page Supervisor procedure for finding or creating one
+  reusable attribute definition, choosing its datatype and behavior, setting
+  numeric constraints or Enum options, and verifying the saved row.
+- CAT-04 v1 is a six-page Supervisor procedure for one reusable component
+  definition: identity, expected parts, attribute contributions, hierarchy
+  overlap, Save, and return routes. It intentionally excludes tracking and
+  placement controls that are not exposed in the browser.
+- Twelve additional canonical captures support CAT-03 and CAT-04. Unsaved
+  forms were prepared without submission; the result-row and overlap-warning
+  examples were screenshot-only DOM states and changed no server record.
+- All four active PDFs pass their focused A4, page-count, text,
+  component-geometry, context-column, and full-page raster gates. They remain
+  working drafts; none has been internally accepted yet.
+- The current [CAT guide-set plan](catalog-guide-plan.md) assigns one owner to
+  every catalogue concept and action. CAT-00 v8, CAT-01 v4, CAT-03 v1, and
+  CAT-04 v1 are the generated drafts aligned to that plan.
+- CAT-02, CAT-05, and CAT-06 still require alignment and evidence before
+  generation. In particular, normal setup belongs to Supervisor, lifecycle
+  and saved-row cleanup belong to Admin, browser-inaccessible component
+  tracking/placement controls are excluded, and CAT-06 may not claim source
+  storage that the application does not provide.
 
 ## Active Guide Set
 
@@ -267,11 +281,11 @@ extensive working drafts:
 | [USR-03 Reset Password](guides/USR-03.md) | Administration task | Admin | Issue one generated temporary password through personal handoff. |
 | [USR-04 Disable Or Restore User](guides/USR-04.md) | Two-sided lifecycle task | Admin | Deactivate by default; delete or restore only after ownership and access checks. |
 | [USR-05 Manage Groups](guides/USR-05.md) | Planned administration task | Superadmin | Create or edit a reusable group and verify its minimum required rights. |
-| [CAT-00 Understand The Catalogue](guides/CAT-00.md) | Eight-page reference chapter | Supervisor | Understand identities, reusable definitions, model-number baselines, actual asset state, value precedence, and the correct follow-up guide. |
+| [CAT-00 Understand The Catalogue](guides/CAT-00.md) | Six-page reference chapter | Supervisor | Understand identities, reusable definitions, model-number baselines, actual asset state, value placement, and the correct follow-up guide. |
 | [CAT-01 Create Model And Model Number](guides/CAT-01.md) | Five-page administration task | Supervisor | Reuse or create the correct Basismodel and add one exact manufacturer model number. |
 | [CAT-02 Build Model Specification](guides/CAT-02.md) | Planned five-page administration task | Supervisor target | Build direct attributes and expected components without duplicate or conflicting values. |
-| [CAT-03 Manage Attributes](guides/CAT-03.md) | Planned administration task | Supervisor target | Reuse, create, constrain, and retire attribute definitions safely. |
-| [CAT-04 Manage Component Definitions](guides/CAT-04.md) | Planned administration task | Supervisor target | Configure reusable component identity, tracking, placement, attributes, and expected children. |
+| [CAT-03 Manage Attributes](guides/CAT-03.md) | Five-page administration task | Supervisor | Reuse or create a definition, choose datatype and behavior, constrain valid input, and verify reuse. |
+| [CAT-04 Manage Component Definitions](guides/CAT-04.md) | Six-page administration task | Supervisor | Configure reusable component identity, expected parts, attribute contributions, overlap handling, and reuse. |
 | [CAT-05 Manage Variants And Lifecycle](guides/CAT-05.md) | Planned administration task | Admin | Add variants and manage default, active, deprecated, delete, and partial-copy behavior. |
 | [CAT-06 Verify Catalogue And Sources](guides/CAT-06.md) | Planned verification task | Supervisor target | Validate exact identifiers and specification facts against authoritative evidence. |
 
@@ -307,13 +321,13 @@ desktop evidence is available:
 
 The catalogue set follows this sequence:
 
-1. Review CAT-00 and CAT-01 separately; preserve each exact working draft.
-2. Capture and generate CAT-02 before CAT-03/CAT-04 so its actual missing-
-   definition routes determine the downstream screenshots and wording.
-3. Generate CAT-03 and CAT-04 as definition-management references.
-4. Generate CAT-05 after the base-model and specification workflows settle.
-5. Resolve the source-recording policy, then generate CAT-06.
-6. Register physical assets through AST-03 only after CAT-01 and CAT-02 are
+1. Review CAT-00, CAT-01, CAT-03, and CAT-04 separately; preserve each exact
+   working draft.
+2. Align and generate CAT-02 now that CAT-03/CAT-04 terminology and return
+   routes are concrete.
+3. Generate CAT-05 after the base-model and specification workflows settle.
+4. Resolve the source-recording policy, then generate CAT-06.
+5. Register physical assets through AST-03 only after CAT-01 and CAT-02 are
    complete; do not merge asset creation into the catalogue guides.
 
 ## Review Rule

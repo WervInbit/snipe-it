@@ -272,7 +272,7 @@
                         "file":  "CMP-INSTALL-RESULT-MOBILE-02.png",
                         "sha256":  "c434b3147e20f873312c9dd87e26d0827aabfeaa3d8d6e4fafaac3eb78919fd4",
                         "purpose":  "Mobile tracked component row after installation with matching tag and serial",
-                        "uses":  "CAT-00 6A and 6B; CMP-01 4A",
+                        "uses":  "CAT-00 4A and 4B; CMP-01 4A",
                         "captureEnvironment":  "Controlled development capture, 2026-08-04"
                     },
                     {
@@ -516,11 +516,19 @@
                         "captureEnvironment":  "Controlled development capture, 2026-08-18; read-only visual state"
                     },
                     {
+                        "id":  "CAT-MODEL-NUMBER-SEARCH-DESKTOP-01",
+                        "file":  "CAT-MODEL-NUMBER-SEARCH-DESKTOP-01.png",
+                        "sha256":  "fb9f42ff224e311ba8ac4eb6835d7926c33da9b680b5bfdeb8d03e208acec0fe",
+                        "purpose":  "Global exact model-number search with complete manufacturer code and matching Basismodel",
+                        "uses":  "CAT-01 2B",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-01; read-only GET search"
+                    },
+                    {
                         "id":  "CAT-MODEL-DETAIL-DESKTOP-01",
                         "file":  "CAT-MODEL-DETAIL-DESKTOP-01.png",
                         "sha256":  "b20b8013f526921da8fa4671c1247e0b0ed3e6e750f30cb1328b1b715cca1998",
                         "purpose":  "Model identity, model-number table, primary state, and create action",
-                        "uses":  "CAT-00 2A and 2B; CAT-01 3A, 5A, and 7A",
+                        "uses":  "CAT-00 2A; CAT-01 3A, 5A, 7A, and 7B",
                         "captureEnvironment":  "Controlled development capture, 2026-08-18; read-only"
                     },
                     {
@@ -544,7 +552,7 @@
                         "file":  "CAT-MODEL-SPEC-DESKTOP-01.png",
                         "sha256":  "561cb3c86e03bfebe089ba1cd4b4393ec653c3a7be74346065355cd362b704da",
                         "purpose":  "Model-number specification page with direct attributes and expected components",
-                        "uses":  "CAT-00 3B and 5A; CAT-02 planned evidence",
+                        "uses":  "CAT-00 5A; CAT-02 planned evidence",
                         "captureEnvironment":  "Controlled development capture, 2026-08-18; read-only"
                     },
                     {
@@ -552,7 +560,7 @@
                         "file":  "CAT-MODEL-SPEC-COMPONENTS-DESKTOP-01.png",
                         "sha256":  "6b4d47f79efe1e631eaa1e38557f88a2b7ca24aaaab8101dd4e038c164adfac8",
                         "purpose":  "Scrolled model-number specification view with Expected Components and complete component rows",
-                        "uses":  "CAT-00 4B and 5B; CAT-02 planned evidence",
+                        "uses":  "CAT-00 5B; CAT-02 planned evidence",
                         "captureEnvironment":  "Controlled development capture, 2026-08-25; read-only"
                     },
                     {
@@ -560,7 +568,7 @@
                         "file":  "CAT-ATTRIBUTE-LIST-DESKTOP-01.png",
                         "sha256":  "41a99908d2c732c3b01bab218ad3af8404c8519f608f8b3b0445f2377e01de66",
                         "purpose":  "Attribute-definition list and create control",
-                        "uses":  "CAT-00 3A; CAT-03 planned evidence",
+                        "uses":  "CAT-00 3A",
                         "captureEnvironment":  "Controlled development capture, 2026-08-18; read-only"
                     },
                     {
@@ -568,8 +576,104 @@
                         "file":  "CAT-COMPONENT-DEFINITION-LIST-DESKTOP-01.png",
                         "sha256":  "44761bec04985ef7a54c7ee37ed7cacea11c9e008d99a0753f360c2421f5441a",
                         "purpose":  "Component-definition list and create control",
-                        "uses":  "CAT-00 4A; CAT-04 planned evidence",
+                        "uses":  "CAT-00 3B",
                         "captureEnvironment":  "Controlled development capture, 2026-08-18; read-only"
+                    },
+                    {
+                        "id":  "CAT-ATTRIBUTE-ENTRY-DESKTOP-01",
+                        "file":  "CAT-ATTRIBUTE-ENTRY-DESKTOP-01.png",
+                        "sha256":  "b7e7ef9d4ac9c312f2b754ce4151acf3a3db7339941ab0038a935c17c9ba86d3",
+                        "purpose":  "Expanded Settings navigation, filtered attribute list, and New Attribute action",
+                        "uses":  "CAT-03 1A and 1B",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-01; read-only search"
+                    },
+                    {
+                        "id":  "CAT-ATTRIBUTE-CREATE-IDENTITY-DESKTOP-01",
+                        "file":  "CAT-ATTRIBUTE-CREATE-IDENTITY-DESKTOP-01.png",
+                        "sha256":  "dc51fccb0671e2ea27f6e86218464fae4e415528d2c17fdc9130470dba1ff2fe",
+                        "purpose":  "Unsaved attribute Label, generated Key, Datatype, scope, behavior, and display fields",
+                        "uses":  "CAT-03 2A and 3A",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-01; form populated in browser and not submitted"
+                    },
+                    {
+                        "id":  "CAT-ATTRIBUTE-CONSTRAINTS-NUMERIC-DESKTOP-01",
+                        "file":  "CAT-ATTRIBUTE-CONSTRAINTS-NUMERIC-DESKTOP-01.png",
+                        "sha256":  "ccd9f0b3bccc029cadc9e2b410765956d033252e38f598f500ec1185652ba675",
+                        "purpose":  "Unsaved numeric attribute with Minimum, Maximum, and Step example",
+                        "uses":  "CAT-03 4A",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-01; form populated in browser and not submitted"
+                    },
+                    {
+                        "id":  "CAT-ATTRIBUTE-OPTIONS-ENUM-DESKTOP-01",
+                        "file":  "CAT-ATTRIBUTE-OPTIONS-ENUM-DESKTOP-01.png",
+                        "sha256":  "e5b956f7f257dac61036fa5b7a991ad7200e810b60c73e9fd50810ceb0985315",
+                        "purpose":  "Unsaved Enum attribute with two ordered Value and Label options",
+                        "uses":  "CAT-03 4B",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-01; options added only in browser and form not submitted"
+                    },
+                    {
+                        "id":  "CAT-ATTRIBUTE-SAVE-DESKTOP-01",
+                        "file":  "CAT-ATTRIBUTE-SAVE-DESKTOP-01.png",
+                        "sha256":  "4f21e6b8efb22afd9d417b399c86614482a4bdf6f450c12d629e8ec2b48dbfb5",
+                        "purpose":  "Unsaved complete numeric attribute form with review fields and Opslaan action",
+                        "uses":  "CAT-03 5A",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-01; form not submitted"
+                    },
+                    {
+                        "id":  "CAT-ATTRIBUTE-RESULT-DESKTOP-01",
+                        "file":  "CAT-ATTRIBUTE-RESULT-DESKTOP-01.png",
+                        "sha256":  "9fa9b973e023340ba1b38d76fcd34f06b40a2b2abec9778ddae2a2317c7d7375",
+                        "purpose":  "Expected saved attribute result row with label, key, datatype, status, category, and option count",
+                        "uses":  "CAT-03 5B",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-01; screenshot-only example row injected in the browser, no server record changed"
+                    },
+                    {
+                        "id":  "CAT-COMPONENT-DEFINITION-ENTRY-DESKTOP-01",
+                        "file":  "CAT-COMPONENT-DEFINITION-ENTRY-DESKTOP-01.png",
+                        "sha256":  "4cf74d42b03a4d7f59042a38b30ad248a66049be6da1abc98d4d4eb8216ecc6c",
+                        "purpose":  "Expanded Settings navigation and filtered reusable component-definition result",
+                        "uses":  "CAT-04 1A, 1B, and 6A",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-01; read-only search with lifecycle actions hidden from the capture"
+                    },
+                    {
+                        "id":  "CAT-COMPONENT-DEFINITION-IDENTITY-DESKTOP-01",
+                        "file":  "CAT-COMPONENT-DEFINITION-IDENTITY-DESKTOP-01.png",
+                        "sha256":  "338e79b91669819d403a1a58dc336aebe831b7b31ede4eccc9312ff97e29af71",
+                        "purpose":  "Existing reusable component identity fields and first expected-child context",
+                        "uses":  "CAT-04 2A",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-01; read-only edit form"
+                    },
+                    {
+                        "id":  "CAT-COMPONENT-DEFINITION-CHILDREN-DESKTOP-01",
+                        "file":  "CAT-COMPONENT-DEFINITION-CHILDREN-DESKTOP-01.png",
+                        "sha256":  "b1ba2fed89c68b94c9d757245c9ea78b32a86605161ecc34e4aa3e0d28fd2858",
+                        "purpose":  "Existing expected-subcomponent rows with definition, recognition name, quantity, required state, and notes control",
+                        "uses":  "CAT-04 3A",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-01; read-only edit form"
+                    },
+                    {
+                        "id":  "CAT-COMPONENT-DEFINITION-CONTRIBUTIONS-DESKTOP-01",
+                        "file":  "CAT-COMPONENT-DEFINITION-CONTRIBUTIONS-DESKTOP-01.png",
+                        "sha256":  "5e318a8c60216ed4b35d993139f01b78322a1dc9a69a18f1205d30d36efd46b6",
+                        "purpose":  "Existing attribute-contribution rows with values and asset-spec/component-label choices",
+                        "uses":  "CAT-04 4A",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-01; read-only edit form"
+                    },
+                    {
+                        "id":  "CAT-COMPONENT-DEFINITION-OVERLAP-DESKTOP-01",
+                        "file":  "CAT-COMPONENT-DEFINITION-OVERLAP-DESKTOP-01.png",
+                        "sha256":  "06fe2b2642df4289225dcd8e4cb553c4ab3944bd9b63fcc7fb2b5cacabdbb410",
+                        "purpose":  "Browser-form example of the implemented parent-child attribute-overlap warning",
+                        "uses":  "CAT-04 5A",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-01; implemented warning markup injected as a screenshot-only example, no server record changed"
+                    },
+                    {
+                        "id":  "CAT-COMPONENT-DEFINITION-SAVE-DESKTOP-01",
+                        "file":  "CAT-COMPONENT-DEFINITION-SAVE-DESKTOP-01.png",
+                        "sha256":  "e1206ad981dda1f6f647f62d1c258538e92c1d5352561bad3d4c5433a15c5bc7",
+                        "purpose":  "Existing contribution rows and Save Changes action at the end of a component definition",
+                        "uses":  "CAT-04 5B",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-01; read-only edit form, Save not selected"
                     },
                     {
                         "id":  "CAT-MODEL-NUMBER-LIFECYCLE-DESKTOP-01",

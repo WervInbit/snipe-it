@@ -25,6 +25,11 @@ Every active guide specification declares these maintenance fields:
 Role, needed items, prerequisites, evidence, warnings, completion state, and
 related guides remain in the individual guide specification.
 
+The [CAT guide-set plan](catalog-guide-plan.md) controls topic placement and
+handoffs across CAT-00 through CAT-06. It does not change a current version or
+artifact status by itself; each CAT specification and registry row is updated
+when its next exact version is prepared.
+
 ## Current Production Matrix
 
 | Guide | Version and status | Pages | Layout | Generator |
@@ -47,13 +52,13 @@ related guides remain in the individual guide specification.
 | USR-03 Wachtwoord resetten | v3 draft; visual-correction pass, awaiting exact-version review | 1 | `stacked-step-flow` + `mixed-visual-widths` | `generate-user-account-guide-review.mjs` |
 | USR-04 Gebruiker uitschakelen of herstellen | v3 draft; visual-correction pass, awaiting exact-version review | 2 | `stacked-step-flow` + `two-sided-continuation` | `generate-user-account-guide-review.mjs` |
 | USR-05 Groepen beheren | planned | ? | `unassigned` | Not assigned |
-| CAT-00 Catalogus begrijpen | v7 draft; semantic-color and audit correction pass, awaiting exact-version review | 8 | `reference-chapter` + `reused-evidence` + `two-sided-continuation` | `generate-catalog-guide-review.mjs` |
-| CAT-01 Model en modelnummer aanmaken | v3 draft; CAT-00-aligned structural rewrite, awaiting exact-version review | 5 | `extended-admin-flow` + three-route decision + warnings + `two-sided-continuation` | `generate-catalog-guide-review.mjs` |
-| CAT-02 Modelspecificatie opbouwen | planned; specification ready | 5 | `extended-admin-flow` | `generate-catalog-guide-review.mjs` after evidence capture |
-| CAT-03 Attributen beheren | planned; specification ready | 4 | `unassigned` | Not assigned |
-| CAT-04 Componentdefinities beheren | planned; specification ready | 5 | `unassigned` | Not assigned |
-| CAT-05 Varianten en lifecycle beheren | planned; specification ready | 4 | `unassigned` | Not assigned |
-| CAT-06 Catalogus controleren en bronnen | planned; source policy unresolved | 3 | `unassigned` | Not assigned |
+| CAT-00 Catalogus begrijpen | v8 draft; six-part orientation rebuild, awaiting exact-version review | 6 | `reference-chapter` + `reused-evidence` + `two-sided-continuation` | `generate-catalog-guide-review.mjs` |
+| CAT-01 Model en modelnummer aanmaken | v4 draft; global-search and family-plan correction, awaiting exact-version review | 5 | `extended-admin-flow` + three-route decision + warnings + `two-sided-continuation` | `generate-catalog-guide-review.mjs` |
+| CAT-02 Modelspecificatie opbouwen | planned; specification alignment and evidence pending | 5 target | `extended-admin-flow` | `generate-catalog-guide-review.mjs` after alignment and evidence capture |
+| CAT-03 Attributen beheren | v1 draft; working draft, awaiting exact-version review | 5 | `extended-admin-flow` + alternatives + `two-sided-continuation` | `generate-catalog-guide-review.mjs` |
+| CAT-04 Componentdefinities beheren | v1 draft; working draft, awaiting exact-version review | 6 | `extended-admin-flow` + hierarchy warning + `two-sided-continuation` | `generate-catalog-guide-review.mjs` |
+| CAT-05 Varianten en lifecycle beheren | planned; scope/title review required | 5 target | `unassigned` | Not assigned |
+| CAT-06 Catalogus controleren en bronnen | planned; verification scope ready, source policy unresolved | 3 target | `unassigned` | Not assigned |
 
 AST-01 is retired and replaced by SC-01. It remains in the historical guide
 specification and evidence inventory but not in the active production matrix.
@@ -79,8 +84,10 @@ specification and evidence inventory but not in the active production matrix.
 | USR-02 | `resources/manuals/operator-guides/drafts/usr-02-rol-en-rechten-wijzigen-v9-draft.pdf`; accepted v7 remains in repository resources |
 | USR-03 | `resources/manuals/operator-guides/drafts/usr-03-wachtwoord-resetten-v3-draft.pdf` |
 | USR-04 | `resources/manuals/operator-guides/drafts/usr-04-gebruiker-uitschakelen-v3-draft.pdf` |
-| CAT-00 | `resources/manuals/operator-guides/drafts/CAT-00-catalogus-begrijpen-v7-draft.pdf`; unaccepted working draft |
-| CAT-01 | `resources/manuals/operator-guides/drafts/CAT-01-model-en-modelnummer-aanmaken-v3-draft.pdf`; unaccepted working draft |
+| CAT-00 | `resources/manuals/operator-guides/drafts/CAT-00-catalogus-begrijpen-v8-draft.pdf`; unaccepted working draft |
+| CAT-01 | `resources/manuals/operator-guides/drafts/CAT-01-model-en-modelnummer-aanmaken-v4-draft.pdf`; unaccepted working draft |
+| CAT-03 | `resources/manuals/operator-guides/drafts/CAT-03-attributen-beheren-v1-draft.pdf`; unaccepted working draft |
+| CAT-04 | `resources/manuals/operator-guides/drafts/CAT-04-componentdefinities-beheren-v1-draft.pdf`; unaccepted working draft |
 
 Committed binary inputs live under `resources/manuals/operator-guides/`.
 Generated and superseded proofs remain under ignored output or the historical

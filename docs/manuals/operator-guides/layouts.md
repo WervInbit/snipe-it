@@ -30,8 +30,8 @@ guide needs more text or a wider screenshot.
 | `two-column-step-grid` | Two-column step grid | Four or similarly balanced steps where two columns improve visual size and comparison. | WF-01 v9 |
 | `route-list` | Route list | A process overview that points to task guides without repeating their instructions. | AST-02 v5 |
 | `troubleshooting-grid` | Troubleshooting grid | Non-linear problem lookup using compact independent recovery routes. | HELP-01 v6 |
-| `reference-chapter` | Reference chapter | Multi-page explanation using diagrams, decision tables, examples, and selected interface landmarks. | CAT-00 v4 |
-| `extended-admin-flow` | Extended administration flow | A desktop-first procedure that preserves field explanations and recognizable screenshots over several continuously numbered pages. | CAT-01 v3 |
+| `reference-chapter` | Reference chapter | Multi-page explanation using diagrams, decision tables, examples, and selected interface landmarks. | CAT-00 v8 |
+| `extended-admin-flow` | Extended administration flow | A desktop-first procedure that preserves field explanations and recognizable screenshots over several continuously numbered pages. | CAT-01 v4 |
 | `unassigned` | Not yet selected | A planned guide whose real workflow has not been investigated. It may not be generated as a review candidate. | USR-05 |
 
 ## Step Patterns
@@ -73,11 +73,11 @@ it.
 | USR-03 | `stacked-step-flow` | `parallel-visual-choice` | One page |
 | USR-04 | `stacked-step-flow` | `single-visual`, `two-sided-continuation` | Two-sided |
 | USR-05 | `unassigned` | To be determined from the verified workflow | Unknown |
-| CAT-00 | `reference-chapter` | `reused-evidence`, `two-sided-continuation` | Eight-page chapter |
+| CAT-00 | `reference-chapter` | `reused-evidence`, `two-sided-continuation` | Six-page chapter |
 | CAT-01 | `extended-admin-flow` | `single-visual`, `inline-route-alternative`, `inline-warning`, `reused-evidence`, `two-sided-continuation` | Five-page procedure |
-| CAT-02 | `unassigned` | Specification and expected-component workflow | Unknown |
-| CAT-03 | `unassigned` | Attribute-definition workflow | Unknown |
-| CAT-04 | `unassigned` | Component-definition workflow | Unknown |
+| CAT-02 | `extended-admin-flow` | Specification and expected-component workflow | Five-page target after evidence capture |
+| CAT-03 | `extended-admin-flow` | `single-visual`, parallel input alternatives, `reused-evidence`, `two-sided-continuation` | Five-page working draft |
+| CAT-04 | `extended-admin-flow` | `single-visual`, hierarchy warning, `reused-evidence`, `two-sided-continuation` | Six-page working draft |
 | CAT-05 | `unassigned` | Variant and lifecycle workflow | Unknown |
 | CAT-06 | `unassigned` | Verification and source workflow | Unknown |
 

@@ -1,6 +1,6 @@
 # Operator Guide Continuation Handoff
 
-Status: current continuation checkpoint, updated 2026-08-27.
+Status: current continuation checkpoint, updated 2026-09-03.
 
 Use this document when resuming guide creation in another task, on another
 device, or after a long interruption. It records the resume order, current
@@ -18,7 +18,10 @@ authoritative specifications, registry, component rules, or review records.
 5. Read [system.md](system.md), [components.md](components.md),
    [layouts.md](layouts.md), and [maintenance.md](maintenance.md) before
    changing shared behavior.
-6. Read the target `guides/<CODE>.md`, its latest `reviews/<CODE>-vN.md`, and
+6. For CAT work, read
+   [catalog-guide-plan.md](catalog-guide-plan.md) before any CAT specification
+   or generator. It controls topic ownership across CAT-00 through CAT-06.
+7. Read the target `guides/<CODE>.md`, its latest `reviews/<CODE>-vN.md`, and
    every evidence entry it uses in [screenshots.md](screenshots.md).
 
 The registry is authoritative for current status. This handoff is a concise
@@ -62,15 +65,19 @@ changes.
 | USR-03 Wachtwoord resetten | v3 draft | Visual-correction pass; awaiting exact-version review | Review the visible unsaved generated value, `Genereer` focus, and full AC-02 handoff. |
 | USR-04 Gebruiker uitschakelen of herstellen | v3 draft | Visual-correction pass; awaiting exact-version review | Review rectangular actions, contained warning text, and full references on both pages. |
 | USR-05 Groepen beheren | Planned | Investigation required | Investigate group list, add/edit controls, permission behavior, and verification route. |
-| CAT-00 Catalogus begrijpen | v7 draft | Portable unaccepted working draft | Review the complete eight-page v7 PDF, especially semantic colors, relationship direction, page 3 print readability, page 6 evidence crops, and page 7 priority flow. |
-| CAT-01 Model en modelnummer aanmaken | v3 draft | Portable unaccepted working draft | Review the three search outcomes, active Basismodel fields, exact-code/label split, final verification, and CAT-02/AST-03 handoff. |
-| CAT-02 Modelspecificatie opbouwen | Planned | Specification ready; evidence pending | Capture the complete specification workflow and generate the next extensive CAT draft. |
-| CAT-03 Attributen beheren | Planned | Specification ready; evidence pending | Generate after CAT-02 establishes which missing-definition handoffs are needed. |
-| CAT-04 Componentdefinities beheren | Planned | Specification ready; evidence pending | Generate with definition, tracking, placement, contribution, and child-template evidence. |
-| CAT-05 Varianten en lifecycle beheren | Planned | Specification ready; evidence pending | Generate after CAT-01/CAT-02 review confirms variant and lifecycle wording. |
-| CAT-06 Catalogus controleren en bronnen | Planned | Specification ready; product policy unresolved | Decide where verification sources are recorded before generating an approval candidate. |
+| CAT-00 Catalogus begrijpen | v8 draft | Portable unaccepted six-part orientation | Review the exact six-page overview, especially the object map, expected/actual state distinction, and guide routing. |
+| CAT-01 Model en modelnummer aanmaken | v4 draft | Portable unaccepted administration flow | Review the global exact-code search, three-route decision, complete save flow, and CAT-02/AST-03 handoffs. |
+| CAT-02 Modelspecificatie opbouwen | Planned | Existing specification requires alignment | Remove unsupported required/optional and Supervisor-cleanup steps, then capture the complete add/review/save workflow. |
+| CAT-03 Attributen beheren | v1 draft | Portable unaccepted five-page working draft | Review search/reuse, datatype chooser, scope/behavior explanations, numeric/Enum alternatives, and the saved-row check. |
+| CAT-04 Componentdefinities beheren | v1 draft | Portable unaccepted six-page working draft | Review identity, expected-part rows, contribution rows, hierarchy-overlap correction, Save, and return routes; tracking/placement controls are intentionally absent. |
+| CAT-05 Varianten en lifecycle beheren | Planned | Scope/title review required | Narrow to branching Admin lifecycle and cleanup; do not repeat variant creation from CAT-01 or invent component-definition deletion. |
+| CAT-06 Catalogus controleren en bronnen | Planned | Verification scope ready; recording policy unresolved | Decide whether v1 is verification-only; do not claim durable source storage without an implemented field or approved convention. |
 
 AST-01 is retired into SC-01 and remains historical evidence only.
+
+The immediate production task after review feedback is CAT-02. CAT-03 and
+CAT-04 are already generated definition-management references and must not be
+replanned as downstream work from CAT-02.
 
 ## What Must Be Tracked For Every New Version
 
@@ -145,17 +152,17 @@ The following variables already work in at least one current script:
 | `GUIDE_CHROME_PATH` | Override Chrome/Chromium executable. |
 | `GUIDE_PDFINFO_PATH` / `GUIDE_PDFTOPPM_PATH` / `GUIDE_PDFTOTEXT_PATH` | Override Poppler executables. |
 | `GUIDE_PYTHON_PATH` | Override Python used for merged review PDFs. |
-| `SNIPEIT_GUIDE_BASE_URL` | User-account capture base URL; this is not yet a canonical QR setting. |
-| `SNIPEIT_GUIDE_USER` / `SNIPEIT_GUIDE_PASSWORD` | User-account capture credentials; never commit values. |
-| `SNIPEIT_CATALOG_MODEL_ID` / `SNIPEIT_CATALOG_MODEL_NUMBER_ID` | Existing controlled records used by the catalogue evidence capture; no record is created by the capture script. |
-| `SNIPEIT_GUIDE_FILTER` | Generate one filtered user-account guide. |
+| `SNIPEIT_GUIDE_BASE_URL` | Controlled user-account or catalogue capture base URL; this is not a canonical QR setting. |
+| `SNIPEIT_GUIDE_USER` / `SNIPEIT_GUIDE_PASSWORD` | Controlled capture credentials; never commit values. |
+| `SNIPEIT_CATALOG_MODEL_ID` / `SNIPEIT_CATALOG_MODEL_NUMBER_ID` / `SNIPEIT_CATALOG_COMPONENT_DEFINITION_ID` | Existing controlled records used by catalogue evidence capture; no record is created by the capture script. |
+| `SNIPEIT_GUIDE_FILTER` | Generate one guide from a generator that supports focused output. |
 | `SNIPEIT_GUIDE_DATE` | Override the generated guide date. |
 | `SNIPEIT_AC01_VERSION` / `SNIPEIT_AST02_VERSION` | Generate an explicit AC-01 or AST-02 review version while accepted defaults remain unchanged. |
 | `SNIPEIT_AST03_VERSION` / `SNIPEIT_AST04_VERSION` / `SNIPEIT_AST05_VERSION` | Generate explicit AST lifecycle versions. Current defaults are AST-03 v14 and AST-04/05 v5; older branches remain reproducible. |
-| `SNIPEIT_GUIDE_CAPTURE_MODE` | AST capture supports `identity-only`, `ast03-only`, and `ast03-saved-check`; catalogue capture supports `all`, `core`, `definitions`, and `lifecycle`. |
+| `SNIPEIT_GUIDE_CAPTURE_MODE` | AST capture supports `identity-only`, `ast03-only`, and `ast03-saved-check`; catalogue capture supports `all`, `core`, `number-search`, `spec`, `definitions`, `catalog-admin`, `attribute-definitions`, and `component-definitions`. |
 | `SNIPEIT_CMP01_VERSION` / `SNIPEIT_CMP02_VERSION` / `SNIPEIT_CMP04_VERSION` | Generate explicit component review versions. |
 | `SNIPEIT_USR01_VERSION` / `SNIPEIT_USR02_VERSION` / `SNIPEIT_USR03_VERSION` / `SNIPEIT_USR04_VERSION` / `SNIPEIT_AC02_VERSION` | Generate explicit user/access review versions; current defaults are the 2026-08-25 visual-correction revisions. |
-| `SNIPEIT_CAT00_VERSION` / `SNIPEIT_CAT01_VERSION` | Generate explicit catalogue review versions; current review versions are CAT-00 v7 and CAT-01 v3. |
+| `SNIPEIT_CAT00_VERSION` / `SNIPEIT_CAT01_VERSION` / `SNIPEIT_CAT03_VERSION` / `SNIPEIT_CAT04_VERSION` | Generate explicit catalogue review versions; current versions are CAT-00 v8, CAT-01 v4, CAT-03 v1, and CAT-04 v1. |
 | `SNIPEIT_WF01_VERSION` / `SNIPEIT_WF02_VERSION` | Generate explicit workflow review versions while accepted defaults remain unchanged. |
 | `SNIPEIT_GUIDE_OUT_DIR` | Override focused proof output. |
 | `SNIPEIT_GUIDE_RESOURCE_ROOT` / `SNIPEIT_GUIDE_EVIDENCE_ROOT` | Override committed guide resources or evidence. |

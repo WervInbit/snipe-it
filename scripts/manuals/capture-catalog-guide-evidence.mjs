@@ -15,6 +15,7 @@ const outDir = process.env.GUIDE_CAPTURE_DIR || evidenceRoot;
 const captureMode = process.env.SNIPEIT_GUIDE_CAPTURE_MODE || 'all';
 const exampleModelId = process.env.SNIPEIT_CATALOG_MODEL_ID || '2';
 const exampleModelNumberId = process.env.SNIPEIT_CATALOG_MODEL_NUMBER_ID || '2';
+const exampleComponentDefinitionId = process.env.SNIPEIT_CATALOG_COMPONENT_DEFINITION_ID || '1';
 
 if (!password) {
     throw new Error('Set SNIPEIT_GUIDE_PASSWORD for the controlled screenshot account.');
@@ -74,6 +75,69 @@ async function expandSettingsNavigation(page) {
     await page.waitForTimeout(250);
 }
 
+async function scrollTo(page, selector, offset = -120) {
+    await page.locator(selector).first().scrollIntoViewIfNeeded();
+    await page.evaluate((scrollOffset) => window.scrollBy(0, scrollOffset), offset);
+    await page.waitForTimeout(300);
+}
+
+async function prepareAttributeExample(page, { datatype = 'int' } = {}) {
+    await page.locator('#label').fill('Aantal geheugenslots');
+    await page.locator('#datatype').selectOption(datatype);
+    await page.locator('#category_ids').selectOption({ label: 'Laptops' });
+    await page.locator('#category_ids').dispatchEvent('change');
+    await page.waitForTimeout(250);
+}
+
+async function addEnumOption(page, value, label, sort) {
+    await page.locator('#new_option_value').fill(value);
+    await page.locator('#new_option_label').fill(label);
+    await page.locator('#new_option_sort').fill(String(sort));
+    await page.locator('[data-option-add]').click();
+}
+
+async function injectAttributeResultExample(page) {
+    await page.evaluate(() => {
+        const body = document.querySelector('table tbody');
+        if (!body) throw new Error('Attribute result table body not found.');
+        body.innerHTML = `
+            <tr data-capture-example-row>
+                <td>Aantal geheugenslots</td>
+                <td><code>aantal_geheugenslots</code></td>
+                <td>Int</td>
+                <td><span class="label label-success">Active</span></td>
+                <td>Laptops</td>
+                <td><span class="text-muted">--</span></td>
+                <td><span class="text-muted">--</span></td>
+                <td>0</td>
+                <td><button type="button" class="btn btn-default btn-xs">Edit</button></td>
+            </tr>`;
+    });
+    await page.waitForTimeout(200);
+}
+
+async function injectHierarchyOverlapExample(page) {
+    await page.evaluate(() => {
+        const section = document.querySelector('#expected-subcomponents');
+        const rows = section?.querySelector('[data-subcomponent-template-rows]');
+        if (!section || !rows) throw new Error('Expected-subcomponent section not found.');
+        const existing = section.querySelector('[data-testid="component-definition-hierarchy-overlap-warning"]');
+        if (existing) existing.remove();
+        const warning = document.createElement('div');
+        warning.className = 'alert alert-warning';
+        warning.dataset.testid = 'component-definition-hierarchy-overlap-warning';
+        warning.innerHTML = `
+            <strong>Hierarchy overlap warning</strong>
+            <ul style="margin-bottom:0; padding-left:18px;">
+                <li>Motherboard and RAM 8GB DDR4 both contribute Geheugentype.
+                    <span class="text-muted">Attached child values override parent values for calculated asset specs.</span>
+                </li>
+            </ul>`;
+        section.insertBefore(warning, rows);
+    });
+    await page.waitForTimeout(200);
+}
+
 const browser = await chromium.launch(browserLaunchOptions({ headless: true }));
 const context = await browser.newContext({
     ignoreHTTPSErrors: true,
@@ -112,6 +176,12 @@ try {
         files.push(await capture(page, 'CAT-MODEL-NUMBER-CREATE-DESKTOP-01.png'));
     }
 
+    if (captureMode === 'all' || captureMode === 'core' || captureMode === 'number-search') {
+        await open(page, '/admin/settings/model-numbers?search=2E9F8EA%23ABH');
+        await page.getByRole('heading', { name: /Model Numbers/i }).first().waitFor();
+        files.push(await capture(page, 'CAT-MODEL-NUMBER-SEARCH-DESKTOP-01.png'));
+    }
+
     if (captureMode === 'all' || captureMode === 'definitions' || captureMode === 'spec') {
         await open(page, `/models/${exampleModelId}/model-numbers/${exampleModelNumberId}/spec`);
         await page.getByRole('heading', { name: 'Expected Components', exact: true }).waitFor();
@@ -136,7 +206,75 @@ try {
         files.push(await capture(page, 'CAT-MODEL-NUMBER-LIFECYCLE-DESKTOP-01.png'));
     }
 
-    console.log(JSON.stringify({ files, baseUrl, captureMode, exampleModelId, exampleModelNumberId }, null, 2));
+    if (captureMode === 'all' || captureMode === 'catalog-admin' || captureMode === 'attribute-definitions') {
+        await open(page, '/attributes?search=geheugen');
+        await page.getByRole('heading', { name: /Attributes/i }).first().waitFor();
+        await expandSettingsNavigation(page);
+        files.push(await capture(page, 'CAT-ATTRIBUTE-ENTRY-DESKTOP-01.png'));
+
+        await open(page, '/attributes/create');
+        await page.getByRole('heading', { name: /Create Attribute/i }).first().waitFor();
+        await prepareAttributeExample(page);
+        files.push(await capture(page, 'CAT-ATTRIBUTE-CREATE-IDENTITY-DESKTOP-01.png'));
+
+        await page.locator('#constraints_min').fill('0');
+        await page.locator('#constraints_max').fill('8');
+        await page.locator('#constraints_step').fill('1');
+        await scrollTo(page, '#constraints_min', -170);
+        files.push(await capture(page, 'CAT-ATTRIBUTE-CONSTRAINTS-NUMERIC-DESKTOP-01.png'));
+
+        await scrollTo(page, '#submit_button', 100);
+        files.push(await capture(page, 'CAT-ATTRIBUTE-SAVE-DESKTOP-01.png'));
+
+        await open(page, '/attributes/create');
+        await page.getByRole('heading', { name: /Create Attribute/i }).first().waitFor();
+        await prepareAttributeExample(page, { datatype: 'enum' });
+        await page.locator('#label').fill('Geheugentype');
+        await addEnumOption(page, 'ddr4', 'DDR4', 10);
+        await addEnumOption(page, 'ddr5', 'DDR5', 20);
+        await scrollTo(page, '[data-attribute-options-wrapper]', -115);
+        files.push(await capture(page, 'CAT-ATTRIBUTE-OPTIONS-ENUM-DESKTOP-01.png'));
+
+        await open(page, '/attributes?search=aantal_geheugenslots');
+        await page.getByRole('heading', { name: /Attributes/i }).first().waitFor();
+        await injectAttributeResultExample(page);
+        files.push(await capture(page, 'CAT-ATTRIBUTE-RESULT-DESKTOP-01.png'));
+    }
+
+    if (captureMode === 'all' || captureMode === 'catalog-admin' || captureMode === 'component-definitions') {
+        const componentSearch = encodeURIComponent('Motherboard - HP ProBook 450 G8');
+        await open(page, `/admin/settings/component-definitions?search=${componentSearch}`);
+        await page.getByRole('heading', { name: 'Component Definitions', exact: true }).last().waitFor();
+        await page.locator('form button.btn-warning, form button.btn-success').evaluateAll((buttons) => buttons.forEach((button) => button.closest('form')?.remove()));
+        await expandSettingsNavigation(page);
+        files.push(await capture(page, 'CAT-COMPONENT-DEFINITION-ENTRY-DESKTOP-01.png'));
+
+        await open(page, `/admin/settings/component-definitions/${exampleComponentDefinitionId}/edit`);
+        await page.getByRole('heading', { name: /Edit Component Definition/i }).first().waitFor();
+        files.push(await capture(page, 'CAT-COMPONENT-DEFINITION-IDENTITY-DESKTOP-01.png'));
+
+        await scrollTo(page, '#expected-subcomponents', -105);
+        files.push(await capture(page, 'CAT-COMPONENT-DEFINITION-CHILDREN-DESKTOP-01.png'));
+
+        await scrollTo(page, '[data-contribution-rows]', -105);
+        files.push(await capture(page, 'CAT-COMPONENT-DEFINITION-CONTRIBUTIONS-DESKTOP-01.png'));
+
+        await injectHierarchyOverlapExample(page);
+        await scrollTo(page, '[data-testid="component-definition-hierarchy-overlap-warning"]', -105);
+        files.push(await capture(page, 'CAT-COMPONENT-DEFINITION-OVERLAP-DESKTOP-01.png'));
+
+        await scrollTo(page, '.box-footer', 100);
+        files.push(await capture(page, 'CAT-COMPONENT-DEFINITION-SAVE-DESKTOP-01.png'));
+    }
+
+    console.log(JSON.stringify({
+        files,
+        baseUrl,
+        captureMode,
+        exampleModelId,
+        exampleModelNumberId,
+        exampleComponentDefinitionId,
+    }, null, 2));
 } finally {
     await context.close();
     await browser.close();

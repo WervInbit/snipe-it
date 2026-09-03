@@ -25,10 +25,13 @@
 - [x] Document the agreed username convention: first name with an initial capital followed by the lowercase first letter of each last-name part, without periods or spaces.
 - [ ] Decide the user email-address standard with the manager; do not invent addresses in operator guidance.
 - [x] Rework all 12 conditional/failing cold-start guides and rerun the gate;
-  AC-02 v2, AST-03 v13, AST-04/05 v4, CMP-02 v3, CMP-04 v6, USR-01
-  v10, USR-02 v8, USR-03/04 v2, and CAT-00/01 v2 now pass as working drafts.
-- [ ] Review and internally accept or revise the remaining user-account drafts: USR-03 v2, AC-02 v2, and two-sided USR-04 v2. USR-01 v8 and USR-02 v7 remain accepted predecessors.
-- [ ] Review AC-01 v8, AST-02 v6, CMP-01 v5, USR-01 v10, WF-01 v10,
+  the latest pass produced AC-02 v3, AST-03 v14, AST-04/05 v5, CMP-02 v4,
+  CMP-04 v6, USR-01 v11, USR-02 v9, USR-03/04 v3, CAT-00 v8, and
+  CAT-01 v4. Exact acceptance remains version-specific.
+- [ ] Review and internally accept or revise the remaining user-account drafts:
+  USR-03 v3, AC-02 v3, and two-sided USR-04 v3. USR-01 v8 and USR-02 v7
+  remain accepted predecessors.
+- [ ] Review AC-01 v8, AST-02 v6, CMP-01 v5, USR-01 v11, WF-01 v10,
   and WF-02 v11; prior accepted versions remain frozen until each replacement
   receives explicit exact-version acceptance.
 - [x] Internally accept exact AST-03 v14 and freeze its two-page PDF.
@@ -47,18 +50,23 @@
   repository asset/runtime contract; keep superseded generators isolated under
   `scripts/manuals/archive/` as non-portable history.
 - [x] Add the operator-guide handoff, authoritative guide sources, maintained
-  generators, 71 canonical evidence files, locked baselines, and nine exact
+  generators, 85 canonical evidence files, locked baselines, and nine exact
   internal-review candidate PDFs to versioned repository storage.
+- [ ] Move the superseded CAT-00 v7 draft out of the live draft root after the
+  external PDF reader releases it, then rerun the strict package verifier
+  without a clean-mirror override.
 - [x] Refresh the repository internal-review package to include USR-01 v8 and
   USR-02 v7 with a checksum manifest.
 - [ ] Investigate, capture, and draft USR-05 Groepen beheren for reusable group creation and editing.
 - [x] Define USR-03 password handoff as personal transfer followed immediately
   by AC-02; do not use chat, email, notes, tickets, or screenshots.
 - [ ] Decide whether AC-02 needs a controlled success-message capture; the current draft deliberately stops at the empty form and save action.
-- [ ] Review CAT-00 v2 and CAT-01 v2 as separate exact working drafts; neither
-  is internally accepted yet.
-- [ ] Capture and generate CAT-02 Modelspecificatie opbouwen, then use its real
-  missing-definition handoffs to generate CAT-03 and CAT-04.
+- [ ] Review CAT-00 v8, CAT-01 v4, CAT-03 v1, and CAT-04 v1 as separate exact
+  working drafts; none is internally accepted yet.
+- [x] Align, capture, and generate CAT-03 Attributen beheren v1 and CAT-04
+  Componentdefinities beheren v1 from the verified Supervisor forms.
+- [ ] Align, capture, and generate CAT-02 Modelspecificatie opbouwen using the
+  now-concrete CAT-03/CAT-04 terminology and return routes.
 - [ ] Generate CAT-05 after CAT-01/CAT-02 wording settles.
 - [ ] Decide where catalogue source and verification evidence is recorded
   before CAT-06 can become an internal review candidate.

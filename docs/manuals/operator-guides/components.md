@@ -52,6 +52,22 @@ with explicit labels, icons, border weight, or fill treatment. Do not assign a
 different hue to a placed component than to its component definition, or to an
 asset-specific value than to the asset it describes.
 
+### Reference Diagram Geometry
+
+Relationship diagrams must remain readable before they become visually dense:
+
+- connector paths may not cross text, labels, badges, or another object;
+- connector labels use a dedicated clear gap or an opaque background;
+- arrowheads stop outside the destination object's border and point in the
+  implemented relationship direction;
+- multiplicity is written in plain operator language when it matters;
+- a complex relationship is split across pages before lines are routed through
+  instructional content.
+
+Diagram generators should record object, text, and connector bounds and fail a
+known connector/text intersection. Until that geometry check is implemented,
+full-page visual review must treat any such intersection as a blocking defect.
+
 ## Guide Registry
 
 `GUIDE_REGISTRY` owns each active guide's code, full Dutch display name,

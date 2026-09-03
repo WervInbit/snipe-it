@@ -59,7 +59,7 @@ Use this catalog before capturing or copying screenshots. When two guides show t
 | `WF-PHOTO-MOBILE-03` | Full blank workflow card with instructions collapsed and photo panel open | `resources/manuals/operator-guides/evidence/WF-PHOTO-MOBILE-03.png` | WF-02 5A | Controlled development capture, 2026-08-04 |
 | `CMP-INSTALL-ENTRY-MOBILE-02` | Mobile asset component tab and `Add / Install Component` action | `resources/manuals/operator-guides/evidence/CMP-INSTALL-ENTRY-MOBILE-02.png` | CMP-01 1A; reusable by CMP-02 | Controlled development capture, 2026-08-04; printed crop excludes workflow-attention banner |
 | `CMP-INSTALL-SELECTED-MOBILE-02` | Mobile install form with controlled tray component selected | `resources/manuals/operator-guides/evidence/CMP-INSTALL-SELECTED-MOBILE-02.png` | CMP-01 2A and 3A | Controlled development capture, 2026-08-04; 2A targets identity, 3A targets Install |
-| `CMP-INSTALL-RESULT-MOBILE-02` | Mobile tracked component row after installation with matching tag and serial | `resources/manuals/operator-guides/evidence/CMP-INSTALL-RESULT-MOBILE-02.png` | CAT-00 6A and 6B; CMP-01 4A | Controlled development capture, 2026-08-04 |
+| `CMP-INSTALL-RESULT-MOBILE-02` | Mobile tracked component row after installation with matching tag and serial | `resources/manuals/operator-guides/evidence/CMP-INSTALL-RESULT-MOBILE-02.png` | CAT-00 4A and 4B; CMP-01 4A | Controlled development capture, 2026-08-04 |
 | `CMP-NEW-ENTRY-MOBILE-03` | Mobile new-component entry with `Show New Component Form` | `resources/manuals/operator-guides/evidence/CMP-NEW-ENTRY-MOBILE-03.jpg` | CMP-02 1B | Controlled development capture, 2026-08-04 |
 | `CMP-NEW-DEFINITION-MOBILE-03` | Definition-backed new-component route with serial, condition, and create/install action | `resources/manuals/operator-guides/evidence/CMP-NEW-DEFINITION-MOBILE-03.jpg` | CMP-02 2A and 3A | Controlled development capture, 2026-08-04; 2A targets the route, 3A targets Create And Install |
 | `CMP-NEW-CUSTOM-MOBILE-03` | Custom new-component route with custom name, serial, and condition | `resources/manuals/operator-guides/evidence/CMP-NEW-CUSTOM-MOBILE-03.jpg` | CMP-02 2B | Controlled development capture, 2026-08-04; form opened but not submitted |
@@ -120,7 +120,7 @@ password; the draft shows the empty form and save control instead.
 
 ## Catalogue Evidence
 
-CAT-00 and CAT-01 use desktop administration captures from the controlled
+CAT-00 through CAT-04 use desktop administration captures from the controlled
 development environment. Search and form values were prepared only in the
 browser; no model, model number, attribute, or component definition was saved.
 Annotations and crops remain generator-owned.
@@ -128,11 +128,30 @@ Annotations and crops remain generator-owned.
 | Source ID | State or purpose | Used by |
 | --- | --- | --- |
 | `CAT-MODEL-LIST-DESKTOP-01` | Expanded `Instellingen > Asset modellen`, filtered model list, and create control | CAT-01 1A, 2A, and 3B |
-| `CAT-MODEL-DETAIL-DESKTOP-01` | Model identity, exact-number rows, primary state, and `Create Model Number` | CAT-00 2A and 2B; CAT-01 3A, 5A, and 7A |
+| `CAT-MODEL-NUMBER-SEARCH-DESKTOP-01` | Global exact-code search with matching Basismodel and complete code | CAT-01 2B |
+| `CAT-MODEL-DETAIL-DESKTOP-01` | Model identity, exact-number rows, primary state, and `Create Model Number` | CAT-00 2A; CAT-01 3A, 5A, 7A, and 7B |
 | `CAT-MODEL-CREATE-DESKTOP-01` | Unsaved populated base-model form | CAT-01 4A |
 | `CAT-MODEL-NUMBER-CREATE-DESKTOP-01` | Unsaved exact-number form with code, case, label, and save controls | CAT-01 6A |
-| `CAT-MODEL-SPEC-DESKTOP-01` | Direct attributes on one exact variant with breadcrumb and model-number selector | CAT-00 3B and 5A; CAT-02 planned |
-| `CAT-MODEL-SPEC-COMPONENTS-DESKTOP-01` | Scrolled `Expected Components` section with complete component rows | CAT-00 4B and 5B; CAT-02 planned |
-| `CAT-ATTRIBUTE-LIST-DESKTOP-01` | Attribute-definition administration | CAT-00 3A; CAT-03 planned |
-| `CAT-COMPONENT-DEFINITION-LIST-DESKTOP-01` | Component-definition administration | CAT-00 4A; CAT-04 planned |
+| `CAT-MODEL-SPEC-DESKTOP-01` | Direct attributes on one exact variant with breadcrumb and model-number selector | CAT-00 5A; CAT-02 planned |
+| `CAT-MODEL-SPEC-COMPONENTS-DESKTOP-01` | Scrolled `Expected Components` section with complete component rows | CAT-00 5B; CAT-02 planned |
+| `CAT-ATTRIBUTE-LIST-DESKTOP-01` | Attribute-definition administration | CAT-00 3A; CAT-03 orientation context |
+| `CAT-COMPONENT-DEFINITION-LIST-DESKTOP-01` | Component-definition administration | CAT-00 3B; CAT-04 orientation context |
 | `CAT-MODEL-NUMBER-LIFECYCLE-DESKTOP-01` | Global exact-number lifecycle and primary controls | CAT-05 planned |
+| `CAT-ATTRIBUTE-ENTRY-DESKTOP-01` | Expanded Settings route to Attributes and the searchable definition list | CAT-03 1A and 1B |
+| `CAT-ATTRIBUTE-CREATE-IDENTITY-DESKTOP-01` | Unsaved attribute form with label, generated Key, datatype, unit, and behavior controls | CAT-03 2A and 3A |
+| `CAT-ATTRIBUTE-CONSTRAINTS-NUMERIC-DESKTOP-01` | Unsaved numeric constraints example | CAT-03 4A |
+| `CAT-ATTRIBUTE-OPTIONS-ENUM-DESKTOP-01` | Unsaved Enum value/label examples | CAT-03 4B |
+| `CAT-ATTRIBUTE-SAVE-DESKTOP-01` | Complete unsaved attribute form with Create control | CAT-03 5A |
+| `CAT-ATTRIBUTE-RESULT-DESKTOP-01` | Screenshot-only resulting definition row for verification | CAT-03 5B |
+| `CAT-COMPONENT-DEFINITION-ENTRY-DESKTOP-01` | Expanded Settings route and searchable component-definition list | CAT-04 1A, 1B, and 6A |
+| `CAT-COMPONENT-DEFINITION-IDENTITY-DESKTOP-01` | Read-only existing definition identity and first expected-part context | CAT-04 2A |
+| `CAT-COMPONENT-DEFINITION-CHILDREN-DESKTOP-01` | Unsaved Expected Subcomponents rows with quantity, required state, and notes | CAT-04 3A |
+| `CAT-COMPONENT-DEFINITION-CONTRIBUTIONS-DESKTOP-01` | Unsaved attribute-contribution rows and display choices | CAT-04 4A |
+| `CAT-COMPONENT-DEFINITION-OVERLAP-DESKTOP-01` | Screenshot-only example of the implemented hierarchy-overlap warning | CAT-04 5A |
+| `CAT-COMPONENT-DEFINITION-SAVE-DESKTOP-01` | Read-only existing definition with contribution context and Save Changes | CAT-04 5B |
+
+CAT-03 and CAT-04 evidence was captured read-only. Unsaved examples were
+prepared in the browser without submitting a form. The CAT-03 result row and
+CAT-04 overlap warning were inserted only into the screenshot DOM so the
+implemented result and warning shapes could be taught without creating or
+changing a server record.
