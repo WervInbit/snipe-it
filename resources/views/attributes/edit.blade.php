@@ -72,7 +72,7 @@
             @else
                 <input type="hidden" name="manual_key_override" value="0">
                 <div class="checkbox">
-                    <label style="display:flex; align-items:center; gap:8px;">
+                    <label>
                         <input type="checkbox" name="manual_key_override" id="manual_key_override" value="1" {{ $createManualKeyOverride ? 'checked' : '' }}>
                         <span>{{ __('Manual key override') }}</span>
                     </label>
@@ -127,19 +127,19 @@
     <div class="form-group">
         <div class="col-md-7 col-md-offset-3">
             <div class="checkbox">
-                <label style="display:flex; align-items:center; gap:8px;">
+                <label>
                     <input type="checkbox" name="required_for_category" value="1" {{ old('required_for_category', $definition->required_for_category) ? 'checked' : '' }}>
                     <span>{{ __('Required for category') }}</span>
                 </label>
             </div>
             <div class="checkbox">
-                <label style="display:flex; align-items:center; gap:8px;">
+                <label>
                     <input type="checkbox" name="allow_asset_override" value="1" {{ old('allow_asset_override', $definition->allow_asset_override) ? 'checked' : '' }}>
                     <span>{{ __('Allow asset overrides') }}</span>
                 </label>
             </div>
             <div class="checkbox">
-                <label style="display:flex; align-items:center; gap:8px;">
+                <label>
                     <input type="checkbox" name="allow_custom_values" value="1" {{ old('allow_custom_values', $definition->allow_custom_values) ? 'checked' : '' }}>
                     <span>{{ __('Allow custom values (enum only)') }}</span>
                 </label>

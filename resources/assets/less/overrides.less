@@ -1145,6 +1145,41 @@ input[type="radio"]:checked::before {
   transform: scale(1);
 }
 
+/**
+ * Bootstrap 3 reserves a fixed 20px gutter for its native form controls and
+ * absolutely positions them in that space. Our replacement controls are 1.8em
+ * wide, so they can overlap the label at larger font sizes. Keep the controls
+ * in normal flex layout so the label spacing follows their rendered size.
+ */
+.checkbox > label,
+.radio > label,
+label.checkbox-inline,
+label.radio-inline,
+.checkbox-inline > label,
+.radio-inline > label {
+  display: inline-flex;
+  align-items: flex-start;
+  max-width: 100%;
+  gap: 0.6em;
+  padding-left: 0;
+}
+
+.checkbox-inline,
+.radio-inline {
+  padding-left: 0;
+}
+
+.checkbox > label > input[type="checkbox"],
+.radio > label > input[type="radio"],
+label.checkbox-inline > input[type="checkbox"],
+label.radio-inline > input[type="radio"],
+.checkbox-inline > label > input[type="checkbox"],
+.radio-inline > label > input[type="radio"] {
+  position: static;
+  flex: 0 0 auto;
+  margin: 0;
+}
+
 
 /**
 * This addresses the column selector in bootstrap-table. Without these two lines, the

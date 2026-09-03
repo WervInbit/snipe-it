@@ -35,6 +35,10 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
   production asset build, and a browser Livewire interaction. The deployed
   V1.0.0 images predate these dependency changes; a later deployment requires
   a separately committed and qualified release.
+- Corrected Bootstrap 3 checkbox and radio label gutters for the fork's larger
+  custom controls. Stacked, inline, table, and nested-inline form variants now
+  keep controls in normal flex flow so labels cannot overlap them as widths or
+  translations change.
 
 ### 2026-09-01
 - Converted the successful data-bearing single-host migration arrangement into

@@ -111,7 +111,7 @@
                 <div class="checkbox-inline">
                     <label>
                       <input type="checkbox" name="required" value="on" @checked(old('required'))>
-                      <span style="padding-left: 10px;">{{ trans('admin/custom_fields/general.required') }}</span>
+                      <span>{{ trans('admin/custom_fields/general.required') }}</span>
                     </label>
                 </div>
 

@@ -131,3 +131,44 @@ with the concurrent operator-guide work.
   pass 9 tests with 440 assertions, local links across ten release-facing
   documents pass, the tag dereferences to the expected commit, and
   `git diff --check` passes.
+
+## Checkbox and radio layout correction
+
+- A source-wide form audit traced overlapping labels to Bootstrap 3's fixed
+  20px, absolutely positioned checkbox/radio gutter conflicting with the
+  fork's 1.8em custom controls.
+- Standard checkbox/radio groups, direct inline labels, and nested inline
+  labels now use normal inline-flex flow with a size-aware gap. Removed the
+  attribute-editor inline workaround and the custom-fieldset's duplicate span
+  padding so both use the shared rule.
+- Rebuilt the production CSS assets. On `dev.inbit`, attribute 15's three
+  reported controls each render with a 7.8px measured gap and no overlap;
+  enum option-table checkboxes, the component workflow's inline radios, and
+  the custom-fieldset nested-inline checkbox also use static-positioned,
+  visible 23.4px controls with zero Bootstrap gutter padding.
+- The focused guarded SQLite suite passes 38 tests with 241 assertions, the
+  new style contract passes independently, all four Node tests pass, and the
+  production asset build completes successfully. Production was not accessed.
+
+## Production QR printer diagnosis
+
+- The owner explicitly restored permission to investigate the temporary
+  production server for the QR-printer regression. The stored ED25519 host key
+  matched the supplied `SHA256:SlRpl66+HouJcotDmGRwKbtx5GA3htJEQy2+ai69rQI`
+  fingerprint before access.
+- Read-only inspection found the host CUPS service active, listening on port
+  631, and exposing an enabled, idle `dymo330` queue. The current application
+  network can reach the host CUPS endpoint successfully (HTTP 200).
+- The V1 application container has no `LABEL_PRINTER_QUEUE`,
+  `LABEL_PRINTER_QUEUES`, `LABEL_PRINT_COMMAND`, `LABEL_PRINT_OPTIONS`, or
+  `CUPS_SERVER` environment values and contains neither `lp` nor `lpstat`.
+  The legacy environment retained `dymo330`, its 72x72 media options, and a
+  Docker-host CUPS address.
+- Root cause: the hardened production Dockerfile omitted `cups-client`, while
+  the production Compose profile and environment template omitted the printer
+  variables during migration. The UI can still render its print button, but
+  the controller resolves no queue and returns its not-configured response.
+- No production configuration, container, service, queue, print job, or data
+  was changed. No test label was submitted. Repair requires a reviewed image
+  rebuild plus Compose/environment wiring; use a host-gateway alias instead of
+  copying the legacy network-specific `172.18.0.1` address.
