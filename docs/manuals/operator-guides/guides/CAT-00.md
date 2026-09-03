@@ -1,20 +1,20 @@
 # CAT-00 Catalogus begrijpen
 
-Status: Working draft v8; six-part orientation rebuild awaiting exact-version
-review.
+Status: Working draft v9; connector and alignment correction awaiting
+exact-version review.
 
 ## Maintenance Metadata
 
 - Family: `CAT`.
 - Type: Reference chapter and guide router.
-- Current version: v8 draft.
+- Current version: v9 draft.
 - Page model: Six-page reference chapter with continuous section numbering.
 - Layout recipe: `reference-chapter` with `reused-evidence` and
   `two-sided-continuation`.
 - Generator: `scripts/manuals/generate-catalog-guide-review.mjs`.
-- Artifact root: `output/manuals/proofs/catalog-guide-review/cat-00-v8/`.
+- Artifact root: `output/manuals/proofs/catalog-guide-review/cat-00-v9/`.
 - Portable review package:
-  `resources/manuals/operator-guides/drafts/CAT-00-catalogus-begrijpen-v8-draft.pdf`.
+  `resources/manuals/operator-guides/drafts/CAT-00-catalogus-begrijpen-v9-draft.pdf`.
   Its manifest status is `Unaccepted working draft`.
 
 ## Purpose
@@ -186,5 +186,5 @@ the required change.
 - Operator copy does not expose internal field names or source-code terms.
 - Cross-guide references use family colour, icon, code, and complete title.
 - Screenshots retain recognizable application context and short captions.
-- CAT-00 v8 remains a working draft until this exact PDF is explicitly
+- CAT-00 v9 remains a working draft until this exact PDF is explicitly
   accepted.

@@ -1,5 +1,48 @@
 # Session Progress (2026-09-03)
 
+## Addendum (2026-09-03 CAT-02 v1 Modelspecificatie)
+- Reworked the stale CAT-02 specification into a six-page Supervisor workflow
+  for one exact model-number baseline: open and validate, choose direct value
+  or expected component, complete both input routes, resolve derived-value
+  conflicts, save, and verify.
+- Captured seven new canonical evidence states from the controlled development
+  environment without submitting a form. Existing saved-row removal controls
+  were hidden to represent the Supervisor route; conflict and success messages
+  were injected only into the screenshot DOM.
+- Extended the shared context strip with an optional per-value font size so a
+  full guide name can remain visible without abbreviation. Existing guides do
+  not opt into the new setting and retain their output.
+- Generated
+  `resources/manuals/operator-guides/drafts/CAT-02-modelspecificatie-opbouwen-v1-draft.pdf`
+  as an unaccepted working draft. No accepted guide record changed.
+- Validation passes: generator component/geometry checks, six-page Poppler
+  raster inspection, PDF page/encryption/A4/text/URL checks, shared guide-
+  system tests, JSON/hash checks, and the clean-manifest package verifier with
+  92 evidence files, 9 accepted PDFs / 11 pages, 20 unaccepted PDFs / 45
+  pages, 2 baselines, and 16 active scripts.
+
+## Addendum (2026-09-03 CAT-01 v5 Clarity Revision)
+- Rebuilt CAT-01 as a new five-page v5 working draft after operator review of
+  the sparse text, duplicate-search route, hidden Basismodel-creation action,
+  and model-number label meaning.
+- Step 2 now names duplicate prevention and makes the separate
+  `Instellingen > Model Numbers` page explicit. Route C now names making a new
+  Basismodel and links directly to numbered step 4.
+- Step 6 now defines the label as the default processor, RAM, and storage for
+  the exact printed code and states that a one-asset exception is recorded on
+  the asset without creating another model number.
+- Added the reusable density rule: sparse instruction regions increase body
+  size and line height instead of inheriting the minimum type used by dense
+  blocks. Applied it only to CAT-01 v5; no accepted guide changed.
+- Retained CAT-01 v4 as a reproducible generator branch. All five regenerated
+  v4 pages match the existing 150-DPI raster references byte-for-byte.
+- Validation passes: focused generation component/geometry checks, five-page
+  visual inspection, PDF page/encryption/A4/text/URL checks, shared
+  guide-system tests, v4 raster reproduction, and the manifest-only complete
+  package verifier (85 evidence files, 9 accepted PDFs / 11 pages, 19
+  unaccepted PDFs / 39 pages, 2 baselines, and 16 active scripts).
+- CAT-01 v5 remains an unaccepted working draft; no accepted guide changed.
+
 ## Addendum (2026-09-03 V1 Continuation)
 - Resumed the V1 release, deployment, and implementation track after the
   reusable production profiles were committed and pushed as `fe4d0b4fe8`.
@@ -88,6 +131,24 @@
   documents pass, the tag dereferences to the expected commit, and
   `git diff --check` passes.
 
+## Addendum (2026-09-03 CAT-00 v9 Diagram Correction)
+- Reviewed CAT-00 v8 page renders after operator feedback identified masked or
+  disconnected arrows, cramped page 3 Attribuutdefinitie rows, and a detached
+  page 4 `Removed` explanation.
+- Generated CAT-00 v9 as a new unaccepted six-page review draft. It preserves
+  v8 content and evidence while joining every connector to its intended node,
+  keeping labels clear of lines, increasing definition-row height, and
+  attaching the `Removed` explanation to the state branch.
+- Retained CAT-00 v8 as a reproducible generator branch; all six v8 pages match
+  the committed v8 PDF pixel-for-pixel when rasterized at 150 DPI.
+- Updated the CAT-00 specification, registry, review record, family plan,
+  layout and inventory references, handoff, TODO, and draft manifest to v9.
+- Validation passes: focused generation component/geometry checks, six-page
+  visual inspection, PDF page/encryption/A4/text/URL checks, shared guide-system
+  tests, and the manifest-only complete package verifier. Direct live-root
+  verification remains pending only because the PDF reader still holds the
+  superseded v7/v8 local copies.
+- CAT-00 v9 remains an unaccepted working draft; no accepted guide changed.
 
 # Session Progress (2026-09-01)
 
@@ -4602,3 +4663,40 @@ there are multiple duplicate functions that still need to be removed, sku will b
   diff/credential checks, and `npm test` against a clean exact-manifest mirror:
   85 evidence files, nine accepted PDFs / 11 pages, 19 unaccepted drafts / 39
   pages, two baselines, and 16 active scripts.
+
+### 2026-09-03 - CAT-04 Required Semantics Review
+- Traced `Quantity` and `Required` from the component-definition form through
+  persistence, expected-slot handling, attribute aggregation, workflow
+  context, and component detail output.
+- Confirmed that Quantity changes the normal expected count and materialized
+  slots. `Required` is persisted and displayed but does not independently
+  enforce readiness; unchecked rows still contribute to calculated
+  specifications.
+- Generated portable unaccepted CAT-04 v2. The page-2 identity-card body copy
+  is larger, and page 3 keeps Required selected while excluding optional or
+  per-device varying parts from the expected structure.
+- Retained CAT-04 v1 in the proof history, replaced the portable draft slot
+  with v2, and updated the specification, family plan, registry, decision,
+  review, manifest, inventory, README, handoff, and TODO state.
+- Generator syntax, shared component checks, six-page geometry, A4 metadata,
+  extracted text, full-page raster review, and clean-mirror package validation
+  pass. The package remains 92 evidence files, nine accepted PDFs / 11 pages,
+  20 unaccepted drafts / 45 pages, two baselines, and 16 active scripts.
+
+### 2026-09-03 - Form-Control Evidence Recapture
+- Audited the 92 registered guide sources against the shared Bootstrap
+  checkbox/radio layout correction and reran the complete catalogue capture.
+- Added 11 versioned replacement sources: four CAT-03 attribute-form captures,
+  five CAT-04 component-definition captures, and two CMP-02 mobile
+  definition/custom alternatives. Historical files remain unchanged.
+- Verified that the remaining catalogue capture states were byte-identical or
+  did not expose an affected label pair. CMP install/tray, user, workflow-run,
+  asset, and physical-label sources were not replaced without visible impact.
+- Registered hashes and provenance in the canonical evidence manifest and
+  `screenshots.md`. CAT-03, CAT-04, and CMP-02 still require new draft versions
+  with remeasured focus annotations before exact-version review.
+- Evidence count is now 103. No form was submitted and no server record was
+  created, edited, or deleted during capture.
+- Final validation passed: all 103 manifest hashes match, the exact-manifest
+  guide package verifier reports `status: ok`, and the verifier script passes
+  Node syntax and `git diff --check` checks.

@@ -25,8 +25,9 @@ The plan inherits the current contracts in:
 The individual `guides/CAT-*.md` files still own exact wording, numbered steps,
 warnings, evidence labels, and completion criteria. Before another CAT artifact
 is generated, its specification must be aligned with this family plan. CAT-00
-v8 and CAT-01 v4 implement the first aligned pair and remain unaccepted working
-drafts. CAT-00 v7 and CAT-01 v3 remain historical review artifacts.
+v9 and CAT-01 v5 implement the current aligned pair and remain unaccepted
+working drafts. CAT-00 v7/v8 and CAT-01 v3/v4 remain historical review
+artifacts.
 
 ## Reader And Execution Contract
 
@@ -277,7 +278,9 @@ matches the intended product.
 
 ### Page Plan
 
-Target: five pages after evidence capture.
+Target: six pages. The direct-value/component decision is kept separate from
+both input procedures so the guide remains usable without shrinking its
+screenshots or field explanations.
 
 1. **Open the correct exact model number**
    - Start from CAT-01's saved Basismodel or show the complete dashboard route.
@@ -300,14 +303,15 @@ Target: five pages after evidence capture.
      separate required/optional choice here.
    - Explain that saving the baseline does not create a tagged physical
      component.
-5. **Review, save, and verify**
+5. **Review derived values and conflicts**
    - Review derived attributes and overlap/conflict messages.
    - Remove duplicate input before saving; do not hide a conflict by entering
      the same fact twice.
+   - Route saved-row removal to Admin CAT-05.
+6. **Save and verify**
    - Show the save control, success state, and final model-number
      specification/expected-component roster.
-   - Route saved-row removal to Admin CAT-05 and physical registration to
-     AST-03.
+   - Route physical registration to AST-03.
 
 ### CAT-02 Exclusions
 
@@ -394,8 +398,12 @@ until full-page evidence proves they remain readable.
    - State that the definition is reusable and is not one tagged physical
      part.
 3. **Add expected parts when relevant**
-   - Select an existing component definition, quantity, required state,
-     and optional recognition name/notes.
+   - Select an existing component definition, its normal quantity, and
+     optional recognition name/notes.
+   - Keep `Required` selected in the current operational process. Unchecked
+     rows are not separately enforced and still affect calculated
+     specifications, so optional or per-device varying parts do not belong in
+     this expected structure.
    - The current supported hierarchy is one level for the operator guide.
    - Do not add an expected part merely to represent another descriptive fact.
 4. **Add attribute contributions**
@@ -617,8 +625,14 @@ This is the recommended creation order, not the operator execution order:
    handoffs before any CAT artifact becomes an Internal review candidate.
 
 Steps 1 through 4 were completed on 2026-09-01 as CAT-00 v8, CAT-01 v4,
-CAT-03 v1, and CAT-04 v1. Their exact PDFs remain unaccepted; production
-continues at step 5 with CAT-02.
+CAT-03 v1, and CAT-04 v1. CAT-00 v9 supersedes v8 for diagram connector and
+alignment corrections. CAT-01 v5 supersedes v4 for duplicate-route clarity,
+action naming, sparse-text sizing, and the default-configuration label rule.
+CAT-02 v1 completed production step 5 on 2026-09-03 as a six-page Supervisor
+workflow with controlled, non-destructive evidence. CAT-04 v2 supersedes v1
+for sparse-card readability and the current-process Required rule. All exact
+PDFs remain unaccepted; production continues with CAT-05 and the CAT-06
+source-policy decision.
 
 ## Set-Level Acceptance Tests
 

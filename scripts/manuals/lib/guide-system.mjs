@@ -361,7 +361,7 @@ export function drawContextStrip(doc, context, options = {}) {
             doc.raw(`<g data-component="context-guide-reference" data-guide-code="${xml(ref.code ?? '')}" data-guide-label="${xml(registeredLabel)}">`);
             doc.familyBadge(itemX + 1.85, valueY, ref.family, { radius: 1.85, fontSize: 1.15 });
             doc.centeredText(itemX + 5, valueY, value, {
-                size: 2.75,
+                size: item.size ?? 2.75,
                 weight: 800,
                 fill: item.color ?? GUIDE_FAMILIES[ref.family].color,
                 anchor: 'start',
@@ -370,7 +370,7 @@ export function drawContextStrip(doc, context, options = {}) {
             doc.raw('</g>');
         } else {
             doc.centeredText(itemX, valueY, item.value, {
-                size: 2.75,
+                size: item.size ?? 2.75,
                 weight: 800,
                 fill: item.color ?? colors.ink,
                 anchor: 'start',

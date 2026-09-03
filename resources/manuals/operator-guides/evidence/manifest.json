@@ -1,6 +1,6 @@
 {
     "schemaVersion":  1,
-    "updatedOn":  "2026-08-20",
+    "updatedOn":  "2026-09-03",
     "source":  "docs/manuals/operator-guides/screenshots.md",
     "sources":  [
                     {
@@ -552,7 +552,7 @@
                         "file":  "CAT-MODEL-SPEC-DESKTOP-01.png",
                         "sha256":  "561cb3c86e03bfebe089ba1cd4b4393ec653c3a7be74346065355cd362b704da",
                         "purpose":  "Model-number specification page with direct attributes and expected components",
-                        "uses":  "CAT-00 5A; CAT-02 planned evidence",
+                        "uses":  "CAT-00 5A; CAT-02 1B and 2A",
                         "captureEnvironment":  "Controlled development capture, 2026-08-18; read-only"
                     },
                     {
@@ -560,8 +560,64 @@
                         "file":  "CAT-MODEL-SPEC-COMPONENTS-DESKTOP-01.png",
                         "sha256":  "6b4d47f79efe1e631eaa1e38557f88a2b7ca24aaaab8101dd4e038c164adfac8",
                         "purpose":  "Scrolled model-number specification view with Expected Components and complete component rows",
-                        "uses":  "CAT-00 5B; CAT-02 planned evidence",
+                        "uses":  "CAT-00 5B",
                         "captureEnvironment":  "Controlled development capture, 2026-08-25; read-only"
+                    },
+                    {
+                        "id":  "CAT-MODEL-SPEC-ATTRIBUTE-ADD-DESKTOP-01",
+                        "file":  "CAT-MODEL-SPEC-ATTRIBUTE-ADD-DESKTOP-01.png",
+                        "sha256":  "e692093b5540ea6c4155c2d916847c7e3351e7e7987658b046a64db94d3dc6b1",
+                        "purpose":  "Unsaved direct-attribute example with search, add action, selected row, and datatype-specific value",
+                        "uses":  "CAT-02 3A and 3B",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-03; attribute added and valued only in the browser, form not submitted"
+                    },
+                    {
+                        "id":  "CAT-MODEL-SPEC-EXPECTED-START-DESKTOP-01",
+                        "file":  "CAT-MODEL-SPEC-EXPECTED-START-DESKTOP-01.png",
+                        "sha256":  "f1134a8db9250097aaeb087d550201286d5111d0b5ba1d08086fbfbb97789b66",
+                        "purpose":  "Model specification with empty expected-component state, add action, and save control",
+                        "uses":  "CAT-02 2B and 4A",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-03; existing rows hidden only in the screenshot DOM, no server record changed"
+                    },
+                    {
+                        "id":  "CAT-MODEL-SPEC-EXPECTED-ADD-DESKTOP-01",
+                        "file":  "CAT-MODEL-SPEC-EXPECTED-ADD-DESKTOP-01.png",
+                        "sha256":  "fe36ebe48e2010db0e82c32a4d4b0b0f0bd54c44142d1bf08cd1790b2e9a6217",
+                        "purpose":  "Unsaved expected-component row with component definition and quantity",
+                        "uses":  "CAT-02 4B",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-03; row added only in the browser, form not submitted"
+                    },
+                    {
+                        "id":  "CAT-MODEL-SPEC-CONFLICT-DESKTOP-01",
+                        "file":  "CAT-MODEL-SPEC-CONFLICT-DESKTOP-01.png",
+                        "sha256":  "98d302faf75c5a1ff0f8353598c6cdeee6d86e1924b9b9bcae2a412101eca4ac",
+                        "purpose":  "Model-specification conflict example showing a direct value that differs from a component-derived value",
+                        "uses":  "CAT-02 5B",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-03; implemented warning shape injected only in the screenshot DOM, no server record changed"
+                    },
+                    {
+                        "id":  "CAT-MODEL-SPEC-SAVE-DESKTOP-01",
+                        "file":  "CAT-MODEL-SPEC-SAVE-DESKTOP-01.png",
+                        "sha256":  "7d85f2211c7eda5a0ba2caa74254d4a188a3fb73ca29b1841a24974ef3932873",
+                        "purpose":  "Model specification with one expected component, quantity, and Opslaan control in view",
+                        "uses":  "CAT-02 6A",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-03; read-only existing value with other rows hidden in the screenshot DOM, Save not selected"
+                    },
+                    {
+                        "id":  "CAT-MODEL-SPEC-ROSTER-DESKTOP-01",
+                        "file":  "CAT-MODEL-SPEC-ROSTER-DESKTOP-01.png",
+                        "sha256":  "f32dc87b923c2fe4716c578bec5acab2cefd7916766a20919154f4ee6863c892",
+                        "purpose":  "Supervisor view of expected component rows with derived attributes and expected child structure",
+                        "uses":  "CAT-02 5A",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-03; read-only with Admin-only saved-row removal controls hidden from the screenshot"
+                    },
+                    {
+                        "id":  "CAT-MODEL-SPEC-SAVED-DESKTOP-01",
+                        "file":  "CAT-MODEL-SPEC-SAVED-DESKTOP-01.png",
+                        "sha256":  "9fc7ef2ff0d58d433ebb104ff3913afa062d43e7f62c71cdb086f8bc29b92b8c",
+                        "purpose":  "Expected saved state with success message, exact model-number selector, and direct attribute list",
+                        "uses":  "CAT-02 6B",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-03; success message injected only in the screenshot DOM, no server record changed"
                     },
                     {
                         "id":  "CAT-ATTRIBUTE-LIST-DESKTOP-01",
@@ -682,6 +738,94 @@
                         "purpose":  "Global model-number lifecycle and primary-state controls",
                         "uses":  "CAT-05 planned evidence",
                         "captureEnvironment":  "Controlled development capture, 2026-08-18; read-only"
+                    },
+                    {
+                        "id":  "CAT-ATTRIBUTE-CREATE-IDENTITY-DESKTOP-02",
+                        "file":  "CAT-ATTRIBUTE-CREATE-IDENTITY-DESKTOP-02.png",
+                        "sha256":  "a440aaffdfeee17ebce7350eebba861db97a8f5b2ef6ec570795ba7351e8ee29",
+                        "purpose":  "Replacement unsaved attribute identity and behavior form with corrected checkbox-label spacing",
+                        "uses":  "CAT-03 next revision, 2A and 3A",
+                        "captureEnvironment":  "Controlled development recapture, 2026-09-03; form populated in browser and not submitted"
+                    },
+                    {
+                        "id":  "CAT-ATTRIBUTE-CONSTRAINTS-NUMERIC-DESKTOP-02",
+                        "file":  "CAT-ATTRIBUTE-CONSTRAINTS-NUMERIC-DESKTOP-02.png",
+                        "sha256":  "4a8efa269cf2658f1dc63cb9dc32d5c7b9de3d9b03b2bd3722a00fdba9ca2a80",
+                        "purpose":  "Replacement numeric attribute example with corrected checkbox-label spacing",
+                        "uses":  "CAT-03 next revision, 4A",
+                        "captureEnvironment":  "Controlled development recapture, 2026-09-03; form populated in browser and not submitted"
+                    },
+                    {
+                        "id":  "CAT-ATTRIBUTE-OPTIONS-ENUM-DESKTOP-02",
+                        "file":  "CAT-ATTRIBUTE-OPTIONS-ENUM-DESKTOP-02.png",
+                        "sha256":  "1c63df829fadad772ddbcb7eb385ae5077d6ae0b1995503207a08e8e710d8867",
+                        "purpose":  "Replacement Enum attribute options example with corrected checkbox-label spacing",
+                        "uses":  "CAT-03 next revision, 4B",
+                        "captureEnvironment":  "Controlled development recapture, 2026-09-03; options added only in browser and form not submitted"
+                    },
+                    {
+                        "id":  "CAT-ATTRIBUTE-SAVE-DESKTOP-02",
+                        "file":  "CAT-ATTRIBUTE-SAVE-DESKTOP-02.png",
+                        "sha256":  "958930b89255f9f4787fe167111d9201a760dee2acc88e02c5e2eceb721649be",
+                        "purpose":  "Replacement complete unsaved numeric attribute form with corrected checkbox-label spacing",
+                        "uses":  "CAT-03 next revision, 5A",
+                        "captureEnvironment":  "Controlled development recapture, 2026-09-03; form not submitted"
+                    },
+                    {
+                        "id":  "CAT-COMPONENT-DEFINITION-IDENTITY-DESKTOP-02",
+                        "file":  "CAT-COMPONENT-DEFINITION-IDENTITY-DESKTOP-02.png",
+                        "sha256":  "78c20e2dd90bf64945ceee37158e4dd7696662c5cb6689cd90eee3acfbd0c2c8",
+                        "purpose":  "Replacement reusable component identity form with corrected checkbox-label spacing",
+                        "uses":  "CAT-04 next revision, 2A",
+                        "captureEnvironment":  "Controlled development recapture, 2026-09-03; read-only edit form"
+                    },
+                    {
+                        "id":  "CAT-COMPONENT-DEFINITION-CHILDREN-DESKTOP-02",
+                        "file":  "CAT-COMPONENT-DEFINITION-CHILDREN-DESKTOP-02.png",
+                        "sha256":  "b374cc7eec716e5f8141f578d1523b93cc88e0f5d50e26fe4256e97f49bf1ca7",
+                        "purpose":  "Replacement expected-subcomponent rows after the shared checkbox layout correction",
+                        "uses":  "CAT-04 next revision, 3A",
+                        "captureEnvironment":  "Controlled development recapture, 2026-09-03; read-only edit form"
+                    },
+                    {
+                        "id":  "CAT-COMPONENT-DEFINITION-CONTRIBUTIONS-DESKTOP-02",
+                        "file":  "CAT-COMPONENT-DEFINITION-CONTRIBUTIONS-DESKTOP-02.png",
+                        "sha256":  "622ca27b49b11b0c71057701a77f022534da1d75911af712396c7d8424d17f5d",
+                        "purpose":  "Replacement component attribute-contribution rows with corrected checkbox-label spacing",
+                        "uses":  "CAT-04 next revision, 4A",
+                        "captureEnvironment":  "Controlled development recapture, 2026-09-03; read-only edit form"
+                    },
+                    {
+                        "id":  "CAT-COMPONENT-DEFINITION-OVERLAP-DESKTOP-02",
+                        "file":  "CAT-COMPONENT-DEFINITION-OVERLAP-DESKTOP-02.png",
+                        "sha256":  "0c106789aad289143e6c5654f565bc87e1a4f9762e098196dfaade219a3c8655",
+                        "purpose":  "Replacement hierarchy-overlap example after the shared checkbox layout correction",
+                        "uses":  "CAT-04 next revision, 5A",
+                        "captureEnvironment":  "Controlled development recapture, 2026-09-03; implemented warning markup injected only in the screenshot DOM"
+                    },
+                    {
+                        "id":  "CAT-COMPONENT-DEFINITION-SAVE-DESKTOP-02",
+                        "file":  "CAT-COMPONENT-DEFINITION-SAVE-DESKTOP-02.png",
+                        "sha256":  "497c14a2033af5338392c9bb6a33d8ccfdf41005ac44bb639f5469dd39f45fcd",
+                        "purpose":  "Replacement component-definition save view with corrected checkbox-label spacing",
+                        "uses":  "CAT-04 next revision, 5B",
+                        "captureEnvironment":  "Controlled development recapture, 2026-09-03; read-only edit form, Save not selected"
+                    },
+                    {
+                        "id":  "CMP-NEW-DEFINITION-MOBILE-04",
+                        "file":  "CMP-NEW-DEFINITION-MOBILE-04.jpg",
+                        "sha256":  "94fcfe04b8432dca75d22fe46e5457569b6361d54848961c691685a20caf23d2",
+                        "purpose":  "Replacement definition-backed new-component form with corrected radio and warning-checkbox spacing",
+                        "uses":  "CMP-02 next revision, 2A and 3A",
+                        "captureEnvironment":  "Controlled development recapture, 2026-09-03; mobile viewport, form populated and not submitted"
+                    },
+                    {
+                        "id":  "CMP-NEW-CUSTOM-MOBILE-04",
+                        "file":  "CMP-NEW-CUSTOM-MOBILE-04.jpg",
+                        "sha256":  "9d370e75f864ff2139c6ad318a5b925cf849c4fed0a561c8e40bb8c8ed1a4306",
+                        "purpose":  "Replacement custom new-component form with corrected radio and warning-checkbox spacing",
+                        "uses":  "CMP-02 next revision, 2B",
+                        "captureEnvironment":  "Controlled development recapture, 2026-09-03; mobile viewport, form populated and not submitted"
                     }
                 ]
 }

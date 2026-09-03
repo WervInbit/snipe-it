@@ -1,21 +1,21 @@
 # CAT-01 Model en modelnummer aanmaken
 
-Status: Working draft v4; global exact-code search correction aligned with
-CAT-00 v8 and awaiting exact-version review.
+Status: Working draft v5; duplicate-check route, Basismodel creation route,
+and model-number default-configuration wording await operator review.
 
 ## Maintenance Metadata
 
 - Family: `CAT`.
 - Type: Extended administration task.
-- Current version: v4 draft.
+- Current version: v5 draft.
 - Page model: Five-page procedure with continuous steps and page handoffs.
 - Layout recipe: `extended-admin-flow` with `single-visual`,
   `inline-route-alternative`, `inline-warning`, `reused-evidence`, and
   `two-sided-continuation`.
 - Generator: `scripts/manuals/generate-catalog-guide-review.mjs`.
-- Artifact root: `output/manuals/proofs/catalog-guide-review/cat-01-v4/`.
+- Artifact root: `output/manuals/proofs/catalog-guide-review/cat-01-v5/`.
 - Portable review package:
-  `resources/manuals/operator-guides/drafts/CAT-01-model-en-modelnummer-aanmaken-v4-draft.pdf`.
+  `resources/manuals/operator-guides/drafts/CAT-01-model-en-modelnummer-aanmaken-v5-draft.pdf`.
   Its manifest status is `Unaccepted working draft`.
 
 ## Purpose
@@ -49,14 +49,15 @@ Visual `1A`: expanded dashboard navigation with `Instellingen` and
 
 Caption: `Open Instellingen en kies Asset modellen.`
 
-### Step 2: Search name and exact code in both lists
+### Step 2: Check name and exact code for duplicates in both lists
 
 Search before using the create control:
 
 1. In `Asset modellen`, search manufacturer, product family, and generation,
    for example `HP ProBook 450 G8`.
-2. In the separate global `Model Numbers` list, search the complete printed
-   code including its suffix, for example `2E9F8EA#ABH`.
+2. Leave the `Asset modellen` page. Under `Instellingen`, open the separate
+   global `Model Numbers` page and search the complete printed code including
+   its suffix, for example `2E9F8EA#ABH`.
 3. Compare the returned Basismodel, code, label, status, and asset count.
 
 Visual `2A`: Basismodel list with search field and matching product/generation
@@ -67,7 +68,8 @@ Caption: `Zoek eerst het Basismodel op fabrikant, product en generatie.`
 Visual `2B`: global `Model Numbers` list filtered by the complete code, showing
 the matching Basismodel, code, label, status, and asset count.
 
-Caption: `Zoek daarna de complete fabrikantcode in de globale lijst Model Numbers.`
+Caption: `Open de aparte pagina Model Numbers en zoek daar de complete
+fabrikantcode.`
 
 Amber warning: `Een vergelijkbare naam is niet genoeg. Controleer ook de
 volledige fabrikantcode en generatie.`
@@ -94,14 +96,15 @@ Visual `3A`: existing Basismodel with its identity, exact-number table, and
 Caption: `Gebruik het bestaande basismodel als product en generatie gelijk
 zijn.`
 
-#### Route C - Basismodel is missing
+#### Route C - Create a new Basismodel
 
 Use `+` on the model list only when the manufacturer plus product family and
-generation are genuinely absent. Continue at step 4.
+generation are genuinely absent. This opens the creation route described in
+step 4; do not treat Basismodel creation as an unnamed substep.
 
 Visual `3B`: model-list create `+` with toolbar and list context.
 
-Caption: `Gebruik de + alleen als het basismodel werkelijk ontbreekt.`
+Caption: `De + opent stap 4: een nieuw Basismodel maken.`
 
 Decision rule:
 
@@ -154,21 +157,26 @@ Visual `5A`: Basismodel detail with the exact-number table and create action.
 
 Caption: `Open de exacte variant vanaf het juiste Basismodel.`
 
-### Step 6: Enter code and recognition label
+### Step 6: Enter code and default-configuration label
 
 | Field | What to enter |
 | --- | --- |
 | Code | Complete manufacturer/SKU code from the label or verified source: `2E9F8EA#ABH`. Preserve meaningful suffixes. |
 | `Aa` | Use only when the printed code intentionally contains lowercase. Normal input is capitalized automatically. |
-| Label | Readable recognition text, for example `HP ProBook 450 G8 - i5-1135G7 - 8GB - 256GB`. |
+| Label | Readable default configuration for this exact code: product, processor, standard RAM, and standard storage. Example: `HP ProBook 450 G8 - i5-1135G7 - 8GB - 256GB`. |
 
-The code is the exact identity. The label helps a refurbisher recognize the
-variant but is not a replacement for CAT-02 specification values.
+The code is the exact identity. The label describes the processor, RAM, and
+storage expected by default for this exact manufacturer variant. It helps a
+refurbisher recognize the variant but does not replace CAT-02 specification
+values.
+
+Do not create another model number only because one physical asset has
+different RAM or storage. Record that exception on the asset itself.
 
 Visual `6A`: unsaved model-number form with code, `Aa`, label, and `Opslaan`
 visible.
 
-Caption: `Code is exact; Label helpt de variant herkennen.`
+Caption: `Code is exact; Label beschrijft de standaardconfiguratie.`
 
 Do not enter a serial number, Product ID, Inbit asset tag, or self-created code.
 Choose `Opslaan` once. The first exact number becomes the system standard
@@ -185,7 +193,8 @@ Check the Basismodel and exact row together:
 1. Basismodel name is product plus generation.
 2. Category and manufacturer match the source.
 3. Exact code includes every meaningful suffix.
-4. Label is understandable but does not replace the exact code.
+4. Label states the default processor, RAM, and storage but does not replace
+   the exact code.
 5. Row is active; the first row may be shown as the automatic standard.
 6. No duplicate Basismodel or exact-code row exists.
 

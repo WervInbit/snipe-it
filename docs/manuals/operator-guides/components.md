@@ -137,6 +137,10 @@ The system is component-based, not a fixed page grid:
 - related guides can contain zero through five entries over at most two rows;
 - a guide can be one or two A4 pages.
 
+Explanatory cards must use the available interior space. Do not leave a short
+one- or two-line explanation at caption size inside a large, otherwise empty
+card; use the largest established body size that fits without crowding.
+
 The reading order remains stable: header, context, steps, help, completion,
 references, QR/source footer. Bottom utilities stay anchored near the bottom.
 

@@ -35,7 +35,7 @@ Status: current classification. No source has been deleted or moved.
 | --- | --- | --- |
 | `output/manuals/proofs/2026-08-25-visual-corrections` | Current focused visual-correction proofs | AC-02, USR-01 through USR-04, AST-03 through AST-05, and CMP-02: nine exact drafts across eleven A4 pages, grouped under `user`, `asset`, and `component` |
 | `output/manuals/proofs/2026-08-20-cold-start-rework` | Current 12-guide cold-start rework | User/access, AST lifecycle, component, and catalogue proofs: 12 exact drafts across 21 A4 pages, grouped under `user`, `asset`, `component`, and `catalog` |
-| `output/manuals/proofs/catalog-guide-review` | Current catalogue review proofs plus history | CAT-00 v8 orientation, CAT-01 v4 creation, CAT-03 v1 attributes, and CAT-04 v1 component definitions; prior versions remain review history |
+| `output/manuals/proofs/catalog-guide-review` | Current catalogue review proofs plus history | CAT-00 v9 orientation correction, CAT-01 v5 creation, CAT-02 v1 model specification, CAT-03 v1 attributes, and CAT-04 v2 component definitions; prior versions remain review history |
 | `output/manuals/proofs/2026-08-18-ast-lifecycle-review/ast03-v12` | Superseded focused AST-03 proof | Two-page v12 retained as review history before the v13 minimum-role and unified-identity correction |
 | `output/manuals/proofs/2026-08-18-feedback-review` | Current focused feedback proofs | AC-01 v8, AST-02 v6, CMP-01 v5, USR-01 v9, WF-01 v10, and two-page WF-02 v11; accepted predecessors remain frozen |
 | `layout-proofs/2026-08-13-guide-component-system-v1` | Current component regression proof | Shared family, badge, focus, completion, and five-reference/two-row components plus geometry report |
@@ -106,8 +106,8 @@ AST-03 v14, USR-01 v8, and USR-02 v7 are included in the repository package.
 | `scripts/manuals/test-guide-system.mjs` | Shared component contract assertions. |
 | `scripts/manuals/verify-guide-package.mjs` | Checks evidence/baseline/PDF hashes, status, page counts, A4 dimensions, URLs, and active-script portability. |
 | `scripts/manuals/generate-guide-component-proof.mjs` | Current A4 visual regression proof for shared components. |
-| `scripts/manuals/generate-catalog-guide-review.mjs` | Current CAT-00 v8, CAT-01 v4, CAT-03 v1, and CAT-04 v1 generator with multi-page A4, context-column, title/version, component-bound, and rendered-geometry checks. |
-| `scripts/manuals/capture-catalog-guide-evidence.mjs` | Read-only controlled catalogue capture harness; fills unsaved examples and captures existing records without submitting changes. |
+| `scripts/manuals/generate-catalog-guide-review.mjs` | Current CAT-00 v9, CAT-01 v5, CAT-02 v1, CAT-03 v1, and CAT-04 v2 generator with retained catalogue review branches, multi-page A4, context-column, title/version, component-bound, and rendered-geometry checks. |
+| `scripts/manuals/capture-catalog-guide-evidence.mjs` | Controlled catalogue capture harness; fills unsaved examples, can stage screenshot-only conflict/success states, and captures existing records without submitting changes. |
 | `scripts/manuals/generate-user-account-guide-review.mjs` | Current user-account batch/focused generator; defaults to USR-01 v11, USR-02 v9, USR-03 v3, AC-02 v3, and USR-04 v3 while explicit version variables preserve older branches. |
 | `scripts/manuals/generate-component-followup-guides.mjs` | Current generator for CMP-02 v4, CMP-04 v6, and HELP-01 v6; uses source-pixel crops, measured target padding, and full family-styled help references. |
 | `scripts/manuals/generate-component-guide-review.mjs` | Focused CMP-01 generator; accepted v4 remains the default and version 5 applies the Senior Refurbisher role. |

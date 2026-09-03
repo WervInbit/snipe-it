@@ -81,6 +81,71 @@ async function scrollTo(page, selector, offset = -120) {
     await page.waitForTimeout(300);
 }
 
+async function useSupervisorSpecificationView(page) {
+    await page.evaluate(() => {
+        document.querySelectorAll('.js-remove-assigned, .js-component-template-remove')
+            .forEach((control) => control.remove());
+    });
+}
+
+async function addDirectAttributeExample(page) {
+    const search = page.locator('.attribute-column--available .js-attribute-search');
+    await search.fill('5G-ondersteuning');
+    const row = page.locator('#available-attributes-list .available-attribute')
+        .filter({ hasText: '5G-ondersteuning' });
+    await row.locator('.js-add-attribute').click();
+    await page.locator('#attribute_15').selectOption('1');
+    await page.waitForTimeout(250);
+}
+
+async function clearExpectedComponentRows(page) {
+    await page.evaluate(() => {
+        document.querySelectorAll('[data-component-template-row]').forEach((row) => row.remove());
+        document.querySelector('[data-component-template-empty]')?.classList.remove('hidden');
+    });
+}
+
+async function addExpectedComponentEntry(page) {
+    await page.locator('[data-add-component-template]').click();
+    const row = page.locator('[data-component-template-row]').last();
+    const select = row.locator('.js-component-template-definition-select');
+    await select.selectOption({ label: 'RAM 8GB DDR4' });
+    await select.dispatchEvent('change');
+    await row.locator('input[type="number"]').fill('1');
+    await page.waitForTimeout(250);
+}
+
+async function injectModelSpecificationConflict(page) {
+    await page.evaluate(() => {
+        const existing = document.querySelector('[data-testid="model-spec-component-conflict-warning"]');
+        if (existing) existing.remove();
+        const warning = document.createElement('div');
+        warning.className = 'col-md-12';
+        warning.innerHTML = `
+            <div class="alert alert-warning" data-testid="model-spec-component-conflict-warning">
+                <strong>Component specification conflict</strong>
+                <ul class="mb-0">
+                    <li><strong>Werkgeheugen</strong>: Manual model value 16 GB differs from component value 8 GB. Component value is being used.</li>
+                </ul>
+            </div>`;
+        const selector = document.querySelector('#model_spec_model_number_id');
+        selector?.parentElement?.insertBefore(warning, selector);
+    });
+    await page.waitForTimeout(200);
+}
+
+async function injectModelSpecificationSuccess(page) {
+    await page.evaluate(() => {
+        const content = document.querySelector('section.content');
+        if (!content) throw new Error('Specification content section not found.');
+        const success = document.createElement('div');
+        success.className = 'alert alert-success';
+        success.textContent = 'Model specification updated.';
+        content.insertBefore(success, content.firstChild);
+    });
+    await page.waitForTimeout(200);
+}
+
 async function prepareAttributeExample(page, { datatype = 'int' } = {}) {
     await page.locator('#label').fill('Aantal geheugenslots');
     await page.locator('#datatype').selectOption(datatype);
@@ -190,6 +255,65 @@ try {
         await page.evaluate(() => window.scrollBy(0, -110));
         await page.waitForTimeout(250);
         files.push(await capture(page, 'CAT-MODEL-SPEC-COMPONENTS-DESKTOP-01.png'));
+    }
+
+    if (captureMode === 'all' || captureMode === 'model-spec') {
+        const specRoute = `/models/${exampleModelId}/model-numbers/${exampleModelNumberId}/spec`;
+
+        await open(page, specRoute);
+        await page.getByRole('heading', { name: 'Expected Components', exact: true }).waitFor();
+        await useSupervisorSpecificationView(page);
+        await addDirectAttributeExample(page);
+        await scrollTo(page, '[data-testid="model-attributes-builder"]', -125);
+        files.push(await capture(page, 'CAT-MODEL-SPEC-ATTRIBUTE-ADD-DESKTOP-01.png'));
+
+        await open(page, specRoute);
+        await page.getByRole('heading', { name: 'Expected Components', exact: true }).waitFor();
+        await useSupervisorSpecificationView(page);
+        await clearExpectedComponentRows(page);
+        await scrollTo(page, '[data-add-component-template]', 0);
+        files.push(await capture(page, 'CAT-MODEL-SPEC-EXPECTED-START-DESKTOP-01.png'));
+        await addExpectedComponentEntry(page);
+        await scrollTo(page, '#expected-components', -115);
+        files.push(await capture(page, 'CAT-MODEL-SPEC-EXPECTED-ADD-DESKTOP-01.png'));
+
+        await open(page, specRoute);
+        await page.getByRole('heading', { name: 'Expected Components', exact: true }).waitFor();
+        await useSupervisorSpecificationView(page);
+        await injectModelSpecificationConflict(page);
+        await page.evaluate(() => window.scrollTo(0, 0));
+        files.push(await capture(page, 'CAT-MODEL-SPEC-CONFLICT-DESKTOP-01.png'));
+
+        await open(page, specRoute);
+        await page.getByRole('heading', { name: 'Expected Components', exact: true }).waitFor();
+        await useSupervisorSpecificationView(page);
+        await page.evaluate(() => {
+            const rows = [...document.querySelectorAll('[data-component-template-row]')];
+            rows.forEach((row) => {
+                const selected = row.querySelector('select')?.selectedOptions[0]?.textContent ?? '';
+                if (!selected.includes('RAM 8GB DDR4')) row.remove();
+            });
+        });
+        await page.getByRole('button', { name: /Opslaan|Save/i }).last().evaluate((button) => {
+            button.scrollIntoView({ block: 'center' });
+        });
+        await page.waitForTimeout(300);
+        files.push(await capture(page, 'CAT-MODEL-SPEC-SAVE-DESKTOP-01.png'));
+
+        await open(page, specRoute);
+        await page.getByRole('heading', { name: 'Expected Components', exact: true }).waitFor();
+        await useSupervisorSpecificationView(page);
+        await page.locator('#expected-components').scrollIntoViewIfNeeded();
+        await page.evaluate(() => window.scrollBy(0, -110));
+        await page.waitForTimeout(250);
+        files.push(await capture(page, 'CAT-MODEL-SPEC-ROSTER-DESKTOP-01.png'));
+
+        await open(page, specRoute);
+        await page.getByRole('heading', { name: 'Expected Components', exact: true }).waitFor();
+        await useSupervisorSpecificationView(page);
+        await injectModelSpecificationSuccess(page);
+        await page.evaluate(() => window.scrollTo(0, 0));
+        files.push(await capture(page, 'CAT-MODEL-SPEC-SAVED-DESKTOP-01.png'));
     }
 
     if (captureMode === 'all' || captureMode === 'definitions') {

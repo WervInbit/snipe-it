@@ -1,12 +1,12 @@
 # CAT-04 Componentdefinities beheren
 
-Status: Working draft v1; workflow and evidence verified, exact-version review pending.
+Status: Working draft v2; workflow and evidence verified, exact-version review pending.
 
 ## Maintenance Metadata
 
 - Family: `CAT`.
 - Type: Extended administration task.
-- Current version: draft v1.
+- Current version: draft v2.
 - Expected page model: Six pages.
 - Layout recipe: `extended-admin-flow`.
 
@@ -70,11 +70,13 @@ of this guide.
    Definition` for the expected part.
 2. Leave `Expected Name` blank to reuse the selected definition name, or enter
    a short recognition name only when operators need a clearer local label.
-3. Enter `Quantity` and choose `Required` only when that part is normally
-   expected within this component definition.
+3. Enter the normal `Quantity` (at least one) and leave `Required` selected in
+   the current operational process.
 4. Use optional Notes for recognition or placement context, not as a substitute
    for a reusable attribute.
-5. Keep the structure to one supported level: component definition -> expected
+5. Add only parts that should normally always be present. Optional or
+   per-device varying parts do not belong in this expected structure.
+6. Keep the structure to one supported level: component definition -> expected
    part. Do not create an expected part for a descriptive fact.
 
 ### Page 4 - Add attribute contributions
@@ -121,6 +123,9 @@ of this guide.
 - Search before create; similar names, part codes, model numbers, categories,
   and manufacturer must be compared together.
 - Expected parts are existing component definitions, not free-text facts.
+- Quantity is the normal expected count. Under the current process every saved
+  expected-part row remains `Required`; an optional or per-device varying part
+  is recorded only when it is physically present.
 - Attribute contributions reuse CAT-03 definitions and valid values.
 - Overlap between definition levels is reviewed deliberately because values
   from expected parts take precedence in calculated asset specifications.
@@ -131,6 +136,12 @@ The data model contains serial-tracking and placement modes, but the current
 browser form has no controls for them. This guide must not instruct an operator
 to choose those modes. Controller defaults are application behavior, not an
 operator step.
+
+The `Required` flag is persisted and displayed, but it currently does not
+enforce a separate completion check and unchecked rows still participate in
+calculated specifications. CAT-04 therefore does not present unchecked
+`Required` as an operator choice. Optional or per-device varying parts are not
+added to the expected structure.
 
 There is no browser Delete action for a component definition. Activation,
 deactivation, and removal of saved contribution or expected-part rows require lifecycle

@@ -45,5 +45,6 @@
 
 ## Review Decision
 
-CAT-00 v8 is the current portable working draft for exact-version review. It
-is not approved and does not change any accepted guide record.
+CAT-00 v8 remains an unaccepted historical working draft. CAT-00 v9 supersedes
+it for diagram connector and alignment review; no accepted guide record was
+changed.

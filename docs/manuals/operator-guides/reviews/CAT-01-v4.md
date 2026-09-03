@@ -42,5 +42,5 @@
 
 ## Review Decision
 
-CAT-01 v4 is the current portable working draft for exact-version review. It
-is explicitly unaccepted and does not change any accepted guide record.
+CAT-01 v4 remains reproducible review history and is superseded by CAT-01 v5.
+It was never accepted and does not change any accepted guide record.

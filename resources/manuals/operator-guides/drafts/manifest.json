@@ -1,6 +1,6 @@
 {
     "schemaVersion": 1,
-    "updatedOn": "2026-09-01",
+    "updatedOn": "2026-09-03",
     "statusDefinition": "Unaccepted working draft; retained for review and environment transfer only",
     "artifacts": [
         {
@@ -155,23 +155,33 @@
         },
         {
             "code": "CAT-00",
-            "version": 8,
+            "version": 9,
             "title": "Catalogus begrijpen",
             "status": "Unaccepted working draft",
             "acceptedPredecessorVersion": null,
             "pages": 6,
-            "file": "CAT-00-catalogus-begrijpen-v8-draft.pdf",
-            "sha256": "4b401731fdfe5a5371f7bf180ddb5778cb1b391d2e1ddea87f75d0b7a1231378"
+            "file": "CAT-00-catalogus-begrijpen-v9-draft.pdf",
+            "sha256": "a7e0d6c7c554a74c2b5161f1babbc1d77dcbc8efe47fcbb7f2db39f9ef8127ae"
         },
         {
             "code": "CAT-01",
-            "version": 4,
+            "version": 5,
             "title": "Model en modelnummer aanmaken",
             "status": "Unaccepted working draft",
             "acceptedPredecessorVersion": null,
             "pages": 5,
-            "file": "CAT-01-model-en-modelnummer-aanmaken-v4-draft.pdf",
-            "sha256": "bfc0c872696d9a35b847a7030384a8e37ee2095d1951b43fb502392ef6f6dd14"
+            "file": "CAT-01-model-en-modelnummer-aanmaken-v5-draft.pdf",
+            "sha256": "39bfaf5725dbcb41308470bf1c13d5e1676e4b01364c646fe659230e77e8ab8f"
+        },
+        {
+            "code": "CAT-02",
+            "version": 1,
+            "title": "Modelspecificatie opbouwen",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": null,
+            "pages": 6,
+            "file": "CAT-02-modelspecificatie-opbouwen-v1-draft.pdf",
+            "sha256": "7db4afcb4867486f49cb336c7e2c59d2dd4a7f3b86e5a47aaae679ab14fa5713"
         },
         {
             "code": "CAT-03",
@@ -185,13 +195,13 @@
         },
         {
             "code": "CAT-04",
-            "version": 1,
+            "version": 2,
             "title": "Componentdefinities beheren",
             "status": "Unaccepted working draft",
             "acceptedPredecessorVersion": null,
             "pages": 6,
-            "file": "CAT-04-componentdefinities-beheren-v1-draft.pdf",
-            "sha256": "4892fbaed0916f9cef75be8a4547bcedac291103f63c995d1cb2d01575f5bc10"
+            "file": "CAT-04-componentdefinities-beheren-v2-draft.pdf",
+            "sha256": "36635d649cc49c1a99942ea7d08eca65fd3378df56913c778f32561859e1d30a"
         }
     ]
 }

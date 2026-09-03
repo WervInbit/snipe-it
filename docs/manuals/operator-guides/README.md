@@ -224,40 +224,45 @@ branches remain review history; AST-03 v14 and AST-04/05 v5 are current:
 
 ### Current Catalogue Review
 
-The catalogue-management family now has a standards-first foundation and four
+The catalogue-management family now has a standards-first foundation and five
 extensive working drafts:
 
-- CAT-00 v8 is a six-page orientation chapter. It presents one relationship
+- CAT-00 v9 is a six-page orientation chapter. It presents one relationship
   map, separates Basismodel/model number/asset identity, explains reusable
   attribute and component definitions, distinguishes expected from physical
   component state, compares direct values with expected components, and ends
   with a task-based guide router.
-- CAT-01 v4 is a five-page Supervisor procedure with continuous steps 1-8. It
-  searches the Basismodel list and the global Model Numbers list before
-  creation, separates the three possible reuse/create routes, teaches only the
-  active Basismodel identity fields, distinguishes exact code from its readable
-  label, verifies the saved identity, and routes onward to CAT-02 or AST-03.
+- CAT-01 v5 is a five-page Supervisor procedure with continuous steps 1-8. It
+  checks the Basismodel list and the separate global Model Numbers page for
+  duplicates before creation, separates the three possible reuse/create
+  routes, teaches only the active Basismodel identity fields, defines the
+  model-number label as its default processor/RAM/storage configuration,
+  verifies the saved identity, and routes onward to CAT-02 or AST-03.
+- CAT-02 v1 is a six-page Supervisor procedure for one exact model-number
+  baseline. It validates the selected variant, separates direct attributes
+  from expected components, shows both add routes, resolves component-derived
+  conflicts, saves, and verifies the result.
 - CAT-03 v1 is a five-page Supervisor procedure for finding or creating one
   reusable attribute definition, choosing its datatype and behavior, setting
   numeric constraints or Enum options, and verifying the saved row.
-- CAT-04 v1 is a six-page Supervisor procedure for one reusable component
+- CAT-04 v2 is a six-page Supervisor procedure for one reusable component
   definition: identity, expected parts, attribute contributions, hierarchy
-  overlap, Save, and return routes. It intentionally excludes tracking and
-  placement controls that are not exposed in the browser.
-- Twelve additional canonical captures support CAT-03 and CAT-04. Unsaved
-  forms were prepared without submission; the result-row and overlap-warning
-  examples were screenshot-only DOM states and changed no server record.
-- All four active PDFs pass their focused A4, page-count, text,
+  overlap, Save, and return routes. It enlarges the identity explanations and
+  keeps `Required` selected because unchecked expected rows are not separately
+  enforced and still affect calculated specifications.
+- Nineteen additional canonical captures support CAT-02 through CAT-04.
+  Unsaved forms were prepared without submission; result, conflict, and
+  overlap examples were screenshot-only DOM states and changed no server
+  record.
+- All five active PDFs pass their focused A4, page-count, text,
   component-geometry, context-column, and full-page raster gates. They remain
   working drafts; none has been internally accepted yet.
 - The current [CAT guide-set plan](catalog-guide-plan.md) assigns one owner to
-  every catalogue concept and action. CAT-00 v8, CAT-01 v4, CAT-03 v1, and
-  CAT-04 v1 are the generated drafts aligned to that plan.
-- CAT-02, CAT-05, and CAT-06 still require alignment and evidence before
-  generation. In particular, normal setup belongs to Supervisor, lifecycle
-  and saved-row cleanup belong to Admin, browser-inaccessible component
-  tracking/placement controls are excluded, and CAT-06 may not claim source
-  storage that the application does not provide.
+  every catalogue concept and action. CAT-00 v9, CAT-01 v5, CAT-02 v1,
+  CAT-03 v1, and CAT-04 v2 are the generated drafts aligned to that plan.
+- CAT-05 still requires lifecycle/cleanup evidence, and CAT-06 requires the
+  source-recording decision before generation. Normal setup belongs to
+  Supervisor; lifecycle and saved-row cleanup belong to Admin.
 
 ## Active Guide Set
 
@@ -283,7 +288,7 @@ extensive working drafts:
 | [USR-05 Manage Groups](guides/USR-05.md) | Planned administration task | Superadmin | Create or edit a reusable group and verify its minimum required rights. |
 | [CAT-00 Understand The Catalogue](guides/CAT-00.md) | Six-page reference chapter | Supervisor | Understand identities, reusable definitions, model-number baselines, actual asset state, value placement, and the correct follow-up guide. |
 | [CAT-01 Create Model And Model Number](guides/CAT-01.md) | Five-page administration task | Supervisor | Reuse or create the correct Basismodel and add one exact manufacturer model number. |
-| [CAT-02 Build Model Specification](guides/CAT-02.md) | Planned five-page administration task | Supervisor target | Build direct attributes and expected components without duplicate or conflicting values. |
+| [CAT-02 Build Model Specification](guides/CAT-02.md) | Six-page administration task | Supervisor | Build direct attributes and expected components without duplicate or conflicting values. |
 | [CAT-03 Manage Attributes](guides/CAT-03.md) | Five-page administration task | Supervisor | Reuse or create a definition, choose datatype and behavior, constrain valid input, and verify reuse. |
 | [CAT-04 Manage Component Definitions](guides/CAT-04.md) | Six-page administration task | Supervisor | Configure reusable component identity, expected parts, attribute contributions, overlap handling, and reuse. |
 | [CAT-05 Manage Variants And Lifecycle](guides/CAT-05.md) | Planned administration task | Admin | Add variants and manage default, active, deprecated, delete, and partial-copy behavior. |
@@ -301,7 +306,7 @@ extensive working drafts:
 
 1. Review the 12 cold-start revisions recorded in the 2026-08-20 retest.
 2. Preserve any exact version explicitly accepted during that review.
-3. Investigate and generate USR-05 and CAT-02 through CAT-06 in small batches.
+3. Investigate and generate USR-05, CAT-05, and CAT-06 in small batches; CAT-02 v1 now awaits review.
 4. Repeat the cold-start gate and exact-version review for every new batch.
 5. Consider Affinity only after the generated set is confirmed or an explicit green light is given.
 
@@ -321,13 +326,10 @@ desktop evidence is available:
 
 The catalogue set follows this sequence:
 
-1. Review CAT-00, CAT-01, CAT-03, and CAT-04 separately; preserve each exact
-   working draft.
-2. Align and generate CAT-02 now that CAT-03/CAT-04 terminology and return
-   routes are concrete.
-3. Generate CAT-05 after the base-model and specification workflows settle.
-4. Resolve the source-recording policy, then generate CAT-06.
-5. Register physical assets through AST-03 only after CAT-01 and CAT-02 are
+1. Review CAT-00 through CAT-04 separately; preserve each exact working draft.
+2. Generate CAT-05 after the base-model and specification workflows settle.
+3. Resolve the source-recording policy, then generate CAT-06.
+4. Register physical assets through AST-03 only after CAT-01 and CAT-02 are
    complete; do not merge asset creation into the catalogue guides.
 
 ## Review Rule

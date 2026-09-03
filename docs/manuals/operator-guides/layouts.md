@@ -30,8 +30,8 @@ guide needs more text or a wider screenshot.
 | `two-column-step-grid` | Two-column step grid | Four or similarly balanced steps where two columns improve visual size and comparison. | WF-01 v9 |
 | `route-list` | Route list | A process overview that points to task guides without repeating their instructions. | AST-02 v5 |
 | `troubleshooting-grid` | Troubleshooting grid | Non-linear problem lookup using compact independent recovery routes. | HELP-01 v6 |
-| `reference-chapter` | Reference chapter | Multi-page explanation using diagrams, decision tables, examples, and selected interface landmarks. | CAT-00 v8 |
-| `extended-admin-flow` | Extended administration flow | A desktop-first procedure that preserves field explanations and recognizable screenshots over several continuously numbered pages. | CAT-01 v4 |
+| `reference-chapter` | Reference chapter | Multi-page explanation using diagrams, decision tables, examples, and selected interface landmarks. | CAT-00 v9 |
+| `extended-admin-flow` | Extended administration flow | A desktop-first procedure that preserves field explanations and recognizable screenshots over several continuously numbered pages. | CAT-01 v5 |
 | `unassigned` | Not yet selected | A planned guide whose real workflow has not been investigated. It may not be generated as a review candidate. | USR-05 |
 
 ## Step Patterns
@@ -75,7 +75,7 @@ it.
 | USR-05 | `unassigned` | To be determined from the verified workflow | Unknown |
 | CAT-00 | `reference-chapter` | `reused-evidence`, `two-sided-continuation` | Six-page chapter |
 | CAT-01 | `extended-admin-flow` | `single-visual`, `inline-route-alternative`, `inline-warning`, `reused-evidence`, `two-sided-continuation` | Five-page procedure |
-| CAT-02 | `extended-admin-flow` | Specification and expected-component workflow | Five-page target after evidence capture |
+| CAT-02 | `extended-admin-flow` | `single-visual`, decision alternatives, component conflict, `reused-evidence`, `two-sided-continuation` | Six-page working draft |
 | CAT-03 | `extended-admin-flow` | `single-visual`, parallel input alternatives, `reused-evidence`, `two-sided-continuation` | Five-page working draft |
 | CAT-04 | `extended-admin-flow` | `single-visual`, hierarchy warning, `reused-evidence`, `two-sided-continuation` | Six-page working draft |
 | CAT-05 | `unassigned` | Variant and lifecycle workflow | Unknown |
@@ -97,6 +97,10 @@ not an active recipe assignment.
   instructions.
 - Add a second side before reducing screenshots below recognizable context or
   shrinking critical instructions.
+- Size body text for the actual block density. When a large text region holds
+  only a few short lines, increase its body size and line height before leaving
+  excessive decorative white space. Dense blocks may use the recipe minimum,
+  but that minimum must not become the default for sparse blocks.
 - A reference chapter may use more than two pages when its decisions are reused
   by several task guides. Keep one question or concept family per page and use
   continuous page and section numbering.

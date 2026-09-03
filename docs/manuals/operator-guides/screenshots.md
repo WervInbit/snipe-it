@@ -1,6 +1,6 @@
 # Canonical Screenshot Catalog
 
-Status: current reusable evidence registry through 2026-08-25.
+Status: current reusable evidence registry through 2026-09-03.
 
 Use this catalog before capturing or copying screenshots. When two guides show the same application state, they should reference the same source ID and file. A guide may use a different crop or target annotation without creating a new source asset.
 
@@ -63,6 +63,8 @@ Use this catalog before capturing or copying screenshots. When two guides show t
 | `CMP-NEW-ENTRY-MOBILE-03` | Mobile new-component entry with `Show New Component Form` | `resources/manuals/operator-guides/evidence/CMP-NEW-ENTRY-MOBILE-03.jpg` | CMP-02 1B | Controlled development capture, 2026-08-04 |
 | `CMP-NEW-DEFINITION-MOBILE-03` | Definition-backed new-component route with serial, condition, and create/install action | `resources/manuals/operator-guides/evidence/CMP-NEW-DEFINITION-MOBILE-03.jpg` | CMP-02 2A and 3A | Controlled development capture, 2026-08-04; 2A targets the route, 3A targets Create And Install |
 | `CMP-NEW-CUSTOM-MOBILE-03` | Custom new-component route with custom name, serial, and condition | `resources/manuals/operator-guides/evidence/CMP-NEW-CUSTOM-MOBILE-03.jpg` | CMP-02 2B | Controlled development capture, 2026-08-04; form opened but not submitted |
+| `CMP-NEW-DEFINITION-MOBILE-04` | Replacement definition-backed form with corrected radio and warning-checkbox spacing | `resources/manuals/operator-guides/evidence/CMP-NEW-DEFINITION-MOBILE-04.jpg` | CMP-02 next revision, 2A and 3A | Controlled development recapture, 2026-09-03; form populated and not submitted |
+| `CMP-NEW-CUSTOM-MOBILE-04` | Replacement custom-component form with corrected radio and warning-checkbox spacing | `resources/manuals/operator-guides/evidence/CMP-NEW-CUSTOM-MOBILE-04.jpg` | CMP-02 next revision, 2B | Controlled development recapture, 2026-09-03; form populated and not submitted |
 | `CMP-NEW-INSTALLED-MOBILE-03` | Definition-backed tracked row after create/install | `resources/manuals/operator-guides/evidence/CMP-NEW-INSTALLED-MOBILE-03.jpg` | CMP-02 4A; CMP-04 1A and 1B | Controlled development capture, 2026-08-04; printed crops exclude workflow-attention banner |
 | `CMP-TRAY-CONFIRM-MOBILE-03` | Move-to-tray confirmation with locked serial and confirmation action | `resources/manuals/operator-guides/evidence/CMP-TRAY-CONFIRM-MOBILE-03.jpg` | CMP-04 2A and 3A | Controlled development capture, 2026-08-04 |
 | `CMP-TRAY-RESULT-MOBILE-03` | Component detail after removal with `In Tray` and no asset attached | `resources/manuals/operator-guides/evidence/CMP-TRAY-RESULT-MOBILE-03.jpg` | CMP-04 4A and 4B | Controlled development capture, 2026-08-04 |
@@ -132,8 +134,15 @@ Annotations and crops remain generator-owned.
 | `CAT-MODEL-DETAIL-DESKTOP-01` | Model identity, exact-number rows, primary state, and `Create Model Number` | CAT-00 2A; CAT-01 3A, 5A, 7A, and 7B |
 | `CAT-MODEL-CREATE-DESKTOP-01` | Unsaved populated base-model form | CAT-01 4A |
 | `CAT-MODEL-NUMBER-CREATE-DESKTOP-01` | Unsaved exact-number form with code, case, label, and save controls | CAT-01 6A |
-| `CAT-MODEL-SPEC-DESKTOP-01` | Direct attributes on one exact variant with breadcrumb and model-number selector | CAT-00 5A; CAT-02 planned |
-| `CAT-MODEL-SPEC-COMPONENTS-DESKTOP-01` | Scrolled `Expected Components` section with complete component rows | CAT-00 5B; CAT-02 planned |
+| `CAT-MODEL-SPEC-DESKTOP-01` | Direct attributes on one exact variant with breadcrumb and model-number selector | CAT-00 5A; CAT-02 1B and 2A |
+| `CAT-MODEL-SPEC-COMPONENTS-DESKTOP-01` | Scrolled `Expected Components` section with complete component rows | CAT-00 5B |
+| `CAT-MODEL-SPEC-ATTRIBUTE-ADD-DESKTOP-01` | Unsaved direct-attribute example with search, added row, and datatype-specific value | CAT-02 3A and 3B |
+| `CAT-MODEL-SPEC-EXPECTED-START-DESKTOP-01` | Empty expected-component state with add and save controls | CAT-02 2B and 4A |
+| `CAT-MODEL-SPEC-EXPECTED-ADD-DESKTOP-01` | Unsaved expected-component row with definition and quantity | CAT-02 4B |
+| `CAT-MODEL-SPEC-CONFLICT-DESKTOP-01` | Screenshot-only direct/component conflict example | CAT-02 5B |
+| `CAT-MODEL-SPEC-SAVE-DESKTOP-01` | Expected component and `Opslaan` control in one contextual frame | CAT-02 6A |
+| `CAT-MODEL-SPEC-ROSTER-DESKTOP-01` | Supervisor view of expected rows, derived attributes, and child structure | CAT-02 5A |
+| `CAT-MODEL-SPEC-SAVED-DESKTOP-01` | Screenshot-only saved confirmation with exact model-number selector | CAT-02 6B |
 | `CAT-ATTRIBUTE-LIST-DESKTOP-01` | Attribute-definition administration | CAT-00 3A; CAT-03 orientation context |
 | `CAT-COMPONENT-DEFINITION-LIST-DESKTOP-01` | Component-definition administration | CAT-00 3B; CAT-04 orientation context |
 | `CAT-MODEL-NUMBER-LIFECYCLE-DESKTOP-01` | Global exact-number lifecycle and primary controls | CAT-05 planned |
@@ -143,15 +152,30 @@ Annotations and crops remain generator-owned.
 | `CAT-ATTRIBUTE-OPTIONS-ENUM-DESKTOP-01` | Unsaved Enum value/label examples | CAT-03 4B |
 | `CAT-ATTRIBUTE-SAVE-DESKTOP-01` | Complete unsaved attribute form with Create control | CAT-03 5A |
 | `CAT-ATTRIBUTE-RESULT-DESKTOP-01` | Screenshot-only resulting definition row for verification | CAT-03 5B |
+| `CAT-ATTRIBUTE-CREATE-IDENTITY-DESKTOP-02` | Replacement unsaved identity and behavior form with corrected checkbox-label spacing | CAT-03 next revision, 2A and 3A |
+| `CAT-ATTRIBUTE-CONSTRAINTS-NUMERIC-DESKTOP-02` | Replacement numeric constraints example with corrected checkbox-label spacing | CAT-03 next revision, 4A |
+| `CAT-ATTRIBUTE-OPTIONS-ENUM-DESKTOP-02` | Replacement Enum options example with corrected checkbox-label spacing | CAT-03 next revision, 4B |
+| `CAT-ATTRIBUTE-SAVE-DESKTOP-02` | Replacement complete unsaved form with corrected checkbox-label spacing | CAT-03 next revision, 5A |
 | `CAT-COMPONENT-DEFINITION-ENTRY-DESKTOP-01` | Expanded Settings route and searchable component-definition list | CAT-04 1A, 1B, and 6A |
 | `CAT-COMPONENT-DEFINITION-IDENTITY-DESKTOP-01` | Read-only existing definition identity and first expected-part context | CAT-04 2A |
 | `CAT-COMPONENT-DEFINITION-CHILDREN-DESKTOP-01` | Unsaved Expected Subcomponents rows with quantity, required state, and notes | CAT-04 3A |
 | `CAT-COMPONENT-DEFINITION-CONTRIBUTIONS-DESKTOP-01` | Unsaved attribute-contribution rows and display choices | CAT-04 4A |
 | `CAT-COMPONENT-DEFINITION-OVERLAP-DESKTOP-01` | Screenshot-only example of the implemented hierarchy-overlap warning | CAT-04 5A |
 | `CAT-COMPONENT-DEFINITION-SAVE-DESKTOP-01` | Read-only existing definition with contribution context and Save Changes | CAT-04 5B |
+| `CAT-COMPONENT-DEFINITION-IDENTITY-DESKTOP-02` | Replacement definition identity with corrected checkbox-label spacing | CAT-04 next revision, 2A |
+| `CAT-COMPONENT-DEFINITION-CHILDREN-DESKTOP-02` | Replacement Expected Subcomponents rows after the shared control-layout correction | CAT-04 next revision, 3A |
+| `CAT-COMPONENT-DEFINITION-CONTRIBUTIONS-DESKTOP-02` | Replacement attribute-contribution rows with corrected checkbox-label spacing | CAT-04 next revision, 4A |
+| `CAT-COMPONENT-DEFINITION-OVERLAP-DESKTOP-02` | Replacement overlap-warning state after the shared control-layout correction | CAT-04 next revision, 5A |
+| `CAT-COMPONENT-DEFINITION-SAVE-DESKTOP-02` | Replacement save view with corrected checkbox-label spacing | CAT-04 next revision, 5B |
 
 CAT-03 and CAT-04 evidence was captured read-only. Unsaved examples were
 prepared in the browser without submitting a form. The CAT-03 result row and
 CAT-04 overlap warning were inserted only into the screenshot DOM so the
 implemented result and warning shapes could be taught without creating or
 changing a server record.
+
+CAT-02 evidence uses the same non-destructive method. Direct-attribute and
+expected-component additions were prepared only in the browser and were not
+submitted. Existing saved-row removal controls were hidden to represent the
+normal Supervisor view. The conflict and saved-confirmation messages were
+inserted only into the screenshot DOM; no server record was changed.

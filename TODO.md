@@ -27,7 +27,7 @@
 - [x] Rework all 12 conditional/failing cold-start guides and rerun the gate;
   the latest pass produced AC-02 v3, AST-03 v14, AST-04/05 v5, CMP-02 v4,
   CMP-04 v6, USR-01 v11, USR-02 v9, USR-03/04 v3, CAT-00 v8, and
-  CAT-01 v4. Exact acceptance remains version-specific.
+  CAT-01 v5. Exact acceptance remains version-specific.
 - [ ] Review and internally accept or revise the remaining user-account drafts:
   USR-03 v3, AC-02 v3, and two-sided USR-04 v3. USR-01 v8 and USR-02 v7
   remain accepted predecessors.
@@ -50,23 +50,29 @@
   repository asset/runtime contract; keep superseded generators isolated under
   `scripts/manuals/archive/` as non-portable history.
 - [x] Add the operator-guide handoff, authoritative guide sources, maintained
-  generators, 85 canonical evidence files, locked baselines, and nine exact
+  generators, 103 canonical evidence files, locked baselines, and nine exact
   internal-review candidate PDFs to versioned repository storage.
-- [ ] Move the superseded CAT-00 v7 draft out of the live draft root after the
-  external PDF reader releases it, then rerun the strict package verifier
-  without a clean-mirror override.
+- [ ] Move the superseded CAT-00 v7 and v8 drafts out of the live draft root
+  after the external PDF reader releases them, then rerun the strict package
+  verifier without a clean-mirror override.
 - [x] Refresh the repository internal-review package to include USR-01 v8 and
   USR-02 v7 with a checksum manifest.
 - [ ] Investigate, capture, and draft USR-05 Groepen beheren for reusable group creation and editing.
 - [x] Define USR-03 password handoff as personal transfer followed immediately
   by AC-02; do not use chat, email, notes, tickets, or screenshots.
 - [ ] Decide whether AC-02 needs a controlled success-message capture; the current draft deliberately stops at the empty form and save action.
-- [ ] Review CAT-00 v8, CAT-01 v4, CAT-03 v1, and CAT-04 v1 as separate exact
-  working drafts; none is internally accepted yet.
+- [ ] Review CAT-00 v9, CAT-01 v5, CAT-02 v1, CAT-03 v1, and CAT-04 v2 as
+  separate exact working drafts; none is internally accepted yet.
 - [x] Align, capture, and generate CAT-03 Attributen beheren v1 and CAT-04
   Componentdefinities beheren v1 from the verified Supervisor forms.
-- [ ] Align, capture, and generate CAT-02 Modelspecificatie opbouwen using the
-  now-concrete CAT-03/CAT-04 terminology and return routes.
+- [x] Align, capture, and generate CAT-02 Modelspecificatie opbouwen v1 using
+  the concrete CAT-03/CAT-04 terminology and non-destructive evidence.
+- [x] Capture 11 versioned replacement sources for the corrected shared
+  checkbox/radio label layout without overwriting historical evidence.
+- [ ] Generate new CAT-03, CAT-04, and CMP-02 draft versions from the corrected
+  replacement sources and remeasure their source-pixel focus annotations.
+- [ ] Review CAT-02 v1 as an exact six-page working draft; do not mark it
+  accepted without explicit approval.
 - [ ] Generate CAT-05 after CAT-01/CAT-02 wording settles.
 - [ ] Decide where catalogue source and verification evidence is recorded
   before CAT-06 can become an internal review candidate.

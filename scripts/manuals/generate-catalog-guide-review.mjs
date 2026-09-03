@@ -22,13 +22,14 @@ import {
 
 const { chromium } = loadGuideDependency('playwright');
 
-const generatedOn = process.env.SNIPEIT_GUIDE_DATE ?? '2026-09-01';
+const generatedOn = process.env.SNIPEIT_GUIDE_DATE ?? '2026-09-03';
 const outputRoot = process.env.SNIPEIT_GUIDE_OUT_DIR ?? guideOutputDir('catalog-guide-review');
 const selectedGuide = process.env.SNIPEIT_GUIDE_FILTER?.trim().toUpperCase() || null;
-const cat00Version = process.env.SNIPEIT_CAT00_VERSION ?? '8';
-const cat01Version = process.env.SNIPEIT_CAT01_VERSION ?? '4';
+const cat00Version = process.env.SNIPEIT_CAT00_VERSION ?? '9';
+const cat01Version = process.env.SNIPEIT_CAT01_VERSION ?? '5';
+const cat02Version = process.env.SNIPEIT_CAT02_VERSION ?? '1';
 const cat03Version = process.env.SNIPEIT_CAT03_VERSION ?? '1';
-const cat04Version = process.env.SNIPEIT_CAT04_VERSION ?? '1';
+const cat04Version = process.env.SNIPEIT_CAT04_VERSION ?? '2';
 const colors = GUIDE_TOKENS.colors;
 const catColor = GUIDE_FAMILIES.CAT.color;
 const catSoft = GUIDE_FAMILIES.CAT.fill;
@@ -45,6 +46,13 @@ const sourceIds = {
     numberCreate: 'CAT-MODEL-NUMBER-CREATE-DESKTOP-01',
     spec: 'CAT-MODEL-SPEC-DESKTOP-01',
     specComponents: 'CAT-MODEL-SPEC-COMPONENTS-DESKTOP-01',
+    specAttributeAdd: 'CAT-MODEL-SPEC-ATTRIBUTE-ADD-DESKTOP-01',
+    specExpectedStart: 'CAT-MODEL-SPEC-EXPECTED-START-DESKTOP-01',
+    specExpectedAdd: 'CAT-MODEL-SPEC-EXPECTED-ADD-DESKTOP-01',
+    specConflict: 'CAT-MODEL-SPEC-CONFLICT-DESKTOP-01',
+    specSave: 'CAT-MODEL-SPEC-SAVE-DESKTOP-01',
+    specRoster: 'CAT-MODEL-SPEC-ROSTER-DESKTOP-01',
+    specSaved: 'CAT-MODEL-SPEC-SAVED-DESKTOP-01',
     attributeList: 'CAT-ATTRIBUTE-LIST-DESKTOP-01',
     componentDefinitionList: 'CAT-COMPONENT-DEFINITION-LIST-DESKTOP-01',
     componentInstallResult: 'CMP-INSTALL-RESULT-MOBILE-02',
@@ -123,6 +131,12 @@ const related = {
         guideReference('CAT-06', { width: 69, row: 2 }),
         guideReference('AST-03', { width: 56, row: 2 }),
     ],
+    cat02: [
+        guideReference('CAT-00', { width: 52 }),
+        guideReference('CAT-03', { width: 57 }),
+        guideReference('CAT-04', { width: 63, row: 2 }),
+        guideReference('AST-03', { width: 56, row: 2 }),
+    ],
     cat03: [
         guideReference('CAT-00', { width: 52 }),
         guideReference('CAT-02', { width: 57 }),
@@ -174,19 +188,53 @@ const definitions = {
         related: related.cat01,
         steps: [
             { number: '1', title: 'Open Asset modellen', visuals: [{ label: '1A', caption: 'Instellingen > Asset modellen.' }] },
-            { number: '2', title: 'Zoek naam en exacte code', visuals: [
+            { number: '2', title: cat01Version === '5' ? 'Controleer naam en code op duplicaten' : 'Zoek naam en exacte code', visuals: [
                 { label: '2A', caption: 'Zoek product en generatie.' },
                 { label: '2B', caption: 'Zoek de exacte code globaal.' },
             ] },
             { number: '3', title: 'Kies een van drie routes', visuals: [{ label: '3A', caption: 'Bestaand basismodel.' }, { label: '3B', caption: 'Nieuw basismodel.' }] },
             { number: '4', title: 'Vul het basismodel in', visuals: [{ label: '4A', caption: 'Actieve productidentiteit.' }] },
             { number: '5', title: 'Open Create Model Number', visuals: [{ label: '5A', caption: 'Open de exacte-variantroute.' }] },
-            { number: '6', title: 'Vul code en herkenningslabel in', visuals: [{ label: '6A', caption: 'Exacte code en leesbaar label.' }] },
+            { number: '6', title: cat01Version === '5' ? 'Vul code en standaardlabel in' : 'Vul code en herkenningslabel in', visuals: [{ label: '6A', caption: 'Exacte code en leesbaar label.' }] },
             { number: '7', title: 'Controleer het resultaat', visuals: [
                 { label: '7A', caption: 'Volledige modelnummerrij.' },
                 { label: '7B', caption: 'Categorie en fabrikant.' },
             ] },
             { number: '8', title: 'Kies het volgende object', visuals: [] },
+        ],
+    },
+    'CAT-02': {
+        code: 'CAT-02',
+        family: 'CAT',
+        title: 'Modelspecificatie opbouwen',
+        version: `Draft v${cat02Version}`,
+        purpose: 'Leg voor één exact modelnummer directe waarden en verwachte componenten vast',
+        related: related.cat02,
+        steps: [
+            { number: '1', title: 'Open het juiste modelnummer', visuals: [
+                { label: '1A', caption: 'Open Edit Spec bij de exacte modelnummerrij.' },
+                { label: '1B', caption: 'Controleer Basismodel, code en selector.' },
+            ] },
+            { number: '2', title: 'Kies directe waarde of component', visuals: [
+                { label: '2A', caption: 'Directe attributen van de hele variant.' },
+                { label: '2B', caption: 'Verwachte, afzonderlijke onderdelen.' },
+            ] },
+            { number: '3', title: 'Voeg een direct attribuut toe', visuals: [
+                { label: '3A', caption: 'Zoek en voeg een bestaande definitie toe.' },
+                { label: '3B', caption: 'Kies de rij en vul de waarde in.' },
+            ] },
+            { number: '4', title: 'Voeg een verwacht component toe', visuals: [
+                { label: '4A', caption: 'Kies Add Expected Component.' },
+                { label: '4B', caption: 'Selecteer definitie en aantal.' },
+            ] },
+            { number: '5', title: 'Controleer afgeleide waarden', visuals: [
+                { label: '5A', caption: 'Bekijk componentbijdragen en onderliggende structuur.' },
+                { label: '5B', caption: 'Los een dubbele of afwijkende invoer op.' },
+            ] },
+            { number: '6', title: 'Sla op en controleer', visuals: [
+                { label: '6A', caption: 'Kies Opslaan na de eindcontrole.' },
+                { label: '6B', caption: 'Controleer bevestiging en modelnummer.' },
+            ] },
         ],
     },
     'CAT-03': {
@@ -841,6 +889,7 @@ function cat00Page8() {
 function cat00V8Page1() {
     const def = definitions['CAT-00'];
     const doc = docFor('cat00-v8-page1');
+    const revisedGeometry = cat00Version === '9';
     header(doc, def, 1, 6, [
         { label: 'Rol', value: 'Supervisor' },
         { label: 'Nodig', value: 'Leesrechten catalogus' },
@@ -862,28 +911,50 @@ function cat00V8Page1() {
     graphNode(doc, 146, 96, 47, 22, 'Asset', ['Eén fysiek apparaat', 'tag + serienummer'], { icon: 'I', color: assetColor, fill: assetSoft, labelColor: assetColor, sw: 0.9 });
     graphArrow(doc, 64, 107, 81, 107);
     graphArrow(doc, 129, 107, 146, 107, assetColor);
-    doc.rect(68, 101.5, 9, 4, colors.white, 'none', 0, 0.8);
-    doc.centeredText(72.5, 103.8, 'heeft', { size: 1.5, weight: 800, fill: catColor });
-    doc.rect(132, 101.5, 11, 4, colors.white, 'none', 0, 0.8);
-    doc.centeredText(137.5, 103.8, 'gebruikt', { size: 1.45, weight: 800, fill: assetColor });
+    if (revisedGeometry) {
+        doc.centeredText(72.5, 103.5, 'heeft', { size: 1.5, weight: 800, fill: catColor });
+        doc.centeredText(137.5, 103.5, 'gebruikt', { size: 1.45, weight: 800, fill: assetColor });
+    } else {
+        doc.rect(68, 101.5, 9, 4, colors.white, 'none', 0, 0.8);
+        doc.centeredText(72.5, 103.8, 'heeft', { size: 1.5, weight: 800, fill: catColor });
+        doc.rect(132, 101.5, 11, 4, colors.white, 'none', 0, 0.8);
+        doc.centeredText(137.5, 103.8, 'gebruikt', { size: 1.45, weight: 800, fill: assetColor });
+    }
 
     card(doc, 17, 127, 112, 96, { fill: catSoft, stroke: catColor, component: 'model-number-baseline' });
     doc.text(22, 134, 'Op het modelnummer: waarden en fabrieksverwachting', { size: 2.2, weight: 900, fill: catColor });
-    downArrow(doc, 105, 118, 139, catColor);
+    if (revisedGeometry) {
+        doc.line(105, 118, 105, 137.5, catColor, 0.8);
+        doc.line(45.5, 137.5, 105, 137.5, catColor, 0.8);
+        downArrow(doc, 45.5, 137.5, 141, catColor);
+        downArrow(doc, 99.5, 137.5, 141, componentColor);
+    } else {
+        downArrow(doc, 105, 118, 139, catColor);
+    }
     simpleRow(doc, 22, 141, 47, 'Directe attribuutwaarde', ['Eén waarde voor', 'dit modelnummer'], { h: 21, icon: 'W', centered: true, bodySize: 1.6, color: catColor, fill: colors.white, stroke: catColor });
     simpleRow(doc, 76, 141, 47, 'Verwachte component', ['Definitie + aantal', 'in de baseline'], { h: 21, icon: 'V', centered: true, bodySize: 1.6, color: componentColor, fill: componentSoft, stroke: componentColor });
     downArrow(doc, 45.5, 162, 176, catColor);
     downArrow(doc, 99.5, 162, 176, componentColor);
-    doc.centeredText(45.5, 169, 'gebruikt', { size: 1.45, weight: 800, fill: catColor });
-    doc.centeredText(99.5, 169, 'gebruikt', { size: 1.45, weight: 800, fill: componentColor });
+    if (revisedGeometry) {
+        doc.text(48.5, 169, 'gebruikt', { size: 1.35, weight: 800, fill: catColor });
+        doc.text(102.5, 169, 'gebruikt', { size: 1.35, weight: 800, fill: componentColor });
+    } else {
+        doc.centeredText(45.5, 169, 'gebruikt', { size: 1.45, weight: 800, fill: catColor });
+        doc.centeredText(99.5, 169, 'gebruikt', { size: 1.45, weight: 800, fill: componentColor });
+    }
     simpleRow(doc, 22, 176, 47, 'Attribuutdefinitie', ['Betekenis +', 'invoerregels'], { h: 22, icon: 'A', centered: true, bodySize: 1.6, color: catColor, fill: colors.white, stroke: catColor });
     simpleRow(doc, 76, 176, 47, 'Componentdefinitie', ['Herbruikbaar', 'fysiek onderdeeltype'], { h: 22, icon: 'C', centered: true, bodySize: 1.55, color: componentColor, fill: componentSoft, stroke: componentColor });
-    doc.line(99.5, 198, 99.5, 213, componentColor, 0.7);
-    doc.line(99.5, 213, 45.5, 213, componentColor, 0.7);
-    doc.line(45.5, 213, 45.5, 198, componentColor, 0.7);
+    const definitionConnectorY = revisedGeometry ? 216 : 213;
+    doc.line(99.5, 198, 99.5, definitionConnectorY, componentColor, 0.7);
+    doc.line(99.5, definitionConnectorY, 45.5, definitionConnectorY, componentColor, 0.7);
+    doc.line(45.5, definitionConnectorY, 45.5, 198, componentColor, 0.7);
     doc.raw(`<polygon points="45.5,198 44.1,200.2 46.9,200.2" fill="${componentColor}"/>`);
-    doc.rect(58, 208.5, 30, 6, colors.white, componentColor, 0.25, 1);
-    doc.centeredText(73, 211.6, 'gebruikt 1 of meer', { size: 1.35, weight: 800, fill: componentColor });
+    if (revisedGeometry) {
+        doc.centeredText(72.5, 212.5, 'gebruikt 1 of meer', { size: 1.35, weight: 800, fill: componentColor });
+    } else {
+        doc.rect(58, 208.5, 30, 6, colors.white, componentColor, 0.25, 1);
+        doc.centeredText(73, 211.6, 'gebruikt 1 of meer', { size: 1.35, weight: 800, fill: componentColor });
+    }
 
     card(doc, 136, 127, 57, 96, { fill: assetSoft, stroke: assetColor, component: 'physical-asset-state' });
     doc.text(141, 134, 'Op één fysiek asset', { size: 2.2, weight: 900, fill: assetColor });
@@ -896,8 +967,10 @@ function cat00V8Page1() {
     doc.line(132, 187, 132, 157.5, componentColor, 0.7);
     doc.line(132, 157.5, 142, 157.5, componentColor, 0.7);
     doc.raw(`<polygon points="142,157.5 139.5,156.1 139.5,158.9" fill="${componentColor}"/>`);
-    doc.rect(124.5, 168, 15, 4, colors.white, 'none', 0, 0.8);
-    doc.centeredText(132, 170.2, 'zelfde type', { size: 1.25, weight: 800, fill: componentColor });
+    if (!revisedGeometry) {
+        doc.rect(124.5, 168, 15, 4, colors.white, 'none', 0, 0.8);
+        doc.centeredText(132, 170.2, 'zelfde type', { size: 1.25, weight: 800, fill: componentColor });
+    }
 
     callout(doc, 12, 232, 186, ['Een definitie beschrijft wat herbruikbaar is; een baseline verwacht; een fysiek record beschrijft wat er werkelijk aanwezig is.'], {
         height: 14, title: 'Lees eerst de rol van het record', icon: 'i', color: catColor, fill: catSoft, stroke: catColor,
@@ -964,6 +1037,7 @@ function cat00V8Page2() {
 function cat00V8Page3() {
     const def = definitions['CAT-00'];
     const doc = docFor('cat00-v8-page3');
+    const revisedGeometry = cat00Version === '9';
     header(doc, def, 3, 6, [
         { label: 'Rol', value: 'Supervisor' },
         { label: 'Onderwerp', value: 'Herbruikbare bouwstenen' },
@@ -971,7 +1045,7 @@ function cat00V8Page3() {
     ]);
     pageHeading(doc, 3, 'Herbruikbare bouwstenen', 'Definities worden één keer gemaakt en daarna op meerdere plekken gebruikt.');
 
-    card(doc, 12, 82, 90, 58, { fill: catSoft, stroke: catColor, component: 'attribute-definition-overview' });
+    card(doc, 12, 82, 90, revisedGeometry ? 56 : 58, { fill: catSoft, stroke: catColor, component: 'attribute-definition-overview' });
     doc.text(17, 90, 'Attribuutdefinitie', { size: 2.9, weight: 900, fill: catColor });
     doc.text(17, 97, ['Legt de betekenis en geldige invoer van één feit vast.', 'Voorbeeld: Werkgeheugen is een geheel getal in GB.'], { size: 1.9, fill: colors.ink, lh: 2.7 });
     const attributeExamples = [
@@ -982,9 +1056,9 @@ function cat00V8Page3() {
         doc.text(17, y, `${row[0]}:`, { size: 1.8, weight: 900, fill: catColor });
         doc.text(34, y, row[1], { size: 1.8, fill: colors.muted });
     });
-    doc.text(17, 136, 'Dit is geen waarde voor één specifiek apparaat.', { size: 1.7, weight: 800, fill: catColor });
+    doc.text(17, revisedGeometry ? 132.5 : 136, 'Dit is geen waarde voor één specifiek apparaat.', { size: 1.7, weight: 800, fill: catColor });
 
-    card(doc, 108, 82, 90, 58, { fill: componentSoft, stroke: componentColor, component: 'component-definition-overview' });
+    card(doc, 108, 82, 90, revisedGeometry ? 56 : 58, { fill: componentSoft, stroke: componentColor, component: 'component-definition-overview' });
     doc.text(113, 90, 'Componentdefinitie', { size: 2.9, weight: 900, fill: componentColor });
     doc.text(113, 97, ['Beschrijft een herbruikbaar fysiek onderdeeltype.', 'Het combineert identiteit, attribuutwaarden en eventueel verwachte kinderen.'], { size: 1.85, fill: colors.ink, lh: 2.65 });
     doc.text(113, 112, 'Voorbeeld:', { size: 1.8, weight: 900, fill: componentColor });
@@ -992,25 +1066,31 @@ function cat00V8Page3() {
     doc.text(113, 120, 'Gebruikt:', { size: 1.8, weight: 900, fill: componentColor });
     doc.text(130, 120, 'Werkgeheugen = 8 GB', { size: 1.8, fill: colors.muted });
     doc.text(130, 127, 'Geheugentype = DDR4', { size: 1.8, fill: colors.muted });
-    doc.text(113, 136, 'Dit is nog geen uniek geplaatst onderdeel.', { size: 1.7, weight: 800, fill: componentColor });
+    doc.text(113, revisedGeometry ? 132.5 : 136, 'Dit is nog geen uniek geplaatst onderdeel.', { size: 1.7, weight: 800, fill: componentColor });
 
-    card(doc, 12, 145, 186, 49, { fill: colors.white, stroke: colors.line, component: 'definition-reuse-map' });
-    doc.text(17, 152, 'Een Componentdefinitie gebruikt één of meer Attribuutdefinities', { size: 2.5, weight: 900, fill: componentColor });
-    simpleRow(doc, 18, 159, 62, 'RAM 8 GB DDR4', ['Componentdefinitie'], { h: 24, icon: 'C', centered: true, color: componentColor, fill: componentSoft, stroke: componentColor });
+    card(doc, 12, revisedGeometry ? 144 : 145, 186, revisedGeometry ? 52 : 49, { fill: colors.white, stroke: colors.line, component: 'definition-reuse-map' });
+    doc.text(17, revisedGeometry ? 151 : 152, 'Een Componentdefinitie gebruikt één of meer Attribuutdefinities', { size: 2.5, weight: 900, fill: componentColor });
+    simpleRow(doc, 18, revisedGeometry ? 161.5 : 159, 62, 'RAM 8 GB DDR4', ['Componentdefinitie'], { h: 24, icon: 'C', centered: true, color: componentColor, fill: componentSoft, stroke: componentColor });
     const definitionRows = [
         ['Werkgeheugen', 'Int + GB'],
         ['Geheugentype', 'Enum'],
         ['Geheugensnelheid', 'Int + MHz'],
     ];
-    definitionRows.forEach((row, index) => simpleRow(doc, 112, 154 + index * 10.5, 72, row[0], [row[1]], {
-        h: 8, icon: 'A', centered: true, labelSize: 1.65, bodySize: 1.45, color: catColor, fill: catSoft, stroke: catColor,
+    definitionRows.forEach((row, index) => simpleRow(doc, 112, (revisedGeometry ? 157 : 154) + index * (revisedGeometry ? 11.5 : 10.5), 72, row[0], [row[1]], {
+        h: revisedGeometry ? 10 : 8, icon: 'A', centered: true, labelSize: 1.65, bodySize: revisedGeometry ? 1.35 : 1.45, lh: revisedGeometry ? 1.9 : 2.65, color: catColor, fill: catSoft, stroke: catColor,
     }));
-    doc.line(80, 171, 99, 171, componentColor, 0.65);
-    doc.line(99, 158, 99, 179, componentColor, 0.65);
-    definitionRows.forEach((row, index) => graphArrow(doc, 99, 158 + index * 10.5, 112, 158 + index * 10.5, componentColor));
-    doc.rect(83, 164, 14, 5, colors.white, 'none', 0, 0.8);
-    doc.centeredText(90, 166.7, 'gebruikt', { size: 1.35, weight: 800, fill: componentColor });
-    doc.text(18, 190, 'Dezelfde Attribuutdefinitie mag ook door andere componentdefinities, modelnummers of workflows worden hergebruikt.', { size: 1.65, fill: colors.muted });
+    const branchStartY = revisedGeometry ? 162 : 158;
+    const branchStep = revisedGeometry ? 11.5 : 10.5;
+    doc.line(80, revisedGeometry ? 173.5 : 171, 99, revisedGeometry ? 173.5 : 171, componentColor, 0.65);
+    doc.line(99, branchStartY, 99, branchStartY + branchStep * 2, componentColor, 0.65);
+    definitionRows.forEach((row, index) => graphArrow(doc, 99, branchStartY + index * branchStep, 112, branchStartY + index * branchStep, componentColor));
+    if (revisedGeometry) {
+        doc.centeredText(89.5, 170.5, 'gebruikt', { size: 1.35, weight: 800, fill: componentColor });
+    } else {
+        doc.rect(83, 164, 14, 5, colors.white, 'none', 0, 0.8);
+        doc.centeredText(90, 166.7, 'gebruikt', { size: 1.35, weight: 800, fill: componentColor });
+    }
+    doc.text(18, revisedGeometry ? 193 : 190, 'Dezelfde Attribuutdefinitie mag ook door andere componentdefinities, modelnummers of workflows worden hergebruikt.', { size: revisedGeometry ? 1.55 : 1.65, fill: colors.muted });
 
     visual(doc, 'attributeList', '3A', 'Attribuutdefinities: herbruikbare namen, datatypes en regels.',
         { x: 12, y: 199, w: 90, h: 44 },
@@ -1031,6 +1111,7 @@ function cat00V8Page3() {
 function cat00V8Page4() {
     const def = definitions['CAT-00'];
     const doc = docFor('cat00-v8-page4');
+    const revisedGeometry = cat00Version === '9';
     header(doc, def, 4, 6, [
         { label: 'Rol', value: 'Supervisor' },
         { label: 'Vraag', value: 'Verwacht of werkelijk?' },
@@ -1044,17 +1125,30 @@ function cat00V8Page4() {
     simpleRow(doc, 81, 98, 45, 'Aangenomen', ['Assumed', 'nog niet apart gevolgd'], { h: 26, icon: 'A', centered: true, bodySize: 1.6, color: componentColor, fill: componentSoft, stroke: componentColor });
     simpleRow(doc, 143, 98, 45, 'Geregistreerd', ['Tracked', 'fysiek record'], { h: 26, icon: 'G', centered: true, bodySize: 1.6, color: componentColor, fill: componentSoft, stroke: componentColor });
     graphArrow(doc, 68, 111, 81, 111, componentColor);
-    doc.rect(69.5, 104, 10, 4.5, colors.white, 'none', 0, 0.8);
-    doc.centeredText(74.5, 106.5, 'aannemen', { size: 1.25, weight: 800, fill: componentColor });
-    doc.line(43, 124, 43, 128.5, componentColor, 0.7);
-    doc.line(43, 128.5, 165.5, 128.5, componentColor, 0.7);
-    doc.line(165.5, 128.5, 165.5, 124, componentColor, 0.7);
+    if (revisedGeometry) {
+        doc.centeredText(74.5, 106.4, 'aannemen', { size: 1.25, weight: 800, fill: componentColor });
+    } else {
+        doc.rect(69.5, 104, 10, 4.5, colors.white, 'none', 0, 0.8);
+        doc.centeredText(74.5, 106.5, 'aannemen', { size: 1.25, weight: 800, fill: componentColor });
+    }
+    const physicalBranchY = revisedGeometry ? 132 : 128.5;
+    doc.line(43, 124, 43, physicalBranchY, componentColor, 0.7);
+    doc.line(43, physicalBranchY, 165.5, physicalBranchY, componentColor, 0.7);
+    doc.line(165.5, physicalBranchY, 165.5, 124, componentColor, 0.7);
     doc.raw(`<polygon points="165.5,124 164.1,126.2 166.9,126.2" fill="${componentColor}"/>`);
-    doc.rect(80, 125.8, 57, 4.5, colors.white, 'none', 0, 0.8);
-    doc.centeredText(108.5, 128.3, 'of fysiek registreren / verplaatsen', { size: 1.15, weight: 800, fill: componentColor });
-    card(doc, 81, 132, 107, 17, { fill: colors.faint, stroke: colors.line, component: 'removed-state-note' });
-    doc.text(86, 138, 'Verwijderd (Removed)', { size: 1.9, weight: 900, fill: componentColor });
-    doc.text(86, 144, 'De verwachte hoeveelheid wordt niet meer alleen op de oorspronkelijke plek aangenomen.', { size: 1.55, fill: colors.muted });
+    if (revisedGeometry) {
+        doc.centeredText(104.2, 128.8, 'fysiek registreren / verplaatsen', { size: 1.15, weight: 800, fill: componentColor });
+        downArrow(doc, 104.2, 132, 138, componentColor);
+        card(doc, 18, 138, 170, 13, { fill: colors.faint, stroke: colors.line, component: 'removed-state-note' });
+        doc.text(23, 145.2, 'Verwijderd (Removed)', { size: 1.9, weight: 900, fill: componentColor });
+        doc.text(61, 145.2, 'Verwachte hoeveelheid is niet meer alleen op de oorspronkelijke plek aangenomen.', { size: 1.5, fill: colors.muted });
+    } else {
+        doc.rect(80, 125.8, 57, 4.5, colors.white, 'none', 0, 0.8);
+        doc.centeredText(108.5, 128.3, 'of fysiek registreren / verplaatsen', { size: 1.15, weight: 800, fill: componentColor });
+        card(doc, 81, 132, 107, 17, { fill: colors.faint, stroke: colors.line, component: 'removed-state-note' });
+        doc.text(86, 138, 'Verwijderd (Removed)', { size: 1.9, weight: 900, fill: componentColor });
+        doc.text(86, 144, 'De verwachte hoeveelheid wordt niet meer alleen op de oorspronkelijke plek aangenomen.', { size: 1.55, fill: colors.muted });
+    }
 
     callout(doc, 12, 161, 186, ['Een verwachte component mag Assumed blijven. Alleen registreren of verplaatsen maakt een fysiek Tracked record; een gewone statuswijziging doet dat niet.'], {
         height: 14, title: 'Niet iedere verwachting hoeft apart gevolgd te worden', icon: 'i', color: componentColor, fill: componentSoft, stroke: componentColor,
@@ -1270,6 +1364,50 @@ function cat01V4Page1() {
     return doc.render();
 }
 
+function cat01V5Page1() {
+    const def = definitions['CAT-01'];
+    const doc = docFor('cat01-v5-page1');
+    header(doc, def, 1, 5, cat01Context());
+    cat01StageHeading(doc, 1, 'Zoek de bestaande catalogusroute', 'Controleer product en generatie én de exacte code voordat je iets aanmaakt.');
+
+    const first = stepCard(doc, 1, 'Open Asset modellen', 83, 50);
+    doc.text(first.bodyX, 98, [
+        'Open vanaf het dashboard:',
+        'Instellingen > Asset modellen.',
+        '',
+        'Hier staan herbruikbare Basismodellen;',
+        'fysieke assets staan onder Apparaten.',
+    ], { size: 2.45, fill: colors.muted, lh: 3.25 });
+    visual(doc, 'list', '1A', 'Open Instellingen en kies Asset modellen.',
+        { x: 103, y: 88, w: 85, h: 40 },
+        { x: 0, y: 480, w: 650, h: 300 },
+        [{ x: 13, y: 681, w: 170, h: 33, padding: 4, target: 'Asset modellen' }]);
+
+    const second = stepCard(doc, 2, 'Controleer naam en code op duplicaten', 140, 102);
+    doc.text(second.bodyX, 153, [
+        '2A Zoek bij Asset modellen naar fabrikant + product + generatie.',
+        '2B Open daarna onder Instellingen de aparte pagina Model Numbers en zoek daar de volledige geprinte code.',
+        'Controleer beide resultaten voordat je iets aanmaakt.',
+    ], { size: 1.98, fill: colors.muted, lh: 2.55 });
+    visual(doc, 'list', '2A', 'Zoek eerst het Basismodel op fabrikant, product en generatie.',
+        { x: 23, y: 163, w: 166, h: 37 },
+        { x: 230, y: 100, w: 1135, h: 275 },
+        [{ x: 782, y: 185, w: 186, h: 36, padding: 4, target: 'Zoekveld Basismodel' }]);
+    visual(doc, 'numberSearch', '2B', 'Open de aparte pagina Model Numbers en zoek daar de complete fabrikantcode.',
+        { x: 23, y: 206, w: 166, h: 30 },
+        { x: 55, y: 100, w: 1295, h: 220 },
+        [
+            { x: 1095, y: 112, w: 255, h: 42, padding: 4, target: 'Globaal zoekveld exacte code' },
+            { x: 66, y: 205, w: 830, h: 82, padding: 3, target: 'Basismodel, code en label in zoekresultaat' },
+        ], { fit: 'cover' });
+
+    continuationFooter(doc, 'kies de juiste bestaande of nieuwe route.', [
+        guideReference('CAT-00', { width: 52 }),
+        guideReference('CAT-06', { width: 69 }),
+    ], 1, 5);
+    return doc.render();
+}
+
 function cat01Page2() {
     const def = definitions['CAT-01'];
     const doc = docFor('cat01-page2');
@@ -1295,6 +1433,46 @@ function cat01Page2() {
     doc.text(29, 201, 'C Basismodel ontbreekt', { size: 2.75, weight: 900, fill: catColor });
     doc.text(29, 208, ['Gebruik de + alleen als fabrikant, product en generatie', 'werkelijk ontbreken. Ga daarna naar stap 4.'], { size: 2.05, fill: colors.muted, lh: 2.7 });
     visual(doc, 'list', '3B', 'De + maakt een nieuw Basismodel.',
+        { x: 106, y: 199, w: 77, h: 25 },
+        { x: 660, y: 155, w: 705, h: 110 },
+        [{ x: 1135, y: 185, w: 39, h: 36, padding: 4, target: 'Create model plus' }],
+        { captionHeight: 5, fit: 'contain' });
+
+    doc.text(23, 237, 'Andere geprinte SKU-code = ander exact modelnummer.', { size: 1.9, weight: 900, fill: catColor });
+    doc.text(105, 237, 'Later vervangen RAM/opslag = componentwijziging op het asset.', { size: 1.82, weight: 900, fill: componentColor });
+
+    continuationFooter(doc, 'maak alleen een ontbrekend Basismodel.', [
+        guideReference('CAT-00', { width: 52 }),
+        guideReference('CAT-06', { width: 69 }),
+    ], 2, 5);
+    return doc.render();
+}
+
+function cat01V5Page2() {
+    const def = definitions['CAT-01'];
+    const doc = docFor('cat01-v5-page2');
+    header(doc, def, 2, 5, cat01Context());
+    cat01StageHeading(doc, 2, 'Kies een van drie routes', 'Wat al bestaat bepaalt waar je verdergaat; niet iedere variant vraagt een nieuw Basismodel.');
+
+    stepCard(doc, 3, 'Kies het juiste resultaat van je zoekactie', 83, 160);
+
+    card(doc, 23, 96, 166, 27, { fill: catSoft, stroke: catColor, component: 'route-card' });
+    doc.text(29, 104, 'A Exacte code bestaat al', { size: 2.75, weight: 900, fill: catColor });
+    doc.text(29, 111, ['Open en controleer de bestaande rij. Maak niets nieuws.', 'Ga verder bij stap 7.'], { size: 2.4, fill: colors.muted, lh: 3.1 });
+
+    card(doc, 23, 129, 166, 58, { fill: catSoft, stroke: catColor, component: 'route-card' });
+    doc.text(29, 137, 'B Basismodel bestaat; exacte code ontbreekt', { size: 2.75, weight: 900, fill: catColor });
+    doc.text(29, 144, ['Controleer fabrikant, product en generatie.', 'Kies daarna Create Model Number en ga naar stap 5.'], { size: 2.35, fill: colors.muted, lh: 3.05 });
+    visual(doc, 'detail', '3A', 'Gebruik het bestaande Basismodel als product en generatie gelijk zijn.',
+        { x: 104, y: 136, w: 79, h: 43 },
+        { x: 0, y: 80, w: 1050, h: 426 },
+        [{ x: 870, y: 177, w: 142, h: 31, padding: 4, target: 'Create Model Number' }],
+        { captionHeight: 5.5, fit: 'contain' });
+
+    card(doc, 23, 193, 166, 38, { fill: colors.faint, stroke: colors.line, component: 'route-card' });
+    doc.text(29, 201, 'C Maak een nieuw Basismodel', { size: 2.75, weight: 900, fill: catColor });
+    doc.text(29, 208, ['Alleen als fabrikant, product en generatie werkelijk ontbreken.', 'Gebruik de + en ga naar stap 4: Basismodel invullen.'], { size: 2.3, fill: colors.muted, lh: 3 });
+    visual(doc, 'list', '3B', 'De + opent stap 4: een nieuw Basismodel maken.',
         { x: 106, y: 199, w: 77, h: 25 },
         { x: 660, y: 155, w: 705, h: 110 },
         [{ x: 1135, y: 185, w: 39, h: 36, padding: 4, target: 'Create model plus' }],
@@ -1395,15 +1573,62 @@ function cat01Page4() {
     return doc.render();
 }
 
+function cat01V5Page4() {
+    const def = definitions['CAT-01'];
+    const doc = docFor('cat01-v5-page4');
+    header(doc, def, 4, 5, cat01Context());
+    cat01StageHeading(doc, 4, 'Voeg de exacte fabrikantvariant toe', 'De code is de identiteit; het label beschrijft de standaardconfiguratie van die variant.');
+
+    const step5 = stepCard(doc, 5, 'Open Create Model Number', 83, 46);
+    doc.text(step5.bodyX, 98, ['Open het opgeslagen of hergebruikte Basismodel.', 'Kies Create Model Number boven de exacte rijen.'], { size: 2.4, fill: colors.muted, lh: 3.15 });
+    visual(doc, 'detail', '5A', 'Open de exacte variant vanaf het juiste Basismodel.',
+        { x: 105, y: 90, w: 83, h: 32 },
+        { x: 0, y: 80, w: 1050, h: 426 },
+        [{ x: 870, y: 177, w: 142, h: 31, padding: 4, target: 'Create Model Number' }],
+        { captionHeight: 5.5 });
+
+    stepCard(doc, 6, 'Vul code en standaardlabel in', 136, 105);
+    card(doc, 23, 151, 63, 59, { fill: catSoft, stroke: catColor, component: 'field-summary' });
+    doc.text(29, 160, 'Code', { size: 2.25, weight: 900, fill: catColor });
+    doc.text(29, 166, ['Exacte fabrikant-/SKU-code', 'inclusief suffix.', 'Voorbeeld: 2E9F8EA#ABH'], { size: 1.95, fill: colors.muted, lh: 2.55 });
+    doc.text(29, 179, 'Aa', { size: 2.25, weight: 900, fill: catColor });
+    doc.text(39, 179, 'alleen voor bewust kleine letters', { size: 1.85, fill: colors.muted });
+    doc.text(29, 188, 'Label', { size: 2.25, weight: 900, fill: catColor });
+    doc.text(29, 194, ['Standaardconfiguratie van deze code:', 'product + processor + RAM + opslag.'], { size: 1.9, fill: colors.muted, lh: 2.5 });
+    doc.text(29, 203, ['Wijkt één asset af? Leg dat vast op het asset;', 'maak daarvoor geen nieuw modelnummer.'], { size: 1.72, weight: 900, fill: colors.orange, lh: 2.25 });
+
+    visual(doc, 'numberCreate', '6A', 'Code is exact; Label beschrijft de standaardconfiguratie.',
+        { x: 92, y: 145, w: 96, h: 70 },
+        { x: 380, y: 150, w: 760, h: 380 },
+        [
+            { x: 508, y: 301, w: 470, h: 35, padding: 4, target: 'Exacte code' },
+            { x: 508, y: 385, w: 470, h: 35, padding: 4, target: 'Herkenningslabel' },
+            { x: 1018, y: 478, w: 93, h: 34, padding: 4, target: 'Opslaan' },
+        ],
+        { fit: 'contain' });
+    callout(doc, 92, 216, 96, ['Geen serienummer, Product ID, Inbit-tag', 'of zelfgemaakte fabrikantcode.'], { height: 15, title: 'Identiteiten niet verwisselen' });
+    doc.text(23, 235, 'De eerste exacte code wordt automatisch de standaardrij.', { size: 1.95, weight: 900, fill: catColor });
+    doc.guideChip(119, 232, 69, guideReference('CAT-05'));
+
+    continuationFooter(doc, 'controleer de opgeslagen identiteit.', [
+        guideReference('CAT-00', { width: 52 }),
+        guideReference('CAT-05', { width: 69 }),
+    ], 4, 5);
+    return doc.render();
+}
+
 function cat01Page5() {
     const def = definitions['CAT-01'];
     const doc = docFor('cat01-page5');
+    const isV5 = cat01Version === '5';
     header(doc, def, 5, 5, cat01Context());
     cat01StageHeading(doc, 5, 'Controleer en kies het volgende object', 'Bekijk Basismodel, exacte rij en informatiepaneel voordat je specificaties of assets toevoegt.');
 
     const step7 = stepCard(doc, 7, 'Controleer de opgeslagen catalogusidentiteit', 83, 105);
-    doc.text(step7.bodyX, 98, ['Basismodel: product + generatie; juiste categorie en fabrikant.', 'Modelnummer: complete code + suffix; duidelijk label; actief; geen duplicaat.'], { size: 2.05, fill: colors.muted, lh: 2.8 });
-    visual(doc, 'detail', '7A', 'Controleer code, label en actieve/standaardstatus.',
+    doc.text(step7.bodyX, 98, isV5
+        ? ['Basismodel: product + generatie; juiste categorie en fabrikant.', 'Modelnummer: complete code + suffix; label met standaard processor, RAM en opslag; actief; geen duplicaat.']
+        : ['Basismodel: product + generatie; juiste categorie en fabrikant.', 'Modelnummer: complete code + suffix; duidelijk label; actief; geen duplicaat.'], { size: 2.05, fill: colors.muted, lh: 2.8 });
+    visual(doc, 'detail', '7A', isV5 ? 'Controleer code, standaardconfiguratie en status.' : 'Controleer code, label en actieve/standaardstatus.',
         { x: 23, y: 111, w: 112, h: 67 },
         { x: 45, y: 92, w: 1015, h: 290 },
         [{ x: 72, y: 235, w: 930, h: 54, padding: 4, target: 'Exact modelnummer en label' }],
@@ -1424,6 +1649,216 @@ function cat01Page5() {
     doc.text(12, 239, ['Kopieer model kopieert geen modelnummers, modelnummerbeelden, specificatiewaarden of verwachte componenten.', 'Controleer ieder onderliggend record handmatig.'], { size: 1.78, weight: 800, fill: colors.orange, lh: 2.35 });
 
     finalFooter(doc, 'Eén juist Basismodel bevat de geverifieerde exacte code zonder duplicaat.', related.cat01, 5, 5);
+    return doc.render();
+}
+
+function cat02Context() {
+    return [
+        { label: 'Rol', value: 'Supervisor' },
+        { label: 'Nodig', value: 'Exact modelnummer + productspecificatie', size: 2.3 },
+        { label: 'Vooraf', value: 'CAT-01 Model en modelnummer aanmaken', guide: guideReference('CAT-01'), size: 2.2 },
+    ];
+}
+
+function cat02Heading(doc, page, title, subtitle) {
+    catalogAdminStageHeading(doc, page, ['Openen', 'Kiezen', 'Attribuut', 'Component', 'Controleren', 'Opslaan'], title, subtitle);
+}
+
+function cat02Page1() {
+    const def = definitions['CAT-02'];
+    const doc = docFor('cat02-page1');
+    header(doc, def, 1, 6, cat02Context());
+    cat02Heading(doc, 1, 'Open en valideer het exacte modelnummer', 'Begin bij het Basismodel en controleer de volledige variant voordat je waarden wijzigt.');
+
+    const step = stepCard(doc, 1, 'Open Edit Spec bij de juiste modelnummerrij', 83, 159);
+    doc.text(step.bodyX, 98, [
+        'Open het Basismodel uit CAT-01 of ga via Instellingen > Asset modellen.',
+        'Vergelijk Basismodel, volledige code met suffix en herkenningslabel. Kies daarna Edit Spec.',
+    ], { size: 2.15, fill: colors.muted, lh: 2.85 });
+    visual(doc, 'detail', '1A', 'Kies Edit Spec in de rij van de exacte fabrikantcode.',
+        { x: 23, y: 111, w: 166, h: 52 },
+        { x: 50, y: 100, w: 980, h: 215 },
+        [{ x: 815, y: 258, w: 61, h: 34, padding: 4, target: 'Edit Spec' }],
+        { fit: 'contain' });
+    visual(doc, 'spec', '1B', 'Controleer de breadcrumb én de geselecteerde modelnummervariant.',
+        { x: 23, y: 169, w: 166, h: 55 },
+        { x: 50, y: 100, w: 1265, h: 260 },
+        [
+            { x: 70, y: 106, w: 1235, h: 40, padding: 2, target: 'Basismodel en exacte variant' },
+            { x: 506, y: 293, w: 474, h: 39, padding: 4, target: 'Model Number selector' },
+        ], { fit: 'contain' });
+    doc.text(23, 233, 'Verkeerde variant geselecteerd? Kies eerst de juiste rij; verander de specificatie niet als workaround.', { size: 1.9, weight: 900, fill: colors.orange });
+
+    continuationFooter(doc, 'bepaal per feit of het direct of via een component hoort.', [
+        guideReference('CAT-00', { width: 52 }),
+        guideReference('CAT-01', { width: 63 }),
+    ], 1, 6);
+    return doc.render();
+}
+
+function cat02Page2() {
+    const def = definitions['CAT-02'];
+    const doc = docFor('cat02-page2');
+    header(doc, def, 2, 6, cat02Context());
+    cat02Heading(doc, 2, 'Kies waar ieder feit thuishoort', 'Gebruik één bron per feit: direct op de variant óf afgeleid uit een verwacht component.');
+
+    stepCard(doc, 2, 'Kies directe waarde of verwacht component', 83, 159);
+    card(doc, 23, 96, 80, 45, { fill: catSoft, stroke: catColor, component: 'decision-card' });
+    doc.familyBadge(29, 103, 'CAT', { radius: 2.8, fontSize: 1.5, fill: colors.white });
+    doc.text(35, 103.5, 'Direct attribuut', { size: 2.65, weight: 900, fill: catColor });
+    doc.text(28, 113, [
+        'Feit van de hele fabrikantvariant.',
+        'Niet los vervangbaar of telbaar.',
+        'Standaard voor assets met deze code.',
+        'Voorbeeld: Introductiejaar = 2021.',
+    ], { size: 2.12, fill: colors.muted, lh: 2.85 });
+    doc.text(28, 134, 'Ga verder op pagina 3.', { size: 1.78, weight: 900, fill: catColor });
+
+    card(doc, 109, 96, 80, 45, { fill: componentSoft, stroke: componentColor, component: 'decision-card' });
+    doc.familyBadge(115, 103, 'CMP', { radius: 2.8, fontSize: 1.4, fill: colors.white });
+    doc.text(121, 103.5, 'Verwacht component', { size: 2.65, weight: 900, fill: componentColor });
+    doc.text(114, 113, [
+        'Afzonderlijk onderdeel in de fabrieksbaseline.',
+        'Vervangbaar, telbaar of inspecteerbaar.',
+        'Wordt later als onderdeel gecontroleerd.',
+        'Voorbeeld: RAM 8GB DDR4, 1 stuk.',
+    ], { size: 2.05, fill: colors.muted, lh: 2.8 });
+    doc.text(114, 134, 'Ga verder op pagina 4.', { size: 1.78, weight: 900, fill: componentColor });
+
+    visual(doc, 'spec', '2A', 'Directe waarden staan bij Selected Attributes en Attribute Details.',
+        { x: 23, y: 146, w: 80, h: 55 },
+        { x: 545, y: 365, w: 590, h: 385 }, [], { fit: 'contain' });
+    visual(doc, 'specExpectedStart', '2B', 'Afzonderlijke onderdelen staan onder Expected Components.',
+        { x: 109, y: 146, w: 80, h: 55 },
+        { x: 285, y: 545, w: 845, h: 315 }, [], { fit: 'contain', badgeColor: componentColor });
+
+    card(doc, 23, 207, 80, 23, { fill: colors.faint, stroke: colors.line, component: 'return-route-card' });
+    doc.guideChip(28, 212, 57, guideReference('CAT-03'));
+    doc.text(28, 224, 'Betekenis ontbreekt? Maak eerst de attribuutdefinitie.', { size: 1.5, fill: colors.muted });
+    card(doc, 109, 207, 80, 23, { fill: colors.faint, stroke: colors.line, component: 'return-route-card' });
+    doc.guideChip(114, 212, 63, guideReference('CAT-04'));
+    doc.text(114, 224, 'Onderdeeltype ontbreekt? Maak eerst de componentdefinitie.', { size: 1.45, fill: colors.muted });
+    doc.text(23, 238, 'Leg RAM niet óók direct vast wanneer het verwachte RAM-component die waarde al levert.', { size: 1.9, weight: 900, fill: colors.orange });
+
+    continuationFooter(doc, 'voeg de gekozen directe waarde of het verwachte component toe.', [
+        guideReference('CAT-03', { width: 57 }),
+        guideReference('CAT-04', { width: 63 }),
+    ], 2, 6);
+    return doc.render();
+}
+
+function cat02Page3() {
+    const def = definitions['CAT-02'];
+    const doc = docFor('cat02-page3');
+    header(doc, def, 3, 6, cat02Context());
+    cat02Heading(doc, 3, 'Voeg een direct attribuut toe', 'Gebruik een bestaande definitie en vul de waarde in volgens het getoonde invoertype.');
+
+    const step = stepCard(doc, 3, 'Zoek, voeg toe en vul de waarde in', 83, 159);
+    doc.text(step.bodyX, 98, 'Voorbeeld: voeg 5G-ondersteuning toe als direct feit van deze exacte variant.', { size: 2.15, fill: colors.muted });
+    visual(doc, 'specAttributeAdd', '3A', 'Zoek bij Available Attributes en kies de + bij de juiste definitie.',
+        { x: 23, y: 108, w: 166, h: 57 },
+        { x: 285, y: 370, w: 855, h: 365 },
+        [
+            { x: 294, y: 402, w: 258, h: 35, padding: 3, target: 'Available Attributes zoeken' },
+            { x: 507, y: 442, w: 31, h: 31, padding: 4, target: 'Attribuut toevoegen' },
+        ], { fit: 'contain' });
+    visual(doc, 'specAttributeAdd', '3B', 'Selecteer de nieuwe rij en vul rechts de waarde in.',
+        { x: 23, y: 171, w: 166, h: 53 },
+        { x: 555, y: 425, w: 585, h: 330 },
+        [
+            { x: 580, y: 678, w: 256, h: 63, padding: 3, target: 'Nieuwe geselecteerde rij' },
+            { x: 864, y: 455, w: 258, h: 38, padding: 4, target: 'Waarde volgens datatype' },
+        ], { fit: 'contain' });
+    doc.text(23, 232, ['Up en Down veranderen alleen de weergavevolgorde.', 'Een nieuw, nog niet opgeslagen attribuut kun je met de rode X uit deze bewerking halen.'], { size: 1.72, weight: 800, fill: catColor, lh: 2.25 });
+
+    continuationFooter(doc, 'voeg zo nodig een verwacht component toe en controleer daarna de bronnen.', [
+        guideReference('CAT-03', { width: 57 }),
+        guideReference('CAT-06', { width: 69 }),
+    ], 3, 6);
+    return doc.render();
+}
+
+function cat02Page4() {
+    const def = definitions['CAT-02'];
+    const doc = docFor('cat02-page4');
+    header(doc, def, 4, 6, cat02Context());
+    cat02Heading(doc, 4, 'Voeg een verwacht component toe', 'Beschrijf de fabrieksbaseline met een bestaande componentdefinitie en het verwachte aantal.');
+
+    const step = stepCard(doc, 4, 'Voeg de componentdefinitie aan de baseline toe', 83, 159);
+    doc.text(step.bodyX, 98, 'Scroll naar Expected Components en voeg één rij toe voor elk afzonderlijk verwacht onderdeeltype.', { size: 2.05, fill: colors.muted });
+    visual(doc, 'specExpectedStart', '4A', 'Kies Add Expected Component onder de bestaande rijen.',
+        { x: 23, y: 108, w: 166, h: 57 },
+        { x: 285, y: 545, w: 845, h: 315 },
+        [{ x: 302, y: 733, w: 192, h: 40, padding: 4, target: 'Add Expected Component' }],
+        { fit: 'contain', badgeColor: componentColor });
+    visual(doc, 'specExpectedAdd', '4B', 'Selecteer de Catalog Definition en vul het aantal bij Stks in.',
+        { x: 23, y: 171, w: 166, h: 53 },
+        { x: 285, y: 650, w: 845, h: 215 },
+        [
+            { x: 388, y: 791, w: 455, h: 40, padding: 4, target: 'Catalog Definition' },
+            { x: 866, y: 791, w: 98, h: 40, padding: 4, target: 'Stks' },
+        ], { fit: 'contain', badgeColor: componentColor });
+    doc.text(23, 231, ['De rij is in deze pagina standaard verplicht; er is geen aparte verplicht/optioneel-keuze.', 'Dit maakt nog geen fysiek component, tag of serienummer aan.'], { size: 1.72, weight: 800, fill: componentColor, lh: 2.25 });
+
+    continuationFooter(doc, 'controleer afgeleide waarden en dubbele invoer.', [
+        guideReference('CAT-04', { width: 63 }),
+        guideReference('CMP-02', { width: 75, row: 2 }),
+    ], 4, 6);
+    return doc.render();
+}
+
+function cat02Page5() {
+    const def = definitions['CAT-02'];
+    const doc = docFor('cat02-page5');
+    header(doc, def, 5, 6, cat02Context());
+    cat02Heading(doc, 5, 'Controleer afgeleide waarden en overlap', 'Een component kan attributen en verwachte onderliggende onderdelen aan de modelspecificatie leveren.');
+
+    stepCard(doc, 5, 'Laat ieder feit door één juiste bron leveren', 83, 159);
+    visual(doc, 'specRoster', '5A', 'Bekijk Derived attributes en Expected child structure bij ieder verwacht component.',
+        { x: 23, y: 95, w: 166, h: 76 },
+        { x: 285, y: 110, w: 845, h: 625 },
+        [{ x: 316, y: 335, w: 781, h: 190, padding: 4, target: 'Afgeleide waarden en onderliggende structuur' }],
+        { fit: 'contain', badgeColor: componentColor });
+    visual(doc, 'specConflict', '5B', 'Een conflict noemt het directe feit en de afwijkende componentwaarde.',
+        { x: 23, y: 177, w: 166, h: 48 },
+        { x: 285, y: 270, w: 845, h: 225 },
+        [{ x: 306, y: 292, w: 803, h: 74, padding: 4, target: 'Specificatieconflict' }],
+        { fit: 'contain' });
+    doc.text(23, 229, 'De componentwaarde wordt gebruikt. Verwijder de nieuwe dubbele directe invoer of corrigeer de gekozen componentdefinitie.', { size: 1.7, weight: 900, fill: colors.orange });
+    doc.guideChip(23, 233, 67, guideReference('CAT-05'));
+    doc.text(93, 237, 'Bestaande opgeslagen rij laten verwijderen: Admin-route.', { size: 1.65, fill: colors.muted });
+
+    continuationFooter(doc, 'sla de gecontroleerde modelspecificatie op en verifieer het resultaat.', [
+        guideReference('CAT-04', { width: 63 }),
+        guideReference('CAT-05', { width: 67 }),
+    ], 5, 6);
+    return doc.render();
+}
+
+function cat02Page6() {
+    const def = definitions['CAT-02'];
+    const doc = docFor('cat02-page6');
+    header(doc, def, 6, 6, cat02Context());
+    cat02Heading(doc, 6, 'Sla op en controleer het resultaat', 'Controleer na Opslaan opnieuw het exacte modelnummer, de directe waarden en de verwachte componenten.');
+
+    const step = stepCard(doc, 6, 'Controleer, sla op en open de opgeslagen baseline', 83, 159);
+    doc.text(step.bodyX, 98, 'Controleer eerst modelnummer, waarden, componentdefinities en aantallen. Kies daarna Opslaan.', { size: 2.05, fill: colors.muted });
+    visual(doc, 'specSave', '6A', 'Kies Opslaan onderaan de gecontroleerde modelspecificatie.',
+        { x: 23, y: 108, w: 166, h: 57 },
+        { x: 285, y: 420, w: 845, h: 445 },
+        [{ x: 1015, y: 807, w: 99, h: 42, padding: 4, target: 'Opslaan' }],
+        { fit: 'contain' });
+    visual(doc, 'specSaved', '6B', 'Controleer de bevestiging en opnieuw de geselecteerde exacte variant.',
+        { x: 23, y: 171, w: 166, h: 54 },
+        { x: 50, y: 100, w: 1300, h: 340 },
+        [
+            { x: 64, y: 198, w: 1288, h: 53, padding: 4, target: 'Opslagbevestiging' },
+            { x: 505, y: 365, w: 477, h: 39, padding: 4, target: 'Exact modelnummer' },
+        ], { fit: 'contain' });
+    doc.text(23, 232, 'Registreer daarna pas het fysieke apparaat; de baseline zelf maakt geen asset of componentrecord.', { size: 1.75, weight: 900, fill: assetColor });
+    doc.guideChip(132, 228.5, 56, guideReference('AST-03'));
+
+    finalFooter(doc, 'Het juiste modelnummer heeft opgeslagen directe waarden en een niet-dubbele verwachte componentbaseline.', related.cat02, 6, 6);
     return doc.render();
 }
 
@@ -1716,6 +2151,63 @@ function cat04Page3() {
     return doc.render();
 }
 
+function cat04V2Page2() {
+    const def = definitions['CAT-04'];
+    const doc = docFor('cat04-page2');
+    header(doc, def, 2, 6, cat04Context());
+    cat04Heading(doc, 2, 'Leg de herbruikbare identiteit vast', 'Vul alleen geverifieerde kenmerken in; laat een optioneel veld leeg in plaats van te gokken.');
+
+    stepCard(doc, 2, 'Vul de componentdefinitie in', 83, 159);
+    visual(doc, 'componentDefinitionIdentity', '2A', 'De definitie beschrijft een type onderdeel, niet één getagd fysiek exemplaar.',
+        { x: 23, y: 94, w: 166, h: 76 },
+        { x: 50, y: 155, w: 1300, h: 505 }, [], { fit: 'contain' });
+
+    const fields = [
+        [23, 176, 'Name', 'herkenbaar type fysiek onderdeel'],
+        [79, 176, 'Part Code', 'fabrikant- of leverancierscode'],
+        [135, 176, 'Model Number', 'modelcode van het onderdeel'],
+        [23, 202, 'Category', 'categorie van dit onderdeel'],
+        [79, 202, 'Manufacturer', 'werkelijke fabrikant of leeg'],
+        [135, 202, 'Summary / Label', 'extra herkenning; voorkom herhaling'],
+    ];
+    fields.forEach(([x, y, label, body]) => {
+        card(doc, x, y, 50, 20, { fill: componentSoft, stroke: componentColor, component: 'identity-field-card' });
+        doc.text(x + 4, y + 7, label, { size: 2.05, weight: 900, fill: componentColor });
+        doc.text(x + 4, y + 14, body, { size: 1.85, fill: colors.muted });
+    });
+    doc.text(23, 230, ['Active toont de huidige status; lifecycle wijzigen hoort niet bij deze route.', 'Gebruik nooit een Inbit-tag of uniek serienummer als definitienaam.'], { size: 1.78, weight: 800, fill: colors.orange, lh: 2.35 });
+
+    continuationFooter(doc, 'voeg alleen relevante verwachte onderdelen toe.', [
+        guideReference('CAT-03', { width: 57 }),
+        guideReference('CAT-05', { width: 67 }),
+    ], 2, 6);
+    return doc.render();
+}
+
+function cat04V2Page3() {
+    const def = definitions['CAT-04'];
+    const doc = docFor('cat04-page3');
+    header(doc, def, 3, 6, cat04Context());
+    cat04Heading(doc, 3, 'Voeg verwachte onderdelen toe', 'Gebruik bestaande onderdeeldefinities voor onderdelen die normaal binnen deze definitie verwacht worden.');
+
+    stepCard(doc, 3, 'Stel de verwachte onderdelen in', 83, 159);
+    visual(doc, 'componentDefinitionChildren', '3A', 'Elke rij bevat definitie, herkenningsnaam, aantal, Required en optionele Notes.',
+        { x: 23, y: 94, w: 166, h: 76 },
+        { x: 50, y: 100, w: 1300, h: 430 }, [], { fit: 'contain' });
+
+    simpleRow(doc, 23, 176, 80, 'Component Definition', ['Zoek en kies een bestaande', 'herbruikbare onderdeeldefinitie.'], { h: 20, icon: '1', color: componentColor, fill: componentSoft, stroke: componentColor, bodySize: 1.62, lh: 2.1, centered: true });
+    simpleRow(doc, 109, 176, 80, 'Expected Name', ['Leeg gebruikt de definitienaam;', 'vul alleen duidelijkere herkenning in.'], { h: 20, icon: '2', color: componentColor, fill: componentSoft, stroke: componentColor, bodySize: 1.57, lh: 2.1, centered: true });
+    simpleRow(doc, 23, 201, 80, 'Quantity + Required', ['Quantity is het normale aantal.', 'Laat Required in deze werkwijze aan.'], { h: 21, icon: '3', color: componentColor, fill: componentSoft, stroke: componentColor, bodySize: 1.67, lh: 2.2, centered: true });
+    simpleRow(doc, 109, 201, 80, 'Notes', ['Optionele herkenning of plaatsing;', 'geen vervanging voor een attribuut.'], { h: 21, icon: '4', color: componentColor, fill: componentSoft, stroke: componentColor, bodySize: 1.67, lh: 2.2, centered: true });
+    doc.text(23, 230, ['Voeg alleen onderdelen toe die normaal altijd aanwezig horen te zijn; laat Required aangevinkt.', 'Een optioneel of per apparaat wisselend onderdeel hoort niet in deze verwachte structuur.'], { size: 1.72, weight: 800, fill: colors.orange, lh: 2.3 });
+
+    continuationFooter(doc, 'voeg waarden uit bestaande attribuutdefinities toe.', [
+        guideReference('CAT-03', { width: 57 }),
+        guideReference('CAT-04', { width: 63 }),
+    ], 3, 6);
+    return doc.render();
+}
+
 function cat04Page4() {
     const def = definitions['CAT-04'];
     const doc = docFor('cat04-page4');
@@ -1797,6 +2289,7 @@ const guides = {
         pages: pagesForVersion('CAT-00', cat00Version, {
             7: [cat00Page1, cat00Page2, cat00Page3, cat00Page4, cat00Page5, cat00Page6, cat00Page7, cat00Page8],
             8: [cat00V8Page1, cat00V8Page2, cat00V8Page3, cat00V8Page4, cat00V8Page5, cat00V8Page6],
+            9: [cat00V8Page1, cat00V8Page2, cat00V8Page3, cat00V8Page4, cat00V8Page5, cat00V8Page6],
         }),
         outputFile: `CAT-00-catalogus-begrijpen-v${cat00Version}-draft.pdf`,
         evidence: [
@@ -1813,9 +2306,28 @@ const guides = {
         pages: pagesForVersion('CAT-01', cat01Version, {
             3: [cat01Page1, cat01Page2, cat01Page3, cat01Page4, cat01Page5],
             4: [cat01V4Page1, cat01Page2, cat01Page3, cat01Page4, cat01Page5],
+            5: [cat01V5Page1, cat01V5Page2, cat01Page3, cat01V5Page4, cat01Page5],
         }),
         outputFile: `CAT-01-model-en-modelnummer-aanmaken-v${cat01Version}-draft.pdf`,
-        evidence: [sourceIds.list, ...(cat01Version === '4' ? [sourceIds.numberSearch] : []), sourceIds.detail, sourceIds.create, sourceIds.numberCreate],
+        evidence: [sourceIds.list, ...(['4', '5'].includes(cat01Version) ? [sourceIds.numberSearch] : []), sourceIds.detail, sourceIds.create, sourceIds.numberCreate],
+    },
+    'CAT-02': {
+        definition: definitions['CAT-02'],
+        pages: pagesForVersion('CAT-02', cat02Version, {
+            1: [cat02Page1, cat02Page2, cat02Page3, cat02Page4, cat02Page5, cat02Page6],
+        }),
+        outputFile: `CAT-02-modelspecificatie-opbouwen-v${cat02Version}-draft.pdf`,
+        evidence: [
+            sourceIds.detail,
+            sourceIds.spec,
+            sourceIds.specAttributeAdd,
+            sourceIds.specExpectedStart,
+            sourceIds.specExpectedAdd,
+            sourceIds.specConflict,
+            sourceIds.specSave,
+            sourceIds.specRoster,
+            sourceIds.specSaved,
+        ],
     },
     'CAT-03': {
         definition: definitions['CAT-03'],
@@ -1836,6 +2348,7 @@ const guides = {
         definition: definitions['CAT-04'],
         pages: pagesForVersion('CAT-04', cat04Version, {
             1: [cat04Page1, cat04Page2, cat04Page3, cat04Page4, cat04Page5, cat04Page6],
+            2: [cat04Page1, cat04V2Page2, cat04V2Page3, cat04Page4, cat04Page5, cat04Page6],
         }),
         outputFile: `CAT-04-componentdefinities-beheren-v${cat04Version}-draft.pdf`,
         evidence: [
@@ -1945,10 +2458,15 @@ async function renderGuide(browser, code, guide) {
         outputs: { htmlPath, proofPdf, repoPdf },
         knownGaps: code === 'CAT-00'
             ? ['CAT-06 source-recording policy remains a product/operations decision.']
+            : code === 'CAT-02'
+                ? ['Removing already-saved specification rows remains an Admin cleanup route planned for CAT-05.']
             : code === 'CAT-03'
                 ? ['Lifecycle cleanup remains planned for CAT-05.']
                 : code === 'CAT-04'
-                    ? ['Browser-inaccessible tracking and placement modes are intentionally excluded.']
+                    ? [
+                        'Browser-inaccessible tracking and placement modes are intentionally excluded.',
+                        'The Required flag is stored and displayed but does not currently enforce separate readiness or exclude unchecked rows from calculated specifications.',
+                    ]
                     : ['CAT-02 is specified but not yet generated.'],
     };
     fs.writeFileSync(path.join(guideDir, 'generation-summary.json'), `${JSON.stringify(summary, null, 2)}\n`, 'utf8');
