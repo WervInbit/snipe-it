@@ -6,13 +6,12 @@ identification, hardware-component traceability, diagnostic and operational
 workflows, work orders, and evidence-backed sale-readiness decisions.
 
 > [!WARNING]
-> **Status: active pre-V1 development (`v0.9.0-dev`).** Automated application
-> gates and the Supervisor product-setup authorization contract are green, but
-> final candidate promotion and owner-operated release acceptance are not.
-> No revision has been approved as a public or generally supported release.
-> See the
-> [current V1 readiness status](docs/v1-release-readiness-status-2026-08-25.md)
-> for exact evidence and remaining blockers.
+> **Status: V1.0.0 internal production baseline; active post-V1 development
+> (`v1.1.0-dev`).** V1.0.0 identifies the exact source revision and image
+> digests deployed on 2026-09-01. It is not a generally supported public
+> distribution. See the
+> [V1 release record](docs/v1-release-readiness-status-2026-09-03.md) for the
+> immutable identities, evidence, accepted limitations, and follow-up work.
 
 ## Product Contract
 
@@ -94,31 +93,39 @@ baseline, but its result is currently environment-dependent and the owner has
 deferred it until after V1. It is not invoked by the V1 quality workflow and is
 not a release gate.
 
-The exact production app/web images have passed content and blocking security
-checks and are running in the populated rehearsal after additive role upgrade
-and a complete cold restart with unchanged database/upload fingerprints. This
-is not yet a V1 release: the remaining gates require owner-operated evidence,
-not another code-path assertion.
+The qualified production app/web images were migrated onto the data-bearing
+temporary production server on 2026-09-01. The controlled cutover preserved
+database and upload parity, the four-role browser permission matrix passed, and
+the owner subsequently signed in with an existing migrated password. A
+2026-09-03 read-only check found all seven services healthy, no pending
+migrations, and no failed jobs.
 
-- complete the browser/operator matrix, including Supervisor product setup and
-  Admin-only destructive lifecycle actions, and verify one migrated user's
-  existing password without sharing it;
-- repeat the now-green
-  [local production-profile rehearsal](docs/v1-production-profile-rehearsal-2026-08-13.md)
-  in the managed release environment with the explicit mail-disabled profile
-  (or later validated real TLS/SMTP), monitoring, and off-host
-  database/upload restore;
-- resolve the remaining catalog placeholders and the product/operator
-  decisions listed in `TODO.md`;
-- cut release metadata from a reviewed immutable commit rather than from a
-  dirty worktree.
+A refreshed 2026-09-03 dependency audit found newly disclosed Livewire and
+JavaScript build-graph advisories. The current post-V1 source updates Livewire
+and the affected locked JavaScript packages, passes the supported non-LDAP
+suite, and serves the refreshed Livewire client successfully on `dev.inbit`.
+Those changes are not part of the immutable V1.0.0 production baseline and
+must be qualified before a later patch or minor release is deployed.
+
+- complete one representative migrated-account data/file workflow and continue
+  aligning the supported paths with the separately maintained operator guides;
+- commit the dependency/CI refresh, freeze a post-V1 candidate, rerun the
+  MariaDB and production-image gates, and publish new immutable image digests;
+- validate backup/restore, monitoring, capacity, and TLS/proxy ownership on the
+  final server before moving the retained data there; and
+- name the long-term release, rollback, and incident owners.
+
+The remaining synthesized catalog identifiers are demo-only and already
+excluded from current production seeding. Five unused legacy rows remain in the
+migrated database and may be explicitly deprecated or replaced as data cleanup;
+they are not a V1 implementation blocker.
 
 Do not use the historical
 [2026-07-21 audit](docs/v1-release-readiness-audit-2026-07-21.md) as the current
 state: it records the defects as originally found. The dated current status
 maps each finding to its repair or remaining release gate.
 
-## Supported V1 Target
+## Supported V1.0.0 Boundary
 
 - PHP 8.2
 - Laravel 11
@@ -243,9 +250,9 @@ of these supported profiles. For isolated single-host deployments without an
 organization registry, `docker-compose.production.registry.yml` provides a
 loopback-only, digest-preserving offline-transfer target.
 
-It is a deployable foundation, not proof of release readiness. Follow the
-[production deployment runbook](docs/production-deployment.md) and complete its
-external rehearsal before using a V1 tag.
+It is a deployable foundation, not proof that a future revision is ready.
+Follow the [production deployment runbook](docs/production-deployment.md) and
+repeat the required qualification before assigning or deploying a later tag.
 
 The inherited `install.sh`, `snipeit.sh`, `upgrade.php`, Vagrant, Heroku, and
 alternate release-download Docker paths are not supported for this fork. The
@@ -281,7 +288,8 @@ audits rather than relying on this snapshot.
 
 ## Documentation
 
-- [Current V1 readiness status](docs/v1-release-readiness-status-2026-08-25.md)
+- [V1.0.0 release record](docs/v1-release-readiness-status-2026-09-03.md)
+- [V1.0.0 release notes](docs/releases/v1.0.0.md)
 - [Production-profile rehearsal evidence](docs/v1-production-profile-rehearsal-2026-08-13.md)
 - [Historical V1 audit](docs/v1-release-readiness-audit-2026-07-21.md)
 - [Fork notes](docs/fork-notes.md)

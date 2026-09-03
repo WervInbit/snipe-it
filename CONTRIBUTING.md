@@ -1,9 +1,10 @@
 # Contributing To The Inbit Fork
 
-This repository is an independent pre-V1 refurbishment product derived from
-Snipe-IT. Contributions must follow this fork's contracts and release plan;
-upstream Snipe-IT contribution or installation guidance is not authoritative
-for fork-specific behavior.
+This repository is an independent refurbishment product derived from Snipe-IT.
+V1.0.0 is the retrospectively designated 2026-09-01 production baseline; the
+current branch contains post-V1 work. Contributions must follow this fork's
+contracts and release plan. Upstream Snipe-IT contribution or installation
+guidance is not authoritative for fork-specific behavior.
 
 The [Agent Handbook](AGENTS.md) is the canonical working agreement. The rules
 below summarize the contributor path.
@@ -12,7 +13,7 @@ below summarize the contributor path.
 
 1. Read the latest entry in [PROGRESS.md](PROGRESS.md).
 2. Read [fork notes](docs/fork-notes.md) and the
-   [current V1 readiness status](docs/v1-release-readiness-status-2026-08-25.md).
+   [current V1 readiness status](docs/v1-release-readiness-status-2026-09-03.md).
 3. Check `git status` and preserve changes you did not author.
 4. Add the required dated session stub/addendum described in `AGENTS.md`.
 5. Identify the user-visible invariant, affected permissions/company scope,

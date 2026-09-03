@@ -23,7 +23,8 @@ class ForkDocumentationBoundaryTest extends TestCase
         $this->assertStringContainsString('official Snipe-IT documentation is not the contract', $documentation);
         $this->assertStringContainsString('php artisan route:list --path=api/v1', $documentation);
         $this->assertStringContainsString('does not currently publish an exhaustive OpenAPI schema', $documentation);
-        $this->assertStringContainsString('pre-V1 development build', $documentation);
+        $this->assertStringContainsString('V1.0.0 designates the exact application revision', $documentation);
+        $this->assertStringContainsString('current branch is post-V1 development', $documentation);
     }
 
     public function testReleaseFacingHelpDoesNotLinkToTheUpstreamDocumentationContract(): void
@@ -97,7 +98,7 @@ class ForkDocumentationBoundaryTest extends TestCase
             $contents = file_get_contents($this->basePath . '/' . $document);
 
             $this->assertStringContainsString(
-                'docs/v1-release-readiness-status-2026-08-25.md',
+                'docs/v1-release-readiness-status-2026-09-03.md',
                 $contents,
                 "{$document} must point readers to the current release status.",
             );

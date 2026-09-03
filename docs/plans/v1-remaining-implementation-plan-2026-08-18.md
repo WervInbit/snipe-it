@@ -8,7 +8,7 @@ Decision: no-go until the V1 exit criteria in this document are satisfied
 
 This plan turns the remaining audit findings into a bounded path to V1. It is
 the controlling implementation sequence for release work; detailed audit
-evidence remains in `docs/v1-release-readiness-status-2026-08-25.md` and
+evidence remains in `docs/v1-release-readiness-status-2026-09-03.md` and
 session history remains in `PROGRESS.md`.
 
 The plan deliberately separates release blockers from useful post-V1 product
@@ -78,7 +78,11 @@ Already implemented and not to be redone:
   production container checks, dependency/security checks, and retained prior
   evidence. The current Supervisor-capable tree and its exact production
   images passed renewed full database, image, populated-promotion, and cold-
-  restart gates on 2026-08-25.
+  restart gates on 2026-08-25. A 2026-09-03 dependency refresh updates
+  Livewire and locked JavaScript transitive packages; its supported SQLite,
+  dependency, asset-build, focused Livewire, browser, and CI-contract checks
+  pass, but the dependency change deliberately invalidates the old MariaDB and
+  production-image evidence for the eventual final candidate.
 
 ## Delivery Order
 
@@ -202,10 +206,12 @@ Objective: prove that the existing production-like Snipe-IT environment can be
 upgraded without losing users, password hashes, permissions, history, files,
 or encryption continuity.
 
-Implementation status (2026-08-25): database/upload restore, forward upgrade,
-exact-batch rollback/reapply, image promotion, role upgrade, and full-profile
-cold-restart parity are complete on the populated clone. The owner-operated
-login using one migrated account's unchanged password remains open.
+Implementation status (2026-09-03): database/upload restore, forward upgrade,
+exact-batch rollback/reapply, image promotion, role upgrade, full-profile
+cold-restart parity, and the real data-bearing server cutover are complete.
+The owner confirmed login through `snipe.inbit` using an existing migrated
+account and unchanged password. One representative migrated data/private-file
+workflow remains an owner acceptance action.
 
 Safety boundary:
 
@@ -345,6 +351,14 @@ completed later without blocking the disabled V1 profile.
 Objective: validate that the tested internals match the real V1 workflows and
 manuals.
 
+Implementation status (2026-09-03): temporary Refurbisher, Senior
+Refurbisher, Supervisor, and Admin accounts completed the browser permission
+and direct-route matrix during the controlled production migration. Dashboard
+landing, supported/denied paths, and role-specific workflow visibility matched
+the contract, and all temporary artifacts were removed with parity restored.
+The remaining acceptance is one representative migrated-account data/file
+workflow plus alignment with the separately maintained operator guides.
+
 Tasks:
 
 1. Use representative production-role accounts, not only a superuser.
@@ -379,11 +393,16 @@ or new screenshots are required.
 Objective: produce evidence for one exact source revision rather than combining
 passes from different change batches.
 
-Implementation status (2026-08-25): the current source passed guarded SQLite
+Implementation status (2026-09-03): the deployed candidate passed guarded SQLite
 and MariaDB, dependency/build, production-content, blocking image-security,
 populated promotion, HTTPS, queue/scheduler, and seven-service cold-restart
-gates. Owner browser/credential acceptance and final release control remain
-open, so this is a qualified candidate rather than a V1 release.
+gates. The browser role matrix, real cutover, and migrated-password login are
+also complete. The owner designated that exact deployed source and image pair
+as V1.0.0 on 2026-09-03. Newly disclosed dependency advisories required a
+source and lockfile refresh after that cutover. The refreshed source passes the
+supported SQLite, dependency, browser, and focused configuration gates, but is
+post-V1 development and has not repeated MariaDB or production-image
+qualification for a later release.
 
 Freeze rules:
 
@@ -439,7 +458,7 @@ Dependencies: WP0-WP5 complete.
    application/dependency/image gates; a migration or storage fix also
    invalidates the production-data rehearsal.
 
-## V1 Go/No-Go Checklist
+## V1 Designation And Follow-Up Checklist
 
 - [x] V1 support and privacy matrix approved.
 - [x] License/private-file authorization matrix complete at source and focused-test level.
@@ -449,16 +468,24 @@ Dependencies: WP0-WP5 complete.
 - [x] SMTP mail-disabled implementation complete and excluded from V1 support,
   or the full real-relay checklist passes.
 - [x] Recent production-clone upgrade and rollback rehearsal passes.
-- [ ] Migrated production user authenticates with the existing password hash.
-- [ ] Operator/browser role matrix passes and manuals match.
-- [x] One frozen candidate passes SQLite, MariaDB, syntax, dependency, asset,
-  container, health, backup, and production-profile gates.
-- [ ] README, deployment guide, limitations, release notes, and rollback steps
-  are complete.
-- [ ] Release owner records final go approval for the exact candidate.
+- [x] Migrated production user authenticates with the existing password hash.
+- [x] Browser role/permission matrix passes with representative temporary
+  accounts and cleanup parity.
+- [x] Owner designates deployed commit `1c9131f4c9` and its recorded app/web
+  digests as the internal V1.0.0 baseline.
+- [ ] Post-V1: one representative migrated-account data/file workflow passes
+  and the supported operator manuals match.
+- [ ] Post-V1: the dependency-refreshed candidate passes SQLite, MariaDB,
+  syntax, dependency, asset, container, health, backup, and production-profile
+  gates before a later deployment.
+- [x] README, deployment guide, limitations, release notes, and rollback steps
+  record the V1.0.0 baseline and its accepted limitations.
+- [ ] Post-V1: long-term release, rollback, and incident/security owners are
+  named.
 
-Until all items are checked, the project remains a release candidate rather
-than a V1 release.
+Unchecked items are accepted post-V1 work. They remain mandatory where stated
+before a later deployment or broader support claim, but do not change the
+immutable V1.0.0 designation.
 
 ## Post-V1 Backlog
 

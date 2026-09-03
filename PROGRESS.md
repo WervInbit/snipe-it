@@ -11,6 +11,83 @@
   mutation is authorized by this checkpoint.
 - Session notes:
   `docs/agents/agents-addendum-2026-09-03-v1-continuation-session-init.md`.
+- Confirmed the reusable-deployment commit `fe4d0b4fe8` remains on
+  `origin/master`. The separate guide session has since created local commit
+  `cf13808744`; this V1 session does not amend, reset, stage, or push that
+  guide-owned commit.
+- Rechecked the data-bearing temporary production host read-only. App, web,
+  queue, scheduler, MariaDB, Redis, and TLS edge are healthy; HTTPS login and
+  health succeed; 477 migrations are applied with none pending; the retained
+  17-user/15-active-user, 12-asset, 14-model, 6-profile, 29-item, and zero-
+  failed-job counts match the post-cutover baseline. All recorded backup
+  checksum inventories remain present.
+- One root-owned read-only Tinker probe was correctly blocked when PsySH could
+  not create `/root/.config` on the read-only container filesystem. It changed
+  no application/database data and was replaced with a direct read-only
+  MariaDB query; the resulting known log entry is not a runtime regression.
+- Confirmed all five inherited demo placeholder model numbers remain visible
+  but have zero assets. They retain legacy seeded attributes/templates because
+  the production migration intentionally ran only the additive permission
+  seeder. No live data was changed; optional deprecation/replacement remains an
+  explicit data-cleanup decision rather than a V1 implementation blocker.
+- Added `docs/v1-release-readiness-status-2026-09-03.md` and draft V1.0.0
+  release notes. Updated README, root contributor/security/testing links, the
+  controlling V1 plan, and its documentation-contract test to the new status.
+- The current no-go is no longer caused by a known severity-1/2 application
+  defect. Open gates are one representative migrated data/private-file
+  workflow, separate manual alignment, an exact final commit/build/digest,
+  release ownership/approval, and final-server deployment acceptance.
+- Validation: `git diff --check` passes; checked local Markdown links resolve;
+  guarded in-memory SQLite runs of `ForkDocumentationBoundaryTest` and
+  `ReleaseVersionConfigurationTest` pass 9 tests with 438 assertions. PHPStan
+  was not run by owner decision; no full suite was repeated for this
+  documentation/status-only change.
+- A refreshed dependency audit found newly disclosed advisories after the
+  earlier candidate qualification. Updated Livewire 3.6.4 to 3.8.7 and
+  republished its client assets; updated locked `fast-uri` to 3.1.7 and
+  `postcss-selector-parser` to 6.1.4/7.1.5. Composer validation/patch/audit,
+  npm clean install and complete/production audits, four Node tests, and the
+  production browser-asset build pass with no high/critical policy finding.
+- The complete local PHPUnit invocation passed 2,178 tests and failed only ten
+  LDAP-group tests because the five-week-old app image lacks PHP LDAP
+  constants. The documented guarded non-LDAP run passes 2,170 tests with
+  10,641 assertions. GitHub Actions database jobs now explicitly install LDAP
+  for deterministic full mocked coverage; the affected infrastructure suite
+  passes 8 tests with 154 assertions.
+- Browser smoke testing on `dev.inbit` loaded the refreshed Livewire asset,
+  rendered the importer, and exercised a non-persistent server-backed category
+  form update without a browser warning or error.
+- Provisional production app/web builds pass the repository content verifier;
+  the app reports Livewire 3.8.7 and both images carry Livewire manifest hash
+  `bd51a0a6`. These uncommitted worktree images are build smoke evidence only,
+  not final artifacts; blocking image scans remain for exact-candidate CI.
+- The running temporary-production images remain healthy but predate this
+  dependency refresh. No live service or row changed. A committed exact
+  candidate still needs MariaDB, production-image/security, digest, and
+  deployment qualification before V1 approval.
+- Final checkpoint hygiene passes: local links across the ten changed release
+  documents, YAML parsing for all four edited test workflows, published versus
+  packaged Livewire asset parity, Composer validation/patch/audit, complete and
+  production npm audits, and `git diff --check`. The provisional app/web image
+  contents were also verified, but remain non-release worktree builds.
+- By explicit owner direction, retrospectively designated the exact 2026-09-01
+  deployed source and image pair as the internal V1.0.0 production baseline.
+  The authoritative source is `1c9131f4c9`; exact app/web digests come from the
+  retained off-host post-cutover snapshot. No production access was used.
+- Current dependency/CI changes are now post-V1 (`v1.1.0-dev`) work and require
+  their own qualification before a later deployment. Remaining small fixes,
+  additions, manual alignment, representative private-file acceptance, and
+  named operational ownership remain follow-up work rather than blockers to
+  the historical V1.0.0 designation.
+- The owner established a hard boundary: do not access, inspect, browser-test,
+  query, or mutate production without new explicit permission.
+- Created local annotated tag `v1.0.0` at exact deployed commit
+  `1c9131f4c9`; it has not been pushed. Updated the working version to
+  `v1.1.0-dev`. Guarded in-memory SQLite release-version/documentation tests
+  pass 9 tests with 440 assertions, local links across ten release-facing
+  documents pass, the tag dereferences to the expected commit, and
+  `git diff --check` passes.
+
 
 # Session Progress (2026-09-01)
 

@@ -6,9 +6,10 @@ official Snipe-IT documentation is not the contract for this fork.
 
 ## Release status
 
-The current application is a pre-V1 development build. The `/api/v1` prefix is
-retained for route compatibility; it does not promise a stable V1 schema until
-an Inbit V1 release is approved and tagged.
+V1.0.0 designates the exact application revision and image digests deployed on
+2026-09-01. The current branch is post-V1 development. The `/api/v1` prefix is
+retained for route compatibility; consumers must not assume that every future
+minor feature will preserve an undocumented payload shape.
 
 API consumers must pin the exact application build or image digest they tested.
 Before upgrading, compare the tagged fork notes and rerun integration tests

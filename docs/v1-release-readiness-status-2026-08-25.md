@@ -1,5 +1,9 @@
 # V1 Release Readiness Status - 2026-08-25
 
+> Historical checkpoint. See
+> [`v1-release-readiness-status-2026-09-03.md`](v1-release-readiness-status-2026-09-03.md)
+> for the current decision after the controlled production migration.
+
 ## Decision
 
 The repository and populated rehearsal are technically qualified release

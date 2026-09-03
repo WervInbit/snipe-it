@@ -4,6 +4,38 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-09-03
+- Designated the exact source and image pair deployed on 2026-09-01 as the
+  internal V1.0.0 production baseline. The annotated `v1.0.0` tag identifies
+  commit `1c9131f4c9`; the release record contains the immutable app/web
+  digests. Current dependency, CI, documentation, and feature work is post-V1.
+- The V1 designation accepts the remaining representative private-file check,
+  manual alignment, and named operational ownership as follow-up work. It does
+  not turn the fork into a generally supported public distribution.
+- Reconciled the V1 release status with the completed data-bearing production
+  migration, four-role browser permission matrix, owner-confirmed migrated
+  password login, and current seven-service health check.
+- Added V1.0.0 release notes and separated remaining release-control,
+  representative workflow, manual-alignment, and final-host deployment gates
+  from already-complete application implementation.
+- Confirmed read-only that the five inherited demo model-number placeholders
+  have no assigned assets in the migrated database. Current production seeding
+  already excludes them; any deprecation/replacement is explicit data cleanup,
+  not a V1 code blocker. No live row was changed.
+- Updated Livewire from 3.6.4 to 3.8.7 after GHSA-g3hc-697w-wm82 and refreshed
+  the published Livewire client assets. Updated the locked `fast-uri` and
+  `postcss-selector-parser` transitive packages to patched releases after the
+  refreshed npm audit. Composer and npm high/critical policy checks are green.
+- Made the complete SQLite, MariaDB/MySQL, PostgreSQL, and V1 GitHub Actions
+  test jobs install the LDAP extension explicitly. This keeps mocked LDAP
+  coverage deterministic instead of depending on runner defaults; real LDAP
+  integration remains outside the V1 support boundary.
+- The refreshed post-V1 source passed 2,170 supported non-LDAP tests with 10,641
+  assertions, focused Livewire coverage, the affected CI contract suite, the
+  production asset build, and a browser Livewire interaction. The deployed
+  V1.0.0 images predate these dependency changes; a later deployment requires
+  a separately committed and qualified release.
+
 ### 2026-09-01
 - Converted the successful data-bearing single-host migration arrangement into
   reusable, secret-free production configuration. The immutable base profile
