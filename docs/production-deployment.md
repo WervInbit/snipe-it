@@ -207,8 +207,8 @@ the asset and component QR-label endpoints. Printing remains optional: leave
 `LABEL_PRINTER_QUEUE` and `LABEL_PRINTER_QUEUES` empty when the deployment has
 no approved printer.
 
-For a CUPS service running on the Docker host, use the stable host-gateway alias
-provided by the production Compose profile rather than copying a bridge IP:
+For a CUPS service running on the Docker host, first try the host-gateway alias
+provided by the production Compose profile:
 
 ```dotenv
 LABEL_PRINTER_QUEUE=approved-queue
@@ -217,6 +217,12 @@ LABEL_PRINT_COMMAND=lp
 LABEL_PRINT_OPTIONS="-o PageSize=w72h72 -o media=w72h72 -o scaling=100"
 CUPS_SERVER=host.docker.internal
 ```
+
+Verify that address from the application container before submitting a job.
+Docker's host-gateway alias targets its default bridge; on hosts where CUPS does
+not accept IPP through that interface, set `CUPS_SERVER` to a stable host LAN
+address or DNS name instead. Do not copy the gateway of the application network,
+because Docker may allocate a different subnet when that network is recreated.
 
 Keep queue and media options environment-specific. Before exposing the print
 button, verify the configured queue without submitting a job:

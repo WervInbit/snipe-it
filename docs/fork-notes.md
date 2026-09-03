@@ -39,6 +39,12 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
   custom controls. Stacked, inline, table, and nested-inline form variants now
   keep controls in normal flex flow so labels cannot overlap them as widths or
   translations change.
+- Restored optional server-side QR printing in the hardened production profile.
+  Production app images now include the CUPS client, Compose passes the
+  queue/command/options/server settings to app workers, and the deployment
+  runbook requires a read-only queue preflight plus one physical label check.
+  The temporary production repair used its stable LAN address because that
+  host's CUPS service did not accept IPP through Docker's default host bridge.
 
 ### 2026-09-01
 - Converted the successful data-bearing single-host migration arrangement into

@@ -170,5 +170,34 @@ with the concurrent operator-guide work.
   the controller resolves no queue and returns its not-configured response.
 - No production configuration, container, service, queue, print job, or data
   was changed. No test label was submitted. Repair requires a reviewed image
-  rebuild plus Compose/environment wiring; use a host-gateway alias instead of
-  copying the legacy network-specific `172.18.0.1` address.
+  rebuild plus Compose/environment wiring; preflight the host-gateway alias or
+  use a stable host address instead of copying the legacy network-specific
+  `172.18.0.1` address.
+
+## Production QR printer repair
+
+- The owner explicitly authorized the required production changes after the
+  diagnosis. The repair stayed on the V1 source line in isolated commit
+  `a5673bc041`; no later feature/dependency work and no database migration were
+  deployed.
+- The hotfix adds `cups-client` to the hardened application image, propagates
+  the existing label-printer settings through the production Compose profile,
+  documents CUPS preflight, and makes `lp`/`lpstat` required image contents.
+- The focused production configuration suite passes 13 tests with 159
+  assertions. The exact Linux/amd64 image contains both CUPS commands and the
+  expected PHP runtime/extensions.
+- Transfer checksums matched before use. A protected runtime-configuration
+  backup and the prior immutable release/digest remain available for rollback.
+  Candidate Compose resolution and a container-side `dymo330` lookup passed
+  before app, queue, and scheduler were recreated.
+- Docker's default `host-gateway` address reached an IPP listener on this host
+  but did not enumerate the queue without a protocol compatibility suffix.
+  The stable server LAN address `10.10.10.33` enumerated both queues normally,
+  so production uses it for `CUPS_SERVER`; the reusable documentation now
+  requires testing the alias and permits a stable LAN/DNS address when needed.
+- App, web, queue, scheduler, database, and Redis are healthy after rollout.
+  The HTTPS health/login paths pass and recent app logs contain no critical
+  line. One and only one Laravel-generated test label was submitted:
+  `dymo330-100` completed and the printer returned to enabled/idle without a
+  job-specific CUPS error. Owner confirmation of the physical label and QR
+  scan remains pending.

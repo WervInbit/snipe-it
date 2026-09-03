@@ -131,6 +131,35 @@
   documents pass, the tag dereferences to the expected commit, and
   `git diff --check` passes.
 
+## Addendum (2026-09-03 Production QR Printer Hotfix)
+- With renewed explicit owner permission, repaired the temporary production
+  server's QR printing path without touching the database or unrelated
+  services. Root cause was production-profile drift: the hardened app image
+  lacked `cups-client`, and the production Compose/runtime configuration did
+  not pass the printer queue, command, options, or CUPS server variables.
+- Added the CUPS client to the production image, passed the printer variables
+  through the shared app environment, documented the optional configuration,
+  and extended both the image verifier and production configuration tests.
+- Built the hotfix from isolated V1 commit `a5673bc041`, passed 13 focused
+  tests with 159 assertions, and verified `lp`, `lpstat`, PHP, and required PHP
+  extensions in the exact image. The repository-local durable fix was then
+  carried to `master` as `cdd90d3832`.
+- Before activation, verified the SSH host fingerprint and artifact hashes,
+  retained the prior release/image digest, and copied the protected runtime
+  environment to
+  `/srv/snipeit-v1/backups/config/production.env.before-printer-20260903-130745`.
+  The candidate Compose configuration and container-to-CUPS queue lookup both
+  passed before the live runtime file was replaced.
+- Production now runs app, queue, and scheduler from immutable app digest
+  `sha256:c9f3cbc0ccbe8aadf9060810d7fdc65500a09992b7eb431de32acdcc09c80f28`.
+  All six application/dependency services are healthy, the HTTPS health/login
+  routes respond, and no new critical application log line was found.
+- Submitted exactly one test label for asset 1 through the same Laravel QR
+  rendering and print service used by the UI. CUPS accepted `dymo330-100`,
+  completed it, returned the `dymo330` queue to enabled/idle, and logged no
+  job-specific error. Physical output/scan confirmation remains with the
+  owner; the print command will not be repeated automatically.
+
 ## Addendum (2026-09-03 CAT-00 v9 Diagram Correction)
 - Reviewed CAT-00 v8 page renders after operator feedback identified masked or
   disconnected arrows, cramped page 3 Attribuutdefinitie rows, and a detached
