@@ -58,3 +58,13 @@ The operator knows which safe recovery action, guide, or person is needed before
 ```text
 output/manuals/proofs/component-followup-v2
 ```
+
+## Focused Candidate - 2026-09-08
+
+The separate [v7 review](../reviews/HELP-01-v7.md)
+records the focused follow-up to baseline v6, with the exact
+PDF and checksum. The owner requested this pass across all existing guides
+after reviewing WF-01 v12 positively. Earlier selections and their policies
+remain traceable; this candidate is not automatically accepted. See the
+[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
+source/crop exceptions, and remaining operational or evidence gaps.

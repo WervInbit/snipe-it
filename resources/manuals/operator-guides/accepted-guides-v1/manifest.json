@@ -1,0 +1,2201 @@
+{
+  "schemaVersion": 1,
+  "packageVersion": 1,
+  "createdOn": "2026-09-10",
+  "scope": "Latest recorded accepted version per guide code, plus prior accepted PDFs",
+  "acceptanceMeaning": "Internal review candidate; no third-party approval implied",
+  "guides": [
+    {
+      "code": "AC-01",
+      "title": "Login",
+      "version": 9,
+      "pages": 1,
+      "status": "Internal review candidate",
+      "pdf": "pdf/AC-01-login-v9-draft.pdf",
+      "sha256": "c9f77eaf5461cb952036eb9ffa9400da0295a9171534f5db3074b574b8fc6785",
+      "html": "source/html/AC-01-login-v9-draft.html",
+      "htmlSha256": "6f03ee9991604b158fac8ca5f9325037c5c3308857c203c4b9d4c7ac6f97aae7",
+      "originalPdf": "resources/manuals/operator-guides/review-rounds/2026-09-08/AC-01-login-v9-draft.pdf",
+      "originalHtml": "output/manuals/proofs/guide-followups-2026-09-08/AC-01-v9/AC-01-login-v9-draft.html",
+      "acceptanceSource": "source/repository/resources/manuals/operator-guides/review-rounds/2026-09-10/current-guide-selection-v1.json"
+    },
+    {
+      "code": "AC-02",
+      "title": "Eigen wachtwoord wijzigen",
+      "version": 4,
+      "pages": 1,
+      "status": "Internal review candidate",
+      "pdf": "pdf/ac-02-eigen-wachtwoord-wijzigen-v4-draft.pdf",
+      "sha256": "923f185a1b0b594083b507c630c1b54783e50d13fe22a04a79d3b8e5f794f12d",
+      "html": "source/html/ac-02-eigen-wachtwoord-wijzigen-v4-draft.html",
+      "htmlSha256": "7a24ab49bf5389bf713a1f1c3beb59c13e197c07a8fdd274629604738d2d73ad",
+      "originalPdf": "resources/manuals/operator-guides/review-rounds/2026-09-08/ac-02-eigen-wachtwoord-wijzigen-v4-draft.pdf",
+      "originalHtml": "output/manuals/proofs/guide-followups-2026-09-08/AC-02-v4/ac-02-eigen-wachtwoord-wijzigen-v4-draft.html",
+      "acceptanceSource": "source/repository/resources/manuals/operator-guides/review-rounds/2026-09-10/current-guide-selection-v1.json"
+    },
+    {
+      "code": "SC-01",
+      "title": "Asset vinden en openen",
+      "version": 12,
+      "pages": 1,
+      "status": "Internal review candidate",
+      "pdf": "pdf/SC-01-asset-vinden-en-openen-v12-draft.pdf",
+      "sha256": "bc29b532a2cea8dad759307c4abcf378a10114eb1205582c88ba1a5b5767461e",
+      "html": "source/html/SC-01-asset-vinden-en-openen-v12-draft.html",
+      "htmlSha256": "044c9df33ed458f9f77c6e2d0c3ccd86802fb8b76363ad5e64762e71adc8dc00",
+      "originalPdf": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/SC-01-asset-vinden-en-openen-v12-draft.pdf",
+      "originalHtml": "output/manuals/proofs/owner-corrections-2026-09-10/SC-01-v12/SC-01-asset-vinden-en-openen-v12-draft.html",
+      "acceptanceSource": "source/repository/resources/manuals/operator-guides/review-rounds/2026-09-10/owner-review-readiness-2026-09-10.json"
+    },
+    {
+      "code": "AST-02",
+      "title": "Refurbishment route",
+      "version": 8,
+      "pages": 1,
+      "status": "Internal review candidate",
+      "pdf": "pdf/AST-02-refurbishment-route-v8-draft.pdf",
+      "sha256": "f932df1e44ca6fe5a3747efb0d2988e601939f9c9832e2ee6fd295889fb87846",
+      "html": "source/html/AST-02-refurbishment-route-v8-draft.html",
+      "htmlSha256": "bd63f8a3aae85a33875d2ee233363c19db4fa6f339fed3b1f41d49a9333cf342",
+      "originalPdf": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/AST-02-refurbishment-route-v8-draft.pdf",
+      "originalHtml": "output/manuals/proofs/owner-corrections-2026-09-10/AST-02-v8/AST-02-refurbishment-route-v8-draft.html",
+      "acceptanceSource": "source/repository/resources/manuals/operator-guides/review-rounds/2026-09-10/owner-review-readiness-2026-09-10.json"
+    },
+    {
+      "code": "AST-03",
+      "title": "Asset registreren en labelen",
+      "version": 15,
+      "pages": 2,
+      "status": "Internal review candidate",
+      "pdf": "pdf/AST-03-asset-registreren-en-labelen-v15-draft.pdf",
+      "sha256": "5e838b9e57e868f81c2b7920ea5e4d76cde487a39fb406736912f7082ebe875d",
+      "html": "source/html/AST-03-asset-registreren-en-labelen-v15-draft.html",
+      "htmlSha256": "b14b9e4389a2024a19e9cf3b20fc11e3b222d626725f1d933260b9b8001bf140",
+      "originalPdf": "resources/manuals/operator-guides/review-rounds/2026-09-08/AST-03-asset-registreren-en-labelen-v15-draft.pdf",
+      "originalHtml": "output/manuals/proofs/guide-followups-2026-09-08/AST-03-v15/AST-03-asset-registreren-en-labelen-v15-draft.html",
+      "acceptanceSource": "source/repository/resources/manuals/operator-guides/review-rounds/2026-09-10/current-guide-selection-v1.json"
+    },
+    {
+      "code": "AST-04",
+      "title": "Werk afronden en overdragen",
+      "version": 6,
+      "pages": 1,
+      "status": "Internal review candidate",
+      "pdf": "pdf/AST-04-complete-handoff-v6-draft.pdf",
+      "sha256": "de991dfcbc70b853f95135116e240e426d5582962accef6c3a26d7b40924b8c7",
+      "html": "source/html/AST-04-complete-handoff-v6-draft.html",
+      "htmlSha256": "077971773f9e5164874f50590a9b1d0bf7af81936c35dfb6d9b40971ad3a9577",
+      "originalPdf": "resources/manuals/operator-guides/review-rounds/2026-09-08/AST-04-complete-handoff-v6-draft.pdf",
+      "originalHtml": "output/manuals/proofs/guide-followups-2026-09-08/AST-04-v6/AST-04-complete-handoff-v6-draft.html",
+      "acceptanceSource": "source/repository/resources/manuals/operator-guides/review-rounds/2026-09-10/current-guide-selection-v1.json"
+    },
+    {
+      "code": "WF-01",
+      "title": "Workflow starten",
+      "version": 13,
+      "pages": 1,
+      "status": "Internal review candidate",
+      "pdf": "pdf/WF-01-workflow-starten-v13-draft.pdf",
+      "sha256": "880429c9b1d599239e72a71fe696b52742b673af8542d5b3cc81a98381c1965b",
+      "html": "source/html/WF-01-workflow-starten-v13-draft.html",
+      "htmlSha256": "4d836458653e9144ea2f358bcd7e4b4b787b9e503b8aa0ba2b636df360808631",
+      "originalPdf": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/WF-01-workflow-starten-v13-draft.pdf",
+      "originalHtml": "output/manuals/proofs/owner-corrections-2026-09-10/WF-01-v13/WF-01-workflow-starten-v13-draft.html",
+      "acceptanceSource": "source/repository/resources/manuals/operator-guides/review-rounds/2026-09-10/owner-review-readiness-2026-09-10.json"
+    },
+    {
+      "code": "WF-02",
+      "title": "Workflow uitvoeren en afronden",
+      "version": 10,
+      "pages": 2,
+      "status": "Internal review candidate",
+      "pdf": "pdf/WF-02-workflow-uitvoeren-en-afronden-v10.pdf",
+      "sha256": "250651038bdd8703f239df1ab72d24f6bb9e7e7e85a3b6fa75df2e3c571990f5",
+      "html": "source/html/WF-02-workflow-uitvoeren-en-afronden-v10.html",
+      "htmlSha256": "6e18e14602299ed9410771b8f9a5eb6880113a9f22e08a22e9a78b479c0447a3",
+      "originalPdf": "resources/manuals/operator-guides/pdf/WF-02-workflow-uitvoeren-en-afronden-v10.pdf",
+      "originalHtml": "output/manuals/final-validation/proofs/workflow-review-v8/WF-02-complete-workflow-v10-draft.html",
+      "acceptanceSource": "source/repository/resources/manuals/operator-guides/pdf/manifest.json"
+    },
+    {
+      "code": "CMP-01",
+      "title": "Bestaand component plaatsen",
+      "version": 4,
+      "pages": 1,
+      "status": "Internal review candidate",
+      "pdf": "pdf/CMP-01-bestaand-component-plaatsen-v4.pdf",
+      "sha256": "cfabd1d519c35f48359e43090749b7f0fc18e677d54cd53fc14171ad896958d0",
+      "html": "source/html/CMP-01-bestaand-component-plaatsen-v4.html",
+      "htmlSha256": "4fe5dab13cb3ee809c59e595da2667d1fd3a3405b02d53f238501dfc22ba9de9",
+      "originalPdf": "resources/manuals/operator-guides/pdf/CMP-01-bestaand-component-plaatsen-v4.pdf",
+      "originalHtml": "output/manuals/final-validation/proofs/CMP-01-v4/CMP-01-install-existing-v4-draft.html",
+      "acceptanceSource": "source/repository/resources/manuals/operator-guides/pdf/manifest.json"
+    },
+    {
+      "code": "CMP-02",
+      "title": "Nieuw component registreren en plaatsen",
+      "version": 6,
+      "pages": 1,
+      "status": "Internal review candidate",
+      "pdf": "pdf/CMP-02-register-install-v6-draft.pdf",
+      "sha256": "873f68279de2c3006a635b008ccffb2e6a52a8793b5f5966ff43f0eeecec1961",
+      "html": "source/html/CMP-02-register-install-v6-draft.html",
+      "htmlSha256": "4e1b7b830c9ac26a8ce3326c3b5a24367c39862b38536ba439ab8703086c4a01",
+      "originalPdf": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CMP-02-register-install-v6-draft.pdf",
+      "originalHtml": "output/manuals/proofs/owner-corrections-2026-09-10/CMP-02-v6/CMP-02-register-install-v6-draft.html",
+      "acceptanceSource": "source/repository/resources/manuals/operator-guides/review-rounds/2026-09-10/owner-review-readiness-2026-09-10.json"
+    },
+    {
+      "code": "CMP-04",
+      "title": "Component naar tray verplaatsen",
+      "version": 7,
+      "pages": 1,
+      "status": "Internal review candidate",
+      "pdf": "pdf/CMP-04-component-to-tray-v7-draft.pdf",
+      "sha256": "a6ae931f48bbfb3ef6d45cf196909e663f7b1da8535de58318c14eed9265956f",
+      "html": "source/html/CMP-04-component-to-tray-v7-draft.html",
+      "htmlSha256": "20b2ba66ab201721e9d0039482ecbaf610913cf7c757f9b6767c5ae74aee964a",
+      "originalPdf": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CMP-04-component-to-tray-v7-draft.pdf",
+      "originalHtml": "output/manuals/proofs/owner-corrections-2026-09-10/CMP-04-v7/CMP-04-component-to-tray-v7-draft.html",
+      "acceptanceSource": "source/repository/resources/manuals/operator-guides/review-rounds/2026-09-10/owner-review-readiness-2026-09-10.json"
+    },
+    {
+      "code": "USR-01",
+      "title": "Gebruiker toevoegen",
+      "version": 13,
+      "pages": 1,
+      "status": "Internal review candidate",
+      "pdf": "pdf/usr-01-gebruiker-toevoegen-v13-draft.pdf",
+      "sha256": "38318811b38adcfb5692e1634fba9ad35c7cca0acb3faf4371bfe370fd462995",
+      "html": "source/html/usr-01-gebruiker-toevoegen-v13-draft.html",
+      "htmlSha256": "fd49838e812a8b7fc459d8ef181d1ab188d012a08ae044dcb7c18d96daf149fc",
+      "originalPdf": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-reference-followups/usr-01-gebruiker-toevoegen-v13-draft.pdf",
+      "originalHtml": "output/manuals/proofs/owner-corrections-2026-09-10/USR-01-v13/usr-01-gebruiker-toevoegen-v13-draft.html",
+      "acceptanceSource": "source/repository/resources/manuals/operator-guides/review-rounds/2026-09-10/owner-review-readiness-2026-09-10.json"
+    },
+    {
+      "code": "USR-02",
+      "title": "Rol en rechten wijzigen",
+      "version": 11,
+      "pages": 1,
+      "status": "Internal review candidate",
+      "pdf": "pdf/usr-02-rol-en-rechten-wijzigen-v11-draft.pdf",
+      "sha256": "53e581c649a0d10e5ef5677a79166a93ebbd99ba4ad8539c29755a0fcf733651",
+      "html": "source/html/usr-02-rol-en-rechten-wijzigen-v11-draft.html",
+      "htmlSha256": "1a87b20861bbcc859a523b67a7a734caacc7d48310d3ad2fe6b0ba6059d73a6a",
+      "originalPdf": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-reference-followups/usr-02-rol-en-rechten-wijzigen-v11-draft.pdf",
+      "originalHtml": "output/manuals/proofs/owner-corrections-2026-09-10/USR-02-v11/usr-02-rol-en-rechten-wijzigen-v11-draft.html",
+      "acceptanceSource": "source/repository/resources/manuals/operator-guides/review-rounds/2026-09-10/owner-review-readiness-2026-09-10.json"
+    },
+    {
+      "code": "USR-04",
+      "title": "Gebruiker uitschakelen",
+      "version": 6,
+      "pages": 1,
+      "status": "Internal review candidate",
+      "pdf": "pdf/USR-04-gebruiker-uitschakelen-of-herstellen-v6-draft.pdf",
+      "sha256": "c5b2e28471dfb912bef502264ed85a5d86b26b7ba24cbb4c8303b34a0f8c0c96",
+      "html": "source/html/USR-04-gebruiker-uitschakelen-of-herstellen-v6-draft.html",
+      "htmlSha256": "269646f8f23383027ba9d0f9179946919863e44389785f100cbde22196ae7d5c",
+      "originalPdf": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/USR-04-gebruiker-uitschakelen-of-herstellen-v6-draft.pdf",
+      "originalHtml": "output/manuals/proofs/owner-corrections-2026-09-10/USR-04-v6/USR-04-gebruiker-uitschakelen-of-herstellen-v6-draft.html",
+      "acceptanceSource": "source/repository/resources/manuals/operator-guides/review-rounds/2026-09-10/owner-review-readiness-2026-09-10.json"
+    },
+    {
+      "code": "CAT-00",
+      "title": "Catalogus begrijpen",
+      "version": 11,
+      "pages": 6,
+      "status": "Internal review candidate",
+      "pdf": "pdf/CAT-00-catalogus-begrijpen-v11-draft.pdf",
+      "sha256": "d8c95c64c70508cdceb43d4aa71d7f1f22027dfd8690349349ec70bb8f09c04c",
+      "html": "source/html/CAT-00-catalogus-begrijpen-v11-draft.html",
+      "htmlSha256": "c0de198aae4914cfb5de2494fb63f3ff3673da7e98317a159aec1994b40b03dd",
+      "originalPdf": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CAT-00-catalogus-begrijpen-v11-draft.pdf",
+      "originalHtml": "output/manuals/proofs/owner-corrections-2026-09-10/CAT-00-v11/CAT-00-catalogus-begrijpen-v11-draft.html",
+      "acceptanceSource": "source/repository/resources/manuals/operator-guides/review-rounds/2026-09-10/owner-review-readiness-2026-09-10.json"
+    },
+    {
+      "code": "CAT-01",
+      "title": "Model en modelnummer aanmaken",
+      "version": 7,
+      "pages": 5,
+      "status": "Internal review candidate",
+      "pdf": "pdf/CAT-01-model-en-modelnummer-aanmaken-v7-draft.pdf",
+      "sha256": "bd79bd83124c9c31e52b12bb92e53d238265226cc5a82caebae5cdb5802c2b46",
+      "html": "source/html/CAT-01-model-en-modelnummer-aanmaken-v7-draft.html",
+      "htmlSha256": "9774d9ff1173a7fe366ec533ce08de5f88f44bdc2227f9d8bd4a671d5e9b18e9",
+      "originalPdf": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CAT-01-model-en-modelnummer-aanmaken-v7-draft.pdf",
+      "originalHtml": "output/manuals/proofs/owner-corrections-2026-09-10/CAT-01-v7/CAT-01-model-en-modelnummer-aanmaken-v7-draft.html",
+      "acceptanceSource": "source/repository/resources/manuals/operator-guides/review-rounds/2026-09-10/owner-review-readiness-2026-09-10.json"
+    }
+  ],
+  "history": [
+    {
+      "code": "AC-01",
+      "version": 6,
+      "pages": 1,
+      "pdf": "history/pdf/AC-01-login-v6.pdf",
+      "sha256": "3fcc11fa05e7a27ff1a542191b88d93fcbc68de81248f72ac1e3b40a02eb64b2",
+      "originalPdf": "resources/manuals/operator-guides/pdf/AC-01-login-v6.pdf",
+      "status": "Previously internally accepted; newer accepted version in pdf/"
+    },
+    {
+      "code": "SC-01",
+      "version": 10,
+      "pages": 1,
+      "pdf": "history/pdf/SC-01-asset-vinden-en-openen-v10.pdf",
+      "sha256": "6eccaf906a36abf49204e8226517777291dfd95e18bfc760c2711e619428dd9b",
+      "originalPdf": "resources/manuals/operator-guides/pdf/SC-01-asset-vinden-en-openen-v10.pdf",
+      "status": "Previously internally accepted; newer accepted version in pdf/"
+    },
+    {
+      "code": "AST-02",
+      "version": 5,
+      "pages": 1,
+      "pdf": "history/pdf/AST-02-refurbishment-route-v5.pdf",
+      "sha256": "78cd745f055399beeef518517232042ce28c54493b2fec0bc9213f41d4ae49c2",
+      "originalPdf": "resources/manuals/operator-guides/pdf/AST-02-refurbishment-route-v5.pdf",
+      "status": "Previously internally accepted; newer accepted version in pdf/"
+    },
+    {
+      "code": "AST-03",
+      "version": 14,
+      "pages": 2,
+      "pdf": "history/pdf/AST-03-asset-registreren-en-labelen-v14.pdf",
+      "sha256": "e557fc77c7e4b5b2249cdc3b4a9ec2dd3e67a6fcfdea368664d585d7eca74390",
+      "originalPdf": "resources/manuals/operator-guides/pdf/AST-03-asset-registreren-en-labelen-v14.pdf",
+      "status": "Previously internally accepted; newer accepted version in pdf/"
+    },
+    {
+      "code": "WF-01",
+      "version": 9,
+      "pages": 1,
+      "pdf": "history/pdf/WF-01-workflow-starten-v9.pdf",
+      "sha256": "49992c5aeba821d88b457200fe09233ada153ea6cae0f5d21abcdef881b90dda",
+      "originalPdf": "resources/manuals/operator-guides/pdf/WF-01-workflow-starten-v9.pdf",
+      "status": "Previously internally accepted; newer accepted version in pdf/"
+    },
+    {
+      "code": "USR-01",
+      "version": 8,
+      "pages": 1,
+      "pdf": "history/pdf/USR-01-gebruiker-toevoegen-v8.pdf",
+      "sha256": "9ab0812aec50a76c896dbbdfbb13440a8fc6d2f4ccee32364884bae4af3cfcd6",
+      "originalPdf": "resources/manuals/operator-guides/pdf/USR-01-gebruiker-toevoegen-v8.pdf",
+      "status": "Previously internally accepted; newer accepted version in pdf/"
+    },
+    {
+      "code": "USR-02",
+      "version": 7,
+      "pages": 1,
+      "pdf": "history/pdf/USR-02-rol-en-rechten-wijzigen-v7.pdf",
+      "sha256": "d58022523c04dc0b964e4f9b1e5f2307c50ee153ae2668ff371c204be57e9a5b",
+      "originalPdf": "resources/manuals/operator-guides/pdf/USR-02-rol-en-rechten-wijzigen-v7.pdf",
+      "status": "Previously internally accepted; newer accepted version in pdf/"
+    }
+  ],
+  "excludedUnaccepted": [
+    {
+      "code": "AST-05",
+      "version": 6,
+      "reason": "No exact accepted version recorded"
+    },
+    {
+      "code": "HELP-01",
+      "version": 7,
+      "reason": "No exact accepted version recorded"
+    },
+    {
+      "code": "USR-03",
+      "version": 4,
+      "reason": "No exact accepted version recorded"
+    },
+    {
+      "code": "CAT-02",
+      "version": 2,
+      "reason": "No exact accepted version recorded"
+    },
+    {
+      "code": "CAT-03",
+      "version": 2,
+      "reason": "No exact accepted version recorded"
+    },
+    {
+      "code": "CAT-04",
+      "version": 4,
+      "reason": "No exact accepted version recorded"
+    }
+  ],
+  "highestKnownVersions": {
+    "AC-01": 9,
+    "AC-02": 4,
+    "SC-01": 12,
+    "AST-02": 8,
+    "AST-03": 15,
+    "AST-04": 6,
+    "AST-05": 6,
+    "WF-01": 13,
+    "WF-02": 12,
+    "CMP-01": 6,
+    "CMP-02": 6,
+    "CMP-04": 7,
+    "HELP-01": 7,
+    "USR-01": 13,
+    "USR-02": 11,
+    "USR-03": 4,
+    "USR-04": 6,
+    "CAT-00": 11,
+    "CAT-01": 7,
+    "CAT-02": 2,
+    "CAT-03": 2,
+    "CAT-04": 4
+  },
+  "files": [
+    {
+      "path": ".gitattributes",
+      "sha256": "d1ef20f195a99460119b325e2daad9a39accd1bdbf6d6c4c7accea3f8c928102",
+      "bytes": 62
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "dc2e149033ed79121e9185fd7791d7e1974ca1d4a1474737ebb2094c0de6e0db",
+      "bytes": 30
+    },
+    {
+      "path": "history/pdf/AC-01-login-v6.pdf",
+      "sha256": "3fcc11fa05e7a27ff1a542191b88d93fcbc68de81248f72ac1e3b40a02eb64b2",
+      "bytes": 813431
+    },
+    {
+      "path": "history/pdf/AST-02-refurbishment-route-v5.pdf",
+      "sha256": "78cd745f055399beeef518517232042ce28c54493b2fec0bc9213f41d4ae49c2",
+      "bytes": 103022
+    },
+    {
+      "path": "history/pdf/AST-03-asset-registreren-en-labelen-v14.pdf",
+      "sha256": "e557fc77c7e4b5b2249cdc3b4a9ec2dd3e67a6fcfdea368664d585d7eca74390",
+      "bytes": 928361
+    },
+    {
+      "path": "history/pdf/SC-01-asset-vinden-en-openen-v10.pdf",
+      "sha256": "6eccaf906a36abf49204e8226517777291dfd95e18bfc760c2711e619428dd9b",
+      "bytes": 1103999
+    },
+    {
+      "path": "history/pdf/USR-01-gebruiker-toevoegen-v8.pdf",
+      "sha256": "9ab0812aec50a76c896dbbdfbb13440a8fc6d2f4ccee32364884bae4af3cfcd6",
+      "bytes": 769221
+    },
+    {
+      "path": "history/pdf/USR-02-rol-en-rechten-wijzigen-v7.pdf",
+      "sha256": "d58022523c04dc0b964e4f9b1e5f2307c50ee153ae2668ff371c204be57e9a5b",
+      "bytes": 309927
+    },
+    {
+      "path": "history/pdf/WF-01-workflow-starten-v9.pdf",
+      "sha256": "49992c5aeba821d88b457200fe09233ada153ea6cae0f5d21abcdef881b90dda",
+      "bytes": 204550
+    },
+    {
+      "path": "pdf/AC-01-login-v9-draft.pdf",
+      "sha256": "c9f77eaf5461cb952036eb9ffa9400da0295a9171534f5db3074b574b8fc6785",
+      "bytes": 814868
+    },
+    {
+      "path": "pdf/ac-02-eigen-wachtwoord-wijzigen-v4-draft.pdf",
+      "sha256": "923f185a1b0b594083b507c630c1b54783e50d13fe22a04a79d3b8e5f794f12d",
+      "bytes": 120008
+    },
+    {
+      "path": "pdf/AST-02-refurbishment-route-v8-draft.pdf",
+      "sha256": "f932df1e44ca6fe5a3747efb0d2988e601939f9c9832e2ee6fd295889fb87846",
+      "bytes": 113378
+    },
+    {
+      "path": "pdf/AST-03-asset-registreren-en-labelen-v15-draft.pdf",
+      "sha256": "5e838b9e57e868f81c2b7920ea5e4d76cde487a39fb406736912f7082ebe875d",
+      "bytes": 929395
+    },
+    {
+      "path": "pdf/AST-04-complete-handoff-v6-draft.pdf",
+      "sha256": "de991dfcbc70b853f95135116e240e426d5582962accef6c3a26d7b40924b8c7",
+      "bytes": 809636
+    },
+    {
+      "path": "pdf/CAT-00-catalogus-begrijpen-v11-draft.pdf",
+      "sha256": "d8c95c64c70508cdceb43d4aa71d7f1f22027dfd8690349349ec70bb8f09c04c",
+      "bytes": 602021
+    },
+    {
+      "path": "pdf/CAT-01-model-en-modelnummer-aanmaken-v7-draft.pdf",
+      "sha256": "bd79bd83124c9c31e52b12bb92e53d238265226cc5a82caebae5cdb5802c2b46",
+      "bytes": 456062
+    },
+    {
+      "path": "pdf/CMP-01-bestaand-component-plaatsen-v4.pdf",
+      "sha256": "cfabd1d519c35f48359e43090749b7f0fc18e677d54cd53fc14171ad896958d0",
+      "bytes": 263828
+    },
+    {
+      "path": "pdf/CMP-02-register-install-v6-draft.pdf",
+      "sha256": "873f68279de2c3006a635b008ccffb2e6a52a8793b5f5966ff43f0eeecec1961",
+      "bytes": 577700
+    },
+    {
+      "path": "pdf/CMP-04-component-to-tray-v7-draft.pdf",
+      "sha256": "a6ae931f48bbfb3ef6d45cf196909e663f7b1da8535de58318c14eed9265956f",
+      "bytes": 496577
+    },
+    {
+      "path": "pdf/SC-01-asset-vinden-en-openen-v12-draft.pdf",
+      "sha256": "bc29b532a2cea8dad759307c4abcf378a10114eb1205582c88ba1a5b5767461e",
+      "bytes": 1105099
+    },
+    {
+      "path": "pdf/usr-01-gebruiker-toevoegen-v13-draft.pdf",
+      "sha256": "38318811b38adcfb5692e1634fba9ad35c7cca0acb3faf4371bfe370fd462995",
+      "bytes": 771449
+    },
+    {
+      "path": "pdf/usr-02-rol-en-rechten-wijzigen-v11-draft.pdf",
+      "sha256": "53e581c649a0d10e5ef5677a79166a93ebbd99ba4ad8539c29755a0fcf733651",
+      "bytes": 780166
+    },
+    {
+      "path": "pdf/USR-04-gebruiker-uitschakelen-of-herstellen-v6-draft.pdf",
+      "sha256": "c5b2e28471dfb912bef502264ed85a5d86b26b7ba24cbb4c8303b34a0f8c0c96",
+      "bytes": 698962
+    },
+    {
+      "path": "pdf/WF-01-workflow-starten-v13-draft.pdf",
+      "sha256": "880429c9b1d599239e72a71fe696b52742b673af8542d5b3cc81a98381c1965b",
+      "bytes": 194431
+    },
+    {
+      "path": "pdf/WF-02-workflow-uitvoeren-en-afronden-v10.pdf",
+      "sha256": "250651038bdd8703f239df1ab72d24f6bb9e7e7e85a3b6fa75df2e3c571990f5",
+      "bytes": 384006
+    },
+    {
+      "path": "README.md",
+      "sha256": "ba1348ad4fa939262586b2071aa1334102eafa6555d4e6af40b94b08fbf35062",
+      "bytes": 9925
+    },
+    {
+      "path": "scripts/compare.py",
+      "sha256": "74b580070621c2b6f98d189723823ec748b7057bc281c25fa3f15b5d73aa02ed",
+      "bytes": 2496
+    },
+    {
+      "path": "scripts/package-lock.json",
+      "sha256": "21bc985559a9540548c11840bed9c7e30f0157528fd778363775ebe9004a34a7",
+      "bytes": 20880
+    },
+    {
+      "path": "scripts/package.json",
+      "sha256": "210777584471dbd876d31329cbfa20b888876d12346a193afa98c4184ba3db27",
+      "bytes": 261
+    },
+    {
+      "path": "scripts/render.mjs",
+      "sha256": "ef7f3475b9e2bddd86999ce889267823b1c3715e82a5c706757fb85d7c63be88",
+      "bytes": 4582
+    },
+    {
+      "path": "scripts/requirements.txt",
+      "sha256": "6342055132c7793d958120312bacaf335850045f6da6f1448bed7f16d5582258",
+      "bytes": 31
+    },
+    {
+      "path": "scripts/verify.mjs",
+      "sha256": "952d704d86caae2953ab43a650308dffc7877e9694bb4b264de4a3b5a0ce9d3a",
+      "bytes": 1196
+    },
+    {
+      "path": "source/html/AC-01-login-v9-draft.html",
+      "sha256": "6f03ee9991604b158fac8ca5f9325037c5c3308857c203c4b9d4c7ac6f97aae7",
+      "bytes": 1008187
+    },
+    {
+      "path": "source/html/ac-02-eigen-wachtwoord-wijzigen-v4-draft.html",
+      "sha256": "7a24ab49bf5389bf713a1f1c3beb59c13e197c07a8fdd274629604738d2d73ad",
+      "bytes": 44479
+    },
+    {
+      "path": "source/html/AST-02-refurbishment-route-v8-draft.html",
+      "sha256": "bd63f8a3aae85a33875d2ee233363c19db4fa6f339fed3b1f41d49a9333cf342",
+      "bytes": 20307
+    },
+    {
+      "path": "source/html/AST-03-asset-registreren-en-labelen-v15-draft.html",
+      "sha256": "b14b9e4389a2024a19e9cf3b20fc11e3b222d626725f1d933260b9b8001bf140",
+      "bytes": 2122817
+    },
+    {
+      "path": "source/html/AST-04-complete-handoff-v6-draft.html",
+      "sha256": "077971773f9e5164874f50590a9b1d0bf7af81936c35dfb6d9b40971ad3a9577",
+      "bytes": 1212393
+    },
+    {
+      "path": "source/html/CAT-00-catalogus-begrijpen-v11-draft.html",
+      "sha256": "c0de198aae4914cfb5de2494fb63f3ff3673da7e98317a159aec1994b40b03dd",
+      "bytes": 814400
+    },
+    {
+      "path": "source/html/CAT-01-model-en-modelnummer-aanmaken-v7-draft.html",
+      "sha256": "9774d9ff1173a7fe366ec533ce08de5f88f44bdc2227f9d8bd4a671d5e9b18e9",
+      "bytes": 1015026
+    },
+    {
+      "path": "source/html/CMP-01-bestaand-component-plaatsen-v4.html",
+      "sha256": "4fe5dab13cb3ee809c59e595da2667d1fd3a3405b02d53f238501dfc22ba9de9",
+      "bytes": 254774
+    },
+    {
+      "path": "source/html/CMP-02-register-install-v6-draft.html",
+      "sha256": "4e1b7b830c9ac26a8ce3326c3b5a24367c39862b38536ba439ab8703086c4a01",
+      "bytes": 691198
+    },
+    {
+      "path": "source/html/CMP-04-component-to-tray-v7-draft.html",
+      "sha256": "20b2ba66ab201721e9d0039482ecbaf610913cf7c757f9b6767c5ae74aee964a",
+      "bytes": 624715
+    },
+    {
+      "path": "source/html/SC-01-asset-vinden-en-openen-v12-draft.html",
+      "sha256": "044c9df33ed458f9f77c6e2d0c3ccd86802fb8b76363ad5e64762e71adc8dc00",
+      "bytes": 1621461
+    },
+    {
+      "path": "source/html/usr-01-gebruiker-toevoegen-v13-draft.html",
+      "sha256": "fd49838e812a8b7fc459d8ef181d1ab188d012a08ae044dcb7c18d96daf149fc",
+      "bytes": 964892
+    },
+    {
+      "path": "source/html/usr-02-rol-en-rechten-wijzigen-v11-draft.html",
+      "sha256": "1a87b20861bbcc859a523b67a7a734caacc7d48310d3ad2fe6b0ba6059d73a6a",
+      "bytes": 1101709
+    },
+    {
+      "path": "source/html/USR-04-gebruiker-uitschakelen-of-herstellen-v6-draft.html",
+      "sha256": "269646f8f23383027ba9d0f9179946919863e44389785f100cbde22196ae7d5c",
+      "bytes": 848288
+    },
+    {
+      "path": "source/html/WF-01-workflow-starten-v13-draft.html",
+      "sha256": "4d836458653e9144ea2f358bcd7e4b4b787b9e503b8aa0ba2b636df360808631",
+      "bytes": 312477
+    },
+    {
+      "path": "source/html/WF-02-workflow-uitvoeren-en-afronden-v10.html",
+      "sha256": "6e18e14602299ed9410771b8f9a5eb6880113a9f22e08a22e9a78b479c0447a3",
+      "bytes": 339037
+    },
+    {
+      "path": "source/repository/AGENTS.md",
+      "sha256": "c89beeb0ee9a2e10663341e1ac376acf41b037dda14b8a3173c72b88b3d16f28",
+      "bytes": 7499
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/catalog-guide-plan.md",
+      "sha256": "c64e06de192666cf79125ddd8306ea99bf4425fddb72ca4652f9c912bf016a02",
+      "bytes": 35594
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/components.md",
+      "sha256": "78e9e3d29758931374a3251b569c8427609240713e438a9c677b95b3597a8f84",
+      "bytes": 12651
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/decisions.md",
+      "sha256": "034802ce98ac67900fa3fd0a12ad774fd71b3ea168242d9f37b4df18a20c1dc3",
+      "bytes": 29327
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/AC-01.md",
+      "sha256": "b6533a8146c2be128810edbbc760e60eba8a402bc968409ffb9b1930baa36eec",
+      "bytes": 3565
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/AC-02.md",
+      "sha256": "2ee29657945342a09b04bdecd9bed25c49b6c4808ff609fbef6416c1d14e2db7",
+      "bytes": 3369
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/AST-01.md",
+      "sha256": "ba22f1277b51b5f1440b07e7481de5a69df5de4d162f944b3f06e68ba9c2f412",
+      "bytes": 679
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/AST-02.md",
+      "sha256": "7b64a0c84a6d2c60fc94d2450ba90d37f16079fbe3d5535fec7d0fc7d3d9a0b7",
+      "bytes": 3106
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/AST-03.md",
+      "sha256": "f4dc905e62d2335dee9c5c0c2471c249c93ca4a80c36790b3a71efa639dc2611",
+      "bytes": 6108
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/AST-04.md",
+      "sha256": "b09181ea893c5ba8bf60c8ca9a1712db8a02e4eaa2f31c062e51007c8cbf545b",
+      "bytes": 4667
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/AST-05.md",
+      "sha256": "ac85c7a37fdfbde851b79e66c7747644cfa1c38574ad787b5f203d5be419d57a",
+      "bytes": 3703
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/CAT-00.md",
+      "sha256": "2c89781937362217d5b9535f1266e598467e9ac6868b394a2cba45e799b74610",
+      "bytes": 9573
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/CAT-01.md",
+      "sha256": "2bbd1054fb8c5d3382be984cc2e8e7581584858b12c776598edb138cb0edd61e",
+      "bytes": 13387
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/CAT-02.md",
+      "sha256": "894408d54ccab00b4904ef7bad61f2a5d10b30d708916592850a3525928530da",
+      "bytes": 6949
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/CAT-03.md",
+      "sha256": "dd0ecbd1b2a9d24db182212f9d5aadddce9964716644dc4837fee1afb98cac44",
+      "bytes": 7765
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/CAT-04.md",
+      "sha256": "9bfcd4e99353086d9d7847c168085cf70bd33810217d02b2ece0754119acbb9f",
+      "bytes": 10022
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/CAT-05.md",
+      "sha256": "2d82dbdd7f0561c3e1fd94d156306ebd28e2160c1d09350f93ce22b1cbc6a2c7",
+      "bytes": 2468
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/CAT-06.md",
+      "sha256": "2e85c2a006c367d9180bc886e9d24753137edc0d9f12d17485255a4d78bcf89d",
+      "bytes": 2166
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/CMP-01.md",
+      "sha256": "335cf84f9a8a089a314a703c23caed2d1e599a4413b060bd2099a96d06f89361",
+      "bytes": 3857
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/CMP-02.md",
+      "sha256": "d02f35289bd98e00107e430a61214374f9571422005a102e11ef694b070560ce",
+      "bytes": 4978
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/CMP-04.md",
+      "sha256": "bdbc883eabc7d5ac965bef9e7d021d157ce2406f0f5b1ee8d9de8eb4aea7ace3",
+      "bytes": 3610
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/HELP-01.md",
+      "sha256": "00b4c87bccaecd2cbd90093290c550b01a50277d1b19688b50f0e824c3516080",
+      "bytes": 2550
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/SC-01.md",
+      "sha256": "ec2e7be4e895a40ddc4bf7759642591592e3c3d796900db1b167f9cec927024b",
+      "bytes": 3754
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/USR-01.md",
+      "sha256": "0e23c2e800be81a9990eae060c8091a36d7a258e5fd3389634fe5ca3659df09a",
+      "bytes": 7071
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/USR-02.md",
+      "sha256": "0e4049b2a4bc86fae9b7c971d843e8dbca51266e880f2aa1c7cbba78154d056b",
+      "bytes": 6521
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/USR-03.md",
+      "sha256": "41ee4174c2c0efd40446e30050961fb5d11d620214d33e9d125d5ad4629affef",
+      "bytes": 3593
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/USR-04.md",
+      "sha256": "4e4a85c86bfee201922f3e134782704409ed13a35c19ca2eb515fd24af1bce75",
+      "bytes": 2310
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/USR-05.md",
+      "sha256": "044f66d15a5858686819d9482ef2b0bbd7b43ac62a42f18d055a086a9768989f",
+      "bytes": 1613
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/WF-01.md",
+      "sha256": "37a26bd4c5ed01c9d31cf4572b3746a3434752a938f8c1b7aed06230e297ccac",
+      "bytes": 4280
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/guides/WF-02.md",
+      "sha256": "525ce9b369b89a5d3e7b22e7f6d678786f10b12182b739b696493533f8d68544",
+      "bytes": 4297
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/HANDOFF.md",
+      "sha256": "7e51d80e8efe68daa1e919b8969a75e7665565fd8880c4f4b38f822024d84fd6",
+      "bytes": 23559
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/inventory.md",
+      "sha256": "6e266424c71fd4e2f88fd33981e4f60484055994019cc59009e1e218031f8d6f",
+      "bytes": 13528
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/layouts.md",
+      "sha256": "33365c2c7a82fed35d3450c529b1280d5cccba8207600dbdabb09ce460caebfe",
+      "bytes": 9531
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/maintenance.md",
+      "sha256": "f13497d391a54b88c3c05a0f9c16459918796b095a777473cc2d4a8cbad9fb37",
+      "bytes": 11693
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/README.md",
+      "sha256": "46dac15d24187d803ecfa80957d8ce95c28d6312fb5de070620f8db416a65dc4",
+      "bytes": 27952
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/registry.md",
+      "sha256": "f8fae11cb2eebdac91ccb250b04ede1c1474ac4b88d078da712029c39b7b217d",
+      "bytes": 15271
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/2026-08-20-cold-start-audit.md",
+      "sha256": "3c6374fa054e38b4302d1f480f859741a53b51f9a813f85218960ce434268555",
+      "bytes": 14076
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/2026-09-08-independent-usability-audit.md",
+      "sha256": "8e62f02ea72400b0ed43d7774a9c5cf6e1ab8be4e60f75ef3636a943e90dd9f0",
+      "bytes": 36944
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/2026-09-08-pilot-direction-feedback.md",
+      "sha256": "c2985b1b6c3c36a0be062510320bb0badd9b2a742208e1321cccebe883d83119",
+      "bytes": 6200
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AC-01-v7.md",
+      "sha256": "4e0906d68a7dd6d9b3576f01095841001cc2539c3ade217120f40cc5af2a2b39",
+      "bytes": 883
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AC-01-v8.md",
+      "sha256": "235f6559c72109d9458bd287e4b3cdae8f4d520eb8f19fc9e8a4180a56f4cda3",
+      "bytes": 1078
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AC-01-v9.md",
+      "sha256": "9155f8bbada286402ff97de87decba490b1a0a931e78d9c4e2cdd52a27cef8ff",
+      "bytes": 2319
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AC-02-v2.md",
+      "sha256": "661825e3d508314eca92e8e3984a017b67e3a84486cb37196ffd158c4431badc",
+      "bytes": 1003
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AC-02-v3.md",
+      "sha256": "f0248541fcc5a6d95eb3d28687a919834a137423ca810cae3dd9eefdaf13fc4a",
+      "bytes": 963
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AC-02-v4.md",
+      "sha256": "2dfde028f6a00a303e1dc236f3a8912ec23b2267a661023d9c73c30662ac7da2",
+      "bytes": 2383
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-02-v6.md",
+      "sha256": "4392415752a8037af6fcf1565f0ab916bb8b4b67a16848f8c61b3edf53ad2501",
+      "bytes": 838
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-02-v7.md",
+      "sha256": "787e1061be98d96a53171f0de0ca5502379b81ece1f317b5b897659fd89cfce7",
+      "bytes": 2305
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-02-v8.md",
+      "sha256": "9db1ae7d5d7acb47e9390b4bd50d64b3319635643bc2329682e3d48c745ee3e6",
+      "bytes": 1721
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-03-v10.md",
+      "sha256": "2f79f2a65e093be5191da092fa1442b2d70fb1f47561ce736afbc4cb43250d46",
+      "bytes": 1007
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-03-v11.md",
+      "sha256": "d8603c18e53961b9de65e65421d36136082bdcd9a42f2dd78c747df18f727ab3",
+      "bytes": 1263
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-03-v12.md",
+      "sha256": "8ff9d0ee0d7a9d453bdb05b255d6d4b908c0ac8ed872961bea145dc52b5ebde0",
+      "bytes": 1130
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-03-v13.md",
+      "sha256": "ef867fe7f71509517a9ffe8bf6ff62a43f9c4f8b48835157a558b0676df13760",
+      "bytes": 1083
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-03-v14.md",
+      "sha256": "a298e433ea6b561c56b26eae21a01a29bb4753ebc89e57604231bcb64b7b5dc3",
+      "bytes": 951
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-03-v15.md",
+      "sha256": "048769928836bd890161566d0d45f044663e5ae8bb7c93a714bc7b26fa5b11f2",
+      "bytes": 2651
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-03-v2.md",
+      "sha256": "79f15a341760a31a3222d49329d8e37056506ed912d50b8fd7cb2611e8244301",
+      "bytes": 1208
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-03-v3.md",
+      "sha256": "8805ac7018231592b114734fdc73a1d78b9c165b6ab25999d9a0da4381972bb8",
+      "bytes": 1508
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-03-v4.md",
+      "sha256": "ba41af0e3834477a67ab6aac9b18f7ada3ff2534124df5c3699c532d6ee9e5a4",
+      "bytes": 1479
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-03-v5.md",
+      "sha256": "68d539ddd9ce6d03572a216fab976f79e99989c5f357a0621cad209fa9ef9aec",
+      "bytes": 1611
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-03-v6.md",
+      "sha256": "a39f2f78f81a6cff81954d446da525c762b8fa4d2f4ac07e9367ad2eef19f0ee",
+      "bytes": 1364
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-03-v7.md",
+      "sha256": "ccd9ee76de0310c6d49b5756bc8ab4a9675b3f0f5523f5f138e3759f035c0904",
+      "bytes": 1177
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-03-v8.md",
+      "sha256": "15d0b6eb2f1fc17a8c19a2916fead750f2a6fd2f5eea8042dff8473a3f9dbfec",
+      "bytes": 1067
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-03-v9.md",
+      "sha256": "efc458dc867c2b135829af70b625da63426504424d89316df050431a808c70c8",
+      "bytes": 904
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-04-v2.md",
+      "sha256": "271fe1280b02e5156d65b33644c1bad69daca2a5c2d8414be3ac134006c74f9b",
+      "bytes": 1176
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-04-v3.md",
+      "sha256": "ef41280e4cf99b8404d50d610a4150d1f07151b4e62a85471a256bae83dadf80",
+      "bytes": 1348
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-04-v4.md",
+      "sha256": "0225614ba61ae747962240e44e49204f2549416dd82b9ce9dbc3c4fb3fdcc591",
+      "bytes": 1050
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-04-v5.md",
+      "sha256": "a7154575c8ea26b4f3750bbd094b6f348a4cb2db65a17479eae364fa55526fa1",
+      "bytes": 1117
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-04-v6.md",
+      "sha256": "99e363087431233b70ebfec0ecf26d9e39a8051b61cacf9ea100dbf806b39fb1",
+      "bytes": 2471
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-05-v2.md",
+      "sha256": "a890625fd62d9863d2a461bd63b0a578e1d86286435c9f2e59e69d79040f8d4b",
+      "bytes": 1203
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-05-v3.md",
+      "sha256": "279974fd89e51c5dbb6a6ff41bef7ccd52903bcaeb3462981a4b888e92e41222",
+      "bytes": 1160
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-05-v4.md",
+      "sha256": "bf028b852ef6b3698197f7a7ac9387edf68de82b562a5b8abb480c6a7e9645a5",
+      "bytes": 1028
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-05-v5.md",
+      "sha256": "633f0b3efa233f3938b15b7edd20d9dab52899f8fad632ffff59282ef93f7c84",
+      "bytes": 845
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/AST-05-v6.md",
+      "sha256": "3a3b49aea88c9e409e8f9846f6637f9592a9fd7133370204494b351c5f0f82a8",
+      "bytes": 2346
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/audit-pilot-2026-09-08-specification.md",
+      "sha256": "72de0737b1978811129db74b9081a3170b34f01dbca7ac9b88091748f50535b0",
+      "bytes": 5634
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/audit-revision-round-2026-09-08.md",
+      "sha256": "d57fdf9419186fe40a9e7e8def04d271fe6757b7c0217b4c9ebc54007fbefee1",
+      "bytes": 7165
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/baseline-2026-09-08.md",
+      "sha256": "d8ba513f74cae866cb24f4f32c04826290fb057e686f30be1cbf89bd2292b7a0",
+      "bytes": 10149
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-00-v1.md",
+      "sha256": "26ce2a77331b719a11fb897ef3daaee570b186b14cc2422cc4f1534a996f26ab",
+      "bytes": 2015
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-00-v10.md",
+      "sha256": "c34742e838301f3c8f904ca0b657afe3a75e8794a52b2c15111af7db32600600",
+      "bytes": 2338
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-00-v11.md",
+      "sha256": "639846d683ada1d0c6c3da97a55f0aa5dc311168e8213470f0cb0272f23bf80a",
+      "bytes": 1911
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-00-v2.md",
+      "sha256": "c6e861bcdced54d5dca25ed251eee93a90941b0dfa508f0169968750c9a2bc71",
+      "bytes": 1106
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-00-v3.md",
+      "sha256": "dc4d71f6cb9651daf9e9f2609ae0845ad87ee900abc6e4978b81609ebb01b00b",
+      "bytes": 1646
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-00-v4.md",
+      "sha256": "5fc9800f0cae978b8d54dc561e2cf0935ec19cafb5cbfc8753b3e88687ff01d0",
+      "bytes": 1987
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-00-v5.md",
+      "sha256": "abb765aad0b6706bb89f85c4072a5155934b69e0960f54e7306afb89401b688b",
+      "bytes": 2347
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-00-v6.md",
+      "sha256": "f54e3c7e450cf32cbb97b360fdeae7af05a400364415f499e5e77ed23dcfb06b",
+      "bytes": 1606
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-00-v7.md",
+      "sha256": "028e08c1d407db32d66cfb1a36d5453e4fd0348ed639555d72a8383cca83d5e4",
+      "bytes": 3557
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-00-v8.md",
+      "sha256": "da698ed226ad386028fd5036e0e51df82bc7094761d691a23a24cb14c1931eb3",
+      "bytes": 2427
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-00-v9.md",
+      "sha256": "4d57eea07c1977250633d76f2f34c72f0123f71c3826fddf3eedbb611dd95b47",
+      "bytes": 2073
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-01-v1.md",
+      "sha256": "fdb1c9b2866183de3f60d773998de3c614f6bb397c42712c3545d0f2d26b16ea",
+      "bytes": 2314
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-01-v2.md",
+      "sha256": "c9bdd0c3f06b0a3eddf358a727732d1fea8d9fdf2c7369a243a069adbc848a03",
+      "bytes": 1219
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-01-v3.md",
+      "sha256": "a0721564d75efc74012bc9eac7cae61233e10fbad72dac2b9fc303ff78f3cd53",
+      "bytes": 1968
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-01-v4.md",
+      "sha256": "4c59ac607f426b37119b3c1cf014a789985b885dc740aa76bc23bb404bfc7024",
+      "bytes": 2170
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-01-v5.md",
+      "sha256": "cd6c8110db4c64a165e4fcc354f1fe963c253fb0fc5ad5e7482cefa714017205",
+      "bytes": 2240
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-01-v6.md",
+      "sha256": "9cd8349c0ca2468290cb672ede130d0d5309a1c1a405163375a2c45d08e20af6",
+      "bytes": 2432
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-01-v7.md",
+      "sha256": "30f563f776dd114537ee5847fc07332bb2db0e37e1b00b0e1f6048d2cce6c1dd",
+      "bytes": 1825
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-02-v1.md",
+      "sha256": "ab8d6a97ac2462877d8734c9d36c1e19641b2134a0f44f7bf4bca9e522064c23",
+      "bytes": 2766
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-02-v2.md",
+      "sha256": "e5888972dc41f922f6c2d5bb8120e37453490bb0caa0d452ec891377193d9851",
+      "bytes": 2344
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-03-v1.md",
+      "sha256": "24fcb5a82ce143757ec7af38e9b861cc4443b0b9337b52868789ba0c8de37001",
+      "bytes": 2465
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-03-v2.md",
+      "sha256": "39ab43fc1119d2ab5159ae77ffd1e1e2a43d74eb0ff5a23747752d8b1221d394",
+      "bytes": 2449
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-04-v1.md",
+      "sha256": "4e83a1af0d01836efb69ce3131d193bc4abf6c291b1f7571f944dd1a509c2f08",
+      "bytes": 2652
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-04-v2.md",
+      "sha256": "98108e56f86e2af18d61ba9e0784d17baea588d17a3eb32cacfee39d4ba20d29",
+      "bytes": 2238
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-04-v3.md",
+      "sha256": "8158e72e80c9f9dd947c0aa6a257969d26e7e5585159b15b308ef50b8c3b6533",
+      "bytes": 4781
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CAT-04-v4.md",
+      "sha256": "5ab9373e9a2ce457968f5cf05fffee2cd1d70729e53f2f21dc77adb3dc0ac41a",
+      "bytes": 2573
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CMP-01-v5.md",
+      "sha256": "109e9425ee3dbcc03db7c15836c323c56170e02194f6fa60536972da66344af0",
+      "bytes": 817
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CMP-01-v6.md",
+      "sha256": "f8a8585ed83d9100b055afc0d96f2f5629479ef7c761d59637fde2f6116f85ec",
+      "bytes": 2216
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CMP-02-v3.md",
+      "sha256": "1b04ee333aa0e780db21f7659758eab04489cd13f701d49e523d9c92f03f5dc5",
+      "bytes": 925
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CMP-02-v4.md",
+      "sha256": "799f2f8496cb4a4f82eba2c3f830972039627cc2da4e1f50d7fe85e0e12536f4",
+      "bytes": 914
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CMP-02-v5.md",
+      "sha256": "378af0f44940d6224db7a2b88d7e880602fc258166ae728e915a5c1cc3c21c96",
+      "bytes": 2383
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CMP-02-v6.md",
+      "sha256": "00f21ee40da139fc44382c9f3441457878194d444524f857c442692921d3e7a1",
+      "bytes": 1707
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CMP-04-v6.md",
+      "sha256": "d381f1ac6ebd579d6cee4d7768d6ef9764ddcbb6c5122a367c9c2432620e778a",
+      "bytes": 846
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/CMP-04-v7.md",
+      "sha256": "ad602189da6e7f6aea5ac3f3e603b43460ed2105e4a4e1d6935dbae9f758e339",
+      "bytes": 1905
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/current-set-review-2026-09-10.md",
+      "sha256": "1bb0f8ba474bcb78e17a76f239f8086939431aabcceacb1b7a39db1d249c7c0d",
+      "bytes": 6217
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/evidence-form-control-recapture-2026-09-03.md",
+      "sha256": "6cf629fd9d4fca78c449e3f117ebb4e24d06bcc45175e67cb7429a6d80895e5d",
+      "bytes": 3634
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/guide-set-comparison-2026-09-08.md",
+      "sha256": "55006a7c8f3a425e852fcccd999d2a246103554d3a796134fea7f5fcc91245bb",
+      "bytes": 7993
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/guide-set-followups-2026-09-08.md",
+      "sha256": "67b2cd8ae80d2b8183c87398f29674b1e801af6ad12439882d024d50c5704c7f",
+      "bytes": 5452
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/HELP-01-v6.md",
+      "sha256": "4c32fd7b7ccfc6f961757bfcc777d1d464e78e5b0007f983a6678b708241b8d2",
+      "bytes": 772
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/HELP-01-v7.md",
+      "sha256": "753fa7d159cb8e3b4cb0738b8cf68c9d72efc66b4446fa73d4431abf749722fb",
+      "bytes": 2218
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/owner-corrections-2026-09-10.md",
+      "sha256": "9611bc535ef6a581748167616d80b3c935d8b317c794168a589e204378d7d663",
+      "bytes": 9006
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/owner-review-readiness-2026-09-10.md",
+      "sha256": "80a1c7c21fc3fd7840aa659e7ce501d38e6635a1f3efb447c50d71af72f46c40",
+      "bytes": 2899
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/owner-review-todos-2026-09-10.md",
+      "sha256": "e9a5221bd5d4ff3a1570533d0cfb891afb5119ddfedbda6e6175719d1c516f91",
+      "bytes": 16378
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/prerequisite-followups-2026-09-10.md",
+      "sha256": "f45bf3da5cd1b587db916ba44a76c2b3f92623b3865b62cb85d9c7be23b0283d",
+      "bytes": 3114
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/README.md",
+      "sha256": "bbfbeaccb042f9f9b6743d6d25460bcfe627d1f947b4751c02666758d019f831",
+      "bytes": 4415
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/SC-01-v11.md",
+      "sha256": "4d586c98b3da97b6748321dec6b02b61286a7d971dfb87975c09be917b1b62ce",
+      "bytes": 2181
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/SC-01-v12.md",
+      "sha256": "94e6c85db81f6b2fac7f33aee3e878e5e760de1bce63f1fb11cc3ff5ac9b4684",
+      "bytes": 1689
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-01-v10.md",
+      "sha256": "ad5cd5220d01b6c9d9905fe8fc0c7e3cc0b77bf43774de795b0405296c29e516",
+      "bytes": 1093
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-01-v11.md",
+      "sha256": "11ccfb0d2f8390d0d5671835f89a95c1c935f1c9af05df8b32ec425d2f4d4e1c",
+      "bytes": 836
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-01-v12.md",
+      "sha256": "3db95ac7350c47013fa38cda3ef87ef9aac2b8da8f39f9509a79596f94b6b620",
+      "bytes": 2338
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-01-v13.md",
+      "sha256": "37ee6c5f1fded40b7f654462a75f390a5f29ba345e49e463856f30fdfbd257b0",
+      "bytes": 1709
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-01-v7.md",
+      "sha256": "37402a9b3f1f24b5212f11a295e0a6a9daf41d6ceb2296988014ccd6fe99bd65",
+      "bytes": 1974
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-01-v8.md",
+      "sha256": "100ca85411aefdf7ca11bf3264b29e7d11e62f4f3db80e949c257c345975cd30",
+      "bytes": 1851
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-01-v9.md",
+      "sha256": "3286562d07b004a4b40a36c249f1ca7d00b90a6267c505d270b931529a4421d3",
+      "bytes": 1191
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-02-v10.md",
+      "sha256": "f9dee403b71fa4c2801460fa1e6dc298a5663abb31e128294b3ea4170c068b57",
+      "bytes": 2439
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-02-v11.md",
+      "sha256": "ab9ce45f2b688b168f79dd7fe958d21d46e5aaa0cb3f067f6406298e21d40353",
+      "bytes": 1670
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-02-v2.md",
+      "sha256": "5c6b9d493b28683644871357c27677e44523c3db60fb02343af98fbd2604ec56",
+      "bytes": 1809
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-02-v3.md",
+      "sha256": "990fbed7a9c893d9504bb0b3031b366a555d4af2743ca71c446778acb43e83fb",
+      "bytes": 2019
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-02-v4.md",
+      "sha256": "75e317e5c674c5e6914232fdc57e78d6801929c427248c2896815607f8c73bcb",
+      "bytes": 1809
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-02-v5.md",
+      "sha256": "93e4d40e13c4a2610ac2629217d91a7e8ce00d40fb56f1bb246a152256ab8d78",
+      "bytes": 1298
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-02-v6.md",
+      "sha256": "e4516644f680c8b0d77ebfa2fed5012497c08435dab6eb68f4fd4971150ad6b0",
+      "bytes": 1343
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-02-v7.md",
+      "sha256": "bf1dbb209f97ce677c0f88d77502406ebfc8b3e0be547265e044b88bd924d106",
+      "bytes": 1556
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-02-v8.md",
+      "sha256": "0b7c162c18b1cb22af64882c83decad6e94e6c7156a7bf050e8513a56af09b59",
+      "bytes": 972
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-02-v9.md",
+      "sha256": "5443d87cfa9d6adc46e810106a0131acc6213f8e7ad06f0a8628994f28e1fe2e",
+      "bytes": 815
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-03-v2.md",
+      "sha256": "d4bbeaad328f1830025e2fba89b93a6e0557058e7114af3c00a3cdbc94e40573",
+      "bytes": 981
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-03-v3.md",
+      "sha256": "449ccbb01ece570bb4e93223ae94d65162f43ee47853b35dfe30f372dcfeb225",
+      "bytes": 1016
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-03-v4.md",
+      "sha256": "c274a887401784c8d57c54cea36056b0817234e809bdc17c2b4c0f51fef6d906",
+      "bytes": 2403
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-04-v2.md",
+      "sha256": "7638e070faf1fc67d4a7b817ea30429ab5265b263195ef098d8f295c6f5ecef8",
+      "bytes": 954
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-04-v3.md",
+      "sha256": "acdbf9ff89e267f32465e7dd0a2de64d6d4321815570719128e654113c3bea1f",
+      "bytes": 911
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-04-v4.md",
+      "sha256": "21ebb1eb78fdb78fd739aeb74517fd0236cdae1149c753bbefd4e9368ed24896",
+      "bytes": 4277
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-04-v5.md",
+      "sha256": "37483f9543e5676dc6ba153e34968cdbecb248f6fb79e259124acbe7f63bbc26",
+      "bytes": 2924
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/USR-04-v6.md",
+      "sha256": "e3c1c15647213a0820780686ccb30ebded8387636d4256432c3669627d85702a",
+      "bytes": 1856
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/WF-01-v10.md",
+      "sha256": "e0f462e43ba9ccf6f315bf75019d751b4dad7dad60f731f2c74f04fe82a3b92f",
+      "bytes": 972
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/WF-01-v11.md",
+      "sha256": "a02f8ced0a15aaad3b603e268df3aae8156d65088e568cb076d432ea12000748",
+      "bytes": 4062
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/WF-01-v12.md",
+      "sha256": "af329f8136afd84616afe6263c117255dd0aca508bb6c4461791466c0e9cceae",
+      "bytes": 3536
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/WF-01-v13.md",
+      "sha256": "7881aa98a4b76cd33389d71f3539485e5d311329c95ef5abe01d8420ac025c79",
+      "bytes": 1724
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/WF-02-v11.md",
+      "sha256": "8caf53c5ac8e822a34dabc4ce63bda8224ea637d20e4e38742fe5d1eb0328058",
+      "bytes": 875
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/reviews/WF-02-v12.md",
+      "sha256": "4edee96d8e64b12d6b13986cf05c3d0110d663874ed4c55e909942a9ecd729e2",
+      "bytes": 2404
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/screenshots.md",
+      "sha256": "81f45fd8c6744fdc57a8aff9f60ac774fad06e652748fe0b7e76db139382e9e5",
+      "bytes": 25960
+    },
+    {
+      "path": "source/repository/docs/manuals/operator-guides/system.md",
+      "sha256": "2a612ff388843e96f9462a8b08ec6abbfee5531afb8cb4a150fe4a42c5d6054b",
+      "bytes": 11225
+    },
+    {
+      "path": "source/repository/output/manuals/proofs/owner-corrections-2026-09-10/inputs/AST-02-v7.html",
+      "sha256": "8009db533c5b45a6c1ec06ed889a1c99c7f0eeffe18ad64abc91969c76aeeb0c",
+      "bytes": 18598
+    },
+    {
+      "path": "source/repository/output/manuals/proofs/owner-corrections-2026-09-10/inputs/CAT-00-v10.html",
+      "sha256": "736c8e451893b5459e7d92eb146865610606330e4861d9b0196bda2c7712c8ee",
+      "bytes": 814036
+    },
+    {
+      "path": "source/repository/output/manuals/proofs/owner-corrections-2026-09-10/inputs/CAT-01-v6.html",
+      "sha256": "ad183dfe1d15771f98bd556c655ad22e737912cabf28d8173db989865c5120c9",
+      "bytes": 1014734
+    },
+    {
+      "path": "source/repository/output/manuals/proofs/owner-corrections-2026-09-10/inputs/CMP-02-v5.html",
+      "sha256": "f153778382d856d2b92f5078e3450d8f5437beca8f68a56ae3ebbd44a2a6c6ca",
+      "bytes": 691147
+    },
+    {
+      "path": "source/repository/output/manuals/proofs/owner-corrections-2026-09-10/inputs/CMP-04-v6.html",
+      "sha256": "42b1ea9991a62b587df44d945413eafe2301f0ef5cfdb2656ef35377b15913ca",
+      "bytes": 909718
+    },
+    {
+      "path": "source/repository/output/manuals/proofs/owner-corrections-2026-09-10/inputs/SC-01-v11.html",
+      "sha256": "aa447ab61be8bda265ce33cbb630c275782901dad10801ade54deb252207c37d",
+      "bytes": 1621393
+    },
+    {
+      "path": "source/repository/output/manuals/proofs/owner-corrections-2026-09-10/inputs/USR-01-v12.html",
+      "sha256": "f389e853a00efbaa73ef10e4ca8cc72f1f6f50813bf2832f59c5681138e9cfe2",
+      "bytes": 964906
+    },
+    {
+      "path": "source/repository/output/manuals/proofs/owner-corrections-2026-09-10/inputs/USR-02-v10.html",
+      "sha256": "6df270ac8f15e71b76ddd161a5bac3b41eb890ef323187bc68af776537e957fa",
+      "bytes": 1101723
+    },
+    {
+      "path": "source/repository/output/manuals/proofs/owner-corrections-2026-09-10/inputs/USR-04-v5.html",
+      "sha256": "03669cf6892279d027a4e025f588d5c341f051ea92795d3263f31872e3c8fede",
+      "bytes": 1203511
+    },
+    {
+      "path": "source/repository/output/manuals/proofs/owner-corrections-2026-09-10/inputs/WF-01-v12.html",
+      "sha256": "cdabcf4021e3cabad9782d8a8775ced87321fb63b14a60982153856e66e96d46",
+      "bytes": 312072
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/baselines/AC-01-login-v6.svg",
+      "sha256": "cb46bc3cd017823026e19fd5754e3319e4652f5d9f53b406602fe4e0c396ce18",
+      "bytes": 1009944
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/baselines/manifest.json",
+      "sha256": "44d2018d473c5b8de37a92f7142b49b20c148137b02d2f36eb8575899d419761",
+      "bytes": 727
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/baselines/SC-01-asset-vinden-en-openen-v10.svg",
+      "sha256": "f10ba83d89d60429ee73c1843b0d6bdaf8a85f0c4f85476047d871bc27f5adda",
+      "bytes": 1623071
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/AC-ACCOUNT-MENU-DESKTOP-01.png",
+      "sha256": "6a322f438da37b7b6c28586b4817437df1b363045db06bd2182588f65311fb32",
+      "bytes": 65210
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/AC-SELF-PASSWORD-DESKTOP-01.png",
+      "sha256": "25b07022b372c5e35e3de446c2e67c41761b8a344e20c1afb5fa2adb34500a46",
+      "bytes": 36789
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/ASSET-DETAIL-02.png",
+      "sha256": "8edb5b931caecdf8985dcbd40ef45aa3b6b8b3386f267bd013e077103ac0ae04",
+      "bytes": 71211
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/ASSET-INDEX-01.png",
+      "sha256": "e07de88d8fbe79eb34ac60471bd33b63ccff98bc9e5375b4eb2d16f961db94c7",
+      "bytes": 55339
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/ASSET-LABEL-01.png",
+      "sha256": "bdcc8a231267378f79bb9ae8b6a90e04bf1d80ddc039a97d44bde93e4a4ab9b8",
+      "bytes": 75354
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/ASSET-VERIFY-01.png",
+      "sha256": "0255ddc373eea2b7e1c8c92cc315b9eedcdb84f3bed20dc409b08ad570118b2b",
+      "bytes": 80926
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/AST-ASSET-SAVED-MOBILE-01.png",
+      "sha256": "1b22876a09fc3c406fb92ede6b878c96e7e3e8a0a0b3bcf0cca4f4f7150e107d",
+      "bytes": 111247
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/AST-COMPONENT-REVIEW-MOBILE-01.png",
+      "sha256": "5dfd05565cfd741a87583408a333f21fa694e29c5f2924291812875b164fc972",
+      "bytes": 126203
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/AST-LABEL-CONTROL-MOBILE-01.png",
+      "sha256": "b55cb0993929e52630afa068722539a2fdd1cfec9cc72b3323de88cba96e6a2c",
+      "bytes": 82621
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/AST-LABEL-PLACEMENT-GENERATED-01.png",
+      "sha256": "f5142afa431e212565ff36159811abb00c8828f2eb6cde2130cf245252ef55d3",
+      "bytes": 2485916
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/AST-LABEL-PLACEMENT-PHOTO-01.jpg",
+      "sha256": "7ede7ec2dca1f0890c5757a402de2c288f629124257fb75f87542b84e5fb2fd0",
+      "bytes": 452916
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/AST-QA-HANDOFF-MOBILE-01.png",
+      "sha256": "257e2300deb1b1355ba7dc2164bb3e247cb5e07edbb5bd51941c6a6645a135d7",
+      "bytes": 83072
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/AST-READY-STATUS-MOBILE-01.png",
+      "sha256": "f52cdef6ae0c7b54f8d5e509f509e854d66829b338c6ae43a190ef0a0e2b16a8",
+      "bytes": 86732
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/AST-REGISTER-ENTRY-MOBILE-01.png",
+      "sha256": "ba207608d7ba6f224f99c41f068629f833eb7520fd1d04eb963a2827b33694dc",
+      "bytes": 90273
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/AST-REGISTER-IDENTITY-MOBILE-01.png",
+      "sha256": "e35fb58eea6ec07d5d4f4d092b28e33026b5e7520a3331d9182df59a6d1e046a",
+      "bytes": 91351
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/AST-REGISTER-LOCATION-MOBILE-01.png",
+      "sha256": "4705a431d014a63b2c75884a3fa510a453863e5125a8a8527dac46c727ec7cfb",
+      "bytes": 135063
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/AST-REGISTER-SAVED-CHECK-01.png",
+      "sha256": "db413c36029308d0b1c26499a375bfc76e70ac35a2f3652e94dd4220bbc83715",
+      "bytes": 32030
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/AST-REGISTER-STATUS-MOBILE-01.png",
+      "sha256": "e35fb58eea6ec07d5d4f4d092b28e33026b5e7520a3331d9182df59a6d1e046a",
+      "bytes": 91351
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/AST-WORKFLOW-ISSUE-MOBILE-01.png",
+      "sha256": "69c778ee8ff941797ef435d4bc9738cc63971fccd154f8102895bea43cbf6ac4",
+      "bytes": 119760
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/AST-WORKFLOW-PASS-MOBILE-01.png",
+      "sha256": "72e5c56b30e8af2ee7d5af0aea60cb414271bdb3652bd7751b7802fba4736003",
+      "bytes": 119852
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-ATTRIBUTE-CONSTRAINTS-NUMERIC-DESKTOP-01.png",
+      "sha256": "ccd9f0b3bccc029cadc9e2b410765956d033252e38f598f500ec1185652ba675",
+      "bytes": 60409
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-ATTRIBUTE-CONSTRAINTS-NUMERIC-DESKTOP-02.png",
+      "sha256": "4a8efa269cf2658f1dc63cb9dc32d5c7b9de3d9b03b2bd3722a00fdba9ca2a80",
+      "bytes": 60543
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-ATTRIBUTE-CREATE-IDENTITY-DESKTOP-01.png",
+      "sha256": "dc51fccb0671e2ea27f6e86218464fae4e415528d2c17fdc9130470dba1ff2fe",
+      "bytes": 59808
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-ATTRIBUTE-CREATE-IDENTITY-DESKTOP-02.png",
+      "sha256": "a440aaffdfeee17ebce7350eebba861db97a8f5b2ef6ec570795ba7351e8ee29",
+      "bytes": 59959
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-ATTRIBUTE-ENTRY-DESKTOP-01.png",
+      "sha256": "b7e7ef9d4ac9c312f2b754ce4151acf3a3db7339941ab0038a935c17c9ba86d3",
+      "bytes": 75252
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-ATTRIBUTE-LIST-DESKTOP-01.png",
+      "sha256": "41a99908d2c732c3b01bab218ad3af8404c8519f608f8b3b0445f2377e01de66",
+      "bytes": 105759
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-ATTRIBUTE-OPTIONS-ENUM-DESKTOP-01.png",
+      "sha256": "e5b956f7f257dac61036fa5b7a991ad7200e810b60c73e9fd50810ceb0985315",
+      "bytes": 38826
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-ATTRIBUTE-OPTIONS-ENUM-DESKTOP-02.png",
+      "sha256": "1c63df829fadad772ddbcb7eb385ae5077d6ae0b1995503207a08e8e710d8867",
+      "bytes": 38909
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-ATTRIBUTE-RESULT-DESKTOP-01.png",
+      "sha256": "9fa9b973e023340ba1b38d76fcd34f06b40a2b2abec9778ddae2a2317c7d7375",
+      "bytes": 42085
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-ATTRIBUTE-SAVE-DESKTOP-01.png",
+      "sha256": "4f21e6b8efb22afd9d417b399c86614482a4bdf6f450c12d629e8ec2b48dbfb5",
+      "bytes": 40704
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-ATTRIBUTE-SAVE-DESKTOP-02.png",
+      "sha256": "958930b89255f9f4787fe167111d9201a760dee2acc88e02c5e2eceb721649be",
+      "bytes": 40774
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-COMPONENT-DEFINITION-CHILDREN-DESKTOP-01.png",
+      "sha256": "b1ba2fed89c68b94c9d757245c9ea78b32a86605161ecc34e4aa3e0d28fd2858",
+      "bytes": 55930
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-COMPONENT-DEFINITION-CHILDREN-DESKTOP-02.png",
+      "sha256": "b374cc7eec716e5f8141f578d1523b93cc88e0f5d50e26fe4256e97f49bf1ca7",
+      "bytes": 55850
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-COMPONENT-DEFINITION-CONTRIBUTIONS-DESKTOP-01.png",
+      "sha256": "5e318a8c60216ed4b35d993139f01b78322a1dc9a69a18f1205d30d36efd46b6",
+      "bytes": 54078
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-COMPONENT-DEFINITION-CONTRIBUTIONS-DESKTOP-02.png",
+      "sha256": "622ca27b49b11b0c71057701a77f022534da1d75911af712396c7d8424d17f5d",
+      "bytes": 52353
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-COMPONENT-DEFINITION-ENTRY-DESKTOP-01.png",
+      "sha256": "4cf74d42b03a4d7f59042a38b30ad248a66049be6da1abc98d4d4eb8216ecc6c",
+      "bytes": 71658
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-COMPONENT-DEFINITION-IDENTITY-DESKTOP-01.png",
+      "sha256": "338e79b91669819d403a1a58dc336aebe831b7b31ede4eccc9312ff97e29af71",
+      "bytes": 60125
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-COMPONENT-DEFINITION-IDENTITY-DESKTOP-02.png",
+      "sha256": "78c20e2dd90bf64945ceee37158e4dd7696662c5cb6689cd90eee3acfbd0c2c8",
+      "bytes": 60184
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-COMPONENT-DEFINITION-LIST-DESKTOP-01.png",
+      "sha256": "44761bec04985ef7a54c7ee37ed7cacea11c9e008d99a0753f360c2421f5441a",
+      "bytes": 89986
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-COMPONENT-DEFINITION-OVERLAP-DESKTOP-01.png",
+      "sha256": "06fe2b2642df4289225dcd8e4cb553c4ab3944bd9b63fcc7fb2b5cacabdbb410",
+      "bytes": 51196
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-COMPONENT-DEFINITION-OVERLAP-DESKTOP-02.png",
+      "sha256": "0c106789aad289143e6c5654f565bc87e1a4f9762e098196dfaade219a3c8655",
+      "bytes": 50928
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-COMPONENT-DEFINITION-SAVE-DESKTOP-01.png",
+      "sha256": "e1206ad981dda1f6f647f62d1c258538e92c1d5352561bad3d4c5433a15c5bc7",
+      "bytes": 53465
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-COMPONENT-DEFINITION-SAVE-DESKTOP-02.png",
+      "sha256": "497c14a2033af5338392c9bb6a33d8ccfdf41005ac44bb639f5469dd39f45fcd",
+      "bytes": 52471
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-MODEL-CREATE-DESKTOP-01.png",
+      "sha256": "98dd412f7c7cf7a12b27bc2b4a6d4f4562e828aade0e19071d029b1dae7bff30",
+      "bytes": 57705
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-MODEL-DETAIL-DESKTOP-01.png",
+      "sha256": "b20b8013f526921da8fa4671c1247e0b0ed3e6e750f30cb1328b1b715cca1998",
+      "bytes": 63604
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-MODEL-LIST-DESKTOP-01.png",
+      "sha256": "64060324c1b927c7cf8737af7785e1ba459ed94978af73ee1ed9201e994574df",
+      "bytes": 96227
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-MODEL-NUMBER-CREATE-DESKTOP-01.png",
+      "sha256": "ed70a04fc25322456e7f3973fcc969b9f65995b939386477c63fb89454a02ad7",
+      "bytes": 45960
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-MODEL-NUMBER-LIFECYCLE-DESKTOP-01.png",
+      "sha256": "4eea398b84c430f4306cb2751aae552010ff86c37c28b24d55d1205f5fe4560c",
+      "bytes": 123759
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-MODEL-NUMBER-SEARCH-DESKTOP-01.png",
+      "sha256": "fb9f42ff224e311ba8ac4eb6835d7926c33da9b680b5bfdeb8d03e208acec0fe",
+      "bytes": 47099
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-MODEL-SPEC-ATTRIBUTE-ADD-DESKTOP-01.png",
+      "sha256": "e692093b5540ea6c4155c2d916847c7e3351e7e7987658b046a64db94d3dc6b1",
+      "bytes": 91667
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-MODEL-SPEC-COMPONENTS-DESKTOP-01.png",
+      "sha256": "6b4d47f79efe1e631eaa1e38557f88a2b7ca24aaaab8101dd4e038c164adfac8",
+      "bytes": 61192
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-MODEL-SPEC-CONFLICT-DESKTOP-01.png",
+      "sha256": "98d302faf75c5a1ff0f8353598c6cdeee6d86e1924b9b9bcae2a412101eca4ac",
+      "bytes": 94397
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-MODEL-SPEC-DESKTOP-01.png",
+      "sha256": "561cb3c86e03bfebe089ba1cd4b4393ec653c3a7be74346065355cd362b704da",
+      "bytes": 97813
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-MODEL-SPEC-EXPECTED-ADD-DESKTOP-01.png",
+      "sha256": "fe36ebe48e2010db0e82c32a4d4b0b0f0bd54c44142d1bf08cd1790b2e9a6217",
+      "bytes": 82406
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-MODEL-SPEC-EXPECTED-START-DESKTOP-01.png",
+      "sha256": "f1134a8db9250097aaeb087d550201286d5111d0b5ba1d08086fbfbb97789b66",
+      "bytes": 64721
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-MODEL-SPEC-ROSTER-DESKTOP-01.png",
+      "sha256": "f32dc87b923c2fe4716c578bec5acab2cefd7916766a20919154f4ee6863c892",
+      "bytes": 63979
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-MODEL-SPEC-SAVE-DESKTOP-01.png",
+      "sha256": "7d85f2211c7eda5a0ba2caa74254d4a188a3fb73ca29b1841a24974ef3932873",
+      "bytes": 64291
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CAT-MODEL-SPEC-SAVED-DESKTOP-01.png",
+      "sha256": "9fc7ef2ff0d58d433ebb104ff3913afa062d43e7f62c71cdb086f8bc29b92b8c",
+      "bytes": 93981
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CMP-INSTALL-ENTRY-MOBILE-02.png",
+      "sha256": "2e5ade7e3428cfdabeb0cd62d963a63844e21fcc80411d296b50eb4ad891e609",
+      "bytes": 52518
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CMP-INSTALL-RESULT-MOBILE-02.png",
+      "sha256": "c434b3147e20f873312c9dd87e26d0827aabfeaa3d8d6e4fafaac3eb78919fd4",
+      "bytes": 49414
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CMP-INSTALL-SELECTED-MOBILE-02.png",
+      "sha256": "6612b7ebb54815ba8ac2b4767d3d924ca48789e6cc07944031c58c3de3438e30",
+      "bytes": 40196
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CMP-LIST-01.png",
+      "sha256": "c1decc4222578a8925ea2e58bb52d1ca04ad0e9bc5755d53319e9cb67039bd2f",
+      "bytes": 169239
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CMP-NEW-CUSTOM-MOBILE-03.jpg",
+      "sha256": "d586b7ea8c138293261286cfe5eeba6d5cca45660c10036faeceb3ef10992b33",
+      "bytes": 43626
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CMP-NEW-CUSTOM-MOBILE-04.jpg",
+      "sha256": "9d370e75f864ff2139c6ad318a5b925cf849c4fed0a561c8e40bb8c8ed1a4306",
+      "bytes": 49553
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CMP-NEW-DEFINITION-MOBILE-03.jpg",
+      "sha256": "655236be70e0fa9f34fd813c3bfeca9cacc8e23efcc0ce30e9a5264b4ca8b9bf",
+      "bytes": 47662
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CMP-NEW-DEFINITION-MOBILE-04.jpg",
+      "sha256": "94fcfe04b8432dca75d22fe46e5457569b6361d54848961c691685a20caf23d2",
+      "bytes": 47534
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CMP-NEW-ENTRY-MOBILE-03.jpg",
+      "sha256": "4cdb2d03abe3cc06e90c91eb335d1385597adad1a2c3a86554ff923facf9c0fb",
+      "bytes": 47576
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CMP-NEW-INSTALLED-MOBILE-03.jpg",
+      "sha256": "8f2d531c904190a3d8b77294069f3b8b67edf44606d55c12cd702ebcbc713156",
+      "bytes": 263365
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CMP-ROWS-01.png",
+      "sha256": "416bf122683552f49ae175669b80f5644092907b5ce727779b716822eee8f96b",
+      "bytes": 43632
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CMP-TAB-WIDE-01.png",
+      "sha256": "9fe931ddc5e8a3f3c62be6a00e521c06f1f29093d6c6a093c5ebd12f909fb988",
+      "bytes": 61404
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CMP-TRAY-CONFIRM-MOBILE-03.jpg",
+      "sha256": "9e2087888e239779e0bd49a3927a258d6cebc0254c779edf933ae94f75a8e742",
+      "bytes": 37820
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CMP-TRAY-LOCKED-01.png",
+      "sha256": "3eaa041be5dc12c656708b801c764366c879a4cc69cfb4576a1fb33490f354ff",
+      "bytes": 35330
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CMP-TRAY-RESULT-MOBILE-03.jpg",
+      "sha256": "504aec3b50ee468f08b694563b9c4b04ce24e1cb890576a841161c5a8a5114b3",
+      "bytes": 35179
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/CMP-TRAY-UNLOCKED-01.png",
+      "sha256": "00213c822627e535709d97bdb263af95796dd3074e73a5de262435adff844b02",
+      "bytes": 35691
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/DASH-MOBILE-01.jpg",
+      "sha256": "26cb6ba96e1243b6b90d0c7be8f7c7b459f561bf56fa65af03a922fc52f8e9bb",
+      "bytes": 152567
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/LOGIN-MOBILE-01.png",
+      "sha256": "132b63bb697b4638b537c88fb5a75f3a903d06fdd2afb34e5257ad6cc78bc24f",
+      "bytes": 34038
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/manifest.json",
+      "sha256": "069d4b3c16b03eb101e203aca3e47719bf40393ab47584a0c56f88fbc97ddcc8",
+      "bytes": 58556
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/PHONE-START-01.jpg",
+      "sha256": "88487d3a868a3f737a0e86bdee858443745cd9163e55debc6c86ecf3cd506b3a",
+      "bytes": 558253
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/SCAN-CAMERA-QR-01.jpg",
+      "sha256": "7e0ef2355954ceaf05b5820bb18103d1893d2b5bf64b7f3142ebb4c3d3cc7d31",
+      "bytes": 647248
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/SEARCH-FIELD-01.png",
+      "sha256": "5e38908e32272ca2fcf6ded4b5e0bde5bbab16868946be0fc4d2788b03fd61ca",
+      "bytes": 87127
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/SEARCH-RESULT-01.png",
+      "sha256": "c4fb1b24920c66894919be27626c4033556d203165e99c0dbfa367baad2d9656",
+      "bytes": 80862
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/USR-ASSIGNMENTS-DESKTOP-01.png",
+      "sha256": "d614e838b07f35669546ac6bbb030b74974d7894e1d970b9be5555948ac8d1d1",
+      "bytes": 90838
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/USR-CREATE-FORM-DESKTOP-01.png",
+      "sha256": "526137dd6953276bae3aee2b263995123cf36a1d87aa150ac7fe3032f1cef1d4",
+      "bytes": 50963
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/USR-DASHBOARD-PEOPLE-NAV-DESKTOP-01.png",
+      "sha256": "bae7f9bc178319e4570d670979ac5721f0d3de78ff3e25fc967239efc79faaab",
+      "bytes": 471112
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/USR-DEACTIVATED-DESKTOP-01.png",
+      "sha256": "d614e838b07f35669546ac6bbb030b74974d7894e1d970b9be5555948ac8d1d1",
+      "bytes": 90838
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/USR-DELETE-DESKTOP-01.png",
+      "sha256": "e7a64ab2f860351adb9d82e229ccf12e22cf9f74d181facf205cf9ef5235436c",
+      "bytes": 76472
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/USR-DELETED-LIST-DESKTOP-01.png",
+      "sha256": "93a63409f0c0e5bea1340fe1af515b0ca3df0449bae891e7efcb2fbd84e3ed22",
+      "bytes": 48803
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/USR-DETAIL-DESKTOP-01.png",
+      "sha256": "c829e27f6e54e633888e7e5acf99c640a4e344ca28c2d15d725f3da92cee091d",
+      "bytes": 93828
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/USR-EDIT-ACTIVATED-DESKTOP-01.png",
+      "sha256": "52a5b8c80260621bf003b1b4340d53b36e113486d684ac103c0fa8933fbdc6fc",
+      "bytes": 55523
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/USR-EDIT-PASSWORD-DESKTOP-01.png",
+      "sha256": "52a5b8c80260621bf003b1b4340d53b36e113486d684ac103c0fa8933fbdc6fc",
+      "bytes": 55523
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/USR-EDIT-PASSWORD-GENERATED-DESKTOP-01.png",
+      "sha256": "f301a08c7306f67f7046c07bcccf9996fcdce4c267508590500274300ae6a7f8",
+      "bytes": 292215
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/USR-GROUP-EDIT-DESKTOP-01.png",
+      "sha256": "3e36abee6c86f48d172f549a3599f1a5d4ff1c2c0fbfa83943d84934b4297ce2",
+      "bytes": 28739
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/USR-LIST-DESKTOP-01.png",
+      "sha256": "6dd6034afbd911bc22b62706e3a968e5574aa485b5b28baf21e9ae08a71e3fbd",
+      "bytes": 58260
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/USR-PERMISSIONS-DESKTOP-01.png",
+      "sha256": "afaca82f02f698b5d13c841c05c03feb9e76c6351e400d05eecd1598648fea7f",
+      "bytes": 60375
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/USR-RESET-LINK-DESKTOP-01.png",
+      "sha256": "c829e27f6e54e633888e7e5acf99c640a4e344ca28c2d15d725f3da92cee091d",
+      "bytes": 93828
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/USR-RESTORE-DESKTOP-01.png",
+      "sha256": "42bd56951a697cfb87f69f89e524fd77fdc64bd070f674131cd60fc46c2fc940",
+      "bytes": 77396
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/USR-RESTORED-DESKTOP-01.png",
+      "sha256": "d614e838b07f35669546ac6bbb030b74974d7894e1d970b9be5555948ac8d1d1",
+      "bytes": 90838
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/WF-ENTRY-MOBILE-03.png",
+      "sha256": "ff4b7c6138df345dc6016c25cadf0e1464e21727e964c943f57e26d306c7a935",
+      "bytes": 45743
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/WF-INSTRUCTIONS-MOBILE-03.png",
+      "sha256": "4ca1357a7846b0c29ae95bee2ce2a58b376a6f4eee1d22b52b04026da44cdacc",
+      "bytes": 41516
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/WF-NEUTRAL-MOBILE-03.png",
+      "sha256": "b7d64c185e8bb6ed73f27f5ec80778a00f08ffd0b40e7ad9bcda5cfef447d7f8",
+      "bytes": 38885
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/WF-NOTE-MOBILE-03.png",
+      "sha256": "9a9751af12aa97983f512fca844c25896001fb23c8c2f3a136d2e7d5ac134812",
+      "bytes": 37009
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/WF-PHOTO-MOBILE-03.png",
+      "sha256": "293e5489f814b38dd78872f8f2a8a3848f9be27a80f39d26f4d2c0b03d1bfec2",
+      "bytes": 37358
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/WF-RESULTS-01.png",
+      "sha256": "106a8f2f1c6546112f1e8b3ee5847d2ae1acb679859a501effe2b94f2ad627e5",
+      "bytes": 28706
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/evidence/WF-RESULTS-02.png",
+      "sha256": "77bcd30b475589b02c40faefd6f2db8114374e1af43d1f0432acb315790455a3",
+      "bytes": 39181
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/pdf/manifest.json",
+      "sha256": "4e3bc1ca4f435319728b248393249345b1e090031d9cbfcd4c4d9cc999774023",
+      "bytes": 4480
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/review-rounds/2026-09-10/current-guide-selection-v1.json",
+      "sha256": "83e9c60aa4c4902f192bb7955c61be93506b9561d1db87331a2381c80d6876f3",
+      "bytes": 8849
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/review-rounds/2026-09-10/current-guide-selection-v4.json",
+      "sha256": "af62dc7824d1632863d2cc245c8c2b7869f8f96f5143169c6fefca38b2992813",
+      "bytes": 11429
+    },
+    {
+      "path": "source/repository/resources/manuals/operator-guides/review-rounds/2026-09-10/owner-review-readiness-2026-09-10.json",
+      "sha256": "4fd413fc45ecbcae56ac4c3e65cae5ad675299e361a96ebd7d4e155431c76d0c",
+      "bytes": 5656
+    },
+    {
+      "path": "source/repository/scripts/manuals/accepted-guide-kit/compare.py",
+      "sha256": "74b580070621c2b6f98d189723823ec748b7057bc281c25fa3f15b5d73aa02ed",
+      "bytes": 2496
+    },
+    {
+      "path": "source/repository/scripts/manuals/accepted-guide-kit/render.mjs",
+      "sha256": "ef7f3475b9e2bddd86999ce889267823b1c3715e82a5c706757fb85d7c63be88",
+      "bytes": 4582
+    },
+    {
+      "path": "source/repository/scripts/manuals/accepted-guide-kit/verify.mjs",
+      "sha256": "952d704d86caae2953ab43a650308dffc7877e9694bb4b264de4a3b5a0ce9d3a",
+      "bytes": 1196
+    },
+    {
+      "path": "source/repository/scripts/manuals/archive/generate-ast01-v12-proof.mjs",
+      "sha256": "5eb095f1a1065a520b7fbac39f10d49a41264e2cbf4f886d1262d9f4c7da9519",
+      "bytes": 14687
+    },
+    {
+      "path": "source/repository/scripts/manuals/archive/generate-first-batch-guides.mjs",
+      "sha256": "fae7773a020506544b94c056174bc020bc439b7efd662171a9ffb6186344e58a",
+      "bytes": 46132
+    },
+    {
+      "path": "source/repository/scripts/manuals/archive/generate-initial-guides-v2.mjs",
+      "sha256": "b0cdcb0157c98d7899099f06f45cd5e7a60a6796e852a3a1667df75a0b7f0c82",
+      "bytes": 47625
+    },
+    {
+      "path": "source/repository/scripts/manuals/archive/generate-next-guide-drafts.mjs",
+      "sha256": "9b2ee352b39ea8a07c148b417b7ccfebcf9b9952fd269a50c0a73e3fbfe5128e",
+      "bytes": 28219
+    },
+    {
+      "path": "source/repository/scripts/manuals/build-accepted-guide-kit.py",
+      "sha256": "e0536a0769929cdcaab8939b61125e0cf521c0a6c59937cb1a971639dc30ce28",
+      "bytes": 14662
+    },
+    {
+      "path": "source/repository/scripts/manuals/build-audit-pilot-comparison.py",
+      "sha256": "f088dbb31c6241556f30d8a6f1f0922bfc997f3cb3fb6c1c770c01f776f5f60a",
+      "bytes": 8775
+    },
+    {
+      "path": "source/repository/scripts/manuals/build-catalog-field-map.py",
+      "sha256": "793178a14b4a9304efd59c53b08d4453e10ec9314e673dac3bd4660d349c964d",
+      "bytes": 6705
+    },
+    {
+      "path": "source/repository/scripts/manuals/build-guide-review-bundle.py",
+      "sha256": "dd3ac9884631adebac15ad033144cab658f8abf478e5da129e8b2f6dee90331d",
+      "bytes": 10037
+    },
+    {
+      "path": "source/repository/scripts/manuals/build-owner-guide-comparison.py",
+      "sha256": "4b85c64f2706fa4db000d3b7e6d8ed07f98d1cd11847429ded4c9dabe2fc27e5",
+      "bytes": 4424
+    },
+    {
+      "path": "source/repository/scripts/manuals/build-plain-guide-comparison.py",
+      "sha256": "5ef0537f9cb87a5d3c64284124fd90f8c37d275da45dfdbc253efa954ababbbd",
+      "bytes": 5976
+    },
+    {
+      "path": "source/repository/scripts/manuals/capture-asset-lifecycle-guide-evidence.mjs",
+      "sha256": "ddf4641203b7edd228c33d201d3426cc4f8df8f75830a9601cb6320b053baf09",
+      "bytes": 10947
+    },
+    {
+      "path": "source/repository/scripts/manuals/capture-catalog-guide-evidence.mjs",
+      "sha256": "90c81c7a7e2953c82f353dd0c391498d174b46095741f7cf9eb6dcceb58a46fc",
+      "bytes": 19371
+    },
+    {
+      "path": "source/repository/scripts/manuals/capture-revised-guide-evidence.mjs",
+      "sha256": "7c2239b98e970200960253794209aa5f8621938b6084755f16315aadcec47cae",
+      "bytes": 7116
+    },
+    {
+      "path": "source/repository/scripts/manuals/capture-user-account-guide-evidence.mjs",
+      "sha256": "33bd219e5ced26ef5ab16b11daad714cbffa5b921d5944d2ba0a3ccb48f16ee8",
+      "bytes": 4654
+    },
+    {
+      "path": "source/repository/scripts/manuals/generate-ac01-snipe-proof.mjs",
+      "sha256": "ef5f248267e1b75678a49c40b809d9543a004fdecdfbac7c588054466092f700",
+      "bytes": 15933
+    },
+    {
+      "path": "source/repository/scripts/manuals/generate-audit-pilot-review.mjs",
+      "sha256": "090723dd06d077049f8d43f6068fffc45e9f9dbd03fdb1f8f221f3865af4a2e7",
+      "bytes": 31186
+    },
+    {
+      "path": "source/repository/scripts/manuals/generate-catalog-guide-review.mjs",
+      "sha256": "21f3775118e62076e5aea10bc1fa2ab611bd6c4237de73306adc245af2f669a2",
+      "bytes": 149960
+    },
+    {
+      "path": "source/repository/scripts/manuals/generate-component-followup-guides.mjs",
+      "sha256": "9de23f970b2e48688232233bd4668daa61faccdcb15ce7c1bb8563bfdec503c6",
+      "bytes": 29714
+    },
+    {
+      "path": "source/repository/scripts/manuals/generate-component-guide-review.mjs",
+      "sha256": "22df394ee86eb1b23cd2f3a0e90bf2f552b52f2ff6356c673309e006c3aaa439",
+      "bytes": 16693
+    },
+    {
+      "path": "source/repository/scripts/manuals/generate-guide-component-proof.mjs",
+      "sha256": "82db2f4c7e7319e8d9c5b1aa2ecd7b759c3d7e75392cb82f399e68545905cdb5",
+      "bytes": 6038
+    },
+    {
+      "path": "source/repository/scripts/manuals/generate-guide-followups.mjs",
+      "sha256": "3b6cdff061380510f9f554201f48b4db9fb23ee856241a3c9542f64ece3432c1",
+      "bytes": 10459
+    },
+    {
+      "path": "source/repository/scripts/manuals/generate-owner-corrections.mjs",
+      "sha256": "5b520385c47f6aeb2b370b6e5a088e74ea6aa4639d5238d06fb73922a084303f",
+      "bytes": 7605
+    },
+    {
+      "path": "source/repository/scripts/manuals/generate-revised-guide-set.mjs",
+      "sha256": "c75be7facaa6e4004d3c8d4f3a126c4942b202859654a444bc7db2a915de339e",
+      "bytes": 95104
+    },
+    {
+      "path": "source/repository/scripts/manuals/generate-sc01-snipe-proof.mjs",
+      "sha256": "6bf7aa955c761d32a6bb9f3aff5206de3fdfb4774c530c088d75dc314eb7ebe2",
+      "bytes": 17429
+    },
+    {
+      "path": "source/repository/scripts/manuals/generate-user-account-guide-review.mjs",
+      "sha256": "ee973dcb3243648fd42e3665f6c7d548b0c54cca955a36bd103d87a011eeee99",
+      "bytes": 42081
+    },
+    {
+      "path": "source/repository/scripts/manuals/generate-wf01-v12.mjs",
+      "sha256": "11b21ca2e613953ea201a626bbf07657cc69243a097f40b176e125e6983fcefc",
+      "bytes": 7336
+    },
+    {
+      "path": "source/repository/scripts/manuals/generate-workflow-guide-review.mjs",
+      "sha256": "21a28333a30a5c93474679e14b868b8442f21d20f7f118b7cef8424813536413",
+      "bytes": 33488
+    },
+    {
+      "path": "source/repository/scripts/manuals/lib/guide-followup-patches.mjs",
+      "sha256": "cd8aa34a74c51b2cc9935174f323452f8fbb2335cc59028a334c06d642fc822f",
+      "bytes": 25320
+    },
+    {
+      "path": "source/repository/scripts/manuals/lib/guide-paths.mjs",
+      "sha256": "634b1c0c2944afb1c93b5b5dd9b9fe97f5d7dac96303581a69b51636949a7521",
+      "bytes": 6093
+    },
+    {
+      "path": "source/repository/scripts/manuals/lib/guide-system.mjs",
+      "sha256": "025336cf0aa5bf6f9e42ede78ff7457d812f8bad5bbfabe2c2603b1e218a3ab5",
+      "bytes": 26167
+    },
+    {
+      "path": "source/repository/scripts/manuals/lib/owner-correction-patches.mjs",
+      "sha256": "2242c519f739a4a4f80ca3d13c5a4c183f5d3de6b47314a1df8e3dc2d0416125",
+      "bytes": 17153
+    },
+    {
+      "path": "source/repository/scripts/manuals/package-lock.json",
+      "sha256": "21bc985559a9540548c11840bed9c7e30f0157528fd778363775ebe9004a34a7",
+      "bytes": 20880
+    },
+    {
+      "path": "source/repository/scripts/manuals/package.json",
+      "sha256": "80a13d4dc9885a7c9466fdf7aa7bcdacafcbfa89739621f2c88638c968630e50",
+      "bytes": 251
+    },
+    {
+      "path": "source/repository/scripts/manuals/retain-guide-followups.py",
+      "sha256": "b4b170490901264cf388a2d6d13d0980cdf96a83968ad23bf7cba3a80da3aa79",
+      "bytes": 16043
+    },
+    {
+      "path": "source/repository/scripts/manuals/retain-owner-corrections.py",
+      "sha256": "f0d87f2df0f4e494f1aa7252e485244d7dc8ba5a6075d86870c30586e4baef30",
+      "bytes": 2948
+    },
+    {
+      "path": "source/repository/scripts/manuals/test-guide-system.mjs",
+      "sha256": "d4d941a0ece1d52e4a539343f8c06b56cc31cdf65aae67fc99ea0cc744fd1cc9",
+      "bytes": 2235
+    },
+    {
+      "path": "source/repository/scripts/manuals/verify-guide-package.mjs",
+      "sha256": "d7ba94013026dd238c11d0962a9a40d4067fbe01f335aef101fe9ea26bbd7cba",
+      "bytes": 10128
+    },
+    {
+      "path": "source/repository/scripts/manuals/verify-owner-corrections.py",
+      "sha256": "b880c6d860ad270df7aab7da3cae10ea62b3ae861f82e366b336f8c50dbf69a4",
+      "bytes": 7076
+    },
+    {
+      "path": "validation/comparison-report.json",
+      "sha256": "d8c0429fe6f5060f3bb6ac6d512095782197f6f666284e869a74cc9d6f11bb57",
+      "bytes": 2302
+    },
+    {
+      "path": "validation/guard-report.json",
+      "sha256": "5d6459542f6071c17eac854551c7d310dbccdd052a48ed2c67c037247ea5510f",
+      "bytes": 576
+    },
+    {
+      "path": "validation/render-report.json",
+      "sha256": "ced4e304bc2c55f81b23ee0f717af2cbad231c1cfdc7a18dffe999b55841145a",
+      "bytes": 6724
+    },
+    {
+      "path": "VALIDATION.md",
+      "sha256": "85d6318db300cc362d2d1e1bd06162d813747d570f9e701369f6d729f6089592",
+      "bytes": 2315
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "inbit-operator-guide-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "verify": "node verify.mjs",
+    "render": "node render.mjs --all"
+  },
+  "dependencies": {
+    "playwright": "1.62.1",
+    "sharp": "0.35.3"
+  }
+}

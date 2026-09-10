@@ -1,14 +1,21 @@
 # CMP-02 Nieuw Component Registreren En Plaatsen
 
+## Latest Correction Candidate - 2026-09-10
+
+Current review candidate: [v6](../reviews/CMP-02-v6.md), owner-cleared for user review.
+Recentered radio targets using the selected-control pixels in the canonical -04 screenshots.
+This current correction takes precedence over conflicting historical version
+notes below. Previous PDFs and exact acceptance records remain unchanged.
+
 | Field | Current value |
 | --- | --- |
-| Status | Working draft v4; visual-correction pass and awaiting exact-version review |
+| Status | Internal review candidate v6; owner cleared for user review 2026-09-10 |
 | Family | CMP |
 | Type | Detail task with alternatives |
-| Current version | `CMP-02-register-install-v4-draft` |
+| Current version | `CMP-02-register-install-v6-draft` |
 | Page model | One page |
 | Layout recipe | `stacked-step-flow` with `parallel-visual-choice`, `reused-evidence`, and targeted `inline-stop` |
-| Generator | `scripts/manuals/generate-component-followup-guides.mjs` |
+| Generator | `scripts/manuals/generate-owner-corrections.mjs CMP-02` |
 | Role | Senior Refurbisher |
 | Needed | Correct open asset and the new physical component |
 | Prerequisite | Asset verified (SC-01) |
@@ -71,3 +78,19 @@ The physical component is installed and one correctly identified component recor
 - CMP-01 Bestaand component plaatsen
 - CMP-04 Component naar tray verplaatsen
 - HELP-01 Problemen en hulp
+
+## Focused Candidate - 2026-09-08
+
+The separate [v5 review](../reviews/CMP-02-v5.md)
+records the focused follow-up to baseline v4, with the exact
+PDF and checksum. The owner requested this pass across all existing guides
+after reviewing WF-01 v12 positively. Earlier selections and their policies
+remain traceable; this candidate is not automatically accepted. See the
+[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
+source/crop exceptions, and remaining operational or evidence gaps.
+
+## Owner Feedback Follow-Up - 2026-09-10
+
+MR-04: remeasure v5 image 2A/2B radio focus centres against the actual recaptured sources.
+See [owner review TODOs](../reviews/owner-review-todos-2026-09-10.md).
+The existing PDF is unchanged; these are next-version or decision items.

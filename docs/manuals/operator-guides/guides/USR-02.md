@@ -1,14 +1,21 @@
 # USR-02 Rol En Rechten Wijzigen
 
+## Latest Correction Candidate - 2026-09-10
+
+Current review candidate: [v11](../reviews/USR-02-v11.md), owner-cleared for user review.
+Updated the USR-04 reference to Gebruiker uitschakelen.
+This current correction takes precedence over conflicting historical version
+notes below. Previous PDFs and exact acceptance records remain unchanged.
+
 | Field | Current value |
 | --- | --- |
-| Status | Working draft v9; visual-correction pass; v7 remains an internal review candidate for V1 |
+| Status | Internal review candidate v11; owner cleared for user review 2026-09-10 |
 | Family | USR |
 | Type | Administration task with an exceptional route |
-| Current version | `usr-02-rol-en-rechten-wijzigen-v9-draft` |
+| Current version | `usr-02-rol-en-rechten-wijzigen-v11-draft` |
 | Page model | One page |
 | Layout recipe | `stacked-step-flow` with `mixed-visual-widths` and `single-visual` |
-| Generator | `scripts/manuals/generate-user-account-guide-review.mjs` |
+| Generator | `scripts/manuals/generate-owner-corrections.mjs USR-02` |
 | Role | Admin |
 | Needed | Correct user and the intended access |
 | Prerequisite | Ingelogd (AC-01 Login); user account already exists |
@@ -107,3 +114,13 @@ intended access, without obsolete groups or unexplained direct overrides.
   inside the image frame.
 - v8 adds the canonical `Personen > Toon Alles` dashboard navigation before
   search and edit, without changing the accepted v7 rights semantics.
+
+## Focused Candidate - 2026-09-08
+
+The separate [v10 review](../reviews/USR-02-v10.md)
+records the focused follow-up to baseline v9, with the exact
+PDF and checksum. The owner requested this pass across all existing guides
+after reviewing WF-01 v12 positively. Earlier selections and their policies
+remain traceable; this candidate is not automatically accepted. See the
+[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
+source/crop exceptions, and remaining operational or evidence gaps.

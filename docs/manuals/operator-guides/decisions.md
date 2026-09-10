@@ -1,5 +1,29 @@
 # Operator Guide Decisions
 
+## Owner Clearance For User Review - 2026-09-10
+
+The owner cleared the ten current changed versions in the v5 pair for review
+by other users. They are now Internal review candidates; the exact PDFs stay
+unchanged. Use the [dated clearance and hashes](reviews/owner-review-readiness-2026-09-10.md)
+and current-guide-selection-v4.json for current status. Earlier four exact
+acceptances remain; the separate prototype is outside this clearance.
+Other-user feedback and third-party approval are still pending. Earlier
+generation-time draft/pending wording below is historical for these versions.
+
+## Owner Implementation Direction - 2026-09-10
+
+- Accepted direction: implement the marked corrections and the single-task
+  USR-04 design in new versions, preserving historical artifacts.
+- Preferred future QA label: **Testing completed**. Do not add a separate
+  **Awaiting approval** state. Completion rules, damaged/blocked handling and
+  live status migration still need operational decisions; AST-04 v6 is unchanged.
+- Catalogue quantities reflect optional records and reuse. Read definitions
+  before model-specification tasks; keep stable guide IDs and conditional reuse.
+- Review the separate field-to-result prototype before deciding its permanent
+  home. No broad catalogue rewrite is accepted by producing the prototype.
+- No new exact-version acceptance is implied by implementation authorization.
+  See [current correction review](reviews/owner-corrections-2026-09-10.md).
+
 Status: current cross-guide decisions and unresolved questions.
 
 ## Status Meanings
@@ -20,6 +44,10 @@ or `Superseded`. `Accepted` therefore does not mean third-party approval.
 
 | Date | Decision | Status |
 | --- | --- | --- |
+| 2026-09-10 | Owner explicitly did not accept USR-04 v5: mixed disable/delete/restore purpose, check-in instructions and the top OR route require redesign. Other guides are generally suitable working drafts with listed corrections. QA-complete status and catalogue visual-map/order ideas remain follow-up decisions. See [owner TODOs](reviews/owner-review-todos-2026-09-10.md). | Accepted direction |
+| 2026-09-10 | Owner accepted exact AC-01 v9, AC-02 v4, AST-03 v15, and AST-04 v6. Preserve their PDFs and earlier versions; review all 22 current guides in the separate versioned bundle. See [selection and hashes](reviews/current-set-review-2026-09-10.md). | Accepted |
+| 2026-09-08 | Owner rejected the first audit pilot design direction (WF-01 v11, USR-04 v4, CAT-04 v3): preserve baseline screenshots, hints, bottom help, useful page width, and task-dependent layouts. Only the clearer two-option block was explicitly preferred. In WF-01 keep profile selection at 2A and start at 3A. Individual factual changes remain undecided; exact baseline acceptance is unchanged. See [feedback](reviews/2026-09-08-pilot-direction-feedback.md). | Accepted direction |
+| 2026-09-08 | Preserve the existing guide set as an immutable comparison checkpoint before new-model audit revisions, including both accepted PDFs and current drafts. Keep new candidates in a visibly separate review round, with new versions, explicit benefits/drawbacks, and independent accept/reject decisions. The audit alone does not supersede accepted content or policy. See the [baseline](reviews/baseline-2026-09-08.md) and [round ledger](reviews/audit-revision-round-2026-09-08.md). | Accepted |
 | 2026-06-23 | Use laminated A4 portrait guides, normally one side and at most double-sided when necessary. | Accepted |
 | 2026-06-25 | Use Dutch for the first floor/refurbisher guide set. | Accepted |
 | 2026-06-25 | Use family color, marker, code, and label for guide references; do not rely on color alone. | Accepted |
@@ -106,7 +134,7 @@ or `Superseded`. `Accepted` therefore does not mean third-party approval.
 | Is serial-number search reliable in the release target? | Before SC-01 can be `Third-party approved`; draft wording may show it only when verified in the controlled environment. |
 | Which exact component permissions/role labels will be deployed? | Before CMP-02 or CMP-04 can be `Third-party approved`; CMP-01 v4 retains its internally accepted wording unless a later version is requested. |
 | What is the agreed physical review location and its recognizable visual marker? | Before AST-04 can be `Third-party approved`. |
-| Which operator-facing status names and in-application next-action cues should represent active work, waiting for QA, release, and return for correction? | Before AST-04 or AST-05 can be internally accepted. |
+| Which operator-facing status names and in-application next-action cues should represent active work, waiting for QA, release, and return for correction? | Before AST-05 can be internally accepted; AST-04 v6 is owner accepted on 2026-09-10, with local operational confirmation still pending. |
 | What is the approved secure channel for the USR-03 generated temporary-password alternative, and how is immediate self-change confirmed? | Before USR-03 can be `Third-party approved`. |
 | What email-address convention should administrators use? | Before USR-01 can instruct administrators to enter anything beyond an existing verified address. |
 | Where must a catalogue administrator record the source and verification result for an exact model number or critical specification? | Before CAT-06 can become an internal review candidate; the current UI has no dedicated source field. |
@@ -120,6 +148,15 @@ Review state is version-specific. Later changes require a new version record.
 
 | Guide | Version | Decision | Date | Notes |
 | --- | --- | --- | --- | --- |
+| USR-04 | v5 draft | Explicitly not accepted by owner | 2026-09-10 | Scope/flow redesign required; remove check-in work and mixed OR lifecycle flow. Exact PDF retained. See [review](reviews/USR-04-v5.md) and [MR-09](reviews/owner-review-todos-2026-09-10.md). |
+| AC-01 | v9 | Internal review candidate; owner accepted | 2026-09-10 | Exact unchanged PDF/hash in [AC-01 v9 review](reviews/AC-01-v9.md); earlier versions retained. |
+| AC-02 | v4 | Internal review candidate; owner accepted | 2026-09-10 | Exact unchanged PDF/hash in [AC-02 v4 review](reviews/AC-02-v4.md); earlier versions retained. |
+| AST-03 | v15 | Internal review candidate; owner accepted | 2026-09-10 | Exact unchanged PDF/hash in [AST-03 v15 review](reviews/AST-03-v15.md); earlier versions retained. |
+| AST-04 | v6 | Internal review candidate; owner accepted | 2026-09-10 | Exact unchanged PDF/hash in [AST-04 v6 review](reviews/AST-04-v6.md); earlier versions retained. |
+| WF-01 | v12 draft | Working draft; awaiting owner review | 2026-09-08 | Based on v10 with only step-3 choice emphasis/introduction and version/date changes; five screenshots, four help items, and all prior text retained. Exact v9 acceptance and v10 selection remain unchanged. See [review](reviews/WF-01-v12.md). |
+| WF-01 | v11 draft | Direction rejected by owner | 2026-09-08 | Only the clearer choice block was preferred; preserve v10 structure, screenshots and help. v10 selection and exact v9 acceptance remain unchanged. See [review](reviews/WF-01-v11.md). |
+| USR-04 | v4 draft | Batch direction rejected by owner | 2026-09-08 | Individual factual changes remain undecided; v3 remains the selected baseline. See [review](reviews/USR-04-v4.md). |
+| CAT-04 | v3 draft | Batch direction rejected by owner | 2026-09-08 | Individual factual changes remain undecided; v2 remains the selected baseline. See [review](reviews/CAT-04-v3.md). |
 | AC-01 | v6 | Internal review candidate for V1 | 2026-07-23 | Exact tested shared-frame layout; do not substitute the generic three-card layout. |
 | SC-01 | v10 | Internal review candidate for V1 | 2026-07-23 | Exact asymmetric mobile-first layout with corner-overlap image labels. |
 | AST-01 | v13 draft | Retired | 2026-07-21 | Scope absorbed into SC-01; useful evidence remains canonical. |

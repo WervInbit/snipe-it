@@ -1,5 +1,24 @@
 # CAT Guide Set Information Architecture
 
+## Implemented Owner Corrections - 2026-09-10
+
+Use the [correction review and plain v4 pair](reviews/owner-corrections-2026-09-10.md)
+for current review: ten revised guides, 22 guides total, previous 48 pages and
+current 47 pages. USR-04 v6 is disable-login only and requires a new review.
+Earlier exact acceptances remain. The field-to-result prototype is separate.
+Testing completed is the preferred future QA label; no Awaiting approval
+state or application status change is included. Older sections below are history.
+
+## Reconsideration Requested - 2026-09-10
+
+The owner requests a later review of learning order and a visual map linking
+data-entry fields to the model-specification, component and asset-detail result.
+Track MR-10 through MR-13 in the [owner review TODOs](reviews/owner-review-todos-2026-09-10.md).
+Prototype one consistent example before a wider family rewrite. Consider teaching
+attributes/component definitions before model-specification use, while retaining
+conditional reuse/create paths during daily work. Keep guide codes stable.
+The CAT-00 v11 learning cards now implement CAT-03 -> CAT-04 -> CAT-01 -> CAT-02. The separate visual prototype still needs matched asset evidence and a placement decision. Daily execution remains conditional on what is missing.
+
 Status: current working family plan for the next CAT guide versions. This plan
 does not approve an artifact, change a registered guide title, or replace an
 exact guide specification.
@@ -508,8 +527,8 @@ Target: three-page `reference-checklist` or other verified reference recipe.
    - Manufacturer support or product documentation.
    - Another explicitly accepted authoritative source when the first two are
      unavailable.
-   - Serial number, Product ID, and Inbit asset tag are not model-number
-     evidence.
+   - Manufacturer Product ID/P/N can be exact-variant evidence (for example HP).
+     Keep software Product IDs, serial numbers, and Inbit asset tags separate.
 2. **Verify identity and facts**
    - Manufacturer, product family, generation, exact code, punctuation,
      regional suffix, and case.
@@ -651,7 +670,7 @@ The CAT set is ready for exact-version review only when:
   shows only controls that exist;
 - CAT-05 exposes only controls available to Admin and verifies every changed
   object after the action;
-- CAT-06 never treats serial, Product ID, or Inbit asset tag as model-number
+- CAT-06 never treats serial, software Product ID, or Inbit asset tag as model-number
   proof and does not claim unsupported source storage;
 - every cross-guide handoff uses the registered family icon, color, code, and
   full name;

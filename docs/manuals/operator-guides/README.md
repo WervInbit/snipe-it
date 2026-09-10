@@ -1,8 +1,60 @@
 # Operator Guide Project
 
-Status: current project entry point, updated 2026-09-01.
+## Accepted Guide Folder - 2026-09-10
+
+Use [accepted-guides-v1](../../../resources/manuals/operator-guides/accepted-guides-v1/README.md)
+for all known accepted guides: 16 current PDFs / 27 pages, seven older
+accepted PDFs, self-contained HTML, scripts and authoring rules. WF-02 v10
+and CMP-01 v4 remain the accepted versions despite newer unaccepted drafts.
+All 27 pages regenerated identically at 96 dpi from a relocated copy.
+This is a frozen internal-review set; later versions need their own decision.
+
+## Owner Clearance For User Review - 2026-09-10
+
+The owner cleared the ten current changed versions in the v5 pair for review
+by other users. They are now Internal review candidates; the exact PDFs stay
+unchanged. Use the [dated clearance and hashes](reviews/owner-review-readiness-2026-09-10.md)
+and current-guide-selection-v4.json for current status. Earlier four exact
+acceptances remain; the separate prototype is outside this clearance.
+Other-user feedback and third-party approval are still pending. Earlier
+generation-time draft/pending wording below is historical for these versions.
+
+## Implemented Owner Corrections - 2026-09-10
+
+Use the [correction review and plain v4 pair](reviews/owner-corrections-2026-09-10.md)
+for current review: ten revised guides, 22 guides total, previous 48 pages and
+current 47 pages. USR-04 v6 is disable-login only and requires a new review.
+Earlier exact acceptances remain. The field-to-result prototype is separate.
+Testing completed is the preferred future QA label; no Awaiting approval
+state or application status change is included. Older sections below are history.
+
+Status: current project entry point, updated 2026-09-08.
 
 Use this directory to continue the laminated operator-guide work. Generated base guides are the active production format. Affinity remains a later finishing option after the complete set is confirmed or the user explicitly gives a green light.
+
+---
+
+## Guide Review Round Boundary - 2026-09-08
+
+**Existing guides are frozen for comparison:** the
+[baseline index](reviews/baseline-2026-09-08.md) preserves all 9 internally
+accepted PDFs and 20 drafts, their exact versions and checksums, and source
+inputs. Existing acceptance remains attached to those exact versions.
+
+**New-model audit revisions are a separate proposal round:** use the
+[candidate ledger](reviews/audit-revision-round-2026-09-08.md) to distinguish
+new changes, compare benefits and drawbacks, and record acceptance or rejection.
+WF-01 v11, USR-04 v4, and CAT-04 v3 are now available as separate comparison
+drafts in that ledger. The owner rejected their design direction; see the
+[feedback and revised approach](reviews/2026-09-08-pilot-direction-feedback.md).
+Preserve baseline screenshots, hints, help, and task-dependent layouts in
+future focused revisions. An audit finding does not by itself supersede an
+accepted guide or policy.
+
+The subsequent [WF-01 v12](reviews/WF-01-v12.md) is ready for review. It
+retains v10's screenshots, help, and page layout with a clearer step-3 choice.
+
+---
 
 ## Current Direction
 

@@ -1,0 +1,155 @@
+{
+  "createdOn": "2026-09-10",
+  "status": "Unaccepted candidates",
+  "previousSelection": "../current-guide-selection-v1.json",
+  "currentSelection": "../current-guide-selection-v2.json",
+  "artifacts": [
+    {
+      "code": "AST-02",
+      "old": 7,
+      "version": 8,
+      "file": "AST-02-refurbishment-route-v8-draft.pdf",
+      "pages": 1,
+      "sha256": "f932df1e44ca6fe5a3747efb0d2988e601939f9c9832e2ee6fd295889fb87846",
+      "bytes": 113378,
+      "input": "output/manuals/proofs/owner-corrections-2026-09-10/inputs/AST-02-v7.html",
+      "inputSha256": "8009db533c5b45a6c1ec06ed889a1c99c7f0eeffe18ad64abc91969c76aeeb0c",
+      "focused": {
+        "routesStyled": true
+      }
+    },
+    {
+      "code": "CAT-00",
+      "old": 10,
+      "version": 11,
+      "file": "CAT-00-catalogus-begrijpen-v11-draft.pdf",
+      "pages": 6,
+      "sha256": "d8c95c64c70508cdceb43d4aa71d7f1f22027dfd8690349349ec70bb8f09c04c",
+      "bytes": 602021,
+      "input": "output/manuals/proofs/owner-corrections-2026-09-10/inputs/CAT-00-v10.html",
+      "inputSha256": "736c8e451893b5459e7d92eb146865610606330e4861d9b0196bda2c7712c8ee",
+      "focused": {
+        "attachedArrow": true
+      }
+    },
+    {
+      "code": "CAT-01",
+      "old": 6,
+      "version": 7,
+      "file": "CAT-01-model-en-modelnummer-aanmaken-v7-draft.pdf",
+      "pages": 5,
+      "sha256": "bd79bd83124c9c31e52b12bb92e53d238265226cc5a82caebae5cdb5802c2b46",
+      "bytes": 456062,
+      "input": "output/manuals/proofs/owner-corrections-2026-09-10/inputs/CAT-01-v6.html",
+      "inputSha256": "ad183dfe1d15771f98bd556c655ad22e737912cabf28d8173db989865c5120c9",
+      "focused": {
+        "routes": true
+      }
+    },
+    {
+      "code": "CMP-02",
+      "old": 5,
+      "version": 6,
+      "file": "CMP-02-register-install-v6-draft.pdf",
+      "pages": 1,
+      "sha256": "873f68279de2c3006a635b008ccffb2e6a52a8793b5f5966ff43f0eeecec1961",
+      "bytes": 577700,
+      "input": "output/manuals/proofs/owner-corrections-2026-09-10/inputs/CMP-02-v5.html",
+      "inputSha256": "f153778382d856d2b92f5078e3450d8f5437beca8f68a56ae3ebbd44a2a6c6ca",
+      "focused": {
+        "2A": true,
+        "2B": true
+      }
+    },
+    {
+      "code": "CMP-04",
+      "old": 6,
+      "version": 7,
+      "file": "CMP-04-component-to-tray-v7-draft.pdf",
+      "pages": 1,
+      "sha256": "a6ae931f48bbfb3ef6d45cf196909e663f7b1da8535de58318c14eed9265956f",
+      "bytes": 496577,
+      "input": "output/manuals/proofs/owner-corrections-2026-09-10/inputs/CMP-04-v6.html",
+      "inputSha256": "42b1ea9991a62b587df44d945413eafe2301f0ef5cfdb2656ef35377b15913ca",
+      "focused": {
+        "completeButton": true,
+        "explicitCrop": true
+      }
+    },
+    {
+      "code": "SC-01",
+      "old": 11,
+      "version": 12,
+      "file": "SC-01-asset-vinden-en-openen-v12-draft.pdf",
+      "pages": 1,
+      "sha256": "bc29b532a2cea8dad759307c4abcf378a10114eb1205582c88ba1a5b5767461e",
+      "bytes": 1105099,
+      "input": "output/manuals/proofs/owner-corrections-2026-09-10/inputs/SC-01-v11.html",
+      "inputSha256": "aa447ab61be8bda265ce33cbb630c275782901dad10801ade54deb252207c37d",
+      "focused": {
+        "badgeClearsInstruction": true
+      }
+    },
+    {
+      "code": "USR-04",
+      "old": 5,
+      "version": 6,
+      "file": "USR-04-gebruiker-uitschakelen-of-herstellen-v6-draft.pdf",
+      "pages": 1,
+      "sha256": "c5b2e28471dfb912bef502264ed85a5d86b26b7ba24cbb4c8303b34a0f8c0c96",
+      "bytes": 698962,
+      "input": "output/manuals/proofs/owner-corrections-2026-09-10/inputs/USR-04-v5.html",
+      "inputSha256": "03669cf6892279d027a4e025f588d5c341f051ea92795d3263f31872e3c8fede",
+      "focused": {
+        "singleTask": true,
+        "retainedEvidence": true
+      }
+    },
+    {
+      "code": "WF-01",
+      "old": 12,
+      "version": 13,
+      "file": "WF-01-workflow-starten-v13-draft.pdf",
+      "pages": 1,
+      "sha256": "880429c9b1d599239e72a71fe696b52742b673af8542d5b3cc81a98381c1965b",
+      "bytes": 194431,
+      "input": "output/manuals/proofs/owner-corrections-2026-09-10/inputs/WF-01-v12.html",
+      "inputSha256": "cdabcf4021e3cabad9782d8a8775ced87321fb63b14a60982153856e66e96d46",
+      "focused": {
+        "sc01Styled": true,
+        "helpClear": true,
+        "profile2A": true,
+        "start3A": true
+      }
+    }
+  ],
+  "prototype": {
+    "file": "Catalogus-van-invoer-naar-resultaat-v1-draft.pdf",
+    "version": 1,
+    "pages": 2,
+    "status": "Unaccepted visual prototype; schematic asset results",
+    "sha256": "2a5e17e65d45ec7a52e0edad7b2f77920fd3564192110582d4abedda51bfc36b",
+    "evidence": [
+      {
+        "file": "CAT-COMPONENT-DEFINITION-CONTRIBUTIONS-DESKTOP-02.png",
+        "sha256": "622ca27b49b11b0c71057701a77f022534da1d75911af712396c7d8424d17f5d"
+      },
+      {
+        "file": "CAT-MODEL-SPEC-ROSTER-DESKTOP-01.png",
+        "sha256": "f32dc87b923c2fe4716c578bec5acab2cefd7916766a20919154f4ee6863c892"
+      },
+      {
+        "file": "CAT-MODEL-SPEC-SAVED-DESKTOP-01.png",
+        "sha256": "9fc7ef2ff0d58d433ebb104ff3913afa062d43e7f62c71cdb086f8bc29b92b8c"
+      }
+    ],
+    "remaining": "Capture and verify the same asset specification, component detail, source labels and replacement result before instructional integration."
+  },
+  "preservedPreviousGuideHashes": 22,
+  "acceptedVersionsUnchanged": [
+    "AC-01 v9",
+    "AC-02 v4",
+    "AST-03 v15",
+    "AST-04 v6"
+  ]
+}

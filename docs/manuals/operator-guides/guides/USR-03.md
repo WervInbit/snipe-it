@@ -69,3 +69,13 @@ continues immediately with AC-02.
 - AC-02 Eigen wachtwoord wijzigen
 - USR-01 Gebruiker toevoegen
 - HELP-01 Problemen en hulp
+
+## Focused Candidate - 2026-09-08
+
+The separate [v4 review](../reviews/USR-03-v4.md)
+records the focused follow-up to baseline v3, with the exact
+PDF and checksum. The owner requested this pass across all existing guides
+after reviewing WF-01 v12 positively. Earlier selections and their policies
+remain traceable; this candidate is not automatically accepted. See the
+[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
+source/crop exceptions, and remaining operational or evidence gaps.

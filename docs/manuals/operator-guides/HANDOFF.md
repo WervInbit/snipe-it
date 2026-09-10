@@ -1,11 +1,132 @@
 # Operator Guide Continuation Handoff
 
-Status: current continuation checkpoint, updated 2026-09-03.
+## Accepted Guide Folder - 2026-09-10
+
+Latest delivery: [accepted-guides-v1](../../../resources/manuals/operator-guides/accepted-guides-v1/README.md),
+with 16 current accepted PDFs / 27 pages and seven older accepted PDFs.
+Start with its README to regenerate from embedded HTML or create a new
+version. Its scripts preserve accepted files and put proofs under `work/`.
+All 16 guides regenerated from a relocated copy with all 27 pages identical
+at 96 dpi. The exact manifest keeps WF-02 v10 and CMP-01 v4 because their
+newer proposals lack acceptance. Other-user review remains pending.
+Earlier delivery requests below describe previous stages.
+
+## Owner Clearance For User Review - 2026-09-10
+
+The owner cleared the ten current changed versions in the v5 pair for review
+by other users. They are now Internal review candidates; the exact PDFs stay
+unchanged. Use the [dated clearance and hashes](reviews/owner-review-readiness-2026-09-10.md)
+and current-guide-selection-v4.json for current status. Earlier four exact
+acceptances remain; the separate prototype is outside this clearance.
+Other-user feedback and third-party approval are still pending. Earlier
+generation-time draft/pending wording below is historical for these versions.
+
+
+Latest delivery scope: the owner requested **only the ten changed guides**.
+Use the plain v5 previous/current pair (20/19 pages) in the
+[correction review](reviews/owner-corrections-2026-09-10.md).
+The v4 pair below remains the full 22-guide comparison.
+
+## Implemented Owner Corrections - 2026-09-10
+
+Use the [correction review and plain v4 pair](reviews/owner-corrections-2026-09-10.md)
+for current review: ten revised guides, 22 guides total, previous 48 pages and
+current 47 pages. USR-04 v6 is disable-login only and requires a new review.
+Earlier exact acceptances remain. The field-to-result prototype is separate.
+Testing completed is the preferred future QA label; no Awaiting approval
+state or application status change is included. Older sections below are history.
+
+Status: current continuation checkpoint, updated 2026-09-10.
+
+Latest owner feedback: read the [review TODOs](reviews/owner-review-todos-2026-09-10.md)
+before generating anything further. USR-04 v5 is explicitly not accepted;
+the general draft direction is suitable with the listed corrections. Make
+local visual fixes separately from USR scope, QA status and catalogue redesign
+decisions. No PDF or application change was made during this feedback pass.
 
 Use this document when resuming guide creation in another task, on another
 device, or after a long interruption. It records the resume order, current
 creation stage, and environment-specific dependencies. It does not replace the
 authoritative specifications, registry, component rules, or review records.
+
+## Exact Acceptances And Scrolling Bundle - 2026-09-10
+
+Latest clarification: use the **plain v2 previous/current pair** in the
+[current-set review record](reviews/current-set-review-2026-09-10.md), 48 pages
+each, same order, no added contents or bookmarks. The v1 presentation below
+is retained history and is not the requested comparison format.
+
+The owner accepted AC-01 v9, AC-02 v4, AST-03 v15, and AST-04 v6.
+Use [the current-set review record](reviews/current-set-review-2026-09-10.md)
+for the combined v1 PDF, all 22 current versions, exact hashes and page map.
+The bundle contains 48 unchanged guide pages plus clickable contents.
+The four creation-tracker rows below now reflect these decisions. Other rows
+retain the earlier baseline; use the current selection for ongoing PDF review.
+Earlier dated sections describe the state at that time. Keep every prior file.
+
+## Frozen Baseline And New Review Round - 2026-09-08
+
+The owner requested a separator between prior guide work and the new-model
+audit revisions, with easy comparison and rollback if proposals are rejected.
+The [frozen baseline](reviews/baseline-2026-09-08.md) preserves all 29 selected
+PDFs (9 internally accepted, 20 drafts), source inputs, original manifests, and
+checksums. Do not replace checkpoint files. Use the separate
+[audit revision ledger](reviews/audit-revision-round-2026-09-08.md) for new
+candidates, changed steps, tradeoffs, and exact-version decisions. The first
+comparison batch now contains WF-01 v11 (one page), USR-04 v4 (three pages),
+and CAT-04 v3 (six pages). All are unaccepted and kept in a separate review-
+round directory; the creation tracker and default draft selections below
+still describe the earlier baseline. Existing acceptance is unchanged.
+
+The owner rejected this batch's design direction on 2026-09-08. Read the
+[feedback and revised approach](reviews/2026-09-08-pilot-direction-feedback.md)
+before further generation. Keep the rejected artifacts. The latest proposal is
+WF-01 v12, with filename `WF-01-workflow-starten-v12-draft.pdf` and review record
+`WF-01-v12.md`, as explicitly requested by the owner. Keep this filename stem
+and increment the version for later revisions; do not introduce naming variants.
+V12 is now generated from WF-01 v10, preserving 2A selection, 3A start, all
+screenshots, hints and bottom help, and improving only the step-3 choice
+grouping. See [v12 review and exact PDF](reviews/WF-01-v12.md). The owner
+reviewed the direction positively and authorized applying it to all existing
+guides. Reproduce the retained example with
+`node scripts/manuals/generate-wf01-v12.mjs`; the previous selections remain.
+Do not propagate the rejected pilot layout or page model. Physical-print and
+first-time-user validation remain pending.
+
+## All-Guide Focused Candidates - 2026-09-08
+
+All 22 existing guides were covered. Twenty new PDFs preserve the baseline
+page models and screenshot counts; WF-01 v12 and CMP-04 v6 are retained.
+Use the [comparison index](reviews/guide-set-comparison-2026-09-08.md) for
+the exact old/new pairs and individual review records. These candidates do
+not replace the selected/accepted manifests or the creation tracker below.
+
+Generate with `node scripts/manuals/generate-guide-followups.mjs` and the
+portable Node/Python dependency settings below. The runner copies historical
+renderers into isolated output, applies focused patches, and finalizes the
+new visible version. Historical renderers remain unchanged. Review-round
+retention is separate and refuses to replace existing files.
+
+The retained `guide-set-followups-manifest.json`, validation and source ZIP
+sit beside the existing round artifacts. Proof PNGs, text diffs and HTML are
+under `output/manuals/proofs/guide-followups-2026-09-08`. Review exact versions
+with the owner, then perform physical/user validation. Do not recreate the
+rejected sparse pilot or describe every audit issue as closed.
+
+## Independent Audit Checkpoint - 2026-09-08
+
+The owner requested an independent audit for first-time users, including
+autistic users who need explicit, predictable steps. The
+[completed audit](reviews/2026-09-08-independent-usability-audit.md) covers all
+22 current generated guides / 48 pages and records 22 findings. Consult its
+correction order before further generation: role/identity/branching and
+application-truth issues precede visual polishing. The audit is an inspection,
+not a physical user-test pass or an acceptance change. Existing guide versions
+and the creation tracker below remain unchanged.
+
+The strict package verifier currently also reports unlisted CAT-01 v4,
+alongside the already noted CAT-00 v7/v8. A fresh manifest-only draft mirror
+passes; the actual-root package has not regained a clean pass.
 
 ## Read First
 
@@ -47,12 +168,12 @@ changes.
 
 | Guide | Current version | Creation state | Next action |
 | --- | --- | --- | --- |
-| AC-01 Login | v8 draft | Working draft; v6 remains accepted | Review `Inbit-telefoon + account` in the required-items strip. |
-| AC-02 Eigen wachtwoord wijzigen | v3 draft | Visual-correction pass; awaiting exact-version review | Review focused actions, inline no-sharing warning, and full USR-03 handoffs. |
+| AC-01 Login | v9 | Internal review candidate; owner accepted 2026-09-10 | Preserve exact PDF; continue reviewing the remaining guides using the combined bundle. |
+| AC-02 Eigen wachtwoord wijzigen | v4 | Internal review candidate; owner accepted 2026-09-10 | Preserve exact PDF; continue reviewing the remaining guides using the combined bundle. |
 | SC-01 Asset vinden en openen | v10 | Internal review candidate | Freeze exact artifact; include in published set. |
 | AST-02 Refurbishment route | v6 draft | Working draft; v5 remains accepted | Review the Refurbisher-only role line. |
-| AST-03 Asset registreren en labelen | v14 | Internal review candidate | Preserve the exact accepted two-page PDF and include it in the published review set. |
-| AST-04 Werk afronden en overdragen | v5 draft | Visual-correction pass; awaiting exact-version review | Review the final refurbishment-to-QA scope, reframed step 1, and optional tracked-component check. |
+| AST-03 Asset registreren en labelen | v15 | Internal review candidate; owner accepted 2026-09-10 | Preserve exact PDF; continue reviewing the remaining guides using the combined bundle. |
+| AST-04 Werk afronden en overdragen | v6 | Internal review candidate; owner accepted 2026-09-10 | Preserve exact PDF; continue reviewing the remaining guides using the combined bundle. |
 | AST-05 Asset beoordelen en vrijgeven | v5 draft | Visual-correction pass; awaiting exact-version review | Review full family-styled help and related-guide handoffs. |
 | WF-01 Workflow starten | v10 draft | Working draft; v9 remains accepted | Review Refurbisher role and centered 3B `Bewerk` target. |
 | WF-02 Workflow uitvoeren en afronden | v11 draft | Working draft; v10 remains accepted | Review Refurbisher role on both pages. |

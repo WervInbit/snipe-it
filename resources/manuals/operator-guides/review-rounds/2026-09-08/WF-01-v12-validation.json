@@ -1,0 +1,247 @@
+{
+  "version": 12,
+  "baselineVersion": 10,
+  "baselineSourceHash": "21a28333a30a5c93474679e14b868b8442f21d20f7f118b7cef8424813536413",
+  "allFiveScreenshotHtmlAndDimensions": "unchanged",
+  "originalStep3Copy": "retained",
+  "protectedRegionsHtmlAndGeometry": "unchanged",
+  "step3ContentBounds": {
+    "step": {
+      "top": 387.140625,
+      "bottom": 833.03125,
+      "left": 45.34375,
+      "right": 392.6875
+    },
+    "content": [
+      {
+        "top": 442.453125,
+        "bottom": 471.875,
+        "left": 80.359375,
+        "right": 379.21875
+      },
+      {
+        "top": 484.328125,
+        "bottom": 519.84375,
+        "left": 80.359375,
+        "right": 379.21875
+      },
+      {
+        "top": 524.75,
+        "bottom": 583.34375,
+        "left": 80.359375,
+        "right": 379.21875
+      },
+      {
+        "top": 592.015625,
+        "bottom": 791.6875,
+        "left": 80.359375,
+        "right": 379.21875
+      }
+    ]
+  },
+  "beforeVisuals": [
+    {
+      "label": "1A",
+      "box": {
+        "x": 80.359375,
+        "y": 289.8125,
+        "width": 298.859375,
+        "height": 77.4375
+      },
+      "shot": {
+        "x": 80.359375,
+        "y": 289.8125,
+        "width": 298.859375,
+        "height": 64.84375
+      },
+      "htmlSha256": "b21d4240e8981671b23fb520e4a09e34e6fb98909a59e4c40a4674fa0382c3be"
+    },
+    {
+      "label": "2A",
+      "box": {
+        "x": 436.015625,
+        "y": 281.171875,
+        "width": 298.859375,
+        "height": 80.21875
+      },
+      "shot": {
+        "x": 436.015625,
+        "y": 281.171875,
+        "width": 298.859375,
+        "height": 67.625
+      },
+      "htmlSha256": "7f11c771f0f770eba20ad837222e7a0c3ce8efc8e9f94f49f6a62328852b66e8"
+    },
+    {
+      "label": "3A",
+      "box": {
+        "x": 80.359375,
+        "y": 507.078125,
+        "width": 298.859375,
+        "height": 58.59375
+      },
+      "shot": {
+        "x": 80.359375,
+        "y": 507.078125,
+        "width": 298.859375,
+        "height": 46
+      },
+      "htmlSha256": "f4f72423c83f81896de75cdc07172114290e9c75020064e1dfbb7f30b0736892"
+    },
+    {
+      "label": "3B",
+      "box": {
+        "x": 80.359375,
+        "y": 646.984375,
+        "width": 298.859375,
+        "height": 120.5
+      },
+      "shot": {
+        "x": 80.359375,
+        "y": 646.984375,
+        "width": 298.859375,
+        "height": 107.90625
+      },
+      "htmlSha256": "34d1efc887b7b33397cee0895915c529b66663c67c17dc8a9e6fa7622b8617e2"
+    },
+    {
+      "label": "4A",
+      "box": {
+        "x": 436.015625,
+        "y": 542.03125,
+        "width": 298.859375,
+        "height": 247.171875
+      },
+      "shot": {
+        "x": 436.015625,
+        "y": 542.03125,
+        "width": 298.859375,
+        "height": 234.578125
+      },
+      "htmlSha256": "5ae1824854466b9254e1ac5d00ec8649be8df63ea3a4f3e29d00334689a33ef9"
+    }
+  ],
+  "afterVisuals": [
+    {
+      "label": "1A",
+      "box": {
+        "x": 80.359375,
+        "y": 289.8125,
+        "width": 298.859375,
+        "height": 77.4375
+      },
+      "shot": {
+        "x": 80.359375,
+        "y": 289.8125,
+        "width": 298.859375,
+        "height": 64.84375
+      },
+      "htmlSha256": "b21d4240e8981671b23fb520e4a09e34e6fb98909a59e4c40a4674fa0382c3be"
+    },
+    {
+      "label": "2A",
+      "box": {
+        "x": 436.015625,
+        "y": 281.171875,
+        "width": 298.859375,
+        "height": 80.21875
+      },
+      "shot": {
+        "x": 436.015625,
+        "y": 281.171875,
+        "width": 298.859375,
+        "height": 67.625
+      },
+      "htmlSha256": "7f11c771f0f770eba20ad837222e7a0c3ce8efc8e9f94f49f6a62328852b66e8"
+    },
+    {
+      "label": "3A",
+      "box": {
+        "x": 80.359375,
+        "y": 524.75,
+        "width": 298.859375,
+        "height": 58.59375
+      },
+      "shot": {
+        "x": 80.359375,
+        "y": 524.75,
+        "width": 298.859375,
+        "height": 46
+      },
+      "htmlSha256": "f4f72423c83f81896de75cdc07172114290e9c75020064e1dfbb7f30b0736892"
+    },
+    {
+      "label": "3B",
+      "box": {
+        "x": 80.359375,
+        "y": 671.1875,
+        "width": 298.859375,
+        "height": 120.5
+      },
+      "shot": {
+        "x": 80.359375,
+        "y": 671.1875,
+        "width": 298.859375,
+        "height": 107.90625
+      },
+      "htmlSha256": "34d1efc887b7b33397cee0895915c529b66663c67c17dc8a9e6fa7622b8617e2"
+    },
+    {
+      "label": "4A",
+      "box": {
+        "x": 436.015625,
+        "y": 542.03125,
+        "width": 298.859375,
+        "height": 247.171875
+      },
+      "shot": {
+        "x": 436.015625,
+        "y": 542.03125,
+        "width": 298.859375,
+        "height": 234.578125
+      },
+      "htmlSha256": "5ae1824854466b9254e1ac5d00ec8649be8df63ea3a4f3e29d00334689a33ef9"
+    }
+  ],
+  "pdf": {
+    "file": "WF-01-workflow-starten-v12-draft.pdf",
+    "sha256": "8d4429511ebebae73f319978d96b904001d0f609b78052618ba9850cd82c8006"
+  },
+  "pdfValidation": {
+    "pages": 1,
+    "a4": true,
+    "unencrypted": true,
+    "originalTextLinesRetained": 55,
+    "noDevelopmentUrl": true
+  },
+  "rasterComparison": {
+    "baselineReproductionDiffBounds": null,
+    "changesOutsideStep3VersionDate": null,
+    "pixelDimensions": [
+      1190,
+      1684
+    ],
+    "allowedChangedRegionsAt144Dpi": {
+      "step3": [
+        64,
+        589,
+        591,
+        1264
+      ],
+      "versionAndDate": [
+        925,
+        65,
+        1125,
+        194
+      ],
+      "footerDate": [
+        64,
+        1604,
+        670,
+        1622
+      ]
+    }
+  },
+  "fullPageVisualInspection": "passed",
+  "physicalPrintAndObservedUserValidation": "not performed"
+}

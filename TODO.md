@@ -1,3 +1,13 @@
+## Current Guide Review Clearance - 2026-09-10
+
+- [x] Record owner clearance for SC-01 v12, AST-02 v8, WF-01 v13, CMP-02 v6,
+  CMP-04 v7, USR-01 v13, USR-02 v11, USR-04 v6, CAT-00 v11 and CAT-01 v7.
+- [ ] Collect feedback from other users against these exact versions, including
+  page/step and the point where help was needed. Third-party approval is pending.
+- [Clearance and exact hashes](docs/manuals/operator-guides/reviews/owner-review-readiness-2026-09-10.md).
+  Earlier pending tasks below are historical where superseded by this exact
+  clearance; unlisted versions, operational decisions and the prototype remain open.
+
 - [ ] Execute the remaining V1 implementation and qualification plan in
   `docs/plans/v1-remaining-implementation-plan-2026-08-18.md`.
 - [x] Grant Supervisor ordinary product/catalog/workflow setup while keeping
@@ -61,6 +71,22 @@
 - [x] Define USR-03 password handoff as personal transfer followed immediately
   by AC-02; do not use chat, email, notes, tickets, or screenshots.
 - [ ] Decide whether AC-02 needs a controlled success-message capture; the current draft deliberately stops at the empty form and save action.
+- [x] Audit all 22 current generated guides / 48 pages for first-time usability,
+  cognitive accessibility, consistency, and targeted local application truth:
+  `docs/manuals/operator-guides/reviews/2026-09-08-independent-usability-audit.md`.
+- [ ] Resolve the independent audit's role, identity, lifecycle-branch,
+  product-code, workflow, and password-policy findings before independent use;
+  then revise readability, evidence, and handoffs in new guide versions.
+- [x] Generate a separate audit comparison batch: WF-01 v11, USR-04 v4,
+  CAT-04 v3 and a 24-page comparison PDF with the preserved baseline versions.
+- [x] Record the owner's rejection of the first audit pilot design direction;
+  retain the PDFs and original selections. Only the clearer choice block was
+  explicitly preferred; individual factual corrections remain undecided.
+- [x] Generate WF-01 v12 (`WF-01-workflow-starten-v12-draft.pdf`) from v10
+  with clearer step-3 alternatives, preserving 2A selection, 3A start,
+  screenshots, hints, help, and page anatomy. Content and raster comparison pass.
+- [ ] Review exact WF-01 v12, including physical A4 legibility and first-time
+  use, before accepting or proposing wider changes.
 - [ ] Review CAT-00 v9, CAT-01 v5, CAT-02 v1, CAT-03 v1, and CAT-04 v2 as
   separate exact working drafts; none is internally accepted yet.
 - [x] Align, capture, and generate CAT-03 Attributen beheren v1 and CAT-04
@@ -69,7 +95,9 @@
   the concrete CAT-03/CAT-04 terminology and non-destructive evidence.
 - [x] Capture 11 versioned replacement sources for the corrected shared
   checkbox/radio label layout without overwriting historical evidence.
-- [ ] Generate new CAT-03, CAT-04, and CMP-02 draft versions from the corrected
+- [x] Use corrected form-control evidence in the separate CAT-04 v3 audit pilot;
+  remeasure focus annotations and retain the earlier v2 selection pending review.
+- [ ] Generate new CAT-03 and CMP-02 draft versions from the corrected
   replacement sources and remeasure their source-pixel focus annotations.
 - [ ] Review CAT-02 v1 as an exact six-page working draft; do not mark it
   accepted without explicit approval.
@@ -100,3 +128,45 @@
   asset/model view or edit rights.
 - [x] Remove deprecated asset Send/Upload paperclip nav action; the authorized generic-file upload form now lives inside Files/Bestanden.
 
+
+## Manual Focused Candidate Review - 2026-09-08
+- [x] Cover all 22 existing guides using the WF-01 v12 approach; generate 20
+  versioned candidates, retaining WF-01 v12 and CMP-04 v6 and all earlier files.
+- [ ] Review exact versions using
+  [the comparison index](docs/manuals/operator-guides/reviews/guide-set-comparison-2026-09-08.md).
+- [ ] Trace representative routes with first-time users and on physical A4;
+  retain the audit's unresolved operational policies and evidence gaps.
+
+## Manual Review Bundle - 2026-09-10
+- [x] Record exact owner acceptance: AC-01 v9, AC-02 v4, AST-03 v15, AST-04 v6.
+- [x] Assemble all 22 current guides in a versioned scrolling PDF, retaining originals.
+- [ ] Continue exact-version decisions for the remaining 18 guides, including
+  WF-01 v12 (direction reviewed positively), using the
+  [current review bundle](docs/manuals/operator-guides/reviews/current-set-review-2026-09-10.md).
+
+## Owner Manual Corrections - 2026-09-10
+
+Full scope, version targets, evidence, advice and pitfalls:
+[owner review TODOs](docs/manuals/operator-guides/reviews/owner-review-todos-2026-09-10.md).
+
+- [x] Record USR-04 v5 as explicitly not accepted; preserve earlier exact approvals.
+- [x] MR-01: SC-01 step 2 / 2A badge clears description text.
+- [x] MR-02: AST-02 alternative and return routes use complete styled references.
+- [x] MR-03: WF-01 step 1 SC-01 reference uses family color/marker/code/title.
+- [x] MR-04: CMP-02 2A/2B radio focus centres match actual screenshots.
+- [x] MR-05: CMP-04 1B includes the whole Naar tray control and readable label.
+- [x] MR-06: CAT-00 part 1 connector attaches to its target.
+- [x] MR-07: CAT-01 page 2 routes name readable destinations instead of compressed codes.
+- [ ] MR-08: Define and implement preferred Testing completed versus blocked/damaged handling; no extra Awaiting approval state.
+- [x] MR-09: Redesign USR-04 as one task; remove check-in work and mixed OR lifecycle flow.
+- [x] MR-10: Verify and explain relationship quantities, optional cases and nested components.
+- [x] MR-11: Clarify/reposition CAT-01 page 4 single-asset deviation warning with a verified example.
+- [ ] MR-12: Review the generated v1 field-to-result prototype; capture matching asset/component results and decide its guide placement.
+- [x] MR-13: Desk-audit all 22 guides and put definitions first in CAT-00 learning cards; IDs remain stable. See prerequisite follow-ups.
+
+### Owner Correction Follow-Up Evidence - 2026-09-10
+
+- [Implementation and PDFs](docs/manuals/operator-guides/reviews/owner-corrections-2026-09-10.md).
+- [ ] Observe a first-time-reader exercise, including an interrupted unsaved CAT/CMP form and return to the same record.
+- [ ] Scope separate account reactivation, deletion and restoration instructions; USR-04 now only disables login.
+- [ ] Resolve and produce planned USR-05, CAT-05 and CAT-06 tasks; confirm profile/QA responsibilities and local help contacts.

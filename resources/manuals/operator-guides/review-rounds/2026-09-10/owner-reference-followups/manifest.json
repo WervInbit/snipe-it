@@ -1,0 +1,60 @@
+{
+  "createdOn": "2026-09-10",
+  "reason": "Dependent USR-04 title corrections found during final reference audit.",
+  "artifacts": [
+    {
+      "code": "USR-01",
+      "old": 12,
+      "version": 13,
+      "file": "usr-01-gebruiker-toevoegen-v13-draft.pdf",
+      "pages": 1,
+      "input": "output/manuals/proofs/owner-corrections-2026-09-10/inputs/USR-01-v12.html",
+      "inputSha256": "f389e853a00efbaa73ef10e4ca8cc72f1f6f50813bf2832f59c5681138e9cfe2",
+      "sha256": "38318811b38adcfb5692e1634fba9ad35c7cca0acb3faf4371bfe370fd462995",
+      "bytes": 771449,
+      "before": {
+        "images": 5,
+        "text": "USR-01 Gebruiker toevoegen\nMaak een lokaal account met de juiste naam, toegang en standaardrol\nDraft v12 2026-09-08\nRol\nSuperadmin\nNodig\nNaam, rol en veilige overdracht\nVooraf\nAC\nIngelogd (AC-01 Login)\n1\nOpen Nieuwe gebruiker\nKlik links op Personen.Kies Toon Alles en daarna + boven de lijst.Bestaat de persoon mogelijk al? Zoek dan eerstop naam, gebruikersnaam of e-mail.\nBestaand account? Hergebruik of herstel.\n1A\nOpen Personen en kies Toon Alles.\n1B\nDe + opent het formulier Nieuwe gebruiker.\n2\nVul account en wachtwoord in\nGebruikersnaam: Voornaam + kleine eerste letters vanalle achternaamdelen, zonder punten of spaties.Jan de Vries wordt Jandv. Tijdelijk: Jandv2026.Zet Deze gebruiker kan inloggen aan.\nEerste login: direct naar\nAC\nAC-02 Eigen wachtwoord wijzigen\n2A\nVul account en tijdelijk wachtwoord in; zet inloggen aan.\n3\nOpen Optionele informatie\nOpen onderaan de balk Optionele informatie.Kies daar bij Groepen de standaardgroep.Normaal: Refurbisher.Extra rechten: open bovenaan Machtigingen.\nGroep ontbreekt? Laat een Superadmin die eerst maken.\nGroepsbeheer (gids volgt):\nUSR\nUSR-05 Groepen beheren\n3A\nNa openen van Optionele informatie: kies Groepen.\n4\nControleer en draag over\nKies Opslaan en open de gebruiker vanuit Gebruikers.Controleer naam, gebruikersnaam, groep en login.Geef het tijdelijke wachtwoord persoonlijk door.Laat de gebruiker direct inloggen en AC-02 volgen.\n4A\nVoorbeeld van de detailpagina; controleer hier de zojuist gemaakte gebruiker.\nHulp bij toevoegen\n?\nNaam bestaat\nHerstel of hergebruikhet bestaande account.\n?\nGeen e-mail\nVul niets verzonnens in;draag tijdelijk persoonlijk over.\n?\nMinimale rechten\nKies de laagste groepdie het werk mogelijk maakt.\n?\nMaatwerk nodig\nGebruik Machtigingen en volg:\nUSR\nUSR-02 Rol en rechten wijzigen\nKlaar als\nHet account klopt en de gebruiker gaat direct door met AC-02.\nRelevante gidsen\nAC\nAC-02 Eigen wachtwoord wijzigen\nUSR\nUSR-02 Rol en rechten wijzigen\nUSR\nUSR-03 Wachtwoord resetten\nUSR\nUSR-04 Gebruiker uitschakelen of herstellen\nUSR\nUSR-05 Groepen beheren\nQR volgt\nDigitale gids\nBron: gecontroleerde testomgeving | USR-01 Draft v12 | 2026-09-08"
+      },
+      "inventory": [
+        {
+          "page": 1,
+          "images": 5,
+          "text": "\nUSR-01 Gebruiker toevoegenMaak een lokaal account met de juiste naam, toegang en standaardrolDraft v13 2026-09-10RolSuperadminNodigNaam, rol en veilige overdrachtVooraf\n            \n            AC\n        Ingelogd (AC-01 Login)\n            \n            1\n        Open Nieuwe gebruikerKlik links op Personen.Kies Toon Alles en daarna + boven de lijst.Bestaat de persoon mogelijk al? Zoek dan eerstop naam, gebruikersnaam of e-mail.Bestaand account? Hergebruik of herstel.\n            \n            1A\n        Open Personen en kies Toon Alles.\n            \n            1B\n        De + opent het formulier Nieuwe gebruiker.\n            \n            2\n        Vul account en wachtwoord inGebruikersnaam: Voornaam + kleine eerste letters vanalle achternaamdelen, zonder punten of spaties.Jan de Vries wordt Jandv. Tijdelijk: Jandv2026.Zet Deze gebruiker kan inloggen aan.Eerste login: direct naar\n            \n            AC\n        AC-02 Eigen wachtwoord wijzigen\n            \n            2A\n        Vul account en tijdelijk wachtwoord in; zet inloggen aan.\n            \n            3\n        Open Optionele informatieOpen onderaan de balk Optionele informatie.Kies daar bij Groepen de standaardgroep.Normaal: Refurbisher.Extra rechten: open bovenaan Machtigingen.Groep ontbreekt? Laat een Superadmin die eerst maken.Groepsbeheer (gids volgt):\n            \n            USR\n        USR-05 Groepen beheren\n            \n            3A\n        Na openen van Optionele informatie: kies Groepen.\n            \n            4\n        Controleer en draag overKies Opslaan en open de gebruiker vanuit Gebruikers.Controleer naam, gebruikersnaam, groep en login.Geef het tijdelijke wachtwoord persoonlijk door.Laat de gebruiker direct inloggen en AC-02 volgen.\n            \n            4A\n        Voorbeeld van de detailpagina; controleer hier de zojuist gemaakte gebruiker.Hulp bij toevoegen?Naam bestaatHerstel of hergebruikhet bestaande account.?Geen e-mailVul niets verzonnens in;draag tijdelijk persoonlijk over.?Minimale rechtenKies de laagste groepdie het werk mogelijk maakt.?Maatwerk nodigGebruik Machtigingen en volg:\n            \n            USR\n        USR-02 Rol en rechten wijzigenKlaar alsHet account klopt en de gebruiker gaat direct door met AC-02.Relevante gidsen\n            \n            \n            AC\n            AC-02 Eigen wachtwoord wijzigen\n        \n            \n            \n            USR\n            USR-02 Rol en rechten wijzigen\n        \n            \n            \n            USR\n            USR-03 Wachtwoord resetten\n        \n            \n            \n            USR\n            USR-04 Gebruiker uitschakelen\n        \n            \n            \n            USR\n            USR-05 Groepen beheren\n        QR volgtDigitale gidsBron: gecontroleerde testomgeving | USR-01 Draft v13 | 2026-09-10",
+          "outside": [],
+          "overflow": []
+        }
+      ],
+      "focused": {
+        "usr04Scope": true
+      }
+    },
+    {
+      "code": "USR-02",
+      "old": 10,
+      "version": 11,
+      "file": "usr-02-rol-en-rechten-wijzigen-v11-draft.pdf",
+      "pages": 1,
+      "input": "output/manuals/proofs/owner-corrections-2026-09-10/inputs/USR-02-v10.html",
+      "inputSha256": "6df270ac8f15e71b76ddd161a5bac3b41eb890ef323187bc68af776537e957fa",
+      "sha256": "53e581c649a0d10e5ef5677a79166a93ebbd99ba4ad8539c29755a0fcf733651",
+      "bytes": 780166,
+      "before": {
+        "images": 6,
+        "text": "USR-02 Rol en rechten wijzigen\nWijzig groepen of pas rechten per gebruiker bewust aan\nDraft v10 2026-09-08\nRol\nAdmin / Superadmin\nNodig\nJuiste gebruiker + gewenste toegang\nVooraf\nAC\nIngelogd (AC-01 Login)\n1\nOpen het juiste account\nOpen links Personen > Toon Alles.Zoek op naam of gebruikersnaam.Open de gebruiker en klik Gebruiker aanpassen.\n1A\nPersonen > Toon Alles.\n1B\nZoek en open de juiste gebruiker.\n1C\nKlik Gebruiker aanpassen.\n2\nGroepen: alleen Superadmin\nOpen eerst Optionele informatie.Alleen Superadmin wijzigt Groepen.Ctrl+klik voegt toe of deselecteert.Admin: laat een groepswijziging uitvoerendoor Superadmin; ga daarna naar stap 3.\n2A\nGroepsrechten zijn de normale route voor een functie.\n3\nPas rechten per gebruiker aan\nOpen Machtigingen. Kies per recht:Overnemen: gebruik het resultaat van de groep(en).Toestaan: geef dit recht extra aan deze gebruiker.Weigeren: blokkeer dit recht, ook als een groep het geeft.Directe keuzes gaan voor groepsrechten.Alleen Superadmin kan Global: Super User wijzigen.\n3A\nOpen Machtigingen; Overnemen is de standaardkeuze.\n4\nSla op en controleer opnieuw\nKies Opslaan. Controleer de groepen.Heropen Machtigingen en controleer directe afwijkingen.\n4A\nSchermvoorbeeld: controleer de groep op het gekozen account.\nHulp bij rollen en rechten\n?\nGroepen vergrendeld\nAlleen Superadmin kangroepskeuzes wijzigen.\n?\nRecht onduidelijk\nLaat Overnemen staan;lees de omschrijving.\n?\nMeerdere gebruikers\nVraag Superadmin om een groep; gids volgt:\nUSR\nUSR-05 Groepen beheren\n?\nToegang te ruim\nControleer oude groepen direct Toestaan.\nKlaar als\nDe groepen en directe rechten geven samen de bedoelde toegang.\nRelevante gidsen\nUSR\nUSR-01 Gebruiker toevoegen\nUSR\nUSR-05 Groepen beheren\nUSR\nUSR-04 Gebruiker uitschakelen of herstellen\nHELP\nHELP-01 Problemen en hulp\nQR volgt\nDigitale gids\nBron: gecontroleerde testomgeving | USR-02 Draft v10 | 2026-09-08"
+      },
+      "inventory": [
+        {
+          "page": 1,
+          "images": 6,
+          "text": "\nUSR-02 Rol en rechten wijzigenWijzig groepen of pas rechten per gebruiker bewust aanDraft v11 2026-09-10RolAdmin / SuperadminNodigJuiste gebruiker + gewenste toegangVooraf\n            \n            AC\n        Ingelogd (AC-01 Login)\n            \n            1\n        Open het juiste accountOpen links Personen > Toon Alles.Zoek op naam of gebruikersnaam.Open de gebruiker en klik Gebruiker aanpassen.\n            \n            1A\n        Personen > Toon Alles.\n            \n            1B\n        Zoek en open de juiste gebruiker.\n            \n            1C\n        Klik Gebruiker aanpassen.\n            \n            2\n        Groepen: alleen SuperadminOpen eerst Optionele informatie.Alleen Superadmin wijzigt Groepen.Ctrl+klik voegt toe of deselecteert.Admin: laat een groepswijziging uitvoerendoor Superadmin; ga daarna naar stap 3.\n            \n            2A\n        Groepsrechten zijn de normale route voor een functie.\n            \n            3\n        Pas rechten per gebruiker aanOpen Machtigingen. Kies per recht:Overnemen: gebruik het resultaat van de groep(en).Toestaan: geef dit recht extra aan deze gebruiker.Weigeren: blokkeer dit recht, ook als een groep het geeft.Directe keuzes gaan voor groepsrechten.Alleen Superadmin kan Global: Super User wijzigen.\n            \n            3A\n        Open Machtigingen; Overnemen is de standaardkeuze.\n            \n            4\n        Sla op en controleer opnieuwKies Opslaan. Controleer de groepen.Heropen Machtigingen en controleer directe afwijkingen.\n            \n            4A\n        Schermvoorbeeld: controleer de groep op het gekozen account.Hulp bij rollen en rechten?Groepen vergrendeldAlleen Superadmin kangroepskeuzes wijzigen.?Recht onduidelijkLaat Overnemen staan;lees de omschrijving.?Meerdere gebruikersVraag Superadmin om een groep; gids volgt:\n            \n            USR\n        USR-05 Groepen beheren?Toegang te ruimControleer oude groepen direct Toestaan.Klaar alsDe groepen en directe rechten geven samen de bedoelde toegang.Relevante gidsen\n            \n            \n            USR\n            USR-01 Gebruiker toevoegen\n        \n            \n            \n            USR\n            USR-05 Groepen beheren\n        \n            \n            \n            USR\n            USR-04 Gebruiker uitschakelen\n        \n            \n            \n            HELP\n            HELP-01 Problemen en hulp\n        QR volgtDigitale gidsBron: gecontroleerde testomgeving | USR-02 Draft v11 | 2026-09-10",
+          "outside": [],
+          "overflow": []
+        }
+      ],
+      "focused": {
+        "usr04Scope": true
+      }
+    }
+  ]
+}

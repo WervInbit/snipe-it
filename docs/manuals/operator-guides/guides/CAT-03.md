@@ -154,3 +154,13 @@ duplicaat worden hergebruikt en accepteert alleen de bedoelde waarden.
 - Operator copy uses `systeemnaam (Key)` and explains every behavior control
   without requiring API, database, or regular-expression knowledge.
 - Lifecycle changes remain outside this ordinary Supervisor route.
+
+## Focused Candidate - 2026-09-08
+
+The separate [v2 review](../reviews/CAT-03-v2.md)
+records the focused follow-up to baseline v1, with the exact
+PDF and checksum. The owner requested this pass across all existing guides
+after reviewing WF-01 v12 positively. Earlier selections and their policies
+remain traceable; this candidate is not automatically accepted. See the
+[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
+source/crop exceptions, and remaining operational or evidence gaps.

@@ -1,14 +1,21 @@
 # AST-04 Werk Afronden En Overdragen
 
+## QA Preference Follow-Up - 2026-09-10
+
+The owner prefers Testing completed and no separate Awaiting approval state.
+This is a future status direction; the accepted v6 PDF and current QA Hold
+instructions remain byte-identical until the operational transition is defined.
+See [implementation record](../reviews/owner-corrections-2026-09-10.md).
+
 | Field | Current value |
 | --- | --- |
-| Status | Working draft v5; visual-correction pass and awaiting exact-version review |
+| Status | Internal review candidate; exact v6 accepted by owner 2026-09-10 |
 | Family | AST |
 | Type | Detail task |
-| Current version | `AST-04-complete-handoff-v5-draft` |
+| Current version | `AST-04-complete-handoff-v6-draft` |
 | Page model | One page |
 | Layout recipe | `stacked-step-flow` with captions, `reused-evidence`, and `inline-warning` |
-| Generator | `scripts/manuals/generate-revised-guide-set.mjs`; use `SNIPEIT_AST04_VERSION=5` explicitly when reproducing this version |
+| Generator | `scripts/manuals/generate-guide-followups.mjs AST-04`; use frozen round inputs to reproduce |
 | Role | Senior refurbisher |
 | Needed | Verified asset and completed workflow |
 | Prerequisite | Workflow completed (WF-02) |
@@ -69,3 +76,25 @@ saved, and the device is visibly waiting at the QA location for AST-05.
 - CMP-04 Component naar tray verplaatsen
 - AST-05 Asset beoordelen en vrijgeven
 - HELP-01 Problemen en hulp
+
+## Focused Candidate - 2026-09-08
+
+The separate [v6 review](../reviews/AST-04-v6.md)
+records the focused follow-up to baseline v5, with the exact
+PDF and checksum. The owner requested this pass across all existing guides
+after reviewing WF-01 v12 positively. Earlier selections and their policies
+remain traceable; this candidate is not automatically accepted. See the
+[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
+source/crop exceptions, and remaining operational or evidence gaps.
+
+## Exact Acceptance - 2026-09-10
+
+The owner accepted v6, selecting the unchanged PDF/hash in the
+[v6 review](../reviews/AST-04-v6.md). The earlier candidate-pending
+notes are historical. Preserve prior versions and the source checkpoint.
+
+## Owner Feedback Follow-Up - 2026-09-10
+
+MR-08: record the tentative testing-complete/awaiting-QA versus blocked/damaged status idea for later review. Exact v6 acceptance remains; do not invent a status in the guide.
+See [owner review TODOs](../reviews/owner-review-todos-2026-09-10.md).
+The existing PDF is unchanged; these are next-version or decision items.

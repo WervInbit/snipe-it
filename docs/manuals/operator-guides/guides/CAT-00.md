@@ -1,21 +1,27 @@
 # CAT-00 Catalogus begrijpen
 
-Status: Working draft v9; connector and alignment correction awaiting
-exact-version review.
+## Latest Correction Candidate - 2026-09-10
+
+Current review candidate: [v11](../reviews/CAT-00-v11.md), owner-cleared for user review.
+Attached the Asset-to-component arrow; explained multiple and optional records, component values/children/tray cases; aligned page 3 optionality; ordered learning cards CAT-03, CAT-04, CAT-01, CAT-02.
+This current correction takes precedence over conflicting historical version
+notes below. Previous PDFs and exact acceptance records remain unchanged.
+
+Status: Internal review candidate v11; owner cleared for user review 2026-09-10.
 
 ## Maintenance Metadata
 
 - Family: `CAT`.
 - Type: Reference chapter and guide router.
-- Current version: v9 draft.
+- Current version: v11; internal review candidate (printed draft label retained).
 - Page model: Six-page reference chapter with continuous section numbering.
 - Layout recipe: `reference-chapter` with `reused-evidence` and
   `two-sided-continuation`.
-- Generator: `scripts/manuals/generate-catalog-guide-review.mjs`.
-- Artifact root: `output/manuals/proofs/catalog-guide-review/cat-00-v9/`.
+- Generator: `scripts/manuals/generate-owner-corrections.mjs CAT-00`.
+- Artifact root: `output/manuals/proofs/owner-corrections-2026-09-10/CAT-00-v11/`.
 - Portable review package:
-  `resources/manuals/operator-guides/drafts/CAT-00-catalogus-begrijpen-v9-draft.pdf`.
-  Its manifest status is `Unaccepted working draft`.
+  `resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CAT-00-catalogus-begrijpen-v11-draft.pdf`.
+  Its frozen generation manifest retains the former draft state; the dated owner clearance records the current status.
 
 ## Purpose
 
@@ -188,3 +194,19 @@ the required change.
 - Screenshots retain recognizable application context and short captions.
 - CAT-00 v9 remains a working draft until this exact PDF is explicitly
   accepted.
+
+## Focused Candidate - 2026-09-08
+
+The separate [v10 review](../reviews/CAT-00-v10.md)
+records the focused follow-up to baseline v9, with the exact
+PDF and checksum. The owner requested this pass across all existing guides
+after reviewing WF-01 v12 positively. Earlier selections and their policies
+remain traceable; this candidate is not automatically accepted. See the
+[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
+source/crop exceptions, and remaining operational or evidence gaps.
+
+## Owner Feedback Follow-Up - 2026-09-10
+
+MR-06/MR-10: fix the part-1 detached connector and verify plain-language relationship quantities. MR-12/MR-13: later reconsider field-to-result mapping and learning order.
+See [owner review TODOs](../reviews/owner-review-todos-2026-09-10.md).
+The existing PDF is unchanged; these are next-version or decision items.

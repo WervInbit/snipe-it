@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-10",
+  "decisionSource": "Owner review of current guides in the plain v2 pair.",
+  "overallAssessment": "Generally suitable working drafts with the listed corrections; no further exact versions individually named as accepted.",
+  "exactDecision": {
+    "code": "USR-04",
+    "version": 5,
+    "decision": "Explicitly not accepted",
+    "path": "resources/manuals/operator-guides/review-rounds/2026-09-08/USR-04-gebruiker-uitschakelen-of-herstellen-v5-draft.pdf",
+    "sha256": "460d508ca86972b86926f3285491e970071acc0b020ebf4ecf18771f7c570665",
+    "reason": "Mixed disable/delete/restore scope, top OR route and check-in work in this guide."
+  },
+  "earlierExactAcceptancesPreserved": [
+    "AC-01 v9",
+    "AC-02 v4",
+    "AST-03 v15",
+    "AST-04 v6"
+  ],
+  "actionList": "docs/manuals/operator-guides/reviews/owner-review-todos-2026-09-10.md",
+  "pdfChanges": false,
+  "applicationChanges": false
+}

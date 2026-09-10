@@ -1,0 +1,385 @@
+{
+  "createdOn": "2026-09-10",
+  "bundleVersion": 2,
+  "purpose": "Plain previous/current PDFs requested by owner; no added contents, dividers or bookmarks.",
+  "previousSelection": "Frozen selected pre-audit baseline, including WF-01 v10; rejected pilots excluded.",
+  "currentSelection": "Current 2026-09-10 selection; exact acceptances unchanged.",
+  "artifacts": [
+    {
+      "file": "Handleidingen-reviewbundel-v2-vorig.pdf",
+      "sha256": "ba382d67066abb9cdb6cb5365ee6d1d892151c22c4c95cf6cf564b6531e1eb73",
+      "pages": 48,
+      "guides": 22,
+      "addedPages": 0,
+      "bookmarks": 0,
+      "contentStreamsAndPageBoxesPreserved": true,
+      "sourcePixelsIdenticalAt96dpi": 48,
+      "pageMap": [
+        {
+          "code": "AC-01",
+          "version": 8,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/AC-01-login-v8-draft.pdf",
+          "sourceSha256": "cbd9e3a290391effe605a7226c1a9d04129de6e6848fc8c41cbbb432dedefd81",
+          "startPage": 1,
+          "pages": 1
+        },
+        {
+          "code": "AC-02",
+          "version": 3,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/ac-02-eigen-wachtwoord-wijzigen-v3-draft.pdf",
+          "sourceSha256": "983fe055579a51b9f62a463f04e4f491c7c0afd122cb852731b02ba561477c0e",
+          "startPage": 2,
+          "pages": 1
+        },
+        {
+          "code": "SC-01",
+          "version": 10,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/pdf/SC-01-asset-vinden-en-openen-v10.pdf",
+          "sourceSha256": "6eccaf906a36abf49204e8226517777291dfd95e18bfc760c2711e619428dd9b",
+          "startPage": 3,
+          "pages": 1
+        },
+        {
+          "code": "AST-02",
+          "version": 6,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/AST-02-refurbishment-route-v6-draft.pdf",
+          "sourceSha256": "190efcd6f6e74e697b98024ab0033bde642dbce2191488fa9c9943edb642f79c",
+          "startPage": 4,
+          "pages": 1
+        },
+        {
+          "code": "AST-03",
+          "version": 14,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/pdf/AST-03-asset-registreren-en-labelen-v14.pdf",
+          "sourceSha256": "e557fc77c7e4b5b2249cdc3b4a9ec2dd3e67a6fcfdea368664d585d7eca74390",
+          "startPage": 5,
+          "pages": 2
+        },
+        {
+          "code": "AST-04",
+          "version": 5,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/AST-04-complete-handoff-v5-draft.pdf",
+          "sourceSha256": "f6a24bf06f06534b661cd37eb3756a466fae28c4a871f47f9e57b15bde50e588",
+          "startPage": 7,
+          "pages": 1
+        },
+        {
+          "code": "AST-05",
+          "version": 5,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/AST-05-review-release-v5-draft.pdf",
+          "sourceSha256": "1d1564a93c2298e8fc707df91df24bd420cd3d47f48fa814e946c63ed8b829c2",
+          "startPage": 8,
+          "pages": 1
+        },
+        {
+          "code": "WF-01",
+          "version": 10,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/WF-01-start-workflow-v10-draft.pdf",
+          "sourceSha256": "5955a6984840583684369d7a4f8b5178f3bfe9a1499a25edaf0a93293d8a01f0",
+          "startPage": 9,
+          "pages": 1
+        },
+        {
+          "code": "WF-02",
+          "version": 11,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/WF-02-complete-workflow-v11-draft.pdf",
+          "sourceSha256": "6ce57d7afc137d93c2a8b699d6d662d5e2b15b108ce41344a48aae52da857224",
+          "startPage": 10,
+          "pages": 2
+        },
+        {
+          "code": "CMP-01",
+          "version": 5,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/CMP-01-install-existing-v5-draft.pdf",
+          "sourceSha256": "81fa856648067cffc2c1dbf1f199896916f6ae37f75bf59a63d6aedd91a0d0ad",
+          "startPage": 12,
+          "pages": 1
+        },
+        {
+          "code": "CMP-02",
+          "version": 4,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/CMP-02-register-install-v4-draft.pdf",
+          "sourceSha256": "923bc26714e96b9edc29f8529051dc8a7be57e2a1c59eee3ffb72c6da58b613a",
+          "startPage": 13,
+          "pages": 1
+        },
+        {
+          "code": "CMP-04",
+          "version": 6,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/CMP-04-component-to-tray-v6-draft.pdf",
+          "sourceSha256": "fe72f79efd24d12730fa1c6bb5e7dcfefbbe28c2179cf8169906bfd7af96cee5",
+          "startPage": 14,
+          "pages": 1
+        },
+        {
+          "code": "HELP-01",
+          "version": 6,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/HELP-01-problems-v6-draft.pdf",
+          "sourceSha256": "02490f9d329c919d617c45e52cdd87bab180a7836df993d9d93ead96d57dff47",
+          "startPage": 15,
+          "pages": 1
+        },
+        {
+          "code": "USR-01",
+          "version": 11,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/usr-01-gebruiker-toevoegen-v11-draft.pdf",
+          "sourceSha256": "057acc8732f3c06ab5ece3982d90f4505511d15285fa9d8e1956b9d288797f59",
+          "startPage": 16,
+          "pages": 1
+        },
+        {
+          "code": "USR-02",
+          "version": 9,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/usr-02-rol-en-rechten-wijzigen-v9-draft.pdf",
+          "sourceSha256": "a0871313aef9ec3538867d7e7e64d71ee9b48d19d8d36e86963b87cf4f920afe",
+          "startPage": 17,
+          "pages": 1
+        },
+        {
+          "code": "USR-03",
+          "version": 3,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/usr-03-wachtwoord-resetten-v3-draft.pdf",
+          "sourceSha256": "12587f1e308454d1e607f8ee7020f2caac1e8af25eb2022370ed01445adaa448",
+          "startPage": 18,
+          "pages": 1
+        },
+        {
+          "code": "USR-04",
+          "version": 3,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/usr-04-gebruiker-uitschakelen-v3-draft.pdf",
+          "sourceSha256": "1fc676e5cf48eb9097df231a40e71b9041e2b977a89b587a58ecc40337db14f0",
+          "startPage": 19,
+          "pages": 2
+        },
+        {
+          "code": "CAT-00",
+          "version": 9,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/CAT-00-catalogus-begrijpen-v9-draft.pdf",
+          "sourceSha256": "a7e0d6c7c554a74c2b5161f1babbc1d77dcbc8efe47fcbb7f2db39f9ef8127ae",
+          "startPage": 21,
+          "pages": 6
+        },
+        {
+          "code": "CAT-01",
+          "version": 5,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/CAT-01-model-en-modelnummer-aanmaken-v5-draft.pdf",
+          "sourceSha256": "39bfaf5725dbcb41308470bf1c13d5e1676e4b01364c646fe659230e77e8ab8f",
+          "startPage": 27,
+          "pages": 5
+        },
+        {
+          "code": "CAT-02",
+          "version": 1,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/CAT-02-modelspecificatie-opbouwen-v1-draft.pdf",
+          "sourceSha256": "7db4afcb4867486f49cb336c7e2c59d2dd4a7f3b86e5a47aaae679ab14fa5713",
+          "startPage": 32,
+          "pages": 6
+        },
+        {
+          "code": "CAT-03",
+          "version": 1,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/CAT-03-attributen-beheren-v1-draft.pdf",
+          "sourceSha256": "050c5a748ef1b62f481f0272b1afdac15fbc1e696a944e316c87aac43fac504a",
+          "startPage": 38,
+          "pages": 5
+        },
+        {
+          "code": "CAT-04",
+          "version": 2,
+          "sourcePath": "resources/manuals/operator-guides/checkpoints/2026-09-08-before-audit-revisions/drafts/CAT-04-componentdefinities-beheren-v2-draft.pdf",
+          "sourceSha256": "36635d649cc49c1a99942ea7d08eca65fd3378df56913c778f32561859e1d30a",
+          "startPage": 43,
+          "pages": 6
+        }
+      ]
+    },
+    {
+      "file": "Handleidingen-reviewbundel-v2-huidig.pdf",
+      "sha256": "9d1acf9558b0046622ace036d6f702e10d792083d9dacb0898e913cc9b5662d8",
+      "pages": 48,
+      "guides": 22,
+      "addedPages": 0,
+      "bookmarks": 0,
+      "contentStreamsAndPageBoxesPreserved": true,
+      "sourcePixelsIdenticalAt96dpi": 48,
+      "pageMap": [
+        {
+          "code": "AC-01",
+          "version": 9,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/AC-01-login-v9-draft.pdf",
+          "sourceSha256": "c9f77eaf5461cb952036eb9ffa9400da0295a9171534f5db3074b574b8fc6785",
+          "startPage": 1,
+          "pages": 1
+        },
+        {
+          "code": "AC-02",
+          "version": 4,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/ac-02-eigen-wachtwoord-wijzigen-v4-draft.pdf",
+          "sourceSha256": "923f185a1b0b594083b507c630c1b54783e50d13fe22a04a79d3b8e5f794f12d",
+          "startPage": 2,
+          "pages": 1
+        },
+        {
+          "code": "SC-01",
+          "version": 11,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/SC-01-asset-vinden-en-openen-v11-draft.pdf",
+          "sourceSha256": "bad71d80e8ef612192f551d892c32a938df49723ee453d7b9df5b9a970b6546e",
+          "startPage": 3,
+          "pages": 1
+        },
+        {
+          "code": "AST-02",
+          "version": 7,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/AST-02-refurbishment-route-v7-draft.pdf",
+          "sourceSha256": "76da3cb06057b70336103db61747a26564493a6aea6c67973f00db519f9ccef0",
+          "startPage": 4,
+          "pages": 1
+        },
+        {
+          "code": "AST-03",
+          "version": 15,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/AST-03-asset-registreren-en-labelen-v15-draft.pdf",
+          "sourceSha256": "5e838b9e57e868f81c2b7920ea5e4d76cde487a39fb406736912f7082ebe875d",
+          "startPage": 5,
+          "pages": 2
+        },
+        {
+          "code": "AST-04",
+          "version": 6,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/AST-04-complete-handoff-v6-draft.pdf",
+          "sourceSha256": "de991dfcbc70b853f95135116e240e426d5582962accef6c3a26d7b40924b8c7",
+          "startPage": 7,
+          "pages": 1
+        },
+        {
+          "code": "AST-05",
+          "version": 6,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/AST-05-review-release-v6-draft.pdf",
+          "sourceSha256": "2311d189b061d7251fe0e4eecc0ce542c1feb7d2ba2ff0a933f05a1ad698ee77",
+          "startPage": 8,
+          "pages": 1
+        },
+        {
+          "code": "WF-01",
+          "version": 12,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/WF-01-workflow-starten-v12-draft.pdf",
+          "sourceSha256": "8d4429511ebebae73f319978d96b904001d0f609b78052618ba9850cd82c8006",
+          "startPage": 9,
+          "pages": 1
+        },
+        {
+          "code": "WF-02",
+          "version": 12,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/WF-02-complete-workflow-v12-draft.pdf",
+          "sourceSha256": "296632d3e07fe646c4b4a165c828f37a55487952ee25ff57f8b9a5a7af86dd7f",
+          "startPage": 10,
+          "pages": 2
+        },
+        {
+          "code": "CMP-01",
+          "version": 6,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/CMP-01-install-existing-v6-draft.pdf",
+          "sourceSha256": "4be1ad1f00e118bd257e6fc9c92fc647e61ee83bdf5677a3a1915f45c82689df",
+          "startPage": 12,
+          "pages": 1
+        },
+        {
+          "code": "CMP-02",
+          "version": 5,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/CMP-02-register-install-v5-draft.pdf",
+          "sourceSha256": "95a8769c83aa157b7deb20e56b18ac06bd7de8fdc3a7803744f2782e952d4681",
+          "startPage": 13,
+          "pages": 1
+        },
+        {
+          "code": "CMP-04",
+          "version": 6,
+          "sourcePath": "resources/manuals/operator-guides/drafts/CMP-04-component-to-tray-v6-draft.pdf",
+          "sourceSha256": "fe72f79efd24d12730fa1c6bb5e7dcfefbbe28c2179cf8169906bfd7af96cee5",
+          "startPage": 14,
+          "pages": 1
+        },
+        {
+          "code": "HELP-01",
+          "version": 7,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/HELP-01-problems-v7-draft.pdf",
+          "sourceSha256": "c2f49d8598dac156047e5826eab553efb6c103b6645702040ec3943dcc6bf668",
+          "startPage": 15,
+          "pages": 1
+        },
+        {
+          "code": "USR-01",
+          "version": 12,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/usr-01-gebruiker-toevoegen-v12-draft.pdf",
+          "sourceSha256": "71f7db37ddf98561484b5ec22b8a427380c238ca67474fe7cd867050ba5ff50e",
+          "startPage": 16,
+          "pages": 1
+        },
+        {
+          "code": "USR-02",
+          "version": 10,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/usr-02-rol-en-rechten-wijzigen-v10-draft.pdf",
+          "sourceSha256": "483b9659e72931febaac9472db19b0a7764c701ecaaf772deeb426d6d0a2da8e",
+          "startPage": 17,
+          "pages": 1
+        },
+        {
+          "code": "USR-03",
+          "version": 4,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/usr-03-wachtwoord-resetten-v4-draft.pdf",
+          "sourceSha256": "b71a9279faa78ebc8b04ede3674067f73c563c0caac9cdc4b89c9cbb51ad7e06",
+          "startPage": 18,
+          "pages": 1
+        },
+        {
+          "code": "USR-04",
+          "version": 5,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/USR-04-gebruiker-uitschakelen-of-herstellen-v5-draft.pdf",
+          "sourceSha256": "460d508ca86972b86926f3285491e970071acc0b020ebf4ecf18771f7c570665",
+          "startPage": 19,
+          "pages": 2
+        },
+        {
+          "code": "CAT-00",
+          "version": 10,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/CAT-00-catalogus-begrijpen-v10-draft.pdf",
+          "sourceSha256": "359516c04ef0845aac9e155024be4c14a4b9ad2bf949a684fd4356b1f6514e1f",
+          "startPage": 21,
+          "pages": 6
+        },
+        {
+          "code": "CAT-01",
+          "version": 6,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/CAT-01-model-en-modelnummer-aanmaken-v6-draft.pdf",
+          "sourceSha256": "494d1eee598f21ff51749a2e72006c45a31d667bbd64be8648d19ceae9b8388a",
+          "startPage": 27,
+          "pages": 5
+        },
+        {
+          "code": "CAT-02",
+          "version": 2,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/CAT-02-modelspecificatie-opbouwen-v2-draft.pdf",
+          "sourceSha256": "13c8939cbe9a72134983161553c1f0696ac57aff8eca7b1fe99325efb6a2be44",
+          "startPage": 32,
+          "pages": 6
+        },
+        {
+          "code": "CAT-03",
+          "version": 2,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/CAT-03-attributen-beheren-v2-draft.pdf",
+          "sourceSha256": "8adb74b5d3d535def133a9f6987a921acad64d3c68641c8a6076f38a2d0e415b",
+          "startPage": 38,
+          "pages": 5
+        },
+        {
+          "code": "CAT-04",
+          "version": 4,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/CAT-04-componentdefinities-beheren-v4-draft.pdf",
+          "sourceSha256": "96e99bbeea19a39b7484aaef5d01f8739e7e092916817a7d06e41be8e6dcb0d2",
+          "startPage": 43,
+          "pages": 6
+        }
+      ]
+    }
+  ]
+}

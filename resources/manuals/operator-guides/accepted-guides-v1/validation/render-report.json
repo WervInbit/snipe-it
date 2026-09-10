@@ -1,0 +1,216 @@
+{
+  "run": "baseline-check",
+  "mode": "regeneration proof",
+  "browser": "152.0.7977.83",
+  "platform": "win32",
+  "results": [
+    {
+      "code": "AC-01",
+      "version": 9,
+      "html": "source/html/AC-01-login-v9-draft.html",
+      "pdf": "pdf/AC-01-login-v9-draft.pdf",
+      "expectedPages": 1,
+      "sha256": "a1c7a7957d868bf60355b034b0446b700cb74133b31aeab0a2e50a439161ffa8",
+      "inventory": {
+        "pages": 1,
+        "brokenImages": [],
+        "title": "AC-01 v9"
+      }
+    },
+    {
+      "code": "AC-02",
+      "version": 4,
+      "html": "source/html/ac-02-eigen-wachtwoord-wijzigen-v4-draft.html",
+      "pdf": "pdf/ac-02-eigen-wachtwoord-wijzigen-v4-draft.pdf",
+      "expectedPages": 1,
+      "sha256": "f405d489e41c2593e55921de991621c3ecce36f181d5b63a3d6510443fdd1c64",
+      "inventory": {
+        "pages": 1,
+        "brokenImages": [],
+        "title": "AC-02 v4"
+      }
+    },
+    {
+      "code": "SC-01",
+      "version": 12,
+      "html": "source/html/SC-01-asset-vinden-en-openen-v12-draft.html",
+      "pdf": "pdf/SC-01-asset-vinden-en-openen-v12-draft.pdf",
+      "expectedPages": 1,
+      "sha256": "94f5bb0f30c0fa982ac8ee80b75a7a36b09347e220b62085af3169fbecfc37ae",
+      "inventory": {
+        "pages": 1,
+        "brokenImages": [],
+        "title": "SC-01 v12"
+      }
+    },
+    {
+      "code": "AST-02",
+      "version": 8,
+      "html": "source/html/AST-02-refurbishment-route-v8-draft.html",
+      "pdf": "pdf/AST-02-refurbishment-route-v8-draft.pdf",
+      "expectedPages": 1,
+      "sha256": "e6d36347633041e7ae824e5cb8488e8c2ccf34effebda335b01acc3f11f1d171",
+      "inventory": {
+        "pages": 1,
+        "brokenImages": [],
+        "title": "AST-02 v8"
+      }
+    },
+    {
+      "code": "AST-03",
+      "version": 15,
+      "html": "source/html/AST-03-asset-registreren-en-labelen-v15-draft.html",
+      "pdf": "pdf/AST-03-asset-registreren-en-labelen-v15-draft.pdf",
+      "expectedPages": 2,
+      "sha256": "73c8233ca52528493bcb912d03c628b6826fd16c0b93344a9f82e5bd2194003b",
+      "inventory": {
+        "pages": 2,
+        "brokenImages": [],
+        "title": "AST-03 v15"
+      }
+    },
+    {
+      "code": "AST-04",
+      "version": 6,
+      "html": "source/html/AST-04-complete-handoff-v6-draft.html",
+      "pdf": "pdf/AST-04-complete-handoff-v6-draft.pdf",
+      "expectedPages": 1,
+      "sha256": "c63c2bbb66d73c8a00404ee648b84ec4ba568cbeaa760bcf9e9d413036ca04ff",
+      "inventory": {
+        "pages": 1,
+        "brokenImages": [],
+        "title": "AST-04 v6"
+      }
+    },
+    {
+      "code": "WF-01",
+      "version": 13,
+      "html": "source/html/WF-01-workflow-starten-v13-draft.html",
+      "pdf": "pdf/WF-01-workflow-starten-v13-draft.pdf",
+      "expectedPages": 1,
+      "sha256": "a6790363d504421415b6ab08b947d0201f3f1816a1dd4c0789e9138dc248b894",
+      "inventory": {
+        "pages": 1,
+        "brokenImages": [],
+        "title": "WF-01 v13"
+      }
+    },
+    {
+      "code": "WF-02",
+      "version": 10,
+      "html": "source/html/WF-02-workflow-uitvoeren-en-afronden-v10.html",
+      "pdf": "pdf/WF-02-workflow-uitvoeren-en-afronden-v10.pdf",
+      "expectedPages": 2,
+      "sha256": "0b753689250c1746803678b757fa60c2b1ba017a92aef1f9f3c8ab2f76919da9",
+      "inventory": {
+        "pages": 2,
+        "brokenImages": [],
+        "title": "WF-02-complete-workflow-v10-draft"
+      }
+    },
+    {
+      "code": "CMP-01",
+      "version": 4,
+      "html": "source/html/CMP-01-bestaand-component-plaatsen-v4.html",
+      "pdf": "pdf/CMP-01-bestaand-component-plaatsen-v4.pdf",
+      "expectedPages": 1,
+      "sha256": "c0bdbec14c0881bdbf50f7ff61ffb7e9ff13a8e6d403f07079978094d751848f",
+      "inventory": {
+        "pages": 1,
+        "brokenImages": [],
+        "title": "CMP-01 Bestaand component plaatsen"
+      }
+    },
+    {
+      "code": "CMP-02",
+      "version": 6,
+      "html": "source/html/CMP-02-register-install-v6-draft.html",
+      "pdf": "pdf/CMP-02-register-install-v6-draft.pdf",
+      "expectedPages": 1,
+      "sha256": "c20ba464bbeab293c84f47676916b38f18ff8571e2786013084985d7480da59c",
+      "inventory": {
+        "pages": 1,
+        "brokenImages": [],
+        "title": "CMP-02 v6"
+      }
+    },
+    {
+      "code": "CMP-04",
+      "version": 7,
+      "html": "source/html/CMP-04-component-to-tray-v7-draft.html",
+      "pdf": "pdf/CMP-04-component-to-tray-v7-draft.pdf",
+      "expectedPages": 1,
+      "sha256": "7efd928d91d989c24da1e7aadadd053b8bc570a0b6d0fa61d9b2783de3b6cc7c",
+      "inventory": {
+        "pages": 1,
+        "brokenImages": [],
+        "title": "CMP-04 v7"
+      }
+    },
+    {
+      "code": "USR-01",
+      "version": 13,
+      "html": "source/html/usr-01-gebruiker-toevoegen-v13-draft.html",
+      "pdf": "pdf/usr-01-gebruiker-toevoegen-v13-draft.pdf",
+      "expectedPages": 1,
+      "sha256": "180a78b617a293524279b321b9b1153555ac3392dc1aabe3e07ea20bd062f21a",
+      "inventory": {
+        "pages": 1,
+        "brokenImages": [],
+        "title": "USR-01 v13"
+      }
+    },
+    {
+      "code": "USR-02",
+      "version": 11,
+      "html": "source/html/usr-02-rol-en-rechten-wijzigen-v11-draft.html",
+      "pdf": "pdf/usr-02-rol-en-rechten-wijzigen-v11-draft.pdf",
+      "expectedPages": 1,
+      "sha256": "8b9a01ac1ef54e7ddb271e6f74be9b2750680117a331707b2cc7b6f2a16de68d",
+      "inventory": {
+        "pages": 1,
+        "brokenImages": [],
+        "title": "USR-02 v11"
+      }
+    },
+    {
+      "code": "USR-04",
+      "version": 6,
+      "html": "source/html/USR-04-gebruiker-uitschakelen-of-herstellen-v6-draft.html",
+      "pdf": "pdf/USR-04-gebruiker-uitschakelen-of-herstellen-v6-draft.pdf",
+      "expectedPages": 1,
+      "sha256": "c1f82d9b2b1b91c0648f6edcacc133a234aa50e70444e0f5567111ec63b50a0c",
+      "inventory": {
+        "pages": 1,
+        "brokenImages": [],
+        "title": "USR-04 Gebruiker uitschakelen v6"
+      }
+    },
+    {
+      "code": "CAT-00",
+      "version": 11,
+      "html": "source/html/CAT-00-catalogus-begrijpen-v11-draft.html",
+      "pdf": "pdf/CAT-00-catalogus-begrijpen-v11-draft.pdf",
+      "expectedPages": 6,
+      "sha256": "802d1cc30f58077ea0188df420f532243eceff18f5ce0a4ac91299d1a21bd75c",
+      "inventory": {
+        "pages": 6,
+        "brokenImages": [],
+        "title": "CAT-00 v11"
+      }
+    },
+    {
+      "code": "CAT-01",
+      "version": 7,
+      "html": "source/html/CAT-01-model-en-modelnummer-aanmaken-v7-draft.html",
+      "pdf": "pdf/CAT-01-model-en-modelnummer-aanmaken-v7-draft.pdf",
+      "expectedPages": 5,
+      "sha256": "a2fdbb1936c99420a84909922924ff5dd2751f8a683b731476e6258f1f9e7c70",
+      "inventory": {
+        "pages": 5,
+        "brokenImages": [],
+        "title": "CAT-01 v7"
+      }
+    }
+  ]
+}

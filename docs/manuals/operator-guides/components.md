@@ -263,3 +263,14 @@ column crossing, and any registered component outside the A4 bounds. Check
 every final PDF page after rasterization, including pages that reuse the same
 header and footer, because one longer title or additional reference row can
 break only one page.
+
+
+## Focused Layout Checks - Owner Review 2026-09-10
+
+Validate the whole image-badge boundary against instructions and captions,
+including stroke width. Recheck target centres after any source replacement.
+Validate the complete control and its focus outline against an explicit crop;
+SVG viewBox alone can show adjacent content through aspect-ratio padding.
+Guide title/scope changes require checking incoming references as well as the
+changed guide. Diagram minimum quantities must allow new empty records where
+the application does; check matching statements on the other pages.

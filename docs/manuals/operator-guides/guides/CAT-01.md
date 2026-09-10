@@ -1,22 +1,28 @@
 # CAT-01 Model en modelnummer aanmaken
 
-Status: Working draft v5; duplicate-check route, Basismodel creation route,
-and model-number default-configuration wording await operator review.
+## Latest Correction Candidate - 2026-09-10
+
+Current review candidate: [v7](../reviews/CAT-01-v7.md), owner-cleared for user review.
+Page 2 now names each route destination on its own line. Page 4 uses a later 8-to-16-GB RAM change to explain why one device change does not change the manufacturer code.
+This current correction takes precedence over conflicting historical version
+notes below. Previous PDFs and exact acceptance records remain unchanged.
+
+Status: Internal review candidate v7; owner cleared for user review 2026-09-10.
 
 ## Maintenance Metadata
 
 - Family: `CAT`.
 - Type: Extended administration task.
-- Current version: v5 draft.
+- Current version: v7; internal review candidate (printed draft label retained).
 - Page model: Five-page procedure with continuous steps and page handoffs.
 - Layout recipe: `extended-admin-flow` with `single-visual`,
   `inline-route-alternative`, `inline-warning`, `reused-evidence`, and
   `two-sided-continuation`.
-- Generator: `scripts/manuals/generate-catalog-guide-review.mjs`.
-- Artifact root: `output/manuals/proofs/catalog-guide-review/cat-01-v5/`.
+- Generator: `scripts/manuals/generate-owner-corrections.mjs CAT-01`.
+- Artifact root: `output/manuals/proofs/owner-corrections-2026-09-10/CAT-01-v7/`.
 - Portable review package:
-  `resources/manuals/operator-guides/drafts/CAT-01-model-en-modelnummer-aanmaken-v5-draft.pdf`.
-  Its manifest status is `Unaccepted working draft`.
+  `resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CAT-01-model-en-modelnummer-aanmaken-v7-draft.pdf`.
+  Its frozen generation manifest retains the former draft state; the dated owner clearance records the current status.
 
 ## Purpose
 
@@ -178,7 +184,8 @@ visible.
 
 Caption: `Code is exact; Label beschrijft de standaardconfiguratie.`
 
-Do not enter a serial number, Product ID, Inbit asset tag, or self-created code.
+Use the manufacturer's exact product/SKU code (for HP, Product ID/P/N).
+Do not enter a serial number, software Product ID, Inbit asset tag, or invented code.
 Choose `Opslaan` once. The first exact number becomes the system standard
 automatically; changing that lifecycle choice belongs to CAT-05.
 
@@ -276,3 +283,19 @@ label, without a duplicate.
   not red stops.
 - Printed operator text contains `https://snipe.inbit/` only; capture metadata
   may identify the controlled development environment internally.
+
+## Focused Candidate - 2026-09-08
+
+The separate [v6 review](../reviews/CAT-01-v6.md)
+records the focused follow-up to baseline v5, with the exact
+PDF and checksum. The owner requested this pass across all existing guides
+after reviewing WF-01 v12 positively. Earlier selections and their policies
+remain traceable; this candidate is not automatically accepted. See the
+[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
+source/crop exceptions, and remaining operational or evidence gaps.
+
+## Owner Feedback Follow-Up - 2026-09-10
+
+MR-07/MR-11: replace the compressed page-2 branch footer; clarify or reposition the page-4 asset-deviation warning. MR-12/MR-13: visual mapping and learning-order follow-up, not an automatic redesign.
+See [owner review TODOs](../reviews/owner-review-todos-2026-09-10.md).
+The existing PDF is unchanged; these are next-version or decision items.

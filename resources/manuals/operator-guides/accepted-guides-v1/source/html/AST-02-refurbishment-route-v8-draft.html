@@ -1,0 +1,227 @@
+<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8"><title>AST-02 v8</title><style>
+  @page { size: A4 portrait; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #E5E7EB; color: #102033; font-family: Arial, Helvetica, sans-serif; }
+  body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .guide-page { width: 210mm; height: 297mm; padding: 12mm; background: #FFFFFF; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: 24mm 17mm minmax(0, 1fr) auto 12mm 29mm; gap: 3mm; break-after: page; page-break-after: always; overflow: hidden; }
+  .guide-page:last-child { break-after: auto; page-break-after: auto; }
+  .guide-page > * { min-width: 0; max-width: 100%; }
+  .guide-page.frozen { padding: 0; display: block; }
+  .guide-page.frozen > svg { display: block; width: 210mm; height: 297mm; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; min-width: 0; }
+  .title-block { display: flex; flex: 1 1 auto; min-width: 0; max-width: calc(100% - 40mm); gap: 4mm; }
+  .title-block > div { min-width: 0; }
+  .family-bar { width: 2mm; height: 17mm; background: var(--family); flex: 0 0 auto; }
+  h1 { margin: 0; font-size: 10mm; line-height: 1; font-weight: 900; letter-spacing: 0; white-space: nowrap; }
+  h1.title-medium { font-size: 7.7mm; }
+  h1.title-small { font-size: 6.45mm; }
+  h1.title-xsmall { font-size: 4.7mm; }
+  .title-block p { margin: 2.2mm 0 0; color: #53657A; font-size: 3.25mm; }
+  .version { flex: 0 0 35mm; min-width: 35mm; padding: 2.6mm 3mm; border: .45mm solid #86EFAC; border-radius: 2mm; background: #ECFDF5; color: #047857; text-align: center; font-size: 2.55mm; line-height: 1.35; font-weight: 800; }
+  .version small { display: block; margin-top: 1mm; color: #53657A; font-weight: 700; }
+  .context { display: grid; align-items: center; border: .4mm solid #C8D5E2; border-radius: 1.8mm; background: #F8FAFC; padding: 2.8mm 5mm; gap: 4mm; }
+  .context-3 { grid-template-columns: .7fr 1.45fr 1.25fr; }
+  .context-2 { grid-template-columns: 1fr 2fr; }
+  .context-item { min-width: 0; display: flex; flex-direction: column; gap: 1mm; }
+  .context-item > span { color: #53657A; font-size: 2.25mm; font-weight: 800; }
+  .context-item > strong { font-size: 3.1mm; line-height: 1.15; }
+  .accent-value { color: var(--family); }
+  .guide-chip { --chip: #64748B; --chip-fill: #F8FAFC; display: inline-flex; align-items: center; gap: 1.8mm; min-width: 0; max-width: 100%; min-height: 7mm; padding: .8mm 2.2mm .8mm 1.2mm; border: .45mm solid var(--chip); border-radius: 2.3mm; background: var(--chip-fill); color: var(--chip); font-size: 2.65mm; font-weight: 800; white-space: nowrap; overflow: hidden; }
+  .guide-chip span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .guide-chip b { width: 5mm; height: 5mm; border: .4mm solid var(--chip); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,.65); font-size: 1.7mm; }
+  .steps { min-height: 0; display: grid; gap: 3mm; padding-top: 2mm; }
+  .layout-two { grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; }
+  .layout-three { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 1fr; }
+  .layout-three-compact { grid-template-columns: repeat(3, 1fr); grid-auto-rows: 95mm; align-content: center; }
+  .layout-rows { grid-template-columns: 1fr; grid-auto-rows: 1fr; gap: 2.2mm; }
+  .layout-rows-caption { grid-template-columns: 1fr; grid-auto-rows: 1fr; gap: 2.2mm; }
+  .step-card { position: relative; min-width: 0; min-height: 0; padding: 9mm 4mm 3.5mm 10mm; border: .4mm solid #C8D5E2; border-radius: 2mm; background: #FFFFFF; display: flex; flex-direction: column; gap: 2mm; overflow: visible; }
+  .step-badge { position: absolute; left: -8.5mm; top: -7.5mm; width: 15mm; height: 15mm; border: 1.35mm solid var(--family); border-radius: 50%; background: rgba(255,255,255,.88); color: var(--family); display: flex; align-items: center; justify-content: center; font-size: 5.2mm; line-height: 1; font-weight: 900; z-index: 4; }
+  .step-copy h3 { margin: 0 0 1.2mm; font-size: 4.15mm; line-height: 1.1; }
+  .step-copy p { margin: .6mm 0; font-size: 2.75mm; line-height: 1.28; color: #334155; }
+  .step-copy .note { color: var(--family); font-size: 2.45mm; font-weight: 800; }
+  .step-copy .inline-warning { color: #B45309; font-weight: 850; }
+  .step-copy .inline-stop { color: #E83448; font-weight: 900; }
+  .step-card.dense-copy .step-copy p { font-size: 2.4mm; line-height: 1.2; }
+  .step-visuals { min-height: 0; flex: 1; display: flex; gap: 2.2mm; align-items: stretch; }
+  .step-visuals.multi .visual-wrap { flex: 1 1 0; min-width: 0; }
+  .visual-wrap { position: relative; min-width: 0; min-height: 0; margin: 0; display: flex; flex: 1; flex-direction: column; gap: 1mm; overflow: visible; }
+  .shot { position: relative; flex: 1; min-height: 18mm; border: .4mm solid #C8D5E2; border-radius: 1.7mm; background: #F1F5F9; overflow: hidden; }
+  .shot img { width: 100%; height: 100%; display: block; }
+  .shot svg { width: 100%; height: 100%; display: block; }
+  .target-mark-svg { fill: none; stroke: #EF3340; stroke-width: 3.2; vector-effect: non-scaling-stroke; }
+  .visual-wrap.title-crop .shot { flex: 0 0 9.5mm; min-height: 9.5mm; }
+  .visual-wrap.tab-crop .shot { flex: 0 0 14mm; min-height: 14mm; }
+  .visual-wrap.control-crop .shot { flex: 0 0 18mm; min-height: 18mm; }
+  .visual-wrap.form-band .shot { flex: 0 0 29mm; min-height: 29mm; }
+  .visual-wrap.workflow-band .shot { flex: 0 0 35mm; min-height: 35mm; }
+  .visual-wrap.component-band .shot { flex: 0 0 44mm; min-height: 44mm; }
+  .visual-wrap.status-band .shot { flex: 0 0 34mm; min-height: 34mm; }
+  .visual-wrap.label-band .shot { flex: 0 0 48mm; min-height: 48mm; }
+  .visual-wrap.identity-band .shot { flex: 0 0 31mm; min-height: 31mm; }
+  .visual-wrap.label-summary-band .shot { flex: 0 0 31mm; min-height: 31mm; }
+  .visual-wrap.qr-location-band .shot { flex: 0 0 34mm; min-height: 34mm; }
+  .image-badge { position: absolute; left: -3.2mm; top: -3.2mm; min-width: 8mm; height: 8mm; padding: 0 1mm; border: .75mm solid var(--family); border-radius: 50%; background: rgba(255,255,255,.55); color: var(--family); display: flex; align-items: center; justify-content: center; font-size: 2.35mm; font-weight: 900; z-index: 3; }
+  .image-badge-right { left: auto; right: -3.2mm; }
+  .target-mark { position: absolute; border: .9mm solid #EF3340; pointer-events: none; z-index: 2; }
+  .caption { margin: 0; min-height: 5mm; color: #334155; font-size: 2.25mm; line-height: 1.2; }
+  .evidence-gap { flex: 1; min-height: 18mm; border: .45mm dashed #F59E0B; border-radius: 1.7mm; background: #FFF7ED; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5mm; padding: 3mm; text-align: center; }
+  .evidence-gap span { color: #B45309; font-size: 2.1mm; font-weight: 900; }
+  .evidence-gap strong { color: #7C2D12; font-size: 2.6mm; line-height: 1.25; }
+  .row-card { padding: 5mm 4mm 3mm 10mm; display: grid; grid-template-columns: 68mm minmax(0, 1fr); grid-template-rows: 1fr; gap: 4mm; align-items: stretch; }
+  .row-card .step-copy { align-self: center; }
+  .row-card .step-visuals { min-height: 0; }
+  .row-card .caption { display: none; }
+  .layout-rows-caption .row-card .caption { display: block; }
+  .layout-rows-caption .visual-wrap.form-band .shot { flex-basis: 24mm; min-height: 24mm; }
+  .row-card.ast03-entry-step { grid-template-columns: 58mm minmax(0, 1fr); gap: 3mm; }
+  .row-card.ast03-entry-step .step-visuals { gap: 1.6mm; }
+  .row-card.ast03-entry-step .caption { font-size: 2mm; line-height: 1.1; }
+  .row-card.ast03-save-step .step-visuals.multi .visual-wrap:first-child { flex: .82 1 0; }
+  .row-card.ast03-save-step .step-visuals.multi .visual-wrap:last-child { flex: 1.18 1 0; }
+  .row-card.ast03-save-step .visual-wrap.save-check-band .shot { flex-basis: 24mm; min-height: 24mm; }
+  .row-card.ast04-workflow-step .step-visuals.multi .visual-wrap:first-child { flex: .72 1 0; }
+  .row-card.ast04-workflow-step .step-visuals.multi .visual-wrap:last-child { flex: 1.28 1 0; }
+  .row-card.ast04-workflow-step .visual-wrap.workflow-summary-band { align-self: center; }
+  .row-card.ast04-workflow-step .visual-wrap.workflow-summary-band .shot { flex: 0 0 20mm; min-height: 20mm; }
+  .row-card .visual-wrap.ast04-component-review-band .shot { flex-basis: 34mm; min-height: 34mm; }
+  .help-section { min-height: 0; }
+  .help-section h2 { margin: 0 0 1.5mm; color: #53657A; font-size: 2.8mm; }
+  .help-grid { display: grid; grid-template-columns: repeat(var(--help-cols), 1fr); gap: 2mm; }
+  .help-tile { min-width: 0; min-height: 22mm; padding: 3mm; border: .4mm solid #FDBA74; border-radius: 2mm; background: #FFF7ED; display: flex; gap: 2mm; }
+  .help-tile > div { min-width: 0; }
+  .help-icon { width: 7mm; height: 7mm; flex: 0 0 7mm; border: .55mm solid #F59E0B; border-radius: 50%; color: #D97706; display: flex; align-items: center; justify-content: center; font-size: 2.5mm; font-weight: 900; }
+  .help-tile strong { font-size: 2.75mm; overflow-wrap: anywhere; }
+  .help-tile p { margin: 2mm 0 0; color: #334155; font-size: 2.3mm; line-height: 1.25; }
+  .help-tile-reference { min-height: 26mm; }
+  .help-tile-reference .guide-chip { width: 100%; margin-top: 1.4mm; min-height: 5.8mm; gap: 1mm; padding: .4mm .8mm .4mm .6mm; font-size: 1.7mm; }
+  .help-tile-reference .guide-chip b { width: 3.8mm; height: 3.8mm; font-size: 1.15mm; }
+  .help-branch { margin-top: 2mm; min-width: 0; padding: 2.5mm 3mm; border: .4mm solid #FDBA74; border-radius: 2mm; background: #FFF7ED; display: grid; grid-template-columns: 7mm max-content max-content minmax(0, 1fr); align-items: center; gap: 2mm; }
+  .help-branch > strong { font-size: 2.75mm; }
+  .help-branch > span:last-child { color: #334155; font-size: 2.4mm; line-height: 1.25; }
+  .help-branch .guide-chip { width: fit-content; transform: none; }
+  .done { display: flex; align-items: center; gap: 7mm; padding: 2.5mm 5mm; border: .45mm solid #6EE7A0; border-radius: 2mm; background: #ECFDF5; color: #047857; }
+  .done strong { min-width: 22mm; font-size: 3.25mm; }
+  .done span { font-size: 2.75mm; line-height: 1.2; }
+  footer { display: grid; grid-template-columns: minmax(0, 1fr) 24mm; gap: 5mm; align-items: end; min-height: 0; }
+  .footer-main { min-width: 0; display: flex; flex-direction: column; gap: 1.7mm; }
+  .footer-label { color: #53657A; font-size: 2.3mm; font-weight: 800; }
+  .related { min-width: 0; display: flex; flex-wrap: wrap; gap: 1.5mm; }
+  .source { color: #64748B; font-size: 1.85mm; white-space: nowrap; }
+  .qr-draft { width: 22mm; display: flex; flex-direction: column; align-items: center; gap: 1mm; }
+  .qr-draft > div { width: 22mm; height: 22mm; border: .55mm solid #102033; border-radius: 1mm; background: #F8FAFC; color: #64748B; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 3mm; font-weight: 900; line-height: 1.05; }
+  .qr-draft span { font-size: 2mm; font-weight: 800; }
+  .route-main { min-height: 0; display: flex; flex-direction: column; justify-content: flex-start; gap: 3mm; padding: 2mm 0; }
+  .route-start { align-self: center; padding: 2.5mm 6mm; border: .45mm solid #C8D5E2; border-radius: 2mm; background: #F8FAFC; font-size: 3mm; font-weight: 800; }
+  .route-track { position: relative; display: flex; flex-direction: column; gap: 2mm; padding-left: 7mm; }
+  .route-track::before { content: ''; position: absolute; left: 7mm; top: 7mm; bottom: 7mm; width: .5mm; background: #B7D9D1; }
+  .route-item { position: relative; min-width: 0; min-height: 16mm; padding: 2.3mm 3mm 2.3mm 10mm; border: .4mm solid #C8D5E2; border-radius: 2mm; display: grid; grid-template-columns: 58mm minmax(0, 1fr); align-items: center; gap: 4mm; text-align: left; background: #FFFFFF; }
+  .route-item .guide-chip { width: fit-content; max-width: 58mm; transform: none; }
+  .route-number { position: absolute; top: 50%; left: 0; transform: translate(-50%, -50%); width: 9mm; height: 9mm; border: .9mm solid var(--family); border-radius: 50%; background: rgba(255,255,255,.94); color: var(--family); display: flex; align-items: center; justify-content: center; font-size: 3.4mm; font-weight: 900; z-index: 2; }
+  .route-item p { margin: 0; font-size: 2.5mm; line-height: 1.3; }
+  .problem-main { min-height: 0; display: flex; flex-direction: column; gap: 3mm; }
+  .global-stop { padding: 3mm 4mm; border: .55mm solid #FDA4AF; border-radius: 2mm; background: #FFF1F3; display: flex; align-items: center; gap: 4mm; color: #BE123C; }
+  .global-stop strong { font-size: 3.3mm; }
+  .global-stop span { font-size: 2.7mm; font-weight: 700; }
+  .problem-grid { min-height: 0; flex: 1; display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr; gap: 2mm; }
+  .problem-tile { min-height: 0; padding: 2.5mm 3mm; border: .4mm solid #C8D5E2; border-radius: 2mm; display: flex; gap: 3mm; align-items: flex-start; }
+  .problem-icon { width: 8mm; height: 8mm; flex: 0 0 8mm; border: .65mm solid var(--family); border-radius: 50%; color: var(--family); display: flex; align-items: center; justify-content: center; font-size: 2.8mm; font-weight: 900; }
+  .problem-tile h3 { margin: .7mm 0 1mm; font-size: 3mm; }
+  .problem-tile p { margin: 0 0 1.3mm; color: #334155; font-size: 2.35mm; line-height: 1.22; }
+  .problem-tile .guide-chip { min-height: 5.5mm; font-size: 2.15mm; padding: .5mm 1.4mm .5mm .8mm; }
+  .problem-tile .guide-chip b { width: 4mm; height: 4mm; font-size: 1.3mm; }
+  .problem-main + .help-section { display: none; }
+  .help.guide-page { grid-template-rows: 24mm 17mm minmax(0, 1fr) 0 12mm 29mm; }
+  .help.guide-page > .done { grid-row: 5; }
+  .help.guide-page > footer { grid-row: 6; }
+  @media print { html, body { background: #FFFFFF; } }
+</style><style>.guide-chip { white-space: normal; } .guide-chip span { overflow: visible; text-overflow: clip; } .guide-chip b { flex-shrink: 0; }</style><style>.help-grid{grid-template-columns:1.5fr 1fr}.help-tile{min-height:34mm;padding:2mm;gap:1.5mm}.route-links{display:flex;flex-direction:column;gap:1mm;margin-top:1.4mm}.help-section .guide-chip{font-size:2.05mm;min-height:5.6mm;padding:.5mm 1.1mm;gap:1mm;white-space:normal;width:fit-content}.help-section .guide-chip b{width:4mm;height:4mm;flex-shrink:0;font-size:1.3mm}.return-link{display:flex;align-items:center;gap:1.5mm;font-size:2.15mm;margin-top:1.5mm}.help-branch{grid-template-columns:7mm 1.2fr 1fr;padding:2mm;align-items:start}.help-branch strong{font-size:2.6mm}.help-branch p{margin:0 0 1mm;font-size:2.2mm}.route-main{gap:2mm}.route-item{min-height:14mm;padding-top:1.4mm;padding-bottom:1.4mm}.route-track{gap:1.6mm}</style></head><body><article class="guide-page route " style="--family:#138A43;--family-soft:#ECFDF3">
+    <header>
+      <div class="title-block"><span class="family-bar"></span><div><h1 class="title-medium">AST-02 Refurbishment-route</h1><p>Kies de juiste taakgids voor de fase waarin het apparaat zich bevindt</p></div></div>
+      <div class="version">Draft v8<br>2026-09-10</div>
+    </header>
+    <div class="context context-3">
+    <div class="context-item">
+      <span>Rol</span>
+      <strong class="">Refurbisher</strong>
+    </div><div class="context-item">
+      <span>Nodig</span>
+      <strong class="">Apparaat + taakgidsen</strong>
+    </div><div class="context-item">
+      <span>Vooraf</span>
+      <span class="guide-chip" style="--chip:#2563EB;--chip-fill:#EFF6FF">
+    <b>AC</b><span>AC-01 Login</span>
+  </span>
+    </div>
+  </div>
+    <main class="route-main">
+    <div class="route-start">Start bij een geregistreerd apparaat</div>
+    <div class="route-track">
+      <div class="route-item ">
+        <span class="route-number">1</span>
+        <span class="guide-chip" style="--chip:#2563EB;--chip-fill:#EFF6FF">
+    <b>AC</b><span>AC-01 Login</span>
+  </span>
+        <p>Meld aan en controleer het dashboard.</p>
+      </div><div class="route-item ">
+        <span class="route-number">2</span>
+        <span class="guide-chip" style="--chip:#0F8F7B;--chip-fill:#ECFDF8">
+    <b>SC</b><span>SC-01 Asset vinden en openen</span>
+  </span>
+        <p>Vind het apparaat en controleer de identiteit.</p>
+      </div><div class="route-item ">
+        <span class="route-number">3</span>
+        <span class="guide-chip" style="--chip:#F97316;--chip-fill:#FFF7ED">
+    <b>WF</b><span>WF-01 Workflow starten</span>
+  </span>
+        <p>Juiste onafgeronde run? Open die. OF start eenmaal een nieuwe run.</p>
+      </div><div class="route-item ">
+        <span class="route-number">4</span>
+        <span class="guide-chip" style="--chip:#F97316;--chip-fill:#FFF7ED">
+    <b>WF</b><span>WF-02 Workflow uitvoeren en afronden</span>
+  </span>
+        <p>Voer controles uit en sla eerlijke resultaten op.</p>
+      </div><div class="route-item ">
+        <span class="route-number">5</span>
+        <span class="guide-chip" style="--chip:#138A43;--chip-fill:#ECFDF3">
+    <b>AST</b><span>AST-04 Werk afronden en overdragen</span>
+  </span>
+        <p>Controleer werk en zet klaar voor beoordeling.</p>
+      </div><div class="route-item ">
+        <span class="route-number">6</span>
+        <span class="guide-chip" style="--chip:#138A43;--chip-fill:#ECFDF3">
+    <b>AST</b><span>AST-05 Asset beoordelen en vrijgeven</span>
+  </span>
+        <p>Supervisor beoordeelt en bepaalt de eindstatus.</p>
+      </div>
+    </div>
+  </main>
+    <section class="help-section">
+    <h2>Afwijkende route</h2>
+    <div class="help-grid" style="--help-cols:2">
+      <div class="help-tile ">
+        <span class="help-icon">!</span>
+        <div><strong>Componentwerk nodig</strong><div class="route-links"><span class="guide-chip" data-guide-code="CMP-01" style="--chip:#B66A00;--chip-fill:#FFF8E6"><b>CMP</b><span>CMP-01 Bestaand component plaatsen</span></span><span class="guide-chip" data-guide-code="CMP-02" style="--chip:#B66A00;--chip-fill:#FFF8E6"><b>CMP</b><span>CMP-02 Nieuw component registreren en plaatsen</span></span><span class="guide-chip" data-guide-code="CMP-04" style="--chip:#B66A00;--chip-fill:#FFF8E6"><b>CMP</b><span>CMP-04 Component naar tray verplaatsen</span></span></div><div class="return-link">Daarna terug naar <span class="guide-chip" data-guide-code="WF-02" style="--chip:#C66A00;--chip-fill:#FFF7ED"><b>WF</b><span>WF-02 Workflow uitvoeren en afronden</span></span></div></div>
+      </div><div class="help-tile ">
+        <span class="help-icon">!</span>
+        <div><strong>Probleem of mismatch</strong><p>Stop en gebruik:</p><div class="route-links"><span class="guide-chip" data-guide-code="HELP-01" style="--chip:#E83448;--chip-fill:#FFF1F3"><b>HELP</b><span>HELP-01 Problemen en hulp</span></span></div></div>
+      </div>
+    </div>
+    <div class="help-branch"><span class="help-icon">!</span><div><strong>Asset nog niet geregistreerd?</strong><p>Laat de Supervisor registreren:</p><span class="guide-chip" data-guide-code="AST-03" style="--chip:#138A43;--chip-fill:#ECFDF3"><b>AST</b><span>AST-03 Asset registreren en labelen</span></span></div><div><p>Daarna terug naar:</p><span class="guide-chip" data-guide-code="SC-01" style="--chip:#0E8A75;--chip-fill:#ECFDF8"><b>SC</b><span>SC-01 Asset vinden en openen</span></span></div></div>
+  </section>
+    <section class="done"><strong>Klaar als</strong><span>Je weet in welke fase het apparaat zit en welke taakgids als volgende nodig is.</span></section>
+  <footer>
+    <div class="footer-main">
+      <span class="footer-label">Relevante gidsen</span>
+      <div class="related"><span class="guide-chip" style="--chip:#138A43;--chip-fill:#ECFDF3">
+    <b>AST</b><span>AST-03 Asset registreren en labelen</span>
+  </span><span class="guide-chip" style="--chip:#C17A00;--chip-fill:#FFF8E6">
+    <b>CMP</b><span>CMP-01 Bestaand component plaatsen</span>
+  </span><span class="guide-chip" style="--chip:#E83448;--chip-fill:#FFF1F3">
+    <b>HELP</b><span>HELP-01 Problemen en hulp</span>
+  </span></div>
+      <div class="source">Bron: bestaande opnamen + gecontroleerde testomgeving | 2026-09-10 | concept voor review</div>
+    </div>
+    <div class="qr-draft"><div>QR<br>volgt</div><span>Digitale gids</span></div>
+  </footer>
+  </article></body></html>

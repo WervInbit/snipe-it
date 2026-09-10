@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "changedGuides": 10,
+  "changedGuidePages": 19,
+  "prototypePages": 2,
+  "currentGuides": 22,
+  "currentPages": 47,
+  "previousPages": 48,
+  "mergePixelsVerifiedAt96dpi": 95,
+  "fourExactAcceptancesPreserved": true,
+  "previousSelectedHashesVerified": 22,
+  "checkpointAndOriginalPdfHashesVerified": 29,
+  "earlierRoundPdfHashesVerified": 25,
+  "priorBundlesAndArchivesPreserved": true,
+  "sourceArchiveFilesVerified": 327,
+  "guideMarkdownFilesChecked": 156,
+  "localLinksChecked": 575,
+  "limitations": "No new live workflow, production data/status change, physical print or first-time-reader trial. Prototype asset panels are schematic."
+}

@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "checks": [
+    {
+      "case": "existing run",
+      "result": "refused",
+      "reason": "This proof run already exists"
+    },
+    {
+      "case": "known version",
+      "result": "refused",
+      "reason": "Use a version above the highest known"
+    },
+    {
+      "case": "accepted source as draft",
+      "result": "refused",
+      "reason": "Draft HTML must be in work/"
+    }
+  ],
+  "packageIntegrityAfter": {
+    "status": "passed",
+    "acceptedGuides": 16,
+    "historicalPdfs": 7,
+    "verifiedFiles": 364
+  }
+}

@@ -162,3 +162,13 @@ saved result has been verified.
 CAT-02 v1 is a first unaccepted working draft. It must not be marked approved
 until explicit review confirms the wording, focus marks, crop context, and
 workflow against the intended Supervisor process.
+
+## Focused Candidate - 2026-09-08
+
+The separate [v2 review](../reviews/CAT-02-v2.md)
+records the focused follow-up to baseline v1, with the exact
+PDF and checksum. The owner requested this pass across all existing guides
+after reviewing WF-01 v12 positively. Earlier selections and their policies
+remain traceable; this candidate is not automatically accepted. See the
+[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
+source/crop exceptions, and remaining operational or evidence gaps.

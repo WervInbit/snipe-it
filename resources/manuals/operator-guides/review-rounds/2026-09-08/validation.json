@@ -1,0 +1,200 @@
+{
+  "date": "2026-09-08",
+  "status": "passed for draft comparison",
+  "newGuides": 3,
+  "newGuidePages": 10,
+  "comparisonPages": 24,
+  "allPagesA4": true,
+  "encrypted": false,
+  "allPagesHaveText": true,
+  "developmentUrlsPresent": false,
+  "newPageRasterMatchesInComparison": 10,
+  "frozenOriginalPdfPairsVerified": 29,
+  "baselinePageContentStreamsPreserved": 9,
+  "instructionSamples": [
+    {
+      "code": "WF-01",
+      "instructionSample": "Zoek het afgesproken profiel",
+      "fontSizesPt": [
+        8.78
+      ]
+    },
+    {
+      "code": "USR-04",
+      "instructionSample": "Open Personen",
+      "fontSizesPt": [
+        9.07
+      ]
+    },
+    {
+      "code": "CAT-04",
+      "instructionSample": "Zoek op naam",
+      "fontSizesPt": [
+        9.21
+      ]
+    }
+  ],
+  "componentAndGeometryQa": {
+    "WF-01": {
+      "componentQa": {
+        "errors": [],
+        "badgeCount": 9,
+        "chipCount": 3,
+        "chipMetrics": [
+          {
+            "code": "WF-02",
+            "frameWidth": 93,
+            "requiredWidth": 58.06
+          },
+          {
+            "code": "SC-01",
+            "frameWidth": 75,
+            "requiredWidth": 47.83
+          },
+          {
+            "code": "HELP-01",
+            "frameWidth": 64,
+            "requiredWidth": 44.61
+          }
+        ]
+      },
+      "layoutQa": {
+        "errors": [],
+        "textBlocks": 21
+      }
+    },
+    "USR-04": {
+      "componentQa": {
+        "errors": [],
+        "badgeCount": 21,
+        "chipCount": 6,
+        "chipMetrics": [
+          {
+            "code": "USR-02",
+            "frameWidth": 85,
+            "requiredWidth": 49.14
+          },
+          {
+            "code": "HELP-01",
+            "frameWidth": 65,
+            "requiredWidth": 44.61
+          },
+          {
+            "code": "USR-02",
+            "frameWidth": 85,
+            "requiredWidth": 49.14
+          },
+          {
+            "code": "HELP-01",
+            "frameWidth": 65,
+            "requiredWidth": 44.61
+          },
+          {
+            "code": "USR-02",
+            "frameWidth": 85,
+            "requiredWidth": 49.14
+          },
+          {
+            "code": "HELP-01",
+            "frameWidth": 65,
+            "requiredWidth": 44.61
+          }
+        ]
+      },
+      "layoutQa": {
+        "errors": [],
+        "textBlocks": 48
+      }
+    },
+    "CAT-04": {
+      "componentQa": {
+        "errors": [],
+        "badgeCount": 20,
+        "chipCount": 14,
+        "chipMetrics": [
+          {
+            "code": "CAT-00",
+            "frameWidth": 70,
+            "requiredWidth": 44.58
+          },
+          {
+            "code": "CAT-03",
+            "frameWidth": 70,
+            "requiredWidth": 43.18
+          },
+          {
+            "code": "CAT-00",
+            "frameWidth": 70,
+            "requiredWidth": 44.58
+          },
+          {
+            "code": "CAT-03",
+            "frameWidth": 70,
+            "requiredWidth": 43.18
+          },
+          {
+            "code": "CAT-00",
+            "frameWidth": 70,
+            "requiredWidth": 44.58
+          },
+          {
+            "code": "CAT-03",
+            "frameWidth": 70,
+            "requiredWidth": 43.18
+          },
+          {
+            "code": "CAT-00",
+            "frameWidth": 70,
+            "requiredWidth": 44.58
+          },
+          {
+            "code": "CAT-03",
+            "frameWidth": 70,
+            "requiredWidth": 43.18
+          },
+          {
+            "code": "CAT-00",
+            "frameWidth": 70,
+            "requiredWidth": 44.58
+          },
+          {
+            "code": "CAT-03",
+            "frameWidth": 70,
+            "requiredWidth": 43.18
+          },
+          {
+            "code": "CAT-02",
+            "frameWidth": 99,
+            "requiredWidth": 55.08
+          },
+          {
+            "code": "CMP-02",
+            "frameWidth": 113,
+            "requiredWidth": 72.44
+          },
+          {
+            "code": "CAT-02",
+            "frameWidth": 99,
+            "requiredWidth": 55.08
+          },
+          {
+            "code": "CMP-02",
+            "frameWidth": 113,
+            "requiredWidth": 72.44
+          }
+        ]
+      },
+      "layoutQa": {
+        "errors": [],
+        "textBlocks": 84
+      }
+    }
+  },
+  "visualReview": "All ten new guide pages and all four divider/index pages rendered and inspected. No remaining clipped or overlapping authored instructions.",
+  "limits": [
+    "Physical A4 print and observed first-time user testing pending.",
+    "Existing screenshots reused; no new same-account end-to-end capture or live form submission.",
+    "Screen-reader order and semantic tagging not validated.",
+    "Existing actual-root package verifier still has three unlisted historical drafts."
+  ]
+}

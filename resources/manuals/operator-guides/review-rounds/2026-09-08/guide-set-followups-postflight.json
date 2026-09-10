@@ -1,0 +1,33 @@
+{
+  "date": "2026-09-08",
+  "newCandidatePdfs": 20,
+  "candidatePages": 46,
+  "retainedRasterPlacements": 122,
+  "allExistingGuides": 22,
+  "wholeSetPages": 48,
+  "priorPdfHashesVerified": 29,
+  "frozenBaselineSourceFilesVerified": 245,
+  "reviewRoundPdfHashesVerified": 25,
+  "newSourceArchiveFilesVerified": 259,
+  "markdownLinksChecked": 431,
+  "markdownFilesChecked": 142,
+  "sharedSystemChecks": {
+    "status": "passed",
+    "registryEntries": 25,
+    "referencePlacements": 5
+  },
+  "baselinePackageVerifier": {
+    "status": "passed using manifest-only draft mirror",
+    "evidence": 103,
+    "acceptedPdfs": 9,
+    "draftPdfs": 20,
+    "baselines": 2
+  },
+  "limits": [
+    "Actual draft root retains the previously documented unlisted CAT-00 v7/v8 and CAT-01 v4 PDFs.",
+    "Physical A4 and first-time-user trials pending.",
+    "No application test suite or production workflow run: this task changes guide artifacts and documentation only."
+  ],
+  "scopedWhitespaceCheck": "passed",
+  "newPdfsMatchRetainedCopies": true
+}

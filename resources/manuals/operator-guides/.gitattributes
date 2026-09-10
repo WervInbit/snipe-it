@@ -1,0 +1,5 @@
+# Frozen records keep original bytes and whitespace for checksum verification.
+# Active documentation and authoring scripts retain normal whitespace checks.
+checkpoints/** -text -whitespace
+review-rounds/** -text -whitespace
+accepted-guides-v*/** -whitespace

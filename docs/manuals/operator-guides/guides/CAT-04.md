@@ -1,5 +1,11 @@
 # CAT-04 Componentdefinities beheren
 
+Separate comparison proposal: [CAT-04 v3](../reviews/CAT-04-v3.md) is retained
+after the owner rejected the batch's design direction. Its replacement evidence
+and numeric warning correction remain proposals, not acceptance. The selected
+baseline below is unchanged; follow the [feedback](../reviews/2026-09-08-pilot-direction-feedback.md)
+before revising.
+
 Status: Working draft v2; workflow and evidence verified, exact-version review pending.
 
 ## Maintenance Metadata
@@ -189,3 +195,13 @@ bijdragen en eventuele verwachte onderdelen en is vindbaar voor hergebruik.
   field labels remain visible only where they occur in the application.
 - Browser-inaccessible tracking/placement modes and lifecycle cleanup remain
   outside this ordinary Supervisor route.
+
+## Focused Candidate - 2026-09-08
+
+The separate [v4 review](../reviews/CAT-04-v4.md)
+records the focused follow-up to baseline v2, with the exact
+PDF and checksum. The owner requested this pass across all existing guides
+after reviewing WF-01 v12 positively. Earlier selections and their policies
+remain traceable; this candidate is not automatically accepted. See the
+[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
+source/crop exceptions, and remaining operational or evidence gaps.

@@ -1,14 +1,21 @@
 # USR-01 Gebruiker Toevoegen
 
+## Latest Correction Candidate - 2026-09-10
+
+Current review candidate: [v13](../reviews/USR-01-v13.md), owner-cleared for user review.
+Updated the USR-04 reference to Gebruiker uitschakelen.
+This current correction takes precedence over conflicting historical version
+notes below. Previous PDFs and exact acceptance records remain unchanged.
+
 | Field | Current value |
 | --- | --- |
-| Status | Working draft v11; visual-correction pass; v8 remains an internal review candidate for V1 |
+| Status | Internal review candidate v13; owner cleared for user review 2026-09-10 |
 | Family | USR |
 | Type | Administration task |
-| Current version | `usr-01-gebruiker-toevoegen-v11-draft` |
+| Current version | `usr-01-gebruiker-toevoegen-v13-draft` |
 | Page model | One page |
 | Layout recipe | `stacked-step-flow` with `mixed-visual-widths` and `single-visual` |
-| Generator | `scripts/manuals/generate-user-account-guide-review.mjs` |
+| Generator | `scripts/manuals/generate-owner-corrections.mjs USR-01` |
 | Role | Admin |
 | Needed | Approved identity, standard role, verified email when available, and a secure handoff route |
 | Prerequisite | Ingelogd (AC-01 Login) with Admin access |
@@ -123,3 +130,13 @@ permissions, and an immediate AC-02 handoff for the temporary password.
 - v10 retains that route and makes the capitalization, lowercase surname
   initials, no-period/no-space username rule and `username + current year`
   temporary-password example explicit in the page itself.
+
+## Focused Candidate - 2026-09-08
+
+The separate [v12 review](../reviews/USR-01-v12.md)
+records the focused follow-up to baseline v11, with the exact
+PDF and checksum. The owner requested this pass across all existing guides
+after reviewing WF-01 v12 positively. Earlier selections and their policies
+remain traceable; this candidate is not automatically accepted. See the
+[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
+source/crop exceptions, and remaining operational or evidence gaps.

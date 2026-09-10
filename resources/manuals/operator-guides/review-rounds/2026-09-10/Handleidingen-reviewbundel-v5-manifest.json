@@ -1,0 +1,195 @@
+{
+  "bundleVersion": 5,
+  "createdOn": "2026-09-10",
+  "scope": "Changed guides only",
+  "previousSelection": "Immediately preceding reviewed versions; 20 pages.",
+  "currentSelection": "10 owner-correction candidates; 19 pages.",
+  "identicalGuideOrder": true,
+  "boundaryDifference": "USR-04 is one page shorter. CAT pages start one page earlier in current.",
+  "artifacts": [
+    {
+      "file": "Handleidingen-reviewbundel-v5-vorig.pdf",
+      "pages": 20,
+      "guides": 10,
+      "sha256": "05cb9f9aad7fc873a40fc7f898cf41c4c5ac9f6380b3676389d136d29c7d8458",
+      "addedPages": 0,
+      "bookmarks": 0,
+      "sourcePixelsIdenticalAt96dpi": 20,
+      "contentStreamsAndPageBoxesPreserved": true,
+      "pageMap": [
+        {
+          "code": "SC-01",
+          "version": 11,
+          "startPage": 1,
+          "pages": 1,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/SC-01-asset-vinden-en-openen-v11-draft.pdf",
+          "sourceSha256": "bad71d80e8ef612192f551d892c32a938df49723ee453d7b9df5b9a970b6546e"
+        },
+        {
+          "code": "AST-02",
+          "version": 7,
+          "startPage": 2,
+          "pages": 1,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/AST-02-refurbishment-route-v7-draft.pdf",
+          "sourceSha256": "76da3cb06057b70336103db61747a26564493a6aea6c67973f00db519f9ccef0"
+        },
+        {
+          "code": "WF-01",
+          "version": 12,
+          "startPage": 3,
+          "pages": 1,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/WF-01-workflow-starten-v12-draft.pdf",
+          "sourceSha256": "8d4429511ebebae73f319978d96b904001d0f609b78052618ba9850cd82c8006"
+        },
+        {
+          "code": "CMP-02",
+          "version": 5,
+          "startPage": 4,
+          "pages": 1,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/CMP-02-register-install-v5-draft.pdf",
+          "sourceSha256": "95a8769c83aa157b7deb20e56b18ac06bd7de8fdc3a7803744f2782e952d4681"
+        },
+        {
+          "code": "CMP-04",
+          "version": 6,
+          "startPage": 5,
+          "pages": 1,
+          "sourcePath": "resources/manuals/operator-guides/drafts/CMP-04-component-to-tray-v6-draft.pdf",
+          "sourceSha256": "fe72f79efd24d12730fa1c6bb5e7dcfefbbe28c2179cf8169906bfd7af96cee5"
+        },
+        {
+          "code": "USR-01",
+          "version": 12,
+          "startPage": 6,
+          "pages": 1,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/usr-01-gebruiker-toevoegen-v12-draft.pdf",
+          "sourceSha256": "71f7db37ddf98561484b5ec22b8a427380c238ca67474fe7cd867050ba5ff50e"
+        },
+        {
+          "code": "USR-02",
+          "version": 10,
+          "startPage": 7,
+          "pages": 1,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/usr-02-rol-en-rechten-wijzigen-v10-draft.pdf",
+          "sourceSha256": "483b9659e72931febaac9472db19b0a7764c701ecaaf772deeb426d6d0a2da8e"
+        },
+        {
+          "code": "USR-04",
+          "version": 5,
+          "startPage": 8,
+          "pages": 2,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/USR-04-gebruiker-uitschakelen-of-herstellen-v5-draft.pdf",
+          "sourceSha256": "460d508ca86972b86926f3285491e970071acc0b020ebf4ecf18771f7c570665"
+        },
+        {
+          "code": "CAT-00",
+          "version": 10,
+          "startPage": 10,
+          "pages": 6,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/CAT-00-catalogus-begrijpen-v10-draft.pdf",
+          "sourceSha256": "359516c04ef0845aac9e155024be4c14a4b9ad2bf949a684fd4356b1f6514e1f"
+        },
+        {
+          "code": "CAT-01",
+          "version": 6,
+          "startPage": 16,
+          "pages": 5,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-08/CAT-01-model-en-modelnummer-aanmaken-v6-draft.pdf",
+          "sourceSha256": "494d1eee598f21ff51749a2e72006c45a31d667bbd64be8648d19ceae9b8388a"
+        }
+      ]
+    },
+    {
+      "file": "Handleidingen-reviewbundel-v5-huidig.pdf",
+      "pages": 19,
+      "guides": 10,
+      "sha256": "beb45e7252fb1d5ae3aa346c7f16a045c0753decc31c3668cd2b244bc121ec92",
+      "addedPages": 0,
+      "bookmarks": 0,
+      "sourcePixelsIdenticalAt96dpi": 19,
+      "contentStreamsAndPageBoxesPreserved": true,
+      "pageMap": [
+        {
+          "code": "SC-01",
+          "version": 12,
+          "startPage": 1,
+          "pages": 1,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/SC-01-asset-vinden-en-openen-v12-draft.pdf",
+          "sourceSha256": "bc29b532a2cea8dad759307c4abcf378a10114eb1205582c88ba1a5b5767461e"
+        },
+        {
+          "code": "AST-02",
+          "version": 8,
+          "startPage": 2,
+          "pages": 1,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/AST-02-refurbishment-route-v8-draft.pdf",
+          "sourceSha256": "f932df1e44ca6fe5a3747efb0d2988e601939f9c9832e2ee6fd295889fb87846"
+        },
+        {
+          "code": "WF-01",
+          "version": 13,
+          "startPage": 3,
+          "pages": 1,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/WF-01-workflow-starten-v13-draft.pdf",
+          "sourceSha256": "880429c9b1d599239e72a71fe696b52742b673af8542d5b3cc81a98381c1965b"
+        },
+        {
+          "code": "CMP-02",
+          "version": 6,
+          "startPage": 4,
+          "pages": 1,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CMP-02-register-install-v6-draft.pdf",
+          "sourceSha256": "873f68279de2c3006a635b008ccffb2e6a52a8793b5f5966ff43f0eeecec1961"
+        },
+        {
+          "code": "CMP-04",
+          "version": 7,
+          "startPage": 5,
+          "pages": 1,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CMP-04-component-to-tray-v7-draft.pdf",
+          "sourceSha256": "a6ae931f48bbfb3ef6d45cf196909e663f7b1da8535de58318c14eed9265956f"
+        },
+        {
+          "code": "USR-01",
+          "version": 13,
+          "startPage": 6,
+          "pages": 1,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-reference-followups/usr-01-gebruiker-toevoegen-v13-draft.pdf",
+          "sourceSha256": "38318811b38adcfb5692e1634fba9ad35c7cca0acb3faf4371bfe370fd462995"
+        },
+        {
+          "code": "USR-02",
+          "version": 11,
+          "startPage": 7,
+          "pages": 1,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-reference-followups/usr-02-rol-en-rechten-wijzigen-v11-draft.pdf",
+          "sourceSha256": "53e581c649a0d10e5ef5677a79166a93ebbd99ba4ad8539c29755a0fcf733651"
+        },
+        {
+          "code": "USR-04",
+          "version": 6,
+          "startPage": 8,
+          "pages": 1,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/USR-04-gebruiker-uitschakelen-of-herstellen-v6-draft.pdf",
+          "sourceSha256": "c5b2e28471dfb912bef502264ed85a5d86b26b7ba24cbb4c8303b34a0f8c0c96"
+        },
+        {
+          "code": "CAT-00",
+          "version": 11,
+          "startPage": 9,
+          "pages": 6,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CAT-00-catalogus-begrijpen-v11-draft.pdf",
+          "sourceSha256": "d8c95c64c70508cdceb43d4aa71d7f1f22027dfd8690349349ec70bb8f09c04c"
+        },
+        {
+          "code": "CAT-01",
+          "version": 7,
+          "startPage": 15,
+          "pages": 5,
+          "sourcePath": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CAT-01-model-en-modelnummer-aanmaken-v7-draft.pdf",
+          "sourceSha256": "bd79bd83124c9c31e52b12bb92e53d238265226cc5a82caebae5cdb5802c2b46"
+        }
+      ]
+    }
+  ]
+}

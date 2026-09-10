@@ -179,3 +179,19 @@ expected-component additions were prepared only in the browser and were not
 submitted. Existing saved-row removal controls were hidden to represent the
 normal Supervisor view. The conflict and saved-confirmation messages were
 inserted only into the screenshot DOM; no server record was changed.
+
+
+## Owner Correction Evidence Use - 2026-09-10
+
+No new live screenshot was captured. CMP-02 v6 targets the measured selected
+radio centres in the canonical -04 images: 2A (35.06, 292.38) and
+2B (226.46, 345.10), in source pixels. CMP-04 v7 replaces the incomplete
+Naar tray detail with the complete control from CMP-INSTALL-RESULT-MOBILE-02.
+The crop excludes that example's different identity and next row; caption
+labels it as a control detail. Original 1A/modal/result identity images remain.
+
+The separate catalogue mapping prototype uses CAT-COMPONENT-DEFINITION-
+CONTRIBUTIONS-DESKTOP-02, CAT-MODEL-SPEC-ROSTER-DESKTOP-01 and
+CAT-MODEL-SPEC-SAVED-DESKTOP-01. Its asset result panels are clearly schematic;
+a matched real asset/component detail and replacement result are pending.
+See [review record](reviews/owner-corrections-2026-09-10.md).

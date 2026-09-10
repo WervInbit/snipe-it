@@ -57,3 +57,13 @@ The physical component is installed and the same component tag and serial number
 - CMP-04 Component naar tray verplaatsen
 - WF-02 Workflow uitvoeren en afronden
 - HELP-01 Problemen en hulp
+
+## Focused Candidate - 2026-09-08
+
+The separate [v6 review](../reviews/CMP-01-v6.md)
+records the focused follow-up to baseline v5, with the exact
+PDF and checksum. The owner requested this pass across all existing guides
+after reviewing WF-01 v12 positively. Earlier selections and their policies
+remain traceable; this candidate is not automatically accepted. See the
+[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
+source/crop exceptions, and remaining operational or evidence gaps.

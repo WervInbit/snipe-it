@@ -1,0 +1,12 @@
+{
+  "name": "inbit-operator-guide-tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node test-guide-system.mjs && node verify-guide-package.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.62.1",
+    "sharp": "0.35.3"
+  }
+}

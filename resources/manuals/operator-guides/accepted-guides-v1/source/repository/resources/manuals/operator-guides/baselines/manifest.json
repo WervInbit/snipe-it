@@ -1,0 +1,18 @@
+{
+    "schemaVersion":  1,
+    "updatedOn":  "2026-08-13",
+    "baselines":  [
+                      {
+                          "code":  "AC-01",
+                          "version":  6,
+                          "file":  "AC-01-login-v6.svg",
+                          "sha256":  "cb46bc3cd017823026e19fd5754e3319e4652f5d9f53b406602fe4e0c396ce18"
+                      },
+                      {
+                          "code":  "SC-01",
+                          "version":  10,
+                          "file":  "SC-01-asset-vinden-en-openen-v10.svg",
+                          "sha256":  "f10ba83d89d60429ee73c1843b0d6bdaf8a85f0c4f85476047d871bc27f5adda"
+                      }
+                  ]
+}

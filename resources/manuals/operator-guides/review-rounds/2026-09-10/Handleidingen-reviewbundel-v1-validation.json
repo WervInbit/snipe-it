@@ -1,0 +1,21 @@
+{
+  "date": "2026-09-10",
+  "bundleVersion": 1,
+  "guides": 22,
+  "pages": 49,
+  "guidePagesPixelIdenticalAt96dpi": 48,
+  "contentsLinksVerified": 22,
+  "bookmarksVerified": 23,
+  "exactOwnerAcceptances": 4,
+  "frozenAndOriginalPdfHashesVerified": 29,
+  "oldReviewRoundPdfHashesVerified": 25,
+  "frozenBaselineSourceFilesVerified": 245,
+  "historicalGenerationArchivesVerified": true,
+  "liveRuntimeChange": "Only AC-02 and AST-04 acceptance status metadata; frozen source preserved.",
+  "guideMarkdownFilesChecked": 143,
+  "localLinksChecked": 456,
+  "visualReview": "Contents page inspected: all 22 rows, status labels, page ranges and footer legible with no overlap or clipping. All remaining pages match prior reviewed source renders pixel-for-pixel.",
+  "sharedGuideSystemChecks": "passed: 25 registry entries, 5 reference placements",
+  "scopedWhitespaceCheck": "passed",
+  "limitations": "No application changes or tests, physical print or first-time-user trial."
+}

@@ -1,5 +1,35 @@
 # Operator Guide Maintenance And Change Impact
 
+## Accepted Guide Snapshot - 2026-09-10
+
+[accepted-guides-v1](../../../resources/manuals/operator-guides/accepted-guides-v1/README.md)
+preserves all 16 latest known accepted versions, seven historical accepted
+PDFs, editable sources and portable verification/regeneration scripts.
+Its manifest records exact versions and acceptance evidence. Regeneration
+writes only to a separate proof directory; revisions must exceed all known
+version numbers, including unaccepted proposals. Preserve this package and
+create a later package only after recording the next exact acceptance.
+
+## Owner Clearance For User Review - 2026-09-10
+
+The owner cleared the ten current changed versions in the v5 pair for review
+by other users. They are now Internal review candidates; the exact PDFs stay
+unchanged. Use the [dated clearance and hashes](reviews/owner-review-readiness-2026-09-10.md)
+and current-guide-selection-v4.json for current status. Earlier four exact
+acceptances remain; the separate prototype is outside this clearance.
+Other-user feedback and third-party approval are still pending. Earlier
+generation-time draft/pending wording below is historical for these versions.
+
+The [all-guide focused comparison](reviews/guide-set-comparison-2026-09-08.md)
+is a separate candidate set. Preserve older renderers and retained PDFs. The
+new runner writes to ignored output; `retain-guide-followups.py` freezes an
+exact reviewed build and refuses replacements. Do not rerun retention over
+existing artifacts to make a correction: use a later version after delivery.
+
+Keep local fit repairs auditable. This round preserves page and image counts,
+and records source/crop replacements and AST-03/05 padding repairs separately.
+An unchanged screenshot count does not prove identical content or legibility.
+
 Status: authoritative workflow for changing one guide, a family, or the whole
 guide set after testing or stakeholder feedback.
 
@@ -41,6 +71,11 @@ Any visible, instructional, behavioral, evidence, or review-status change to a
 generated guide creates a new integer version. Do not overwrite an internally
 accepted or third-party-approved artifact.
 
+Recording an owner decision about an unchanged existing PDF does not regenerate
+or renumber that PDF. Record the exact version/hash, reviewer and date in the
+review ledger and current selection. A changed printed review label or other
+visible PDF change does require a new integer version.
+
 Examples:
 
 - changing a focus circle in SC-01 v10 produces an SC-01 v11 draft;
@@ -50,6 +85,39 @@ Examples:
   versions when the printed pixels change;
 - correcting only an internal path or non-rendered comment does not require a
   guide version change, but the tooling change is logged.
+
+## Frozen Review Rounds
+
+At the owner's request, the [2026-09-08 baseline](reviews/baseline-2026-09-08.md)
+separates the existing guide work from the
+[new-model audit revision round](reviews/audit-revision-round-2026-09-08.md).
+Preserve checkpoint PDFs, source archive, manifest, and acceptance states.
+This includes the current unaccepted drafts; they are comparison points, not
+new approvals. Later candidates always receive a new unused integer version.
+
+Every candidate identifies its round, frozen comparison version, accepted
+predecessor if any, exact changes, benefits, drawbacks, and review decision.
+Keep a visible round separator in review indexes and combined review packages.
+Do not modify an existing PDF to add that separator. Keep model provenance in
+review documentation rather than operator task instructions.
+
+The audit does not supersede accepted policy. A proposed revision may be
+accepted, rejected, or returned for changes independently of other proposals.
+Retain rejected candidates and their version numbers. Restore only affected
+source or active-selection references after comparison; do not reset the whole
+working tree or overwrite unrelated changes to undo a guide proposal.
+
+## Preserve Instructional Support During Audit Revisions
+
+The owner [rejected the first audit pilot direction](reviews/2026-09-08-pilot-direction-feedback.md).
+Start later revisions from the frozen baseline and repair one identified
+problem at a time. Before generation, inventory the baseline's steps,
+screenshots and recognition purposes, captions, hints, help, completion, and
+handoffs. Account for each in the comparison; do not remove useful support or
+shrink screen context to achieve a preferred font size, grid, or white space.
+Use available page width and preserve task-dependent layouts and page models.
+Record any necessary tradeoff explicitly. Geometry checks do not establish
+instructional completeness or first-time-user usability.
 
 ## Change Workflow
 
@@ -124,3 +192,14 @@ changes through canonical evidence IDs. If the controlled capture environment
 does not match the intended release UI, affected guides remain working drafts
 until representative evidence is available or the difference is explicitly
 accepted.
+
+
+## Frozen Owner Corrections - 2026-09-10
+
+Use the final current-guide-selection-v3.json with the plain v4 comparison
+pair. The eight primary corrections and two dependent USR reference versions
+are unaccepted. The v3 bundle pair remains an intermediate preserved assembly.
+Do not reuse an integer after delivery or freeze. The generator refuses to
+replace retained candidates; reproduce archived inputs in a separate workspace,
+and create the next integer for visible changes. Restore prior selections by
+exact path and hash, without deleting newer versions.

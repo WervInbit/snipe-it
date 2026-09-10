@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "round": "2026-09-08",
+  "statusDefinition": "Audit comparison proposals; no baseline selection or acceptance changed",
+  "artifacts": [
+    {
+      "code": "WF-01",
+      "title": "Workflow starten",
+      "version": 11,
+      "pages": 1,
+      "status": "Unaccepted working draft",
+      "baselineVersion": 10,
+      "acceptedPredecessorVersion": 9,
+      "file": "WF-01-workflow-starten-v11-draft.pdf",
+      "sha256": "32c8abcc9a834847aaf6f7264fd20580773698df6637eca888918446126be1c0"
+    },
+    {
+      "code": "USR-04",
+      "title": "Gebruiker uitschakelen of herstellen",
+      "version": 4,
+      "pages": 3,
+      "status": "Unaccepted working draft",
+      "baselineVersion": 3,
+      "acceptedPredecessorVersion": null,
+      "file": "USR-04-gebruiker-uitschakelen-of-herstellen-v4-draft.pdf",
+      "sha256": "15370c2dba3db9631292aa4b5e1bd9de75c2000bbf8281c7159e3817e6c59cec"
+    },
+    {
+      "code": "CAT-04",
+      "title": "Componentdefinities beheren",
+      "version": 3,
+      "pages": 6,
+      "status": "Unaccepted working draft",
+      "baselineVersion": 2,
+      "acceptedPredecessorVersion": null,
+      "file": "CAT-04-componentdefinities-beheren-v3-draft.pdf",
+      "sha256": "3b1d399440dade1107087fc8437c97d8b744687a1ff3a0b6500c3b056ae705af"
+    }
+  ],
+  "comparison": {
+    "file": "Handleidingen-vergelijking-auditronde-2026-09-08.pdf",
+    "pages": 24,
+    "sha256": "08cdd48d52934ebfdd0824652a38be92b0db7a2e3d61858347a393f2abfd3828",
+    "newRoundDividerPage": 12,
+    "acceptedWf01Page": 24,
+    "comparisonPages": [
+      {
+        "code": "WF-01",
+        "oldPage": 3,
+        "oldPages": 1,
+        "newPage": 13,
+        "pages": 1
+      },
+      {
+        "code": "USR-04",
+        "oldPage": 4,
+        "oldPages": 2,
+        "newPage": 14,
+        "pages": 3
+      },
+      {
+        "code": "CAT-04",
+        "oldPage": 6,
+        "oldPages": 6,
+        "newPage": 17,
+        "pages": 6
+      }
+    ]
+  },
+  "sourceSnapshot": {
+    "file": "pilot-source-inputs.zip",
+    "sha256": "52e5828c0408243cc5e7293d152e5f63275f089fec581426356d9da21f4e8939",
+    "files": [
+      {
+        "path": "scripts/manuals/generate-audit-pilot-review.mjs",
+        "sha256": "090723dd06d077049f8d43f6068fffc45e9f9dbd03fdb1f8f221f3865af4a2e7"
+      },
+      {
+        "path": "scripts/manuals/build-audit-pilot-comparison.py",
+        "sha256": "f088dbb31c6241556f30d8a6f1f0922bfc997f3cb3fb6c1c770c01f776f5f60a"
+      },
+      {
+        "path": "scripts/manuals/lib/guide-system.mjs",
+        "sha256": "08a5b279b8516316a0f4aeeb42782e121aaa2ed14b86b2b3135758e28c4d7b67"
+      },
+      {
+        "path": "scripts/manuals/lib/guide-paths.mjs",
+        "sha256": "634b1c0c2944afb1c93b5b5dd9b9fe97f5d7dac96303581a69b51636949a7521"
+      },
+      {
+        "path": "scripts/manuals/package.json",
+        "sha256": "80a13d4dc9885a7c9466fdf7aa7bcdacafcbfa89739621f2c88638c968630e50"
+      },
+      {
+        "path": "scripts/manuals/package-lock.json",
+        "sha256": "21bc985559a9540548c11840bed9c7e30f0157528fd778363775ebe9004a34a7"
+      },
+      {
+        "path": "docs/manuals/operator-guides/reviews/audit-pilot-2026-09-08-specification.md",
+        "sha256": "3a0fbac14c69c683bcba9983b0ffd9a6ec5ae0d85d2d85a4b86789b4a1bb7a4a"
+      }
+    ],
+    "evidenceCheckpoint": "2026-09-08-before-audit-revisions/source-inputs.zip"
+  }
+}

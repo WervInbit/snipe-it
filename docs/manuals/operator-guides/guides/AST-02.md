@@ -1,14 +1,21 @@
 # AST-02 Refurbishment Route
 
+## Latest Correction Candidate - 2026-09-10
+
+Current review candidate: [v8](../reviews/AST-02-v8.md), owner-cleared for user review.
+Styled all alternative and return references with family color, marker, code and full title.
+This current correction takes precedence over conflicting historical version
+notes below. Previous PDFs and exact acceptance records remain unchanged.
+
 | Field | Current value |
 | --- | --- |
-| Status | Working draft; v5 remains an internal review candidate for V1 |
+| Status | Internal review candidate v8; owner cleared for user review 2026-09-10 |
 | Family | AST |
 | Type | Route overview |
-| Current version | `AST-02-refurbishment-route-v6-draft` |
+| Current version | `AST-02-refurbishment-route-v8-draft` |
 | Page model | One page |
 | Layout recipe | `route-list` with `help-alternative` |
-| Generator | `scripts/manuals/generate-revised-guide-set.mjs` |
+| Generator | `scripts/manuals/generate-owner-corrections.mjs AST-02` |
 | Role | Refurbisher |
 | Needed | Device, account, and the task guides referenced by the route |
 
@@ -48,3 +55,19 @@ All active guides except HELP-01 may appear as route references. HELP-01 remains
 
 - v6 removes the senior-refurbisher role from this general refurbishment
   route. The route content and accepted compact-list layout remain unchanged.
+
+## Focused Candidate - 2026-09-08
+
+The separate [v7 review](../reviews/AST-02-v7.md)
+records the focused follow-up to baseline v6, with the exact
+PDF and checksum. The owner requested this pass across all existing guides
+after reviewing WF-01 v12 positively. Earlier selections and their policies
+remain traceable; this candidate is not automatically accepted. See the
+[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
+source/crop exceptions, and remaining operational or evidence gaps.
+
+## Owner Feedback Follow-Up - 2026-09-10
+
+MR-02: v7 alternative/return routes need complete family-styled guide references.
+See [owner review TODOs](../reviews/owner-review-todos-2026-09-10.md).
+The existing PDF is unchanged; these are next-version or decision items.

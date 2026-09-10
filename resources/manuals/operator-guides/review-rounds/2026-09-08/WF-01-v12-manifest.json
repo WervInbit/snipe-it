@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "round": "2026-09-08",
+  "artifact": {
+    "code": "WF-01",
+    "version": 12,
+    "status": "Unaccepted working draft",
+    "file": "WF-01-workflow-starten-v12-draft.pdf",
+    "pages": 1,
+    "bytes": 207244,
+    "sha256": "8d4429511ebebae73f319978d96b904001d0f609b78052618ba9850cd82c8006",
+    "baselineVersion": 10,
+    "acceptedPredecessorVersion": 9,
+    "rejectedPredecessorVersion": 11
+  },
+  "validation": {
+    "file": "WF-01-v12-validation.json",
+    "sha256": "0daf6ae826cfd45f280567072c62d6aa806b6e5102a809e9e204d1e8107666c7"
+  },
+  "sourceSnapshot": {
+    "file": "WF-01-v12-source-inputs.zip",
+    "sha256": "f91f3dc92d66c19fe4800d978aaa228fa3d05947105164f0a0ab03316ceb9498",
+    "files": [
+      {
+        "path": "scripts/manuals/generate-wf01-v12.mjs",
+        "sha256": "11b21ca2e613953ea201a626bbf07657cc69243a097f40b176e125e6983fcefc",
+        "bytes": 7336
+      },
+      {
+        "path": "scripts/manuals/generate-workflow-guide-review.mjs",
+        "sha256": "21a28333a30a5c93474679e14b868b8442f21d20f7f118b7cef8424813536413",
+        "bytes": 33488
+      },
+      {
+        "path": "scripts/manuals/lib/guide-paths.mjs",
+        "sha256": "634b1c0c2944afb1c93b5b5dd9b9fe97f5d7dac96303581a69b51636949a7521",
+        "bytes": 6093
+      },
+      {
+        "path": "scripts/manuals/package.json",
+        "sha256": "80a13d4dc9885a7c9466fdf7aa7bcdacafcbfa89739621f2c88638c968630e50",
+        "bytes": 251
+      },
+      {
+        "path": "scripts/manuals/package-lock.json",
+        "sha256": "21bc985559a9540548c11840bed9c7e30f0157528fd778363775ebe9004a34a7",
+        "bytes": 20880
+      },
+      {
+        "path": "docs/manuals/operator-guides/reviews/WF-01-v12.md",
+        "sha256": "3d531cc7a5d206201389802ac0b9f3efd659d34fcdca45798c1a9b4f440d5384",
+        "bytes": 3365
+      },
+      {
+        "path": "output/manuals/proofs/WF-01-v12/WF-01-workflow-starten-v12-draft.html",
+        "sha256": "cdabcf4021e3cabad9782d8a8775ced87321fb63b14a60982153856e66e96d46",
+        "bytes": 312072
+      },
+      {
+        "path": "output/manuals/proofs/WF-01-v12/check_v12.py",
+        "sha256": "50aeab450b45424919456652dcd1d4d333c5e5d6e619ab96db5bb5085dd2ecd6",
+        "bytes": 3077
+      }
+    ],
+    "evidenceCheckpoint": "../../checkpoints/2026-09-08-before-audit-revisions/source-inputs.zip"
+  },
+  "decisionRecord": "../../../../../docs/manuals/operator-guides/reviews/WF-01-v12.md",
+  "baselineSelectionChanged": false
+}

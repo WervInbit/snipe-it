@@ -1,0 +1,119 @@
+{
+  "status": "passed",
+  "dpi": 96,
+  "guides": [
+    {
+      "code": "AC-01",
+      "version": 9,
+      "pages": 1,
+      "pixelIdenticalPages": 1,
+      "differences": []
+    },
+    {
+      "code": "AC-02",
+      "version": 4,
+      "pages": 1,
+      "pixelIdenticalPages": 1,
+      "differences": []
+    },
+    {
+      "code": "SC-01",
+      "version": 12,
+      "pages": 1,
+      "pixelIdenticalPages": 1,
+      "differences": []
+    },
+    {
+      "code": "AST-02",
+      "version": 8,
+      "pages": 1,
+      "pixelIdenticalPages": 1,
+      "differences": []
+    },
+    {
+      "code": "AST-03",
+      "version": 15,
+      "pages": 2,
+      "pixelIdenticalPages": 2,
+      "differences": []
+    },
+    {
+      "code": "AST-04",
+      "version": 6,
+      "pages": 1,
+      "pixelIdenticalPages": 1,
+      "differences": []
+    },
+    {
+      "code": "WF-01",
+      "version": 13,
+      "pages": 1,
+      "pixelIdenticalPages": 1,
+      "differences": []
+    },
+    {
+      "code": "WF-02",
+      "version": 10,
+      "pages": 2,
+      "pixelIdenticalPages": 2,
+      "differences": []
+    },
+    {
+      "code": "CMP-01",
+      "version": 4,
+      "pages": 1,
+      "pixelIdenticalPages": 1,
+      "differences": []
+    },
+    {
+      "code": "CMP-02",
+      "version": 6,
+      "pages": 1,
+      "pixelIdenticalPages": 1,
+      "differences": []
+    },
+    {
+      "code": "CMP-04",
+      "version": 7,
+      "pages": 1,
+      "pixelIdenticalPages": 1,
+      "differences": []
+    },
+    {
+      "code": "USR-01",
+      "version": 13,
+      "pages": 1,
+      "pixelIdenticalPages": 1,
+      "differences": []
+    },
+    {
+      "code": "USR-02",
+      "version": 11,
+      "pages": 1,
+      "pixelIdenticalPages": 1,
+      "differences": []
+    },
+    {
+      "code": "USR-04",
+      "version": 6,
+      "pages": 1,
+      "pixelIdenticalPages": 1,
+      "differences": []
+    },
+    {
+      "code": "CAT-00",
+      "version": 11,
+      "pages": 6,
+      "pixelIdenticalPages": 6,
+      "differences": []
+    },
+    {
+      "code": "CAT-01",
+      "version": 7,
+      "pages": 5,
+      "pixelIdenticalPages": 5,
+      "differences": []
+    }
+  ],
+  "pixelIdenticalPages": 27
+}

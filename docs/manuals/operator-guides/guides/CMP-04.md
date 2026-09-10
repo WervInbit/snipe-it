@@ -1,14 +1,21 @@
 # CMP-04 Component Naar Tray Verplaatsen
 
+## Latest Correction Candidate - 2026-09-10
+
+Current review candidate: [v7](../reviews/CMP-04-v7.md), owner-cleared for user review.
+Replaced the incomplete 1B control crop with the complete Naar tray control from existing controlled evidence.
+This current correction takes precedence over conflicting historical version
+notes below. Previous PDFs and exact acceptance records remain unchanged.
+
 | Field | Current value |
 | --- | --- |
-| Status | Working draft v6; cold-start pass and awaiting exact-version review |
+| Status | Internal review candidate v7; owner cleared for user review 2026-09-10 |
 | Family | CMP |
 | Type | Detail task |
-| Current version | `CMP-04-component-to-tray-v6-draft` |
+| Current version | `CMP-04-component-to-tray-v7-draft` |
 | Page model | One page |
 | Layout recipe | `stacked-step-flow` with `single-visual`, `reused-evidence`, and `inline-stop` |
-| Generator | `scripts/manuals/generate-component-followup-guides.mjs` |
+| Generator | `scripts/manuals/generate-owner-corrections.mjs CMP-04` |
 | Role | Senior Refurbisher |
 | Needed | Correct open asset, identified physical component, intended tray/storage destination |
 | Prerequisite | Asset verified (SC-01) |
@@ -57,3 +64,9 @@ The physical component is in the intended tray/storage, is no longer listed on t
 - CMP-02 Nieuw component registreren en plaatsen
 - WF-02 Workflow uitvoeren en afronden
 - HELP-01 Problemen en hulp
+
+## Owner Feedback Follow-Up - 2026-09-10
+
+MR-05: v6 was unchanged in the prior pass, but image 1B clips the Naar tray control. Expand the crop in a new version.
+See [owner review TODOs](../reviews/owner-review-todos-2026-09-10.md).
+The existing PDF is unchanged; these are next-version or decision items.

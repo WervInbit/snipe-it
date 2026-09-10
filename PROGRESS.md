@@ -1,4 +1,280 @@
-# Session Progress (2026-09-03)
+# Session Progress (2026-09-10)
+
+## Manuals Commit Preparation - 2026-09-10
+
+- Reviewing the manuals-only commit scope: guides, accepted package, review
+  decisions, historical comparison/rollback snapshots, generators and related
+  documentation. Keep unrelated production tests and identifier/preflight
+  progress notes outside this commit; preserve their working-tree changes.
+- Temporary output, regenerated proofs and installed dependencies stay ignored.
+  Explicitly retain the accepted kit's ten frozen source HTML files that the
+  generic output ignore rule would otherwise omit. Preserve checksummed review
+  record bytes across Git checkouts with scoped attributes.
+- Checks passed: 18 new-script syntax checks, shared guide-system checks,
+  all 369 kit inventory hashes, 483 staged resource files with exact bytes,
+  five source ZIP integrity scans and 619 links in staged documentation.
+  Staged whitespace passes; frozen snapshots retain original whitespace.
+- The full legacy npm test remains blocked by three already-tracked PDFs
+  absent from the historical draft manifest: CAT-00 v7/v8 and CAT-01 v4.
+  Preserve them and record the limitation; no application tests or PDF
+  regeneration were needed for this commit. Repaired the split TODO item.
+- Prepared one manuals-only commit with 589 files; eight unrelated sections
+  in the two shared logs and the production test remain outside its scope.
+
+## Accepted Guide Package - 2026-09-10
+
+- Created [accepted-guides-v1](resources/manuals/operator-guides/accepted-guides-v1/README.md):
+  16 latest recorded accepted guides / 27 pages, seven older accepted PDFs,
+  self-contained HTML, source screenshots/generators/rules and portable scripts.
+  The exact selection retains WF-02 v10 and CMP-01 v4; their newer drafts
+  lack acceptance. No guide content, filenames or acceptance status changed.
+- Relocated the kit to a path with spaces and regenerated all 16 guides.
+  All 27 pages are pixel-identical to their originals at 96 dpi. Inspected
+  WF-02's two pages, CMP-01 and SC-01; no regeneration differences found.
+  Existing-run, known-version and accepted-input write guards passed.
+- Preserved all original accepted PDF hashes and recorded validation reports.
+  Final package integrity and focused documentation checks are recorded in
+  the kit's VALIDATION.md. Application tests, physical print and novice-user
+  trials were not run; this task only assembles the accepted review snapshot.
+
+## Owner Clearance For User Review - 2026-09-10
+
+- Owner cleared the ten exact new versions in the v5 changed-guide PDF for
+  review by other users. Recorded Internal review candidate status and the
+  exact hashes in a new decision and current selection v4; prior manifests stay.
+- Updated ten reviews/specifications, registry and five runtime status entries.
+  Four earlier acceptances remain; user feedback and third-party approval are
+  pending. The separate catalogue prototype is outside this clearance.
+- No PDF regeneration, renaming, distribution, application or data changes.
+- Validation passed: all 277 prior PDF/archive/manifest files unchanged,
+  607 local links valid, shared guide checks passed (25 entries, 5 placements),
+  and scoped whitespace clean. No application or new user tests were run.
+- [Decision and exact versions](docs/manuals/operator-guides/reviews/owner-review-readiness-2026-09-10.md).
+
+
+## Changed-Guide Comparison - 2026-09-10
+
+- Owner requested only the changed guides. Assemble the plain v5 pair from
+  existing exact PDFs: ten guides, previous 20 pages / new 19 pages, same
+  guide order. Preserve all previous individual and combined versions.
+- No guide content, application state or acceptance changes.
+- Completed: all 39 merged pages match their individual PDFs pixel-for-pixel
+  at 96 dpi; page streams, boxes, hashes, count and order verified. Sample
+  rendered pages inspected; scoped whitespace passed. No application tests
+  needed for this PDF-only assembly.
+
+## Owner Manual Corrections Implementation
+
+- Completed ten versioned candidates: SC-01 v12, AST-02 v8, WF-01 v13,
+  CMP-02 v6, CMP-04 v7, USR-04 v6, CAT-00 v11, CAT-01 v7, USR-01 v13
+  and USR-02 v11. The last two align their reference with USR-04's new scope.
+- Fixed marked badges, targets, crop, references, quantities and routes;
+  retained established layouts and help. USR-04 is a one-page disable-login
+  task. USR-04 v5 remains explicitly not accepted. All four exact accepted
+  PDFs, including AST-04 v6, are unchanged.
+- Delivered plain v4 previous/current PDFs: same 22-guide order, 48/47 pages.
+  V3 remains an intermediate assembly before the dependent reference fixes.
+  Previous means the immediately preceding reviewed set (v2-huidig).
+- Added a separate two-page catalogue field-to-result prototype and a desk
+  dependency audit of all 22 guides. Prototype asset endpoints are schematic;
+  matched live evidence, its guide placement and a novice trial remain open.
+- Future QA preference is Testing completed, without another Awaiting approval
+  state. No application code, status labels or live data changed.
+- [Implementation, PDFs and remaining decisions](docs/manuals/operator-guides/reviews/owner-corrections-2026-09-10.md).
+- Checks passed: 19 revised guide pages and two prototype pages visually
+  reviewed; focused geometry/reference/scope assertions; all 95 merged pages
+  pixel-identical to source at 96 dpi. Preserved 22 previous selected hashes,
+  29 original/checkpoint PDFs, 25 earlier round PDFs and prior archives/bundles.
+  New source snapshot verifies 327 files. Shared guide checks passed (25
+  entries, 5 placements), as did 575 local links and scoped whitespace.
+- No application tests, physical print or first-time-reader trial. Remaining
+  live QA rules, planned guides, account lifecycle tasks and interrupted-form
+  exercises are recorded in the linked review and TODOs.
+
+## Owner Manual Review And Follow-Up Plan
+- Recorded all owner notes in [review TODOs](docs/manuals/operator-guides/reviews/owner-review-todos-2026-09-10.md).
+  Confirmed the reported visual defects on eleven relevant PDF pages, retained
+  prior exact acceptances, and marked USR-04 v5 explicitly not accepted.
+- Separated seven local fixes from USR lifecycle scope, QA completion/blockage,
+  CAT quantities/deviation wording, and the larger field-to-result/learning-order work.
+- Read-only application checks: asset check-in/checkout retirement differs from
+  still-present licence/accessory routes; user deletion still checks relationships.
+  QA Hold seed meaning differs from the guide's completed-work handoff meaning.
+- No new PDFs, renderer changes, application changes or data mutations. This
+  pass records implementation/decision TODOs; it does not implement those fixes.
+- Validation: all 22 current individual PDFs and four copies of the plain
+  comparison pair retain their hashes; 496 local links across 144 Markdown
+  files and scoped whitespace checks pass. No application tests were needed.
+
+## Plain Previous And Current Guide PDFs
+- Owner clarified the requested comparison: two long PDFs containing the
+  previous and current guide versions as-is, without extra navigation or pages.
+- Created the versioned v2 previous/current pair, each with all 22 guides / 48
+  original pages in matching order. The previous set uses the frozen pre-audit
+  selection; the current set uses the latest exact versions. Preserved v1 history.
+- See [plain comparison pair](docs/manuals/operator-guides/reviews/current-set-review-2026-09-10.md).
+- Validation passed: all 96 merged pages are pixel-identical to their source
+  pages at 96 dpi; page streams, sizes, order and guide boundaries match.
+  No pages or bookmarks added. First pages visually inspected; whitespace clean.
+
+## Manual Acceptance And Combined Review PDF
+- Session initialized from AGENTS.md, progress, fork notes, and manual records.
+- Record owner acceptance of AC-01 v9, AC-02 v4, AST-03 v15, and AST-04 v6;
+  combine the current 22 guides for scrolling review without changing their pages.
+- See [session addendum](docs/agents/agents-addendum-2026-09-10-session-init.md).
+- Completed: [reviewbundel v1 and exact decisions](docs/manuals/operator-guides/reviews/current-set-review-2026-09-10.md)
+  contains all 22 current guides / 48 unchanged content pages plus clickable contents.
+  Recorded owner acceptance against the existing hashes of the four named versions;
+  advanced their live registry/specification records and two runtime status fields.
+- Validation: all 48 merged guide pages are pixel-identical at 96 dpi; content
+  streams/page boxes, 22 contents links and 23 bookmarks checked. Contents PNG
+  visually inspected. Verified 29 original/checkpoint PDFs, 25 prior review-round
+  PDFs and frozen source archives. Shared-guide checks and scoped whitespace pass.
+- No application changes, deployment, application test suite, physical print,
+  or first-time-user trial. Earlier PDFs/manifests/source ZIPs remain preserved.
+
+# Session Progress (2026-09-08)
+
+## Addendum (2026-09-08 Guide Set Focused Revisions)
+- Owner judged WF-01 v12 suitable and explicitly requested the same approach
+  for all existing guides. Inspect every existing guide; preserve task layouts,
+  screenshots, captions, hints, help, and numbered version filenames.
+- Apply local choice, missing-action, consistency, and evidence corrections
+  in new versions. Keep historical PDFs and rejected proposals intact; avoid
+  broad restyling or silently replacing accepted operational policies.
+- Work in progress, starting with USR-04 and CAT-04, followed by the remaining
+  generated guides. Planned-only USR-05/CAT-05/CAT-06 are dependency checks.
+
+## Addendum (2026-09-08 WF-01 v12 Generation)
+- Generated the owner-requested `WF-01-workflow-starten-v12-draft.pdf` from
+  v10 with only a local step-3 choice frame/introduction and updated version/date.
+  Preserved all five screenshots at identical dimensions, every original text
+  line, all four help items, the two-column layout, and existing artifacts.
+- The v10 reproduction matches the frozen raster pixel for pixel. V12 changes
+  no pixels outside step 3 and version/date areas at 144 dpi. Full-page visual
+  inspection, A4/text/geometry/overlap checks, and shared guide tests pass.
+- Retained the one-page PDF (207,244 bytes), separate v12 checksum manifest,
+  validation, and an eight-file source snapshot in the existing review round.
+  The four earlier pilot/comparison PDF hashes remain unchanged. No accepted
+  or selected version was replaced; v12 awaits exact owner review. Review:
+  `docs/manuals/operator-guides/reviews/WF-01-v12.md`.
+- The complete manifest-only package verifier passes with 18 active scripts;
+  the earlier actual-root unlisted-draft issue is unchanged. No application
+  tests, live capture, physical-print pass, or observed-user pass are claimed.
+  Unrelated identifier/application changes in the shared workspace were preserved.
+
+## Addendum (2026-09-08 WF-01 v12 Naming)
+- Owner explicitly assigned the next revision v12 and requested consistent
+  versioned filenames. Recorded `WF-01-workflow-starten-v12-draft.pdf` and
+  `WF-01-v12.md` in the feedback, ledger, handoff, guide notes, and TODO.
+- Continue the v11 filename stem and increment the version for future changes;
+  do not add competing descriptive suffixes or rename historical artifacts.
+  V12 remains planned; no PDF was generated or existing artifact changed.
+
+## Addendum (2026-09-08 Pilot Direction Rejected)
+- Owner rejected the first audit pilot design direction, citing changed WF-01
+  step meanings, lost screenshots, missing hints/help, and excessive unused
+  page width. Only the clearer two-choice block was explicitly preferred.
+- Compared WF-01 v10 and v11 renders and recorded the exact regressions.
+  Updated candidate decisions, continuation notes, and shared maintenance
+  guidance to preserve baseline instructional support during focused repairs.
+- Recommended the next proof start from WF-01 v10, retaining 2A selection,
+  3A start, all five visuals, and all four bottom help items, with a local
+  step-3 choice improvement. No new PDF or generator change in this turn.
+- Feedback: `docs/manuals/operator-guides/reviews/2026-09-08-pilot-direction-feedback.md`.
+  Existing acceptance, selected versions, checkpoint and rejected PDFs remain
+  unchanged. Factual audit findings remain open for separate local corrections.
+- Validation: 29 baseline/original PDF hash pairs, 245 archived source files,
+  241 local links and all four retained pilot/comparison PDF hashes pass;
+  original generators/evidence/manifests are unchanged. Scoped whitespace
+  checks pass. No application tests were needed for these review-note changes.
+
+## Addendum (2026-09-08 Audit Pilot Generation)
+- Generated owner-requested WF-01 v11 (one page), USR-04 v4 (three pages),
+  and CAT-04 v3 (six pages) as separate unaccepted audit-round proposals.
+- Assembled a 24-page comparison PDF with frozen earlier drafts, a visible
+  new-round divider on page 12, the ten new pages, and accepted WF-01 v9 as
+  an appendix. Saved four PDFs, checksums, validation and source snapshots in
+  `resources/manuals/operator-guides/review-rounds/2026-09-08`.
+- WF-01 tests checking existing runs before choosing a start/continue route.
+  USR-04 tests three independent lifecycle routes and corrects restore-state
+  assumptions. CAT-04 names both Add actions, uses corrected control captures,
+  and replaces the simulated Enum warning with a labeled numeric explanation.
+- Each version has its own review record with changes, benefits, drawbacks,
+  evidence limits and rejection/recovery instructions. Prior selections and
+  acceptance remain unchanged; no shared tokens or historical generator changed.
+- Pilot specification:
+  `docs/manuals/operator-guides/reviews/audit-pilot-2026-09-08-specification.md`.
+  Historical PDFs, existing acceptance, and global generator behavior remain
+  protected by the frozen checkpoint.
+- Validation: all ten new pages and four divider/index pages rendered and
+  inspected; A4/text/page/component/focus/overlap checks pass. New comparison
+  pages match standalone rasters, prior draft page streams are retained, and
+  all 29 frozen/original PDF hash pairs still match. Representative instruction
+  sizes are 8.78/9.07/9.21 pt; no physical-print or observed-user pass is claimed.
+- No application or production operation was performed by this manual work.
+  Separate tag-generation model/service/view/migration/test edits appeared in
+  the shared workspace during generation and were left untouched.
+- Shared guide checks, 223 local links, scoped whitespace checks and all four
+  retained output hashes pass. The complete manifest-only package verifier
+  passes with 17 active scripts. The actual draft root still contains the
+  three previously recorded unlisted historical PDFs; this pilot does not
+  claim to have resolved that packaging issue.
+
+## Addendum (2026-09-08 Guide Review Round Boundary)
+- At the owner's request, froze the existing manual set before any new-model
+  audit revisions: 9 internally accepted PDFs and 20 unaccepted drafts, exact
+  versions/statuses/checksums, and 245 supporting source/evidence files in a
+  separate archive. Existing PDFs and acceptance records remain unchanged.
+- Added a visible separator to the guide index, a frozen comparison index,
+  and a separate audit candidate/decision ledger. Recorded that audit proposals
+  may be rejected and cannot silently supersede accepted policy or content.
+- Documented new-version review, per-change benefits/drawbacks, comparison
+  against both the current draft and accepted predecessor, and selective
+  recovery. No guide correction, generation, or application change was made.
+- Checkpoint: `docs/manuals/operator-guides/reviews/baseline-2026-09-08.md`.
+  New round: `docs/manuals/operator-guides/reviews/audit-revision-round-2026-09-08.md`.
+- Validation: all 29 frozen/original PDF hash pairs and all 245 archived source
+  files match; archive integrity and 187 local links pass. Original generators,
+  evidence, and manifests are unchanged. Shared guide-system checks and
+  `git diff --check` pass. The earlier actual-root package warning about three
+  unlisted historical drafts remains; no application tests were needed.
+
+## Addendum (2026-09-08 Independent Manuals Audit)
+- Completed the owner-requested audit of all 22 current generated guides /
+  48 A4 pages, shared guide rules, planned dependencies, and targeted local
+  application behavior. Recorded 22 prioritized findings with exact versions,
+  page/step evidence, user impact, and proposed corrections.
+- Key findings include Admin/Superadmin group-assignment mismatch, changing
+  user identities in screenshots, sequential delete/restore instructions,
+  conflicting Product ID guidance, a simulated hierarchy warning outside the
+  real numeric warning conditions, and incomplete workflow routing/readiness.
+- Measured important PDF instruction text at approximately 5-7 pt; inspected
+  rendered pages for instruction/image overlap and evidence consistency.
+- Shared component checks pass. All 29 manifest PDF hashes and page counts
+  match. The strict actual-root package verifier fails on three unlisted
+  historical drafts; a fresh manifest-only draft mirror passes the complete
+  103-evidence / 9-accepted / 20-draft / 2-baseline / 16-script verifier.
+- No guides, policies, application records, or acceptance states changed.
+  No production access or application tests; physical print and observed-user
+  validation remain outside this inspection's evidence.
+- Report and exact evidence:
+  `docs/manuals/operator-guides/reviews/2026-09-08-independent-usability-audit.md`
+  and `docs/manuals/operator-guides/reviews/2026-09-08-audit-evidence.json`.
+
+## Addendum (2026-09-08 Manuals Session Initialization)
+- Initialized from AGENTS.md, recent progress and fork notes, contributor
+  guidance, and the operator-guide README, handoff, registry, decision log,
+  CAT family plan, TODO, and form-control evidence recapture record.
+- The working tree was clean before initialization. Current CAT drafts are
+  CAT-00 v9, CAT-01 v5, CAT-02 v1, CAT-03 v1, and CAT-04 v2; all remain
+  unaccepted. Nine accepted PDFs remain frozen at their exact versions.
+- Pending follow-up: regenerate CAT-03, CAT-04, and CMP-02 using the 11
+  replacement form-control captures and remeasure focus marks before review.
+  CAT-05 is the next new CAT guide; CAT-06 needs a source-recording decision.
+- Session initialization only; no guide generation or application tests were
+  needed. Documentation whitespace validation passed. No production access.
+- Session notes: `docs/agents/agents-addendum-2026-09-08-session-init.md`.
 
 ## Addendum (2026-09-03 CAT-02 v1 Modelspecificatie)
 - Reworked the stale CAT-02 specification into a six-page Supervisor workflow
@@ -4729,3 +5005,30 @@ there are multiple duplicate functions that still need to be removed, sku will b
 - Final validation passed: all 103 manifest hashes match, the exact-manifest
   guide package verifier reports `status: ok`, and the verifier script passes
   Node syntax and `git diff --check` checks.
+
+## Addendum (2026-09-08 All-Guide Focused Candidates)
+- Owner confirmed all existing guides after reviewing WF-01 v12 positively.
+- Generated 20 new PDFs / 46 pages. Retained WF-01 v12 and CMP-04 v6: all
+  22 current guides / 48 pages covered. Earlier accepted, draft and rejected
+  PDFs, selected manifests, and historical renderers remain unchanged.
+- Kept all 122 raster placements in the revised subset and the help headings.
+  Applied local route, role, save/check, handoff, terminology, and reference
+  fixes. Logged explicit crop/evidence and AST-03/05 spacing exceptions.
+- Comparison and exact-version records:
+  docs/manuals/operator-guides/reviews/guide-set-comparison-2026-09-08.md
+- No application code, migration, database, production, acceptance, or
+  deployment change. A read-only dev account inspection made no data changes.
+- Physical A4/user tracing and owner decisions remain pending. Predictable
+  initial-password policy, operational locations/profile sets, source storage,
+  and missing continuous/numeric-warning evidence remain explicitly open.
+
+- Final checks passed: all 20 new PDF hashes match retained copies; all 25
+  review-round PDF hashes (including rejected pilots and WF-01 v12) verified.
+  The new 259-file source ZIP passed integrity checks. All 29 earlier PDF
+  hashes and the 245-file baseline ZIP remain unchanged; 431 local links pass.
+- Shared guide-system checks passed (25 registry entries, 5 reference placements).
+  The selected baseline package passes using the manifest-only draft mirror
+  (103 evidence, 9 accepted PDFs, 20 drafts, 2 baselines). The actual draft
+  folder retains the three previously documented unlisted historical PDFs.
+- Scoped whitespace checks passed. The application test suite was not run
+  because no application code changed. No commit, push, or deployment.

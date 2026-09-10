@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "clearedGuides": 10,
+  "clearedGuidePages": 19,
+  "totalCurrentOwnerClearedVersions": 14,
+  "preservedPdfArchiveAndManifestFiles": 277,
+  "localLinksChecked": 607,
+  "runtimeStatusEntriesChanged": [
+    "CAT-00",
+    "CAT-01",
+    "CMP-02",
+    "CMP-04",
+    "USR-04"
+  ],
+  "pdfsChanged": 0,
+  "thirdPartyApprovalsRecorded": 0
+}
