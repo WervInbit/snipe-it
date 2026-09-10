@@ -41,6 +41,7 @@ RUN install-php-extensions \
         curl \
         exif \
         gd \
+        intl \
         ldap \
         mbstring \
         opcache \

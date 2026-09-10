@@ -4,6 +4,11 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-09-10
+- Production application images now include PHP `intl`. This restores Laravel
+  number and file-size formatting used by supported console/runtime paths while
+  retaining ICU's runtime library and removing compiler/build dependencies.
+
 ### 2026-09-08
 - New asset and component tags use independent, transactional numeric-first
   sequences: AA0001 through AA9999, then AB0001. Existing tags and QR payloads

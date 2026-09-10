@@ -5189,3 +5189,15 @@ there are multiple duplicate functions that still need to be removed, sku will b
 - Host maintenance remains separately outstanding: 155 cached package updates
   are listed and `/var/run/reboot-required` is present. Do not combine that OS
   maintenance with the application migration/cutover.
+
+## Addendum (2026-09-10 Production Intl Image Correction)
+- Added PHP `intl` to the production application image and a production-image
+  contract assertion so the extension cannot be omitted silently again.
+- Cleared Laravel caches and verified the focused test boundary resolves to
+  `testing|sqlite|:memory:`. Production container/host-overlay/release tests
+  pass: 26 tests and 397 assertions.
+- A complete local production `app` target built successfully. Runtime smoke
+  checks confirm `intl` and ICU 72.1 are enabled, Laravel file-size formatting
+  works, and compiler/make tooling is absent after image cleanup.
+- Production was not accessed or changed during this correction. The validation
+  image is local-only and is not a qualified or deployed release artifact.
