@@ -14,6 +14,7 @@ use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\DepreciationsController;
 use App\Http\Controllers\GroupsController;
 use App\Http\Controllers\HealthController;
+use App\Http\Controllers\IdentifierController;
 use App\Http\Controllers\ForkDocumentationController;
 use App\Http\Controllers\LabelsController;
 use App\Http\Controllers\UploadedFilesController;
@@ -50,6 +51,9 @@ use Illuminate\Support\Facades\Route;
 use Tabuna\Breadcrumbs\Trail;
 
 Route::group(['middleware' => 'auth'], function () {
+    Route::get('identifiers/check', [IdentifierController::class, 'check'])->name('identifiers.check');
+    Route::get('identifiers/choose', [IdentifierController::class, 'choose'])->name('identifiers.choose');
+
     /*
     * Companies
     */

@@ -98,7 +98,12 @@ class LicenseImporter extends ItemImporter
             // Lets try to checkout seats if the fields exist and we have seats.
             if ($license->seats > 0) {
                 $checkout_target = $this->item['checkout_target'];
-                $asset = Asset::where('asset_tag', $asset_tag)->first();
+                $assets = Asset::where('asset_tag', $asset_tag)->limit(2)->get();
+                if ($assets->count() > 1) {
+                    $this->addErrorToBag($license, 'asset_tag', 'Multiple assets have this tag. Assign the license to an asset explicitly after import.');
+                    return;
+                }
+                $asset = $assets->first();
                 $targetLicense = $license->freeSeat();
 
                 if (is_null($targetLicense)){

@@ -561,12 +561,6 @@ class ComponentsController extends Controller
                 'nullable',
                 'string',
                 'max:255',
-                Rule::unique('component_instances', 'component_tag')->ignore($ignoreId),
-                function (string $attribute, mixed $value, \Closure $fail): void {
-                    if ($value && Asset::withTrashed()->where('asset_tag', $value)->exists()) {
-                        $fail('Component tags must be globally unique and cannot overlap with asset tags.');
-                    }
-                },
             ],
             'display_name' => ['required_without:component_definition_id', 'nullable', 'string', 'max:255'],
             'serial' => ['nullable', 'string', 'max:255'],

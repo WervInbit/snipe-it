@@ -4,6 +4,21 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-09-08
+- New asset and component tags use independent, transactional numeric-first
+  sequences: AA0001 through AA9999, then AB0001. Existing tags and QR payloads
+  remain unchanged; occupied identifiers in either table, including deleted
+  records and other companies, are skipped. New-form reservations can leave
+  gaps. Requires both identifier migrations; see
+  [sequential identifiers](sequential-identifiers.md).
+- Owner expanded the policy to explicitly accepted duplicate tags and serials
+  for assets and tracked components. Added live per-field confirmation, server
+  write serialization, activity records, existing-record warnings, authorized
+  scan selection, and record-specific label caches. Component administrators
+  can edit visible tags without changing QR UUIDs. Ambiguous asset imports and
+  agent reports require an explicit record ID; legacy assignment imports stop
+  rather than pick the first match. The former unique-tag policy is superseded.
+
 ### 2026-09-03
 - Designated the exact source and image pair deployed on 2026-09-01 as the
   internal V1.0.0 production baseline. The annotated `v1.0.0` tag identifies

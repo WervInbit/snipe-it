@@ -75,4 +75,9 @@ This guide keeps automation agents and human contributors aligned on the expecta
 ### Security & Configuration Tips
 - Never commit `.env*` files; use `.env.testing.example` and document overrides in `docs/`.
 - Secrets stay in your runtime environment; rotate tokens before sharing logs.
+- Automatic asset/component tags use database-backed reservations; preserve
+  `identifier_sequences` and `identifier_write_locks` during upgrades and backups.
+  Identifier writes must use model save validation; duplicate tags and serials
+  require explicit acceptance, and lookups must handle ambiguous matches. See
+  `docs/sequential-identifiers.md` before changing allocation behavior.
 - When adding third-party packages, vet licenses and update `SECURITY.md` if new attack surfaces appear.

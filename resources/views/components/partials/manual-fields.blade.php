@@ -20,7 +20,7 @@
     );
 @endphp
 
-<div data-component-mode-scope>
+<div data-component-mode-scope data-identifier-scope data-identifier-type="component">
     @if ($showCreationModeToggle)
         <div class="form-group {{ $errors->has($creationModeField) ? 'has-error' : '' }}">
             <label>{{ __('New Component Type') }}</label>

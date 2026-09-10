@@ -8,6 +8,7 @@
 
 <div class="form-group {{ $errors->has('serial') ? 'has-error' : '' }}"
      data-component-serial-control
+     data-identifier-scope data-identifier-type="component" data-identifier-id="{{ $component->id ?? '' }}"
      data-original-serial="{{ $currentSerial }}">
     <label for="{{ $serialId }}">{{ trans('admin/hardware/form.serial') }}</label>
     <div class="input-group">
@@ -129,7 +130,7 @@
                     updateButtonLabel(control);
                 });
 
-                window.refreshComponentSerialControl = function (control, serial) {
+                window.refreshComponentSerialControl = function (control, serial, recordId) {
                     if (!control) {
                         return;
                     }
@@ -140,9 +141,11 @@
                     var confirmedField = control.querySelector('[data-component-serial-confirmed]');
 
                     control.setAttribute('data-original-serial', value);
+                    control.dataset.identifierId = recordId || '';
 
                     if (input) {
                         input.value = value;
+                        input.defaultValue = value;
                         input.disabled = true;
                     }
 

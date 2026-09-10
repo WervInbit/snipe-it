@@ -33,6 +33,29 @@ class ImportAssetsTest extends ImportDataTestCase implements TestsPermissionsReq
         return parent::importFileResponse($parameters);
     }
 
+    public function testDuplicateImportRequiresConfirmationAndUpdateRequiresAnId(): void
+    {
+        $first = Asset::factory()->create(['asset_tag' => 'SHARED-IMPORT', 'serial' => 'SHARED-SERIAL']);
+        $this->actingAsForApi(User::factory()->superuser()->create());
+        $row = array_merge(ImportFileBuilder::new()->firstRow(), ['tag' => $first->asset_tag, 'serialNumber' => $first->serial,
+            'allowDuplicateTag' => 'true', 'allowDuplicateSerial' => 'true']);
+        $builder = new ImportFileBuilder([$row]);
+        $import = Import::factory()->asset()->create(['file_path' => $builder->saveToImportsDirectory()]);
+        $this->importFileResponse(['import' => $import->id])->assertOk()->assertJsonPath('status', 'success');
+        $this->assertSame(2, Asset::where('asset_tag', $first->asset_tag)->count());
+
+        $builder = new ImportFileBuilder([array_merge($row, ['itemName' => 'Must select an ID'])]);
+        $import = Import::factory()->asset()->create(['file_path' => $builder->saveToImportsDirectory()]);
+        $this->importFileResponse(['import' => $import->id, 'import-update' => true])->assertStatus(500)->assertJsonPath('status', 'import-errors');
+        $this->assertFalse(Asset::where('name', 'Must select an ID')->exists());
+
+        $builder = new ImportFileBuilder([array_merge($row, ['id' => $first->id, 'itemName' => 'Selected by ID'])]);
+        $import = Import::factory()->asset()->create(['file_path' => $builder->saveToImportsDirectory()]);
+        $this->importFileResponse(['import' => $import->id, 'import-update' => true])->assertOk()->assertJsonPath('status', 'success');
+        $this->assertSame('Selected by ID', $first->fresh()->name);
+        $this->assertSame(2, Asset::where('asset_tag', $first->asset_tag)->count());
+    }
+
     #[Test]
     public function testRequiresPermission()
     {

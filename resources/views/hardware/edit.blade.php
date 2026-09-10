@@ -49,6 +49,7 @@
 
 {{-- Page content --}}
 @section('inputFields')
+<span hidden data-identifier-page data-identifier-type="asset" data-identifier-id="{{ $item->id }}"></span>
 
     @if (session('requires_ack_failed_tests'))
         <input type="hidden" name="ack_failed_tests" value="1">
@@ -96,7 +97,7 @@
               @endphp
               <div class="js-case-wrapper" data-case-field="asset_tag">
                   <div class="input-group">
-                      <input class="form-control js-asset-tag-input js-uppercase-input" type="text" name="asset_tags[1]" id="asset_tag" value="{{ old('asset_tags.1', \App\Models\Asset::generateTag()) }}" readonly>
+                      <input class="form-control js-asset-tag-input js-uppercase-input" type="text" name="asset_tags[1]" id="asset_tag" value="{{ old('asset_tags.1') ?? \App\Models\Asset::generateTag() }}" readonly>
                       <span class="input-group-btn">
                           <button type="button" class="btn btn-default js-asset-tag-unlock">Unlock</button>
                           <button type="button" class="btn {{ $assetTagOverrideActive ? 'btn-warning active' : 'btn-default' }} js-case-override-toggle" aria-pressed="{{ $assetTagOverrideActive ? 'true' : 'false' }}" title="Preserve case">
@@ -446,113 +447,6 @@
         });
     }
 
-    var serialCheckEndpoint = '/api/v1/hardware/serial-check';
-    var serialCheckAssetId = {{ $item->id ?? 'null' }};
-    var serialCheckRequests = {};
-    var serialCheckTimers = {};
-
-    function setSerialWarning($entry, payload) {
-        var $warning = $entry.find('.js-serial-warning');
-        if (!$warning.length) {
-            return;
-        }
-
-        var $details = $entry.find('.js-serial-warning-details');
-        var $allow = $entry.find('.js-serial-allow');
-
-        if (!payload || !payload.exists) {
-            $warning.addClass('hidden');
-            $details.empty();
-            if ($allow.length) {
-                $allow.prop('checked', false);
-                $allow.prop('disabled', true);
-            }
-            return;
-        }
-
-        $warning.removeClass('hidden');
-        $details.empty();
-
-        var count = payload.count || 0;
-        var assets = payload.assets || [];
-        var summary = $('<div class="serial-duplicate-summary"></div>')
-            .text('Used by ' + count + ' asset' + (count === 1 ? '' : 's') + ':');
-        var $list = $('<ul class="list-unstyled serial-duplicate-list"></ul>');
-
-        assets.forEach(function (asset) {
-            var label = '';
-            if (asset.asset_tag) {
-                label = asset.asset_tag;
-            }
-            if (asset.name) {
-                label = label ? label + ' - ' + asset.name : asset.name;
-            }
-            if (!label && asset.id) {
-                label = 'Asset #' + asset.id;
-            }
-            var $link = $('<a></a>').attr('href', '/hardware/' + asset.id).text(label);
-            $list.append($('<li></li>').append($link));
-        });
-
-        if (count > assets.length) {
-            $list.append($('<li></li>').text('+' + (count - assets.length) + ' more'));
-        }
-
-        $details.append(summary).append($list);
-
-        if ($allow.length) {
-            $allow.prop('disabled', false);
-        }
-    }
-
-    function checkSerialInput($input) {
-        var serial = $.trim($input.val());
-        var $entry = $input.closest('.js-serial-entry');
-        if (!serial) {
-            setSerialWarning($entry, null);
-            return;
-        }
-
-        var requestKey = $input.attr('name') || $input.attr('id') || serial;
-        if (serialCheckRequests[requestKey]) {
-            serialCheckRequests[requestKey].abort();
-        }
-
-        var data = { serial: serial };
-        if (serialCheckAssetId) {
-            data.ignore_id = serialCheckAssetId;
-        }
-
-        serialCheckRequests[requestKey] = $.ajax({
-            type: 'GET',
-            url: serialCheckEndpoint,
-            data: data,
-            headers: {
-                "X-Requested-With": 'XMLHttpRequest',
-                "X-CSRF-TOKEN": $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function (payload) {
-                if ($.trim($input.val()) !== serial) {
-                    return;
-                }
-                setSerialWarning($entry, payload);
-            },
-            error: function () {
-                setSerialWarning($entry, null);
-            }
-        });
-    }
-
-    function scheduleSerialCheck($input) {
-        var key = $input.attr('name') || $input.attr('id') || 'serial';
-        if (serialCheckTimers[key]) {
-            clearTimeout(serialCheckTimers[key]);
-        }
-        serialCheckTimers[key] = setTimeout(function () {
-            checkSerialInput($input);
-        }, 300);
-    }
-
     function unlockAssetTag($button) {
         var $input = $('.js-asset-tag-input');
         if (!$input.length) {
@@ -644,22 +538,10 @@
 
             e.preventDefault();
 
-            var prefixPattern = '{{ preg_quote(App\Models\Setting::getSettings()->auto_increment_prefix, '/') }}';
-            var raw_tag = String($("#asset_tag").val() || '');
-            if (prefixPattern) {
-                raw_tag = raw_tag.replace(new RegExp('^' + prefixPattern, 'i'), '');
-            }
-            var parsed_tag = parseInt(raw_tag, 10);
             var box_html        = '';
-			const zeroPad 		= (num, places) => String(num).padStart(places, '0');
 
             // Check that we haven't exceeded the max number of asset fields
-            if (x < max_fields) {
-
-                var auto_tag = '';
-                if (raw_tag !== '' && !isNaN(parsed_tag)) {
-                     auto_tag = zeroPad(parsed_tag + parseInt(x), raw_tag.length);
-                }
+            if (wrapper.find('.fields_wrapper').length + 1 < max_fields) {
 
                 x++; //text box increment
 
@@ -668,7 +550,7 @@
                 box_html += '<div class="col-md-7 col-sm-12">';
                 box_html += '<div class="js-case-wrapper" data-case-field="asset_tag">';
                 box_html += '<div class="input-group">';
-                box_html += '<input type="text" class="form-control js-uppercase-input" name="asset_tags[' + x + ']" value="{{ (($snipeSettings->auto_increment_prefix!='') && ($snipeSettings->auto_increment_assets=='1')) ? $snipeSettings->auto_increment_prefix : '' }}'+ auto_tag +'">';
+                box_html += '<input type="text" class="form-control js-uppercase-input" name="asset_tags[' + x + ']" value="">';
                 box_html += '<span class="input-group-btn">';
                 box_html += '<button type="button" class="btn btn-default js-case-override-toggle" aria-pressed="false" title="Preserve case">Aa</button>';
                 box_html += '</span>';
@@ -714,7 +596,7 @@
 
             // We have reached the maximum number of extra asset fields, so disable the button
             } else {
-                $(".add_field_button").attr('disabled');
+                $(".add_field_button").attr('disabled', true);
                 $(".add_field_button").addClass('disabled');
             }
         });
@@ -726,7 +608,7 @@
             //console.log(x);
 
             $(this).parent('div').parent('div').parent('span').remove();
-            x--;
+            // Keep row keys monotonic so removing a middle row cannot overwrite another row.
         });
 
 
@@ -794,11 +676,6 @@
 
         $(document).on('input', '.js-serial-input', function () {
             applyUppercase($(this));
-            scheduleSerialCheck($(this));
-        });
-
-        $(document).on('blur change', '.js-serial-input', function () {
-            checkSerialInput($(this));
         });
 
         $('.js-case-wrapper').each(function () {
@@ -810,11 +687,6 @@
 
         $('.js-serial-input').each(function () {
             applyUppercase($(this));
-            if ($.trim($(this).val()) !== '') {
-                checkSerialInput($(this));
-            } else {
-                setSerialWarning($(this).closest('.js-serial-entry'), null);
-            }
         });
     });
 

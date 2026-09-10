@@ -41,6 +41,8 @@ class AssetsImportFileBuilder extends FileBuilder
     {
         return [
             'id'                  => 'ID',
+            'allowDuplicateTag'    => 'Allow Duplicate Tag',
+            'allowDuplicateSerial' => 'Allow Duplicate Serial',
             'assigneeFullName'    => 'Full Name',
             'assigneeEmail'       => 'Email',
             'assigneeUsername'    => 'Username',

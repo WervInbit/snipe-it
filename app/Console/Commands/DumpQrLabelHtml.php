@@ -15,7 +15,12 @@ class DumpQrLabelHtml extends Command
 
     public function handle(QrLabelService $service): int
     {
-        $asset = Asset::where('asset_tag', $this->argument('asset_tag'))->first();
+        $assets = Asset::where('asset_tag', $this->argument('asset_tag'))->limit(2)->get();
+        if ($assets->count() > 1) {
+            $this->error('Multiple assets have this tag. Use the label action on the intended asset instead.');
+            return 1;
+        }
+        $asset = $assets->first();
         if (! $asset) {
             $this->error('Asset not found');
             return 1;

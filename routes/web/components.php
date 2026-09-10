@@ -7,6 +7,7 @@ Route::group([
     'prefix' => 'components',
     'middleware' => ['auth'],
 ], function (): void {
+    Route::post('{component_id}/tag', [Components\ComponentsController::class, 'updateTag'])->name('components.tag.update');
     Route::get('{component_id}/qr-label', [Components\ComponentLabelController::class, 'download'])
         ->name('components.qr-label.download');
 

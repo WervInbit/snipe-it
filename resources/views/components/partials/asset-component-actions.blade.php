@@ -46,6 +46,7 @@
                         data-tray-action="{{ $trayAction }}"
                         data-tray-name="{{ $component?->display_name ?: $rowDisplayName }}"
                         data-tray-serial="{{ $component?->serial ?? '' }}"
+                        data-tray-id="{{ $component?->id ?? '' }}"
                         data-tray-return-to="{{ $trayReturnTo }}"
                         data-testid="asset-component-card-default-action">
                     {{ trans('general.to_tray') }}
@@ -156,6 +157,7 @@
                     data-tray-action="{{ $trayAction }}"
                     data-tray-name="{{ $component->display_name }}"
                     data-tray-serial="{{ $component->serial ?? '' }}"
+                    data-tray-id="{{ $component->id }}"
                     data-tray-return-to="{{ $trayReturnTo }}"
                 >
                     {{ trans('general.to_tray') }}

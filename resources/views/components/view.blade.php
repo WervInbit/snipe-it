@@ -22,6 +22,21 @@
 @inject('qrLabels', 'App\\Services\\QrLabelService')
 
 @section('content')
+@include('identifiers.existing', ['identifierRecord' => $component])
+@if ((auth()->user()->isAdmin() || auth()->user()->isSuperUser()) && \Illuminate\Support\Facades\Gate::allows('update', $component))
+<details class="box box-default">
+    <summary class="box-header">{{ trans('identifiers.change_tag') }}</summary>
+    <form class="box-body" method="POST" action="{{ route('components.tag.update', $component) }}">
+        @csrf
+        <div class="form-group" data-identifier-scope data-identifier-type="component" data-identifier-id="{{ $component->id }}">
+            <label for="component_tag">{{ trans('general.tag') }}</label>
+            <input class="form-control" id="component_tag" name="component_tag" value="{{ old('component_tag', $component->component_tag) }}" required>
+            {!! $errors->first('component_tag', '<span class="help-block">:message</span>') !!}
+        </div>
+        <button class="btn btn-primary" type="submit">{{ trans('general.save') }}</button>
+    </form>
+</details>
+@endif
 @php
     $lifecycleStatus = $component->effectiveLifecycleStatus();
     $conditionStatus = $component->effectiveConditionStatus();

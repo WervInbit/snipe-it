@@ -45,6 +45,13 @@ The chronological product delta is recorded in
 the V1 role contract is summarized in the
 [role-capability matrix](docs/v1-operational-role-capability-matrix.md).
 
+New asset and component tags advance their numeric suffix before their letters
+(`AA0001`, `AA0002`, then `AB0001` after `AA9999`). Existing labels remain valid.
+Custom tags remain supported. Duplicate asset/component tags and serials need
+separate explicit acceptance; ambiguous scans offer record selection.
+See [sequential identifiers](docs/sequential-identifiers.md) for reservations,
+confirmation fields, integration changes, and the two required migrations.
+
 ### Sensitive records and media
 
 - Licenses hold entitlements and seats for device-bound/OEM software,

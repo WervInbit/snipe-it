@@ -12,6 +12,7 @@
 @stop
 
 @section('content')
+<span hidden data-identifier-page data-identifier-type="component" data-identifier-id="{{ $component->id }}"></span>
 <div class="row">
     <div class="col-md-8 col-md-offset-2">
         <div class="box box-default">

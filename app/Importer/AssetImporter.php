@@ -92,6 +92,8 @@ class AssetImporter extends ItemImporter
     {
         $editingAsset = false;
         $asset_tag = $this->findCsvMatch($row, 'asset_tag');
+        $allowDuplicateTag = filter_var($this->findCsvMatch($row, 'allow_duplicate_tag'), FILTER_VALIDATE_BOOLEAN);
+        $allowDuplicateSerial = filter_var($this->findCsvMatch($row, 'allow_duplicate_serial'), FILTER_VALIDATE_BOOLEAN);
 
         if (empty($asset_tag)){
             $asset_tag = Asset::generateTag();
@@ -104,7 +106,13 @@ class AssetImporter extends ItemImporter
             \Log::debug('Finding asset by ID: '.$this->findCsvMatch($row, 'id'));
             $asset = Asset::find($this->findCsvMatch($row, 'id'));
         } else {
-            $asset = Asset::where(['asset_tag'=> (string) $asset_tag])->first();
+            $matches = Asset::where(['asset_tag'=> (string) $asset_tag])->get();
+            if ($this->updating && $matches->count() > 1) {
+                $error = 'Multiple assets have this tag. Supply the asset ID to select the record to update.';
+                $this->addErrorToBag($matches->first(), 'asset_tag', $error);
+                return $error;
+            }
+            $asset = !$this->updating && $allowDuplicateTag ? null : $matches->first();
         }
         
         if ($asset) {
@@ -155,11 +163,7 @@ class AssetImporter extends ItemImporter
         }
 
 
-        if ($editingAsset) {
-            $asset->update($item);
-        } else {
-            $asset->fill($item);
-        }
+        $asset->fill($item);
 
         // If we're updating, we don't want to overwrite old fields.
         if (array_key_exists('custom_fields', $this->item)) {
@@ -170,6 +174,7 @@ class AssetImporter extends ItemImporter
 
         // This sets an attribute on the Loggable trait for the action log
         $asset->setImported(true);
+        $asset->allowDuplicateTag($allowDuplicateTag)->allowDuplicateSerial($allowDuplicateSerial);
 
         if ($asset->save()) {
 
