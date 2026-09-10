@@ -106,6 +106,32 @@
   comparison pair retain their hashes; 496 local links across 144 Markdown
   files and scoped whitespace checks pass. No application tests were needed.
 
+## Identifier Production-Applicability Audit
+- Audited the uncommitted sequential asset/component numbering, explicit
+  duplicate acceptance, ambiguity handling, and QR identity/cache changes.
+  No production access, implementation mutation, or application-data change.
+- Current-worktree risk slices pass on isolated SQLite (174 tests / 870
+  assertions) and disposable MariaDB 11.4.7 (174 / 889), including allocator
+  and unconfirmed-write concurrency. Syntax and scoped whitespace pass;
+  focused PSR-12 has no errors and three line-length warnings. PHPStan remains
+  deferred by owner direction.
+- A disposable clone of the retained production-data rehearsal migrated from
+  477 to 479 migrations with 12 assets / 4 components unchanged. The two
+  counter rows, singleton write lock, and non-unique component-tag index were
+  correct; no normalized tag/serial duplicate groups existed. A second clone
+  passed rollback to 477 with the original unique index and no coordination
+  tables, then reapplication to 479 with unchanged inventory counts. Temporary
+  clone and test resources were removed.
+- Technical implementation verdict: no supported-MariaDB functional blocker
+  found. The identifier implementation, both migrations, tests, policy, and
+  audit record were isolated from the concurrent manuals work in commit
+  `fbf4aea74f` (`Add Sequential Inventory Identifiers`). No push, image build,
+  or deployment has been performed. Build the deployment candidate from that
+  exact commit rather than the still-dirty shared workspace, then use a
+  backed-up maintenance deployment with code and both migrations applied
+  together. Details:
+  [identifier audit addendum](docs/agents/agents-addendum-2026-09-10-identifier-audit-session-init.md).
+
 ## Plain Previous And Current Guide PDFs
 - Owner clarified the requested comparison: two long PDFs containing the
   previous and current guide versions as-is, without extra navigation or pages.
@@ -134,6 +160,49 @@
   or first-time-user trial. Earlier PDFs/manifests/source ZIPs remain preserved.
 
 # Session Progress (2026-09-08)
+
+## Addendum (2026-09-08 Identifier Confirmation And Qualification)
+- Owner explicitly authorized duplicates of both visible tags/QR-label IDs and
+  serial numbers, including assets, tracked components, and existing records.
+  Each duplicate field requires its own live warning and explicit acceptance.
+- Implemented server-side serialized validation, per-field acceptance/reset,
+  existing-record warnings, permission-filtered match links, scan selection,
+  administrator component-tag edits, and separate QR cache paths per record.
+- Extended CSV acceptance and ambiguous-update handling. Agent reports accept
+  an explicit asset ID and refuse ambiguous tags; legacy assignment imports
+  refuse to select an arbitrary destination. Updated integration/rollback notes
+  in [sequential identifiers](docs/sequential-identifiers.md).
+- Supersedes the earlier migration/coverage status below: both identifier
+  migrations were applied to local development only. No inventory identifiers
+  were rewritten. Cleared an existing root-owned compiled-view permission issue
+  in local storage/framework/views. Production was not accessed or deployed.
+- Qualification uses separate application containers with temporary storage and
+  cleared config, explicit testing database variables, and a disposable MariaDB
+  11.4.7 database named snipeit_test on an internal network with no published port.
+  Shared development data and the concurrent manual work remain preserved.
+- MariaDB component/import/identifier/QR regression gate: 322 tests and 1,891
+  assertions passed, including four-process allocation on SQLite and MariaDB.
+  New PHP files pass focused PSR-12; changed PHP files pass syntax checks.
+- Browser checks on dev.inbit verified independent asset/component warnings,
+  cross-type matches, acceptance reset after changing a tag, and blocked Save.
+  Both preview forms were discarded; no inventory rows were created by UI tests.
+- Full guarded SQLite non-LDAP run completed: 2,191 tests / 10,699 assertions,
+  with five failures. Three assertions still expected the previous label-cache
+  filename or silent duplicate reuse; two existing production-config tests
+  assumed LF line endings. Corrected the assertions and made those two test
+  reads CRLF-compatible without changing production configuration.
+- Final SQLite correction/identifier/scan gate passes 83 tests / 478 assertions.
+  Final MariaDB identifier/concurrency gate passes 18 tests / 108 assertions;
+  four simultaneous unconfirmed manual writes produce exactly one saved asset.
+  Earlier focused MariaDB gates also passed 58 tests / 293 assertions and
+  26 tests / 126 assertions. Counts overlap and are not a unique-test total.
+- Sparse batch rows now retain tag/serial/acceptance alignment after removing
+  a middle row, and new blank rows always use server allocation. Case-only
+  identifier edits agree between live checks and save validation. Both covered
+  by the final regression gates. Syntax, focused PSR-12, and whitespace pass.
+- LDAP is unavailable in the local image; PHPStan remains deferred under the
+  prior owner decision. No physical printer rehearsal or production deployment
+  is claimed. No front-end bundle rebuild is needed for these Blade scripts.
 
 ## Addendum (2026-09-08 Guide Set Focused Revisions)
 - Owner judged WF-01 v12 suitable and explicitly requested the same approach
@@ -5006,6 +5075,54 @@ there are multiple duplicate functions that still need to be removed, sku will b
   guide package verifier reports `status: ok`, and the verifier script passes
   Node syntax and `git diff --check` checks.
 
+## Addendum (2026-09-08 Backlog Inventory Session)
+- Initialized from AGENTS.md, PROGRESS.md, and docs/fork-notes.md for an
+  owner-requested inventory of wishlist items and unfinished work only.
+- Preserve all pre-existing manual audit and TODO changes. No implementation,
+  application access, production access, or deployment is in scope.
+- Session notes: docs/agents/agents-addendum-2026-09-08-session-init.md
+- Inventory completed: current post-V1 product backlog includes label design,
+  validated Windows diagnostics, media/files UX, license-transfer flows,
+  credential-vault workflow, integration qualification, and migration cleanup.
+- Older June plans also retain serial OCR, QR/PIN login cards, and catalog
+  search aliases; source searches found no matching implementation. Older
+  inactivity/start-button and component-plan gaps must not be treated as
+  current missing features without reconciliation with later implementation.
+- Root TODO contains manual acceptance/policy work as well as product items;
+  historical release checklists do not mean V1 remains unimplemented.
+- No implementation changes or application/production access. Tests skipped
+  because this was a repository inventory; session-document whitespace checked.
+
+## Addendum (2026-09-08 Sequential Tag Patch)
+- Owner authorized the numeric-first tag patch for new assets and components.
+- Adding independent database-backed reservations with AA0001..AA9999,
+  AB0001 rollover, collision checks including deleted records, and unchanged
+  existing identifiers/QR payloads. Preserve concurrent manual-owned changes.
+- Focused tests and documentation updates are in progress. No production access.
+- Implemented independent INBIT-/INBIT-C- sequences with transactional counter
+  reservations, numeric-first rollover, explicit exhaustion, and global
+  collision checks across both record tables, including soft-deleted records.
+- Preserved custom identifiers, case-preservation, existing-record tags/QR
+  identity, and existing edit permissions. Validation redisplays reuse their
+  reserved tag; batch rows no longer submit a bare legacy prefix when a number
+  cannot be inferred, and blank rows allocate on save.
+- Added docs/sequential-identifiers.md plus README, AGENTS.md, and fork notes.
+  The additive migration creates counters only; it has NOT been applied to
+  shared development or production databases. Deployment must run it before
+  enabling the new allocator. No version bump, commit, or deployment performed.
+- Validation: guarded APP_ENV=testing / DB_CONNECTION=sqlite /
+  DB_DATABASE=:memory: runs passed 55 tests / 234 assertions for initial
+  allocation/create/domain regressions, then 70 tests / 275 assertions for
+  custom/edit/API/QR regressions, and 14 tests / 45 assertions after the final
+  batch-form change. These runs overlap and are not a unique-test total.
+- Separate concurrency coverage passed 1 test / 7 assertions: four independent
+  processes reserved 100 unique ordered tags in one disposable SQLite file.
+  The same test also passed in the 70-test run. PHP syntax, focused PSR-12
+  checks, and scoped git diff --check pass.
+- No full-suite, MariaDB concurrency, or physical/browser QR rerun. PHPStan
+  remains deferred under the recorded owner decision. Existing unrelated
+  manual changes were preserved; no manual artifacts were edited here.
+
 ## Addendum (2026-09-08 All-Guide Focused Candidates)
 - Owner confirmed all existing guides after reviewing WF-01 v12 positively.
 - Generated 20 new PDFs / 46 pages. Retained WF-01 v12 and CMP-04 v6: all
@@ -5032,3 +5149,43 @@ there are multiple duplicate functions that still need to be removed, sku will b
   folder retains the three previously documented unlisted historical PDFs.
 - Scoped whitespace checks passed. The application test suite was not run
   because no application code changed. No commit, push, or deployment.
+
+## Addendum (2026-09-10 Production Read-only Preflight)
+- Reconfirmed pinned-fingerprint SSH access to the temporary production host
+  and performed a read-only preflight only. No pull, build, migration, restart,
+  backup creation, cleanup, environment edit, or container replacement ran.
+- The public login and health endpoints return HTTP 200. Application, web,
+  queue, scheduler, MariaDB, and Redis containers are healthy; the queue's
+  hourly clean restart is expected from `queue:work --max-time=3600` and has
+  exit code 0. No failed queue jobs or recent web/edge HTTP 5xx were found.
+- Production currently has 17 users, 12 assets, 4 tracked component instances,
+  and 477 applied migrations. Identifier preflight found 11 asset and 4
+  component tags already in the new format, with no duplicate tag groups,
+  cross-type tag collisions, or cross-type serial collisions. The two target
+  identifier migrations remain unapplied, as expected.
+- The active app/queue image is the QR printer hotfix release `a5673bc041ef`,
+  while web remains on the V1 baseline image. The target identifier commit is
+  `fbf4aea74faa`; local `master` is three commits ahead of `origin/master` and
+  has not been pushed.
+- Durable database, Redis, upload, backup, registry, and TLS data remain in
+  named production volumes. The September 1 complete backup checksum set and
+  database gzip passed verification; a scheduled application backup dated
+  September 6 is also present. A fresh verified off-host pre-deploy backup is
+  still mandatory.
+- The active dependency stack still uses the historical rehearsal overlay.
+  Current repository releases must use the dedicated production dependency
+  overlay while preserving the existing volume names and `172.31.209.0/24`
+  network. The host-specific edge remains separate because it also fronts
+  Frigate and stages additional certificates; it must not be replaced blindly
+  by the reusable single-site edge overlay.
+- `/opt/snipe-it` is an old, extensively dirty June checkout and is not a safe
+  deployment source. The immutable `/srv/snipeit-v1/releases/*` directories are
+  archive trees without Git metadata, so a repository pull alone cannot update
+  the digest-pinned running images.
+- Found one image defect before the next build: PHP `intl` is absent from both
+  the deployed image and the current production Dockerfile, causing Laravel's
+  `db:show --counts` command to fail. Add and test `intl` before qualifying the
+  next app image.
+- Host maintenance remains separately outstanding: 155 cached package updates
+  are listed and `/var/run/reboot-required` is present. Do not combine that OS
+  maintenance with the application migration/cutover.

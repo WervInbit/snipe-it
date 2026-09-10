@@ -17,7 +17,7 @@ class ProductionContainerConfigurationTest extends TestCase
 
     public function test_production_compose_uses_immutable_services_and_external_secrets(): void
     {
-        $compose = file_get_contents($this->basePath.'/docker-compose.production.yml');
+        $compose = str_replace("\r\n", "\n", file_get_contents($this->basePath.'/docker-compose.production.yml'));
 
         $this->assertMatchesRegularExpression('/^  (app|web|queue|scheduler):$/m', $compose);
         $this->assertSame(4, preg_match_all('/^  (app|web|queue|scheduler):$/m', $compose));
@@ -72,7 +72,7 @@ class ProductionContainerConfigurationTest extends TestCase
 
     public function test_production_environment_template_requires_separate_image_digests(): void
     {
-        $example = file_get_contents($this->basePath.'/docker/production.env.example');
+        $example = str_replace("\r\n", "\n", file_get_contents($this->basePath.'/docker/production.env.example'));
 
         $this->assertMatchesRegularExpression(
             '/^SNIPEIT_APP_IMAGE=registry\.example\.invalid\/inbit\/snipeit-app$/m',

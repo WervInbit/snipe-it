@@ -143,6 +143,59 @@ guide work can continue from the existing evidence and review decisions.
 - Work in progress; coverage and intended versions are recorded in the
   [set revision plan](../manuals/operator-guides/reviews/guide-set-followups-2026-09-08.md).
 
+## Separate Backlog Inventory Session
+
+- Owner requested initialization and an inventory of unimplemented wishlist
+  items, explicitly excluding project implementation work.
+- Read AGENTS.md, PROGRESS.md, and docs/fork-notes.md. Preserve existing
+  uncommitted manual audit, handoff, review, and TODO changes.
+- Compare root TODO, current release follow-ups, older plans, and relevant
+  source markers to distinguish current backlog from historical checklists.
+- Completed inventory using TODO.md, the current September release status,
+  the August post-V1 backlog, June investigation plans, and source searches.
+- Distinguish explicit current product backlog from older proposed features,
+  manual acceptance/policy decisions, and release/operational qualification.
+- No application code changes, runtime tests, or environment access.
+
+## Sequential Tag Patch
+
+- Owner authorized implementation after reviewing numeric-first tag examples.
+- Scope: new asset/component identifiers, persistent reservations, rollover,
+  collision handling, focused tests, and upgrade documentation.
+- Existing identifiers and QR payloads are preserved. No production access.
+- Completed the sequential-tag patch and custom-tag compatibility follow-up.
+  Documentation: docs/sequential-identifiers.md. Tests cover numeric/letter
+  rollover, exhaustion, unsaved reservations, company/deleted collisions,
+  custom tags, existing identity, validation redisplay, and mixed batch intake.
+- Guarded focused SQLite suites, four-process disposable SQLite concurrency,
+  PHP syntax, focused PSR-12, and scoped whitespace checks pass; exact counts
+  and deferred coverage are recorded in PROGRESS.md.
+- Counter migration is included but unapplied to shared application databases.
+  No production access, deployment, or changes to manual review artifacts.
+
+## Duplicate Identifier Follow-Up And Final Qualification
+
+- Owner explicitly authorized separate acceptance of duplicate visible tags
+  and serials for both assets and tracked components, including existing items.
+- Completed live warnings, serialized model validation, audit records, existing
+  duplicate warnings, scan selection, custom component-tag edits, safe label
+  caches, import disambiguation and agent-report asset-ID selection.
+- The earlier migration status is superseded: both identifier migrations were
+  applied to local development. Production remains untouched. Browser preview
+  forms were discarded without creating inventory rows. Concurrent manual
+  artifacts and their acceptance records were preserved.
+- Full non-LDAP SQLite run: 2,191 tests, five assertion failures. Corrected
+  old duplicate/cache expectations and Windows line-ending assumptions in two
+  configuration tests. Final correction suites pass: SQLite 83/478 and MariaDB
+  18/108 (tests/assertions). Broader MariaDB gate passed 322/1,891.
+- Concurrency covers four-process allocation and unconfirmed simultaneous
+  writes. Syntax, focused PSR-12 and whitespace checks pass. Temporary test
+  applications use isolated storage and disposable snipeit_test MariaDB;
+  teardown removes only these session-owned containers/network.
+- See [identifier policy and upgrade notes](../sequential-identifiers.md) and
+  the current PROGRESS.md addendum for exact scope, overlapping test counts,
+  rollback restrictions, and deferred LDAP/PHPStan/physical-print coverage.
+
 ## Addendum (2026-09-08 All-Guide Focused Candidates)
 - Owner confirmed all existing guides after reviewing WF-01 v12 positively.
 - Generated 20 new PDFs / 46 pages. Retained WF-01 v12 and CMP-04 v6: all
