@@ -8,6 +8,9 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 - Added PHP `intl` to the production application image and its container
   contract test so Laravel's internationalization-dependent console paths are
   available in the next qualified image.
+- Updated the locked transitive `fast-uri` package from 3.1.5 to 3.1.7 after
+  the release audit reported current high-severity advisories against the V1
+  lock. No direct package or application API changed.
 
 ### 2026-09-08
 - New asset and component tags use independent, transactional numeric-first
