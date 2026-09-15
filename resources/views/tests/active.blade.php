@@ -262,26 +262,7 @@
             <div class="card border-0 shadow-sm p-5 text-center mx-auto" style="max-width: 520px;">
                 <h2 class="h5 mb-3">{{ trans('tests.no_active_run') }}</h2>
                 <p class="text-muted mb-4">{{ trans('tests.start_run_cta') }}</p>
-                @if($canStartRun ?? false)
-                    <form method="POST"
-                          action="{{ route('test-runs.store', $asset->id) }}"
-                          data-testid="tests-empty-start-run-form">
-                        @csrf
-                        <div class="form-group text-start mb-3">
-                            <label for="empty_workflow_profile_id">{{ trans('tests.workflow_profile') }}</label>
-                            <select id="empty_workflow_profile_id" name="workflow_profile_id" class="form-control" required>
-                                @foreach(($workflowProfiles ?? collect()) as $profile)
-                                    <option value="{{ $profile->id }}" @selected($profile->is_default)>
-                                        {{ $profile->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary btn-lg w-100">
-                            <i class="fas fa-play me-2" aria-hidden="true"></i>{{ trans('tests.start_new_run') }}
-                        </button>
-                    </form>
-                @endif
+                @include('tests.partials.workflow-progression', ['workflowContext' => 'tests-empty'])
             </div>
         @else
             <main>

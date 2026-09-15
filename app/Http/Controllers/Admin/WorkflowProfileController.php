@@ -12,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class WorkflowProfileController extends Controller
@@ -23,6 +24,7 @@ class WorkflowProfileController extends Controller
         $profiles = WorkflowProfile::query()
             ->with([
                 'categories',
+                'prerequisites',
             ])
             ->withCount('items')
             ->ordered()
@@ -33,7 +35,11 @@ class WorkflowProfileController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('settings.workflow-profiles', compact('profiles', 'categories'));
+        return view('settings.workflow-profiles', [
+            'profiles' => $profiles,
+            'categories' => $categories,
+            'dependencyProfiles' => $profiles,
+        ]);
     }
 
     public function editItems(WorkflowProfile $workflowProfile): View
@@ -60,15 +66,22 @@ class WorkflowProfileController extends Controller
     {
         $this->authorize('create', TestType::class);
 
-        [$data, $categoryIds] = $this->validatedProfileData($request);
+        [$data, $categoryIds, $dependencies] = $this->validatedProfileData($request);
 
-        $profile = DB::transaction(function () use ($data, $categoryIds): WorkflowProfile {
+        $profile = DB::transaction(function () use ($data, $categoryIds, $dependencies): WorkflowProfile {
+            WorkflowProfile::query()
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get(['id']);
+            $this->ensureDependenciesAreActive($dependencies);
+
             if ($data['is_default']) {
                 WorkflowProfile::query()->update(['is_default' => false]);
             }
 
             $profile = WorkflowProfile::create($data);
             $profile->categories()->sync($categoryIds);
+            $profile->prerequisites()->sync($dependencies);
 
             return $profile;
         });
@@ -82,9 +95,23 @@ class WorkflowProfileController extends Controller
     {
         $this->authorize('update', TestType::class);
 
-        [$data, $categoryIds] = $this->validatedProfileData($request, $workflowProfile);
+        [$data, $categoryIds, $dependencies] = $this->validatedProfileData($request, $workflowProfile);
 
-        DB::transaction(function () use ($workflowProfile, $data, $categoryIds): void {
+        DB::transaction(function () use ($workflowProfile, $data, $categoryIds, $dependencies): void {
+            WorkflowProfile::query()
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get(['id']);
+
+            $this->ensureDependenciesAreActive($dependencies);
+            $this->ensureDependenciesAreAcyclic($workflowProfile, $dependencies);
+
+            if (!$data['is_active'] && $workflowProfile->dependents()->exists()) {
+                throw ValidationException::withMessages([
+                    'is_active' => __('Disconnect dependent workflows before making this prerequisite inactive.'),
+                ]);
+            }
+
             if ($data['is_default']) {
                 WorkflowProfile::query()
                     ->whereKeyNot($workflowProfile->id)
@@ -93,6 +120,7 @@ class WorkflowProfileController extends Controller
 
             $workflowProfile->update($data);
             $workflowProfile->categories()->sync($categoryIds);
+            $workflowProfile->prerequisites()->sync($dependencies);
         });
 
         return redirect()
@@ -103,6 +131,14 @@ class WorkflowProfileController extends Controller
     public function destroy(WorkflowProfile $workflowProfile): RedirectResponse
     {
         $this->authorize('delete', TestType::class);
+
+        if ($workflowProfile->dependents()->exists()) {
+            return redirect()
+                ->route('settings.workflow-profiles.index')
+                ->withErrors([
+                    'workflow_profile' => __('Disconnect this workflow from its dependent workflows before deleting it.'),
+                ]);
+        }
 
         $workflowProfile->delete();
 
@@ -214,8 +250,44 @@ class WorkflowProfileController extends Controller
         return response()->json(['status' => 'ok']);
     }
 
+    public function reorder(Request $request): JsonResponse
+    {
+        $this->authorize('update', TestType::class);
+
+        $data = $request->validate([
+            'order' => ['required', 'array', 'min:1'],
+            'order.*' => ['integer', 'distinct', Rule::exists('workflow_profiles', 'id')],
+        ]);
+        $order = array_values(array_map('intval', $data['order']));
+
+        DB::transaction(function () use ($order): void {
+            $profiles = WorkflowProfile::query()
+                ->ordered()
+                ->lockForUpdate()
+                ->get()
+                ->keyBy('id');
+            $completeOrder = collect($order)
+                ->concat($profiles->keys()->map(fn ($id): int => (int) $id)->diff($order))
+                ->values();
+
+            foreach ($completeOrder as $position => $id) {
+                /** @var WorkflowProfile $profile */
+                $profile = $profiles->get($id);
+
+                if ((int) $profile->display_order === $position) {
+                    continue;
+                }
+
+                $profile->display_order = $position;
+                $profile->save();
+            }
+        });
+
+        return response()->json(['status' => 'ok']);
+    }
+
     /**
-     * @return array{0: array<string, mixed>, 1: array<int>}
+     * @return array{0: array<string, mixed>, 1: array<int>, 2: array<int>}
      */
     private function validatedProfileData(Request $request, ?WorkflowProfile $profile = null): array
     {
@@ -229,6 +301,10 @@ class WorkflowProfileController extends Controller
             'is_default' => ['nullable', 'boolean'],
             'blocks_sale_readiness' => ['nullable', 'boolean'],
             'display_order' => ['nullable', 'integer', 'min:0'],
+            'repeat_policy' => ['nullable', Rule::in(WorkflowProfile::REPEAT_POLICIES)],
+            'execution_level' => ['nullable', Rule::in(WorkflowProfile::EXECUTION_LEVELS)],
+            'dependency_profile_ids' => ['nullable', 'array'],
+            'dependency_profile_ids.*' => ['integer', 'distinct', Rule::exists('workflow_profiles', 'id')],
         ]);
 
         $manualSlug = trim((string) ($validated['slug'] ?? ''));
@@ -245,8 +321,113 @@ class WorkflowProfileController extends Controller
             'display_order' => isset($validated['display_order'])
                 ? (int) $validated['display_order']
                 : (((int) WorkflowProfile::query()->max('display_order')) + 1),
+            'repeat_policy' => $validated['repeat_policy']
+                ?? $profile?->repeat_policy
+                ?? WorkflowProfile::REPEAT_OVERRIDE_REQUIRED,
+            'execution_level' => $validated['execution_level']
+                ?? $profile?->execution_level
+                ?? WorkflowProfile::EXECUTION_OPERATOR,
         ];
 
-        return [$data, array_values($validated['category_ids'] ?? [])];
+        $enabledDependencyIds = collect($validated['dependency_profile_ids'] ?? [])
+            ->map(fn ($id): int => (int) $id)
+            ->unique()
+            ->values();
+
+        if ($profile && $enabledDependencyIds->contains((int) $profile->id)) {
+            throw ValidationException::withMessages([
+                'dependency_profile_ids' => __('A workflow cannot depend on itself.'),
+            ]);
+        }
+
+        $existingDependencies = WorkflowProfile::query()
+            ->whereIn('id', $enabledDependencyIds)
+            ->get(['id', 'is_active']);
+        $existingDependencyIds = $existingDependencies->pluck('id')->map(fn ($id): int => (int) $id);
+
+        if ($existingDependencyIds->count() !== $enabledDependencyIds->count()) {
+            throw ValidationException::withMessages([
+                'dependency_profile_ids' => __('One or more selected workflow dependencies no longer exist.'),
+            ]);
+        }
+
+        if ($existingDependencies->contains(fn (WorkflowProfile $dependency): bool => !$dependency->is_active)) {
+            throw ValidationException::withMessages([
+                'dependency_profile_ids' => __('Inactive workflows cannot be selected as prerequisites.'),
+            ]);
+        }
+
+        $dependencies = $enabledDependencyIds->all();
+
+        return [$data, array_values($validated['category_ids'] ?? []), $dependencies];
+    }
+
+    /**
+     * Reject dependency edits that would make a workflow depend on itself indirectly.
+     *
+     * @param array<int> $proposedPrerequisiteIds
+     */
+    private function ensureDependenciesAreAcyclic(
+        WorkflowProfile $profile,
+        array $proposedPrerequisiteIds
+    ): void {
+        $adjacency = DB::table('workflow_profile_dependencies')
+            ->get(['workflow_profile_id', 'prerequisite_workflow_profile_id'])
+            ->groupBy('workflow_profile_id')
+            ->map(fn ($rows) => $rows
+                ->pluck('prerequisite_workflow_profile_id')
+                ->map(fn ($id): int => (int) $id)
+                ->all())
+            ->all();
+
+        $profileId = (int) $profile->id;
+        $adjacency[$profileId] = array_values(array_map('intval', $proposedPrerequisiteIds));
+
+        $reachesProfile = function (int $node, array $visited = []) use (&$reachesProfile, $adjacency, $profileId): bool {
+            if ($node === $profileId) {
+                return true;
+            }
+
+            if (isset($visited[$node])) {
+                return false;
+            }
+
+            $visited[$node] = true;
+
+            foreach ($adjacency[$node] ?? [] as $prerequisiteId) {
+                if ($reachesProfile((int) $prerequisiteId, $visited)) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        foreach ($proposedPrerequisiteIds as $prerequisiteId) {
+            if ($reachesProfile((int) $prerequisiteId)) {
+                throw ValidationException::withMessages([
+                    'dependency_profile_ids' => __('This dependency would create a circular workflow chain.'),
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Recheck after the graph-wide row lock so a concurrent deactivation
+     * cannot create a silently waived dependency.
+     *
+     * @param array<int> $dependencyIds
+     */
+    private function ensureDependenciesAreActive(array $dependencyIds): void
+    {
+        if ($dependencyIds === []) {
+            return;
+        }
+
+        if (WorkflowProfile::query()->whereIn('id', $dependencyIds)->where('is_active', false)->exists()) {
+            throw ValidationException::withMessages([
+                'dependency_profile_ids' => __('Inactive workflows cannot be selected as prerequisites.'),
+            ]);
+        }
     }
 }

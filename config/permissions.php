@@ -77,6 +77,12 @@ return [
             'display'    => true,
         ],
         [
+            'permission' => 'assets.override_sale_readiness',
+            'label'      => 'Override Sale Readiness',
+            'note'       => 'Allows the user to confirm a protected status change despite workflow or component issues, with a required reason.',
+            'display'    => true,
+        ],
+        [
             'permission' => 'assets.images.upload',
             'label'      => 'Upload Images',
             'note'       => 'Allows the user to upload and caption asset images.',
@@ -769,6 +775,36 @@ return [
             'permission' => 'tests.execute',
             'label'      => 'Execute Tests',
             'note'       => 'Allows the user to run system tests.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'tests.execute.senior',
+            'label'      => 'Execute Senior Workflows',
+            'note'       => 'Allows the user to start and edit workflows restricted to senior operators.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'tests.execute.supervisor',
+            'label'      => 'Execute Supervisor Workflows',
+            'note'       => 'Allows the user to start and edit workflows restricted to supervisors.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'tests.edit_runs',
+            'label'      => 'Edit Workflow Runs',
+            'note'       => 'Allows the user to edit current and historical workflow runs within their execution level.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'tests.start_new_run',
+            'label'      => 'Start Additional Workflow Runs',
+            'note'       => 'Allows the user to explicitly start a new run while retaining the previous run for editing.',
+            'display'    => true,
+        ],
+        [
+            'permission' => 'tests.override_dependencies',
+            'label'      => 'Override Workflow Guards',
+            'note'       => 'Allows the user to start a workflow before its dependencies are complete or repeat a guarded workflow, after an explicit confirmation and reason.',
             'display'    => true,
         ],
         [

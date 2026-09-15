@@ -175,38 +175,10 @@
 
 @section('content')
 <div class="container">
-    @can('tests.execute')
-        <form method="POST"
-              action="{{ route('test-runs.store', $asset->id) }}"
-              class="mb-3"
-              data-testid="tests-index-start-run-form">
-            @csrf
-            <div class="form-group">
-                <label for="workflow_profile_id">{{ trans('tests.workflow_profile') }}</label>
-                <select id="workflow_profile_id" name="workflow_profile_id" class="form-control" required>
-                    @foreach(($workflowProfiles ?? collect()) as $profile)
-                        <option value="{{ $profile->id }}" @selected($profile->is_default)>
-                            {{ $profile->name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            @if(($manualWorkflowItems ?? collect())->isNotEmpty())
-                <div class="form-group">
-                    <label for="extra_workflow_item_ids">{{ __('Extra workflow items') }}</label>
-                    <select id="extra_workflow_item_ids" name="extra_workflow_item_ids[]" class="form-control" multiple>
-                        @foreach($manualWorkflowItems as $item)
-                            <option value="{{ $item->id }}" @selected(in_array($item->id, (array) old('extra_workflow_item_ids', [])))>
-                                {{ $item->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    <span class="help-block">{{ __('Use this for one-off checks on this run. These items are added after the selected profile items.') }}</span>
-                </div>
-            @endif
-            <button type="submit" class="btn btn-primary btn-lg btn-block">{{ trans('tests.start_new_run') }}</button>
-        </form>
-    @endcan
+    @include('tests.partials.workflow-progression', [
+        'workflowContext' => 'tests-index',
+        'manualWorkflowItems' => $manualWorkflowItems ?? collect(),
+    ])
 
     <div class="tests-run-list">
         @foreach ($runs as $run)
@@ -229,6 +201,15 @@
                         <span class="test-run-row__summary-main">
                             <span class="test-run-row__primary">
                                 {{ $run->display_name }} #{{ $run->id }} &middot; {{ optional($run->created_at)->format('Y-m-d H:i') }} &middot; {{ optional($run->user)->name }}
+                                @if($run->guard_override_by)
+                                    <span class="label label-warning" title="{{ __('By :user at :time: :reason', [
+                                        'user' => optional($run->guardOverrideUser)->name ?? __('Unknown user'),
+                                        'time' => optional($run->guard_override_at)->format('Y-m-d H:i'),
+                                        'reason' => $run->guard_override_reason,
+                                    ]) }}">
+                                        {{ __('Guard overridden') }}
+                                    </span>
+                                @endif
                             </span>
                         </span>
                         <span class="test-run-row__stats">

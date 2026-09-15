@@ -166,7 +166,8 @@ class AssetsController extends Controller
         $latestRunIdSub = TestRun::query()
             ->select('id')
             ->whereColumn('asset_id', 'assets.id')
-            ->orderByRaw('COALESCE(finished_at, created_at) DESC')
+            ->orderByDesc('started_at')
+            ->orderByDesc('id')
             ->limit(1);
 
         $assets->addSelect([

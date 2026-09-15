@@ -21,10 +21,10 @@ use App\Models\Location;
 use App\Models\Setting;
 use App\Models\Statuslabel;
 use App\Models\User;
-use App\Models\WorkflowProfile;
 use App\View\Label;
 use App\Services\QrLabelService;
 use App\Services\Assets\LegacyAssetAssignmentCleanupService;
+use App\Services\Assets\AssetStatusTransitionGuardService;
 use App\Services\Components\AttachedComponentIssueService;
 use App\Services\ModelAttributes\EffectiveAttributeResolver;
 use App\Services\ModelAttributes\ModelAttributeManager;
@@ -38,6 +38,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use TypeError;
 use Illuminate\Support\Collection;
 
@@ -436,6 +437,7 @@ class AssetsController extends Controller
             $asset->load([
                 'tests.audits.user',
                 'tests.profile',
+                'tests.guardOverrideUser',
                 'tests.results.audits.user',
                 'tests.results.type',
                 'tests.results.attributeDefinition',
@@ -482,13 +484,14 @@ class AssetsController extends Controller
                 ->get()
                 ->groupBy('ancestry_parent_component_instance_id');
             $testSummary = $asset->latestTestIssueSummary();
-            $workflowProfiles = WorkflowProfile::query()
-                ->active()
-                ->forAsset($asset)
-                ->whereHas('items')
-                ->withCount('items')
-                ->ordered()
-                ->get();
+            $workflowProgression = app(\App\Services\WorkflowProgressionService::class)->forAsset($asset);
+            $saleWorkflowIds = $asset->blockingSaleReadinessProfiles()->pluck('id')->map(fn ($id): int => (int) $id);
+            $workflowSaleProgression = $workflowProgression
+                ->filter(fn (array $row): bool => $saleWorkflowIds->contains((int) $row['profile']->id))
+                ->values();
+            $canStartRun = Gate::allows('tests.execute') && Gate::allows('view', $asset);
+            $canOverrideWorkflowGuards = Gate::allows('tests.override_dependencies');
+            $canStartNewRun = Gate::allows('tests.start_new_run');
             $componentLocations = $this->storageLocationsByType();
             $currentUserTrayComponents = ComponentInstance::query()
                 ->with(['componentDefinition.category', 'componentDefinition.manufacturer', 'sourceAsset.model'])
@@ -504,7 +507,11 @@ class AssetsController extends Controller
                 ->with('use_currency', $use_currency)
                 ->with('audit_log', $audit_log)
                 ->with('testSummary', $testSummary)
-                ->with('workflowProfiles', $workflowProfiles)
+                ->with('workflowProgression', $workflowProgression)
+                ->with('workflowSaleProgression', $workflowSaleProgression)
+                ->with('canStartRun', $canStartRun)
+                ->with('canOverrideWorkflowGuards', $canOverrideWorkflowGuards)
+                ->with('canStartNewRun', $canStartNewRun)
                 ->with('componentHistory', $componentHistory)
                 ->with('componentDefinitions', $this->activeComponentDefinitions())
                 ->with('componentConditionOptions', $this->conditionOptions())
@@ -523,6 +530,33 @@ class AssetsController extends Controller
     }
 
     /**
+     * Return the exact protected-status consequences that the user must confirm.
+     */
+    public function previewStatusTransition(
+        Request $request,
+        Asset $asset,
+        AssetStatusTransitionGuardService $guardService
+    ): JsonResponse {
+        $validated = $request->validate([
+            'status_id' => ['required', 'integer', 'exists:status_labels,id'],
+        ]);
+        $status = Statuslabel::findOrFail($validated['status_id']);
+
+        if (Asset::statusRequiresTestAck($status)) {
+            Gate::authorize('assets.sale_transition');
+            $this->authorize('view', $asset);
+        } else {
+            $this->authorize('update', $asset);
+        }
+
+        $evaluation = $guardService->evaluate($asset->loadMissing('assetstatus'), $status);
+        $evaluation['can_override_issues'] = !$evaluation['has_issues']
+            || Gate::allows('assets.override_sale_readiness');
+
+        return response()->json($evaluation);
+    }
+
+    /**
      * Update only the status from the detail view.
      *
      * @param Request $request
@@ -531,8 +565,9 @@ class AssetsController extends Controller
     public function updateStatus(
         Request $request,
         Asset $asset,
-        LegacyAssetAssignmentCleanupService $legacyAssignmentCleanup
-    ) : RedirectResponse
+        LegacyAssetAssignmentCleanupService $legacyAssignmentCleanup,
+        AssetStatusTransitionGuardService $guardService
+    ) : RedirectResponse|JsonResponse
     {
         $validated = $request->validate([
             'status_id' => ['required', 'integer', 'exists:status_labels,id'],
@@ -540,6 +575,8 @@ class AssetsController extends Controller
             'quality_grade' => ['nullable', Rule::in(array_keys(Asset::qualityGradeOptions()))],
             'ack_failed_tests' => ['nullable', 'boolean'],
             'ack_component_issues' => ['nullable', 'boolean'],
+            'status_confirmation_hash' => ['nullable', 'string', 'size:64'],
+            'status_override_reason' => ['nullable', 'string', 'max:2000'],
         ]);
 
         $status = Statuslabel::find($validated['status_id']);
@@ -556,43 +593,126 @@ class AssetsController extends Controller
             abort(403);
         }
 
-        if ($status && $this->statusRequiresTestAck($status)) {
-            $issueLines = $this->testIssueLines($asset);
+        $outcome = DB::transaction(function () use (
+            $asset,
+            $validated,
+            $request,
+            $guardService,
+            $legacyAssignmentCleanup
+        ): array {
+            $lockedAsset = Asset::query()->lockForUpdate()->findOrFail($asset->id);
+            $lockedAsset->load('assetstatus');
+            $targetStatus = Statuslabel::findOrFail($validated['status_id']);
+            $statusChanging = (int) $lockedAsset->status_id !== (int) $targetStatus->id;
 
-            if ($issueLines->isNotEmpty() && !$request->boolean('ack_failed_tests')) {
-                return redirect()->back()
-                    ->withInput()
-                    ->with('warning', trans('tests.status_change_warning'))
-                    ->with('test_issue_details', $issueLines->all())
-                    ->with('requires_ack_failed_tests', true);
+            if ($statusChanging && Asset::statusRequiresTestAck($targetStatus)) {
+                $evaluation = $guardService->evaluate($lockedAsset, $targetStatus);
+                $submittedHash = (string) ($validated['status_confirmation_hash'] ?? '');
+
+                if ($submittedHash === '' || !hash_equals($evaluation['confirmation_hash'], $submittedHash)) {
+                    return [
+                        'status' => 'confirmation_changed',
+                        'guard' => $evaluation,
+                    ];
+                }
+
+                $overrideReason = trim((string) ($validated['status_override_reason'] ?? ''));
+                if ($evaluation['has_issues']) {
+                    if (!Gate::allows('assets.override_sale_readiness')) {
+                        return ['status' => 'forbidden_override', 'guard' => $evaluation];
+                    }
+
+                    if ($overrideReason === '') {
+                        return ['status' => 'missing_reason', 'guard' => $evaluation];
+                    }
+                }
+
+                $request->merge([
+                    'ack_failed_tests' => 1,
+                    'ack_component_issues' => 1,
+                ]);
+                $lockedAsset->withStatusGuardAudit([
+                    'confirmation_hash' => $evaluation['confirmation_hash'],
+                    'override_reason' => $evaluation['has_issues'] ? $overrideReason : null,
+                    'overridden' => (bool) $evaluation['has_issues'],
+                    'workflow_issues' => $evaluation['workflow_issues'],
+                    'component_issues' => $evaluation['component_issues'],
+                ]);
             }
-        }
 
-        if ($status && $this->statusRequiresComponentIssueAck($status)) {
-            $warningRedirect = $this->componentIssueWarningRedirect($request, $asset);
-            if ($warningRedirect) {
-                return $warningRedirect;
+            $lockedAsset->status_id = $targetStatus->id;
+            if (array_key_exists('quality_grade', $validated)) {
+                $lockedAsset->quality_grade = $validated['quality_grade'];
             }
-        }
+            $lockedAsset->withStatusChangeNote($validated['status_change_note'] ?? null);
 
-        $asset->status_id = $validated['status_id'];
-        if (array_key_exists('quality_grade', $validated)) {
-            $asset->quality_grade = $validated['quality_grade'];
-        }
-        $asset->withStatusChangeNote($validated['status_change_note'] ?? null);
-
-        $clearLegacyAssignment = $legacyAssignmentCleanup->statusRetiresAssignment($status);
-
-        if ($asset->save()) {
-            if ($clearLegacyAssignment) {
-                $legacyAssignmentCleanup->clear($asset);
+            if (!$lockedAsset->save()) {
+                return ['status' => 'save_failed', 'errors' => $lockedAsset->getErrors()];
             }
 
-            return redirect()->route('hardware.show', $asset)
-                ->with('success', trans('admin/hardware/message.update.success'));
+            if ($legacyAssignmentCleanup->statusRetiresAssignment($targetStatus)) {
+                $legacyAssignmentCleanup->clear($lockedAsset);
+            }
+
+            return ['status' => 'saved', 'asset' => $lockedAsset];
+        });
+
+        if ($outcome['status'] === 'confirmation_changed') {
+            $message = __('The asset, workflows, or attached components changed. Review the refreshed confirmation before continuing.');
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $message,
+                    'guard' => array_merge($outcome['guard'], [
+                        'can_override_issues' => !$outcome['guard']['has_issues']
+                            || Gate::allows('assets.override_sale_readiness'),
+                    ]),
+                ], 409);
+            }
+
+            return redirect()->back()->withInput()->withErrors(['status_id' => $message]);
         }
 
-        return redirect()->back()->withInput()->withErrors($asset->getErrors());
+        if ($outcome['status'] === 'forbidden_override') {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => __('You may change this protected status only after all listed issues are resolved.'),
+                ], 403);
+            }
+
+            abort(403);
+        }
+
+        if ($outcome['status'] === 'missing_reason') {
+            $message = __('Enter a reason for continuing despite the listed issues.');
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $message,
+                    'errors' => ['status_override_reason' => [$message]],
+                ], 422);
+            }
+
+            return redirect()->back()->withInput()->withErrors(['status_override_reason' => $message]);
+        }
+
+        if ($outcome['status'] === 'save_failed') {
+            if ($request->expectsJson()) {
+                return response()->json(['errors' => $outcome['errors']], 422);
+            }
+
+            return redirect()->back()->withInput()->withErrors($outcome['errors']);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => trans('admin/hardware/message.update.success'),
+                'redirect_url' => route('hardware.show', $asset),
+            ]);
+        }
+
+        return redirect()->route('hardware.show', $asset)
+            ->with('success', trans('admin/hardware/message.update.success'));
     }
 
     /**

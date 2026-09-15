@@ -13,6 +13,13 @@ class AssetStatusEvent extends Model
         'to_status_id',
         'triggered_by',
         'note',
+        'guard_confirmation_hash',
+        'guard_override_reason',
+        'guard_override_details',
+    ];
+
+    protected $casts = [
+        'guard_override_details' => 'array',
     ];
 
     public function asset(): BelongsTo

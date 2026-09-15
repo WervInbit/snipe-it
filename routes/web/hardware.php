@@ -67,6 +67,9 @@ Route::group(
         Route::patch('{asset}/status', [AssetsController::class, 'updateStatus'])
             ->name('hardware.status.update');
 
+        Route::post('{asset}/status/preview', [AssetsController::class, 'previewStatusTransition'])
+            ->name('hardware.status.preview');
+
         Route::post(
             'bulkedit',
             [BulkAssetsController::class, 'edit']

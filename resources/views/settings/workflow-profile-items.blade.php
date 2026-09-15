@@ -18,6 +18,7 @@
         color: #6b7280;
         cursor: grab;
         padding: 6px 8px;
+        touch-action: none;
     }
 
     .workflow-profile-item-drag-handle:active {
@@ -121,7 +122,7 @@
                                     <th style="width:90px;">{{ __('Order') }}</th>
                                     <th>{{ __('Workflow Item') }}</th>
                                     <th>{{ __('Source') }}</th>
-                                    <th>{{ __('Defaults') }}</th>
+                                    <th>{{ __('Requirement') }}</th>
                                     <th class="text-right">{{ trans('button.actions') }}</th>
                                 </tr>
                             </thead>
@@ -131,7 +132,7 @@
                                 @forelse($profileItems as $profileItem)
                                     @php
                                         $item = $profileItem->item;
-                                        $labelMode = $item?->result_label_mode
+                                        $labelMode = $profileItem->result_label_mode
                                             ?: \App\Models\WorkflowProfileItem::LABEL_MODE_PASS_FAIL;
                                     @endphp
                                     @if(!$item)
@@ -156,8 +157,6 @@
                                                    name="items[{{ $item->id }}][sort_order]"
                                                    value="{{ $loop->index }}">
                                             <input type="hidden" name="items[{{ $item->id }}][enabled]" value="1">
-                                            <input type="hidden" name="items[{{ $item->id }}][is_required]" value="{{ $item->is_required ? 1 : 0 }}">
-                                            <input type="hidden" name="items[{{ $item->id }}][result_label_mode]" value="{{ $labelMode }}">
                                         </td>
                                         <td>
                                             <strong>{{ $item->name }}</strong>
@@ -165,10 +164,26 @@
                                         </td>
                                         <td>{{ $sourceLabel($item) }}</td>
                                         <td>
-                                            <span class="label {{ $item->is_required ? 'label-primary' : 'label-default' }}">
-                                                {{ $item->is_required ? __('Required') : __('Optional') }}
-                                            </span>
-                                            <span class="label label-default">{{ $resultModeLabel($labelMode) }}</span>
+                                            <input type="hidden" name="items[{{ $item->id }}][is_required]" value="0">
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input type="checkbox"
+                                                           name="items[{{ $item->id }}][is_required]"
+                                                           value="1"
+                                                           @checked($profileItem->is_required)>
+                                                    {{ __('Required in this workflow') }}
+                                                </label>
+                                            </div>
+                                            <select class="form-control input-sm"
+                                                    name="items[{{ $item->id }}][result_label_mode]"
+                                                    aria-label="{{ __('Result labels for :name', ['name' => $item->name]) }}">
+                                                <option value="{{ \App\Models\WorkflowProfileItem::LABEL_MODE_PASS_FAIL }}" @selected($labelMode === \App\Models\WorkflowProfileItem::LABEL_MODE_PASS_FAIL)>
+                                                    {{ __('Pass / Fail') }}
+                                                </option>
+                                                <option value="{{ \App\Models\WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE }}" @selected($labelMode === \App\Models\WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE)>
+                                                    {{ __('Done / Not Done') }}
+                                                </option>
+                                            </select>
                                         </td>
                                         <td class="text-right">
                                             <button type="submit"

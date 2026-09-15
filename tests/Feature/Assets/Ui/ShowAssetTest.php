@@ -303,6 +303,7 @@ class ShowAssetTest extends TestCase
             'workflow_profile_id' => $shipping->id,
             'workflow_item_id' => TestType::factory()->create()->id,
         ]);
+        $shipping->prerequisites()->sync([$diagnostics->id]);
 
         $response = $this->actingAs(User::factory()->superuser()->create())
             ->get(route('hardware.show', $asset));
@@ -311,19 +312,28 @@ class ShowAssetTest extends TestCase
         $response->assertSee('data-testid="hardware-tests-tab-actions"', false);
         $response->assertSee(trans('tests.tests_workflows'));
         $response->assertSee('data-testid="hardware-tests-start-form"', false);
-        $response->assertSee('data-testid="hardware-tests-workflow-profile"', false);
+        $response->assertSee('data-testid="workflow-progression"', false);
+        $response->assertSee('data-testid="workflow-step"', false);
+        $response->assertSee('data-workflow-position="1"', false);
+        $response->assertSee('data-workflow-position="2"', false);
+        $response->assertSee('workflow-progression__item--locked', false);
         $response->assertSee('name="workflow_profile_id"', false);
         $response->assertSee('Standard Diagnostics');
         $response->assertSee('Shipping Laptop');
         $response->assertSee(trans('tests.view_all_workflows'));
         $response->assertSee('data-testid="hardware-tests-tab-fab"', false);
         $response->assertSee('data-testid="hardware-tests-tab-fab-label"', false);
-        $response->assertSee('data-starts-selected-workflow="true"', false);
-        $response->assertSee('workflowChooser.requestSubmit', false);
+        $response->assertSee('data-opens-workflow-list="true"', false);
+        $response->assertSee('workflowChooser.scrollIntoView', false);
         $response->assertSee(route('test-runs.store', $asset), false);
         $response->assertDontSee('data-testid="hardware-tests-start-form-desktop"', false);
         $response->assertDontSee('data-testid="hardware-tests-tab-fab-form"', false);
         $response->assertDontSee('class="mb-3 text-right"', false);
+        $this->assertGreaterThanOrEqual(
+            2,
+            substr_count($response->getContent(), 'modal.appendTo(document.body);'),
+            'Status and workflow modals must be hoisted above Bootstrap backdrops.'
+        );
     }
 
     public function testDetailPageTestsTabUsesSingleColumnRunList(): void
@@ -337,6 +347,43 @@ class ShowAssetTest extends TestCase
         $response->assertSee('<div class="col-md-12">', false);
         $response->assertDontSee('<div class="col-md-6 col-sm-12">', false);
         $response->assertSee('data-testid="hardware-tests-run-list"', false);
+    }
+
+    public function testInfoTabShowsTheRequiredSaleWorkflowDependencyChainInOrder(): void
+    {
+        $asset = Asset::factory()->create();
+        $profiles = collect([
+            ['name' => 'Standard Diagnostics', 'order' => 0, 'blocks' => false],
+            ['name' => 'Cleaning', 'order' => 1, 'blocks' => false],
+            ['name' => 'Pre-Sale Check', 'order' => 2, 'blocks' => true],
+        ])->map(function (array $config): WorkflowProfile {
+            $profile = WorkflowProfile::factory()->create([
+                'name' => $config['name'],
+                'display_order' => $config['order'],
+                'blocks_sale_readiness' => $config['blocks'],
+            ]);
+            WorkflowProfileItem::factory()->create([
+                'workflow_profile_id' => $profile->id,
+                'workflow_item_id' => TestType::factory()->create(['applies_to_all' => true])->id,
+                'is_required' => true,
+            ]);
+
+            return $profile;
+        });
+        $profiles[1]->prerequisites()->sync([$profiles[0]->id]);
+        $profiles[2]->prerequisites()->sync([$profiles[1]->id]);
+
+        $response = $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('hardware.show', $asset));
+
+        $response->assertOk();
+        $response->assertSee('data-testid="required-workflow-summary"', false);
+        $response->assertSeeInOrder([
+            '1. Standard Diagnostics',
+            '2. Cleaning',
+            '3. Pre-Sale Check',
+        ]);
+        $response->assertSee('Open Workflows');
     }
 
     public function testDetailPageLabelsTestHistoryByWorkflowProfile(): void

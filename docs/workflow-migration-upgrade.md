@@ -49,3 +49,50 @@ Use `php artisan migrate:status` on the isolated clone to identify the exact mig
 Automated upgrade tests exercise clean, populated, interrupted/retried, mismatch, and rollback states on in-memory SQLite. The implementation also verifies foreign-key metadata through MySQL/MariaDB `information_schema` and PostgreSQL `information_schema`.
 
 Before V1 production release, repeat the populated upgrade and rollback rehearsal on the exact supported MySQL/MariaDB image. PostgreSQL should remain outside the declared V1 support matrix until the repository's other PostgreSQL-specific migration gaps are resolved and the same rehearsal passes there.
+
+## Post-V1 Execution Guards
+
+`2026_09_15_120000_add_workflow_execution_guards.php` is a separate additive
+extension. It adds editable profile dependencies, a repeat policy, and run
+snapshots for prerequisites, authorized overrides, and legacy profile display
+order. Existing profiles receive the safe `override_required` repeat policy but
+no inferred dependencies. The display-order snapshot preserves validation of
+older readiness hashes after presentation-only profile reordering.
+
+After applying it, review every active profile in Workflow Profiles and connect
+the intended graph deliberately. Every dependency requires all Required items
+in its prerequisite to be Pass/Done; optional items do not block progression.
+Any exceptional early start must use the audited override. Grant
+`tests.override_dependencies` only to operators who may start out of order or
+otherwise bypass a dependency. Repeats use the separate `tests.start_new_run`
+ability. The production Supervisor/Admin seed defaults include both.
+The migration does not rewrite runs or infer policy from display order.
+
+`2026_09_15_130000_add_workflow_execution_levels_and_status_guard_audits.php`
+is the follow-up additive extension. It:
+
+- adds `workflow_profiles.execution_level` with the compatible `operator`
+  default;
+- normalizes the removed unrestricted `allowed` repeat policy to
+  `override_required`;
+- adds confirmation hash, override reason, and issue-detail columns to asset
+  status history.
+
+After both migrations, rerun `ProductionPermissionGroupSeeder`. It merges the
+new workflow abilities into the operational role floor without removing custom
+permissions: Refurbisher can execute Operator profiles and edit runs; Senior
+also executes Senior profiles; Supervisor/Admin also execute Supervisor
+profiles, start guarded new runs, bypass dependency guards, perform sale
+transitions, and override live sale-readiness issues.
+
+The corresponding abilities are `tests.execute.senior`,
+`tests.execute.supervisor`, `tests.edit_runs`, `tests.start_new_run`,
+`tests.override_dependencies`, `assets.sale_transition`, and
+`assets.override_sale_readiness`. Review custom groups explicitly after seeding.
+Do not grant either override merely to make a blocked workflow disappear.
+
+The status confirmation is deliberately short-lived: any asset, workflow, or
+component change invalidates an already open dialog and returns a conflict so
+the operator must review the current state. A clean protected transition still
+requires confirmation, but only transitions with issues require the override
+ability and reason.

@@ -148,6 +148,38 @@ class AgentTestResultsTest extends TestCase
         });
     }
 
+    public function test_agent_completion_uses_the_profile_item_required_override(): void
+    {
+        $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAGOPTIONAL']);
+        $this->assignWorkflowComponentsToAsset($asset, [$this->keyboardSlug, $this->wifiSlug]);
+        $profile = WorkflowProfile::query()->where('slug', 'agent-diagnostics')->firstOrFail();
+        $wifiProfileItem = $profile->items()
+            ->whereHas('item', fn ($query) => $query->where('slug', $this->wifiSlug))
+            ->firstOrFail();
+        $wifiProfileItem->update(['is_required' => false]);
+        config(['agent.api_token' => 'secrettoken']);
+
+        $this->postJson('/api/v1/agent/reports', [
+            'type' => 'workflow_results',
+            'asset_tag' => $asset->asset_tag,
+            'workflow_profile_slug' => $profile->slug,
+            'results' => [
+                ['test_slug' => $this->keyboardSlug, 'status' => TestResult::STATUS_PASS],
+            ],
+        ], [
+            'Authorization' => 'Bearer secrettoken',
+        ])->assertOk();
+
+        $run = TestRun::query()->where('asset_id', $asset->id)->firstOrFail();
+        $this->assertNotNull($run->finished_at);
+        $this->assertDatabaseHas('workflow_results', [
+            'workflow_run_id' => $run->id,
+            'workflow_item_id' => $wifiProfileItem->workflow_item_id,
+            'status' => TestResult::STATUS_NVT,
+            'is_required' => 0,
+        ]);
+    }
+
     public function test_agent_gets_404_for_unknown_asset_tag(): void
     {
         \App\Models\User::factory()->create();
@@ -372,6 +404,88 @@ class AgentTestResultsTest extends TestCase
             ->assertJson(['message' => 'Unauthorized']);
     }
 
+    public function test_agent_cannot_bypass_a_workflow_dependency(): void
+    {
+        $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAGGUARDED']);
+        $this->assignWorkflowComponentsToAsset($asset, [$this->keyboardSlug, $this->wifiSlug]);
+        $profile = WorkflowProfile::query()->where('slug', 'agent-diagnostics')->firstOrFail();
+        $prerequisite = WorkflowProfile::factory()->create([
+            'name' => 'Intake',
+            'slug' => 'intake',
+            'display_order' => 0,
+        ]);
+        WorkflowProfileItem::factory()->create([
+            'workflow_profile_id' => $prerequisite->id,
+            'workflow_item_id' => TestType::factory()->create(['applies_to_all' => true])->id,
+        ]);
+        $profile->prerequisites()->sync([$prerequisite->id]);
+
+        config(['agent.api_token' => 'secrettoken']);
+
+        $this->postJson('/api/v1/agent/reports', [
+            'type' => 'workflow_results',
+            'asset_tag' => $asset->asset_tag,
+            'workflow_profile_slug' => $profile->slug,
+            'results' => [
+                ['test_slug' => $this->keyboardSlug, 'status' => TestResult::STATUS_PASS],
+                ['test_slug' => $this->wifiSlug, 'status' => TestResult::STATUS_PASS],
+            ],
+        ], [
+            'Authorization' => 'Bearer secrettoken',
+        ])->assertStatus(409)
+            ->assertJsonPath('blockers.0.workflow_profile_name', 'Intake')
+            ->assertJsonPath('blockers.0.actual_state', 'not_started');
+
+        $this->assertDatabaseCount('workflow_runs', 0);
+    }
+
+    public function test_token_only_agent_cannot_execute_a_senior_workflow(): void
+    {
+        $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAGSENIOR']);
+        $this->assignWorkflowComponentsToAsset($asset, [$this->keyboardSlug, $this->wifiSlug]);
+        $profile = WorkflowProfile::query()->where('slug', 'agent-diagnostics')->firstOrFail();
+        $profile->update(['execution_level' => WorkflowProfile::EXECUTION_SENIOR]);
+        config(['agent.api_token' => 'secrettoken']);
+
+        $this->postJson('/api/v1/agent/reports', [
+            'type' => 'workflow_results',
+            'asset_tag' => $asset->asset_tag,
+            'workflow_profile_slug' => $profile->slug,
+            'results' => [
+                ['test_slug' => $this->keyboardSlug, 'status' => TestResult::STATUS_PASS],
+                ['test_slug' => $this->wifiSlug, 'status' => TestResult::STATUS_PASS],
+            ],
+        ], [
+            'Authorization' => 'Bearer secrettoken',
+        ])->assertForbidden()
+            ->assertJsonPath('execution_level', WorkflowProfile::EXECUTION_SENIOR);
+
+        $this->assertDatabaseCount('workflow_runs', 0);
+    }
+
+    public function test_configured_inactive_agent_user_fails_closed(): void
+    {
+        $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAGINACTIVE']);
+        $agent = \App\Models\User::factory()->create(['activated' => false]);
+        config([
+            'agent.api_token' => 'secrettoken',
+            'agent.user_id' => $agent->id,
+        ]);
+
+        $this->postJson('/api/v1/agent/reports', [
+            'type' => 'workflow_results',
+            'asset_tag' => $asset->asset_tag,
+            'results' => [
+                ['test_slug' => $this->keyboardSlug, 'status' => TestResult::STATUS_PASS],
+            ],
+        ], [
+            'Authorization' => 'Bearer secrettoken',
+        ])->assertForbidden()
+            ->assertJsonPath('message', 'The configured agent user is missing or inactive.');
+
+        $this->assertDatabaseCount('workflow_runs', 0);
+    }
+
     private function assignWorkflowComponentsToAsset(Asset $asset, array $slugs): void
     {
         foreach ($slugs as $index => $slug) {
@@ -397,4 +511,3 @@ class AgentTestResultsTest extends TestCase
         }
     }
 }
-

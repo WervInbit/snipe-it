@@ -1,3 +1,806 @@
+# Session Progress (2026-09-15)
+
+## Feature Change Session Initialization
+
+- Reinitialized from `AGENTS.md`, the current progress log,
+  `docs/fork-notes.md`, repository history, and the working-tree state for an
+  owner-requested feature update.
+- The exact feature, desired behavior, and acceptance criteria have not yet
+  been specified. No implementation, test, database, runtime, or deployment
+  action was taken during this initialization checkpoint.
+- Preserve the existing uncommitted operator-guide batch and its generated
+  artifacts. Any feature work must be scoped around those changes, with
+  focused tests and the relevant README/fork-note documentation reviewed once
+  the target behavior is known.
+- Session notes remain in
+  `docs/agents/agents-addendum-2026-09-15-session-init.md`.
+
+## Workflow Execution Dependency Investigation
+
+- Investigated cross-profile execution order, repeat behavior, completion
+  semantics, permissions, audit history, agent ingestion, UI entry points,
+  seeded configuration, readiness coupling, and migration consequences.
+- Confirmed that `display_order` and profile-item `sort_order` are presentation
+  only. Every valid start request currently creates a new run; no dependency,
+  same-profile open-run, repeat, or concurrency guard exists.
+- Confirmed that `finished_at` is set by any partial result/note/photo save and
+  cannot represent full completion as-is. Sale readiness separately rechecks
+  current required results and hashes, but is not a complete progression
+  engine. The agent report endpoint is a second unguarded run-creation path.
+- Recommended explicit profile dependency and repeat-policy configuration, a
+  shared transactional progression service, one numbered all-profile process
+  list, dedicated override permissions, mandatory warning/reason confirmation,
+  and immutable prerequisite/override snapshots.
+- Recorded completion/N.v.t., per-profile required flags, applicability,
+  cycles, run deletion/editing, stale results, agent authorization, concurrent
+  starts, and readiness-hash/order invalidation as design risks. See
+  [the investigation](docs/plans/workflow-execution-dependencies-2026-09-15.md).
+- No application code, schema, database, runtime, or deployment was changed.
+  Focused PHP tests were not run because PHP/vendor PHPUnit are unavailable in
+  the host environment; this was a source/documentation investigation.
+
+## Workflow Execution Guards Implemented
+
+- Added an additive workflow-guard migration, editable profile dependencies,
+  editable repeat policy, cycle prevention, and
+  restrictive dependency deletion behavior. Existing profiles receive no
+  inferred graph and can be connected or rewired after migration.
+- Added one progression evaluator used by asset history/detail/empty-run
+  surfaces and both run-creation paths. Every applicable profile is visible and
+  numbered; dependency topology takes precedence over display-order ties;
+  unavailable rows remain readable, muted, and explain their blockers.
+- Enforced one current run per asset/profile through asset-row locking. An open
+  run is continued. Guarded repeats and early starts require
+  `tests.override_dependencies`, an explicit warning confirmation, and a
+  non-empty reason. The actor, time, reason, blocker details, and prerequisite
+  states/runs are saved on the run. Agent requests fail with structured 409
+  blockers and cannot perform a human override.
+- Completion and progression now use each profile item's editable Required
+  flag. Every required result must leave legacy pending `nvt`; Pass/Done is the
+  default dependency requirement, while optional results do not hold back the
+  next workflow. Profiles with no required items safely fall back to requiring
+  all results. A distinct explicit N/A/skipped state remains future work.
+- Fixed configured profile ordering by removing default-profile promotion from
+  shared list ordering, added persistent mouse/touch drag ordering on the
+  Workflow Profiles page, and retained explicit default selection for agent
+  fallback. Reordering is presentation-only in new readiness hashes; the
+  migration snapshots display order so pre-change hashes remain verifiable.
+- Repaired checkbox/radio label overlap globally with an explicit input margin
+  and rebuilt committed CSS assets. The fix covers the reported workflow-item
+  modal and other Bootstrap checkbox/radio labels.
+- Initial guarded SQLite verification passed 83 tests / 569 assertions. The
+  required-item/order compatibility follow-up passed 85 tests / 536 assertions.
+  Focused PHPStan and PSR-12 checks for the new service/migration pass; the production
+  frontend build and four Node security/build tests also pass. After the asset
+  detail page exposed the expected missing-table 500, the single additive
+  workflow-guard migration was applied to the local `https://dev.inbit`
+  development database. Laravel caches were cleared and a read-only progression
+  smoke check returned four rows for a real asset. Production remains unchanged
+  and no dependency graph was inferred.
+- Updated README, fork notes, agent API, workflow migration guidance, and the
+  investigation/decision record. Existing accepted/manual PDFs and concurrent
+  operator-guide work were preserved; WF-01/WF-02 need later new versions and
+  evidence before this behavior is released.
+
+## Workflow Run/Edit And Status Confirmation Implemented
+
+- Implemented permanently editable workflow runs, a privileged and audited
+  `Start new...` action, a compact role-aware process list, a Required-workflow
+  summary on the asset Info tab, and a Ready-for-Sale/Sold confirmation modal.
+- Confirmed that completed runs are not authorization-locked, but their primary
+  progression action disappears; edit remains discoverable only in history.
+  Current asset-editor authorization also lets every seeded operational role
+  edit another user's run, so shared editing is currently implicit rather than
+  a dedicated workflow permission.
+- Found inconsistent current-run selection: progression uses newest
+  `started_at`, while readiness uses `finished_at`/`created_at`. Editing an old
+  completed run can therefore promote it back into readiness. Recommended one
+  newest-started current-run rule and completion timestamps that do not change
+  for note/photo-only edits.
+- Every repeat now requires a distinct authorized, reasoned
+  `Start new...` confirmation; ordinary users retain `Edit run`. Profile-level
+  execution capabilities should represent Operator/Senior/Supervisor work and
+  must guard both starts and edits without hiding process rows.
+- Added a compact all-row tracker plus a read-only Info-tab summary of
+  sale-blocking profiles and their prerequisite closure. This avoids omitting a
+  non-sale-blocking prerequisite whose later regression should revoke readiness.
+- Replaced the detail selector's warning/reload/resubmit round trip with one
+  modal backed by a shared transactional server guard, exact warning-set
+  fingerprint, separate readiness-override permission, and durable
+  actor/reason/issue audit data. Clean protected changes still require explicit
+  confirmation; an issue override additionally requires permission and reason.
+- Because the first workflow-guard migration is recorded on `dev.inbit`, the
+  follow-up must use a new additive migration rather than editing the applied
+  file and creating schema drift between development and fresh installs.
+- Kept the implementation contract in
+  `docs/plans/workflow-run-status-ux-implementation-2026-09-15.md`. The plan
+  adds a modal-safe searchable Select2 dependency field, distinguishes item
+  defaults/profile-required items/sale-required profiles, specifies compact
+  workflow and Info-tab projections, and sequences run-selection, permissions,
+  role levels, and protected-status confirmation behind characterization tests.
+- Added the separate `2026_09_15_130000` migration for execution levels and
+  status-guard audit fields, searchable Select2 dependency configuration, and
+  explicit Operator/Senior/Supervisor execution gates. The first applied guard
+  migration was not edited.
+- Validation passed with the guarded in-memory SQLite boundary: 157 focused
+  PHP tests / 872 assertions, four Node security/build tests, scoped PHPStan,
+  Blade compilation, the production frontend build, and diff whitespace
+  checks.
+- Applied only `2026_09_15_130000` to the local development MySQL database
+  `snipeit_prod_work`; the unrelated pending failed-jobs migration was left
+  untouched. Reran `ProductionPermissionGroupSeeder`, cleared caches, and
+  verified the execution/audit columns plus Supervisor start-new and sale
+  override grants. Production was not accessed or changed.
+- The running `https://dev.inbit/hardware/1` boundary returns the expected 302
+  to a healthy HTTP-200 login page instead of a server 500. An authenticated
+  browser smoke could not be completed because the Windows browser helper twice
+  failed during initialization with `failed to write kernel assets: path not
+  found`; the authenticated asset-detail render remains covered by the passing
+  `ShowAssetTest` batch and needs final visual confirmation in the user's
+  existing browser session.
+- Fixed the follow-up asset-detail input blocker by hoisting the protected-status
+  and workflow-override dialogs to `document.body` before Bootstrap creates its
+  body-level backdrop. This prevents a nested stacking context from placing an
+  invisible backdrop above the dialog and swallowing all taps/clicks. Blade
+  compilation and the two focused asset-detail/status suites passed (23 tests,
+  132 assertions); the Windows browser helper still fails before initialization,
+  so the already-open development page needs a hard reload and manual smoke.
+
+# Session Progress (2026-09-10)
+
+## Manuals Commit Preparation - 2026-09-10
+
+- Reviewing the manuals-only commit scope: guides, accepted package, review
+  decisions, historical comparison/rollback snapshots, generators and related
+  documentation. Keep unrelated production tests and identifier/preflight
+  progress notes outside this commit; preserve their working-tree changes.
+- Temporary output, regenerated proofs and installed dependencies stay ignored.
+  Explicitly retain the accepted kit's ten frozen source HTML files that the
+  generic output ignore rule would otherwise omit. Preserve checksummed review
+  record bytes across Git checkouts with scoped attributes.
+- Checks passed: 18 new-script syntax checks, shared guide-system checks,
+  all 369 kit inventory hashes, 483 staged resource files with exact bytes,
+  five source ZIP integrity scans and 619 links in staged documentation.
+  Staged whitespace passes; frozen snapshots retain original whitespace.
+- The full legacy npm test remains blocked by three already-tracked PDFs
+  absent from the historical draft manifest: CAT-00 v7/v8 and CAT-01 v4.
+  Preserve them and record the limitation; no application tests or PDF
+  regeneration were needed for this commit. Repaired the split TODO item.
+- Prepared one manuals-only commit with 589 files; eight unrelated sections
+  in the two shared logs and the production test remain outside its scope.
+
+## Accepted Guide Package - 2026-09-10
+
+- Created [accepted-guides-v1](resources/manuals/operator-guides/accepted-guides-v1/README.md):
+  16 latest recorded accepted guides / 27 pages, seven older accepted PDFs,
+  self-contained HTML, source screenshots/generators/rules and portable scripts.
+  The exact selection retains WF-02 v10 and CMP-01 v4; their newer drafts
+  lack acceptance. No guide content, filenames or acceptance status changed.
+- Relocated the kit to a path with spaces and regenerated all 16 guides.
+  All 27 pages are pixel-identical to their originals at 96 dpi. Inspected
+  WF-02's two pages, CMP-01 and SC-01; no regeneration differences found.
+  Existing-run, known-version and accepted-input write guards passed.
+- Preserved all original accepted PDF hashes and recorded validation reports.
+  Final package integrity and focused documentation checks are recorded in
+  the kit's VALIDATION.md. Application tests, physical print and novice-user
+  trials were not run; this task only assembles the accepted review snapshot.
+
+## Owner Clearance For User Review - 2026-09-10
+
+- Owner cleared the ten exact new versions in the v5 changed-guide PDF for
+  review by other users. Recorded Internal review candidate status and the
+  exact hashes in a new decision and current selection v4; prior manifests stay.
+- Updated ten reviews/specifications, registry and five runtime status entries.
+  Four earlier acceptances remain; user feedback and third-party approval are
+  pending. The separate catalogue prototype is outside this clearance.
+- No PDF regeneration, renaming, distribution, application or data changes.
+- Validation passed: all 277 prior PDF/archive/manifest files unchanged,
+  607 local links valid, shared guide checks passed (25 entries, 5 placements),
+  and scoped whitespace clean. No application or new user tests were run.
+- [Decision and exact versions](docs/manuals/operator-guides/reviews/owner-review-readiness-2026-09-10.md).
+
+
+## Changed-Guide Comparison - 2026-09-10
+
+- Owner requested only the changed guides. Assemble the plain v5 pair from
+  existing exact PDFs: ten guides, previous 20 pages / new 19 pages, same
+  guide order. Preserve all previous individual and combined versions.
+- No guide content, application state or acceptance changes.
+- Completed: all 39 merged pages match their individual PDFs pixel-for-pixel
+  at 96 dpi; page streams, boxes, hashes, count and order verified. Sample
+  rendered pages inspected; scoped whitespace passed. No application tests
+  needed for this PDF-only assembly.
+
+## Owner Manual Corrections Implementation
+
+- Completed ten versioned candidates: SC-01 v12, AST-02 v8, WF-01 v13,
+  CMP-02 v6, CMP-04 v7, USR-04 v6, CAT-00 v11, CAT-01 v7, USR-01 v13
+  and USR-02 v11. The last two align their reference with USR-04's new scope.
+- Fixed marked badges, targets, crop, references, quantities and routes;
+  retained established layouts and help. USR-04 is a one-page disable-login
+  task. USR-04 v5 remains explicitly not accepted. All four exact accepted
+  PDFs, including AST-04 v6, are unchanged.
+- Delivered plain v4 previous/current PDFs: same 22-guide order, 48/47 pages.
+  V3 remains an intermediate assembly before the dependent reference fixes.
+  Previous means the immediately preceding reviewed set (v2-huidig).
+- Added a separate two-page catalogue field-to-result prototype and a desk
+  dependency audit of all 22 guides. Prototype asset endpoints are schematic;
+  matched live evidence, its guide placement and a novice trial remain open.
+- Future QA preference is Testing completed, without another Awaiting approval
+  state. No application code, status labels or live data changed.
+- [Implementation, PDFs and remaining decisions](docs/manuals/operator-guides/reviews/owner-corrections-2026-09-10.md).
+- Checks passed: 19 revised guide pages and two prototype pages visually
+  reviewed; focused geometry/reference/scope assertions; all 95 merged pages
+  pixel-identical to source at 96 dpi. Preserved 22 previous selected hashes,
+  29 original/checkpoint PDFs, 25 earlier round PDFs and prior archives/bundles.
+  New source snapshot verifies 327 files. Shared guide checks passed (25
+  entries, 5 placements), as did 575 local links and scoped whitespace.
+- No application tests, physical print or first-time-reader trial. Remaining
+  live QA rules, planned guides, account lifecycle tasks and interrupted-form
+  exercises are recorded in the linked review and TODOs.
+
+## Owner Manual Review And Follow-Up Plan
+- Recorded all owner notes in [review TODOs](docs/manuals/operator-guides/reviews/owner-review-todos-2026-09-10.md).
+  Confirmed the reported visual defects on eleven relevant PDF pages, retained
+  prior exact acceptances, and marked USR-04 v5 explicitly not accepted.
+- Separated seven local fixes from USR lifecycle scope, QA completion/blockage,
+  CAT quantities/deviation wording, and the larger field-to-result/learning-order work.
+- Read-only application checks: asset check-in/checkout retirement differs from
+  still-present licence/accessory routes; user deletion still checks relationships.
+  QA Hold seed meaning differs from the guide's completed-work handoff meaning.
+- No new PDFs, renderer changes, application changes or data mutations. This
+  pass records implementation/decision TODOs; it does not implement those fixes.
+- Validation: all 22 current individual PDFs and four copies of the plain
+  comparison pair retain their hashes; 496 local links across 144 Markdown
+  files and scoped whitespace checks pass. No application tests were needed.
+
+## Identifier Production-Applicability Audit
+- Audited the uncommitted sequential asset/component numbering, explicit
+  duplicate acceptance, ambiguity handling, and QR identity/cache changes.
+  No production access, implementation mutation, or application-data change.
+- Current-worktree risk slices pass on isolated SQLite (174 tests / 870
+  assertions) and disposable MariaDB 11.4.7 (174 / 889), including allocator
+  and unconfirmed-write concurrency. Syntax and scoped whitespace pass;
+  focused PSR-12 has no errors and three line-length warnings. PHPStan remains
+  deferred by owner direction.
+- A disposable clone of the retained production-data rehearsal migrated from
+  477 to 479 migrations with 12 assets / 4 components unchanged. The two
+  counter rows, singleton write lock, and non-unique component-tag index were
+  correct; no normalized tag/serial duplicate groups existed. A second clone
+  passed rollback to 477 with the original unique index and no coordination
+  tables, then reapplication to 479 with unchanged inventory counts. Temporary
+  clone and test resources were removed.
+- Technical implementation verdict: no supported-MariaDB functional blocker
+  found. The identifier implementation, both migrations, tests, policy, and
+  audit record were isolated from the concurrent manuals work in commit
+  `fbf4aea74f` (`Add Sequential Inventory Identifiers`). No push, image build,
+  or deployment has been performed. Build the deployment candidate from that
+  exact commit rather than the still-dirty shared workspace, then use a
+  backed-up maintenance deployment with code and both migrations applied
+  together. Details:
+  [identifier audit addendum](docs/agents/agents-addendum-2026-09-10-identifier-audit-session-init.md).
+
+## Plain Previous And Current Guide PDFs
+- Owner clarified the requested comparison: two long PDFs containing the
+  previous and current guide versions as-is, without extra navigation or pages.
+- Created the versioned v2 previous/current pair, each with all 22 guides / 48
+  original pages in matching order. The previous set uses the frozen pre-audit
+  selection; the current set uses the latest exact versions. Preserved v1 history.
+- See [plain comparison pair](docs/manuals/operator-guides/reviews/current-set-review-2026-09-10.md).
+- Validation passed: all 96 merged pages are pixel-identical to their source
+  pages at 96 dpi; page streams, sizes, order and guide boundaries match.
+  No pages or bookmarks added. First pages visually inspected; whitespace clean.
+
+## Manual Acceptance And Combined Review PDF
+- Session initialized from AGENTS.md, progress, fork notes, and manual records.
+- Record owner acceptance of AC-01 v9, AC-02 v4, AST-03 v15, and AST-04 v6;
+  combine the current 22 guides for scrolling review without changing their pages.
+- See [session addendum](docs/agents/agents-addendum-2026-09-10-session-init.md).
+- Completed: [reviewbundel v1 and exact decisions](docs/manuals/operator-guides/reviews/current-set-review-2026-09-10.md)
+  contains all 22 current guides / 48 unchanged content pages plus clickable contents.
+  Recorded owner acceptance against the existing hashes of the four named versions;
+  advanced their live registry/specification records and two runtime status fields.
+- Validation: all 48 merged guide pages are pixel-identical at 96 dpi; content
+  streams/page boxes, 22 contents links and 23 bookmarks checked. Contents PNG
+  visually inspected. Verified 29 original/checkpoint PDFs, 25 prior review-round
+  PDFs and frozen source archives. Shared-guide checks and scoped whitespace pass.
+- No application changes, deployment, application test suite, physical print,
+  or first-time-user trial. Earlier PDFs/manifests/source ZIPs remain preserved.
+
+# Session Progress (2026-09-08)
+
+## Addendum (2026-09-08 Identifier Confirmation And Qualification)
+- Owner explicitly authorized duplicates of both visible tags/QR-label IDs and
+  serial numbers, including assets, tracked components, and existing records.
+  Each duplicate field requires its own live warning and explicit acceptance.
+- Implemented server-side serialized validation, per-field acceptance/reset,
+  existing-record warnings, permission-filtered match links, scan selection,
+  administrator component-tag edits, and separate QR cache paths per record.
+- Extended CSV acceptance and ambiguous-update handling. Agent reports accept
+  an explicit asset ID and refuse ambiguous tags; legacy assignment imports
+  refuse to select an arbitrary destination. Updated integration/rollback notes
+  in [sequential identifiers](docs/sequential-identifiers.md).
+- Supersedes the earlier migration/coverage status below: both identifier
+  migrations were applied to local development only. No inventory identifiers
+  were rewritten. Cleared an existing root-owned compiled-view permission issue
+  in local storage/framework/views. Production was not accessed or deployed.
+- Qualification uses separate application containers with temporary storage and
+  cleared config, explicit testing database variables, and a disposable MariaDB
+  11.4.7 database named snipeit_test on an internal network with no published port.
+  Shared development data and the concurrent manual work remain preserved.
+- MariaDB component/import/identifier/QR regression gate: 322 tests and 1,891
+  assertions passed, including four-process allocation on SQLite and MariaDB.
+  New PHP files pass focused PSR-12; changed PHP files pass syntax checks.
+- Browser checks on dev.inbit verified independent asset/component warnings,
+  cross-type matches, acceptance reset after changing a tag, and blocked Save.
+  Both preview forms were discarded; no inventory rows were created by UI tests.
+- Full guarded SQLite non-LDAP run completed: 2,191 tests / 10,699 assertions,
+  with five failures. Three assertions still expected the previous label-cache
+  filename or silent duplicate reuse; two existing production-config tests
+  assumed LF line endings. Corrected the assertions and made those two test
+  reads CRLF-compatible without changing production configuration.
+- Final SQLite correction/identifier/scan gate passes 83 tests / 478 assertions.
+  Final MariaDB identifier/concurrency gate passes 18 tests / 108 assertions;
+  four simultaneous unconfirmed manual writes produce exactly one saved asset.
+  Earlier focused MariaDB gates also passed 58 tests / 293 assertions and
+  26 tests / 126 assertions. Counts overlap and are not a unique-test total.
+- Sparse batch rows now retain tag/serial/acceptance alignment after removing
+  a middle row, and new blank rows always use server allocation. Case-only
+  identifier edits agree between live checks and save validation. Both covered
+  by the final regression gates. Syntax, focused PSR-12, and whitespace pass.
+- LDAP is unavailable in the local image; PHPStan remains deferred under the
+  prior owner decision. No physical printer rehearsal or production deployment
+  is claimed. No front-end bundle rebuild is needed for these Blade scripts.
+
+## Addendum (2026-09-08 Guide Set Focused Revisions)
+- Owner judged WF-01 v12 suitable and explicitly requested the same approach
+  for all existing guides. Inspect every existing guide; preserve task layouts,
+  screenshots, captions, hints, help, and numbered version filenames.
+- Apply local choice, missing-action, consistency, and evidence corrections
+  in new versions. Keep historical PDFs and rejected proposals intact; avoid
+  broad restyling or silently replacing accepted operational policies.
+- Work in progress, starting with USR-04 and CAT-04, followed by the remaining
+  generated guides. Planned-only USR-05/CAT-05/CAT-06 are dependency checks.
+
+## Addendum (2026-09-08 WF-01 v12 Generation)
+- Generated the owner-requested `WF-01-workflow-starten-v12-draft.pdf` from
+  v10 with only a local step-3 choice frame/introduction and updated version/date.
+  Preserved all five screenshots at identical dimensions, every original text
+  line, all four help items, the two-column layout, and existing artifacts.
+- The v10 reproduction matches the frozen raster pixel for pixel. V12 changes
+  no pixels outside step 3 and version/date areas at 144 dpi. Full-page visual
+  inspection, A4/text/geometry/overlap checks, and shared guide tests pass.
+- Retained the one-page PDF (207,244 bytes), separate v12 checksum manifest,
+  validation, and an eight-file source snapshot in the existing review round.
+  The four earlier pilot/comparison PDF hashes remain unchanged. No accepted
+  or selected version was replaced; v12 awaits exact owner review. Review:
+  `docs/manuals/operator-guides/reviews/WF-01-v12.md`.
+- The complete manifest-only package verifier passes with 18 active scripts;
+  the earlier actual-root unlisted-draft issue is unchanged. No application
+  tests, live capture, physical-print pass, or observed-user pass are claimed.
+  Unrelated identifier/application changes in the shared workspace were preserved.
+
+## Addendum (2026-09-08 WF-01 v12 Naming)
+- Owner explicitly assigned the next revision v12 and requested consistent
+  versioned filenames. Recorded `WF-01-workflow-starten-v12-draft.pdf` and
+  `WF-01-v12.md` in the feedback, ledger, handoff, guide notes, and TODO.
+- Continue the v11 filename stem and increment the version for future changes;
+  do not add competing descriptive suffixes or rename historical artifacts.
+  V12 remains planned; no PDF was generated or existing artifact changed.
+
+## Addendum (2026-09-08 Pilot Direction Rejected)
+- Owner rejected the first audit pilot design direction, citing changed WF-01
+  step meanings, lost screenshots, missing hints/help, and excessive unused
+  page width. Only the clearer two-choice block was explicitly preferred.
+- Compared WF-01 v10 and v11 renders and recorded the exact regressions.
+  Updated candidate decisions, continuation notes, and shared maintenance
+  guidance to preserve baseline instructional support during focused repairs.
+- Recommended the next proof start from WF-01 v10, retaining 2A selection,
+  3A start, all five visuals, and all four bottom help items, with a local
+  step-3 choice improvement. No new PDF or generator change in this turn.
+- Feedback: `docs/manuals/operator-guides/reviews/2026-09-08-pilot-direction-feedback.md`.
+  Existing acceptance, selected versions, checkpoint and rejected PDFs remain
+  unchanged. Factual audit findings remain open for separate local corrections.
+- Validation: 29 baseline/original PDF hash pairs, 245 archived source files,
+  241 local links and all four retained pilot/comparison PDF hashes pass;
+  original generators/evidence/manifests are unchanged. Scoped whitespace
+  checks pass. No application tests were needed for these review-note changes.
+
+## Addendum (2026-09-08 Audit Pilot Generation)
+- Generated owner-requested WF-01 v11 (one page), USR-04 v4 (three pages),
+  and CAT-04 v3 (six pages) as separate unaccepted audit-round proposals.
+- Assembled a 24-page comparison PDF with frozen earlier drafts, a visible
+  new-round divider on page 12, the ten new pages, and accepted WF-01 v9 as
+  an appendix. Saved four PDFs, checksums, validation and source snapshots in
+  `resources/manuals/operator-guides/review-rounds/2026-09-08`.
+- WF-01 tests checking existing runs before choosing a start/continue route.
+  USR-04 tests three independent lifecycle routes and corrects restore-state
+  assumptions. CAT-04 names both Add actions, uses corrected control captures,
+  and replaces the simulated Enum warning with a labeled numeric explanation.
+- Each version has its own review record with changes, benefits, drawbacks,
+  evidence limits and rejection/recovery instructions. Prior selections and
+  acceptance remain unchanged; no shared tokens or historical generator changed.
+- Pilot specification:
+  `docs/manuals/operator-guides/reviews/audit-pilot-2026-09-08-specification.md`.
+  Historical PDFs, existing acceptance, and global generator behavior remain
+  protected by the frozen checkpoint.
+- Validation: all ten new pages and four divider/index pages rendered and
+  inspected; A4/text/page/component/focus/overlap checks pass. New comparison
+  pages match standalone rasters, prior draft page streams are retained, and
+  all 29 frozen/original PDF hash pairs still match. Representative instruction
+  sizes are 8.78/9.07/9.21 pt; no physical-print or observed-user pass is claimed.
+- No application or production operation was performed by this manual work.
+  Separate tag-generation model/service/view/migration/test edits appeared in
+  the shared workspace during generation and were left untouched.
+- Shared guide checks, 223 local links, scoped whitespace checks and all four
+  retained output hashes pass. The complete manifest-only package verifier
+  passes with 17 active scripts. The actual draft root still contains the
+  three previously recorded unlisted historical PDFs; this pilot does not
+  claim to have resolved that packaging issue.
+
+## Addendum (2026-09-08 Guide Review Round Boundary)
+- At the owner's request, froze the existing manual set before any new-model
+  audit revisions: 9 internally accepted PDFs and 20 unaccepted drafts, exact
+  versions/statuses/checksums, and 245 supporting source/evidence files in a
+  separate archive. Existing PDFs and acceptance records remain unchanged.
+- Added a visible separator to the guide index, a frozen comparison index,
+  and a separate audit candidate/decision ledger. Recorded that audit proposals
+  may be rejected and cannot silently supersede accepted policy or content.
+- Documented new-version review, per-change benefits/drawbacks, comparison
+  against both the current draft and accepted predecessor, and selective
+  recovery. No guide correction, generation, or application change was made.
+- Checkpoint: `docs/manuals/operator-guides/reviews/baseline-2026-09-08.md`.
+  New round: `docs/manuals/operator-guides/reviews/audit-revision-round-2026-09-08.md`.
+- Validation: all 29 frozen/original PDF hash pairs and all 245 archived source
+  files match; archive integrity and 187 local links pass. Original generators,
+  evidence, and manifests are unchanged. Shared guide-system checks and
+  `git diff --check` pass. The earlier actual-root package warning about three
+  unlisted historical drafts remains; no application tests were needed.
+
+## Addendum (2026-09-08 Independent Manuals Audit)
+- Completed the owner-requested audit of all 22 current generated guides /
+  48 A4 pages, shared guide rules, planned dependencies, and targeted local
+  application behavior. Recorded 22 prioritized findings with exact versions,
+  page/step evidence, user impact, and proposed corrections.
+- Key findings include Admin/Superadmin group-assignment mismatch, changing
+  user identities in screenshots, sequential delete/restore instructions,
+  conflicting Product ID guidance, a simulated hierarchy warning outside the
+  real numeric warning conditions, and incomplete workflow routing/readiness.
+- Measured important PDF instruction text at approximately 5-7 pt; inspected
+  rendered pages for instruction/image overlap and evidence consistency.
+- Shared component checks pass. All 29 manifest PDF hashes and page counts
+  match. The strict actual-root package verifier fails on three unlisted
+  historical drafts; a fresh manifest-only draft mirror passes the complete
+  103-evidence / 9-accepted / 20-draft / 2-baseline / 16-script verifier.
+- No guides, policies, application records, or acceptance states changed.
+  No production access or application tests; physical print and observed-user
+  validation remain outside this inspection's evidence.
+- Report and exact evidence:
+  `docs/manuals/operator-guides/reviews/2026-09-08-independent-usability-audit.md`
+  and `docs/manuals/operator-guides/reviews/2026-09-08-audit-evidence.json`.
+
+## Addendum (2026-09-08 Manuals Session Initialization)
+- Initialized from AGENTS.md, recent progress and fork notes, contributor
+  guidance, and the operator-guide README, handoff, registry, decision log,
+  CAT family plan, TODO, and form-control evidence recapture record.
+- The working tree was clean before initialization. Current CAT drafts are
+  CAT-00 v9, CAT-01 v5, CAT-02 v1, CAT-03 v1, and CAT-04 v2; all remain
+  unaccepted. Nine accepted PDFs remain frozen at their exact versions.
+- Pending follow-up: regenerate CAT-03, CAT-04, and CMP-02 using the 11
+  replacement form-control captures and remeasure focus marks before review.
+  CAT-05 is the next new CAT guide; CAT-06 needs a source-recording decision.
+- Session initialization only; no guide generation or application tests were
+  needed. Documentation whitespace validation passed. No production access.
+- Session notes: `docs/agents/agents-addendum-2026-09-08-session-init.md`.
+
+## Addendum (2026-09-03 CAT-02 v1 Modelspecificatie)
+- Reworked the stale CAT-02 specification into a six-page Supervisor workflow
+  for one exact model-number baseline: open and validate, choose direct value
+  or expected component, complete both input routes, resolve derived-value
+  conflicts, save, and verify.
+- Captured seven new canonical evidence states from the controlled development
+  environment without submitting a form. Existing saved-row removal controls
+  were hidden to represent the Supervisor route; conflict and success messages
+  were injected only into the screenshot DOM.
+- Extended the shared context strip with an optional per-value font size so a
+  full guide name can remain visible without abbreviation. Existing guides do
+  not opt into the new setting and retain their output.
+- Generated
+  `resources/manuals/operator-guides/drafts/CAT-02-modelspecificatie-opbouwen-v1-draft.pdf`
+  as an unaccepted working draft. No accepted guide record changed.
+- Validation passes: generator component/geometry checks, six-page Poppler
+  raster inspection, PDF page/encryption/A4/text/URL checks, shared guide-
+  system tests, JSON/hash checks, and the clean-manifest package verifier with
+  92 evidence files, 9 accepted PDFs / 11 pages, 20 unaccepted PDFs / 45
+  pages, 2 baselines, and 16 active scripts.
+
+## Addendum (2026-09-03 CAT-01 v5 Clarity Revision)
+- Rebuilt CAT-01 as a new five-page v5 working draft after operator review of
+  the sparse text, duplicate-search route, hidden Basismodel-creation action,
+  and model-number label meaning.
+- Step 2 now names duplicate prevention and makes the separate
+  `Instellingen > Model Numbers` page explicit. Route C now names making a new
+  Basismodel and links directly to numbered step 4.
+- Step 6 now defines the label as the default processor, RAM, and storage for
+  the exact printed code and states that a one-asset exception is recorded on
+  the asset without creating another model number.
+- Added the reusable density rule: sparse instruction regions increase body
+  size and line height instead of inheriting the minimum type used by dense
+  blocks. Applied it only to CAT-01 v5; no accepted guide changed.
+- Retained CAT-01 v4 as a reproducible generator branch. All five regenerated
+  v4 pages match the existing 150-DPI raster references byte-for-byte.
+- Validation passes: focused generation component/geometry checks, five-page
+  visual inspection, PDF page/encryption/A4/text/URL checks, shared
+  guide-system tests, v4 raster reproduction, and the manifest-only complete
+  package verifier (85 evidence files, 9 accepted PDFs / 11 pages, 19
+  unaccepted PDFs / 39 pages, 2 baselines, and 16 active scripts).
+- CAT-01 v5 remains an unaccepted working draft; no accepted guide changed.
+
+## Addendum (2026-09-03 V1 Continuation)
+- Resumed the V1 release, deployment, and implementation track after the
+  reusable production profiles were committed and pushed as `fe4d0b4fe8`.
+- This session begins with read-only repository and temporary-production
+  checks, then will separate actual V1 blockers from accepted post-V1 work.
+- The existing CAT/manual worktree belongs to the separate guide effort and
+  remains outside this session's implementation and commit boundary.
+- No destructive database operation, reseed, legacy cleanup, or deployment
+  mutation is authorized by this checkpoint.
+- Session notes:
+  `docs/agents/agents-addendum-2026-09-03-v1-continuation-session-init.md`.
+- Confirmed the reusable-deployment commit `fe4d0b4fe8` remains on
+  `origin/master`. The separate guide session has since created local commit
+  `cf13808744`; this V1 session does not amend, reset, stage, or push that
+  guide-owned commit.
+- Rechecked the data-bearing temporary production host read-only. App, web,
+  queue, scheduler, MariaDB, Redis, and TLS edge are healthy; HTTPS login and
+  health succeed; 477 migrations are applied with none pending; the retained
+  17-user/15-active-user, 12-asset, 14-model, 6-profile, 29-item, and zero-
+  failed-job counts match the post-cutover baseline. All recorded backup
+  checksum inventories remain present.
+- One root-owned read-only Tinker probe was correctly blocked when PsySH could
+  not create `/root/.config` on the read-only container filesystem. It changed
+  no application/database data and was replaced with a direct read-only
+  MariaDB query; the resulting known log entry is not a runtime regression.
+- Confirmed all five inherited demo placeholder model numbers remain visible
+  but have zero assets. They retain legacy seeded attributes/templates because
+  the production migration intentionally ran only the additive permission
+  seeder. No live data was changed; optional deprecation/replacement remains an
+  explicit data-cleanup decision rather than a V1 implementation blocker.
+- Added `docs/v1-release-readiness-status-2026-09-03.md` and draft V1.0.0
+  release notes. Updated README, root contributor/security/testing links, the
+  controlling V1 plan, and its documentation-contract test to the new status.
+- The current no-go is no longer caused by a known severity-1/2 application
+  defect. Open gates are one representative migrated data/private-file
+  workflow, separate manual alignment, an exact final commit/build/digest,
+  release ownership/approval, and final-server deployment acceptance.
+- Validation: `git diff --check` passes; checked local Markdown links resolve;
+  guarded in-memory SQLite runs of `ForkDocumentationBoundaryTest` and
+  `ReleaseVersionConfigurationTest` pass 9 tests with 438 assertions. PHPStan
+  was not run by owner decision; no full suite was repeated for this
+  documentation/status-only change.
+- A refreshed dependency audit found newly disclosed advisories after the
+  earlier candidate qualification. Updated Livewire 3.6.4 to 3.8.7 and
+  republished its client assets; updated locked `fast-uri` to 3.1.7 and
+  `postcss-selector-parser` to 6.1.4/7.1.5. Composer validation/patch/audit,
+  npm clean install and complete/production audits, four Node tests, and the
+  production browser-asset build pass with no high/critical policy finding.
+- The complete local PHPUnit invocation passed 2,178 tests and failed only ten
+  LDAP-group tests because the five-week-old app image lacks PHP LDAP
+  constants. The documented guarded non-LDAP run passes 2,170 tests with
+  10,641 assertions. GitHub Actions database jobs now explicitly install LDAP
+  for deterministic full mocked coverage; the affected infrastructure suite
+  passes 8 tests with 154 assertions.
+- Browser smoke testing on `dev.inbit` loaded the refreshed Livewire asset,
+  rendered the importer, and exercised a non-persistent server-backed category
+  form update without a browser warning or error.
+- Provisional production app/web builds pass the repository content verifier;
+  the app reports Livewire 3.8.7 and both images carry Livewire manifest hash
+  `bd51a0a6`. These uncommitted worktree images are build smoke evidence only,
+  not final artifacts; blocking image scans remain for exact-candidate CI.
+- The running temporary-production images remain healthy but predate this
+  dependency refresh. No live service or row changed. A committed exact
+  candidate still needs MariaDB, production-image/security, digest, and
+  deployment qualification before V1 approval.
+- Final checkpoint hygiene passes: local links across the ten changed release
+  documents, YAML parsing for all four edited test workflows, published versus
+  packaged Livewire asset parity, Composer validation/patch/audit, complete and
+  production npm audits, and `git diff --check`. The provisional app/web image
+  contents were also verified, but remain non-release worktree builds.
+- By explicit owner direction, retrospectively designated the exact 2026-09-01
+  deployed source and image pair as the internal V1.0.0 production baseline.
+  The authoritative source is `1c9131f4c9`; exact app/web digests come from the
+  retained off-host post-cutover snapshot. No production access was used.
+- Current dependency/CI changes are now post-V1 (`v1.1.0-dev`) work and require
+  their own qualification before a later deployment. Remaining small fixes,
+  additions, manual alignment, representative private-file acceptance, and
+  named operational ownership remain follow-up work rather than blockers to
+  the historical V1.0.0 designation.
+- The owner established a hard boundary: do not access, inspect, browser-test,
+  query, or mutate production without new explicit permission.
+- Created local annotated tag `v1.0.0` at exact deployed commit
+  `1c9131f4c9`; it has not been pushed. Updated the working version to
+  `v1.1.0-dev`. Guarded in-memory SQLite release-version/documentation tests
+  pass 9 tests with 440 assertions, local links across ten release-facing
+  documents pass, the tag dereferences to the expected commit, and
+  `git diff --check` passes.
+
+## Addendum (2026-09-03 Production QR Printer Hotfix)
+- With renewed explicit owner permission, repaired the temporary production
+  server's QR printing path without touching the database or unrelated
+  services. Root cause was production-profile drift: the hardened app image
+  lacked `cups-client`, and the production Compose/runtime configuration did
+  not pass the printer queue, command, options, or CUPS server variables.
+- Added the CUPS client to the production image, passed the printer variables
+  through the shared app environment, documented the optional configuration,
+  and extended both the image verifier and production configuration tests.
+- Built the hotfix from isolated V1 commit `a5673bc041`, passed 13 focused
+  tests with 159 assertions, and verified `lp`, `lpstat`, PHP, and required PHP
+  extensions in the exact image. The repository-local durable fix was then
+  carried to `master` as `cdd90d3832`.
+- Before activation, verified the SSH host fingerprint and artifact hashes,
+  retained the prior release/image digest, and copied the protected runtime
+  environment to
+  `/srv/snipeit-v1/backups/config/production.env.before-printer-20260903-130745`.
+  The candidate Compose configuration and container-to-CUPS queue lookup both
+  passed before the live runtime file was replaced.
+- Production now runs app, queue, and scheduler from immutable app digest
+  `sha256:c9f3cbc0ccbe8aadf9060810d7fdc65500a09992b7eb431de32acdcc09c80f28`.
+  All six application/dependency services are healthy, the HTTPS health/login
+  routes respond, and no new critical application log line was found.
+- Submitted exactly one test label for asset 1 through the same Laravel QR
+  rendering and print service used by the UI. CUPS accepted `dymo330-100`,
+  completed it, returned the `dymo330` queue to enabled/idle, and logged no
+  job-specific error. Physical output/scan confirmation remains with the
+  owner; the print command will not be repeated automatically.
+
+## Addendum (2026-09-03 CAT-00 v9 Diagram Correction)
+- Reviewed CAT-00 v8 page renders after operator feedback identified masked or
+  disconnected arrows, cramped page 3 Attribuutdefinitie rows, and a detached
+  page 4 `Removed` explanation.
+- Generated CAT-00 v9 as a new unaccepted six-page review draft. It preserves
+  v8 content and evidence while joining every connector to its intended node,
+  keeping labels clear of lines, increasing definition-row height, and
+  attaching the `Removed` explanation to the state branch.
+- Retained CAT-00 v8 as a reproducible generator branch; all six v8 pages match
+  the committed v8 PDF pixel-for-pixel when rasterized at 150 DPI.
+- Updated the CAT-00 specification, registry, review record, family plan,
+  layout and inventory references, handoff, TODO, and draft manifest to v9.
+- Validation passes: focused generation component/geometry checks, six-page
+  visual inspection, PDF page/encryption/A4/text/URL checks, shared guide-system
+  tests, and the manifest-only complete package verifier. Direct live-root
+  verification remains pending only because the PDF reader still holds the
+  superseded v7/v8 local copies.
+- CAT-00 v9 remains an unaccepted working draft; no accepted guide changed.
+
+# Session Progress (2026-09-01)
+
+## Addendum (2026-09-01 CAT Guide Set Plan)
+- Audited CAT-00 through CAT-06 against the current guide-system contracts,
+  review history, implemented routes/forms, and least-privilege role matrix.
+- Added `docs/manuals/operator-guides/catalog-guide-plan.md` as the current
+  working CAT-family information architecture. It assigns one owner to every
+  concept/action, separates the operator route from production order, and
+  provides page plans, terminology, evidence needs, and set-level acceptance
+  tests.
+- Confirmed ordinary catalogue setup is a Supervisor route while lifecycle and
+  saved-row cleanup remain Admin-only. The plan removes unsupported
+  component-definition tracking/placement choices, avoids a false expected-
+  component required/optional control, and keeps source recording explicitly
+  unresolved.
+- Promoted the recurring connector/text-overlap failure into the shared
+  reference-diagram component contract and linked the family plan from the
+  system precedence, project index, inventory, registry, decision log, and
+  continuation handoff.
+- Validation passes: `git diff --check`, local Markdown links, shared guide
+  component tests, and the accepted/unaccepted package verification. Existing
+  package counts remain 25 registry entries, 72 evidence files, 9 accepted
+  PDFs/11 pages, and 17 unaccepted PDFs/30 pages.
+- No CAT specification, generator, screenshot, PDF, registered version,
+  artifact status, application behavior, or accepted artifact changed in this
+  planning pass. Session notes:
+  `docs/agents/agents-addendum-2026-09-01-cat-guide-plan-session-init.md`.
+- Follow-on implementation aligned and generated CAT-00 v8 as a six-page
+  orientation chapter and CAT-01 v4 as a five-page Supervisor procedure. Both
+  remain explicitly unaccepted working drafts; no accepted artifact changed.
+- Added read-only evidence `CAT-MODEL-NUMBER-SEARCH-DESKTOP-01` for the global
+  exact-code check, registered its checksum and uses, and extended the capture
+  helper with isolated `number-search` mode.
+- Updated the CAT-00/CAT-01 specifications, generator, layouts, registry,
+  guide index, decisions, inventory, handoff, review records, and portable
+  draft manifest to v8/v4. Prior v7/v3 outputs remain review history.
+- Focused generation reports no component or geometry errors. PDFInfo confirms
+  6-page and 5-page unencrypted A4 output, extracted text contains only the
+  intended `Draft v8`/`Draft v4` labels and no printed environment URL, and all
+  eleven final pages were visually inspected.
+- Shared guide-component tests pass with 25 registry entries. The complete
+  package verifier passes against a clean mirror of the exact manifest: 73
+  evidence files, 9 accepted PDFs / 11 pages, 17 unaccepted PDFs / 28 pages,
+  2 baselines, and 16 active scripts. Direct live-directory validation remains
+  blocked only because Foxit holds the superseded portable `CAT-00 ... v7`
+  file open as one extra unlisted file beside v8. Close that document, move
+  the duplicate out of `resources/.../drafts`, and rerun the same verifier.
+
+## Addendum (2026-09-01 Controlled Beta Migration)
+- Opened a production-grade migration session for the data-bearing temporary
+  Snipe-IT server. The target is treated as production even though it will be
+  replaced by a separately provisioned final Docker environment.
+- Verified the supplied SSH ED25519 host fingerprint before authentication.
+  Read-only discovery, backup verification, an explicit rollback boundary, and
+  data/upload parity checks precede any deployment or database migration.
+- The candidate source remains exact commit
+  `1c9131f4c92a02ba75a230cf57ede3b58c5a19ac`. No destructive database command,
+  reset, reseed, or unreviewed cleanup is authorized.
+- Session notes:
+  `docs/agents/agents-addendum-2026-09-01-session-init.md`.
+- Verified the temporary server host key before authenticating through the
+  dedicated expiring migration account. The existing `/opt/snipe-it` checkout
+  is dirty at `eaaf32726` and remains untouched as the immediate rollback
+  deployment.
+- Created and verified the production-data preflight backup on-host and copied
+  it outside the repository to
+  `C:\snipeit-production-backups\preflight-20260901T084607Z`. Database,
+  configuration, uploads, private storage, source diff, and manifests pass all
+  recorded SHA-256 checks.
+- Imported the qualified candidate source/images into an isolated release
+  area, restored digest pinning through a loopback-only registry, and brought
+  up separate MariaDB/Redis/upload volumes on `172.31.209.0/24`.
+- Restored the copied data with exact 294-public/14-private upload parity,
+  applied the nine reviewed migrations from 468 to 477, and ran only the
+  additive `ProductionPermissionGroupSeeder`. The 17-user/15-active-user,
+  12-asset, 14-model, 6-workflow-profile, and 29-workflow-item baselines remain
+  unchanged.
+- Completed the authenticated browser matrix with temporary Refurbisher,
+  Senior Refurbisher, Supervisor, and Admin accounts. All four landed on the
+  dashboard; operational allow/deny routes matched the role contract; the two
+  refurbisher roles saw the single applicable workflow while Supervisor/Admin
+  saw all eight; and the browser produced no warnings or errors. The four
+  users, their eight create/delete audit rows, their four login-attempt rows,
+  and the two QR-label files generated by the route checks were removed. User,
+  audit, login, and upload counts/sequences returned to their source baselines.
+- Froze the legacy app in maintenance mode and captured the authoritative
+  `final-20260901T092030Z` backup. Its canonical database and public/private
+  upload manifests match the rehearsed preflight exactly. All ten embedded
+  checksums and the transfer-archive hash pass in the protected off-host copy
+  at `C:\snipeit-production-backups\final-20260901T092030Z`.
+- Cut over ports 80/443 to the digest-pinned candidate under an automatic
+  rollback trap. App, internal web, queue, scheduler, MariaDB, Redis, and edge
+  are healthy; HTTP redirects to HTTPS; Snipe health/login and the preserved
+  Frigate route return 200; the original TLS fingerprints and security
+  headers/cookies are present; and recent candidate logs contain no runtime
+  errors.
+- Post-cutover production holds 477 migrations with zero pending, 17 users/15
+  active, 12 assets, 14 models, 6 workflow profiles, 29 workflow items, zero
+  failed jobs, and exact 294-public/14-private file parity. The real production
+  login page renders without rehearsal-port links or browser warnings.
+- The legacy app/web are stopped with restart disabled, while their database,
+  volumes, dirty checkout, configuration, and backups remain intact. A
+  server-side rollback note and verified upgraded-database snapshot
+  `post-cutover-20260901T093703Z` were created; its protected off-host copy is
+  under `C:\snipeit-production-backups`. No legacy data or Docker volumes were
+  pruned.
+- Converted the qualified host arrangement into reusable, secret-free
+  repository configuration: optional production MariaDB/Redis and public TLS
+  edge overlays, a loopback-only offline-transfer registry, a protected
+  environment template, and a read-only configuration validator. Live data,
+  secrets, certificates, host addresses, and the unrelated Frigate proxy were
+  deliberately excluded.
+- The production runbook now carries one selected Compose command through
+  bootstrap, maintenance, native backup, migration, permission activation,
+  service start, and certificate renewal. This prevents managed deployments
+  from accidentally falling back to the base file and resolving external
+  database/Redis settings mid-upgrade.
+- Validation is green: all six supported Compose combinations resolve, the
+  combined project remains `snipeit-production`, the generic Nginx edge syntax
+  passed, the validator passed against the real Ubuntu host configuration in
+  read-only mode (including its standalone Compose v2 binary), shell syntax and
+  host-detail/secret scans pass, and 23 focused tests pass with 292 assertions
+  against the guarded in-memory SQLite database. Temporary remote validation
+  files were removed and no live service was changed.
+- Remaining acceptance gate: a real migrated user should sign in and confirm
+  one representative data/file workflow. LDAP and SMTP qualification remain
+  explicitly deferred beyond this V1 cutover; destructive legacy cleanup must
+  wait for explicit acceptance.
+
 # Session Progress (2026-08-27)
 
 ## Addendum (2026-08-27 CAT-01 Structural Rewrite)
@@ -4349,3 +5152,200 @@ there are multiple duplicate functions that still need to be removed, sku will b
 - User explicitly accepted USR-01 v8. Updated its specification, review record, decision record, registry status, project index, and TODO entry to `Internal review candidate for V1`; acceptance remains exact-version only.
 - Prepared focused USR-02 v2 as the next user-account review page. The role/rights policy and real v1 evidence remain unchanged; the page now uses shared components, true-center badges, an AC-01 prerequisite marker, measured focus padding, non-overlapping long headings, and four full related-guide references over two rows.
 - Revised focused USR-02 to v3 from detailed review. Removed redundant identity and Superadmin/unclear-role stops, removed the separate-approval model, documented selecting/deselecting multiple groups with Ctrl+click, changed the audience to Admin / Superadmin, and explained the effective Overnemen/Toestaan/Weigeren semantics. Local code verification confirmed only Superadmin can sync groups or change `Global: Super User`, while Admin can manage ordinary direct user permissions.
+
+### 2026-09-01 - CAT-03/CAT-04 Working Drafts
+- Aligned CAT-03 attribute management and CAT-04 component-definition
+  management with the verified least-privilege Supervisor routes and current
+  browser forms.
+- Added twelve canonical read-only catalogue captures and generated portable
+  unaccepted PDFs: CAT-03 v1 across five A4 pages and CAT-04 v1 across six A4
+  pages.
+- Registered both drafts, their evidence, review records, hashes, page models,
+  and continuation state without changing any accepted guide.
+- Validation passes script syntax, shared guide-system tests, generator
+  component/geometry checks, PDF metadata and extracted-text checks, final
+  Poppler raster inspection, and the clean-mirror package verifier (85
+  evidence files; 9 accepted PDFs / 11 pages; 19 drafts / 39 pages).
+- Direct live-root package validation remains blocked only by the known extra
+  locked CAT-00 v7 draft PDF; no application, database, Docker, or Computer Use
+  action was performed.
+
+### 2026-09-03 - Guide Continuation Checkpoint
+- Reinitialized on the operator-guide handoff and fetched `origin` without
+  merging. Local `master` and `origin/master` both resolve to `fe4d0b4f`, with
+  zero commits ahead and zero behind.
+- Preserved the existing uncommitted CAT guide specifications, evidence,
+  scripts, manifests, reviews, and PDFs unchanged during the remote check.
+- Session notes:
+  `docs/agents/agents-addendum-2026-09-03-guide-continuation-session-init.md`.
+- Reconciled the repository TODO and continuation handoff with CAT-00 v8,
+  CAT-01 v4, CAT-03 v1, CAT-04 v1, 85 canonical evidence files, and CAT-02 as
+  the next planned production guide.
+- Pre-commit guide validation passes script syntax, shared component tests,
+  diff/credential checks, and `npm test` against a clean exact-manifest mirror:
+  85 evidence files, nine accepted PDFs / 11 pages, 19 unaccepted drafts / 39
+  pages, two baselines, and 16 active scripts.
+
+### 2026-09-03 - CAT-04 Required Semantics Review
+- Traced `Quantity` and `Required` from the component-definition form through
+  persistence, expected-slot handling, attribute aggregation, workflow
+  context, and component detail output.
+- Confirmed that Quantity changes the normal expected count and materialized
+  slots. `Required` is persisted and displayed but does not independently
+  enforce readiness; unchecked rows still contribute to calculated
+  specifications.
+- Generated portable unaccepted CAT-04 v2. The page-2 identity-card body copy
+  is larger, and page 3 keeps Required selected while excluding optional or
+  per-device varying parts from the expected structure.
+- Retained CAT-04 v1 in the proof history, replaced the portable draft slot
+  with v2, and updated the specification, family plan, registry, decision,
+  review, manifest, inventory, README, handoff, and TODO state.
+- Generator syntax, shared component checks, six-page geometry, A4 metadata,
+  extracted text, full-page raster review, and clean-mirror package validation
+  pass. The package remains 92 evidence files, nine accepted PDFs / 11 pages,
+  20 unaccepted drafts / 45 pages, two baselines, and 16 active scripts.
+
+### 2026-09-03 - Form-Control Evidence Recapture
+- Audited the 92 registered guide sources against the shared Bootstrap
+  checkbox/radio layout correction and reran the complete catalogue capture.
+- Added 11 versioned replacement sources: four CAT-03 attribute-form captures,
+  five CAT-04 component-definition captures, and two CMP-02 mobile
+  definition/custom alternatives. Historical files remain unchanged.
+- Verified that the remaining catalogue capture states were byte-identical or
+  did not expose an affected label pair. CMP install/tray, user, workflow-run,
+  asset, and physical-label sources were not replaced without visible impact.
+- Registered hashes and provenance in the canonical evidence manifest and
+  `screenshots.md`. CAT-03, CAT-04, and CMP-02 still require new draft versions
+  with remeasured focus annotations before exact-version review.
+- Evidence count is now 103. No form was submitted and no server record was
+  created, edited, or deleted during capture.
+- Final validation passed: all 103 manifest hashes match, the exact-manifest
+  guide package verifier reports `status: ok`, and the verifier script passes
+  Node syntax and `git diff --check` checks.
+
+## Addendum (2026-09-08 Backlog Inventory Session)
+- Initialized from AGENTS.md, PROGRESS.md, and docs/fork-notes.md for an
+  owner-requested inventory of wishlist items and unfinished work only.
+- Preserve all pre-existing manual audit and TODO changes. No implementation,
+  application access, production access, or deployment is in scope.
+- Session notes: docs/agents/agents-addendum-2026-09-08-session-init.md
+- Inventory completed: current post-V1 product backlog includes label design,
+  validated Windows diagnostics, media/files UX, license-transfer flows,
+  credential-vault workflow, integration qualification, and migration cleanup.
+- Older June plans also retain serial OCR, QR/PIN login cards, and catalog
+  search aliases; source searches found no matching implementation. Older
+  inactivity/start-button and component-plan gaps must not be treated as
+  current missing features without reconciliation with later implementation.
+- Root TODO contains manual acceptance/policy work as well as product items;
+  historical release checklists do not mean V1 remains unimplemented.
+- No implementation changes or application/production access. Tests skipped
+  because this was a repository inventory; session-document whitespace checked.
+
+## Addendum (2026-09-08 Sequential Tag Patch)
+- Owner authorized the numeric-first tag patch for new assets and components.
+- Adding independent database-backed reservations with AA0001..AA9999,
+  AB0001 rollover, collision checks including deleted records, and unchanged
+  existing identifiers/QR payloads. Preserve concurrent manual-owned changes.
+- Focused tests and documentation updates are in progress. No production access.
+- Implemented independent INBIT-/INBIT-C- sequences with transactional counter
+  reservations, numeric-first rollover, explicit exhaustion, and global
+  collision checks across both record tables, including soft-deleted records.
+- Preserved custom identifiers, case-preservation, existing-record tags/QR
+  identity, and existing edit permissions. Validation redisplays reuse their
+  reserved tag; batch rows no longer submit a bare legacy prefix when a number
+  cannot be inferred, and blank rows allocate on save.
+- Added docs/sequential-identifiers.md plus README, AGENTS.md, and fork notes.
+  The additive migration creates counters only; it has NOT been applied to
+  shared development or production databases. Deployment must run it before
+  enabling the new allocator. No version bump, commit, or deployment performed.
+- Validation: guarded APP_ENV=testing / DB_CONNECTION=sqlite /
+  DB_DATABASE=:memory: runs passed 55 tests / 234 assertions for initial
+  allocation/create/domain regressions, then 70 tests / 275 assertions for
+  custom/edit/API/QR regressions, and 14 tests / 45 assertions after the final
+  batch-form change. These runs overlap and are not a unique-test total.
+- Separate concurrency coverage passed 1 test / 7 assertions: four independent
+  processes reserved 100 unique ordered tags in one disposable SQLite file.
+  The same test also passed in the 70-test run. PHP syntax, focused PSR-12
+  checks, and scoped git diff --check pass.
+- No full-suite, MariaDB concurrency, or physical/browser QR rerun. PHPStan
+  remains deferred under the recorded owner decision. Existing unrelated
+  manual changes were preserved; no manual artifacts were edited here.
+
+## Addendum (2026-09-08 All-Guide Focused Candidates)
+- Owner confirmed all existing guides after reviewing WF-01 v12 positively.
+- Generated 20 new PDFs / 46 pages. Retained WF-01 v12 and CMP-04 v6: all
+  22 current guides / 48 pages covered. Earlier accepted, draft and rejected
+  PDFs, selected manifests, and historical renderers remain unchanged.
+- Kept all 122 raster placements in the revised subset and the help headings.
+  Applied local route, role, save/check, handoff, terminology, and reference
+  fixes. Logged explicit crop/evidence and AST-03/05 spacing exceptions.
+- Comparison and exact-version records:
+  docs/manuals/operator-guides/reviews/guide-set-comparison-2026-09-08.md
+- No application code, migration, database, production, acceptance, or
+  deployment change. A read-only dev account inspection made no data changes.
+- Physical A4/user tracing and owner decisions remain pending. Predictable
+  initial-password policy, operational locations/profile sets, source storage,
+  and missing continuous/numeric-warning evidence remain explicitly open.
+
+- Final checks passed: all 20 new PDF hashes match retained copies; all 25
+  review-round PDF hashes (including rejected pilots and WF-01 v12) verified.
+  The new 259-file source ZIP passed integrity checks. All 29 earlier PDF
+  hashes and the 245-file baseline ZIP remain unchanged; 431 local links pass.
+- Shared guide-system checks passed (25 registry entries, 5 reference placements).
+  The selected baseline package passes using the manifest-only draft mirror
+  (103 evidence, 9 accepted PDFs, 20 drafts, 2 baselines). The actual draft
+  folder retains the three previously documented unlisted historical PDFs.
+- Scoped whitespace checks passed. The application test suite was not run
+  because no application code changed. No commit, push, or deployment.
+
+## Addendum (2026-09-10 Production Read-only Preflight)
+- Reconfirmed pinned-fingerprint SSH access to the temporary production host
+  and performed a read-only preflight only. No pull, build, migration, restart,
+  backup creation, cleanup, environment edit, or container replacement ran.
+- The public login and health endpoints return HTTP 200. Application, web,
+  queue, scheduler, MariaDB, and Redis containers are healthy; the queue's
+  hourly clean restart is expected from `queue:work --max-time=3600` and has
+  exit code 0. No failed queue jobs or recent web/edge HTTP 5xx were found.
+- Production currently has 17 users, 12 assets, 4 tracked component instances,
+  and 477 applied migrations. Identifier preflight found 11 asset and 4
+  component tags already in the new format, with no duplicate tag groups,
+  cross-type tag collisions, or cross-type serial collisions. The two target
+  identifier migrations remain unapplied, as expected.
+- The active app/queue image is the QR printer hotfix release `a5673bc041ef`,
+  while web remains on the V1 baseline image. The target identifier commit is
+  `fbf4aea74faa`; local `master` is three commits ahead of `origin/master` and
+  has not been pushed.
+- Durable database, Redis, upload, backup, registry, and TLS data remain in
+  named production volumes. The September 1 complete backup checksum set and
+  database gzip passed verification; a scheduled application backup dated
+  September 6 is also present. A fresh verified off-host pre-deploy backup is
+  still mandatory.
+- The active dependency stack still uses the historical rehearsal overlay.
+  Current repository releases must use the dedicated production dependency
+  overlay while preserving the existing volume names and `172.31.209.0/24`
+  network. The host-specific edge remains separate because it also fronts
+  Frigate and stages additional certificates; it must not be replaced blindly
+  by the reusable single-site edge overlay.
+- `/opt/snipe-it` is an old, extensively dirty June checkout and is not a safe
+  deployment source. The immutable `/srv/snipeit-v1/releases/*` directories are
+  archive trees without Git metadata, so a repository pull alone cannot update
+  the digest-pinned running images.
+- Found one image defect before the next build: PHP `intl` is absent from both
+  the deployed image and the current production Dockerfile, causing Laravel's
+  `db:show --counts` command to fail. Add and test `intl` before qualifying the
+  next app image.
+- Host maintenance remains separately outstanding: 155 cached package updates
+  are listed and `/var/run/reboot-required` is present. Do not combine that OS
+  maintenance with the application migration/cutover.
+
+## Addendum (2026-09-10 Production Intl Image Correction)
+- Added PHP `intl` to the production application image and a production-image
+  contract assertion so the extension cannot be omitted silently again.
+- Cleared Laravel caches and verified the focused test boundary resolves to
+  `testing|sqlite|:memory:`. Production container/host-overlay/release tests
+  pass: 26 tests and 397 assertions.
+- A complete local production `app` target built successfully. Runtime smoke
+  checks confirm `intl` and ICU 72.1 are enabled, Laravel file-size formatting
+  works, and compiler/make tooling is absent after image cleanup.
+- Production was not accessed or changed during this correction. The validation
+  image is local-only and is not a qualified or deployed release artifact.

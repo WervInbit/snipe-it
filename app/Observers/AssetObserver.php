@@ -98,13 +98,22 @@ class AssetObserver
     {
         if ($asset->wasChanged('status_id')) {
             [$from, $to] = $asset->pullPendingStatusTransition();
-            AssetStatusEvent::create([
+            $guardAudit = $asset->pullStatusGuardAudit();
+            $event = [
                 'asset_id' => $asset->id,
                 'from_status_id' => $from,
                 'to_status_id' => $to ?? $asset->status_id,
                 'triggered_by' => Auth::id(),
                 'note' => $asset->pullStatusChangeNote() ?? (app()->bound('request') && !app()->runningInConsole() ? request()->input('status_change_note') : null),
-            ]);
+            ];
+
+            if ($guardAudit !== null) {
+                $event['guard_confirmation_hash'] = $guardAudit['confirmation_hash'] ?? null;
+                $event['guard_override_reason'] = $guardAudit['override_reason'] ?? null;
+                $event['guard_override_details'] = $guardAudit;
+            }
+
+            AssetStatusEvent::create($event);
         }
     }
 

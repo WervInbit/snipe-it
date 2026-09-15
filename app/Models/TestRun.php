@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\SnipeModel;
 use App\Models\Traits\TestAuditable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -29,8 +30,14 @@ class TestRun extends SnipeModel
         'workflow_profile_id',
         'profile_name_snapshot',
         'profile_slug_snapshot',
+        'profile_display_order_snapshot',
         'readiness_context_hash',
+        'prerequisite_snapshot',
         'user_id',
+        'guard_override_by',
+        'guard_override_reason',
+        'guard_override_at',
+        'guard_override_details',
         'started_at',
         'finished_at',
     ];
@@ -41,8 +48,14 @@ class TestRun extends SnipeModel
         'workflow_profile_id',
         'profile_name_snapshot',
         'profile_slug_snapshot',
+        'profile_display_order_snapshot',
         'readiness_context_hash',
+        'prerequisite_snapshot',
         'user_id',
+        'guard_override_by',
+        'guard_override_reason',
+        'guard_override_at',
+        'guard_override_details',
         'started_at',
         'finished_at',
     ];
@@ -50,6 +63,10 @@ class TestRun extends SnipeModel
     protected $casts = [
         'started_at' => 'datetime',
         'finished_at' => 'datetime',
+        'profile_display_order_snapshot' => 'int',
+        'prerequisite_snapshot' => 'array',
+        'guard_override_at' => 'datetime',
+        'guard_override_details' => 'array',
     ];
 
     /**
@@ -66,6 +83,43 @@ class TestRun extends SnipeModel
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function guardOverrideUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'guard_override_by');
+    }
+
+    /**
+     * A workflow is operationally complete when every required result has an
+     * answer. Profiles without required results fall back to all results so a
+     * misconfigured profile cannot complete immediately after it is started.
+     */
+    public function syncFinishedAtFromResults(): void
+    {
+        $results = $this->results()->get(['is_required', 'status']);
+        $requiredResults = $results->where('is_required', true)->values();
+        $completionResults = $requiredResults->isNotEmpty() ? $requiredResults : $results;
+
+        $isComplete = $completionResults->isNotEmpty()
+            && !$completionResults->contains(
+                fn (TestResult $result): bool => $result->status === TestResult::STATUS_NVT
+            );
+
+        if ($isComplete && $this->finished_at === null) {
+            $this->finished_at = now();
+        } elseif (!$isComplete && $this->finished_at !== null) {
+            $this->finished_at = null;
+        }
+
+        if ($this->isDirty('finished_at')) {
+            $this->save();
+        }
+    }
+
+    public function scopeCurrentFirst(Builder $query): Builder
+    {
+        return $query->orderByDesc('started_at')->orderByDesc('id');
     }
 
     /**

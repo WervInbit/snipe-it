@@ -27,12 +27,17 @@ class PreSalePermissionTest extends TestCase
             'is_sellable' => false,
         ]);
         $user = $this->saleTransitionUser();
+        $hash = $this->actingAs($user)
+            ->postJson(route('hardware.status.preview', $asset), ['status_id' => $readyForSale->id])
+            ->assertOk()
+            ->assertJsonPath('has_issues', false)
+            ->json('confirmation_hash');
 
         $this->actingAs($user)
             ->from(route('hardware.show', $asset))
             ->patch(route('hardware.status.update', $asset), [
                 'status_id' => $readyForSale->id,
-                'ack_failed_tests' => 1,
+                'status_confirmation_hash' => $hash,
             ])
             ->assertRedirect(route('hardware.show', $asset));
 
@@ -73,12 +78,18 @@ class PreSalePermissionTest extends TestCase
             'lifecycle_stage' => Statuslabel::LIFECYCLE_SOLD,
             'default_label' => 0,
         ]);
+        $user = $this->saleTransitionUser();
+        $hash = $this->actingAs($user)
+            ->postJson(route('hardware.status.preview', $asset), ['status_id' => $sold->id])
+            ->assertOk()
+            ->assertJsonPath('has_issues', false)
+            ->json('confirmation_hash');
 
-        $this->actingAs($this->saleTransitionUser())
+        $this->actingAs($user)
             ->from(route('hardware.show', $asset))
             ->patch(route('hardware.status.update', $asset), [
                 'status_id' => $sold->id,
-                'ack_failed_tests' => 1,
+                'status_confirmation_hash' => $hash,
             ])
             ->assertRedirect(route('hardware.show', $asset));
 

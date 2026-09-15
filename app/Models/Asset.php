@@ -311,6 +311,7 @@ class Asset extends Depreciable
     protected ?string $pendingStatusNote = null;
     protected ?int $pendingStatusFrom = null;
     protected ?int $pendingStatusTo = null;
+    protected ?array $pendingStatusGuardAudit = null;
 
     public function withStatusChangeNote(?string $note): self
     {
@@ -346,6 +347,20 @@ class Asset extends Depreciable
         $this->pendingStatusTo = null;
 
         return [$from, $to];
+    }
+
+    public function withStatusGuardAudit(?array $details): self
+    {
+        $this->pendingStatusGuardAudit = $details;
+
+        return $this;
+    }
+
+    public function pullStatusGuardAudit(): ?array
+    {
+        return tap($this->pendingStatusGuardAudit, function (): void {
+            $this->pendingStatusGuardAudit = null;
+        });
     }
 
     /**
@@ -1203,7 +1218,7 @@ class Asset extends Depreciable
     public function tests()
     {
         return $this->hasMany(\App\Models\TestRun::class, 'asset_id')
-            ->orderByRaw('COALESCE(finished_at, created_at) DESC');
+            ->currentFirst();
     }
 
     /**
@@ -1427,7 +1442,30 @@ class Asset extends Depreciable
             return $this->latestSingleRunIssueSummary();
         }
 
-        return app(WorkflowReadinessService::class)->summary($this, $blockingProfiles);
+        $summary = app(WorkflowReadinessService::class)->summary($this, $blockingProfiles);
+        $requiredProfileIds = $blockingProfiles->pluck('id')->map(fn ($id): int => (int) $id);
+        $configurationBlockers = app(\App\Services\WorkflowProgressionService::class)
+            ->forAsset($this)
+            ->filter(fn (array $row): bool => $requiredProfileIds->contains((int) $row['profile']->id))
+            ->flatMap(fn (array $row) => $row['blockers'])
+            ->filter(fn (array $blocker): bool => in_array(
+                $blocker['actual_state'],
+                ['inactive', 'empty', 'invalid_dependency_graph'],
+                true
+            ))
+            ->pluck('profile_name')
+            ->unique()
+            ->values();
+
+        if ($configurationBlockers->isNotEmpty()) {
+            $summary['missing_run'] = true;
+            $summary['missing_profiles'] = $summary['missing_profiles']
+                ->concat($configurationBlockers)
+                ->unique()
+                ->values();
+        }
+
+        return $summary;
     }
 
     /**
@@ -1453,15 +1491,44 @@ class Asset extends Depreciable
             && $summary['incomplete']->isEmpty();
     }
 
-    private function blockingSaleReadinessProfiles(): Collection
+    public function blockingSaleReadinessProfiles(): Collection
     {
-        return WorkflowProfile::query()
+        $profiles = WorkflowProfile::query()
             ->active()
             ->forAsset($this)
-            ->where('blocks_sale_readiness', true)
             ->whereHas('items')
+            ->with('prerequisites')
             ->ordered()
             ->get();
+
+        $profilesById = $profiles->keyBy(fn (WorkflowProfile $profile): int => (int) $profile->id);
+        $requiredIds = $profiles
+            ->where('blocks_sale_readiness', true)
+            ->pluck('id')
+            ->map(fn ($id): int => (int) $id)
+            ->flip();
+        $pending = $requiredIds->keys()->values();
+
+        while ($pending->isNotEmpty()) {
+            $profileId = (int) $pending->shift();
+            $profile = $profilesById->get($profileId);
+
+            if (!$profile) {
+                continue;
+            }
+
+            foreach ($profile->prerequisites as $prerequisite) {
+                $prerequisiteId = (int) $prerequisite->id;
+                if ($profilesById->has($prerequisiteId) && !$requiredIds->has($prerequisiteId)) {
+                    $requiredIds->put($prerequisiteId, true);
+                    $pending->push($prerequisiteId);
+                }
+            }
+        }
+
+        return $profiles
+            ->filter(fn (WorkflowProfile $profile): bool => $requiredIds->has((int) $profile->id))
+            ->values();
     }
 
     private function latestSingleRunIssueSummary(): array
@@ -2803,9 +2870,6 @@ class Asset extends Depreciable
     }
 
 }
-
-
-
 
 
 

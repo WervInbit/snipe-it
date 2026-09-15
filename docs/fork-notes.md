@@ -5,18 +5,54 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 ## Update Log
 
 ### 2026-09-15
-- Added PHP `intl` to the production application image and its container
-  contract test so Laravel's internationalization-dependent console paths are
-  available in the next qualified image.
-- Updated the locked transitive `fast-uri` package from 3.1.5 to 3.1.7 after
-  the release audit reported current high-severity advisories against the V1
-  lock. No direct package or application API changed.
-- Pinned repository text and patch files to LF in `.gitattributes` so Windows
-  release archives retain Linux-compatible scripts and the checksum-verified
-  patch bytes required by Composer.
-- Made the PCRE2 and libssh2 runtime packages explicit production-image
-  install targets so image builds select their current Debian security
-  revisions instead of retaining vulnerable versions from the pinned base.
+- Workflow profiles now support editable dependencies and per-profile repeat
+  policy. Dependencies require every Required item to be Pass/Done. Asset workflow surfaces render
+  every applicable profile as a numbered progression list with guarded rows
+  muted and explained. Web and agent start paths enforce the same rule; only
+  authorized, explicitly confirmed web overrides with a required reason are
+  recorded. An override permits only that exceptional start and never makes a
+  later dependent eligible. Existing profiles are left unconnected for
+  deliberate rollout.
+- Required profile items now control progression: every required item must be
+  Pass/Done for the default dependency rule, while optional items do not hold
+  back the next workflow. Profile-item required/label settings are editable
+  and authoritative at run creation/readiness.
+- Workflow profiles now sort by configured `display_order` everywhere instead
+  of promoting the default profile in lists, and the settings table supports
+  persistent mouse/touch drag ordering. Default agent selection remains
+  independent. Presentation-only reordering no longer invalidates current or
+  legacy workflow hashes; the migration snapshots legacy profile order.
+- Concurrent starts serialize on the asset, and shared checkbox/radio labels
+  use an explicit input margin to prevent text overlap.
+- Completed workflow runs remain editable and never auto-lock. The current run
+  is consistently the newest-started run; completing or later editing an older
+  run cannot promote it back into readiness. Continuing an incomplete run stays
+  the ordinary action, while every repeat is an explicit, separately permitted,
+  reasoned `Start new...` action.
+- Workflow profiles now have Operator, Senior, or Supervisor execution levels.
+  Level restrictions apply to starts and result edits on both web and agent
+  paths while every applicable step remains numbered and visible. The complete
+  tracker compacts automatically for longer processes, and the asset Info tab
+  shows the sale-required workflows plus their prerequisite closure.
+- Dependency administration now uses a searchable Select2 multi-select and
+  remains editable after rollout. A separate additive migration converts the
+  obsolete unrestricted-repeat value to guarded repeats without inferring a
+  dependency graph. Configured profiles with no items applicable to an asset
+  remain visible as `Needs configuration` and cannot satisfy progression or
+  sale readiness.
+- Detail-page transitions to Ready for Sale or Sold now open one cancel/confirm
+  dialog before any write. The server rechecks a signed snapshot under the asset
+  lock, combines workflow and attached-component issues, requires a reason and
+  dedicated override right when issues exist, and records the confirmation hash,
+  reason, issue details, and actor in status history.
+- Asset-detail status and workflow-override dialogs are hoisted to the document
+  body before opening. This keeps Bootstrap's body-level backdrop behind the
+  dialog instead of invisibly intercepting all pointer input on the asset page.
+
+### 2026-09-10
+- Production application images now include PHP `intl`. This restores Laravel
+  number and file-size formatting used by supported console/runtime paths while
+  retaining ICU's runtime library and removing compiler/build dependencies.
 
 ### 2026-09-08
 - New asset and component tags use independent, transactional numeric-first
@@ -32,6 +68,70 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
   can edit visible tags without changing QR UUIDs. Ambiguous asset imports and
   agent reports require an explicit record ID; legacy assignment imports stop
   rather than pick the first match. The former unique-tag policy is superseded.
+
+### 2026-09-03
+- Designated the exact source and image pair deployed on 2026-09-01 as the
+  internal V1.0.0 production baseline. The annotated `v1.0.0` tag identifies
+  commit `1c9131f4c9`; the release record contains the immutable app/web
+  digests. Current dependency, CI, documentation, and feature work is post-V1.
+- The V1 designation accepts the remaining representative private-file check,
+  manual alignment, and named operational ownership as follow-up work. It does
+  not turn the fork into a generally supported public distribution.
+- Reconciled the V1 release status with the completed data-bearing production
+  migration, four-role browser permission matrix, owner-confirmed migrated
+  password login, and current seven-service health check.
+- Added V1.0.0 release notes and separated remaining release-control,
+  representative workflow, manual-alignment, and final-host deployment gates
+  from already-complete application implementation.
+- Confirmed read-only that the five inherited demo model-number placeholders
+  have no assigned assets in the migrated database. Current production seeding
+  already excludes them; any deprecation/replacement is explicit data cleanup,
+  not a V1 code blocker. No live row was changed.
+- Updated Livewire from 3.6.4 to 3.8.7 after GHSA-g3hc-697w-wm82 and refreshed
+  the published Livewire client assets. Updated the locked `fast-uri` and
+  `postcss-selector-parser` transitive packages to patched releases after the
+  refreshed npm audit. Composer and npm high/critical policy checks are green.
+- Made the complete SQLite, MariaDB/MySQL, PostgreSQL, and V1 GitHub Actions
+  test jobs install the LDAP extension explicitly. This keeps mocked LDAP
+  coverage deterministic instead of depending on runner defaults; real LDAP
+  integration remains outside the V1 support boundary.
+- The refreshed post-V1 source passed 2,170 supported non-LDAP tests with 10,641
+  assertions, focused Livewire coverage, the affected CI contract suite, the
+  production asset build, and a browser Livewire interaction. The deployed
+  V1.0.0 images predate these dependency changes; a later deployment requires
+  a separately committed and qualified release.
+- Corrected Bootstrap 3 checkbox and radio label gutters for the fork's larger
+  custom controls. Stacked, inline, table, and nested-inline form variants now
+  keep controls in normal flex flow so labels cannot overlap them as widths or
+  translations change.
+- Restored optional server-side QR printing in the hardened production profile.
+  Production app images now include the CUPS client, Compose passes the
+  queue/command/options/server settings to app workers, and the deployment
+  runbook requires a read-only queue preflight plus one physical label check.
+  The temporary production repair used its stable LAN address because that
+  host's CUPS service did not accept IPP through Docker's default host bridge.
+
+### 2026-09-01
+- Converted the successful data-bearing single-host migration arrangement into
+  reusable, secret-free production configuration. The immutable base profile
+  still supports external database, Redis, and TLS infrastructure.
+- Added an optional production dependency overlay with digest-pinned MariaDB
+  and Redis, file-backed database/root/Redis credentials, internal-only
+  networking, durable volumes, service health checks, and app/writer
+  dependency wiring. Production no longer needs to borrow the isolated
+  rehearsal overlay for a self-contained host.
+- Added an optional public TLS edge overlay and generic Nginx configuration
+  based on the qualified deployment. TLS material is staged through a one-shot
+  root container into a restricted volume; the long-running edge remains
+  unprivileged, read-only, health-checked, and overwrites forwarded headers.
+- Added the qualified loopback-only registry as an optional offline artifact
+  transfer profile. It retains repository-plus-digest deployment identities
+  without exposing a registry beyond localhost and does not replace transfer
+  hashes, image-content verification, scanning, or an archive of record.
+- Expanded the production environment template and runbook with overlay
+  selection, configuration validation, managed-database native backups,
+  certificate renewal, volume inventory, and the rule that host-specific
+  secondary proxies and all live secrets/data remain outside the repository.
 
 ### 2026-08-25
 - Implemented the owner-approved Supervisor product-setup contract. Supervisor

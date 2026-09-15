@@ -20,7 +20,7 @@ class SellingStateComponentWarningTest extends TestCase
         $this->withoutMiddleware(VerifyCsrfToken::class);
     }
 
-    public function testDetailStatusChangeWarnsForAttachedDamagedComponentAndCanProceed(): void
+    public function testDetailStatusChangePreviewsAttachedDamagedComponentAndCanProceed(): void
     {
         $readyForSale = $this->readyForSaleStatus();
         $originalStatus = $this->pendingStatus();
@@ -35,29 +35,22 @@ class SellingStateComponentWarningTest extends TestCase
         ]);
         $user = User::factory()->superuser()->create();
 
-        $this->actingAs($user)
-            ->from(route('hardware.show', $asset))
-            ->patch(route('hardware.status.update', $asset), [
-                'status_id' => $readyForSale->id,
-                'ack_failed_tests' => 1,
-            ])
-            ->assertRedirect(route('hardware.show', $asset))
-            ->assertSessionHas('warning')
-            ->assertSessionHas('requires_ack_component_issues');
+        $preview = $this->actingAs($user)
+            ->postJson(route('hardware.status.preview', $asset), ['status_id' => $readyForSale->id])
+            ->assertOk()
+            ->assertJsonPath('has_issues', true);
 
-        $this->assertTrue(
-            collect(session('component_issue_details'))->contains(
-                fn ($line) => str_contains($line, 'Cracked display assembly')
-            )
-        );
+        $this->assertTrue(collect($preview->json('component_issues'))->contains(
+            fn ($line) => str_contains($line, 'Cracked display assembly')
+        ));
         $this->assertSame($originalStatus->id, $asset->fresh()->status_id);
 
         $this->actingAs($user)
             ->from(route('hardware.show', $asset))
             ->patch(route('hardware.status.update', $asset), [
                 'status_id' => $readyForSale->id,
-                'ack_failed_tests' => 1,
-                'ack_component_issues' => 1,
+                'status_confirmation_hash' => $preview->json('confirmation_hash'),
+                'status_override_reason' => 'Damaged component is documented for disposition.',
             ])
             ->assertRedirect(route('hardware.show', $asset));
 
@@ -134,11 +127,17 @@ class SellingStateComponentWarningTest extends TestCase
             'current_asset_id' => null,
         ]);
 
-        $this->actingAs(User::factory()->superuser()->create())
+        $user = User::factory()->superuser()->create();
+        $preview = $this->actingAs($user)
+            ->postJson(route('hardware.status.preview', $asset), ['status_id' => $readyForSale->id])
+            ->assertOk()
+            ->assertJsonPath('has_issues', false);
+
+        $this->actingAs($user)
             ->from(route('hardware.show', $asset))
             ->patch(route('hardware.status.update', $asset), [
                 'status_id' => $readyForSale->id,
-                'ack_failed_tests' => 1,
+                'status_confirmation_hash' => $preview->json('confirmation_hash'),
             ])
             ->assertRedirect(route('hardware.show', $asset))
             ->assertSessionMissing('requires_ack_component_issues');
