@@ -5349,3 +5349,18 @@ there are multiple duplicate functions that still need to be removed, sku will b
   works, and compiler/make tooling is absent after image cleanup.
 - Production was not accessed or changed during this correction. The validation
   image is local-only and is not a qualified or deployed release artifact.
+
+## Addendum (2026-09-15 Workflow Production Deployment)
+- Qualified and deployed the workflow dependency, execution guard, profile
+  ordering, status confirmation, and checkbox-layout release to production.
+- Applied the two additive workflow migrations and permission seeder after a
+  complete pre-change recovery point was verified off-host. All existing
+  production workflow profiles, assignments, runs, results, and uploads were
+  preserved; the dependency graph intentionally remains empty for manual setup.
+- Verified healthy zero-restart services, empty queue, HTTP 200 health/login,
+  clean fresh logs, all real workflow summaries, protected-status decisions,
+  and complete asset-detail rendering. Three retained runs are stale by design
+  and remain editable.
+- See `docs/releases/workflow-production-deployment-2026-09-15.md` for release
+  identities, qualification evidence, backup checksums, rollback guidance, and
+  the remaining signed-in operator interaction check.
