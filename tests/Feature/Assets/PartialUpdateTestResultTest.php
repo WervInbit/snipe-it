@@ -25,12 +25,18 @@ class PartialUpdateTestResultTest extends TestCase
     private function makeRun(): array
     {
         $asset = Asset::factory()->create();
-        $user = User::factory()->refurbisher()->create();
+        $user = User::factory()->create([
+            'permissions' => json_encode([
+                'assets.view' => '1',
+                'tests.execute' => '1',
+                'tests.edit_runs' => '1',
+            ]),
+        ]);
         $run = TestRun::factory()
             ->for($asset)
             ->for($user)
             ->create([
-                'finished_at' => now()->subDay(),
+                'finished_at' => null,
             ]);
 
         $type = TestType::factory()->create();
@@ -64,8 +70,6 @@ class PartialUpdateTestResultTest extends TestCase
     public function test_status_can_be_updated_via_partial_endpoint(): void
     {
         [$asset, $run, $result, $user] = $this->makeRun();
-        $originalFinishedAt = $run->finished_at;
-
         $response = $this->actingAs($user, 'web')->postJson(
             route('test-results.partial-update', [$asset->id, $run->id, $result->id]),
             ['status' => TestResult::STATUS_PASS]
@@ -82,7 +86,7 @@ class PartialUpdateTestResultTest extends TestCase
         $run->refresh();
 
         $this->assertSame(TestResult::STATUS_PASS, $result->status);
-        $this->assertTrue($run->finished_at->gt($originalFinishedAt));
+        $this->assertNotNull($run->finished_at);
     }
 
     public function test_status_can_be_cleared_via_partial_endpoint(): void
@@ -104,6 +108,7 @@ class PartialUpdateTestResultTest extends TestCase
 
         $result->refresh();
         $this->assertSame(TestResult::STATUS_NVT, $result->status);
+        $this->assertNull($run->fresh()->finished_at);
     }
 
     public function test_note_updates_are_persisted(): void
@@ -126,6 +131,7 @@ class PartialUpdateTestResultTest extends TestCase
 
         $result->refresh();
         $this->assertSame($note, $result->note);
+        $this->assertNull($run->fresh()->finished_at);
     }
 
     public function test_photo_can_be_uploaded_and_path_is_stored(): void
@@ -253,6 +259,7 @@ class PartialUpdateTestResultTest extends TestCase
                 'tests.execute' => '1',
                 'assets.view' => '1',
                 'assets.edit' => '1',
+                'tests.edit_runs' => '1',
             ]),
         ]);
 
@@ -272,11 +279,12 @@ class PartialUpdateTestResultTest extends TestCase
         $this->assertSame(TestResult::STATUS_FAIL, $result->status);
     }
 
-    public function test_run_owner_with_test_execution_permission_can_update_results_without_refurbisher_role(): void
+    public function test_run_owner_with_explicit_edit_permission_can_update_results_without_refurbisher_role(): void
     {
         $user = User::factory()->create([
             'permissions' => json_encode([
                 'tests.execute' => '1',
+                'tests.edit_runs' => '1',
                 'assets.view' => '1',
             ]),
         ]);

@@ -7,6 +7,8 @@ use App\Models\TestResult;
 use App\Models\TestRun;
 use App\Models\TestType;
 use App\Models\User;
+use App\Models\WorkflowProfile;
+use App\Models\WorkflowProfileItem;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -68,6 +70,11 @@ class ActiveTestViewTest extends TestCase
     {
         $user = User::factory()->superuser()->create();
         $asset = Asset::factory()->create(['asset_tag' => 'TAG-NO-RUN']);
+        $profile = WorkflowProfile::factory()->create();
+        WorkflowProfileItem::factory()->create([
+            'workflow_profile_id' => $profile->id,
+            'workflow_item_id' => TestType::factory()->create(['applies_to_all' => true])->id,
+        ]);
 
         $response = $this->actingAs($user)
             ->get("/hardware/{$asset->id}/tests/active")
@@ -117,6 +124,7 @@ class ActiveTestViewTest extends TestCase
     {
         $user = $this->makeUserWithPermissions([
             'tests.execute' => '1',
+            'tests.edit_runs' => '1',
             'assets.view' => '1',
             'refurbisher' => '1',
         ]);
@@ -133,10 +141,11 @@ class ActiveTestViewTest extends TestCase
             ->assertSee('canUpdate: true', false);
     }
 
-    public function test_run_owner_with_test_execution_permission_can_update_without_refurbisher_role(): void
+    public function test_run_owner_with_explicit_edit_permission_can_update_without_refurbisher_role(): void
     {
         $user = $this->makeUserWithPermissions([
             'tests.execute' => '1',
+            'tests.edit_runs' => '1',
             'assets.view' => '1',
         ]);
 
@@ -178,7 +187,7 @@ class ActiveTestViewTest extends TestCase
             ->assertSee('canUpdate: false', false);
     }
 
-    public function test_asset_editor_can_update_foreign_run(): void
+    public function test_user_with_explicit_run_edit_permission_can_update_foreign_run(): void
     {
         $owner = $this->makeUserWithPermissions([
             'tests.execute' => '1',
@@ -189,6 +198,7 @@ class ActiveTestViewTest extends TestCase
             'tests.execute' => '1',
             'assets.view' => '1',
             'assets.edit' => '1',
+            'tests.edit_runs' => '1',
         ]);
 
         $asset = Asset::factory()->create(['asset_tag' => 'TAG-FOREIGN-EDIT']);

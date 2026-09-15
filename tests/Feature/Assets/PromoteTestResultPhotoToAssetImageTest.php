@@ -35,7 +35,15 @@ class PromoteTestResultPhotoToAssetImageTest extends TestCase
             'image_override_enabled' => false,
             'image' => null,
         ]);
-        $user = User::factory()->refurbisher()->editAssets()->create();
+        $user = User::factory()->create([
+            'permissions' => json_encode([
+                'assets.view' => '1',
+                'assets.edit' => '1',
+                'assets.images.upload' => '1',
+                'tests.execute' => '1',
+                'tests.edit_runs' => '1',
+            ]),
+        ]);
         $run = TestRun::factory()->for($asset)->for($user)->create();
         $type = TestType::factory()->create(['name' => 'Camera']);
         $result = TestResult::factory()->for($run)->for($type, 'type')->create();
@@ -90,6 +98,7 @@ class PromoteTestResultPhotoToAssetImageTest extends TestCase
                 'assets.edit' => '1',
                 'assets.images.upload' => '1',
                 'tests.execute' => '1',
+                'tests.edit_runs' => '1',
             ]),
         ]);
         $run = TestRun::factory()->for($asset)->for($user)->create();
@@ -137,6 +146,7 @@ class PromoteTestResultPhotoToAssetImageTest extends TestCase
                 'assets.edit' => '1',
                 'assets.images.upload' => '1',
                 'tests.execute' => '1',
+                'tests.edit_runs' => '1',
             ]),
         ]);
         $run = TestRun::factory()->for($asset)->for($user)->create();
@@ -179,6 +189,7 @@ class PromoteTestResultPhotoToAssetImageTest extends TestCase
                 'assets.view' => '1',
                 'assets.edit' => '1',
                 'tests.execute' => '1',
+                'tests.edit_runs' => '1',
             ]),
         ]);
         $run = TestRun::factory()->for($asset)->for($user)->create();

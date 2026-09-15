@@ -26,10 +26,15 @@ class WorkflowRunDefinitionService
      *     profile_items: Collection<int, WorkflowProfileItem>,
      *     resolved_attributes: Collection,
      *     resolved_by_definition: Collection,
-     *     readiness_context_hash: string
+     *     readiness_context_hash: string,
+     *     legacy_readiness_context_hash: string
      * }
      */
-    public function forProfile(Asset $asset, WorkflowProfile $profile): array
+    public function forProfile(
+        Asset $asset,
+        WorkflowProfile $profile,
+        ?int $legacyProfileDisplayOrder = null
+    ): array
     {
         foreach ([
             'model',
@@ -64,7 +69,7 @@ class WorkflowRunDefinitionService
             ->values();
 
         $context = [
-            'schema' => 1,
+            'schema' => 2,
             'asset' => [
                 'model_id' => $asset->model_id !== null ? (int) $asset->model_id : null,
                 'model_number_id' => $asset->model_number_id !== null ? (int) $asset->model_number_id : null,
@@ -77,7 +82,6 @@ class WorkflowRunDefinitionService
                 'is_active' => (bool) $profile->is_active,
                 'is_default' => (bool) $profile->is_default,
                 'blocks_sale_readiness' => (bool) $profile->blocks_sale_readiness,
-                'display_order' => (int) $profile->display_order,
                 'category_ids' => $profile->categories->pluck('id')->map(fn ($id) => (int) $id)->sort()->values()->all(),
             ],
             'components' => $roster->rows
@@ -120,8 +124,8 @@ class WorkflowRunDefinitionService
                         'hidden_at' => $item->attributeDefinition->hidden_at?->toAtomString(),
                         'deprecated_at' => $item->attributeDefinition->deprecated_at?->toAtomString(),
                     ] : null,
-                    'is_required' => (bool) $item->is_required,
-                    'result_label_mode' => $item->result_label_mode
+                    'is_required' => (bool) $profileItem->is_required,
+                    'result_label_mode' => $profileItem->result_label_mode
                         ?: WorkflowProfileItem::LABEL_MODE_PASS_FAIL,
                     'category_ids' => $item->categories->pluck('id')->map(fn ($id) => (int) $id)->sort()->values()->all(),
                     'component_category_ids' => $item->componentCategories->pluck('id')->map(fn ($id) => (int) $id)->sort()->values()->all(),
@@ -133,6 +137,37 @@ class WorkflowRunDefinitionService
             })->values()->all(),
         ];
 
+        $legacyContext = $context;
+        $legacyContext['schema'] = 1;
+        $legacyContext['profile'] = [
+            'id' => (int) $profile->id,
+            'name' => (string) $profile->name,
+            'slug' => (string) $profile->slug,
+            'description' => (string) $profile->description,
+            'is_active' => (bool) $profile->is_active,
+            'is_default' => (bool) $profile->is_default,
+            'blocks_sale_readiness' => (bool) $profile->blocks_sale_readiness,
+            'display_order' => $legacyProfileDisplayOrder ?? (int) $profile->display_order,
+            'category_ids' => $profile->categories
+                ->pluck('id')
+                ->map(fn ($id) => (int) $id)
+                ->sort()
+                ->values()
+                ->all(),
+        ];
+        $legacyContext['items'] = collect($context['items'])
+            ->map(function (array $itemContext, int $index) use ($profileItems): array {
+                /** @var WorkflowProfileItem $profileItem */
+                $profileItem = $profileItems->get($index);
+                $itemContext['is_required'] = (bool) $profileItem->item->is_required;
+                $itemContext['result_label_mode'] = $profileItem->item->result_label_mode
+                    ?: WorkflowProfileItem::LABEL_MODE_PASS_FAIL;
+
+                return $itemContext;
+            })
+            ->values()
+            ->all();
+
         return [
             'profile_items' => $profileItems,
             'resolved_attributes' => $resolved,
@@ -140,6 +175,13 @@ class WorkflowRunDefinitionService
             'readiness_context_hash' => hash(
                 'sha256',
                 json_encode($context, JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            ),
+            'legacy_readiness_context_hash' => hash(
+                'sha256',
+                json_encode(
+                    $legacyContext,
+                    JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+                )
             ),
         ];
     }

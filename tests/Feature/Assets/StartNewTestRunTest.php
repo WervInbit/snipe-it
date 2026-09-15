@@ -227,7 +227,7 @@ class StartNewTestRunTest extends TestCase
         $this->assertSame([$expectedItem->id], $run->results()->pluck('workflow_item_id')->map(fn ($id) => (int) $id)->all());
     }
 
-    public function test_start_new_run_uses_workflow_item_defaults_for_result_settings(): void
+    public function test_start_new_run_uses_profile_item_result_settings(): void
     {
         $asset = Asset::factory()->laptopMbp()->create();
         $categoryId = $asset->model?->category_id;
@@ -259,8 +259,8 @@ class StartNewTestRunTest extends TestCase
         $this->assertDatabaseHas('workflow_results', [
             'workflow_run_id' => $run->id,
             'workflow_item_id' => $item->id,
-            'is_required' => 0,
-            'result_label_mode' => WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE,
+            'is_required' => 1,
+            'result_label_mode' => WorkflowProfileItem::LABEL_MODE_PASS_FAIL,
         ]);
     }
 

@@ -185,12 +185,11 @@ class WorkflowReadinessIntegrityTest extends TestCase
         $originalStatusId = $asset->status_id;
 
         $this->actingAs($user)
-            ->from(route('hardware.show', $asset))
-            ->patch(route('hardware.status.update', $asset), [
+            ->patchJson(route('hardware.status.update', $asset), [
                 'status_id' => $ready->id,
             ])
-            ->assertRedirect(route('hardware.show', $asset))
-            ->assertSessionHas('requires_ack_failed_tests');
+            ->assertStatus(409)
+            ->assertJsonPath('guard.has_issues', true);
 
         $this->assertSame($originalStatusId, $asset->fresh()->status_id);
     }
@@ -277,15 +276,15 @@ class WorkflowReadinessIntegrityTest extends TestCase
         for ($index = 0; $index < $itemCount; $index++) {
             $item = TestType::factory()->create([
                 'applies_to_all' => true,
-                'is_required' => true,
+                // Deliberately disagree: the profile item is authoritative.
+                'is_required' => false,
                 'display_order' => $index,
             ]);
             $profileItems[] = WorkflowProfileItem::factory()->create([
                 'workflow_profile_id' => $profile->id,
                 'workflow_item_id' => $item->id,
                 'sort_order' => $index,
-                // Deliberately disagree: TestType is authoritative.
-                'is_required' => false,
+                'is_required' => true,
             ]);
         }
 
@@ -318,7 +317,7 @@ class WorkflowReadinessIntegrityTest extends TestCase
             'workflow_item_id' => $profileItem->workflow_item_id,
             'workflow_profile_item_id' => $profileItem->id,
             'status' => $status,
-            // Deliberately disagree: current TestType is authoritative.
+            // The current profile item, not this snapshot, controls readiness.
             'is_required' => false,
         ]);
     }

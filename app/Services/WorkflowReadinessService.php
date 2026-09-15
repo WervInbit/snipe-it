@@ -26,27 +26,35 @@ class WorkflowReadinessService
         $missingProfiles = collect();
 
         foreach ($profiles as $profile) {
-            $definition = $this->definitions->forProfile($asset, $profile);
-            $requiredItems = $definition['profile_items']
-                ->filter(fn ($profileItem): bool => (bool) $profileItem->item->is_required)
-                ->values();
-
             $run = TestRun::query()
                 ->where('asset_id', $asset->id)
                 ->where('workflow_profile_id', $profile->id)
                 ->with(['results.type', 'results.attributeDefinition'])
-                ->orderByRaw('COALESCE(finished_at, created_at) DESC')
-                ->orderByDesc('id')
+                ->currentFirst()
                 ->first();
+            $definition = $this->definitions->forProfile(
+                $asset,
+                $profile,
+                $run?->profile_display_order_snapshot
+            );
+            $requiredItems = $definition['profile_items']
+                ->filter(fn ($profileItem): bool => (bool) $profileItem->is_required)
+                ->values();
+            $knownHashes = [
+                $definition['readiness_context_hash'],
+                $definition['legacy_readiness_context_hash'],
+            ];
 
             if (
                 !$run
                 || !$run->finished_at
                 || $requiredItems->isEmpty()
-                || (int) $run->model_number_id !== (int) $asset->model_number_id
+                || (int) $run->model_number_id !== (int) $asset->getAttribute('model_number_id')
                 || !is_string($run->readiness_context_hash)
                 || strlen($run->readiness_context_hash) !== 64
-                || !hash_equals($definition['readiness_context_hash'], $run->readiness_context_hash)
+                || !collect($knownHashes)->contains(
+                    fn (string $hash): bool => hash_equals($hash, $run->readiness_context_hash)
+                )
             ) {
                 $missingProfiles->push($profile->name);
                 if ($run) {
@@ -81,7 +89,11 @@ class WorkflowReadinessService
         }
 
         return [
-            'run' => $runs->sortByDesc(fn ($run) => $run->finished_at ?? $run->created_at)->first(),
+            'run' => $runs->sortByDesc(fn ($run) => sprintf(
+                '%s-%020d',
+                optional($run->started_at)->format('Y-m-d H:i:s.u') ?? '',
+                $run->id
+            ))->first(),
             'runs' => $runs,
             'failed' => $failed->values(),
             'incomplete' => $incomplete->values(),

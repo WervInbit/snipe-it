@@ -1,3 +1,151 @@
+# Session Progress (2026-09-15)
+
+## Feature Change Session Initialization
+
+- Reinitialized from `AGENTS.md`, the current progress log,
+  `docs/fork-notes.md`, repository history, and the working-tree state for an
+  owner-requested feature update.
+- The exact feature, desired behavior, and acceptance criteria have not yet
+  been specified. No implementation, test, database, runtime, or deployment
+  action was taken during this initialization checkpoint.
+- Preserve the existing uncommitted operator-guide batch and its generated
+  artifacts. Any feature work must be scoped around those changes, with
+  focused tests and the relevant README/fork-note documentation reviewed once
+  the target behavior is known.
+- Session notes remain in
+  `docs/agents/agents-addendum-2026-09-15-session-init.md`.
+
+## Workflow Execution Dependency Investigation
+
+- Investigated cross-profile execution order, repeat behavior, completion
+  semantics, permissions, audit history, agent ingestion, UI entry points,
+  seeded configuration, readiness coupling, and migration consequences.
+- Confirmed that `display_order` and profile-item `sort_order` are presentation
+  only. Every valid start request currently creates a new run; no dependency,
+  same-profile open-run, repeat, or concurrency guard exists.
+- Confirmed that `finished_at` is set by any partial result/note/photo save and
+  cannot represent full completion as-is. Sale readiness separately rechecks
+  current required results and hashes, but is not a complete progression
+  engine. The agent report endpoint is a second unguarded run-creation path.
+- Recommended explicit profile dependency and repeat-policy configuration, a
+  shared transactional progression service, one numbered all-profile process
+  list, dedicated override permissions, mandatory warning/reason confirmation,
+  and immutable prerequisite/override snapshots.
+- Recorded completion/N.v.t., per-profile required flags, applicability,
+  cycles, run deletion/editing, stale results, agent authorization, concurrent
+  starts, and readiness-hash/order invalidation as design risks. See
+  [the investigation](docs/plans/workflow-execution-dependencies-2026-09-15.md).
+- No application code, schema, database, runtime, or deployment was changed.
+  Focused PHP tests were not run because PHP/vendor PHPUnit are unavailable in
+  the host environment; this was a source/documentation investigation.
+
+## Workflow Execution Guards Implemented
+
+- Added an additive workflow-guard migration, editable profile dependencies,
+  editable repeat policy, cycle prevention, and
+  restrictive dependency deletion behavior. Existing profiles receive no
+  inferred graph and can be connected or rewired after migration.
+- Added one progression evaluator used by asset history/detail/empty-run
+  surfaces and both run-creation paths. Every applicable profile is visible and
+  numbered; dependency topology takes precedence over display-order ties;
+  unavailable rows remain readable, muted, and explain their blockers.
+- Enforced one current run per asset/profile through asset-row locking. An open
+  run is continued. Guarded repeats and early starts require
+  `tests.override_dependencies`, an explicit warning confirmation, and a
+  non-empty reason. The actor, time, reason, blocker details, and prerequisite
+  states/runs are saved on the run. Agent requests fail with structured 409
+  blockers and cannot perform a human override.
+- Completion and progression now use each profile item's editable Required
+  flag. Every required result must leave legacy pending `nvt`; Pass/Done is the
+  default dependency requirement, while optional results do not hold back the
+  next workflow. Profiles with no required items safely fall back to requiring
+  all results. A distinct explicit N/A/skipped state remains future work.
+- Fixed configured profile ordering by removing default-profile promotion from
+  shared list ordering, added persistent mouse/touch drag ordering on the
+  Workflow Profiles page, and retained explicit default selection for agent
+  fallback. Reordering is presentation-only in new readiness hashes; the
+  migration snapshots display order so pre-change hashes remain verifiable.
+- Repaired checkbox/radio label overlap globally with an explicit input margin
+  and rebuilt committed CSS assets. The fix covers the reported workflow-item
+  modal and other Bootstrap checkbox/radio labels.
+- Initial guarded SQLite verification passed 83 tests / 569 assertions. The
+  required-item/order compatibility follow-up passed 85 tests / 536 assertions.
+  Focused PHPStan and PSR-12 checks for the new service/migration pass; the production
+  frontend build and four Node security/build tests also pass. After the asset
+  detail page exposed the expected missing-table 500, the single additive
+  workflow-guard migration was applied to the local `https://dev.inbit`
+  development database. Laravel caches were cleared and a read-only progression
+  smoke check returned four rows for a real asset. Production remains unchanged
+  and no dependency graph was inferred.
+- Updated README, fork notes, agent API, workflow migration guidance, and the
+  investigation/decision record. Existing accepted/manual PDFs and concurrent
+  operator-guide work were preserved; WF-01/WF-02 need later new versions and
+  evidence before this behavior is released.
+
+## Workflow Run/Edit And Status Confirmation Implemented
+
+- Implemented permanently editable workflow runs, a privileged and audited
+  `Start new...` action, a compact role-aware process list, a Required-workflow
+  summary on the asset Info tab, and a Ready-for-Sale/Sold confirmation modal.
+- Confirmed that completed runs are not authorization-locked, but their primary
+  progression action disappears; edit remains discoverable only in history.
+  Current asset-editor authorization also lets every seeded operational role
+  edit another user's run, so shared editing is currently implicit rather than
+  a dedicated workflow permission.
+- Found inconsistent current-run selection: progression uses newest
+  `started_at`, while readiness uses `finished_at`/`created_at`. Editing an old
+  completed run can therefore promote it back into readiness. Recommended one
+  newest-started current-run rule and completion timestamps that do not change
+  for note/photo-only edits.
+- Every repeat now requires a distinct authorized, reasoned
+  `Start new...` confirmation; ordinary users retain `Edit run`. Profile-level
+  execution capabilities should represent Operator/Senior/Supervisor work and
+  must guard both starts and edits without hiding process rows.
+- Added a compact all-row tracker plus a read-only Info-tab summary of
+  sale-blocking profiles and their prerequisite closure. This avoids omitting a
+  non-sale-blocking prerequisite whose later regression should revoke readiness.
+- Replaced the detail selector's warning/reload/resubmit round trip with one
+  modal backed by a shared transactional server guard, exact warning-set
+  fingerprint, separate readiness-override permission, and durable
+  actor/reason/issue audit data. Clean protected changes still require explicit
+  confirmation; an issue override additionally requires permission and reason.
+- Because the first workflow-guard migration is recorded on `dev.inbit`, the
+  follow-up must use a new additive migration rather than editing the applied
+  file and creating schema drift between development and fresh installs.
+- Kept the implementation contract in
+  `docs/plans/workflow-run-status-ux-implementation-2026-09-15.md`. The plan
+  adds a modal-safe searchable Select2 dependency field, distinguishes item
+  defaults/profile-required items/sale-required profiles, specifies compact
+  workflow and Info-tab projections, and sequences run-selection, permissions,
+  role levels, and protected-status confirmation behind characterization tests.
+- Added the separate `2026_09_15_130000` migration for execution levels and
+  status-guard audit fields, searchable Select2 dependency configuration, and
+  explicit Operator/Senior/Supervisor execution gates. The first applied guard
+  migration was not edited.
+- Validation passed with the guarded in-memory SQLite boundary: 157 focused
+  PHP tests / 872 assertions, four Node security/build tests, scoped PHPStan,
+  Blade compilation, the production frontend build, and diff whitespace
+  checks.
+- Applied only `2026_09_15_130000` to the local development MySQL database
+  `snipeit_prod_work`; the unrelated pending failed-jobs migration was left
+  untouched. Reran `ProductionPermissionGroupSeeder`, cleared caches, and
+  verified the execution/audit columns plus Supervisor start-new and sale
+  override grants. Production was not accessed or changed.
+- The running `https://dev.inbit/hardware/1` boundary returns the expected 302
+  to a healthy HTTP-200 login page instead of a server 500. An authenticated
+  browser smoke could not be completed because the Windows browser helper twice
+  failed during initialization with `failed to write kernel assets: path not
+  found`; the authenticated asset-detail render remains covered by the passing
+  `ShowAssetTest` batch and needs final visual confirmation in the user's
+  existing browser session.
+- Fixed the follow-up asset-detail input blocker by hoisting the protected-status
+  and workflow-override dialogs to `document.body` before Bootstrap creates its
+  body-level backdrop. This prevents a nested stacking context from placing an
+  invisible backdrop above the dialog and swallowing all taps/clicks. Blade
+  compilation and the two focused asset-detail/status suites passed (23 tests,
+  132 assertions); the Windows browser helper still fails before initialization,
+  so the already-open development page needs a hard reload and manual smoke.
+
 # Session Progress (2026-09-10)
 
 ## Manuals Commit Preparation - 2026-09-10

@@ -6,7 +6,9 @@ use App\Models\Asset;
 use App\Models\TestRun;
 use App\Models\TestResult;
 use App\Models\TestType;
+use App\Models\User;
 use App\Models\WorkflowProfile;
+use App\Services\WorkflowProgressionService;
 use App\Services\WorkflowRunDefinitionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -89,7 +91,14 @@ class AgentReportController extends Controller
 
         $agentUserId = config('agent.user_id');
         if ($agentUserId) {
-            Auth::onceUsingId($agentUserId);
+            $configuredAgentUser = User::query()->find($agentUserId);
+            if (!$configuredAgentUser || !$configuredAgentUser->isActivated()) {
+                return response()->json([
+                    'message' => 'The configured agent user is missing or inactive.',
+                ], 403);
+            }
+
+            Auth::onceUsingId($configuredAgentUser->id);
         }
 
         $profile = !empty($validated['workflow_profile_slug'])
@@ -105,6 +114,23 @@ class AgentReportController extends Controller
             return response()->json([
                 'message' => 'No active workflow profile found for asset',
             ], 422);
+        }
+
+        $agentUser = Auth::user();
+        if (
+            $profile->execution_level !== WorkflowProfile::EXECUTION_OPERATOR
+            && (!$agentUser || !$profile->canBeExecutedBy($agentUser))
+        ) {
+            return response()->json([
+                'message' => 'The configured agent user may not execute this workflow level.',
+                'execution_level' => $profile->execution_level,
+            ], 403);
+        }
+
+        $progressionService = app(WorkflowProgressionService::class);
+        $guardDecision = $progressionService->forProfile($asset, $profile);
+        if (!$guardDecision || !$guardDecision['can_start']) {
+            return $this->workflowGuardResponse($profile, $guardDecision);
         }
 
         $definition = app(WorkflowRunDefinitionService::class)->forProfile($asset, $profile);
@@ -141,7 +167,7 @@ class AgentReportController extends Controller
 
         $missingBlocking = $profile->blocks_sale_readiness
             ? $types
-                ->filter(fn (array $payload) => $payload['type']->is_required)
+                ->filter(fn (array $payload) => $payload['profile_item']->is_required)
                 ->keys()
                 ->diff($provided->keys())
             : collect();
@@ -155,26 +181,65 @@ class AgentReportController extends Controller
             ], 422);
         }
 
-        $run = DB::transaction(function () use (
+        $outcome = DB::transaction(function () use (
             $agentUserId,
             $asset,
             $profile,
             $provided,
             $types,
-            $definition
-        ): TestRun {
+            $definition,
+            $progressionService
+        ): array {
+            $lockedAsset = Asset::query()->lockForUpdate()->findOrFail($asset->id);
+            $lockedProfile = WorkflowProfile::query()
+                ->active()
+                ->forAsset($lockedAsset)
+                ->whereHas('items')
+                ->whereKey($profile->id)
+                ->first();
+            $lockedDecision = $lockedProfile
+                ? $progressionService->forProfile($lockedAsset, $lockedProfile)
+                : null;
+
+            if (!$lockedProfile || !$lockedDecision || !$lockedDecision['can_start']) {
+                return ['run' => null, 'decision' => $lockedDecision];
+            }
+
+            $agentUser = Auth::user();
+            if (
+                $lockedProfile->execution_level !== WorkflowProfile::EXECUTION_OPERATOR
+                && (!$agentUser || !$lockedProfile->canBeExecutedBy($agentUser))
+            ) {
+                return ['run' => null, 'decision' => array_merge($lockedDecision, [
+                    'execution_forbidden' => true,
+                ])];
+            }
+
+            $lockedDefinition = app(WorkflowRunDefinitionService::class)
+                ->forProfile($lockedAsset, $lockedProfile);
+            if (!hash_equals(
+                $definition['readiness_context_hash'],
+                $lockedDefinition['readiness_context_hash']
+            )) {
+                return ['run' => null, 'decision' => array_merge($lockedDecision, [
+                    'definition_changed' => true,
+                ])];
+            }
+
             $run = new TestRun();
-            $run->asset()->associate($asset);
-            $run->model_number_id = $asset->model_number_id;
-            $run->workflow_profile_id = $profile->id;
-            $run->profile_name_snapshot = $profile->name;
-            $run->profile_slug_snapshot = $profile->slug;
-            $run->readiness_context_hash = $definition['readiness_context_hash'];
+            $run->asset()->associate($lockedAsset);
+            $run->model_number_id = $lockedAsset->getAttribute('model_number_id');
+            $run->workflow_profile_id = $lockedProfile->id;
+            $run->profile_name_snapshot = $lockedProfile->name;
+            $run->profile_slug_snapshot = $lockedProfile->slug;
+            $run->profile_display_order_snapshot = $lockedProfile->display_order;
+            $run->readiness_context_hash = $lockedDefinition['readiness_context_hash'];
+            $run->prerequisite_snapshot = $lockedDecision['prerequisites']->all();
             if ($agentUserId) {
                 $run->user_id = $agentUserId;
             }
             $run->started_at = now();
-            $run->finished_at = now();
+            $run->finished_at = null;
             $run->save();
 
             foreach ($types as $slug => $payload) {
@@ -196,12 +261,14 @@ class AgentReportController extends Controller
                     'note' => $note,
                     'expected_value' => $attribute?->value,
                     'expected_raw_value' => $attribute?->rawValue,
-                    'is_required' => $type->is_required,
-                    'result_label_mode' => $type->result_label_mode
+                    'is_required' => $profileItem->is_required,
+                    'result_label_mode' => $profileItem->result_label_mode
                         ?: \App\Models\WorkflowProfileItem::LABEL_MODE_PASS_FAIL,
                     'sort_order' => $profileItem->sort_order,
                 ]);
             }
+
+            $run->syncFinishedAtFromResults();
 
             $run->audits()->create([
                 'user_id' => $agentUserId,
@@ -211,12 +278,19 @@ class AgentReportController extends Controller
                 'created_at' => now(),
             ]);
 
-            $asset->refreshTestCompletionFlag();
+            $lockedAsset->refreshTestCompletionFlag();
 
-            return $run;
+            return ['run' => $run, 'decision' => null];
         });
 
-        Log::info('Agent results received for Asset ' . $asset->asset_tag . ' by IP ' . $request->ip());
+        if (!$outcome['run']) {
+            return $this->workflowGuardResponse($profile, $outcome['decision']);
+        }
+
+        /** @var TestRun $run */
+        $run = $outcome['run'];
+
+        Log::info('Agent results received for Asset ' . $asset->getAttribute('asset_tag') . ' by IP ' . $request->ip());
 
         return response()->json([
             'message' => 'Workflow results recorded',
@@ -224,5 +298,32 @@ class AgentReportController extends Controller
             'test_run_id' => $run->id,
         ]);
     }
-}
 
+    /**
+     * The bearer-token agent cannot exercise a human override. It must stop and
+     * leave the decision to a permitted, authenticated operator.
+     */
+    private function workflowGuardResponse(WorkflowProfile $profile, ?array $decision): JsonResponse
+    {
+        $blockers = collect($decision['blockers'] ?? [])->map(fn (array $blocker): array => [
+            'workflow_profile_id' => $blocker['profile_id'],
+            'workflow_profile_name' => $blocker['profile_name'],
+            'actual_state' => $blocker['actual_state'],
+        ])->values();
+
+        return response()->json([
+            'message' => 'Workflow cannot be started because its execution guards are not satisfied.',
+            'workflow_profile' => [
+                'id' => $profile->id,
+                'slug' => $profile->slug,
+                'name' => $profile->name,
+            ],
+            'state' => $decision['state'] ?? null,
+            'can_continue_in_web_ui' => (bool) ($decision['can_continue'] ?? false),
+            'repeat_override_required' => (bool) ($decision['repeat_override_required'] ?? false),
+            'repeat_forbidden' => (bool) ($decision['repeat_forbidden'] ?? false),
+            'definition_changed' => (bool) ($decision['definition_changed'] ?? false),
+            'blockers' => $blockers,
+        ], 409);
+    }
+}

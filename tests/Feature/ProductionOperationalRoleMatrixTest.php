@@ -11,6 +11,8 @@ use App\Models\Group;
 use App\Models\Setting;
 use App\Models\TestType;
 use App\Models\User;
+use App\Models\WorkflowProfile;
+use App\Models\WorkflowProfileItem;
 use App\Models\WorkOrder;
 use Database\Seeders\ProductionPermissionGroupSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -47,11 +49,16 @@ class ProductionOperationalRoleMatrixTest extends TestCase
         }
 
         $this->assertTrue($refurbisher->hasAccess('tests.execute'));
+        $this->assertTrue($refurbisher->hasAccess('tests.edit_runs'));
         $this->assertTrue(Gate::forUser($refurbisher)->allows('tests.execute'));
+        $this->assertFalse($refurbisher->hasAccess('tests.start_new_run'));
         $this->assertFalse($refurbisher->hasAccess('assets.images.manage'));
         $this->assertFalse(Gate::forUser($refurbisher)->allows('create', WorkOrder::class));
 
         $this->assertTrue($senior->hasAccess('tests.execute'));
+        $this->assertTrue($senior->hasAccess('tests.execute.senior'));
+        $this->assertTrue($senior->hasAccess('tests.edit_runs'));
+        $this->assertFalse($senior->hasAccess('tests.start_new_run'));
         $this->assertTrue(Gate::forUser($senior)->allows('tests.execute'));
         $this->assertTrue($senior->hasAccess('assets.images.manage'));
 
@@ -72,6 +79,9 @@ class ProductionOperationalRoleMatrixTest extends TestCase
         }
 
         $this->assertTrue($supervisor->hasAccess('assets.sale_transition'));
+        $this->assertTrue($supervisor->hasAccess('assets.override_sale_readiness'));
+        $this->assertTrue($supervisor->hasAccess('tests.execute.supervisor'));
+        $this->assertTrue($supervisor->hasAccess('tests.start_new_run'));
         $this->assertTrue(Gate::forUser($supervisor)->allows('tests.execute'));
         $this->assertTrue(Gate::forUser($supervisor)->allows('assets.sale_transition'));
         $this->assertTrue(Gate::forUser($supervisor)->allows('delete', $component));
@@ -106,6 +116,10 @@ class ProductionOperationalRoleMatrixTest extends TestCase
         $this->assertTrue($admin->hasAccess('attributes.lifecycle'));
         $this->assertTrue($admin->hasAccess('workflows.delete'));
         $this->assertTrue($admin->hasAccess('config.manage'));
+        $this->assertFalse($refurbisher->hasAccess('tests.override_dependencies'));
+        $this->assertFalse($senior->hasAccess('tests.override_dependencies'));
+        $this->assertTrue($supervisor->hasAccess('tests.override_dependencies'));
+        $this->assertTrue($admin->hasAccess('tests.override_dependencies'));
 
         foreach (['Refurbisher', 'Senior Refurbisher', 'Supervisor'] as $groupName) {
             $permissions = $this->groupPermissions($groupName);
@@ -121,6 +135,11 @@ class ProductionOperationalRoleMatrixTest extends TestCase
         Setting::factory()->create();
         $this->seed(ProductionPermissionGroupSeeder::class);
         Storage::fake('public');
+        $workflowProfile = WorkflowProfile::factory()->create();
+        WorkflowProfileItem::factory()->create([
+            'workflow_profile_id' => $workflowProfile->id,
+            'workflow_item_id' => TestType::factory()->create(['applies_to_all' => true])->id,
+        ]);
 
         foreach (['Refurbisher', 'Senior Refurbisher', 'Supervisor'] as $groupName) {
             $user = $this->userInGroup($groupName);

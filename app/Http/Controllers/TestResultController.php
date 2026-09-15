@@ -7,9 +7,9 @@ use App\Models\AttributeDefinition;
 use App\Models\TestResult;
 use App\Models\TestResultPhoto;
 use App\Models\TestRun;
-use App\Models\WorkflowProfile;
 use App\Models\WorkflowProfileItem;
 use App\Services\WorkflowEvidencePhotoService;
+use App\Services\WorkflowProgressionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,7 +26,7 @@ class TestResultController extends Controller
     {
     }
 
-    public function active(Asset $asset)
+    public function active(Asset $asset, WorkflowProgressionService $progressionService)
     {
         $this->authorize('view', $asset);
 
@@ -41,15 +41,8 @@ class TestResultController extends Controller
                 },
                 'profile',
                 'user',
+                'guardOverrideUser',
             ]);
-        $workflowProfiles = WorkflowProfile::query()
-            ->active()
-            ->forAsset($asset)
-            ->whereHas('items')
-            ->withCount('items')
-            ->ordered()
-            ->get();
-
         if ($requestedRunId) {
             $run = $runsQuery->whereKey($requestedRunId)->first();
             abort_unless($run, 404);
@@ -57,13 +50,12 @@ class TestResultController extends Controller
             $run = $runsQuery->first();
         }
 
-        $canUpdateResults = Gate::allows('update', $asset);
-
-        if ($run) {
-            $canUpdateResults = $canUpdateResults || Gate::allows('update', $run);
-        }
+        $canUpdateResults = $run ? Gate::allows('update', $run) : false;
 
         $canStartRun = Gate::allows('tests.execute') && Gate::allows('view', $asset);
+        $canOverrideWorkflowGuards = Gate::allows('tests.override_dependencies');
+        $canStartNewRun = Gate::allows('tests.start_new_run');
+        $workflowProgression = $progressionService->forAsset($asset);
 
         if (!$run) {
             return view('tests.active', [
@@ -81,7 +73,9 @@ class TestResultController extends Controller
                 'canUpdate' => $canUpdateResults,
                 'canStartRun' => $canStartRun,
                 'canViewAudit' => Gate::allows('audits.view'),
-                'workflowProfiles' => $workflowProfiles,
+                'workflowProgression' => $workflowProgression,
+                'canOverrideWorkflowGuards' => $canOverrideWorkflowGuards,
+                'canStartNewRun' => $canStartNewRun,
             ]);
         }
 
@@ -158,7 +152,9 @@ class TestResultController extends Controller
             'canUpdate' => $canUpdateResults,
             'canStartRun' => $canStartRun,
             'canViewAudit' => Gate::allows('audits.view'),
-            'workflowProfiles' => $workflowProfiles,
+            'workflowProgression' => $workflowProgression,
+            'canOverrideWorkflowGuards' => $canOverrideWorkflowGuards,
+            'canStartNewRun' => $canStartNewRun,
         ]);
     }
 
@@ -232,8 +228,7 @@ class TestResultController extends Controller
                     $result->save();
                 }
 
-                $testRun->finished_at = now();
-                $testRun->save();
+                $testRun->syncFinishedAtFromResults();
             });
         } catch (Throwable $exception) {
             $this->deleteEvidencePaths($storedPaths);
@@ -499,8 +494,7 @@ class TestResultController extends Controller
 
                 if ($updated) {
                     $result->save();
-                    $testRun->finished_at = now();
-                    $testRun->save();
+                    $testRun->syncFinishedAtFromResults();
                 }
             });
         } catch (Throwable $exception) {

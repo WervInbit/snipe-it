@@ -954,13 +954,60 @@
                                             <form id="{{ $detailStatusFormId }}" method="POST" action="{{ route('hardware.status.update', $asset) }}" style="display:none;">
                                                 @csrf
                                                 @method('PATCH')
-                                                @if (session('requires_ack_failed_tests'))
-                                                    <input type="hidden" name="ack_failed_tests" value="1">
-                                                @endif
-                                                @if (session('requires_ack_component_issues'))
-                                                    <input type="hidden" name="ack_component_issues" value="1">
-                                                @endif
+                                                <input type="hidden" name="status_confirmation_hash" value="">
+                                                <input type="hidden" name="status_override_reason" value="">
                                             </form>
+
+                                            <div class="modal fade"
+                                                 id="asset-status-confirmation-{{ $asset->id }}"
+                                                 tabindex="-1"
+                                                 role="dialog"
+                                                 aria-hidden="true"
+                                                 aria-labelledby="asset-status-confirmation-title-{{ $asset->id }}">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="{{ trans('general.close') }}"><span aria-hidden="true">&times;</span></button>
+                                                            <h4 class="modal-title" id="asset-status-confirmation-title-{{ $asset->id }}">{{ __('Confirm protected status change') }}</h4>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p>
+                                                                {{ __('Change status from') }}
+                                                                <strong data-status-guard-from></strong>
+                                                                {{ __('to') }}
+                                                                <strong data-status-guard-to></strong>?
+                                                            </p>
+                                                            <div class="alert alert-danger hidden" data-status-guard-error></div>
+                                                            <div class="alert alert-success hidden" data-status-guard-clean>
+                                                                {{ __('All required workflows and attached-component checks currently pass. Confirm to continue.') }}
+                                                            </div>
+                                                            <div class="alert alert-warning hidden" data-status-guard-issues>
+                                                                <strong>{{ __('The following issues will be overridden:') }}</strong>
+                                                                <div class="hidden" data-status-guard-workflow-section>
+                                                                    <h5>{{ __('Workflow issues') }}</h5>
+                                                                    <ul data-status-guard-workflow-issues></ul>
+                                                                </div>
+                                                                <div class="hidden" data-status-guard-component-section>
+                                                                    <h5>{{ __('Attached component issues') }}</h5>
+                                                                    <ul data-status-guard-component-issues></ul>
+                                                                </div>
+                                                            </div>
+                                                            <div class="form-group hidden" data-status-guard-reason-group>
+                                                                <label for="asset-status-override-reason-{{ $asset->id }}">{{ __('Override reason') }}</label>
+                                                                <textarea id="asset-status-override-reason-{{ $asset->id }}"
+                                                                          class="form-control"
+                                                                          rows="3"
+                                                                          maxlength="2000"></textarea>
+                                                                <span class="help-block">{{ __('Required when continuing despite workflow or component issues. This is saved in the status audit event.') }}</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-default" data-dismiss="modal">{{ trans('button.cancel') }}</button>
+                                                            <button type="button" class="btn btn-warning" data-status-guard-confirm>{{ __('Confirm status change') }}</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         @endif
 
                                         <div class="row asset-detail-edit-row" id="asset-status-row">
@@ -983,32 +1030,6 @@
                                                     </div>
 
                                                     @if ($canUseDetailStatusForm)
-                                                        @if (session('requires_ack_failed_tests'))
-                                                            <div class="alert alert-warning asset-detail-control" role="alert">
-                                                                <p class="mb-2">{{ trans('tests.status_change_prompt') }}</p>
-                                                                @if (session('test_issue_details'))
-                                                                    <ul class="mb-0">
-                                                                        @foreach ((array) session('test_issue_details') as $detail)
-                                                                            <li>{{ $detail }}</li>
-                                                                        @endforeach
-                                                                    </ul>
-                                                                @endif
-                                                            </div>
-                                                        @endif
-
-                                                        @if (session('requires_ack_component_issues'))
-                                                            <div class="alert alert-warning asset-detail-control" role="alert">
-                                                                <p class="mb-2">{{ __('Attached damaged or needs-attention components remain on this asset. Submit again to confirm the selling-state change.') }}</p>
-                                                                @if (session('component_issue_details'))
-                                                                    <ul class="mb-0">
-                                                                        @foreach ((array) session('component_issue_details') as $detail)
-                                                                            <li>{{ $detail }}</li>
-                                                                        @endforeach
-                                                                    </ul>
-                                                                @endif
-                                                            </div>
-                                                        @endif
-
                                                         <div class="asset-detail-control">
                                                             <select
                                                                 name="status_id"
@@ -1016,10 +1037,16 @@
                                                                 class="form-control"
                                                                 aria-label="status_id"
                                                                 form="{{ $detailStatusFormId }}"
-                                                                onchange="document.getElementById('{{ $detailStatusFormId }}').submit()"
+                                                                data-current-status-id="{{ $asset->status_id }}"
+                                                                data-status-preview-url="{{ route('hardware.status.preview', $asset) }}"
                                                             >
                                                                 @foreach($__status_options as $key => $value)
-                                                                    <option value="{{ $key }}" {{ (string) $selectedStatus === (string) $key ? 'selected' : '' }}>
+                                                                    @php
+                                                                        $optionStatus = $statusLabelsById->get((int) $key);
+                                                                    @endphp
+                                                                    <option value="{{ $key }}"
+                                                                            data-protected-transition="{{ \App\Models\Asset::statusRequiresTestAck($optionStatus) ? '1' : '0' }}"
+                                                                            {{ (string) $selectedStatus === (string) $key ? 'selected' : '' }}>
                                                                         {{ $value }}
                                                                     </option>
                                                                 @endforeach
@@ -1101,6 +1128,10 @@
                                             </div>
                                         </div>
                                     @endif
+
+                                    @include('hardware.partials.workflow-sale-readiness', [
+                                        'workflowSaleProgression' => $workflowSaleProgression ?? collect(),
+                                    ])
 
                                     @if ($asset->company)
                                         <div class="row">
@@ -1976,48 +2007,10 @@
 
                     <div class="tab-pane fade" id="tests">
                         <div class="hardware-tests-tab-actions" data-testid="hardware-tests-tab-actions">
-                            @can('tests.execute')
-                                @php
-                                    $hardwareWorkflowProfiles = $workflowProfiles ?? collect();
-                                    $selectedWorkflowProfile = $hardwareWorkflowProfiles->firstWhere('is_default', true) ?? $hardwareWorkflowProfiles->first();
-                                    $selectedWorkflowProfileId = old('workflow_profile_id', optional($selectedWorkflowProfile)->id);
-                                @endphp
-                                @if($hardwareWorkflowProfiles->isNotEmpty())
-                                    <form method="POST"
-                                          action="{{ route('test-runs.store', $asset->id) }}"
-                                          class="hardware-tests-tab-actions__form"
-                                          data-testid="hardware-tests-start-form">
-                                        @csrf
-                                        <div class="hardware-tests-tab-actions__controls">
-                                            <div class="form-group hardware-tests-tab-actions__profile">
-                                                <label for="hardware_workflow_profile_id">{{ trans('tests.workflow_profile') }}</label>
-                                                <select id="hardware_workflow_profile_id"
-                                                        name="workflow_profile_id"
-                                                        class="form-control"
-                                                        data-testid="hardware-tests-workflow-profile"
-                                                        required>
-                                                    @foreach($hardwareWorkflowProfiles as $profile)
-                                                        <option value="{{ $profile->id }}" @selected((int) $selectedWorkflowProfileId === (int) $profile->id)>
-                                                            {{ $profile->name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                            <button type="submit" class="btn btn-primary hardware-tests-tab-actions__button" data-testid="hardware-tests-start-selected-workflow">
-                                                <x-icon type="plus" />
-                                                {{ trans('tests.start_new_run') }}
-                                            </button>
-                                        </div>
-                                        <a href="{{ route('test-runs.index', $asset->id) }}" class="hardware-tests-tab-actions__link">
-                                            {{ trans('tests.view_all_workflows') }}
-                                        </a>
-                                    </form>
-                                @else
-                                    <div class="alert alert-warning mb-0" data-testid="hardware-tests-no-workflow-profiles">
-                                        {{ trans('tests.no_workflow_profiles_available') }}
-                                    </div>
-                                @endif
-                            @endcan
+                            @include('tests.partials.workflow-progression', ['workflowContext' => 'hardware-tests'])
+                            <a href="{{ route('test-runs.index', $asset->id) }}" class="hardware-tests-tab-actions__link">
+                                {{ trans('tests.view_all_workflows') }}
+                            </a>
                         </div>
                         <div class="row">
                             <div class="col-md-12">
@@ -2042,6 +2035,13 @@
                                                         aria-controls="{{ $detailId }}">
                                                     <span class="hardware-test-run-row__summary-main">
                                                         <span class="hardware-test-run-row__primary">{{ $run->display_name }} #{{ $run->id }} &middot; {{ optional($timestamp)->format('Y-m-d H:i') }} &middot; {{ optional($run->user)->name }}</span>
+                                                        @if($run->guard_override_by)
+                                                            <span class="label label-warning" title="{{ __('By :user at :time: :reason', [
+                                                                'user' => optional($run->guardOverrideUser)->name ?? __('Unknown user'),
+                                                                'time' => optional($run->guard_override_at)->format('Y-m-d H:i'),
+                                                                'reason' => $run->guard_override_reason,
+                                                            ]) }}">{{ __('Guard overridden') }}</span>
+                                                        @endif
                                                     </span>
                                                     <span class="hardware-test-run-row__stats">
                                                         {{ $passes }} {{ trans('tests.pass') }} &middot;
@@ -2245,7 +2245,17 @@
                                                                     {{ trans('general.system') }}
                                                                 @endif
                                                             </td>
-                                                            <td>{{ $event->note }}</td>
+                                                            <td>
+                                                                @if($event->guard_override_reason)
+                                                                    <span class="label label-warning">{{ __('Readiness overridden') }}</span>
+                                                                    {{ $event->guard_override_reason }}
+                                                                    @if($event->note)
+                                                                        <br>{{ $event->note }}
+                                                                    @endif
+                                                                @else
+                                                                    {{ $event->note }}
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                     @endforeach
                                                 </tbody>
@@ -2315,10 +2325,10 @@
                     <button type="button"
                             class="btn btn-primary hardware-tests-tab-fab__button"
                             data-testid="hardware-tests-tab-fab"
-                            data-starts-selected-workflow="true"
+                            data-opens-workflow-list="true"
                             aria-label="{{ trans('tests.choose_workflow') }}">
                         <x-icon type="plus" />
-                        <span class="hardware-tests-tab-fab__label" data-testid="hardware-tests-tab-fab-label">{{ trans('tests.start_new_run') }}</span>
+                        <span class="hardware-tests-tab-fab__label" data-testid="hardware-tests-tab-fab-label">{{ trans('tests.choose_workflow') }}</span>
                     </button>
                 </div>
             @endcan
@@ -2328,6 +2338,195 @@
 @stop
 @section('moar_scripts')
     @include ('partials.bootstrap-table')
+    <script nonce="{{ csrf_token() }}">
+        (function () {
+            var select = document.getElementById('status_select_detail_{{ $asset->id }}');
+            var form = document.getElementById('asset-detail-status-form-{{ $asset->id }}');
+            var modalElement = document.getElementById('asset-status-confirmation-{{ $asset->id }}');
+            var $ = window.jQuery || window.$;
+
+            if (!select || !form || !modalElement || !$ || !$.fn || !$.fn.modal) {
+                return;
+            }
+
+            var modal = $(modalElement);
+            // Bootstrap appends its backdrop to <body>. Keeping a modal inside
+            // the tab/detail stacking context can put that backdrop above the
+            // dialog and make the entire asset page appear unclickable.
+            modal.appendTo(document.body);
+            var currentStatusId = String(select.dataset.currentStatusId || '');
+            var confirmationHash = '';
+            var currentGuard = null;
+            var submitting = false;
+            var confirmButton = modalElement.querySelector('[data-status-guard-confirm]');
+            var reasonInput = modalElement.querySelector('#asset-status-override-reason-{{ $asset->id }}');
+            var errorBox = modalElement.querySelector('[data-status-guard-error]');
+
+            function setHidden(element, hidden) {
+                element.classList.toggle('hidden', hidden);
+            }
+
+            function renderList(list, values) {
+                list.innerHTML = '';
+                values.forEach(function (value) {
+                    var item = document.createElement('li');
+                    item.textContent = value;
+                    list.appendChild(item);
+                });
+            }
+
+            function showError(message) {
+                errorBox.textContent = message || '{{ __('The status change could not be confirmed.') }}';
+                setHidden(errorBox, false);
+            }
+
+            function restoreCurrentSelection() {
+                select.value = currentStatusId;
+                $(select).trigger('change.select2');
+            }
+
+            function renderGuard(guard) {
+                currentGuard = guard;
+                confirmationHash = guard.confirmation_hash || '';
+                modalElement.querySelector('[data-status-guard-from]').textContent = guard.from_status.name;
+                modalElement.querySelector('[data-status-guard-to]').textContent = guard.to_status.name;
+                setHidden(errorBox, true);
+
+                var workflowSection = modalElement.querySelector('[data-status-guard-workflow-section]');
+                var componentSection = modalElement.querySelector('[data-status-guard-component-section]');
+                renderList(modalElement.querySelector('[data-status-guard-workflow-issues]'), guard.workflow_issues || []);
+                renderList(modalElement.querySelector('[data-status-guard-component-issues]'), guard.component_issues || []);
+                setHidden(workflowSection, !(guard.workflow_issues || []).length);
+                setHidden(componentSection, !(guard.component_issues || []).length);
+                setHidden(modalElement.querySelector('[data-status-guard-issues]'), !guard.has_issues);
+                setHidden(modalElement.querySelector('[data-status-guard-clean]'), !!guard.has_issues);
+                setHidden(modalElement.querySelector('[data-status-guard-reason-group]'), !guard.has_issues);
+
+                confirmButton.disabled = !!guard.has_issues && !guard.can_override_issues;
+                confirmButton.textContent = guard.has_issues
+                    ? '{{ __('Confirm override and change status') }}'
+                    : '{{ __('Confirm status change') }}';
+
+                if (guard.has_issues && !guard.can_override_issues) {
+                    showError('{{ __('You do not have permission to override these issues. Resolve them before changing this status.') }}');
+                }
+            }
+
+            function previewStatus() {
+                var body = new URLSearchParams();
+                body.set('_token', form.querySelector('input[name="_token"]').value);
+                body.set('status_id', select.value);
+
+                confirmButton.disabled = true;
+                select.disabled = true;
+                fetch(select.dataset.statusPreviewUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin',
+                    body: body
+                }).then(function (response) {
+                    return response.json().then(function (data) {
+                        return { response: response, data: data };
+                    });
+                }).then(function (result) {
+                    if (!result.response.ok) {
+                        throw new Error(result.data.message || '{{ __('Unable to inspect this status change.') }}');
+                    }
+
+                    renderGuard(result.data);
+                    select.disabled = false;
+                    modal.modal('show');
+                }).catch(function (error) {
+                    select.disabled = false;
+                    restoreCurrentSelection();
+                    window.alert(error.message);
+                });
+            }
+
+            select.addEventListener('change', function () {
+                if (String(select.value) === currentStatusId) {
+                    return;
+                }
+
+                var option = select.options[select.selectedIndex];
+                if (!option || option.dataset.protectedTransition !== '1') {
+                    form.submit();
+                    return;
+                }
+
+                previewStatus();
+            });
+
+            confirmButton.addEventListener('click', function () {
+                if (!currentGuard || !confirmationHash || submitting) {
+                    return;
+                }
+
+                var reason = reasonInput.value.trim();
+                if (currentGuard.has_issues && reason === '') {
+                    showError('{{ __('Enter a reason for continuing despite the listed issues.') }}');
+                    reasonInput.focus();
+                    return;
+                }
+
+                submitting = true;
+                confirmButton.disabled = true;
+                form.querySelector('input[name="status_confirmation_hash"]').value = confirmationHash;
+                form.querySelector('input[name="status_override_reason"]').value = reason;
+
+                var data = new FormData(form);
+                data.set('status_id', select.value);
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin',
+                    body: data
+                }).then(function (response) {
+                    return response.json().then(function (payload) {
+                        return { response: response, payload: payload };
+                    });
+                }).then(function (result) {
+                    if (result.response.status === 409 && result.payload.guard) {
+                        submitting = false;
+                        renderGuard(result.payload.guard);
+                        showError(result.payload.message);
+                        return;
+                    }
+
+                    if (!result.response.ok) {
+                        throw new Error(
+                            result.payload.message
+                            || (result.payload.errors && Object.values(result.payload.errors).flat().join(' '))
+                            || '{{ __('The status change could not be saved.') }}'
+                        );
+                    }
+
+                    window.location.href = result.payload.redirect_url + '#details';
+                }).catch(function (error) {
+                    submitting = false;
+                    confirmButton.disabled = !!currentGuard.has_issues && !currentGuard.can_override_issues;
+                    showError(error.message);
+                });
+            });
+
+            modal.on('hidden.bs.modal', function () {
+                if (!submitting) {
+                    restoreCurrentSelection();
+                    confirmationHash = '';
+                    currentGuard = null;
+                    reasonInput.value = '';
+                    setHidden(errorBox, true);
+                }
+            });
+        })();
+    </script>
     <script>
         (function () {
             var $ = window.jQuery || window.$;
@@ -2450,8 +2649,7 @@
         (function () {
             var fab = document.querySelector('.hardware-tests-tab-fab');
             var testsPane = document.getElementById('tests');
-            var workflowChooser = document.querySelector('[data-testid="hardware-tests-start-form"]');
-            var workflowProfile = document.getElementById('hardware_workflow_profile_id');
+            var workflowChooser = testsPane ? testsPane.querySelector('[data-testid="workflow-progression"]') : null;
             var $ = window.jQuery || window.$;
 
             if (!fab || !testsPane || !$ || !$.fn || !$.fn.tab) {
@@ -2487,33 +2685,10 @@
                     workflowChooser.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
 
-                if (workflowProfile) {
-                    window.setTimeout(function () {
-                        workflowProfile.focus();
-                    }, 150);
-                }
             }
 
             fab.addEventListener('click', function () {
-                if (!workflowChooser) {
-                    focusWorkflowChooser();
-                    return;
-                }
-
-                if (workflowChooser.checkValidity && !workflowChooser.checkValidity()) {
-                    if (workflowChooser.reportValidity) {
-                        workflowChooser.reportValidity();
-                    }
-                    focusWorkflowChooser();
-                    return;
-                }
-
-                if (workflowChooser.requestSubmit) {
-                    workflowChooser.requestSubmit();
-                    return;
-                }
-
-                workflowChooser.submit();
+                focusWorkflowChooser();
             });
 
             $tabLinks.on('shown.bs.tab', syncTestsFabVisibility);

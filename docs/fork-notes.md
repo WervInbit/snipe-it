@@ -4,6 +4,51 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-09-15
+- Workflow profiles now support editable dependencies and per-profile repeat
+  policy. Dependencies require every Required item to be Pass/Done. Asset workflow surfaces render
+  every applicable profile as a numbered progression list with guarded rows
+  muted and explained. Web and agent start paths enforce the same rule; only
+  authorized, explicitly confirmed web overrides with a required reason are
+  recorded. An override permits only that exceptional start and never makes a
+  later dependent eligible. Existing profiles are left unconnected for
+  deliberate rollout.
+- Required profile items now control progression: every required item must be
+  Pass/Done for the default dependency rule, while optional items do not hold
+  back the next workflow. Profile-item required/label settings are editable
+  and authoritative at run creation/readiness.
+- Workflow profiles now sort by configured `display_order` everywhere instead
+  of promoting the default profile in lists, and the settings table supports
+  persistent mouse/touch drag ordering. Default agent selection remains
+  independent. Presentation-only reordering no longer invalidates current or
+  legacy workflow hashes; the migration snapshots legacy profile order.
+- Concurrent starts serialize on the asset, and shared checkbox/radio labels
+  use an explicit input margin to prevent text overlap.
+- Completed workflow runs remain editable and never auto-lock. The current run
+  is consistently the newest-started run; completing or later editing an older
+  run cannot promote it back into readiness. Continuing an incomplete run stays
+  the ordinary action, while every repeat is an explicit, separately permitted,
+  reasoned `Start new...` action.
+- Workflow profiles now have Operator, Senior, or Supervisor execution levels.
+  Level restrictions apply to starts and result edits on both web and agent
+  paths while every applicable step remains numbered and visible. The complete
+  tracker compacts automatically for longer processes, and the asset Info tab
+  shows the sale-required workflows plus their prerequisite closure.
+- Dependency administration now uses a searchable Select2 multi-select and
+  remains editable after rollout. A separate additive migration converts the
+  obsolete unrestricted-repeat value to guarded repeats without inferring a
+  dependency graph. Configured profiles with no items applicable to an asset
+  remain visible as `Needs configuration` and cannot satisfy progression or
+  sale readiness.
+- Detail-page transitions to Ready for Sale or Sold now open one cancel/confirm
+  dialog before any write. The server rechecks a signed snapshot under the asset
+  lock, combines workflow and attached-component issues, requires a reason and
+  dedicated override right when issues exist, and records the confirmation hash,
+  reason, issue details, and actor in status history.
+- Asset-detail status and workflow-override dialogs are hoisted to the document
+  body before opening. This keeps Bootstrap's body-level backdrop behind the
+  dialog instead of invisibly intercepting all pointer input on the asset page.
+
 ### 2026-09-10
 - Production application images now include PHP `intl`. This restores Laravel
   number and file-size formatting used by supported console/runtime paths while

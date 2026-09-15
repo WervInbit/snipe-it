@@ -15,7 +15,13 @@ class TestAuditLoggingTest extends TestCase
     {
         $asset = Asset::factory()->create();
         $type = TestType::factory()->create();
-        $user = User::factory()->refurbisher()->create();
+        $user = User::factory()->create([
+            'permissions' => json_encode([
+                'assets.view' => '1',
+                'tests.execute' => '1',
+                'tests.edit_runs' => '1',
+            ]),
+        ]);
         $run = TestRun::factory()->for($asset)->for($user)->create([
             'finished_at' => now()->subDay(),
         ]);
@@ -23,6 +29,7 @@ class TestAuditLoggingTest extends TestCase
             ->create(['status' => TestResult::STATUS_FAIL]);
 
         $oldFinished = $run->finished_at;
+        $finishedAuditCount = $run->audits()->where('field', 'finished_at')->count();
 
         $this->actingAs($user)->put(
             route('test-results.update', [$asset->id, $run->id]),
@@ -49,12 +56,10 @@ class TestAuditLoggingTest extends TestCase
             'after' => 'fixed',
         ]);
 
-        $this->assertDatabaseHas('workflow_audits', [
-            'auditable_type' => TestRun::class,
-            'auditable_id' => $run->id,
-            'field' => 'finished_at',
-            'before' => $oldFinished->format('Y-m-d H:i:s'),
-            'after' => $run->finished_at->format('Y-m-d H:i:s'),
-        ]);
+        $this->assertSame(
+            $finishedAuditCount,
+            $run->audits()->where('field', 'finished_at')->count()
+        );
+        $this->assertTrue($oldFinished->equalTo($run->finished_at));
     }
 }

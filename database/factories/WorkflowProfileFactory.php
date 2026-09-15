@@ -22,6 +22,8 @@ class WorkflowProfileFactory extends Factory
             'is_default' => false,
             'blocks_sale_readiness' => false,
             'display_order' => 0,
+            'repeat_policy' => WorkflowProfile::REPEAT_OVERRIDE_REQUIRED,
+            'execution_level' => WorkflowProfile::EXECUTION_OPERATOR,
         ];
     }
 }

@@ -9,23 +9,12 @@ class TestRunPolicy
 {
     public function update(User $user, TestRun $testRun): bool
     {
-        if ($user->hasAccess('supervisor') || $user->hasAccess('admin')) {
-            return true;
-        }
+        $testRun->loadMissing(['asset', 'profile']);
 
-        if ($testRun->asset && $user->can('update', $testRun->asset)) {
-            return true;
-        }
-
-        if ($testRun->user_id === $user->id && $user->hasAccess('tests.execute')) {
-            return true;
-        }
-
-        if ($user->hasAccess('refurbisher') || $user->hasAccess('senior-refurbisher')) {
-            return $testRun->user_id === $user->id;
-        }
-
-        return false;
+        return ($user->isAdmin() || $user->hasAccess('tests.edit_runs'))
+            && $testRun->asset
+            && $user->can('view', $testRun->asset)
+            && (!$testRun->profile || $testRun->profile->canBeExecutedBy($user));
     }
 
     public function delete(User $user, TestRun $testRun): bool

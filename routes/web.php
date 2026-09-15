@@ -355,6 +355,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth']], function () {
     Route::post('workflow-profiles', [AdminWorkflowProfileController::class, 'store'])
         ->name('settings.workflow-profiles.store');
 
+    Route::patch('workflow-profiles/reorder', [AdminWorkflowProfileController::class, 'reorder'])
+        ->name('settings.workflow-profiles.reorder');
+
     Route::get('workflow-profiles/{workflowProfile}/items', [AdminWorkflowProfileController::class, 'editItems'])
         ->name('settings.workflow-profiles.items.edit')
         ->breadcrumbs(fn (Trail $trail, $workflowProfile) =>

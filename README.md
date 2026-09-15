@@ -27,8 +27,14 @@ different operating model for refurbished devices:
   condition, expected-state reconciliation, lifecycle events, and calculated
   specification contributions;
 - workflow profiles combine diagnostics and operator tasks, snapshot their
-  applicable definitions per run, retain controlled photo evidence, and feed
-  sale-readiness decisions;
+  applicable definitions per run, follow a configurable drag-ordered list,
+  support searchable/editable dependencies gated by required Pass/Done items,
+  keep completed runs editable, require an audited privileged `Start new...`
+  action for repeats, retain controlled photo evidence, and feed sale-readiness
+  decisions;
+- workflow execution levels distinguish Operator, Senior, and Supervisor work;
+  restricted steps remain visible, and protected Ready-for-Sale/Sold changes
+  use a server-verified confirmation dialog with an audited issue override;
 - readiness is tied to the current asset model, workflow profile, applicable
   items, expected/attached components, and lifecycle context rather than a
   stale pass flag;

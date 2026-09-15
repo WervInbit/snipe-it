@@ -343,6 +343,26 @@ class AuthServiceProvider extends ServiceProvider
               return $user->hasAccess('tests.execute');
           });
 
+          Gate::define('tests.execute.senior', function ($user) {
+              return $user->isAdmin() || $user->hasAccess('tests.execute.senior') || $user->hasAccess('tests.execute.supervisor');
+          });
+
+          Gate::define('tests.execute.supervisor', function ($user) {
+              return $user->isAdmin() || $user->hasAccess('tests.execute.supervisor');
+          });
+
+          Gate::define('tests.edit_runs', function ($user) {
+              return $user->isAdmin() || $user->hasAccess('tests.edit_runs');
+          });
+
+          Gate::define('tests.start_new_run', function ($user) {
+              return $user->isAdmin() || $user->hasAccess('tests.start_new_run');
+          });
+
+          Gate::define('tests.override_dependencies', function ($user) {
+              return $user->isAdmin() || $user->hasAccess('tests.override_dependencies');
+          });
+
           Gate::define('tests.delete', function ($user) {
               return $user->hasAccess('tests.delete');
           });
@@ -353,6 +373,10 @@ class AuthServiceProvider extends ServiceProvider
 
         Gate::define('assets.sale_transition', function ($user) {
             return $user->hasAccess('assets.sale_transition') || $user->hasAccess('admin');
+        });
+
+        Gate::define('assets.override_sale_readiness', function ($user) {
+            return $user->hasAccess('assets.override_sale_readiness') || $user->hasAccess('admin');
         });
 
         Gate::define('audits.view', function ($user) {

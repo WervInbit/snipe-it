@@ -12,6 +12,24 @@ class WorkflowProfile extends SnipeModel
 {
     use HasFactory;
 
+    public const REPEAT_OVERRIDE_REQUIRED = 'override_required';
+    public const REPEAT_NEVER = 'never';
+
+    public const REPEAT_POLICIES = [
+        self::REPEAT_OVERRIDE_REQUIRED,
+        self::REPEAT_NEVER,
+    ];
+
+    public const EXECUTION_OPERATOR = 'operator';
+    public const EXECUTION_SENIOR = 'senior';
+    public const EXECUTION_SUPERVISOR = 'supervisor';
+
+    public const EXECUTION_LEVELS = [
+        self::EXECUTION_OPERATOR,
+        self::EXECUTION_SENIOR,
+        self::EXECUTION_SUPERVISOR,
+    ];
+
     protected $table = 'workflow_profiles';
 
     protected $fillable = [
@@ -22,6 +40,8 @@ class WorkflowProfile extends SnipeModel
         'is_default',
         'blocks_sale_readiness',
         'display_order',
+        'repeat_policy',
+        'execution_level',
     ];
 
     protected $casts = [
@@ -44,10 +64,12 @@ class WorkflowProfile extends SnipeModel
         $candidate = $baseSlug;
         $suffix = 2;
 
-        while (static::query()
-            ->when($ignoreId, fn (Builder $query) => $query->whereKeyNot($ignoreId))
-            ->where('slug', $candidate)
-            ->exists()) {
+        while (
+            static::query()
+                ->when($ignoreId, fn (Builder $query) => $query->whereKeyNot($ignoreId))
+                ->where('slug', $candidate)
+                ->exists()
+        ) {
             $candidate = $baseSlug . '-' . $suffix;
             $suffix++;
         }
@@ -72,6 +94,26 @@ class WorkflowProfile extends SnipeModel
         return $this->belongsToMany(Category::class, 'category_workflow_profile', 'workflow_profile_id', 'category_id');
     }
 
+    public function prerequisites(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            self::class,
+            'workflow_profile_dependencies',
+            'workflow_profile_id',
+            'prerequisite_workflow_profile_id'
+        )->withTimestamps();
+    }
+
+    public function dependents(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            self::class,
+            'workflow_profile_dependencies',
+            'prerequisite_workflow_profile_id',
+            'workflow_profile_id'
+        )->withTimestamps();
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
@@ -80,7 +122,6 @@ class WorkflowProfile extends SnipeModel
     public function scopeOrdered(Builder $query): Builder
     {
         return $query
-            ->orderByDesc('is_default')
             ->orderBy('display_order')
             ->orderBy('name')
             ->orderBy('id');
@@ -95,7 +136,10 @@ class WorkflowProfile extends SnipeModel
             $inner->whereDoesntHave('categories');
 
             if ($categoryId) {
-                $inner->orWhereHas('categories', fn (Builder $relation) => $relation->where('categories.id', $categoryId));
+                $inner->orWhereHas(
+                    'categories',
+                    fn (Builder $relation) => $relation->where('categories.id', $categoryId)
+                );
             }
         });
     }
@@ -106,7 +150,35 @@ class WorkflowProfile extends SnipeModel
             ->active()
             ->forAsset($asset)
             ->whereHas('items')
+            ->orderByDesc('is_default')
             ->ordered()
             ->first();
+    }
+
+    public function executionAbility(): string
+    {
+        return match ($this->execution_level) {
+            self::EXECUTION_SUPERVISOR => 'tests.execute.supervisor',
+            self::EXECUTION_SENIOR => 'tests.execute.senior',
+            default => 'tests.execute',
+        };
+    }
+
+    public function canBeExecutedBy(User $user): bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        if (!$user->hasAccess('tests.execute')) {
+            return false;
+        }
+
+        return match ($this->execution_level) {
+            self::EXECUTION_SUPERVISOR => $user->hasAccess('tests.execute.supervisor'),
+            self::EXECUTION_SENIOR => $user->hasAccess('tests.execute.senior')
+                || $user->hasAccess('tests.execute.supervisor'),
+            default => true,
+        };
     }
 }

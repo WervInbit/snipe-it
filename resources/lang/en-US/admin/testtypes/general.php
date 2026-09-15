@@ -29,7 +29,7 @@ return [
     'component_definitions_prefix' => 'Components: :list',
     'required' => 'Required',
     'required_label' => 'This item is required by default',
-    'required_help' => 'This default controls whether the item counts toward workflow completion.',
+    'required_help' => 'Used when the item is first added to a workflow profile. Each profile can override it.',
     'result_buttons' => 'Result Buttons',
     'result_buttons_help' => 'Use Pass / Fail for checks and Done / Not Done for task steps.',
     'instructions' => 'Instructions',
