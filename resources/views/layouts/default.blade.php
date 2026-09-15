@@ -1130,6 +1130,7 @@ dir="{{ Helper::determineLanguageDirection() }}">
 
         {{-- Page level javascript --}}
         @stack('js')
+        @include('identifiers.script')
 
         @section('moar_scripts')
         @show

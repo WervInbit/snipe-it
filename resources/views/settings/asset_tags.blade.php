@@ -36,6 +36,8 @@
                     </h2>
                 </div>
                 <div class="box-body">
+                    <div class="alert alert-info">{{ trans('identifiers.sequences') }}</div>
+                    <h3>{{ trans('identifiers.legacy_settings') }}</h3>
 
 
                     <div class="col-md-11 col-md-offset-1">

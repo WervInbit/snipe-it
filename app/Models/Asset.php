@@ -45,6 +45,7 @@ class Asset extends Depreciable
     protected $with = ['model', 'adminuser'];
 
     use CompanyableTrait;
+    use \App\Models\Traits\ChecksIdentifierDuplicates;
     use HasUploads;
     use HasFactory, Loggable, Requestable, Presentable, SoftDeletes, ValidatingTrait, UniqueUndeletedTrait;
 
@@ -206,13 +207,11 @@ class Asset extends Depreciable
     public function getRules(): array
     {
         $rules = $this->rules;
-
-        $uniqueSerialsEnabled = (bool) (Setting::getSettings()?->unique_serial ?? false);
-
-        if (($this->allowDuplicateSerial || !$uniqueSerialsEnabled) && isset($rules['serial'])) {
-            $rules['serial'] = $this->stripSerialUniqueness($rules['serial']);
+        foreach (['asset_tag', 'serial'] as $field) {
+            $rules[$field] = array_values(array_filter($rules[$field], function ($rule) {
+                return !is_string($rule) || !str_starts_with($rule, 'unique_undeleted:assets,');
+            }));
         }
-
         return $rules;
     }
 
@@ -574,7 +573,7 @@ class Asset extends Depreciable
     public function save(array $params = [])
     {
         $this->rules += $this->customFieldValidationRules();
-        return parent::save($params);
+        return $this->saveWithIdentifierValidation($params);
     }
 
 
@@ -1538,32 +1537,13 @@ class Asset extends Depreciable
     /**
      * Generate a unique asset tag when one is not supplied.
      *
-     * Uses the traditional auto-increment settings when enabled, otherwise
-     * falls back to a sequential `ASSET-XX0001` style tag.
+     * Reserves a sequential INBIT-AA0001 style tag; numbers advance before letters.
      *
      * @since [v5.1]
      */
     public static function generateTag(): string
     {
-        $settings = \App\Models\Setting::getSettings();
-        $number = self::zerofill($settings->next_auto_tag_base, 4);
-
-        do {
-            $tag = 'INBIT-' . self::randomLetters(2) . $number;
-        } while (static::withTrashed()->where('asset_tag', $tag)->exists());
-
-        return $tag;
-    }
-
-    protected static function randomLetters(int $length = 2): string
-    {
-        $letters = '';
-
-        for ($i = 0; $i < $length; $i++) {
-            $letters .= chr(random_int(65, 90));
-        }
-
-        return $letters;
+        return app(\App\Services\SequentialTagGenerator::class)->generate('INBIT-');
     }
 
 

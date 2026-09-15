@@ -58,6 +58,7 @@ class AgentReportController extends Controller
         $validator = validator($request->all(), [
             'type' => ['required', 'string', 'in:test_results,workflow_results'],
             'asset_tag' => ['required', 'string', 'max:255'],
+            'asset_id' => ['nullable', 'integer', 'min:1'],
             'workflow_profile_slug' => ['nullable', 'string', 'max:255'],
             'results' => ['required', 'array', 'min:1', 'max:' . self::MAX_RESULTS_PER_REPORT],
             'results.*.test_slug' => ['required', 'string', 'max:255', 'distinct:strict'],
@@ -74,7 +75,14 @@ class AgentReportController extends Controller
 
         $validated = $validator->validated();
 
-        $asset = Asset::where('asset_tag', $validated['asset_tag'])->first();
+        $assets = Asset::whereRaw('UPPER(TRIM(asset_tag)) = ?', [
+            \App\Services\IdentifierDuplicateService::normalize($validated['asset_tag']),
+        ])->when(!empty($validated['asset_id']), fn ($query) => $query->whereKey($validated['asset_id']))
+            ->limit(2)->get();
+        if ($assets->count() > 1) {
+            return response()->json(['message' => 'Multiple assets have this tag. Supply asset_id to select the intended asset.'], 409);
+        }
+        $asset = $assets->first();
         if (!$asset) {
             return response()->json(['message' => 'Asset not found'], 404);
         }

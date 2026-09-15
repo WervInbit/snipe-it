@@ -20,13 +20,15 @@ class QrRegenerate extends Command
     {
         $tag = $this->argument('assetTag');
         if ($tag) {
-            $asset = Asset::where('asset_tag', $tag)->first();
-            if (! $asset) {
+            $assets = Asset::where('asset_tag', $tag)->get();
+            if ($assets->isEmpty()) {
                 $this->error('Asset not found.');
                 return 1;
             }
-            $this->labels->generate($asset);
-            $this->info("Regenerated label for {$asset->asset_tag}");
+            foreach ($assets as $asset) {
+                $this->labels->generate($asset);
+                $this->info("Regenerated label for {$asset->asset_tag} (#{$asset->id})");
+            }
             return 0;
         }
 

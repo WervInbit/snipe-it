@@ -8,6 +8,7 @@
 
 {{-- Page content --}}
 @section('content')
+@include('identifiers.existing', ['identifierRecord' => $asset])
 
 @push('css')
 <style>
@@ -2364,7 +2365,7 @@
                 modal.find('[data-asset-component-tray-return-to]').val(returnTo);
 
                 if (window.refreshComponentSerialControl) {
-                    window.refreshComponentSerialControl(control, serial);
+                    window.refreshComponentSerialControl(control, serial, button.data('tray-id') || '');
                 }
             }).on('hidden.bs.modal', function () {
                 var modal = $(this);

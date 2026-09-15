@@ -56,7 +56,13 @@ class ComponentImporter extends ItemImporter
             $this->log('Component '.$this->item['name'].' was created');
 
             // If we have an asset tag, checkout to that asset.
-            if (isset($this->item['asset_tag']) && ($asset = Asset::where('asset_tag', $this->item['asset_tag'])->first())) {
+            $assets = isset($this->item['asset_tag'])
+                ? Asset::where('asset_tag', $this->item['asset_tag'])->limit(2)->get() : collect();
+            if ($assets->count() > 1) {
+                $this->addErrorToBag($component, 'asset_tag', 'Multiple assets have this tag. Assign the component to an asset explicitly after import.');
+                return;
+            }
+            if ($asset = $assets->first()) {
                 $component->assets()->attach($component->id, [
                     'component_id' => $component->id,
                     'created_by' => auth()->id(),

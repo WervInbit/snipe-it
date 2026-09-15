@@ -45,7 +45,10 @@ This document started as the forward-looking replacement plan. It is now partial
 - Component definitions are global catalog records and are no longer company-scoped.
 - Serial tracking is intentionally deferred and hidden from the admin settings UI until it is either properly enforced or removed.
 - Work-order and portal UI now exist; the remaining work is deeper integration, not initial scaffolding.
-- Component tags and asset tags must never overlap and are treated as globally unique identifiers.
+- Updated 2026-09-08: automatic tags avoid collisions, while visible component
+  and asset tags may overlap after explicit duplicate acceptance. Ambiguous
+  scans require record selection; internal component QR UUIDs remain unique.
+  See [identifier policy](../sequential-identifiers.md).
 
 ### Remaining Scope / Gaps
 - model-number expected-component template management UI is still not implemented on model-number screens
@@ -274,7 +277,7 @@ Purpose:
 Recommended fields:
 - `id`
 - `uuid`
-- `component_tag` unique human-readable identifier
+- `component_tag` human-readable identifier; duplicates require explicit acceptance
 - `qr_uid` unique identifier for QR encoding
 - `component_definition_id` nullable
 - `display_name` snapshot/fallback name

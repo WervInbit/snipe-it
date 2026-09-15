@@ -410,7 +410,7 @@ class StoreAssetTest extends TestCase
             ->assertStatusMessageIs('error');
     }
 
-    public function testUniqueSerialNumbersIsNotEnforcedWhenDisabled()
+    public function testDuplicateSerialConfirmationIsRequiredEvenWhenLegacySettingIsDisabled()
     {
         $model = AssetModel::factory()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
@@ -434,6 +434,15 @@ class StoreAssetTest extends TestCase
                 'status_id' => $status->id,
                 'serial' => $serial,
             ])
+            ->assertOk()
+            ->assertStatusMessageIs('error');
+
+        $this->postJson(route('api.assets.store'), [
+            'model_id' => $model->id,
+            'status_id' => $status->id,
+            'serial' => $serial,
+            'allow_duplicate_serial' => true,
+        ])
             ->assertOk()
             ->assertStatusMessageIs('success');
     }
@@ -465,7 +474,7 @@ class StoreAssetTest extends TestCase
             ->assertStatusMessageIs('error');
     }
 
-    public function testAssetTagsCanBeDuplicatedIfDeleted()
+    public function testDeletedAssetTagReuseRequiresExplicitConfirmation()
     {
         $model = AssetModel::factory()->create();
         $status = Statuslabel::factory()->readyToDeploy()->create();
@@ -491,6 +500,15 @@ class StoreAssetTest extends TestCase
                 'model_id' => $model->id,
                 'status_id' => $status->id,
             ])
+            ->assertOk()
+            ->assertStatusMessageIs('error');
+
+        $this->postJson(route('api.assets.store'), [
+            'asset_tag' => $asset_tag,
+            'model_id' => $model->id,
+            'status_id' => $status->id,
+            'allow_duplicate_tag' => true,
+        ])
             ->assertOk()
             ->assertStatusMessageIs('success');
     }

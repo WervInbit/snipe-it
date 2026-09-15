@@ -62,6 +62,8 @@ class AgentTestResultsTest extends TestCase
         \App\Models\User::factory()->create();
         $agent = \App\Models\User::factory()->create();
         $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAG123']);
+        $duplicate = Asset::factory()->make(['asset_tag' => 'TAG123']);
+        $duplicate->allowDuplicateTag()->save();
         $this->assignWorkflowComponentsToAsset($asset, [$this->keyboardSlug, $this->wifiSlug]);
 
         $payload = [
@@ -87,6 +89,12 @@ class AgentTestResultsTest extends TestCase
         ]);
 
         Log::spy();
+
+        $this->postJson('/api/v1/agent/reports', $payload, [
+            'Authorization' => 'Bearer secrettoken',
+        ])->assertStatus(409);
+        $this->assertSame(0, TestRun::count());
+        $payload['asset_id'] = $asset->id;
 
         $this->postJson('/api/v1/agent/reports', $payload, [
             'Authorization' => 'Bearer secrettoken',

@@ -264,7 +264,8 @@ class QrLabelService
                 'label' => ($settings->qr_text_redundancy ?? false) ? $assetTag : null,
                 'logo_path' => $logoPath,
                 'caption' => $this->assetLabelBlocks($target, $settings, $template),
-                'filename' => Str::slug($assetTag ?: (string) $target->id),
+                'filename' => Str::slug($assetTag ?: (string) $target->id)
+                    . ($target->id ? '-asset-' . $target->id : ''),
             ];
         }
 
@@ -277,7 +278,8 @@ class QrLabelService
             'label' => ($settings->qr_text_redundancy ?? false) ? $labelText : null,
             'logo_path' => $logoPath,
             'caption' => $this->componentInstanceLabelBlocks($target, $settings, $template),
-            'filename' => 'CMP-'.Str::slug($labelText ?: (string) $target->id),
+            'filename' => 'CMP-'.Str::slug($labelText ?: (string) $target->id)
+                . ($target->id ? '-component-' . $target->id : ''),
         ];
     }
 

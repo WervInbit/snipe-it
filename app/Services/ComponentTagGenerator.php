@@ -18,24 +18,12 @@ class ComponentTagGenerator
 
     protected function nextCandidate(): string
     {
-        return sprintf('INBIT-C-%s%04d', $this->randomLetters(2), random_int(0, 9999));
-    }
-
-    protected function randomLetters(int $length): string
-    {
-        $letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $result = '';
-
-        for ($i = 0; $i < $length; $i++) {
-            $result .= $letters[random_int(0, strlen($letters) - 1)];
-        }
-
-        return $result;
+        return app(SequentialTagGenerator::class)->generate('INBIT-C-');
     }
 
     protected function tagExists(string $tag): bool
     {
-        return ComponentInstance::withTrashed()->where('component_tag', $tag)->exists()
-            || Asset::withTrashed()->where('asset_tag', $tag)->exists();
+        return ComponentInstance::withoutGlobalScopes()->where('component_tag', $tag)->exists()
+            || Asset::withoutGlobalScopes()->where('asset_tag', $tag)->exists();
     }
 }

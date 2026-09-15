@@ -41,6 +41,8 @@ abstract class Importer
     private $defaultFieldMap = [
         'id' => 'id',
         'asset_tag' => 'asset tag',
+        'allow_duplicate_tag' => 'allow duplicate tag',
+        'allow_duplicate_serial' => 'allow duplicate serial',
         'activated' => 'activated',
         'category' => 'category',
         'checkout_class' => 'checkout type', // Supports Location or User for assets.  Using checkout_class instead of checkout_type because type exists on asset already.

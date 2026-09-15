@@ -65,6 +65,7 @@ class ComponentsController extends Controller
             'display_name' => ['required_without:component_definition_id', 'nullable', 'string', 'max:255'],
             'serial' => ['nullable', 'string', 'max:255'],
             'source_type' => ['required', 'string', 'max:255'],
+            'component_tag' => ['nullable', 'string', 'max:255'],
             'condition_code' => ['required', Rule::in(array_keys($this->conditionOptions()))],
             'storage_location_id' => ['required', 'integer', 'exists:component_storage_locations,id'],
             'notes' => ['nullable', 'string'],
@@ -78,6 +79,7 @@ class ComponentsController extends Controller
                 'status' => ComponentInstance::STATUS_IN_STOCK,
                 'condition_code' => $data['condition_code'],
                 'source_type' => $data['source_type'],
+                'component_tag' => $data['component_tag'] ?? null,
                 'storage_location_id' => $data['storage_location_id'],
                 'notes' => $data['notes'] ?? null,
             ], $request->user());
@@ -329,6 +331,26 @@ class ComponentsController extends Controller
         return redirect()
             ->route('components.show', ['component_id' => $component_id])
             ->with('success', trans('general.component_serial_updated'));
+    }
+
+    public function updateTag(Request $request, ComponentInstance $component_id)
+    {
+        $this->authorize('update', $component_id);
+        abort_unless($request->user()->isAdmin() || $request->user()->isSuperUser(), 403);
+        try {
+            $data = $request->validate(['component_tag' => ['required', 'string', 'max:255']]);
+            $component_id->component_tag = trim($data['component_tag']);
+            $component_id->save();
+        } catch (ValidationException $exception) {
+            if ($request->expectsJson()) {
+                return response()->json(['status' => 'error', 'errors' => $exception->errors()], 422);
+            }
+            throw $exception;
+        }
+        if ($request->expectsJson()) {
+            return response()->json(['status' => 'success', 'payload' => ['id' => $component_id->id, 'component_tag' => $component_id->component_tag]]);
+        }
+        return redirect()->route('components.show', $component_id)->with('success', trans('identifiers.tag_updated'));
     }
 
     public function materializeExpectedSubcomponent(Request $request, ComponentInstance $component_id, ComponentDefinitionSubcomponentTemplate $template): RedirectResponse

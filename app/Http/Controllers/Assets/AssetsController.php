@@ -128,7 +128,12 @@ class AssetsController extends Controller
 
         // There are a lot more rules to add here but prevents
         // errors around `asset_tags` not being present below.
-        $this->validate($request, ['asset_tags' => ['array']]);
+        $this->validate($request, [
+            'asset_tags' => ['array', 'max:100'],
+            'asset_tags.*' => ['nullable', 'string', 'max:255'],
+            'serials' => ['array', 'max:100'],
+            'serials.*' => ['nullable', 'string', 'max:255'],
+        ]);
 
         // Handle asset tags - there could be one, or potentially many.
         // This is only necessary on create, not update, since bulk editing is handled
@@ -184,10 +189,11 @@ class AssetsController extends Controller
         $serials = $request->input('serials', []);
         $asset = null;
         $qr = app(QrLabelService::class);
-        $count = max(count($requestedTags), count($serials), 1);
+        $rowKeys = array_unique(array_merge(array_keys($requestedTags), array_keys($serials))) ?: [1];
 
-        for ($a = 1; $a <= $count; $a++) {
+        foreach ($rowKeys as $a) {
             $asset = new Asset();
+            $asset->allowDuplicateTag($request->boolean("allow_duplicate_tags.$a"));
             if ($request->boolean("asset_tag_case_override.$a")) {
                 $asset->preserveAssetTagCase();
             }
@@ -755,6 +761,7 @@ class AssetsController extends Controller
         $asset->serial = is_scalar($serialInput) ? (string) $serialInput : null;
 
         $asset->allowDuplicateSerial($request->boolean('allow_duplicate_serials.1'));
+        $asset->allowDuplicateTag($request->boolean('allow_duplicate_tags.1'));
 
         $asset->name = $request->input('name');
         $asset->company_id = Company::getIdForCurrentUser($request->input('company_id'));
@@ -863,7 +870,11 @@ class AssetsController extends Controller
     {
         $topsearch = ($request->get('topsearch')=="true");
 
-        if (!$asset = Asset::where('serial', '=', $request->get('serial'))->first()) {
+        $serialQuery = Asset::whereRaw('UPPER(TRIM(serial)) = ?', [\App\Services\IdentifierDuplicateService::normalize($request->get('serial'))]);
+        if ((clone $serialQuery)->count() > 1) {
+            return redirect()->route('identifiers.choose', ['field' => 'serial', 'value' => $request->get('serial'), 'type' => 'asset']);
+        }
+        if (!$asset = $serialQuery->first()) {
             return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
         }
         $this->authorize('view', $asset);
@@ -883,7 +894,11 @@ class AssetsController extends Controller
         $topsearch = ($request->get('topsearch') == 'true');
 
         // Search for an exact and unique asset tag match
-        $assets = Asset::where('asset_tag', '=', $tag);
+        $assets = Asset::whereRaw('UPPER(TRIM(asset_tag)) = ?', [\App\Services\IdentifierDuplicateService::normalize($tag)]);
+
+        if ($assets->count() > 1) {
+            return redirect()->route('identifiers.choose', ['field' => 'tag', 'value' => $tag, 'type' => 'asset']);
+        }
 
         // If not a unique result, redirect to the index view
         if ($assets->count() != 1) {

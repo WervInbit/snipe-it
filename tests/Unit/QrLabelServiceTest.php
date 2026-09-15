@@ -33,7 +33,7 @@ class QrLabelServiceTest extends TestCase
 
         $service->generate($asset, 'dymo-89x36');
 
-        $slug = Str::slug($asset->asset_tag);
+        $slug = Str::slug($asset->asset_tag) . '-asset-' . $asset->id;
         Storage::disk('public')->assertExists("labels/qr-v14-dymo-89x36-{$slug}.png");
         Storage::disk('public')->assertExists("labels/qr-v14-dymo-89x36-{$slug}.pdf");
     }

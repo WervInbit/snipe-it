@@ -44,6 +44,7 @@ class ScanController extends Controller
     {
         Gate::authorize('scanning');
         $code = trim($code);
+        $normalizedCode = \App\Services\IdentifierDuplicateService::normalize($code);
 
         if (Str::startsWith($code, 'CMP:')) {
             $component = ComponentInstance::query()
@@ -60,7 +61,13 @@ class ScanController extends Controller
         }
 
         if ($request->query('mode') === 'asset_destination') {
-            $asset = Asset::query()->where('asset_tag', '=', $code)->first();
+            if (Asset::query()->whereRaw('UPPER(TRIM(asset_tag)) = ?', [$normalizedCode])->count() > 1) {
+                return redirect()->route('identifiers.choose', [
+                    'field' => 'tag', 'value' => $code, 'type' => 'asset',
+                    'return_to' => SameOriginRedirect::sanitize($request->query('return_to')),
+                ]);
+            }
+            $asset = Asset::query()->whereRaw('UPPER(TRIM(asset_tag)) = ?', [$normalizedCode])->first();
             $returnTo = SameOriginRedirect::sanitize($request->query('return_to'));
 
             if (!$asset) {
@@ -78,8 +85,14 @@ class ScanController extends Controller
             return redirect()->route('hardware.show', $asset);
         }
 
+        $tagMatches = app(\App\Services\IdentifierDuplicateService::class)->matches('tag', $code)
+            ->where('deleted', false);
+        if ($tagMatches->count() > 1) {
+            return redirect()->route('identifiers.choose', ['field' => 'tag', 'value' => $code]);
+        }
+
         $component = ComponentInstance::query()
-            ->where('component_tag', $code)
+            ->whereRaw('UPPER(TRIM(component_tag)) = ?', [$normalizedCode])
             ->first();
 
         if ($component) {
@@ -88,15 +101,23 @@ class ScanController extends Controller
 
         if ($request->query('mode') === 'manual') {
             $assetTagMatch = Company::scopeCompanyables(
-                Asset::query()->where('asset_tag', $code)
+                Asset::query()->whereRaw('UPPER(TRIM(asset_tag)) = ?', [$normalizedCode])
             )->first();
 
             if ($assetTagMatch) {
                 return redirect()->route('findbytag/hardware', ['any' => $code]);
             }
 
+            $allSerialMatches = app(\App\Services\IdentifierDuplicateService::class)->matches('serial', $code)
+                ->where('deleted', false);
+            if ($allSerialMatches->count() > 1) {
+                return redirect()->route('identifiers.choose', ['field' => 'serial', 'value' => $code]);
+            }
+            if ($allSerialMatches->count() === 1 && $allSerialMatches->first()['type'] === 'component') {
+                return redirect()->route('identifiers.choose', ['field' => 'serial', 'value' => $code]);
+            }
             $serialMatches = Company::scopeCompanyables(
-                Asset::query()->where('serial', $code)
+                Asset::query()->whereRaw('UPPER(TRIM(serial)) = ?', [$normalizedCode])
             )->limit(2)->get();
 
             if ($serialMatches->count() === 1) {

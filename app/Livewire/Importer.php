@@ -209,6 +209,8 @@ class Importer extends Component
             'asset_model' => trans('general.model_name'),
             'asset_notes' => trans('general.item_notes', ['item' => trans('admin/hardware/general.asset')]),
             'asset_tag' => trans('general.asset_tag'),
+            'allow_duplicate_tag' => trans('identifiers.import_tag_confirmation'),
+            'allow_duplicate_serial' => trans('identifiers.import_serial_confirmation'),
             'byod' => trans('general.byod'),
             'category' => trans('general.category'),
             'company' => trans('general.company'),

@@ -15,6 +15,7 @@ class ComponentInstance extends SnipeModel
 {
     use HasFactory;
     use CompanyableTrait;
+    use \App\Models\Traits\ChecksIdentifierDuplicates;
     use HasUploads;
     use Loggable;
     use SoftDeletes;
@@ -383,6 +384,11 @@ class ComponentInstance extends SnipeModel
             $instance->normalizeHierarchyFields();
             $instance->assertHierarchyDepthIsAllowed();
         });
+    }
+
+    public function save(array $options = [])
+    {
+        return $this->saveWithIdentifierValidation($options);
     }
 
     public function componentDefinition(): BelongsTo
