@@ -11,8 +11,9 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 - Updated the locked transitive `fast-uri` package from 3.1.5 to 3.1.7 after
   the release audit reported current high-severity advisories against the V1
   lock. No direct package or application API changed.
-- Pinned repository patch files to LF in `.gitattributes` so Windows release
-  archives retain the checksum-verified bytes required by Composer.
+- Pinned repository text and patch files to LF in `.gitattributes` so Windows
+  release archives retain Linux-compatible scripts and the checksum-verified
+  patch bytes required by Composer.
 
 ### 2026-09-08
 - New asset and component tags use independent, transactional numeric-first
