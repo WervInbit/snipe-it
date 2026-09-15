@@ -162,7 +162,9 @@ USER root
 
 RUN apk add --no-cache --upgrade \
         libcrypto3=3.5.8-r0 \
-        libssl3=3.5.8-r0
+        libexpat=2.8.4-r0 \
+        libssl3=3.5.8-r0 \
+        libuuid=2.42.3-r1
 
 COPY docker/production/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=application-build /var/www/html/public/ /var/www/html/public/
