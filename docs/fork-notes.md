@@ -14,6 +14,9 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 - Pinned repository text and patch files to LF in `.gitattributes` so Windows
   release archives retain Linux-compatible scripts and the checksum-verified
   patch bytes required by Composer.
+- Made the PCRE2 and libssh2 runtime packages explicit production-image
+  install targets so image builds select their current Debian security
+  revisions instead of retaining vulnerable versions from the pinned base.
 
 ### 2026-09-08
 - New asset and component tags use independent, transactional numeric-first

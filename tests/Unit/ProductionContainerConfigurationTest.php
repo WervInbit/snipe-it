@@ -245,6 +245,8 @@ class ProductionContainerConfigurationTest extends TestCase
         $this->assertStringContainsString('npm ci --no-audit --no-fund', $dockerfile);
         $this->assertStringContainsString('npm run production', $dockerfile);
         $this->assertStringContainsString('cups-client', $dockerfile);
+        $this->assertStringContainsString('libpcre2-8-0', $dockerfile);
+        $this->assertStringContainsString('libssh2-1', $dockerfile);
         $this->assertMatchesRegularExpression('/^\s+intl\s+\\\\$/m', $dockerfile);
         $this->assertStringContainsString('composer install', $dockerfile);
         $this->assertStringContainsString('--no-dev', $dockerfile);

@@ -31,6 +31,8 @@ RUN apt-get update \
         curl \
         default-mysql-client \
         gosu \
+        libpcre2-8-0 \
+        libssh2-1 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=mlocati/php-extension-installer:2@sha256:b6d3fa381b9ba5cf051117c1c601d6a523b590e534bf3d56eb4fbe352949c138 /usr/bin/install-php-extensions /usr/local/bin/
