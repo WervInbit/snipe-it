@@ -1,3 +1,30 @@
+## Production Host Migration - 2026-09-17
+
+- [ ] Prepare and execute the approved Snipe-IT and CUPS relocation from
+  `10.10.10.33` to `10.10.10.249` using
+  `docs/plans/production-host-migration-2026-09-17.md`. Complete the stable-IP,
+  Docker/Compose, firewall, backup, isolated restore, Snipe-only edge, and DYMO
+  gates before cutover; leave Frigate on `.33` and do not combine the move with
+  application/schema/catalogue changes.
+
+## Refurbisher Review Backlog - 2026-09-17
+
+- [ ] Resolve and implement the consolidated refurbisher review backlog in
+  `docs/plans/refurbisher-review-followups-2026-09-17.md`.
+- [ ] Complete its product decisions before changing status names/rights,
+  diagnostic order, workflow completion routing, or password policy.
+- [ ] Use the document's Manual Administration Work section for approved system
+  configuration and its Guide Updates section for newly versioned guides.
+- [ ] Audit every attribute for hard-coded or partially hard-coded visibility,
+  category, lifecycle, component, migration, and seeder behavior; make all
+  attributes discoverable and manually assignable through the backend without
+  foundation reseeding overriding administrator choices. See AT-01 through
+  AT-06 in the consolidated backlog.
+- [ ] Investigate the reported asset/component specification mismatch where an
+  asset shows 6400 MHz instead of the expected 3200 MHz. Trace and expose value
+  provenance before correcting any source data; see AT-07 in the consolidated
+  backlog.
+
 ## Current Guide Review Clearance - 2026-09-10
 
 - [x] Record owner clearance for SC-01 v12, AST-02 v8, WF-01 v13, CMP-02 v6,
