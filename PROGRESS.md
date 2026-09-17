@@ -1,3 +1,38 @@
+# Session Progress (2026-09-17)
+
+## Debugging And Small Bug-Fix Session Initialization
+
+- Initialized from `AGENTS.md`, the current progress log,
+  `docs/fork-notes.md`, recent repository history, and the working-tree state.
+- The next work block is scoped to debugging and small bug fixes. Exact defects
+  and acceptance criteria are pending; inspect each affected path and add
+  focused regression coverage before changing behavior.
+- Preserve the substantial uncommitted operator-guide batch and all generated
+  artifacts. Do not modify unrelated changes already present in the worktree.
+- PHPUnit must use the guarded isolated testing database boundary. No
+  destructive database command, migration, deployment, or production access is
+  authorized by this initialization.
+- Session notes are in
+  `docs/agents/agents-addendum-2026-09-17-session-init.md`.
+
+## Workflow Dependency Select2 Modal Scroll Fix
+
+- Traced the misplaced dependency dropdown and stuttering, blocked upward
+  scrolling to Select2 4.0.13's dropdown adapter. The page attached the
+  dropdown to Bootstrap's fixed, scrollable modal, while Select2 positioned
+  against that moving coordinate space and restored the modal's saved
+  `scrollTop` on every scroll event.
+- The dependency dropdown now uses the non-scrolling `.modal-content` as its
+  positioning parent and removes only Select2's modal scroll-lock handler when
+  opened. The dropdown remains inside the modal for focus handling and moves
+  naturally with its field.
+- Added a focused rendered-template regression assertion. Guarded in-memory
+  SQLite verification passed 14 tests / 71 assertions for
+  `ManageWorkflowProfilesTest`; Blade compilation and scoped whitespace checks
+  passed. The unauthenticated local route returns the expected login redirect.
+  Final interaction confirmation requires a hard reload in an authenticated
+  browser session.
+
 # Session Progress (2026-09-15)
 
 ## Feature Change Session Initialization

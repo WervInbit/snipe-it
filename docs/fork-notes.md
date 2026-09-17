@@ -4,6 +4,11 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-09-17
+- Fixed the workflow-profile dependency Select2 dropdown inside its long edit
+  modal. It now positions against stable modal content instead of the scrolling
+  modal and no longer lets Select2 reset modal scrolling while open.
+
 ### 2026-09-15
 - Workflow profiles now support editable dependencies and per-profile repeat
   policy. Dependencies require every Required item to be Pass/Done. Asset workflow surfaces render

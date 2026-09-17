@@ -33,6 +33,19 @@ class ManageWorkflowProfilesTest extends TestCase
         $response->assertDontSee('Items for Standard Diagnostics');
     }
 
+    public function test_dependency_select_uses_stable_modal_positioning_without_scroll_lock(): void
+    {
+        WorkflowProfile::factory()->count(2)->create();
+
+        $response = $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('settings.workflow-profiles.index'));
+
+        $response->assertOk();
+        $response->assertSee("dropdownParent: dropdownParent", false);
+        $response->assertSee("select.closest('.modal-content')", false);
+        $response->assertSee("modal.off('scroll.select2')", false);
+    }
+
     public function test_profile_index_uses_configured_order_even_when_default_is_later(): void
     {
         $diagnostics = WorkflowProfile::factory()->create([

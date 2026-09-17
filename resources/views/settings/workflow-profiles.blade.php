@@ -244,10 +244,16 @@
                 if (select.hasClass('select2-hidden-accessible')) {
                     select.select2('destroy');
                 }
+                var dropdownParent = select.closest('.modal-content');
+                select.off('.workflowProfileDependencies');
                 select.select2({
-                    dropdownParent: modal,
+                    dropdownParent: dropdownParent,
                     placeholder: select.data('placeholder'),
                     width: '100%'
+                });
+                select.on('select2:open.workflowProfileDependencies', function () {
+                    // Select2 4.0.13 otherwise restores the scrollable modal's old position.
+                    modal.off('scroll.select2');
                 });
             });
         });
