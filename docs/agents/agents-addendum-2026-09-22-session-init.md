@@ -44,3 +44,8 @@
   the feature and asset API boundaries. PHP lint, focused new-file PSR-12, the
   production webpack build, and `git diff --check` pass. The generic Node suite
   retains one unrelated stale dependency-volume marker failure.
+- Local `dev.inbit` was switched from the dirty primary checkout to this
+  isolated feature worktree without moving its persistent volumes. The local
+  database received the two additive feature migrations and the older pending
+  additive failed-jobs migration; the production role seeder was rerun. The
+  primary checkout's manual-guide work remains untouched.

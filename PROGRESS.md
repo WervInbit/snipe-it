@@ -41,8 +41,20 @@
 - The generic Node suite has one unrelated shared-volume failure: the installed
   brace-expansion compatibility package lacks its expected patch marker. Three
   Bootstrap security checks pass, and the production webpack build completes.
-- No destructive database command, deployment, production access, or live
-  configuration change ran.
+- No destructive database command, production access, remote deployment, or
+  production configuration change ran.
+- Activated the feature branch on the local `dev.inbit` stack after confirming
+  it had still been bind-mounted from the dirty primary checkout. Recreated
+  only `snipeit_app` and `snipeit_web` against the isolated feature worktree;
+  retained the existing database, uploads/storage, vendor, cache, and node
+  volumes, and overlaid the primary local `.env` and TLS certificate directory.
+- Local dev migration batch 7 applied the two feature migrations plus the
+  repository's older pending additive `create_failed_jobs_table` migration.
+  Reran `ProductionPermissionGroupSeeder`; Refurbisher now has explicit
+  create/quality denies while Senior, Supervisor, and Admin have both grants.
+  Login returns HTTP 200, the focused creation route and compiled workflow
+  bundle are present, and app/web services are healthy. No production or
+  remote server was touched.
 - Session notes are in
   `docs/agents/agents-addendum-2026-09-22-session-init.md`.
 
