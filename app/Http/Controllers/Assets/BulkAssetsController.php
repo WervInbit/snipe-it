@@ -27,6 +27,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Response;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
+use App\Rules\UserCanSelectStatusLabel;
 
 class BulkAssetsController extends Controller
 {
@@ -279,8 +280,25 @@ class BulkAssetsController extends Controller
 
         $requestedStatus = null;
         if ($request->filled('status_id')) {
+            $request->validate([
+                'status_id' => ['integer', 'exists:status_labels,id', new UserCanSelectStatusLabel()],
+            ]);
             $status = Statuslabel::find($request->input('status_id'));
             $requestedStatus = $status;
+            $lockedAssets = $status
+                ? $assets->filter(fn (Asset $asset): bool => app(\App\Services\Assets\AssetStatusTransitionGuardService::class)
+                    ->isLockedExit($asset->loadMissing('assetstatus'), $status))
+                : collect();
+            if ($lockedAssets->isNotEmpty()) {
+                return redirect()->back()->withInput()->withErrors([
+                    'status_id' => __('Locked statuses must be changed one asset at a time from the asset detail page.'),
+                ]);
+            }
+            if ($status?->requires_note) {
+                $request->validate([
+                    'status_change_note' => ['required', 'string', 'max:65535'],
+                ]);
+            }
             if ($status && $this->statusRequiresTestAck($status)) {
                 $warnings = [];
                 foreach ($assets as $asset) {
@@ -568,6 +586,10 @@ class BulkAssetsController extends Controller
 
 
                 // Check if it passes validation, and then try to save
+                if (array_key_exists('status_id', $this->update_array)) {
+                    $asset->withStatusChangeNote($request->input('status_change_note'));
+                }
+
                 if (!$asset->update($this->update_array)) {
 
                     // Build the error array

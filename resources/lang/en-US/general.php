@@ -859,6 +859,13 @@ return [
     'printing_failed_with_error' => 'Printing failed: :error',
     'sent_to_printer' => 'Sent to printer (:queue).',
     'sent_to_printer_with_job' => 'Sent to printer (:queue), job :job.',
+    'recent_devices' => 'Recent devices',
+    'asset_creation_complete' => 'Asset creation complete',
+    'asset_creation_summary' => 'The new asset is ready. Open it to continue or print its QR label.',
+    'assets_creation_summary' => ':count assets were created. Open an asset or print its QR label.',
+    'create_another_asset' => 'Create another asset',
+    'creation_failures' => 'Rows that could not be created',
+    'password_requirements' => 'Use at least 8 characters, including one uppercase letter and one number.',
 
 ];
 

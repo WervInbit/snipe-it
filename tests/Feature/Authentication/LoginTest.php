@@ -8,6 +8,16 @@ use Tests\TestCase;
 
 class LoginTest extends TestCase
 {
+    public function test_login_form_keeps_remember_me_available(): void
+    {
+        $this->withoutMiddleware(\App\Http\Middleware\CheckForSetup::class);
+
+        $this->get(route('login'))
+            ->assertOk()
+            ->assertSee('name="remember"', false)
+            ->assertSee('id="remember"', false);
+    }
+
     public function testLogsFailedLoginAttempt()
     {
 

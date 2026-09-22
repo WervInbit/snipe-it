@@ -249,6 +249,10 @@ class ValidationServiceProvider extends ServiceProvider
             return preg_match('/\pN/', $value);
         });
 
+        Validator::extend('has_uppercase', function ($attribute, $value, $parameters) {
+            return preg_match('/\p{Lu}/u', $value);
+        });
+
         Validator::extend('case_diff', function ($attribute, $value, $parameters) {
             return preg_match('/(\p{Ll}+.*\p{Lu})|(\p{Lu}+.*\p{Ll})/u', $value);
         });

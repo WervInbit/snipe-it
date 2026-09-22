@@ -10,6 +10,7 @@ use Illuminate\Support\Collection;
 use App\Models\ComponentInstance;
 use App\Models\Statuslabel;
 use App\Support\RefurbStatus;
+use App\Services\Assets\RecentAssetActivityService;
 
 
 /**
@@ -27,7 +28,7 @@ class DashboardController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v1.0]
      */
-    public function index() : View | RedirectResponse
+    public function index(RecentAssetActivityService $recentAssetActivity) : View | RedirectResponse
     {
         $asset_stats = null;
         $user = auth()->user();
@@ -61,11 +62,13 @@ class DashboardController extends Controller
         }
 
         $refurbFilters = $this->buildRefurbFilters();
+        $recentAssets = $recentAssetActivity->forUser($user);
 
         return view('dashboard')
             ->with('asset_stats', $asset_stats)
             ->with('counts', $counts)
-            ->with('refurbFilters', $refurbFilters);
+            ->with('refurbFilters', $refurbFilters)
+            ->with('recentAssets', $recentAssets);
     }
 
     /**
@@ -128,6 +131,12 @@ class DashboardController extends Controller
         ]);
 
         $statusLabels = Statuslabel::select(['id', 'name', 'color', 'lifecycle_stage'])->get();
+        if (auth()->check()) {
+            $access = app(\App\Services\Assets\StatusLabelAccessService::class);
+            $statusLabels = $statusLabels
+                ->filter(fn (Statuslabel $status): bool => $access->canView(auth()->user(), $status))
+                ->values();
+        }
         $statusLabelsByName = $statusLabels->keyBy('name');
         $statusLabelsByStage = $statusLabels
             ->whereNotNull('lifecycle_stage')

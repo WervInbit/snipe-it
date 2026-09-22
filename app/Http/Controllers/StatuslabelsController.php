@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Helpers\Helper;
 use App\Models\Statuslabel;
+use App\Models\Group;
+use App\Models\StatusLabelAccessRule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
@@ -45,7 +47,9 @@ class StatuslabelsController extends Controller
         return view('statuslabels/edit')
             ->with('item', new Statuslabel)
             ->with('statuslabel_types', Helper::statusTypeList())
-            ->with('lifecycle_stages', Statuslabel::lifecycleStageOptions());
+            ->with('lifecycle_stages', Statuslabel::lifecycleStageOptions())
+            ->with('accessGroups', Group::query()->orderBy('name')->get())
+            ->with('userAccessRules', collect());
     }
 
     /**
@@ -65,6 +69,7 @@ class StatuslabelsController extends Controller
 
         $request->validate([
             'lifecycle_stage' => ['nullable', Rule::in(array_filter(array_keys(Statuslabel::lifecycleStageOptions())))],
+            ...$this->accessValidationRules(),
         ]);
 
         $statusType = Statuslabel::getStatuslabelTypesForDB($request->input('statuslabel_types'));
@@ -80,8 +85,10 @@ class StatuslabelsController extends Controller
         $statusLabel->show_in_nav = $request->input('show_in_nav', 0);
         $statusLabel->default_label = $request->input('default_label', 0);
         $statusLabel->lifecycle_stage = $request->input('lifecycle_stage') ?: null;
+        $statusLabel->requires_note = $request->boolean('requires_note');
 
         if ($statusLabel->save()) {
+            $this->syncAccessRules($request, $statusLabel);
             // Redirect to the new Statuslabel  page
             return redirect()->route('statuslabels.index')->with('success', trans('admin/statuslabels/message.create.success'));
         }
@@ -103,7 +110,13 @@ class StatuslabelsController extends Controller
         return view('statuslabels/edit', compact('statuslabel_types'))
             ->with('item', $statuslabel)
             ->with('use_statuslabel_type', $statuslabel)
-            ->with('lifecycle_stages', Statuslabel::lifecycleStageOptions());
+            ->with('lifecycle_stages', Statuslabel::lifecycleStageOptions())
+            ->with('accessGroups', Group::query()->orderBy('name')->get())
+            ->with('userAccessRules', $statuslabel->accessRules()
+                ->where('subject_type', StatusLabelAccessRule::SUBJECT_USER)
+                ->with('user')
+                ->orderBy('subject_id')
+                ->get());
     }
 
     /**
@@ -121,6 +134,7 @@ class StatuslabelsController extends Controller
 
         $request->validate([
             'lifecycle_stage' => ['nullable', Rule::in(array_filter(array_keys(Statuslabel::lifecycleStageOptions())))],
+            ...$this->accessValidationRules(),
         ]);
 
         // Update the Statuslabel data
@@ -134,9 +148,11 @@ class StatuslabelsController extends Controller
         $statuslabel->show_in_nav = $request->input('show_in_nav', 0);
         $statuslabel->default_label = $request->input('default_label', 0);
         $statuslabel->lifecycle_stage = $request->input('lifecycle_stage') ?: null;
+        $statuslabel->requires_note = $request->boolean('requires_note');
 
         // Was the asset created?
         if ($statuslabel->save()) {
+            $this->syncAccessRules($request, $statuslabel);
             // Redirect to the saved Statuslabel page
             return redirect()->route('statuslabels.index')->with('success', trans('admin/statuslabels/message.update.success'));
         }
@@ -165,5 +181,103 @@ class StatuslabelsController extends Controller
         }
 
         return redirect()->route('statuslabels.index')->with('error', trans('admin/statuslabels/message.assoc_assets'));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function accessValidationRules(): array
+    {
+        return [
+            'status_access_groups' => ['nullable', 'array'],
+            'status_access_groups.*.view' => ['required', Rule::in([-1, 0, 1, '-1', '0', '1'])],
+            'status_access_groups.*.select' => ['required', Rule::in([-1, 0, 1, '-1', '0', '1'])],
+            'status_access_users' => ['nullable', 'array'],
+            'status_access_users.*.view' => ['required', Rule::in([-1, 0, 1, '-1', '0', '1'])],
+            'status_access_users.*.select' => ['required', Rule::in([-1, 0, 1, '-1', '0', '1'])],
+            'new_status_access_user_id' => ['nullable', 'integer', 'exists:users,id'],
+            'new_status_access_user_view' => ['nullable', Rule::in([-1, 0, 1, '-1', '0', '1'])],
+            'new_status_access_user_select' => ['nullable', Rule::in([-1, 0, 1, '-1', '0', '1'])],
+        ];
+    }
+
+    private function syncAccessRules(Request $request, Statuslabel $statuslabel): void
+    {
+        $groupValues = (array) $request->input('status_access_groups', []);
+        $validGroupIds = Group::query()->whereIn('id', array_keys($groupValues))->pluck('id')->all();
+
+        $statuslabel->accessRules()
+            ->where('subject_type', StatusLabelAccessRule::SUBJECT_GROUP)
+            ->delete();
+
+        foreach ($validGroupIds as $groupId) {
+            $this->saveAccessRule(
+                $statuslabel,
+                StatusLabelAccessRule::SUBJECT_GROUP,
+                (int) $groupId,
+                $groupValues[$groupId] ?? []
+            );
+        }
+
+        $userValues = (array) $request->input('status_access_users', []);
+        foreach ($userValues as $userId => $values) {
+            $rule = $statuslabel->accessRules()
+                ->where('subject_type', StatusLabelAccessRule::SUBJECT_USER)
+                ->where('subject_id', (int) $userId)
+                ->first();
+            $view = (int) ($values['view'] ?? 0);
+            $select = (int) ($values['select'] ?? 0);
+
+            if ($view === 0 && $select === 0) {
+                $rule?->delete();
+                continue;
+            }
+
+            StatusLabelAccessRule::query()->updateOrCreate(
+                [
+                    'status_label_id' => $statuslabel->id,
+                    'subject_type' => StatusLabelAccessRule::SUBJECT_USER,
+                    'subject_id' => (int) $userId,
+                ],
+                ['view_value' => $view, 'select_value' => $select]
+            );
+        }
+
+        if ($request->filled('new_status_access_user_id')) {
+            $this->saveAccessRule(
+                $statuslabel,
+                StatusLabelAccessRule::SUBJECT_USER,
+                (int) $request->input('new_status_access_user_id'),
+                [
+                    'view' => $request->input('new_status_access_user_view', 0),
+                    'select' => $request->input('new_status_access_user_select', 0),
+                ]
+            );
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     */
+    private function saveAccessRule(
+        Statuslabel $statuslabel,
+        string $subjectType,
+        int $subjectId,
+        array $values
+    ): void {
+        $view = (int) ($values['view'] ?? 0);
+        $select = (int) ($values['select'] ?? 0);
+        if ($view === 0 && $select === 0) {
+            return;
+        }
+
+        StatusLabelAccessRule::query()->updateOrCreate(
+            [
+                'status_label_id' => $statuslabel->id,
+                'subject_type' => $subjectType,
+                'subject_id' => $subjectId,
+            ],
+            ['view_value' => $view, 'select_value' => $select]
+        );
     }
 }

@@ -9,20 +9,22 @@
 
 ## Refurbisher Review Backlog - 2026-09-17
 
-- [ ] Resolve and implement the consolidated refurbisher review backlog in
+- [x] Implement the approved application portion of the consolidated
+  refurbisher review backlog in
   `docs/plans/refurbisher-review-followups-2026-09-17.md`.
-- [ ] Complete its product decisions before changing status names/rights,
-  diagnostic order, workflow completion routing, or password policy.
+- [x] Record the product decisions for status rights, workflow completion,
+  dashboard actions, quality edit, password baseline, and Remember Me.
 - [ ] Use the document's Manual Administration Work section for approved system
-  configuration and its Guide Updates section for newly versioned guides.
-- [ ] Audit every attribute for hard-coded or partially hard-coded visibility,
-  category, lifecycle, component, migration, and seeder behavior; make all
-  attributes discoverable and manually assignable through the backend without
-  foundation reseeding overriding administrator choices. See AT-01 through
-  AT-06 in the consolidated backlog.
+  configuration and its Guide Updates section for newly versioned guides. The
+  application handoff is in `docs/refurbisher-follow-up-configuration.md`.
+- [x] Fix the confirmed attribute lifecycle gap: existing hidden/deprecated
+  component/model assignments remain editable/removable, while new assignments
+  require current attributes. Foundation workflow reseeding no longer
+  overwrites administrator-managed content/order.
 - [ ] Investigate the reported asset/component specification mismatch where an
   asset shows 6400 MHz instead of the expected 3200 MHz. Trace and expose value
-  provenance before correcting any source data; see AT-07 in the consolidated
+  provenance in the affected live record before correcting any source data; no
+  matching 6400 MHz repository source was found. See AT-07 in the consolidated
   backlog.
 
 ## Current Guide Review Clearance - 2026-09-10

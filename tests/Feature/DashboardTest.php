@@ -9,10 +9,15 @@ use App\Models\Consumable;
 use App\Models\License;
 use App\Models\Setting;
 use App\Models\User;
+use App\Models\Group;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function testUsersWithoutAdminAccessCanViewDashboard()
     {
         $this->actingAs(User::factory()->create())
@@ -115,5 +120,57 @@ class DashboardTest extends TestCase
             '/@media \(min-width: 768px\) and \(max-width: 899px\).*?\.navbar-brand-name\s*\{\s*display:\s*none;.*?#tagSearch,\s*#topSearchButton\s*\{.*?height:\s*34px;/s',
             $responsiveStyles
         );
+    }
+
+    public function testRefurbisherHeaderShowsCompactAccountMenuWithPasswordAndLogout(): void
+    {
+        $group = Group::factory()->create(['name' => 'Refurbisher']);
+        $user = User::factory()->viewAssets()->create(['ldap_import' => 0]);
+        $user->groups()->attach($group);
+
+        $this->actingAs($user)
+            ->get(route('home'))
+            ->assertOk()
+            ->assertSee('data-testid="refurbisher-account-menu"', false)
+            ->assertSee(route('account.password.index'))
+            ->assertSee(route('logout.post'));
+    }
+
+    public function testDashboardShowsFiveMostRecentVisibleAssetsAndCreateAction(): void
+    {
+        $user = User::factory()->viewAssets()->createAssets()->create();
+        $assets = Asset::factory()->count(6)->create();
+
+        foreach ($assets as $index => $asset) {
+            DB::table('user_recent_assets')->insert([
+                'user_id' => $user->id,
+                'asset_id' => $asset->id,
+                'last_activity_at' => now()->addMinutes($index),
+            ]);
+        }
+
+        $response = $this->actingAs($user)->get(route('home'));
+
+        $response
+            ->assertOk()
+            ->assertSee('data-testid="dashboard-new-asset"', false)
+            ->assertDontSee($assets->first()->asset_tag);
+
+        foreach ($assets->slice(1) as $asset) {
+            $response->assertSee($asset->asset_tag);
+        }
+    }
+
+    public function testViewingAnAssetAddsItToTheUsersRecentList(): void
+    {
+        $user = User::factory()->viewAssets()->create();
+        $asset = Asset::factory()->create();
+
+        $this->actingAs($user)->get(route('hardware.show', $asset))->assertOk();
+
+        $this->assertDatabaseHas('user_recent_assets', [
+            'user_id' => $user->id,
+            'asset_id' => $asset->id,
+        ]);
     }
 }

@@ -53,6 +53,8 @@ class ProductionOperationalRoleMatrixTest extends TestCase
         $this->assertTrue(Gate::forUser($refurbisher)->allows('tests.execute'));
         $this->assertFalse($refurbisher->hasAccess('tests.start_new_run'));
         $this->assertFalse($refurbisher->hasAccess('assets.images.manage'));
+        $this->assertFalse($refurbisher->hasAccess('assets.create'));
+        $this->assertFalse($refurbisher->hasAccess('assets.quality_grade.update'));
         $this->assertFalse(Gate::forUser($refurbisher)->allows('create', WorkOrder::class));
 
         $this->assertTrue($senior->hasAccess('tests.execute'));
@@ -61,6 +63,8 @@ class ProductionOperationalRoleMatrixTest extends TestCase
         $this->assertFalse($senior->hasAccess('tests.start_new_run'));
         $this->assertTrue(Gate::forUser($senior)->allows('tests.execute'));
         $this->assertTrue($senior->hasAccess('assets.images.manage'));
+        $this->assertTrue($senior->hasAccess('assets.create'));
+        $this->assertTrue($senior->hasAccess('assets.quality_grade.update'));
 
         foreach ([$refurbisher, $senior] as $operator) {
             $this->assertFalse($operator->hasAccess('assets.sale_transition'));
@@ -79,6 +83,7 @@ class ProductionOperationalRoleMatrixTest extends TestCase
         }
 
         $this->assertTrue($supervisor->hasAccess('assets.sale_transition'));
+        $this->assertTrue($supervisor->hasAccess('assets.quality_grade.update'));
         $this->assertTrue($supervisor->hasAccess('assets.override_sale_readiness'));
         $this->assertTrue($supervisor->hasAccess('tests.execute.supervisor'));
         $this->assertTrue($supervisor->hasAccess('tests.start_new_run'));
@@ -109,6 +114,7 @@ class ProductionOperationalRoleMatrixTest extends TestCase
         $this->assertFalse($supervisor->hasAccess('components.manage_storage_locations'));
 
         $this->assertTrue($admin->hasAccess('components.manage_definitions'));
+        $this->assertTrue($admin->hasAccess('assets.quality_grade.update'));
         $this->assertTrue($admin->hasAccess('components.manage_definition_lifecycle'));
         $this->assertTrue($admin->hasAccess('components.manage_storage_locations'));
         $this->assertTrue($admin->hasAccess('models.manage_lifecycle'));
@@ -199,6 +205,25 @@ class ProductionOperationalRoleMatrixTest extends TestCase
         $this->assertArrayNotHasKey('attributes.lifecycle', $permissions);
         $this->assertArrayNotHasKey('components.manage_definition_lifecycle', $permissions);
         $this->assertArrayNotHasKey('workflows.delete', $permissions);
+    }
+
+    public function test_foundation_role_rerun_removes_forbidden_refurbisher_grants(): void
+    {
+        Group::factory()->create([
+            'name' => 'Refurbisher',
+            'permissions' => json_encode([
+                'operator.custom_permission' => 1,
+                'assets.create' => 1,
+                'assets.quality_grade.update' => 1,
+            ]),
+        ]);
+
+        $this->seed(ProductionPermissionGroupSeeder::class);
+
+        $permissions = $this->groupPermissions('Refurbisher');
+        $this->assertSame(1, $permissions['operator.custom_permission']);
+        $this->assertSame(0, $permissions['assets.create']);
+        $this->assertSame(0, $permissions['assets.quality_grade.update']);
     }
 
     private function userInGroup(string $groupName): User

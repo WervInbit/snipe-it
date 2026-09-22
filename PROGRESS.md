@@ -1,3 +1,51 @@
+# Session Progress (2026-09-22)
+
+## Refurbisher Follow-Up Implementation
+
+- Initialized the isolated feature worktree from `master` after reviewing
+  `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, the consolidated refurbisher
+  backlog, and the primary checkout's preserved manual-guide changes.
+- Implemented the approved refurbisher navigation/dashboard,
+  status/quality/note authorization, workflow completion, post-create,
+  recent-device, scanner/login, and attribute-control changes without touching
+  the separate server migration.
+- Remember Me remains available on desktop and mobile. Dutch status names,
+  status access data, Afgevoerd creation, and workflow item content/order remain
+  administrator-owned configuration.
+- Refurbisher now has a compact account menu. The dashboard exposes Scan QR,
+  permission-aware New Asset, and five per-user recent assets. Senior,
+  Supervisor, and Admin receive asset-create/quality rights; ordinary
+  Refurbisher does not.
+- Added status View and Choose/use matrices with user overrides, configurable
+  required transition notes, and Admin-only audited exits from Sold,
+  Broken/Parts, and Destroyed using a reason plus exact asset tag/QR check.
+- Workflow cards now turn green when complete; Klaar remains visibly disabled
+  until required work is saved, then returns to the asset Workflows tab. The
+  asset page reports when all available workflows are done. Foundation reruns
+  preserve administrator-owned workflow items, requiredness, labels, and order.
+- Successful asset creation now has one focused result/QR page, including
+  multi-create failures. Serial moved directly below asset tag. Existing
+  hidden/deprecated component attributes remain editable/removable while new
+  assignments require current attributes.
+- Local passwords now have a minimum baseline of eight characters, one capital,
+  and one number. The existing browser camera flow remains automatic with
+  retry/manual entry; serial OCR was not added.
+- No repository source for the reported 6400 MHz value was found. The affected
+  live record and effective-spec provenance must be checked before data is
+  changed. Manual configuration is documented in
+  `docs/refurbisher-follow-up-configuration.md`.
+- Guarded in-memory SQLite verification passed 127 focused feature tests / 790
+  assertions and 65 asset API tests / 258 assertions. The production asset
+  build and changed-file PHP lint passed; new production files pass focused
+  PSR-12 checks. `git diff --check` passes.
+- The generic Node suite has one unrelated shared-volume failure: the installed
+  brace-expansion compatibility package lacks its expected patch marker. Three
+  Bootstrap security checks pass, and the production webpack build completes.
+- No destructive database command, deployment, production access, or live
+  configuration change ran.
+- Session notes are in
+  `docs/agents/agents-addendum-2026-09-22-session-init.md`.
+
 # Session Progress (2026-09-17)
 
 ## Debugging And Small Bug-Fix Session Initialization

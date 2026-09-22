@@ -11,7 +11,7 @@
     $failLabel = $result['fail_label'] ?? trans('tests.status_fail');
 @endphp
 
-<article class="testing-card"
+<article class="testing-card{{ $status === TestResult::STATUS_PASS ? ' testing-card--completed' : '' }}"
          id="test-{{ $result['id'] }}"
          data-result-id="{{ $result['id'] }}"
          data-testid="test-item-{{ $result['slug'] }}"

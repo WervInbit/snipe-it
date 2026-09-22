@@ -165,6 +165,7 @@ return [
     'disallow_same_pwd_as_user_fields' => 'Password cannot be the same as the username.',
     'letters'              => 'Password must contain at least one letter.',
     'numbers'              => 'Password must contain at least one number.',
+    'has_uppercase'        => 'Password must contain at least one uppercase letter.',
     'case_diff'            => 'Password must use mixed case.',
     'symbols'              => 'Password must contain symbols.',
     'timezone' => 'The :attribute field must be a valid timezone.',

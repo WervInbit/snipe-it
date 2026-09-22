@@ -49,6 +49,21 @@
         min-height: 100%;
     }
 
+    .testing-card--completed {
+        border-color: rgba(22, 163, 74, 0.55);
+        background: #f0fdf4;
+        box-shadow: 0 14px 32px rgba(22, 101, 52, 0.12);
+    }
+
+    .testing-complete {
+        margin-top: 1.5rem;
+        text-align: right;
+    }
+
+    .testing-complete .help-block {
+        margin: 0.5rem 0 0;
+    }
+
     .testing-card__body {
         padding: var(--testing-space-md);
         display: flex;
@@ -275,6 +290,19 @@
                         </div>
                     @endforelse
                 </div>
+                <div class="testing-complete" data-testid="workflow-done-area">
+                    <button type="button"
+                            class="btn btn-primary btn-lg"
+                            id="tests-complete-btn"
+                            {{ (($progress['remaining'] ?? 0) > 0) ? 'disabled' : '' }}>
+                        {{ trans('tests.done') }}
+                    </button>
+                    <p class="help-block text-muted" id="tests-complete-help">
+                        {{ (($progress['remaining'] ?? 0) > 0)
+                            ? trans('tests.complete_required_first')
+                            : trans('tests.done_returns_to_workflow') }}
+                    </p>
+                </div>
             </main>
 
             <div class="modal fade" id="photoDeleteModal" tabindex="-1" aria-hidden="true">
@@ -319,10 +347,16 @@
         },
         canUpdate: {{ ($canUpdate ?? false) ? 'true' : 'false' }},
         progress: @json($progress),
+        actions: {
+            completeUrl: @json(route('hardware.show', $asset) . '#tests'),
+        },
         messages: {
             noteSaved: @json(trans('tests.note_saved_at', ['time' => ':time'])),
             photoDrawerEmpty: @json(trans('tests.photo_drawer_empty')),
             removePhoto: @json(trans('tests.remove_photo')),
+            completeRequiredFirst: @json(trans('tests.complete_required_first')),
+            completeWaitingForSaves: @json(trans('tests.complete_waiting_for_saves')),
+            completeReady: @json(trans('tests.done_returns_to_workflow')),
         },
         layoutKey: 'tests.layout.active.oneCol',
     };

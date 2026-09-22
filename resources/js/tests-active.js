@@ -99,6 +99,7 @@ const bootTestsActiveUI = () => {
     const progressRemainingEls = document.querySelectorAll('[data-progress-remaining]');
     const failuresSummaryEls = document.querySelectorAll('[data-progress-failures]');
     const completeBtn = document.getElementById('tests-complete-btn');
+    const completeHelp = document.getElementById('tests-complete-help');
     const completeConfirmModalEl = document.getElementById('testsCompleteConfirmModal');
     const completeConfirmModal = createModalController(completeConfirmModalEl);
     const completeConfirmContinue = document.getElementById('testsCompleteConfirmContinue');
@@ -113,6 +114,9 @@ const bootTestsActiveUI = () => {
     const confirmPrompt = config.messages?.completeConfirmPrompt ?? '';
     const confirmFailedLabel = config.messages?.completeConfirmFailed ?? '';
     const confirmIncompleteLabel = config.messages?.completeConfirmIncomplete ?? '';
+    const completeRequiredFirst = config.messages?.completeRequiredFirst ?? '';
+    const completeWaitingForSaves = config.messages?.completeWaitingForSaves ?? '';
+    const completeReady = config.messages?.completeReady ?? '';
 
     const noteDebouncers = new WeakMap();
 
@@ -136,6 +140,7 @@ const bootTestsActiveUI = () => {
     const beginSave = () => {
         pendingSaves += 1;
         setIndicator('saving');
+        refreshCompletionState();
     };
 
     const endSave = (ok = true) => {
@@ -145,6 +150,7 @@ const bootTestsActiveUI = () => {
             return;
         }
         setIndicator(ok ? 'clean' : 'error');
+        refreshCompletionState();
     };
 
     const submitFormData = async (resultId, formData) => {
@@ -244,12 +250,21 @@ const bootTestsActiveUI = () => {
             progressBar.setAttribute('aria-valuenow', progressState.completed);
             progressBar.setAttribute('aria-valuemax', progressState.total);
         }
-        if (completeBtn) {
-            completeBtn.disabled = false;
-            completeBtn.classList.remove('disabled');
-        }
+        refreshCompletionState();
         updateFailureSummary();
     };
+
+    function refreshCompletionState() {
+        if (!completeBtn) return;
+        const ready = progressState.remaining === 0 && pendingSaves === 0;
+        completeBtn.disabled = !ready;
+        completeBtn.classList.toggle('disabled', !ready);
+        if (completeHelp) {
+            completeHelp.textContent = pendingSaves > 0
+                ? completeWaitingForSaves
+                : (progressState.remaining > 0 ? completeRequiredFirst : completeReady);
+        }
+    }
 
     const updateProgressCounts = (oldStatus, newStatus, isRequired) => {
         if (oldStatus === newStatus) return;
@@ -284,6 +299,7 @@ const bootTestsActiveUI = () => {
         const failBtn = card.querySelector('[data-action="set-fail"]');
         passBtn?.setAttribute('aria-pressed', status === 'pass' ? 'true' : 'false');
         failBtn?.setAttribute('aria-pressed', status === 'fail' ? 'true' : 'false');
+        card.classList.toggle('testing-card--completed', status === 'pass');
         const pill = card.querySelector('[data-status-pill]');
         if (pill) {
             pill.dataset.status = status;

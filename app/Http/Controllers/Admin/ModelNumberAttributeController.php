@@ -83,7 +83,7 @@ class ModelNumberAttributeController extends Controller
     {
         $this->authorize('manageSpecificationCleanup', $model);
         $this->ensureModelNumber($model, $modelNumber);
-        $definition = $this->resolveDefinitionForModel($model, $attributeDefinition->id);
+        $definition = AttributeDefinition::query()->whereKey($attributeDefinition->id)->firstOrFail();
 
         $deleted = DB::transaction(function () use ($modelNumber, $definition): int {
             $deleted = ModelNumberAttribute::query()

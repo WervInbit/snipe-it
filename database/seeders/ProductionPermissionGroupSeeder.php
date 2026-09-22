@@ -33,7 +33,9 @@ class ProductionPermissionGroupSeeder extends Seeder
         return [
             'Refurbisher' => [
                 'assets.view' => 1,
+                'assets.create' => 0,
                 'assets.edit' => 1,
+                'assets.quality_grade.update' => 0,
                 'assets.images.upload' => 1,
                 'scanning' => 1,
                 'tests.execute' => 1,
@@ -48,7 +50,9 @@ class ProductionPermissionGroupSeeder extends Seeder
             ],
             'Senior Refurbisher' => [
                 'assets.view' => 1,
+                'assets.create' => 1,
                 'assets.edit' => 1,
+                'assets.quality_grade.update' => 1,
                 'assets.images.upload' => 1,
                 'assets.images.manage' => 1,
                 'scanning' => 1,
@@ -66,6 +70,7 @@ class ProductionPermissionGroupSeeder extends Seeder
             'Supervisor' => [
                 'assets.view' => 1,
                 'assets.edit' => 1,
+                'assets.quality_grade.update' => 1,
                 'assets.images.upload' => 1,
                 'assets.images.manage' => 1,
                 'scanning' => 1,
@@ -108,6 +113,7 @@ class ProductionPermissionGroupSeeder extends Seeder
                 'admin' => 1,
                 'assets.view' => 1,
                 'assets.edit' => 1,
+                'assets.quality_grade.update' => 1,
                 'assets.images.upload' => 1,
                 'assets.images.manage' => 1,
                 'scanning' => 1,

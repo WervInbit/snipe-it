@@ -32,7 +32,7 @@ class CreateUserTest extends TestCase
                 'first_name' => 'Test First Name',
                 'last_name' => 'Test Last Name',
                 'username' => 'testuser',
-                'password' => 'testpassword1235!!',
+                'password' => 'Testpassword1235!!',
                 //'notes' => 'Test Note',
             ])
             ->assertStatus(302)

@@ -857,6 +857,13 @@ return [
     'printing_failed_with_error' => 'Printen mislukt: :error',
     'sent_to_printer' => 'Naar printer gestuurd (:queue).',
     'sent_to_printer_with_job' => 'Naar printer gestuurd (:queue), job :job.',
+    'recent_devices' => 'Recente apparaten',
+    'asset_creation_complete' => 'Asset aanmaken voltooid',
+    'asset_creation_summary' => 'Het nieuwe asset is klaar. Open het om verder te gaan of print het QR-label.',
+    'assets_creation_summary' => ':count assets zijn aangemaakt. Open een asset of print het QR-label.',
+    'create_another_asset' => 'Nog een asset aanmaken',
+    'creation_failures' => 'Rijen die niet konden worden aangemaakt',
+    'password_requirements' => 'Gebruik minimaal 8 tekens, waaronder één hoofdletter en één cijfer.',
 
 
 ];

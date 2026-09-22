@@ -76,7 +76,7 @@ class ComponentDefinitionSettingsController extends Controller
             'item' => $componentDefinition,
             'componentDefinition' => $componentDefinition,
             'hierarchyOverlapWarnings' => $this->hierarchyWarningService->overlapWarnings($componentDefinition),
-            ...$this->formOptions(),
+            ...$this->formOptions($componentDefinition),
         ]);
     }
 
@@ -109,7 +109,7 @@ class ComponentDefinitionSettingsController extends Controller
             $this->authorize('manageLifecycle', $componentDefinition);
         }
 
-        $data = $this->validatedData($request);
+        $data = $this->validatedData($request, $componentDefinition);
         DB::transaction(function () use ($request, $componentDefinition, $data): void {
             $componentDefinition->fill($data);
             $componentDefinition->updated_by = $request->user()?->id;
@@ -151,8 +151,13 @@ class ComponentDefinitionSettingsController extends Controller
             ->with('success', __('Component definition activated.'));
     }
 
-    protected function validatedData(Request $request): array
+    protected function validatedData(Request $request, ?ComponentDefinition $componentDefinition = null): array
     {
+        $persistedAttributeIds = $componentDefinition?->attributeContributions()
+            ->pluck('attribute_definition_id')
+            ->map(fn ($id): int => (int) $id)
+            ->all() ?? [];
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
@@ -182,10 +187,15 @@ class ComponentDefinitionSettingsController extends Controller
                 'nullable',
                 'integer',
                 Rule::exists('attribute_definitions', 'id')->where(
-                    fn ($query) => $query
-                        ->whereNull('deleted_at')
-                        ->whereNull('deprecated_at')
-                        ->whereNull('hidden_at')
+                    fn ($query) => $query->whereNull('deleted_at')->where(function ($lifecycle) use ($persistedAttributeIds) {
+                        $lifecycle->where(function ($current) {
+                            $current->whereNull('deprecated_at')->whereNull('hidden_at');
+                        });
+
+                        if ($persistedAttributeIds !== []) {
+                            $lifecycle->orWhereIn('id', $persistedAttributeIds);
+                        }
+                    })
                 ),
             ],
             'attribute_contributions.*.attribute_search' => ['nullable', 'string', 'max:255'],
@@ -202,8 +212,13 @@ class ComponentDefinitionSettingsController extends Controller
         return $data;
     }
 
-    protected function formOptions(): array
+    protected function formOptions(?ComponentDefinition $componentDefinition = null): array
     {
+        $persistedAttributeIds = $componentDefinition?->attributeContributions()
+            ->pluck('attribute_definition_id')
+            ->map(fn ($id): int => (int) $id)
+            ->all() ?? [];
+
         return [
             'categories' => Category::query()->where('category_type', 'component')->orderBy('name')->pluck('name', 'id'),
             'manufacturers' => Manufacturer::query()->orderBy('name')->pluck('name', 'id'),
@@ -213,7 +228,13 @@ class ComponentDefinitionSettingsController extends Controller
                 ->orderBy('name')
                 ->get(),
             'attributeDefinitions' => AttributeDefinition::query()
-                ->current()
+                ->where(function ($query) use ($persistedAttributeIds) {
+                    $query->current();
+
+                    if ($persistedAttributeIds !== []) {
+                        $query->orWhereIn('id', $persistedAttributeIds);
+                    }
+                })
                 ->with('options')
                 ->orderBy('label')
                 ->get(),

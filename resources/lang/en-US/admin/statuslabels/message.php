@@ -6,6 +6,8 @@ return [
     'deleted_label' => 'Deleted Status Label',
     'assoc_assets'	 => 'This Status Label is currently associated with at least one Asset and cannot be deleted. Please update your assets to no longer reference this status and try again. ',
     'semantic_fields_in_use' => 'The lifecycle meaning and status type cannot be changed while assets use this label. Move those assets to another label first.',
+    'not_authorized_to_select' => 'You are not allowed to select this status.',
+    'locked_exit_admin_only' => 'Only an Admin may move an asset out of this locked status.',
 
     'create' => [
         'error'   => 'Status Label was not created, please try again.',

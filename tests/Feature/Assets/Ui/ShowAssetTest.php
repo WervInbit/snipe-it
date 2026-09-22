@@ -80,6 +80,22 @@ class ShowAssetTest extends TestCase
         $response->assertSee('width: 100%;', false);
     }
 
+    public function testSerialIsShownImmediatelyAfterTheAssetTag(): void
+    {
+        $asset = Asset::factory()->create([
+            'serial' => 'SERIAL-POSITION-123',
+        ]);
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('hardware.show', $asset))
+            ->assertOk()
+            ->assertSeeInOrder([
+                'class="js-copy-assettag"',
+                'class="js-copy-serial"',
+                'name="status_id"',
+            ], false);
+    }
+
     public function testDetailPageKeepsCalculatedSpecMetadataInBlockLayout(): void
     {
         $asset = Asset::factory()->create();
@@ -527,5 +543,38 @@ class ShowAssetTest extends TestCase
         $response->assertOk();
         $response->assertSee('id="asset-status-row"', false);
         $response->assertSee('id="asset-quality-row"', false);
+    }
+
+    public function testDetailPageMarksCompletedWorkflowGreenAndShowsAllDoneMessage(): void
+    {
+        $asset = Asset::factory()->create();
+        $profile = WorkflowProfile::factory()->create(['name' => 'Finished Workflow']);
+        $type = TestType::factory()->create(['name' => 'Finished step', 'applies_to_all' => true]);
+        $profileItem = WorkflowProfileItem::factory()->create([
+            'workflow_profile_id' => $profile->id,
+            'workflow_item_id' => $type->id,
+            'is_required' => true,
+        ]);
+        $definition = app(WorkflowRunDefinitionService::class)->forProfile($asset, $profile);
+        $run = TestRun::factory()->create([
+            'asset_id' => $asset->id,
+            'workflow_profile_id' => $profile->id,
+            'readiness_context_hash' => $definition['readiness_context_hash'],
+            'finished_at' => now(),
+        ]);
+        TestResult::factory()->create([
+            'workflow_run_id' => $run->id,
+            'workflow_item_id' => $type->id,
+            'workflow_profile_item_id' => $profileItem->id,
+            'status' => TestResult::STATUS_PASS,
+            'is_required' => true,
+        ]);
+
+        $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('hardware.show', $asset))
+            ->assertOk()
+            ->assertSee('workflow-progression__item--completed', false)
+            ->assertSee('data-testid="all-workflows-completed"', false)
+            ->assertSee(trans('tests.all_workflows_completed'));
     }
 }

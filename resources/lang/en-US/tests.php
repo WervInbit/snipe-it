@@ -88,4 +88,9 @@ return [
     'note_cta' => 'Note',
     'photo_cta' => 'Photo',
     'evidence_privacy_notice' => 'Private workflow evidence: access is controlled. Do not photograph passwords, recovery codes, or customer/repair credentials.',
+    'done' => 'Done',
+    'complete_required_first' => 'Complete all required steps before finishing this workflow.',
+    'complete_waiting_for_saves' => 'Waiting for the latest changes to save.',
+    'done_returns_to_workflow' => 'Returns to this asset with the Workflows tab open.',
+    'all_workflows_completed' => 'All workflows are complete.',
 ];

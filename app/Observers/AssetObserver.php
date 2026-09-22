@@ -6,6 +6,7 @@ use App\Models\Actionlog;
 use App\Models\Asset;
 use App\Models\AssetStatusEvent;
 use App\Models\Setting;
+use App\Services\Assets\RecentAssetActivityService;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -115,6 +116,8 @@ class AssetObserver
 
             AssetStatusEvent::create($event);
         }
+
+        app(RecentAssetActivityService::class)->recordForCurrentUser($asset);
     }
 
     /**
@@ -173,6 +176,8 @@ class AssetObserver
                 'note' => $asset->pullStatusChangeNote(),
             ]);
         }
+
+        app(RecentAssetActivityService::class)->recordForCurrentUser($asset);
     }
 
     /**

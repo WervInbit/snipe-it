@@ -93,6 +93,126 @@
     </div>
 </div>
 
+<!-- Require transition note -->
+<div class="form-group">
+    <div class="col-md-9 col-md-offset-3">
+        <label class="form-control">
+            <input type="checkbox" value="1" name="requires_note" id="requires_note" {{ old('requires_note', $item->requires_note) ? ' checked="checked"' : '' }}>
+            {{ trans('admin/statuslabels/table.requires_note') }}
+        </label>
+        <p class="help-block">{{ trans('admin/statuslabels/table.requires_note_help') }}</p>
+    </div>
+</div>
+
+<div class="form-group">
+    <div class="col-md-9 col-md-offset-3">
+        <h3>{{ trans('admin/statuslabels/table.access_title') }}</h3>
+        <p class="help-block">{{ trans('admin/statuslabels/table.access_help') }}</p>
+        @php
+            $accessOptions = [
+                0 => trans('admin/statuslabels/table.access_inherit'),
+                1 => trans('admin/statuslabels/table.access_allow'),
+                -1 => trans('admin/statuslabels/table.access_deny'),
+            ];
+            $groupRules = $item->exists
+                ? $item->accessRules->where('subject_type', \App\Models\StatusLabelAccessRule::SUBJECT_GROUP)->keyBy('subject_id')
+                : collect();
+        @endphp
+        <div class="table-responsive">
+            <table class="table table-condensed table-striped">
+                <thead>
+                    <tr>
+                        <th>{{ trans('general.group') }}</th>
+                        <th>{{ trans('admin/statuslabels/table.access_view') }}</th>
+                        <th>{{ trans('admin/statuslabels/table.access_select') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($accessGroups as $group)
+                        @php($groupRule = $groupRules->get($group->id))
+                        <tr>
+                            <td>{{ $group->name }}</td>
+                            <td>
+                                <select class="form-control" name="status_access_groups[{{ $group->id }}][view]">
+                                    @foreach($accessOptions as $value => $label)
+                                        <option value="{{ $value }}" {{ (int) old("status_access_groups.{$group->id}.view", $groupRule?->view_value ?? 0) === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td>
+                                <select class="form-control" name="status_access_groups[{{ $group->id }}][select]">
+                                    @foreach($accessOptions as $value => $label)
+                                        <option value="{{ $value }}" {{ (int) old("status_access_groups.{$group->id}.select", $groupRule?->select_value ?? 0) === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+        @if($userAccessRules->isNotEmpty())
+            <h4>{{ trans('admin/statuslabels/table.user_overrides') }}</h4>
+            <div class="table-responsive">
+                <table class="table table-condensed table-striped">
+                    <thead>
+                        <tr>
+                            <th>{{ trans('general.user') }}</th>
+                            <th>{{ trans('admin/statuslabels/table.access_view') }}</th>
+                            <th>{{ trans('admin/statuslabels/table.access_select') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($userAccessRules as $userRule)
+                            <tr>
+                                <td>{{ $userRule->user?->getFullNameAttribute() ?? trans('general.unknown') }}</td>
+                                <td>
+                                    <select class="form-control" name="status_access_users[{{ $userRule->subject_id }}][view]">
+                                        @foreach($accessOptions as $value => $label)
+                                            <option value="{{ $value }}" {{ (int) old("status_access_users.{$userRule->subject_id}.view", $userRule->view_value) === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                                <td>
+                                    <select class="form-control" name="status_access_users[{{ $userRule->subject_id }}][select]">
+                                        @foreach($accessOptions as $value => $label)
+                                            <option value="{{ $value }}" {{ (int) old("status_access_users.{$userRule->subject_id}.select", $userRule->select_value) === $value ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+
+        <h4>{{ trans('admin/statuslabels/table.add_user_override') }}</h4>
+        <div class="row">
+            <div class="col-md-6">
+                <select class="js-data-ajax" data-endpoint="users" data-placeholder="{{ trans('general.select_user') }}" name="new_status_access_user_id" style="width:100%">
+                    <option value="">{{ trans('general.select_user') }}</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-control" name="new_status_access_user_view" aria-label="{{ trans('admin/statuslabels/table.access_view') }}">
+                    @foreach($accessOptions as $value => $label)
+                        <option value="{{ $value }}">{{ trans('admin/statuslabels/table.access_view') }}: {{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-control" name="new_status_access_user_select" aria-label="{{ trans('admin/statuslabels/table.access_select') }}">
+                    @foreach($accessOptions as $value => $label)
+                        <option value="{{ $value }}">{{ trans('admin/statuslabels/table.access_select') }}: {{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
 @stop
 
 @section('moar_scripts')

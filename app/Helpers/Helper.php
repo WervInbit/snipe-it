@@ -555,10 +555,21 @@ class Helper
      * @since [v2.5]
      * @return array
      */
-    public static function statusLabelList()
+    public static function statusLabelList(?int $currentStatusId = null)
     {
-        $statuslabel_list = ['' => trans('general.select_statuslabel')] + Statuslabel::orderBy('default_label', 'desc')->orderBy('name', 'asc')->orderBy('deployable', 'desc')
-                ->pluck('name', 'id')->toArray();
+        $labels = Statuslabel::orderBy('default_label', 'desc')
+            ->orderBy('name', 'asc')
+            ->orderBy('deployable', 'desc')
+            ->get();
+
+        if (auth()->check()) {
+            $access = app(\App\Services\Assets\StatusLabelAccessService::class);
+            $labels = $labels->filter(fn (Statuslabel $status): bool =>
+                (int) $status->id === $currentStatusId || $access->canSelect(auth()->user(), $status)
+            );
+        }
+
+        $statuslabel_list = ['' => trans('general.select_statuslabel')] + $labels->pluck('name', 'id')->toArray();
 
         return $statuslabel_list;
     }
@@ -576,10 +587,17 @@ class Helper
      */
     public static function deployableStatusLabelList()
     {
-        $statuslabel_list = Statuslabel::where('deployable', '=', '1')->orderBy('default_label', 'desc')
+        $labels = Statuslabel::where('deployable', '=', '1')->orderBy('default_label', 'desc')
                 ->orderBy('name', 'asc')
                 ->orderBy('deployable', 'desc')
-                ->pluck('name', 'id')->toArray();
+                ->get();
+
+        if (auth()->check()) {
+            $access = app(\App\Services\Assets\StatusLabelAccessService::class);
+            $labels = $labels->filter(fn (Statuslabel $status): bool => $access->canSelect(auth()->user(), $status));
+        }
+
+        $statuslabel_list = $labels->pluck('name', 'id')->toArray();
 
         return $statuslabel_list;
     }

@@ -83,6 +83,12 @@ return [
             'display'    => true,
         ],
         [
+            'permission' => 'assets.quality_grade.update',
+            'label'      => 'Edit Quality Grade',
+            'note'       => 'Allows the user to set or change an asset quality grade.',
+            'display'    => true,
+        ],
+        [
             'permission' => 'assets.images.upload',
             'label'      => 'Upload Images',
             'note'       => 'Allows the user to upload and caption asset images.',

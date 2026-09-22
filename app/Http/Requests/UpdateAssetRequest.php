@@ -8,6 +8,8 @@ use App\Models\AssetModel;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use App\Models\Statuslabel;
+use App\Rules\UserCanSelectStatusLabel;
 
 class UpdateAssetRequest extends ImageUploadRequest
 {
@@ -36,7 +38,11 @@ class UpdateAssetRequest extends ImageUploadRequest
             // this is to overwrite rulesets that include required, and rewrite unique_undeleted
             [
                 'model_id'  => ['integer', 'exists:models,id,deleted_at,NULL', 'not_array'],
-                'status_id' => ['integer', 'exists:status_labels,id'],
+                'status_id' => [
+                    'integer',
+                    'exists:status_labels,id',
+                    new UserCanSelectStatusLabel((int) $this->asset?->status_id),
+                ],
                 'asset_tag' => [
                     'min:1', 'max:255', 'not_array',
                 ],
@@ -103,7 +109,30 @@ class UpdateAssetRequest extends ImageUploadRequest
 
         $rules['attribute_overrides'] = ['nullable', 'array'];
         $rules['attribute_overrides.*'] = ['nullable'];
-        $rules['status_change_note'] = ['nullable', 'string', 'max:65535'];
+        $targetStatus = Statuslabel::find($this->input('status_id'));
+        $statusChanging = $targetStatus
+            && (int) $targetStatus->id !== (int) $this->asset?->status_id;
+        $rules['status_change_note'] = [
+            Rule::requiredIf($statusChanging && (bool) $targetStatus?->requires_note),
+            'nullable',
+            'string',
+            'max:65535',
+        ];
+        $lockedExit = $targetStatus
+            && app(\App\Services\Assets\AssetStatusTransitionGuardService::class)
+                ->isLockedExit($this->asset->loadMissing('assetstatus'), $targetStatus);
+        $rules['status_override_reason'] = [
+            Rule::requiredIf(fn (): bool => $this->expectsJson() && $lockedExit),
+            'nullable',
+            'string',
+            'max:2000',
+        ];
+        $rules['locked_status_identifier'] = [
+            Rule::requiredIf(fn (): bool => $this->expectsJson() && $lockedExit),
+            'nullable',
+            'string',
+            'max:255',
+        ];
         foreach (Asset::LEGACY_READ_ONLY_FIELDS as $legacyField) {
             $rules[$legacyField] = ['missing'];
         }

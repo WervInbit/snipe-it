@@ -7,6 +7,8 @@ return [
     'assoc_assets'	 => 'Dit statuslabel is tenminste met één asset gekoppeld en kan niet verwijderd worden. Zorg ervoor dat assets geen gebruik maken van dit statuslabel en probeer het nogmaals. ',
 
     'semantic_fields_in_use' => 'De levenscyclusbetekenis en het statustype kunnen niet worden gewijzigd zolang assets dit label gebruiken. Verplaats die assets eerst naar een ander label.',
+    'not_authorized_to_select' => 'Je mag deze status niet kiezen.',
+    'locked_exit_admin_only' => 'Alleen een Admin mag een asset uit deze vergrendelde status halen.',
 
     'create' => [
         'error'   => 'Statuslabel is niet aangemaakt, probeer het nogmaals.',

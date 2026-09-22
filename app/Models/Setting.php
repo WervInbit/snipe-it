@@ -323,8 +323,9 @@ class Setting extends Model
      */
     public static function passwordComplexityRulesSaving($action = 'update'): string
     {
-        $security_rules = '';
+        $security_rules = '|numbers|has_uppercase';
         $settings = self::getSettings();
+        $minimumLength = max(8, (int) $settings->pwd_secure_min);
 
         // Check if they have uncommon password enforcement selected in settings
         if ($settings->pwd_secure_uncommon == 1) {
@@ -337,10 +338,10 @@ class Setting extends Model
         }
 
         if ($action == 'update') {
-            return 'nullable|min:'.$settings->pwd_secure_min.$security_rules;
+            return 'nullable|min:'.$minimumLength.$security_rules;
         }
 
-        return 'required|min:'.$settings->pwd_secure_min.$security_rules;
+        return 'required|min:'.$minimumLength.$security_rules;
     }
 
     /**

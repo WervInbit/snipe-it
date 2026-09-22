@@ -4,6 +4,28 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-09-22
+- Added the refurbisher follow-up application slice: compact account controls,
+  permission-aware New Asset/quality actions, Scan QR wording, and a five-row
+  per-user recent-device dashboard list. Remember Me remains available on
+  desktop and mobile.
+- Status labels now support editable group/user View and Choose/use rules plus
+  configurable required transition notes. Exits from Sold, Broken/Parts, and
+  Destroyed lifecycle stages are Admin-only and require a reason and exact
+  asset tag/QR confirmation with status-history audit data.
+- Workflow completion now reflects completed cards in green, keeps the Klaar
+  action disabled with guidance until required work is saved, returns to the
+  asset Workflows tab, and reports when all workflows are complete. Foundation
+  workflow seeding preserves administrator-managed item/profile content and
+  order; local operational steps stay manual.
+- Successful asset creation now opens one focused result/QR page, including a
+  single multi-create summary. Asset detail puts Serial immediately below the
+  asset tag. Existing hidden/deprecated model/component attributes remain
+  editable/removable without becoming eligible for new assignment.
+- See [refurbisher follow-up configuration](refurbisher-follow-up-configuration.md)
+  for the required manual Dutch status matrix, Afgevoerd, workflow steps,
+  camera-permission guidance, and the unresolved 6400/3200 MHz data check.
+
 ### 2026-09-17
 - Fixed the workflow-profile dependency Select2 dropdown inside its long edit
   modal. It now positions against stable modal content instead of the scrolling

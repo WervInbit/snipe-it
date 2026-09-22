@@ -59,4 +59,9 @@ class AssetPolicy extends CheckoutablePermissionsPolicy
         return $user->hasAccess('assets.images.manage')
             || $user->hasAccess('senior-refurbisher');
     }
+
+    public function updateQualityGrade(User $user, $item = null): bool
+    {
+        return $user->hasAccess('assets.quality_grade.update');
+    }
 }

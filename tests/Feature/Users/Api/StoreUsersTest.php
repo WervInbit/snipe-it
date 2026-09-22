@@ -16,8 +16,8 @@ class StoreUsersTest extends TestCase
             ->postJson(route('api.users.store'), [
                 'first_name' => 'Joe',
                 'username' => 'joe',
-                'password' => 'joe_password',
-                'password_confirmation' => 'joe_password',
+                'password' => 'Joe_password1',
+                'password_confirmation' => 'Joe_password1',
             ])
             ->assertForbidden();
     }
@@ -31,8 +31,8 @@ class StoreUsersTest extends TestCase
                 'company_id' => [$company->id],
                 'first_name' => 'Joe',
                 'username' => 'joe',
-                'password' => 'joe_password',
-                'password_confirmation' => 'joe_password',
+                'password' => 'Joe_password1',
+                'password_confirmation' => 'Joe_password1',
             ])
             ->assertStatusMessageIs('error')
             ->assertJson(function (AssertableJson $json) {
@@ -49,8 +49,8 @@ class StoreUsersTest extends TestCase
                 'department_id' => [$department->id],
                 'first_name' => 'Joe',
                 'username' => 'joe',
-                'password' => 'joe_password',
-                'password_confirmation' => 'joe_password',
+                'password' => 'Joe_password1',
+                'password_confirmation' => 'Joe_password1',
             ])
             ->assertStatusMessageIs('error')
             ->assertJson(function (AssertableJson $json) {
@@ -64,8 +64,8 @@ class StoreUsersTest extends TestCase
             ->postJson(route('api.users.store'), [
                 'first_name' => 'Darth',
                 'username' => 'darthvader',
-                'password' => 'darth_password',
-                'password_confirmation' => 'darth_password',
+                'password' => 'Darth_password1',
+                'password_confirmation' => 'Darth_password1',
             ])
             ->assertStatusMessageIs('success')
             ->assertOk();

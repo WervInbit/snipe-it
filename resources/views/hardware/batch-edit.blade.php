@@ -46,6 +46,14 @@
                             {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                         </div>
                     </div>
+                    <div class="form-group {{ $errors->has('status_change_note') ? ' has-error' : '' }}">
+                        <label for="status_change_note" class="col-md-3 control-label">{{ trans('admin/statuslabels/table.status_change_note') }}</label>
+                        <div class="col-md-7">
+                            <textarea class="form-control" name="status_change_note" id="status_change_note" rows="3" maxlength="65535">{{ old('status_change_note') }}</textarea>
+                            <p class="help-block">{{ trans('admin/statuslabels/table.status_change_note_help') }}</p>
+                            {!! $errors->first('status_change_note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                        </div>
+                    </div>
                     @include('partials.forms.edit.location-select', ['translated_name' => trans('admin/hardware/form.default_location'), 'fieldname' => 'rtd_location_id'])
                     <div class="form-group">
                         <div class="col-md-9 col-md-offset-3">

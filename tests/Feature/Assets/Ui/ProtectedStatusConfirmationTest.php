@@ -139,6 +139,77 @@ class ProtectedStatusConfirmationTest extends TestCase
             ->assertJsonPath('guard.has_issues', false);
     }
 
+    public function test_only_admin_can_leave_each_locked_lifecycle_status(): void
+    {
+        $target = Statuslabel::factory()->pending()->create(['default_label' => 0]);
+        $operator = User::factory()->create([
+            'permissions' => json_encode(['assets.view' => '1', 'assets.edit' => '1']),
+        ]);
+
+        foreach ([
+            Statuslabel::LIFECYCLE_SOLD,
+            Statuslabel::LIFECYCLE_BROKEN_PARTS,
+            Statuslabel::LIFECYCLE_DESTROYED,
+        ] as $stage) {
+            $locked = Statuslabel::factory()->archived()->create([
+                'name' => 'Locked '.$stage,
+                'lifecycle_stage' => $stage,
+            ]);
+            $asset = Asset::factory()->create(['status_id' => $locked->id]);
+
+            $this->actingAs($operator)
+                ->postJson(route('hardware.status.preview', $asset), ['status_id' => $target->id])
+                ->assertForbidden();
+        }
+    }
+
+    public function test_admin_locked_exit_requires_reason_and_exact_asset_tag_and_is_audited(): void
+    {
+        $locked = Statuslabel::factory()->archived()->create([
+            'lifecycle_stage' => Statuslabel::LIFECYCLE_BROKEN_PARTS,
+        ]);
+        $target = Statuslabel::factory()->pending()->create(['default_label' => 0]);
+        $asset = Asset::factory()->create([
+            'asset_tag' => 'LOCKED-QR-42',
+            'status_id' => $locked->id,
+        ]);
+        $admin = User::factory()->admin()->create();
+
+        $preview = $this->actingAs($admin)
+            ->postJson(route('hardware.status.preview', $asset), ['status_id' => $target->id])
+            ->assertOk()
+            ->assertJsonPath('locked_exit', true)
+            ->assertJsonPath('required_identifier', 'LOCKED-QR-42');
+
+        $payload = [
+            'status_id' => $target->id,
+            'status_confirmation_hash' => $preview->json('confirmation_hash'),
+        ];
+
+        $this->patchJson(route('hardware.status.update', $asset), $payload)
+            ->assertJsonValidationErrors('status_override_reason');
+
+        $this->patchJson(route('hardware.status.update', $asset), $payload + [
+            'status_override_reason' => 'Approved return to diagnostics.',
+            'locked_status_identifier' => 'WRONG-TAG',
+        ])->assertJsonValidationErrors('locked_status_identifier');
+
+        $this->patchJson(route('hardware.status.update', $asset), $payload + [
+            'status_override_reason' => 'Approved return to diagnostics.',
+            'locked_status_identifier' => 'LOCKED-QR-42',
+        ])->assertOk();
+
+        $event = AssetStatusEvent::query()
+            ->where('asset_id', $asset->id)
+            ->where('to_status_id', $target->id)
+            ->latest('id')
+            ->firstOrFail();
+
+        $this->assertSame('Approved return to diagnostics.', $event->guard_override_reason);
+        $this->assertTrue($event->guard_override_details['locked_exit']);
+        $this->assertTrue($event->guard_override_details['identifier_verified']);
+    }
+
     /**
      * @return array{0: Asset, 1: Statuslabel}
      */

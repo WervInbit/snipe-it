@@ -55,4 +55,46 @@ class QualityGradeDetailUpdateTest extends TestCase
 
         $this->assertNull($asset->quality_grade);
     }
+
+    public function testQualityGradeRequiresDedicatedPermission(): void
+    {
+        $status = Statuslabel::factory()->pending()->create(['name' => 'Stand-by']);
+        $asset = Asset::factory()->create([
+            'status_id' => $status->id,
+            'quality_grade' => Asset::QUALITY_GRADE_B,
+        ]);
+        $user = User::factory()->editAssets()->viewAssets()->create();
+        $this->withoutMiddleware(VerifyCsrfToken::class);
+
+        $this->actingAs($user)
+            ->patch(route('hardware.status.update', $asset), [
+                'status_id' => $asset->status_id,
+                'quality_grade' => Asset::QUALITY_GRADE_A,
+            ])
+            ->assertForbidden();
+
+        $this->assertSame(Asset::QUALITY_GRADE_B, $asset->fresh()->quality_grade);
+    }
+
+    public function testDedicatedQualityPermissionCanEditWithoutGeneralAssetEdit(): void
+    {
+        $status = Statuslabel::factory()->pending()->create(['name' => 'Stand-by']);
+        $asset = Asset::factory()->create(['status_id' => $status->id]);
+        $user = User::factory()->viewAssets()->create([
+            'permissions' => json_encode([
+                'assets.view' => '1',
+                'assets.quality_grade.update' => '1',
+            ]),
+        ]);
+        $this->withoutMiddleware(VerifyCsrfToken::class);
+
+        $this->actingAs($user)
+            ->patch(route('hardware.status.update', $asset), [
+                'status_id' => $asset->status_id,
+                'quality_grade' => Asset::QUALITY_GRADE_A,
+            ])
+            ->assertRedirect(route('hardware.show', $asset));
+
+        $this->assertSame(Asset::QUALITY_GRADE_A, $asset->fresh()->quality_grade);
+    }
 }

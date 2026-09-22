@@ -41,6 +41,10 @@ Route::group(
             [AssetsController::class, 'getClone']
         )->name('clone/hardware')->withTrashed();
 
+        Route::get('{asset}/created',
+            [AssetsController::class, 'created']
+        )->name('hardware.created');
+
         Route::get('{assetId}/label',
             [AssetsController::class, 'getLabel']
         )->name('label/hardware');

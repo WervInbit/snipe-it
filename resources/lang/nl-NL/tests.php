@@ -88,6 +88,11 @@ return [
     'complete_confirm_incomplete' => 'Niet uitgevoerd',
     'complete_confirm_continue' => 'Doorgaan',
     'evidence_privacy_notice' => 'Privéworkflowbewijs: toegang wordt beheerd. Fotografeer geen wachtwoorden, herstelcodes of klant-/reparatiegegevens.',
+    'done' => 'Klaar',
+    'complete_required_first' => 'Rond eerst alle verplichte stappen af.',
+    'complete_waiting_for_saves' => 'Wacht tot de laatste wijzigingen zijn opgeslagen.',
+    'done_returns_to_workflow' => 'Je gaat terug naar dit asset met het tabblad Workflows geopend.',
+    'all_workflows_completed' => 'Alle workflows zijn voltooid.',
 ];
 
 

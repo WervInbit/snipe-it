@@ -16,7 +16,7 @@ class ActiveTestViewTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_active_view_shows_test_blocks_without_bottom_workflow_bar(): void
+    public function test_active_view_shows_green_completed_blocks_and_disabled_done_action_until_required_steps_finish(): void
     {
         $user = User::factory()->superuser()->create();
         $asset = Asset::factory()->create(['asset_tag' => 'TAG-001']);
@@ -60,10 +60,20 @@ class ActiveTestViewTest extends TestCase
             ->assertDontSee('data-testid="tests-view-history-btn"', false)
             ->assertDontSee('data-testid="tests-start-new-run-form"', false)
             ->assertDontSee('data-testid="tests-start-new-run-btn"', false)
-            ->assertDontSee('data-testid="tests-complete-btn"', false)
+            ->assertSee('data-testid="workflow-done-area"', false)
+            ->assertSee('id="tests-complete-btn"', false)
+            ->assertSee(trans('tests.complete_required_first'))
+            ->assertSee('testing-card--completed', false)
             ->assertDontSee('testsCompleteConfirmModal', false)
+            ->assertSee('completeUrl:', false)
+            ->assertSee(route('hardware.show', $asset), false)
             ->assertSee("layoutKey: 'tests.layout.active.oneCol'", false)
             ->assertDontSee(trans('tests.two_column_toggle'));
+
+        $this->assertMatchesRegularExpression(
+            '/id="tests-complete-btn"[^>]*disabled/s',
+            $response->getContent()
+        );
     }
 
     public function test_no_active_run_start_button_is_desktop_only(): void

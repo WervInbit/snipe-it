@@ -6,14 +6,21 @@
             $__status_options = $statuslabel_list;
             $selectedStatus = old('status_id', $item->status_id);
             $canMoveSaleLifecycle = Gate::allows('assets.sale_transition');
+            $currentStatusIsLocked = isset($item->assetstatus)
+                && app(\App\Services\Assets\AssetStatusTransitionGuardService::class)->isLockedStatus($item->assetstatus);
+            $canExitLockedStatus = auth()->user()->isAdmin() || auth()->user()->isSuperUser();
             $statusLabelsById = \App\Models\Statuslabel::query()
                 ->whereIn('id', array_keys($__status_options))
                 ->get()
                 ->keyBy('id');
             $__status_options = collect($__status_options)
-                ->filter(function ($label, $id) use ($selectedStatus, $statusLabelsById, $canMoveSaleLifecycle) {
+                ->filter(function ($label, $id) use ($selectedStatus, $statusLabelsById, $canMoveSaleLifecycle, $currentStatusIsLocked, $canExitLockedStatus) {
                     if ((string) $selectedStatus === (string) $id) {
                         return true;
+                    }
+
+                    if ($currentStatusIsLocked && !$canExitLockedStatus) {
+                        return false;
                     }
 
                     $statusLabel = $statusLabelsById->get((int) $id);
@@ -74,6 +81,11 @@
         <div id="status_helptext" style="margin-top:10px;">
             <p id="selected_status_status" style="display:none;"></p>
         </div>
+
+        <label for="status_change_note" style="margin-top:10px;">{{ trans('admin/statuslabels/table.status_change_note') }}</label>
+        <textarea class="form-control" name="status_change_note" id="status_change_note" rows="3" maxlength="65535">{{ old('status_change_note') }}</textarea>
+        <p class="help-block">{{ trans('admin/statuslabels/table.status_change_note_help') }}</p>
+        {!! $errors->first('status_change_note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
     </div>
     <div class="col-md-2 col-sm-12 text-left">
         @can('create', \App\Models\Statuslabel::class)

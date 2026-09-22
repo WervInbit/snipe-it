@@ -42,6 +42,7 @@ class Statuslabel extends SnipeModel
         'pending' => 'required',
         'archived' => 'required',
         'lifecycle_stage' => 'nullable|in:ready_for_sale,sold,broken_parts,returned,destruction_pending,destroyed',
+        'requires_note' => 'boolean',
     ];
 
     protected $fillable = [
@@ -55,6 +56,11 @@ class Statuslabel extends SnipeModel
         'color',
         'created_by',
         'lifecycle_stage',
+        'requires_note',
+    ];
+
+    protected $casts = [
+        'requires_note' => 'boolean',
     ];
 
     use Searchable;
@@ -99,6 +105,11 @@ class Statuslabel extends SnipeModel
     public function adminuser()
     {
         return $this->belongsTo(\App\Models\User::class, 'created_by');
+    }
+
+    public function accessRules()
+    {
+        return $this->hasMany(StatusLabelAccessRule::class, 'status_label_id');
     }
 
     /**

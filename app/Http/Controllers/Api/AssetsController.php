@@ -34,6 +34,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use App\View\Label;
 use App\Services\Assets\LegacyAssetAssignmentCleanupService;
+use App\Services\Assets\AssetStatusTransitionGuardService;
 use App\Services\Components\AttachedComponentIssueService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -958,7 +959,8 @@ class AssetsController extends Controller
         UpdateAssetRequest $request,
         Asset $asset,
         LegacyAssetAssignmentCleanupService $legacyAssignmentCleanup,
-        AttachedComponentIssueService $componentIssueService
+        AttachedComponentIssueService $componentIssueService,
+        AssetStatusTransitionGuardService $guardService
     ): JsonResponse {
         if ($request->hasAny(self::LEGACY_ASSIGNMENT_FIELDS)) {
             return response()->json(
@@ -974,6 +976,33 @@ class AssetsController extends Controller
         $status = $request->has('status_id')
             ? Statuslabel::find((int) $request->input('status_id'))
             : null;
+        $lockedExit = $status
+            ? $guardService->isLockedExit($asset->loadMissing('assetstatus'), $status)
+            : false;
+        if ($lockedExit) {
+            abort_unless(auth()->user()->isAdmin() || auth()->user()->isSuperUser(), 403);
+
+            if (!$guardService->identifierMatches($asset, $request->input('locked_status_identifier'))) {
+                return response()->json(
+                    Helper::formatStandardApiResponse(
+                        'error',
+                        ['locked_status_identifier' => [__('Scan the asset QR code or enter the exact asset tag.')]],
+                        __('Locked status verification failed.')
+                    ),
+                    422
+                );
+            }
+
+            $asset->withStatusGuardAudit([
+                'locked_exit' => true,
+                'locked_exit_reason' => $request->input('status_override_reason'),
+                'identifier_verified' => true,
+                'override_reason' => $request->input('status_override_reason'),
+                'overridden' => false,
+                'workflow_issues' => [],
+                'component_issues' => [],
+            ]);
+        }
 
         if (
             $status
@@ -1074,6 +1103,8 @@ class AssetsController extends Controller
                 }
             }
         }
+        $asset->withStatusChangeNote($request->input('status_change_note'));
+
         if ($asset->save()) {
             if ($clearLegacyAssignment) {
                 $legacyAssignmentCleanup->clear($asset);

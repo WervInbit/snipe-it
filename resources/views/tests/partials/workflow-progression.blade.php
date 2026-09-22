@@ -44,6 +44,11 @@
                 background: #f1f3f5;
                 border-color: #d8dde3;
             }
+            .workflow-progression__item--completed {
+                color: #166534;
+                background: #f0fdf4;
+                border-color: #86efac;
+            }
             .workflow-progression__number {
                 display: inline-flex;
                 align-items: center;
@@ -209,7 +214,7 @@
                     }
                     $guardWarning = $guardMessages->implode(' ');
                 @endphp
-                <li class="workflow-progression__item{{ $isLocked ? ' workflow-progression__item--locked' : '' }}"
+                <li class="workflow-progression__item{{ $isLocked ? ' workflow-progression__item--locked' : '' }}{{ $row['state'] === WorkflowProgressionService::STATE_COMPLETED_SUCCESSFULLY && $row['dependencies_satisfied'] ? ' workflow-progression__item--completed' : '' }}"
                     data-testid="workflow-step"
                     data-workflow-position="{{ $row['position'] }}"
                     data-workflow-profile-id="{{ $profile->id }}">
@@ -275,6 +280,18 @@
                     </div>
                 </li>
             @endforeach
+            @php
+                $allAvailableWorkflowsDone = $workflowRows->isNotEmpty()
+                    && $workflowRows->every(fn (array $row): bool => in_array($row['state'], [
+                        WorkflowProgressionService::STATE_COMPLETED_SUCCESSFULLY,
+                        WorkflowProgressionService::STATE_COMPLETED_WITH_ISSUES,
+                    ], true));
+            @endphp
+            @if($allAvailableWorkflowsDone)
+                <li class="alert alert-success mb-0" data-testid="all-workflows-completed">
+                    {{ trans('tests.all_workflows_completed') }}
+                </li>
+            @endif
         </ol>
     @endif
 </section>

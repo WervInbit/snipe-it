@@ -895,6 +895,21 @@
                                         </div>
                                     @endif
 
+                                    @if ($asset->serial)
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <strong>{{ trans('admin/hardware/form.serial') }}</strong>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <span class="js-copy-serial">{{ $asset->serial  }}</span>
+
+                                                <i class="fa-regular fa-clipboard js-copy-link hidden-print" data-clipboard-target=".js-copy-serial" aria-hidden="true" data-tooltip="true" data-placement="top" title="{{ trans('general.copy_to_clipboard') }}">
+                                                    <span class="sr-only">{{ trans('general.copy_to_clipboard') }}</span>
+                                                </i>
+                                            </div>
+                                        </div>
+                                    @endif
+
 
                                     @if ($asset->deleted_at!='')
                                         <div class="row">
@@ -917,14 +932,21 @@
                                             $canUpdateStatus = Gate::allows('update', $asset);
                                             $canMoveSaleLifecycle = Gate::allows('assets.sale_transition');
                                             $canUseDetailStatusForm = $canUpdateStatus || $canMoveSaleLifecycle;
+                                            $currentStatusIsLocked = app(\App\Services\Assets\AssetStatusTransitionGuardService::class)
+                                                ->isLockedStatus($asset->assetstatus);
+                                            $canExitLockedStatus = auth()->user()->isAdmin() || auth()->user()->isSuperUser();
                                             $statusLabelsById = \App\Models\Statuslabel::query()
                                                 ->whereIn('id', array_keys($__status_options))
                                                 ->get()
                                                 ->keyBy('id');
                                             $__status_options = collect($__status_options)
-                                                ->filter(function ($label, $id) use ($selectedStatus, $statusLabelsById, $canUpdateStatus, $canMoveSaleLifecycle) {
+                                                ->filter(function ($label, $id) use ($selectedStatus, $statusLabelsById, $canUpdateStatus, $canMoveSaleLifecycle, $currentStatusIsLocked, $canExitLockedStatus) {
                                                     if ((string) $selectedStatus === (string) $id) {
                                                         return true;
+                                                    }
+
+                                                    if ($currentStatusIsLocked && !$canExitLockedStatus) {
+                                                        return false;
                                                     }
 
                                                     $statusLabel = $statusLabelsById->get((int) $id);
@@ -944,18 +966,20 @@
                                                 ->all();
                                             $selectedQualityGrade = old('quality_grade', $asset->quality_grade);
                                             $qualityOptions = \App\Models\Asset::qualityGradeOptions();
+                                            $canUpdateQualityGrade = Gate::allows('updateQualityGrade', $asset);
                                             $statusType = $asset->assetstatus->getStatuslabelType();
                                         @endphp
 
                                         @php
                                             $detailStatusFormId = 'asset-detail-status-form-'.$asset->id;
                                         @endphp
-                                        @if ($canUseDetailStatusForm)
+                                        @if ($canUseDetailStatusForm || $canUpdateQualityGrade)
                                             <form id="{{ $detailStatusFormId }}" method="POST" action="{{ route('hardware.status.update', $asset) }}" style="display:none;">
                                                 @csrf
                                                 @method('PATCH')
                                                 <input type="hidden" name="status_confirmation_hash" value="">
                                                 <input type="hidden" name="status_override_reason" value="">
+                                                <input type="hidden" name="locked_status_identifier" value="">
                                             </form>
 
                                             <div class="modal fade"
@@ -999,6 +1023,15 @@
                                                                           rows="3"
                                                                           maxlength="2000"></textarea>
                                                                 <span class="help-block">{{ __('Required when continuing despite workflow or component issues. This is saved in the status audit event.') }}</span>
+                                                            </div>
+                                                            <div class="form-group hidden" data-status-guard-identifier-group>
+                                                                <label for="asset-status-identifier-{{ $asset->id }}">{{ __('Scan QR or enter asset tag') }}</label>
+                                                                <input id="asset-status-identifier-{{ $asset->id }}"
+                                                                       class="form-control"
+                                                                       type="text"
+                                                                       autocomplete="off"
+                                                                       placeholder="{{ $asset->asset_tag }}">
+                                                                <span class="help-block">{{ __('This locked state can only be left after the exact asset tag has been verified.') }}</span>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
@@ -1045,13 +1078,24 @@
                                                                         $optionStatus = $statusLabelsById->get((int) $key);
                                                                     @endphp
                                                                     <option value="{{ $key }}"
-                                                                            data-protected-transition="{{ \App\Models\Asset::statusRequiresTestAck($optionStatus) ? '1' : '0' }}"
+                                                                            data-protected-transition="{{ (\App\Models\Asset::statusRequiresTestAck($optionStatus) || ($currentStatusIsLocked && (string) $asset->status_id !== (string) $key)) ? '1' : '0' }}"
                                                                             {{ (string) $selectedStatus === (string) $key ? 'selected' : '' }}>
                                                                         {{ $value }}
                                                                     </option>
                                                                 @endforeach
                                                             </select>
                                                             {!! $errors->first('status_id', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
+                                                            <label for="status_change_note_detail_{{ $asset->id }}" style="margin-top:10px;">{{ trans('admin/statuslabels/table.status_change_note') }}</label>
+                                                            <textarea
+                                                                class="form-control"
+                                                                name="status_change_note"
+                                                                id="status_change_note_detail_{{ $asset->id }}"
+                                                                rows="2"
+                                                                maxlength="65535"
+                                                                form="{{ $detailStatusFormId }}"
+                                                            >{{ old('status_change_note') }}</textarea>
+                                                            <p class="help-block">{{ trans('admin/statuslabels/table.status_change_note_help') }}</p>
+                                                            {!! $errors->first('status_change_note', '<span class="alert-msg" aria-hidden="true"><i class="fas fa-times" aria-hidden="true"></i> :message</span>') !!}
                                                         </div>
                                                     @endif
                                                 </div>
@@ -1072,7 +1116,7 @@
                                                     @endif
                                                     </div>
 
-                                                    @can('update', $asset)
+                                                    @can('updateQualityGrade', $asset)
                                                         <div class="asset-detail-control">
                                                             <select
                                                                 name="quality_grade"
@@ -1151,21 +1195,6 @@
                                             </div>
                                             <div class="col-md-9">
                                                 {{ $asset->name }}
-                                            </div>
-                                        </div>
-                                    @endif
-
-                                    @if ($asset->serial)
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <strong>{{ trans('admin/hardware/form.serial') }}</strong>
-                                            </div>
-                                            <div class="col-md-9">
-                                                <span class="js-copy-serial">{{ $asset->serial  }}</span>
-
-                                                <i class="fa-regular fa-clipboard js-copy-link hidden-print" data-clipboard-target=".js-copy-serial" aria-hidden="true" data-tooltip="true" data-placement="top" title="{{ trans('general.copy_to_clipboard') }}">
-                                                    <span class="sr-only">{{ trans('general.copy_to_clipboard') }}</span>
-                                                </i>
                                             </div>
                                         </div>
                                     @endif
@@ -2360,6 +2389,7 @@
             var submitting = false;
             var confirmButton = modalElement.querySelector('[data-status-guard-confirm]');
             var reasonInput = modalElement.querySelector('#asset-status-override-reason-{{ $asset->id }}');
+            var identifierInput = modalElement.querySelector('#asset-status-identifier-{{ $asset->id }}');
             var errorBox = modalElement.querySelector('[data-status-guard-error]');
 
             function setHidden(element, hidden) {
@@ -2400,10 +2430,12 @@
                 setHidden(componentSection, !(guard.component_issues || []).length);
                 setHidden(modalElement.querySelector('[data-status-guard-issues]'), !guard.has_issues);
                 setHidden(modalElement.querySelector('[data-status-guard-clean]'), !!guard.has_issues);
-                setHidden(modalElement.querySelector('[data-status-guard-reason-group]'), !guard.has_issues);
+                setHidden(modalElement.querySelector('[data-status-guard-reason-group]'), !guard.requires_reason);
+                setHidden(modalElement.querySelector('[data-status-guard-identifier-group]'), !guard.locked_exit);
 
-                confirmButton.disabled = !!guard.has_issues && !guard.can_override_issues;
-                confirmButton.textContent = guard.has_issues
+                confirmButton.disabled = (!!guard.has_issues && !guard.can_override_issues)
+                    || (guard.locked_exit && !guard.can_confirm_locked_exit);
+                confirmButton.textContent = guard.has_issues || guard.locked_exit
                     ? '{{ __('Confirm override and change status') }}'
                     : '{{ __('Confirm status change') }}';
 
@@ -2466,9 +2498,16 @@
                 }
 
                 var reason = reasonInput.value.trim();
-                if (currentGuard.has_issues && reason === '') {
-                    showError('{{ __('Enter a reason for continuing despite the listed issues.') }}');
+                if (currentGuard.requires_reason && reason === '') {
+                    showError('{{ __('Enter a reason for this protected status change.') }}');
                     reasonInput.focus();
+                    return;
+                }
+
+                var identifier = identifierInput.value.trim();
+                if (currentGuard.locked_exit && identifier === '') {
+                    showError('{{ __('Scan the asset QR code or enter the exact asset tag.') }}');
+                    identifierInput.focus();
                     return;
                 }
 
@@ -2476,6 +2515,7 @@
                 confirmButton.disabled = true;
                 form.querySelector('input[name="status_confirmation_hash"]').value = confirmationHash;
                 form.querySelector('input[name="status_override_reason"]').value = reason;
+                form.querySelector('input[name="locked_status_identifier"]').value = identifier;
 
                 var data = new FormData(form);
                 data.set('status_id', select.value);
@@ -2511,7 +2551,8 @@
                     window.location.href = result.payload.redirect_url + '#details';
                 }).catch(function (error) {
                     submitting = false;
-                    confirmButton.disabled = !!currentGuard.has_issues && !currentGuard.can_override_issues;
+                    confirmButton.disabled = (!!currentGuard.has_issues && !currentGuard.can_override_issues)
+                        || (currentGuard.locked_exit && !currentGuard.can_confirm_locked_exit);
                     showError(error.message);
                 });
             });
@@ -2522,6 +2563,7 @@
                     confirmationHash = '';
                     currentGuard = null;
                     reasonInput.value = '';
+                    identifierInput.value = '';
                     setHidden(errorBox, true);
                 }
             });

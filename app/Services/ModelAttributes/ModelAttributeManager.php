@@ -64,6 +64,7 @@ class ModelAttributeManager
                 if (!$assignment) {
                     $definition = AttributeDefinition::query()
                         ->forCategory($model->category_id, $model->category?->category_type)
+                        ->current()
                         ->whereKey($definitionId)
                         ->first();
 

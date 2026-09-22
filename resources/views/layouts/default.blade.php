@@ -151,14 +151,34 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                       <span class="sr-only">{{ trans('general.scan') }}</span>
                                   </a>
                               </li>
-                              <li>
-                                  <a href="{{ route('logout.get') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                      <x-icon type="logout" class="fa-fw" />
-                                      <span class="sr-only">{{ trans('general.logout') }}</span>
+                              <li class="dropdown user user-menu" data-testid="refurbisher-account-menu">
+                                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-label="{{ trans('general.user') }}">
+                                      @if (Auth::user()->present()->gravatar())
+                                          <img src="{{ Auth::user()->present()->gravatar() }}" class="user-image" alt="">
+                                      @else
+                                          <x-icon type="user" />
+                                      @endif
+                                      <span class="hidden-xs"><strong class="caret"></strong></span>
                                   </a>
-                                  <form id="logout-form" action="{{ route('logout.post') }}" method="POST" style="display: none;">
-                                      {{ csrf_field() }}
-                                  </form>
+                                  <ul class="dropdown-menu">
+                                      @if (Auth::user()->ldap_import != '1')
+                                          <li>
+                                              <a href="{{ route('account.password.index') }}">
+                                                  <x-icon type="password" class="fa-fw" />
+                                                  {{ trans('general.changepassword') }}
+                                              </a>
+                                          </li>
+                                      @endif
+                                      <li>
+                                          <a href="{{ route('logout.get') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                              <x-icon type="logout" class="fa-fw" />
+                                              {{ trans('general.logout') }}
+                                          </a>
+                                          <form id="logout-form" action="{{ route('logout.post') }}" method="POST" style="display: none;">
+                                              {{ csrf_field() }}
+                                          </form>
+                                      </li>
+                                  </ul>
                               </li>
                           </ul>
                           @else
@@ -533,6 +553,7 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                         $status_navs = \App\Models\Statuslabel::where('show_in_nav', '=', 1)
                                             ->withCount('assets as asset_count')
                                             ->get()
+                                            ->filter(fn ($label) => app(\App\Services\Assets\StatusLabelAccessService::class)->canView(auth()->user(), $label))
                                             ->sortBy(function ($label) use ($refurbOrder) {
                                                 $index = array_search($label->name, $refurbOrder, true);
                                                 return $index !== false ? $index : count($refurbOrder) + $label->id;

@@ -33,7 +33,7 @@ class UpdateUserTest extends TestCase
                 'first_name' => 'Mabel',
                 'last_name' => 'Mora',
                 'username' => 'mabel',
-                'password' => 'super-secret',
+                'password' => 'Super-secret1',
                 'email' => 'mabel@onlymurderspod.com',
                 'permissions' => '{"a.new.permission":"1"}',
                 'activated' => true,
@@ -61,7 +61,7 @@ class UpdateUserTest extends TestCase
         $this->assertEquals('Mabel', $user->first_name, 'First name was not updated');
         $this->assertEquals('Mora', $user->last_name, 'Last name was not updated');
         $this->assertEquals('mabel', $user->username, 'Username was not updated');
-        $this->assertTrue(Hash::check('super-secret', $user->password), 'Password was not updated');
+        $this->assertTrue(Hash::check('Super-secret1', $user->password), 'Password was not updated');
         $this->assertEquals('mabel@onlymurderspod.com', $user->email, 'Email was not updated');
         $this->assertArrayHasKey('a.new.permission', $user->decodePermissions(), 'Permissions were not updated');
         $this->assertTrue((bool) $user->activated, 'User not marked as activated');
@@ -108,8 +108,8 @@ class UpdateUserTest extends TestCase
                 'first_name' => 'Mabel',
                 'last_name' => 'Mora',
                 'username' => 'mabel',
-                'password' => 'super-secret',
-                'password_confirmation' => 'super-secret',
+                'password' => 'Super-secret1',
+                'password_confirmation' => 'Super-secret1',
                 'email' => 'mabel@onlymurderspod.com',
                 'permissions' => '{"a.new.permission":"1"}',
                 'activated' => true,
@@ -137,7 +137,7 @@ class UpdateUserTest extends TestCase
         $this->assertEquals('Mabel', $user->first_name, 'First name was not updated');
         $this->assertEquals('Mora', $user->last_name, 'Last name was not updated');
         $this->assertEquals('mabel', $user->username, 'Username was not updated');
-        $this->assertTrue(Hash::check('super-secret', $user->password), 'Password was not updated');
+        $this->assertTrue(Hash::check('Super-secret1', $user->password), 'Password was not updated');
         $this->assertEquals('mabel@onlymurderspod.com', $user->email, 'Email was not updated');
         $this->assertArrayHasKey('a.new.permission', $user->decodePermissions(), 'Permissions were not updated');
         $this->assertTrue((bool) $user->activated, 'User not marked as activated');

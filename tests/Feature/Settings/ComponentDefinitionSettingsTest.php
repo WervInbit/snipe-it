@@ -530,6 +530,58 @@ class ComponentDefinitionSettingsTest extends TestCase
             ->assertSeeText('Use one of the defined options.');
     }
 
+    public function test_hidden_existing_attribute_contribution_can_still_be_edited_without_becoming_a_new_choice(): void
+    {
+        $user = User::factory()->manageComponentDefinitions()->create();
+        $attribute = AttributeDefinition::create([
+            'key' => 'legacy_capacity',
+            'label' => 'Legacy Capacity',
+            'datatype' => AttributeDefinition::DATATYPE_INT,
+            'allow_asset_override' => true,
+            'hidden_at' => now(),
+        ]);
+        $definition = ComponentDefinition::factory()->create(['name' => 'Legacy Memory Module']);
+        $definition->attributeContributions()->create([
+            'attribute_definition_id' => $attribute->id,
+            'value' => '8',
+            'raw_value' => '8',
+            'sort_order' => 0,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('settings.component_definitions.edit', $definition))
+            ->assertOk()
+            ->assertSee('Legacy Capacity')
+            ->assertSee('name="attribute_contributions[0][value]"', false);
+
+        $this->put(route('settings.component_definitions.update', $definition), [
+            'name' => 'Legacy Memory Module',
+            'is_active' => '1',
+            'attribute_contributions' => [[
+                'attribute_definition_id' => $attribute->id,
+                'attribute_search' => 'Legacy Capacity (legacy_capacity)',
+                'value' => '16',
+            ]],
+        ])->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('component_definition_attributes', [
+            'component_definition_id' => $definition->id,
+            'attribute_definition_id' => $attribute->id,
+            'value' => '16',
+        ]);
+
+        $newDefinition = ComponentDefinition::factory()->create(['name' => 'New Module']);
+        $this->put(route('settings.component_definitions.update', $newDefinition), [
+            'name' => 'New Module',
+            'is_active' => '1',
+            'attribute_contributions' => [[
+                'attribute_definition_id' => $attribute->id,
+                'attribute_search' => 'Legacy Capacity (legacy_capacity)',
+                'value' => '32',
+            ]],
+        ])->assertSessionHasErrors('attribute_contributions.0.attribute_definition_id');
+    }
+
     public function testUnauthorizedUserIsBlockedFromDefinitionsSettings(): void
     {
         $user = User::factory()->create();

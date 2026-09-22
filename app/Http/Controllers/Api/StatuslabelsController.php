@@ -114,6 +114,7 @@ class StatuslabelsController extends Controller
         $statuslabel->show_in_nav       =  $request->input('show_in_nav', 0);
         $statuslabel->default_label     =  $request->input('default_label', 0);
         $statuslabel->lifecycle_stage   =  $request->input('lifecycle_stage') ?: null;
+        $statuslabel->requires_note     =  $request->boolean('requires_note');
 
 
         if ($statuslabel->save()) {
@@ -175,6 +176,7 @@ class StatuslabelsController extends Controller
         $statuslabel->show_in_nav       =  $request->input('show_in_nav', 0);
         $statuslabel->default_label     =  $request->input('default_label', 0);
         $statuslabel->lifecycle_stage   =  $request->input('lifecycle_stage') ?: null;
+        $statuslabel->requires_note     =  $request->boolean('requires_note');
 
         if ($statuslabel->hasInUseAssetSemanticChanges()) {
             return response()->json(
@@ -237,6 +239,11 @@ class StatuslabelsController extends Controller
         } else {
             $statuslabels = Statuslabel::withCount('assets')->get();
         }
+
+        $access = app(\App\Services\Assets\StatusLabelAccessService::class);
+        $statuslabels = $statuslabels
+            ->filter(fn (Statuslabel $status): bool => $access->canView(auth()->user(), $status))
+            ->values();
 
         $total = [];
 
@@ -352,7 +359,12 @@ class StatuslabelsController extends Controller
     {
 
         $this->authorize('view.selectlists');
-        $statuslabels = Statuslabel::orderBy('default_label', 'desc')->orderBy('name', 'asc')->orderBy('deployable', 'desc');
+        $allowedStatusIds = app(\App\Services\Assets\StatusLabelAccessService::class)
+            ->selectableIdsFor($request->user());
+        $statuslabels = Statuslabel::whereIn('id', $allowedStatusIds)
+            ->orderBy('default_label', 'desc')
+            ->orderBy('name', 'asc')
+            ->orderBy('deployable', 'desc');
 
         if ($request->filled('search')) {
             $statuslabels = $statuslabels->where('name', 'LIKE', '%'.$request->get('search').'%');

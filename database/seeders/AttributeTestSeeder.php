@@ -37,9 +37,13 @@ class AttributeTestSeeder extends Seeder
                 ? $definitions->get($config['attribute'])
                 : null;
 
-            $testType = TestType::updateOrCreate(
-                ['slug' => Arr::get($config, 'slug', $key)],
-                [
+            $testType = TestType::query()->firstOrNew([
+                'slug' => Arr::get($config, 'slug', $key),
+            ]);
+            $isNew = ! $testType->exists;
+
+            if ($isNew) {
+                $testType->fill([
                     'name' => Arr::get($config, 'name', $definition?->label ?? Str::headline($key)),
                     'attribute_definition_id' => $definition?->id,
                     'tooltip' => Arr::get($config, 'tooltip'),
@@ -48,16 +52,16 @@ class AttributeTestSeeder extends Seeder
                     'is_required' => true,
                     'result_label_mode' => Arr::get($config, 'result_label_mode', WorkflowProfileItem::LABEL_MODE_PASS_FAIL),
                     'display_order' => Arr::get($config, 'display_order', $index),
-                ]
-            );
+                ])->save();
 
-            $this->syncItemCategories($testType, $config['categories'] ?? []);
-            $this->syncItemComponentCategories($testType, $config['component_categories'] ?? []);
-            $this->syncItemComponentDefinitions(
-                $testType,
-                $config['component_definitions'] ?? [],
-                $config['component_definition_prefixes'] ?? []
-            );
+                $this->syncItemCategories($testType, $config['categories'] ?? []);
+                $this->syncItemComponentCategories($testType, $config['component_categories'] ?? []);
+                $this->syncItemComponentDefinitions(
+                    $testType,
+                    $config['component_definitions'] ?? [],
+                    $config['component_definition_prefixes'] ?? []
+                );
+            }
 
             if (Arr::get($config, 'profile', true)) {
                 $diagnosticItems[] = $testType;
@@ -175,11 +179,6 @@ class AttributeTestSeeder extends Seeder
                 'component_definition_prefixes' => ['Wireless'],
                 'instructions' => 'Connect to the designated Wi-Fi network and confirm internet access.',
             ],
-            'igpu' => [
-                'name' => 'iGPU',
-                'categories' => ['Laptops'],
-                'instructions' => 'Draai GPU-Z 10 minuten, geen artifacts, driver reset, crash.',
-            ],
         ];
     }
 
@@ -255,9 +254,11 @@ class AttributeTestSeeder extends Seeder
             ->all();
 
         foreach ($this->operationalItems() as $slug => $config) {
-            $item = TestType::updateOrCreate(
-                ['slug' => $slug],
-                [
+            $item = TestType::query()->firstOrNew(['slug' => $slug]);
+            $isNew = ! $item->exists;
+
+            if ($isNew) {
+                $item->fill([
                     'name' => $config['name'],
                     'attribute_definition_id' => null,
                     'tooltip' => $config['tooltip'] ?? null,
@@ -266,20 +267,20 @@ class AttributeTestSeeder extends Seeder
                     'is_required' => $config['is_required'] ?? true,
                     'result_label_mode' => $config['result_label_mode'] ?? WorkflowProfileItem::LABEL_MODE_PASS_FAIL,
                     'display_order' => $config['display_order'] ?? 0,
-                ]
-            );
+                ])->save();
 
-            $item->categories()->syncWithoutDetaching(
-                isset($config['categories'])
-                    ? Category::query()
-                        ->whereIn('name', $config['categories'])
-                        ->where('category_type', 'asset')
-                        ->pluck('id')
-                        ->all()
-                    : $categoryIds
-            );
-            $this->syncItemComponentCategories($item, []);
-            $this->syncItemComponentDefinitions($item, [], []);
+                $item->categories()->syncWithoutDetaching(
+                    isset($config['categories'])
+                        ? Category::query()
+                            ->whereIn('name', $config['categories'])
+                            ->where('category_type', 'asset')
+                            ->pluck('id')
+                            ->all()
+                        : $categoryIds
+                );
+                $this->syncItemComponentCategories($item, []);
+                $this->syncItemComponentDefinitions($item, [], []);
+            }
         }
     }
 
@@ -311,17 +312,6 @@ class AttributeTestSeeder extends Seeder
                     'sale-photos-present',
                 ],
             ],
-            'cleaning' => [
-                'name' => 'Cleaning',
-                'description' => 'Cleaning workflow steps.',
-                'is_default' => false,
-                'blocks_sale_readiness' => false,
-                'label_mode' => WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE,
-                'items' => [
-                    'cleaning-external',
-                    'cleaning-internal',
-                ],
-            ],
             'shipping-laptop' => [
                 'name' => 'Shipping Laptop',
                 'description' => 'Laptop packing and shipping preparation.',
@@ -339,20 +329,18 @@ class AttributeTestSeeder extends Seeder
         foreach ($profiles as $slug => $config) {
             $profile = WorkflowProfile::query()->firstOrNew(['slug' => $slug]);
             $isNewProfile = !$profile->exists;
-            $profile->fill([
-                'name' => $config['name'],
-                'description' => $config['description'],
-                'is_active' => true,
-                'blocks_sale_readiness' => (bool) $config['blocks_sale_readiness'],
-                'display_order' => array_search($slug, array_keys($profiles), true) ?: 0,
-            ]);
-
             if ($isNewProfile) {
+                $profile->fill([
+                    'name' => $config['name'],
+                    'description' => $config['description'],
+                    'is_active' => true,
+                    'blocks_sale_readiness' => (bool) $config['blocks_sale_readiness'],
+                    'display_order' => array_search($slug, array_keys($profiles), true) ?: 0,
+                ]);
                 $profile->is_default = (bool) $config['is_default']
                     && !WorkflowProfile::query()->where('is_default', true)->exists();
+                $profile->save();
             }
-
-            $profile->save();
 
             $items = TestType::query()
                 ->whereIn('slug', $config['items'])
@@ -366,7 +354,7 @@ class AttributeTestSeeder extends Seeder
                     continue;
                 }
 
-                WorkflowProfileItem::updateOrCreate(
+                WorkflowProfileItem::firstOrCreate(
                     [
                         'workflow_profile_id' => $profile->id,
                         'workflow_item_id' => $item->id,
@@ -387,18 +375,6 @@ class AttributeTestSeeder extends Seeder
     private function operationalItems(): array
     {
         return [
-            'cleaning-external' => [
-                'name' => 'Cleaning - external',
-                'instructions' => 'Wipe down exterior surfaces and remove visible residue.',
-                'result_label_mode' => WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE,
-                'display_order' => 200,
-            ],
-            'cleaning-internal' => [
-                'name' => 'Cleaning - internal',
-                'instructions' => 'Clean internal components and remove dust where applicable.',
-                'result_label_mode' => WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE,
-                'display_order' => 210,
-            ],
             'case' => [
                 'name' => 'Behuizing',
                 'instructions' => 'Controleer behuizing, scharnieren, rubbers, kapjes en zichtbare schade.',

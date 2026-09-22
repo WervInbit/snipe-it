@@ -10,6 +10,8 @@ use App\Models\Setting;
 use Illuminate\Support\Facades\Gate;
 use App\Rules\AssetCannotBeCheckedOutToNondeployableStatus;
 use Illuminate\Validation\Rule;
+use App\Models\Statuslabel;
+use App\Rules\UserCanSelectStatusLabel;
 
 class StoreAssetRequest extends ImageUploadRequest
 {
@@ -90,10 +92,15 @@ class StoreAssetRequest extends ImageUploadRequest
             $modelRules,
             [
                 'model_number_id' => $modelNumberRules,
-                'status_id' => [new AssetCannotBeCheckedOutToNondeployableStatus()],
+                'status_id' => [new AssetCannotBeCheckedOutToNondeployableStatus(), new UserCanSelectStatusLabel()],
                 'attribute_overrides' => ['nullable', 'array'],
                 'attribute_overrides.*' => ['nullable'],
-                'status_change_note' => ['nullable', 'string', 'max:65535'],
+                'status_change_note' => [
+                    Rule::requiredIf((bool) Statuslabel::find($this->input('status_id'))?->requires_note),
+                    'nullable',
+                    'string',
+                    'max:65535',
+                ],
                 ...array_fill_keys(Asset::LEGACY_READ_ONLY_FIELDS, ['missing']),
             ],
             parent::rules(),

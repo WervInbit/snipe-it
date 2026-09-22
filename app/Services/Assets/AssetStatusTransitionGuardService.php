@@ -17,11 +17,13 @@ class AssetStatusTransitionGuardService
      */
     public function evaluate(Asset $asset, Statuslabel $targetStatus): array
     {
-        $workflowIssues = $this->workflowIssueLines($asset);
-        $componentIssues = Asset::statusRequiresTestAck($targetStatus)
+        $readinessTransition = Asset::statusRequiresTestAck($targetStatus);
+        $lockedExit = $this->isLockedExit($asset, $targetStatus);
+        $workflowIssues = $readinessTransition ? $this->workflowIssueLines($asset) : [];
+        $componentIssues = $readinessTransition
             ? $this->componentIssues->warningLinesForAsset($asset)
             : [];
-        $protected = Asset::statusRequiresTestAck($targetStatus);
+        $protected = $readinessTransition || $lockedExit;
         $fromStatusId = (int) $asset->getAttribute('status_id');
         $updatedAt = $asset->getAttribute('updated_at');
         $fingerprintPayload = [
@@ -33,6 +35,9 @@ class AssetStatusTransitionGuardService
                 : (string) $updatedAt,
             'workflow_issues' => array_values($workflowIssues),
             'component_issues' => array_values($componentIssues),
+            'locked_exit' => $lockedExit,
+            'requires_reason' => $lockedExit || $workflowIssues !== [] || $componentIssues !== [],
+            'required_identifier' => $lockedExit ? (string) $asset->asset_tag : null,
         ];
 
         return [
@@ -48,8 +53,33 @@ class AssetStatusTransitionGuardService
             'workflow_issues' => array_values($workflowIssues),
             'component_issues' => array_values($componentIssues),
             'has_issues' => $workflowIssues !== [] || $componentIssues !== [],
+            'locked_exit' => $lockedExit,
+            'requires_reason' => $fingerprintPayload['requires_reason'],
+            'required_identifier' => $fingerprintPayload['required_identifier'],
             'confirmation_hash' => $this->hash($fingerprintPayload),
         ];
+    }
+
+    public function isLockedExit(Asset $asset, Statuslabel $targetStatus): bool
+    {
+        $asset->loadMissing('assetstatus');
+
+        return (int) $asset->status_id !== (int) $targetStatus->id
+            && $this->isLockedStatus($asset->assetstatus);
+    }
+
+    public function isLockedStatus(?Statuslabel $status): bool
+    {
+        return $status?->hasLifecycleStage(
+            Statuslabel::LIFECYCLE_SOLD,
+            Statuslabel::LIFECYCLE_BROKEN_PARTS,
+            Statuslabel::LIFECYCLE_DESTROYED
+        ) ?? false;
+    }
+
+    public function identifierMatches(Asset $asset, ?string $identifier): bool
+    {
+        return mb_strtoupper(trim((string) $identifier)) === mb_strtoupper(trim((string) $asset->asset_tag));
     }
 
     /**

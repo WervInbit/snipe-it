@@ -165,6 +165,7 @@ return [
     'disallow_same_pwd_as_user_fields' => 'Wachtwoord kan niet hetzelfde zijn als de gebruikersnaam.',
     'letters'              => 'Wachtwoord moet ten minste één letter bevatten.',
     'numbers'              => 'Wachtwoord moet ten minste één cijfer bevatten.',
+    'has_uppercase'        => 'Wachtwoord moet ten minste één hoofdletter bevatten.',
     'case_diff'            => 'Wachtwoord moet kleine letters en hoofdletters bevatten.',
     'symbols'              => 'Wachtwoord moet symbolen bevatten.',
     'timezone' => ':attribute moet een geldige tijdzone zijn.',

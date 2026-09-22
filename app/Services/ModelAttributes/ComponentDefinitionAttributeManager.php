@@ -36,8 +36,19 @@ class ComponentDefinitionAttributeManager
             ]);
         }
 
+        $persistedDefinitionIds = $componentDefinition->attributeContributions()
+            ->pluck('attribute_definition_id')
+            ->map(fn ($id): int => (int) $id)
+            ->all();
+
         $definitions = AttributeDefinition::query()
-            ->current()
+            ->where(function ($query) use ($persistedDefinitionIds) {
+                $query->current();
+
+                if ($persistedDefinitionIds !== []) {
+                    $query->orWhereIn('id', $persistedDefinitionIds);
+                }
+            })
             ->with('options')
             ->whereIn('id', $definitionIds->all())
             ->get()

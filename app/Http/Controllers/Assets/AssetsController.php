@@ -186,6 +186,7 @@ class AssetsController extends Controller
         }
 
         $successes = [];
+        $createdAssets = [];
         $failures = [];
         $serials = $request->input('serials', []);
         $asset = null;
@@ -301,7 +302,8 @@ class AssetsController extends Controller
 
                 $qr->generate($asset);
 
-                $successes[] = "<a href='" . route('hardware.show', $asset) . "' style='color: white;'>" . e($asset->asset_tag) . "</a>";
+                $createdAssets[] = $asset;
+                $successes[] = $asset->id;
 
             } else {
                 $failures[] = join(",", $asset->getErrors()->all());
@@ -320,30 +322,44 @@ class AssetsController extends Controller
 
 
         if ($successes) {
-            if ($failures) {
-                //some succeeded, some failed
-                return Helper::getRedirectOption($request, $asset->id, 'Assets') //FIXME - not tested
-                ->with('success-unescaped', trans_choice('admin/hardware/message.create.multi_success_linked', $successes, ['links' => join(", ", $successes)]))
-                    ->with('warning', trans_choice('admin/hardware/message.create.partial_failure', $failures, ['failures' => join("; ", $failures)]));
-            } else {
-                if (count($successes) == 1) {
-                    //the most common case, keeping it so we don't have to make every use of that translation string be trans_choice'ed
-                    //and re-translated
-                    return Helper::getRedirectOption($request, $asset->id, 'Assets')
-                        ->with('success-unescaped', trans('admin/hardware/message.create.success_linked', [
-                            'link' => route('hardware.show', $asset),
-                            'tag' => e($asset->asset_tag),
-                        ]));
-                } else {
-                    //multi-success
-                    return Helper::getRedirectOption($request, $asset->id, 'Assets')
-                        ->with('success-unescaped', trans_choice('admin/hardware/message.create.multi_success_linked', $successes, ['links' => join(", ", $successes)]));
-                }
-            }
+            session()->put('asset_creation_result', [
+                'anchor_id' => $asset->id,
+                'asset_ids' => collect($createdAssets)->pluck('id')->all(),
+                'failures' => $failures,
+            ]);
+
+            return redirect()->route('hardware.created', $asset);
 
         }
 
         return redirect()->back()->withInput()->withErrors($asset->getErrors());
+    }
+
+    /**
+     * Show a focused result after creating one or more assets.
+     */
+    public function created(Asset $asset): View
+    {
+        $this->authorize('view', $asset);
+
+        $result = session('asset_creation_result', []);
+        $isMatchingResult = (int) ($result['anchor_id'] ?? 0) === (int) $asset->id;
+        $ids = $isMatchingResult ? ($result['asset_ids'] ?? [$asset->id]) : [$asset->id];
+        $ids = collect($ids)->map(fn ($id): int => (int) $id)->filter()->unique()->values();
+
+        $createdAssets = Asset::query()
+            ->with(['model', 'assetstatus'])
+            ->whereIn('id', $ids)
+            ->get()
+            ->filter(fn (Asset $createdAsset): bool => Gate::allows('view', $createdAsset))
+            ->sortBy(fn (Asset $createdAsset): int => $ids->search($createdAsset->id))
+            ->values();
+
+        return view('hardware.created', [
+            'anchorAsset' => $asset,
+            'createdAssets' => $createdAssets,
+            'failures' => $isMatchingResult ? ($result['failures'] ?? []) : [],
+        ]);
     }
 
 
@@ -370,7 +386,7 @@ class AssetsController extends Controller
 
         return view('hardware/edit')
             ->with('item', $asset)
-            ->with('statuslabel_list', Helper::statusLabelList())
+            ->with('statuslabel_list', Helper::statusLabelList((int) $asset->status_id))
             ->with('statuslabel_types', Helper::statusTypeList())
             ->with('specAttributes', $specAttributes)
             ->with('modelNumbers', $modelNumbers)
@@ -390,6 +406,7 @@ class AssetsController extends Controller
     public function show(Asset $asset) : View | RedirectResponse
     {
         $this->authorize('view', $asset);
+        app(\App\Services\Assets\RecentAssetActivityService::class)->recordForCurrentUser($asset);
         $settings = Setting::getSettings();
 
         if (isset($asset)) {
@@ -523,7 +540,7 @@ class AssetsController extends Controller
                 ->with('verificationComponentLocations', $componentLocations['verification'])
                 ->with('destructionComponentLocations', $componentLocations['destruction'])
                 ->with('currentUserTrayComponents', $currentUserTrayComponents)
-                ->with('statuslabel_list', Helper::statusLabelList());
+                ->with('statuslabel_list', Helper::statusLabelList((int) $asset->status_id));
         }
 
         return redirect()->route('hardware.index')->with('error', trans('admin/hardware/message.does_not_exist'));
@@ -541,8 +558,12 @@ class AssetsController extends Controller
             'status_id' => ['required', 'integer', 'exists:status_labels,id'],
         ]);
         $status = Statuslabel::findOrFail($validated['status_id']);
+        $lockedExit = $guardService->isLockedExit($asset->loadMissing('assetstatus'), $status);
 
-        if (Asset::statusRequiresTestAck($status)) {
+        if ($lockedExit) {
+            abort_unless(auth()->user()->isAdmin() || auth()->user()->isSuperUser(), 403);
+            $this->authorize('view', $asset);
+        } elseif (Asset::statusRequiresTestAck($status)) {
             Gate::authorize('assets.sale_transition');
             $this->authorize('view', $asset);
         } else {
@@ -552,6 +573,9 @@ class AssetsController extends Controller
         $evaluation = $guardService->evaluate($asset->loadMissing('assetstatus'), $status);
         $evaluation['can_override_issues'] = !$evaluation['has_issues']
             || Gate::allows('assets.override_sale_readiness');
+        $evaluation['can_confirm_locked_exit'] = !$evaluation['locked_exit']
+            || auth()->user()->isAdmin()
+            || auth()->user()->isSuperUser();
 
         return response()->json($evaluation);
     }
@@ -569,28 +593,50 @@ class AssetsController extends Controller
         AssetStatusTransitionGuardService $guardService
     ) : RedirectResponse|JsonResponse
     {
+        $requestedStatus = Statuslabel::find($request->input('status_id'));
+        $statusChanging = $requestedStatus
+            && (int) $asset->status_id !== (int) $requestedStatus->id;
         $validated = $request->validate([
-            'status_id' => ['required', 'integer', 'exists:status_labels,id'],
-            'status_change_note' => ['nullable', 'string', 'max:65535'],
+            'status_id' => [
+                'required',
+                'integer',
+                'exists:status_labels,id',
+                new \App\Rules\UserCanSelectStatusLabel((int) $asset->status_id),
+            ],
+            'status_change_note' => [
+                Rule::requiredIf($statusChanging && (bool) $requestedStatus?->requires_note),
+                'nullable',
+                'string',
+                'max:65535',
+            ],
             'quality_grade' => ['nullable', Rule::in(array_keys(Asset::qualityGradeOptions()))],
             'ack_failed_tests' => ['nullable', 'boolean'],
             'ack_component_issues' => ['nullable', 'boolean'],
             'status_confirmation_hash' => ['nullable', 'string', 'size:64'],
             'status_override_reason' => ['nullable', 'string', 'max:2000'],
+            'locked_status_identifier' => ['nullable', 'string', 'max:255'],
         ]);
 
         $status = Statuslabel::find($validated['status_id']);
-        $canUpdateAsset = Gate::allows('update', $asset);
+        $statusChanging = (int) $asset->status_id !== (int) $validated['status_id'];
+        $lockedExit = $status
+            ? $guardService->isLockedExit($asset->loadMissing('assetstatus'), $status)
+            : false;
 
-        if ($status && (Asset::isPreSaleStatus($status) || Asset::isSoldStatus($status))) {
+        if ($lockedExit) {
+            abort_unless(auth()->user()->isAdmin() || auth()->user()->isSuperUser(), 403);
+            $this->authorize('view', $asset);
+        } elseif ($statusChanging && $status && (Asset::isPreSaleStatus($status) || Asset::isSoldStatus($status))) {
             Gate::authorize('assets.sale_transition');
             $this->authorize('view', $asset);
-        } else {
+        } elseif ($statusChanging) {
             $this->authorize('update', $asset);
+        } else {
+            $this->authorize('view', $asset);
         }
 
-        if (array_key_exists('quality_grade', $validated) && !$canUpdateAsset) {
-            abort(403);
+        if (array_key_exists('quality_grade', $validated)) {
+            $this->authorize('updateQualityGrade', $asset);
         }
 
         $outcome = DB::transaction(function () use (
@@ -605,7 +651,7 @@ class AssetsController extends Controller
             $targetStatus = Statuslabel::findOrFail($validated['status_id']);
             $statusChanging = (int) $lockedAsset->status_id !== (int) $targetStatus->id;
 
-            if ($statusChanging && Asset::statusRequiresTestAck($targetStatus)) {
+            if ($statusChanging && ($guardService->isLockedExit($lockedAsset, $targetStatus) || Asset::statusRequiresTestAck($targetStatus))) {
                 $evaluation = $guardService->evaluate($lockedAsset, $targetStatus);
                 $submittedHash = (string) ($validated['status_confirmation_hash'] ?? '');
 
@@ -617,6 +663,16 @@ class AssetsController extends Controller
                 }
 
                 $overrideReason = trim((string) ($validated['status_override_reason'] ?? ''));
+                if ($evaluation['locked_exit']) {
+                    if ($overrideReason === '') {
+                        return ['status' => 'missing_reason', 'guard' => $evaluation];
+                    }
+
+                    if (!$guardService->identifierMatches($lockedAsset, $validated['locked_status_identifier'] ?? null)) {
+                        return ['status' => 'identifier_mismatch', 'guard' => $evaluation];
+                    }
+                }
+
                 if ($evaluation['has_issues']) {
                     if (!Gate::allows('assets.override_sale_readiness')) {
                         return ['status' => 'forbidden_override', 'guard' => $evaluation];
@@ -633,8 +689,11 @@ class AssetsController extends Controller
                 ]);
                 $lockedAsset->withStatusGuardAudit([
                     'confirmation_hash' => $evaluation['confirmation_hash'],
-                    'override_reason' => $evaluation['has_issues'] ? $overrideReason : null,
+                    'override_reason' => ($evaluation['has_issues'] || $evaluation['locked_exit']) ? $overrideReason : null,
                     'overridden' => (bool) $evaluation['has_issues'],
+                    'locked_exit' => (bool) $evaluation['locked_exit'],
+                    'locked_exit_reason' => $evaluation['locked_exit'] ? $overrideReason : null,
+                    'identifier_verified' => (bool) $evaluation['locked_exit'],
                     'workflow_issues' => $evaluation['workflow_issues'],
                     'component_issues' => $evaluation['component_issues'],
                 ]);
@@ -666,6 +725,9 @@ class AssetsController extends Controller
                     'guard' => array_merge($outcome['guard'], [
                         'can_override_issues' => !$outcome['guard']['has_issues']
                             || Gate::allows('assets.override_sale_readiness'),
+                        'can_confirm_locked_exit' => !$outcome['guard']['locked_exit']
+                            || auth()->user()->isAdmin()
+                            || auth()->user()->isSuperUser(),
                     ]),
                 ], 409);
             }
@@ -684,7 +746,7 @@ class AssetsController extends Controller
         }
 
         if ($outcome['status'] === 'missing_reason') {
-            $message = __('Enter a reason for continuing despite the listed issues.');
+            $message = __('Enter a reason for this protected status change.');
 
             if ($request->expectsJson()) {
                 return response()->json([
@@ -694,6 +756,19 @@ class AssetsController extends Controller
             }
 
             return redirect()->back()->withInput()->withErrors(['status_override_reason' => $message]);
+        }
+
+        if ($outcome['status'] === 'identifier_mismatch') {
+            $message = __('Scan the asset QR code or enter the exact asset tag to confirm this locked-state change.');
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $message,
+                    'errors' => ['locked_status_identifier' => [$message]],
+                ], 422);
+            }
+
+            return redirect()->back()->withInput()->withErrors(['locked_status_identifier' => $message]);
         }
 
         if ($outcome['status'] === 'save_failed') {
@@ -726,11 +801,21 @@ class AssetsController extends Controller
         UpdateAssetRequest $request,
         Asset $asset,
         ModelAttributeManager $attributeManager,
-        LegacyAssetAssignmentCleanupService $legacyAssignmentCleanup
+        LegacyAssetAssignmentCleanupService $legacyAssignmentCleanup,
+        AssetStatusTransitionGuardService $guardService
     ) : RedirectResponse
     {
 
         $this->authorize($asset);
+
+        $requestedStatus = $request->filled('status_id')
+            ? Statuslabel::find((int) $request->input('status_id'))
+            : null;
+        if ($requestedStatus && $guardService->isLockedExit($asset->loadMissing('assetstatus'), $requestedStatus)) {
+            return redirect()->back()->withInput()->withErrors([
+                'status_id' => __('Change a locked status from the asset detail page so the Admin confirmation can be recorded.'),
+            ]);
+        }
 
         if ($request->hasAny(self::LEGACY_ASSIGNMENT_FIELDS)) {
             return redirect()->back()

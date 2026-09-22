@@ -181,6 +181,7 @@
 
 @can('view', \App\Models\Asset::class)
     @include('dashboard.partials.refurb-filter-row', ['filters' => $refurbFilters ?? collect()])
+    @include('dashboard.partials.recent-assets', ['recentAssets' => $recentAssets ?? collect()])
 @endcan
 
 @if ($counts['grand_total'] == 0)
