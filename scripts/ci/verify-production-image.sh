@@ -11,7 +11,7 @@ image_tag="$1"
 
 docker image inspect "$image_tag" >/dev/null
 
-docker run --rm --entrypoint /bin/sh "$image_tag" -s <<'CONTAINER_CHECK'
+docker run --rm -i --entrypoint /bin/sh "$image_tag" -s <<'CONTAINER_CHECK'
 set -eu
 
 root=/var/www/html

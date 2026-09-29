@@ -202,6 +202,10 @@ class ReleaseInfrastructureConfigurationTest extends TestCase
         }
 
         $this->assertStringContainsString('command -v git', $imageVerifier);
+        $this->assertStringContainsString(
+            'docker run --rm -i --entrypoint /bin/sh "$image_tag" -s',
+            $imageVerifier,
+        );
         $this->assertStringContainsString('vendor/laravelcollective', $imageVerifier);
         $this->assertStringContainsString('Email addresses may not contain line break characters.', $imageVerifier);
         $this->assertStringContainsString('strtr(rawurlencode(', $imageVerifier);
