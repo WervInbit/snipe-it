@@ -136,7 +136,7 @@ class DashboardTest extends TestCase
             ->assertSee(route('logout.post'));
     }
 
-    public function testDashboardShowsFiveMostRecentVisibleAssetsAndCreateAction(): void
+    public function testDashboardShowsFiveMostRecentVisibleAssetsAndCreateTile(): void
     {
         $user = User::factory()->viewAssets()->createAssets()->create();
         $assets = Asset::factory()->count(6)->create();
@@ -154,11 +154,23 @@ class DashboardTest extends TestCase
         $response
             ->assertOk()
             ->assertSee('data-testid="dashboard-new-asset"', false)
+            ->assertSee('dashboard dashboard-tile small-box bg-green', false)
+            ->assertSee(route('hardware.create'))
             ->assertDontSee($assets->first()->asset_tag);
 
         foreach ($assets->slice(1) as $asset) {
             $response->assertSee($asset->asset_tag);
         }
+    }
+
+    public function testDashboardHidesNewAssetTileWithoutCreatePermission(): void
+    {
+        $user = User::factory()->viewAssets()->create();
+
+        $this->actingAs($user)
+            ->get(route('home'))
+            ->assertOk()
+            ->assertDontSee('data-testid="dashboard-new-asset"', false);
     }
 
     public function testViewingAnAssetAddsItToTheUsersRecentList(): void

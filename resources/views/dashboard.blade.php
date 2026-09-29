@@ -50,6 +50,26 @@
     </div><!-- ./col -->
     @endcan
 
+    @can('create', \App\Models\Asset::class)
+    <div class="col-lg-2 col-xs-6">
+        <a href="{{ route('hardware.create') }}" data-testid="dashboard-new-asset">
+            <div class="dashboard dashboard-tile small-box bg-green">
+                <div class="inner">
+                    <h3>&nbsp;</h3>
+                    <p>{{ trans('general.new_asset') }}</p>
+                </div>
+                <div class="icon" aria-hidden="true">
+                    <x-icon type="plus" />
+                </div>
+                <span class="small-box-footer">
+                    {{ trans('general.create') }}
+                    <x-icon type="arrow-circle-right" />
+                </span>
+            </div>
+        </a>
+    </div><!-- ./col -->
+    @endcan
+
     @can('scanning')
     <div class="col-lg-2 col-xs-6">
         <a href="{{ route('scan') }}" data-testid="dashboard-scan-card">
@@ -209,11 +229,6 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-2">
-                            @can('create', \App\Models\Asset::class)
-                            <a class="btn bg-teal" style="width: 100%" href="{{ route('hardware.create') }}">{{ trans('general.new_asset') }}</a>
-                            @endcan
-                        </div>
                         <div class="col-md-2">
                             @can('create', \App\Models\License::class)
                                 <a class="btn bg-maroon" style="width: 100%" href="{{ route('licenses.create') }}">{{ trans('general.new_license') }}</a>

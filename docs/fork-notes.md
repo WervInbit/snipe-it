@@ -4,6 +4,15 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-09-29
+- Moved the permission-aware New Asset action from the recent-device panel to a
+  full dashboard tile directly beside Assets. The tile uses the dashboard's
+  existing responsive presentation and remains hidden from users, including
+  ordinary Refurbishers, who cannot create assets.
+- Removed duplicate New Asset buttons from the recent-device header and empty
+  dashboard action row. The recent-device panel now renders only when it has
+  rows to display.
+
 ### 2026-09-22
 - Added the refurbisher follow-up application slice: compact account controls,
   permission-aware New Asset/quality actions, Scan QR wording, and a five-row

@@ -1,3 +1,27 @@
+# Session Progress (2026-09-29)
+
+## Dashboard New Asset Tile
+
+- Reinitialized the existing refurbisher follow-up feature worktree after
+  reviewing `AGENTS.md`, `PROGRESS.md`, `docs/fork-notes.md`, current branch
+  state, and the active local `dev.inbit` mounts.
+- This work block moves the permission-aware New Asset action out of the recent
+  devices panel and into the top dashboard tile row alongside Assets, Scan QR,
+  and Components. The ordinary Refurbisher create restriction remains intact.
+- New Asset now renders as a green top-level tile directly after Assets. The
+  duplicate action was removed from both the recent-devices header and the
+  empty-dashboard action row; the recent panel now appears only when it has
+  device rows to show.
+- Guarded in-memory SQLite verification passed all 9 focused dashboard tests / 42
+  assertions, including create-permission visibility. The local Blade view
+  cache was cleared, the active app mount still targets this worktree, and
+  `dev.inbit` returns the expected unauthenticated login redirect.
+- No database change, destructive command, remote deployment, or production
+  access occurred. Focused dashboard coverage ran against the guarded
+  in-memory SQLite test boundary.
+- Session notes are in
+  `docs/agents/agents-addendum-2026-09-29-session-init.md`.
+
 # Session Progress (2026-09-22)
 
 ## Refurbisher Follow-Up Implementation
