@@ -7,6 +7,9 @@
   image built successfully. The web build failed closed when Alpine replaced
   the pinned `libexpat 2.8.4-r0` package with `2.8.5-r0`; updated that explicit
   runtime pin and its production-image contract assertion before deployment.
+  The subsequent Trivy gate found five newly fixed HIGH findings in the app
+  base image, so the runtime now also pins the fixed Debian `libpcre2` and
+  `libssh2` revisions; no production changes were made before these gates.
 - Added a persistent signed-in identity block to both account menus. It shows
   the current user's display name and username; the compact Refurbisher header
   also shows the name on desktop while retaining password and logout actions.

@@ -8,6 +8,9 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 - Refreshed the production web image's pinned Alpine `libexpat` runtime package
   from `2.8.4-r0` to `2.8.5-r0` after the older package left the pinned base
   image's repository; the production container contract tracks the new pin.
+- Pinned the app runtime to Debian's fixed `libpcre2 10.42-1+deb12u1` and
+  `libssh2 1.10.0-3+deb12u1` revisions after the pre-deployment vulnerability
+  gate identified five HIGH findings with available fixes in the base image.
 - Moved the permission-aware New Asset action from the recent-device panel to a
   full dashboard tile directly beside Assets. The tile uses the dashboard's
   existing responsive presentation and remains hidden from users, including

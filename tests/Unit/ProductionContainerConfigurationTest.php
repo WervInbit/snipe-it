@@ -282,6 +282,8 @@ class ProductionContainerConfigurationTest extends TestCase
         $this->assertStringContainsString('libcrypto3=3.5.8-r0', $dockerfile);
         $this->assertStringContainsString('libexpat=2.8.5-r0', $dockerfile);
         $this->assertStringContainsString('libssl3=3.5.8-r0', $dockerfile);
+        $this->assertStringContainsString('libpcre2-8-0=10.42-1+deb12u1', $dockerfile);
+        $this->assertStringContainsString('libssh2-1=1.10.0-3+deb12u1', $dockerfile);
     }
 
     public function test_docker_build_context_excludes_runtime_cache_and_session_artifacts(): void
