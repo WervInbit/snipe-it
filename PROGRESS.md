@@ -19,6 +19,9 @@
 - No database change, destructive command, remote deployment, or production
   access occurred. Focused dashboard coverage ran against the guarded
   in-memory SQLite test boundary.
+- Added an open phone-preparation TODO: disable page translation for the
+  production site, pre-allow its camera permission where supported (otherwise
+  accept the one-time browser request), and verify Scan QR before handoff.
 - Session notes are in
   `docs/agents/agents-addendum-2026-09-29-session-init.md`.
 

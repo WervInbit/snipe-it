@@ -62,6 +62,21 @@ complete, the asset page says so below the final editable workflow.
   that the current user viewed or changed appear as one-line links below the
   action/status blocks.
 
+### Work Phone Preparation
+
+Before handing an assigned phone to an operator:
+
+1. Disable automatic page translation and translation prompts for the
+   production Snipe-IT site.
+2. Allow camera access for the production Snipe-IT site in the browser and OS
+   settings in advance where supported. If the platform requires an in-page
+   request, open **Scan QR** and accept the one-time camera prompt.
+3. Reload **Scan QR** and verify that the rear camera opens without another
+   permission prompt and can scan a known device label.
+
+Camera approval is tied to the exact HTTPS origin, so repeat this preparation
+if the production hostname changes.
+
 ## Creation, Asset Detail, and Attributes
 
 Successful creation opens a focused result page with **Print QR** and

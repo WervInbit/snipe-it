@@ -34,3 +34,6 @@
 - `DashboardTest` passes all 9 tests / 42 assertions against in-memory SQLite.
   Cleared the local Blade view cache and confirmed the active `dev.inbit` app
   mount points at this worktree.
+- Recorded phone preparation as an open operational TODO: disable translation
+  behavior for the production site, pre-authorize camera access where the
+  platform permits it, and verify Scan QR before operator handoff.

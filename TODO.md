@@ -1,3 +1,11 @@
+## Phone Preparation - 2026-09-29
+
+- [ ] Prepare every assigned work phone before handoff: disable automatic page
+  translation/translation prompts for the production Snipe-IT site, allow
+  camera access for that site in advance where the phone/browser supports it,
+  and otherwise complete the browser's one-time camera permission prompt.
+  Verify **Scan QR** with the phone after both settings are applied.
+
 ## Production Host Migration - 2026-09-17
 
 - [ ] Prepare and execute the approved Snipe-IT and CUPS relocation from
