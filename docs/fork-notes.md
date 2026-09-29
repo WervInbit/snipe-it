@@ -5,6 +5,12 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 ## Update Log
 
 ### 2026-09-29
+- Deployed configurable numeric component aggregation from application commit
+  `4751683ac0`. Existing numeric attributes remain additive except
+  `ram_speed_mhz`, which keeps distinct speeds so the production NUC now shows
+  `3200 MHz` instead of `6400 MHz` while retaining `16 GB`. The controlled
+  rollout preserved all current entity counts and identifiers; see
+  [the aggregation production record](releases/numeric-component-aggregation-production-2026-09-29.md).
 - Deployed the refurbisher follow-up release from application commit
   `0df107a50b` using immutable app/web digests after clean-build, contract,
   runtime, and zero-HIGH/CRITICAL vulnerability gates. The controlled rollout

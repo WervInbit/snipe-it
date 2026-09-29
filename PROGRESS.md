@@ -1,5 +1,39 @@
 # Session Progress (2026-09-29)
 
+## Production Numeric Component Aggregation Deployment
+
+- Qualified and deployed application commit
+  `4751683ac066941f99021ebc2eb1484b7860e67a`. Focused behavior coverage passed
+  55 tests / 357 assertions and the clean-LF production contract suite passed
+  42 tests / 570 assertions. Both exact images passed the corrected runtime
+  content verifier and Trivy reported zero fixable HIGH/CRITICAL findings.
+- Entered maintenance mode, stopped queue and scheduler writers, and created a
+  complete recovery point before applying the migration. The on-host and
+  off-host archive is `pre-aggregation-20260929T120552Z`; SHA-256 is
+  `5779b1a1b3e516a05215daf225b3c137f740c29d5b17b61d99e86cc3dcf2c47f`.
+  The database dump, application backup ZIP, public/private uploads, fresh
+  Redis snapshot, runtime configuration, secrets, TLS material, release state,
+  and baseline data all passed internal and off-host checksum/structure checks.
+- Applied only
+  `2026_09_29_120000_add_component_aggregation_mode_to_attribute_definitions`
+  and ran `ProductionPermissionGroupSeeder` once. Production now has 48 `sum`
+  attributes and one `distinct` attribute, `ram_speed_mhz`; no component,
+  model, asset, or existing attribute-definition row was manually rewritten.
+- The NUC `INBIT-AA0010` now resolves to `3200 MHz` and remains `16 GB`.
+  Production counts remain 19 users, 17 assets, 4 component instances, 6
+  workflow profiles, 38 workflow items, 20 workflow runs, 14 statuses, and 49
+  attribute definitions. Duplicate asset tags, non-empty asset serials, and
+  component tags remain zero. The Cisco model and its two subsequently created
+  physical assets remain intact.
+- Production runs the app digest
+  `sha256:98e094a8065bbd75f472e351f05cf97c753da42b5b55ba2b324addaaf30198d6`.
+  The unchanged web content retains digest
+  `sha256:128513a85a9fe21c9304389e3ca88f55b8dc1995357a5e53479053ed3900cac7`.
+  All seven services are healthy with zero restarts, HTTPS health/login return
+  200, pending/failed/queued jobs are zero, and fresh service log scans are
+  clean. See
+  `docs/releases/numeric-component-aggregation-production-2026-09-29.md`.
+
 ## Local Numeric Component Aggregation
 
 - Kept production out of scope and traced the NUC memory-speed issue to the

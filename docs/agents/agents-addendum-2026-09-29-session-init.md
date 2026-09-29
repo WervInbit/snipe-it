@@ -121,3 +121,14 @@
   NUC result from `6400 MHz` / `16 GB` to `3200 MHz` / `16 GB`. The rollout and
   per-attribute decisions are recorded in
   `docs/plans/numeric-component-aggregation-production-plan-2026-09-29.md`.
+- Deployed the aggregation release from exact application commit
+  `4751683ac066941f99021ebc2eb1484b7860e67a` after clean-LF contract, runtime,
+  content, and vulnerability gates passed. A complete maintenance-mode backup
+  was verified on-host and off-host before the sole additive migration ran.
+- Production now stores 48 `sum` modes and one `distinct` mode for
+  `ram_speed_mhz`. `INBIT-AA0010` resolves to `3200 MHz` and remains `16 GB`;
+  current entity counts, the two Cisco assets, and all zero-duplicate checks
+  were preserved. All seven services are healthy on the immutable release,
+  queues and failed jobs are empty, HTTPS health/login return 200, and recent
+  logs are clean. Full identities and rollback anchors are in
+  `docs/releases/numeric-component-aggregation-production-2026-09-29.md`.
