@@ -5,6 +5,14 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 ## Update Log
 
 ### 2026-09-29
+- Deployed the refurbisher follow-up release from application commit
+  `0df107a50b` using immutable app/web digests after clean-build, contract,
+  runtime, and zero-HIGH/CRITICAL vulnerability gates. The controlled rollout
+  preserved baseline data and zero-duplicate checks, ran only the two intended
+  additive migrations, and completed a physical `dymo330` QR-label job. See
+  [the production release record](releases/refurbisher-followups-production-2026-09-29.md)
+  for backup hashes, image identities, verification evidence, rollback anchors,
+  and the remaining authenticated/manual acceptance checks.
 - Refreshed the production web image's pinned Alpine `libexpat` runtime package
   from `2.8.4-r0` to `2.8.5-r0` after the older package left the pinned base
   image's repository; the production container contract tracks the new pin.

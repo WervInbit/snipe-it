@@ -22,11 +22,10 @@
   Supervisor access rule. Updated stale workflow/attribute tests to the current
   controller signature, explicit workflow permissions, stable completion-time
   rule, and Admin-only locked-status exit behavior.
-- Configured the local development data for acceptance testing only: QA Hold
-  now requires a note; Afgevoerd is a destroyed/archived status selectable by
-  Supervisor (and Admin); and the pre-existing Broken/Parts Supervisor rule now
-  explicitly allows both View and Choose/use. Production configuration remains
-  a manual deployment step.
+- Configured the acceptance data first on development and then, after explicit
+  deployment approval, on production: QA Hold requires a note; Afgevoerd is a
+  destroyed/archived status selectable by Supervisor (and Admin); and the
+  active Broken / Parts status explicitly allows Supervisor View and Choose/use.
 - Browser-tested `dev.inbit` as Admin, Supervisor, Senior Refurbisher, and
   Refurbisher. Verified identity display, role-filtered status choices,
   Supervisor entry into Afgevoerd, Refurbisher/Senior exclusion, required QA
@@ -43,8 +42,9 @@
   against guarded in-memory SQLite. Changed PHP files pass syntax checks,
   Blade compilation passes, the print route is registered, and `git diff
   --check` reports no whitespace errors. The corrective printer-path run also
-  passes 26 tests / 153 assertions with the printer service mocked; no physical
-  label was sent during automated verification.
+  passes 26 tests / 153 assertions with the printer service mocked. Production
+  later accepted exactly one physical print job, `dymo330-7`, for existing asset
+  `INBIT-AA0010`; CUPS completed it and returned `dymo330` to enabled/idle.
 - A single-command full-suite result is still unavailable for repository/test
   harness reasons: `phpunit.xml` references the missing
   `tests/Feature/Maintenances/Api` directory, a broad run observed
@@ -52,8 +52,24 @@
   by the test guard, and the worktree has no untracked `.env.testing` so the
   example test `APP_KEY` must be supplied explicitly. These are recorded as
   test-infrastructure follow-ups rather than ignored release evidence.
-- No production/remote access, production configuration, migration, or
-  destructive database command was performed.
+- Fast-forwarded both the feature branch and `master` through application commit
+  `0df107a50b`, built from a clean LF checkout, verified both framework patches,
+  and passed 19 production contract tests / 272 assertions. Trivy 0.66 reported
+  zero HIGH/CRITICAL findings for both immutable candidate images.
+- Created and independently verified the complete pre-deployment backup
+  `pre-deploy-20260929T100343Z` before the maintenance window. The off-host copy
+  is under `C:\snipeit-production-backups`; the archive SHA-256 is
+  `071c3b418e9a00e9f83493e07b1db52c323431eb333721df1bd5b7d6d710d98a`.
+- Promoted the immutable app/web image digests, ran exactly the two pending
+  additive migrations once, and ran `ProductionPermissionGroupSeeder` once.
+  All seven production services are healthy, external HTTPS `/health` returns
+  200, queues are empty, and recent error scans are clean. Baseline user, asset,
+  component, workflow, and duplicate-identifier counts remained unchanged.
+- Authenticated production browser role checks remain manual because no
+  production credentials were supplied; the visible browser correctly reached
+  the login page and no test user or bypass was created. Full evidence,
+  immutable digests, rollback anchors, and remaining acceptance points are in
+  `docs/releases/refurbisher-followups-production-2026-09-29.md`.
 
 ## Dashboard New Asset Tile
 

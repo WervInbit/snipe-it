@@ -24,7 +24,12 @@
 
 ## Safety Boundary
 
-- Do not run destructive database commands or modify production/remote state.
+- Initial investigation did not authorize production changes. A later explicit
+  owner instruction authorized commit, push, merge, and the production rollout;
+  the deployment therefore used maintenance mode, a complete verified backup,
+  immutable images, additive migrations, and post-change data-parity checks.
+- Do not run destructive database commands. No destructive database command was
+  used during the production rollout.
 - Run PHPUnit only with explicit testing, SQLite, and in-memory database
   settings after clearing cached Laravel configuration.
 
@@ -50,10 +55,12 @@
 - Replaced the post-create Print QR static-storage link with the existing
   authorized server-print endpoint. It renders the label server-side and sends
   it to the configured default CUPS/`lp` queue instead of opening a PDF.
-- Applied development-only status configuration for acceptance testing: QA
+- Applied the status configuration first on development and later on production
+  after explicit rollout approval: QA
   Hold requires a note, Afgevoerd is a destroyed/archived status available to
   Supervisor/Admin, and Broken/Parts explicitly allows Supervisor View and
-  Choose/use. Production remains administrator-owned manual configuration.
+  Choose/use. Further Dutch names and matrix refinements remain editable and
+  administrator-owned.
 - Live role checks covered Admin, Supervisor, Senior Refurbisher, and
   Refurbisher. A QA Hold transition without a note was rejected, Supervisor
   could enter Afgevoerd but not leave it, and Admin had to provide both a
@@ -65,9 +72,26 @@
   browser harness could not reproduce the pointer-only drag reliably.
 - Final production-relevant regression: 180 tests / 760 assertions passed on
   guarded in-memory SQLite. A corrective focused run for the printer path
-  passes 26 tests / 153 assertions with a mocked CUPS dispatch; no physical
-  label was sent. PHP syntax, Blade compilation, route registration, and
-  whitespace checks pass.
+  passes 26 tests / 153 assertions with a mocked CUPS dispatch. PHP syntax,
+  Blade compilation, route registration, and whitespace checks pass.
+- Fast-forwarded the feature branch and `master` through `0df107a50b`. Clean
+  release images passed framework-patch, production-contract, runtime, and
+  zero-HIGH/CRITICAL vulnerability gates before the server was changed.
+- Backed up the live database, uploads, Redis session state, runtime settings,
+  secrets, TLS material, and release state under maintenance mode. Verified the
+  server archive and restricted off-host copy byte-for-byte before promotion.
+- Promoted immutable app/web digests, ran the two pending additive migrations
+  and role seeder once, then applied the approved QA Hold, Broken / Parts, and
+  Afgevoerd status rules through application models. All baseline entity counts
+  and zero-duplicate checks remained unchanged.
+- All seven services are healthy; HTTPS health is 200, TLS is valid, queues are
+  empty, and service error scans are clean. One controlled label for existing
+  asset `INBIT-AA0010` completed as CUPS job `dymo330-7`, after which `dymo330`
+  was enabled, idle, and had no pending jobs.
+- Authenticated production role/UI smoke remains an owner-assisted acceptance
+  step because the production browser had no saved credentials and correctly
+  stopped at login. No temporary user, password-manager access, or bypass was
+  introduced. See the linked production release record for full evidence.
 - Full-suite infrastructure remains open: `phpunit.xml` lists a missing
   maintenance API directory, the shared container recreated a cached config
   during a broad run and triggered the intended test guard, and this worktree
