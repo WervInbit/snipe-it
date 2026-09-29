@@ -37,3 +37,8 @@
 - Recorded phone preparation as an open operational TODO: disable translation
   behavior for the production site, pre-authorize camera access where the
   platform permits it, and verify Scan QR before operator handoff.
+- Current regression rerun passed all 106 focused feature tests / 696
+  assertions, syntax checks for 55 changed PHP files, Blade compilation, and
+  whitespace validation. The full asset API directory passed 105 tests and
+  failed four unchanged model-number image tests; that separate baseline image
+  test-health issue is not in the refurbisher branch's changed paths.

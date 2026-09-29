@@ -22,6 +22,15 @@
 - Added an open phone-preparation TODO: disable page translation for the
   production site, pre-allow its camera permission where supported (otherwise
   accept the one-time browser request), and verify Scan QR before handoff.
+- Re-ran the current feature regression set on request: all 106 focused tests / 696
+  assertions passed against guarded in-memory SQLite. PHP syntax checks passed
+  for all 55 changed PHP files, Blade templates compiled successfully, and
+  `git diff --check` passed.
+- A broader asset API sweep passed 105 tests but exposed four failures, all in
+  the unchanged `ModelNumberImagesApiTest`/safe-raster path (two stale 201-vs-200
+  expectations and two replacement-image behaviors). This branch does not
+  modify those image API/service/test files; treat that as a separate baseline
+  test-health investigation rather than refurbisher acceptance evidence.
 - Session notes are in
   `docs/agents/agents-addendum-2026-09-29-session-init.md`.
 
