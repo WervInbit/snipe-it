@@ -313,6 +313,12 @@ as a substitute for controlled administration.
   value provenance to the backend, provide a permissioned and audited correction
   route for bad source values, preserve history, and add regression coverage for
   expected-versus-installed specification resolution.
+  - Local implementation on 2026-09-29 traced the reported 6400 MHz value to
+    quantity-based numeric summing. Attribute definitions now choose additive
+    or distinct component aggregation; memory speed uses distinct aggregation,
+    repeated equal speeds collapse to one value, and mixed speeds remain visible
+    with a warning. In-use mode changes require lifecycle permission. Production
+    rollout remains explicitly deferred until approved.
 
 ## Guide Updates
 

@@ -7,6 +7,7 @@ use App\Models\AssetModel;
 use App\Models\AttributeDefinition;
 use App\Models\Category;
 use App\Models\ComponentDefinition;
+use App\Models\ComponentDefinitionAttribute;
 use App\Models\Group;
 use App\Models\ModelNumberAttribute;
 use App\Models\Setting;
@@ -246,6 +247,40 @@ class SupervisorCatalogAuthorizationTest extends TestCase
         ]);
         $this->assertDatabaseHas('workflow_items', ['id' => $workflowItem->id]);
         $this->assertDatabaseHas('workflow_profiles', ['id' => $workflowProfile->id]);
+    }
+
+    public function test_supervisor_cannot_change_aggregation_for_an_attribute_used_by_components(): void
+    {
+        $supervisor = $this->userInGroup('Supervisor');
+        $attribute = AttributeDefinition::create([
+            'key' => 'guarded_memory_speed',
+            'label' => 'Guarded Memory Speed',
+            'datatype' => AttributeDefinition::DATATYPE_INT,
+            'unit' => 'MHz',
+        ]);
+        $componentDefinition = ComponentDefinition::factory()->create();
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $componentDefinition->id,
+            'attribute_definition_id' => $attribute->id,
+            'value' => '3200',
+            'raw_value' => '3200',
+            'resolves_to_spec' => true,
+        ]);
+
+        $this->actingAs($supervisor)
+            ->put(route('attributes.update', $attribute), [
+                'key' => $attribute->key,
+                'label' => $attribute->label,
+                'datatype' => $attribute->datatype,
+                'unit' => $attribute->unit,
+                'component_aggregation_mode' => AttributeDefinition::COMPONENT_AGGREGATION_DISTINCT,
+            ])
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('attribute_definitions', [
+            'id' => $attribute->id,
+            'component_aggregation_mode' => AttributeDefinition::COMPONENT_AGGREGATION_SUM,
+        ]);
     }
 
     public function test_preserved_legacy_model_delete_grant_does_not_bypass_lifecycle_boundary(): void

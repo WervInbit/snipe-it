@@ -162,6 +162,37 @@
         </div>
     </div>
 
+    <div class="form-group{{ $errors->has('component_aggregation_mode') ? ' has-error' : '' }}">
+        <label for="component_aggregation_mode" class="col-md-3 control-label">
+            {{ __('Numeric Component Aggregation') }}
+        </label>
+        <div class="col-md-7">
+            <select name="component_aggregation_mode" id="component_aggregation_mode" class="form-control">
+                @foreach(\App\Models\AttributeDefinition::componentAggregationModeOptions() as $mode => $label)
+                    <option
+                        value="{{ $mode }}"
+                        {{ old('component_aggregation_mode', $definition->component_aggregation_mode ?: \App\Models\AttributeDefinition::COMPONENT_AGGREGATION_SUM) === $mode ? 'selected' : '' }}
+                    >
+                        {{ $label }}
+                    </option>
+                @endforeach
+            </select>
+            <span class="help-block">
+                {{ __('For integer and decimal values contributed by components. Sum values by quantity for capacities and counts. Keep distinct values for shared properties such as memory speed; repeated equal values are shown once and differing values are all shown.') }}
+            </span>
+            @if(
+                $isEdit
+                && (($usageSummary['component_definitions'] ?? 0) > 0
+                    || ($usageSummary['component_instances'] ?? 0) > 0)
+            )
+                <span class="help-block text-warning">
+                    {{ __('This attribute already has component values. Changing its aggregation immediately changes resolved model and asset specifications and requires lifecycle-management permission.') }}
+                </span>
+            @endif
+            {!! $errors->first('component_aggregation_mode', '<span class="alert-msg">:message</span>') !!}
+        </div>
+    </div>
+
     <hr>
 
     <div class="form-group">

@@ -30,6 +30,9 @@ class AttributeDefinition extends SnipeModel
     public const COMPONENT_SPEC_DISPLAY_VALUE_LABELS = 'value_labels';
     public const COMPONENT_SPEC_DISPLAY_COMPONENT_LABELS = 'component_labels';
 
+    public const COMPONENT_AGGREGATION_SUM = 'sum';
+    public const COMPONENT_AGGREGATION_DISTINCT = 'distinct';
+
     public const DATATYPES = [
         self::DATATYPE_ENUM,
         self::DATATYPE_INT,
@@ -43,6 +46,11 @@ class AttributeDefinition extends SnipeModel
         self::COMPONENT_SPEC_DISPLAY_COMPONENT_LABELS,
     ];
 
+    public const COMPONENT_AGGREGATION_MODES = [
+        self::COMPONENT_AGGREGATION_SUM,
+        self::COMPONENT_AGGREGATION_DISTINCT,
+    ];
+
     protected $table = 'attribute_definitions';
 
     protected $fillable = [
@@ -54,6 +62,7 @@ class AttributeDefinition extends SnipeModel
         'allow_custom_values',
         'allow_asset_override',
         'component_spec_display_mode',
+        'component_aggregation_mode',
         'constraints',
         'hidden_at',
         'deprecated_at',
@@ -76,11 +85,13 @@ class AttributeDefinition extends SnipeModel
         'allow_custom_values' => 'boolean',
         'allow_asset_override' => 'boolean',
         'component_spec_display_mode' => 'required|string|in:value_labels,component_labels',
+        'component_aggregation_mode' => 'required|string|in:sum,distinct',
     ];
 
     protected $attributes = [
         'version' => 1,
         'component_spec_display_mode' => self::COMPONENT_SPEC_DISPLAY_VALUE_LABELS,
+        'component_aggregation_mode' => self::COMPONENT_AGGREGATION_SUM,
     ];
 
     public function categories(): BelongsToMany
@@ -284,6 +295,27 @@ class AttributeDefinition extends SnipeModel
             self::COMPONENT_SPEC_DISPLAY_VALUE_LABELS => __('Value labels'),
             self::COMPONENT_SPEC_DISPLAY_COMPONENT_LABELS => __('Component labels'),
         ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function componentAggregationModeOptions(): array
+    {
+        return [
+            self::COMPONENT_AGGREGATION_SUM => __('Sum values by quantity'),
+            self::COMPONENT_AGGREGATION_DISTINCT => __('Keep distinct values'),
+        ];
+    }
+
+    public function sumsComponentValues(): bool
+    {
+        return $this->component_aggregation_mode === self::COMPONENT_AGGREGATION_SUM;
+    }
+
+    public function keepsDistinctComponentValues(): bool
+    {
+        return $this->component_aggregation_mode === self::COMPONENT_AGGREGATION_DISTINCT;
     }
 
     public function allowsAssetOverride(): bool

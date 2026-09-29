@@ -116,6 +116,48 @@ class AttributeDefinitionLifecycleTest extends TestCase
         ]);
     }
 
+    public function test_numeric_component_aggregation_mode_can_be_configured(): void
+    {
+        $user = $this->makeSuperUser();
+
+        $this->actingAs($user)
+            ->post(route('attributes.store'), [
+                'label' => 'Memory Speed',
+                'datatype' => AttributeDefinition::DATATYPE_INT,
+                'unit' => 'MHz',
+                'component_aggregation_mode' => AttributeDefinition::COMPONENT_AGGREGATION_DISTINCT,
+            ])
+            ->assertRedirect();
+
+        $attribute = AttributeDefinition::query()->where('key', 'memory_speed')->firstOrFail();
+
+        $this->assertSame(
+            AttributeDefinition::COMPONENT_AGGREGATION_DISTINCT,
+            $attribute->component_aggregation_mode
+        );
+
+        $this->actingAs($user)
+            ->get(route('attributes.edit', $attribute))
+            ->assertOk()
+            ->assertSeeText('Numeric Component Aggregation')
+            ->assertSeeInOrder(['value="distinct"', 'selected'], false);
+
+        $this->actingAs($user)
+            ->put(route('attributes.update', $attribute), [
+                'label' => 'Memory Speed',
+                'key' => $attribute->key,
+                'datatype' => $attribute->datatype,
+                'unit' => 'MHz',
+                'component_aggregation_mode' => AttributeDefinition::COMPONENT_AGGREGATION_SUM,
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('attribute_definitions', [
+            'id' => $attribute->id,
+            'component_aggregation_mode' => AttributeDefinition::COMPONENT_AGGREGATION_SUM,
+        ]);
+    }
+
     public function test_create_manual_override_sanitizes_key_and_applies_suffix_on_collision(): void
     {
         $user = $this->makeSuperUser();

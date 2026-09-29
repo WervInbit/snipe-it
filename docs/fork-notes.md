@@ -686,3 +686,15 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 ### 2026-06-08
 - Default seeding now uses an explicit `ProductionFoundationSeeder` for first production setup. It seeds settings, permission groups, status labels, attribute definitions, model-number presets, component definitions, and workflow catalog data without destructive truncation or demo user/company creation.
 - Production status labels and permission groups are idempotent foundation rows. Production suppliers have their own seeder, but it is intentionally empty until real supplier names are provided; the old demo `SupplierSeeder` remains separate and is not part of the production foundation path.
+
+### 2026-09-29
+
+- Numeric component-derived attributes now define how repeated component
+  values aggregate. `Sum values by quantity` remains the backward-compatible
+  default for capacities and counts; `Keep distinct values` ignores repeated
+  equal values and exposes mixed values with a warning.
+- Attribute settings expose this choice to authorized users. Changing it after
+  component values exist is guarded by lifecycle-management permission because
+  resolved model and asset specifications change immediately.
+- `ram_speed_mhz` is migrated and seeded as distinct, so two 3200 MHz modules
+  resolve to 3200 MHz rather than 6400 MHz. `ram_size_gb` stays additive.

@@ -203,14 +203,10 @@ class ComponentAttributeAggregator
                     return null;
                 }
 
-                [$value, $rawValue, $option, $displayValue] = match ($definition->datatype) {
-                    AttributeDefinition::DATATYPE_INT => [...$this->aggregateInteger($group), null],
-                    AttributeDefinition::DATATYPE_DECIMAL => [...$this->aggregateDecimal($group), null],
-                    AttributeDefinition::DATATYPE_BOOL => [...$this->aggregateBoolean($group), null],
-                    AttributeDefinition::DATATYPE_ENUM,
-                    AttributeDefinition::DATATYPE_TEXT => $this->aggregateDistinctStrings($group),
-                    default => [null, null, null, null],
-                };
+                [$value, $rawValue, $option, $displayValue, $aggregationConflict] = $this->aggregateDefinitionValues(
+                    $definition,
+                    $group
+                );
 
                 if ($value === null) {
                     return null;
@@ -250,12 +246,33 @@ class ComponentAttributeAggregator
                     [
                         'resolves_to_spec' => $group->contains(fn (array $record) => !empty($record['resolves_to_spec'])),
                         'display_value' => $displayValue,
+                        'component_aggregation_mode' => $definition->component_aggregation_mode,
+                        'aggregation_conflict' => $aggregationConflict,
                         'hierarchy_overlap_warnings' => $this->hierarchyOverlapWarnings($suppressedRecords),
                     ]
                 );
             })
             ->filter()
             ->mapWithKeys(fn (ComponentAttributeAggregate $aggregate) => [$aggregate->definition->id => $aggregate]);
+    }
+
+    /**
+     * @return array{0: ?string, 1: ?string, 2: ?AttributeOption, 3: ?string, 4: bool}
+     */
+    private function aggregateDefinitionValues(AttributeDefinition $definition, Collection $group): array
+    {
+        if ($definition->isNumericDatatype() && $definition->keepsDistinctComponentValues()) {
+            return $this->aggregateDistinctNumericValues($definition, $group);
+        }
+
+        return match ($definition->datatype) {
+            AttributeDefinition::DATATYPE_INT => [...$this->aggregateInteger($group), null, false],
+            AttributeDefinition::DATATYPE_DECIMAL => [...$this->aggregateDecimal($group), null, false],
+            AttributeDefinition::DATATYPE_BOOL => [...$this->aggregateBoolean($group), null, false],
+            AttributeDefinition::DATATYPE_ENUM,
+            AttributeDefinition::DATATYPE_TEXT => [...$this->aggregateDistinctStrings($group), false],
+            default => [null, null, null, null, false],
+        };
     }
 
     private function shouldAggregateContribution(ComponentDefinitionAttribute|ComponentInstanceAttribute $contribution, bool $specOnly): bool
@@ -710,6 +727,55 @@ class ComponentAttributeAggregator
         $normalized = $this->trimTrailingZeros($sum);
 
         return [$normalized, $normalized, null];
+    }
+
+    /**
+     * @return array{0: ?string, 1: ?string, 2: ?AttributeOption, 3: ?string, 4: bool}
+     */
+    private function aggregateDistinctNumericValues(AttributeDefinition $definition, Collection $group): array
+    {
+        $distinctValues = [];
+
+        foreach ($group as $record) {
+            $value = $record['value'] ?? null;
+            if ($value === null || $value === '' || !is_numeric($value)) {
+                continue;
+            }
+
+            $normalized = $definition->datatype === AttributeDefinition::DATATYPE_INT
+                ? (string) ((int) $value)
+                : $this->trimTrailingZeros((float) $value);
+
+            $distinctValues[$normalized] = $normalized;
+        }
+
+        if ($distinctValues === []) {
+            return [null, null, null, null, false];
+        }
+
+        $values = array_values($distinctValues);
+        $value = implode(', ', $values);
+        $hasConflict = count($values) > 1;
+        $displayValue = $hasConflict
+            ? $this->formatDistinctNumericValues($values, $definition->unit)
+            : null;
+
+        return [$value, $value, null, $displayValue, $hasConflict];
+    }
+
+    /**
+     * @param array<int, string> $values
+     */
+    private function formatDistinctNumericValues(array $values, ?string $unit): string
+    {
+        $display = implode(', ', $values);
+        $unit = trim((string) $unit);
+
+        if ($unit === '') {
+            return $display;
+        }
+
+        return $display . (in_array($unit, ['%', '"'], true) ? '' : ' ') . $unit;
     }
 
     /**

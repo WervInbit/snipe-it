@@ -1,5 +1,69 @@
 # Session Progress (2026-09-29)
 
+## Local Numeric Component Aggregation
+
+- Kept production out of scope and traced the NUC memory-speed issue to the
+  generic numeric component aggregator multiplying every value by component
+  quantity. Two `3200 MHz` memory modules therefore produced `6400 MHz` even
+  though speed is a shared property rather than an additive capacity.
+- Added a user-configurable numeric component aggregation setting with two
+  modes: `Sum values by quantity` and `Keep distinct values`. Existing
+  attributes remain additive by default; the seeded `ram_speed_mhz` attribute
+  and migration backfill use distinct aggregation.
+- Distinct aggregation ignores repeated equal values, so two 3200 MHz modules
+  resolve to `3200 MHz`. Mixed values remain visible together and produce a
+  warning instead of being silently summed. Additive specifications such as
+  `ram_size_gb` retain the existing quantity-based total and subtotal behavior.
+- Added the setting to attribute edit/list screens. Changing the aggregation
+  of an attribute already used by component definitions or instances requires
+  lifecycle-management permission because it immediately changes resolved
+  model and asset specifications.
+- Applied only the new forward migration to the local Docker development
+  database. The local dataset does not contain the production NUC model, so no
+  device or catalogue data was copied from production. Production was not
+  accessed or changed.
+- Focused in-memory SQLite coverage passes 55 tests / 357 assertions across
+  attribute lifecycle, component-derived resolution, catalogue seeding, and
+  Supervisor authorization. PHP syntax checks pass. Targeted PHPStan remains
+  noisy on the repository's existing untyped Eloquent dynamic properties, and
+  the PSR-12 command reports the repository's existing CRLF/baseline findings.
+- Audited all 12 numeric definitions in the saved production catalogue. The
+  only current quantity-driven error is `ram_speed_mhz`; no component,
+  component-instance, model-number, or asset row needs to be rewritten.
+- Rehearsed the migration, rollback, reapplication, and repeat-run behavior on
+  an isolated MariaDB 11.4 restore of the verified off-host production backup.
+  The unchanged NUC catalogue changed from `6400 MHz` / `16 GB` to `3200 MHz`
+  / `16 GB`; 49 attribute definitions, 15 assets, and zero duplicate tags or
+  non-empty serials were preserved. The disposable database was removed and
+  production was not contacted.
+- Documented the production-safe release and acceptance procedure in
+  `docs/plans/numeric-component-aggregation-production-plan-2026-09-29.md`.
+  The release must deploy application code plus the additive migration; it
+  must not run the full production foundation seeder or mass-change other
+  numeric attributes.
+
+## Production Cisco Aironet Catalogue Configuration
+
+- Investigated the live catalogue and confirmed that `Cisco`, the `Access
+  Points` asset category, `Cisco Aironet 2702i`, model number
+  `AIR-CAP2702I-E-K9`, and an RJ-45 console component did not already exist.
+- Took a native transaction-consistent production database backup before the
+  catalogue write. The verified server and off-host backup is
+  `pre-cisco-catalog-20260929T104432Z`; its SHA-256 is
+  `e15375b3fbed5c2a116c83ca1a64d64472ec7c544468ce610c01a0b3b34e8acb`.
+- Added the `Access Points` asset category, `Cisco` manufacturer, `Cisco Aironet
+  2702i` model, and primary `AIR-CAP2702I-E-K9` model number in one database
+  transaction. The model note records that the units use custom firmware.
+- Reused the existing `Wireless - 802.11ac` and `RJ-45 Ethernet Port - 1GbE`
+  definitions for Wireless, PoE, and AUX. Added only one new component
+  definition, `RJ-45 Console Port`, using the existing RJ-45 connector
+  attribute; no attribute definition or custom-field assignment was added.
+- Post-write resolution reports `802.11ac` and
+  `2x RJ-45 1GbE, RJ-45 Console`. Exactly four required component templates
+  exist, no physical asset was created, the total asset count remains 15, and
+  duplicate tag/serial counts remain zero. All seven services are healthy,
+  external HTTPS health is 200, and recent service logs are clean.
+
 ## Production-Readiness Follow-Up Verification
 
 - Fast-forwarded `origin/master` to the reviewed refurbisher release and began

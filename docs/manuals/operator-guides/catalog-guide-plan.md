@@ -337,8 +337,9 @@ screenshots or field explanations.
 - Creating an attribute or component definition inline.
 - Physical component tags, serials, lifecycle, or installation.
 - Admin-only removal of an existing direct value or expected-component row.
-- Internal names such as `resolves_to_spec` or an operator-selectable
-  `aggregation` mode that does not exist in the UI.
+- Internal names such as `resolves_to_spec`. Numeric aggregation belongs in the
+  attribute-management route below, using the user-facing choices shown in the
+  UI.
 
 ## CAT-03 Attributen Beheren
 
@@ -367,10 +368,15 @@ Target: five-page `extended-admin-flow`.
    - State before Save that datatype cannot be changed later.
 3. **Set scope and allowed behavior**
    - Unit, Category Scope, Required for category, Allow asset overrides,
-     Allow custom values for Enum, and Component Spec Display.
+     Allow custom values for Enum, Component Spec Display, and Numeric
+     Component Aggregation.
    - Explain each choice with a safe default and one concrete example.
    - `Component Spec Display` chooses value labels versus component labels; it
      does not choose how values are calculated.
+   - `Sum values by quantity` is for capacities and counts, such as two 8 GB
+     modules resolving to 16 GB. `Keep distinct values` is for shared numeric
+     properties such as memory speed, where two 3200 MHz modules resolve to
+     3200 MHz and differing speeds remain visible together as a warning.
 4. **Set constraints or Enum options**
    - Use minimum, maximum, and step only where they constrain numeric input.
    - Use ordered value/label pairs for Enum.
@@ -567,8 +573,8 @@ claiming a durable in-application audit trail.
 
 If the UI exposes a technical English label, show it exactly once and explain
 the effect. Do not teach internal names such as `resolves_to_spec`,
-`instance-attribuut`, `cataloguslaag`, `Kind -> ouder`, or code-oriented
-aggregation rules.
+`instance-attribuut`, `cataloguslaag`, or `Kind -> ouder`. Explain numeric
+aggregation only through the two user-visible choices and concrete outcomes.
 
 ## Diagram And Visual Rules For CAT
 

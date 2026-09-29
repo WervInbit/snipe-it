@@ -70,6 +70,7 @@
         @php($calculatedExtraSummary = method_exists($attribute, 'calculatedExtraContributorSummary') ? $attribute->calculatedExtraContributorSummary() : null)
         @php($hierarchyOverlapSummary = method_exists($attribute, 'hierarchyOverlapSummary') ? $attribute->hierarchyOverlapSummary() : null)
         @php($manualComponentConflictMessage = method_exists($attribute, 'manualModelComponentConflictMessage') ? $attribute->manualModelComponentConflictMessage() : null)
+        @php($aggregationConflictMessage = method_exists($attribute, 'componentAggregationConflictMessage') ? $attribute->componentAggregationConflictMessage() : null)
         <div class="form-group{{ $errors->has($fieldKey) ? ' has-error' : '' }}">
             <label class="col-md-3 control-label" for="attribute_override_{{ $definition->id }}">
                 {{ $definition->label }}
@@ -100,6 +101,9 @@
                     @endif
                     @if(method_exists($attribute, 'hasReducedExpectedBaseline') && $attribute->hasReducedExpectedBaseline())
                         <p class="help-block text-warning">{{ __('Current calculated value is below the expected baseline because expected components were removed.') }}</p>
+                    @endif
+                    @if($aggregationConflictMessage)
+                        <p class="help-block text-warning" data-testid="asset-spec-aggregation-conflict">{{ $aggregationConflictMessage }}</p>
                     @endif
                     @if($hierarchyOverlapSummary)
                         <p class="help-block text-warning">{{ __('Parent/child overlap: :value', ['value' => $hierarchyOverlapSummary]) }}</p>

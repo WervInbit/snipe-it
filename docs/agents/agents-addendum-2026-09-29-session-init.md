@@ -97,3 +97,27 @@
   during a broad run and triggered the intended test guard, and this worktree
   requires the example `APP_KEY` at the command boundary because no
   `.env.testing` is present.
+- Added the owner-approved Cisco Aironet catalogue configuration to production
+  without creating a physical asset. A verified native database backup was
+  retained on-host and off-host first. The new model uses the exact primary
+  model number `AIR-CAP2702I-E-K9`, reuses the existing 802.11ac and 1GbE RJ-45
+  definitions for Wireless/PoE/AUX, and adds one RJ-45 Console Port definition
+  using the existing connector attribute. No new attribute or custom fieldset
+  was introduced. Post-write entity/duplicate checks and all service, HTTPS,
+  and log checks passed.
+- Returned exclusively to local development after the owner froze production.
+  Numeric component attributes now expose additive versus distinct aggregation
+  in the attribute settings UI. The migration and seed data set
+  `ram_speed_mhz` to distinct, fixing the two-times-3200-MHz display while
+  retaining summed RAM capacity. Mixed component speeds remain visible and
+  warn operators, and changing an in-use aggregation mode requires lifecycle
+  permission. The local migration is applied; 55 focused tests / 357
+  assertions pass against guarded in-memory SQLite.
+- Audited the saved production catalogue without reconnecting to production.
+  Only `ram_speed_mhz` currently needs a mode change; the component, template,
+  instance, and asset rows remain valid. An isolated MariaDB 11.4 restore of
+  the verified off-host backup rehearsed migration, rollback, reapplication,
+  and idempotency. It preserved counts and duplicate checks while changing the
+  NUC result from `6400 MHz` / `16 GB` to `3200 MHz` / `16 GB`. The rollout and
+  per-attribute decisions are recorded in
+  `docs/plans/numeric-component-aggregation-production-plan-2026-09-29.md`.

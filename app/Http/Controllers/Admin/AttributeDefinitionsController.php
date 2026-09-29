@@ -97,7 +97,10 @@ class AttributeDefinitionsController extends Controller
     {
         $this->authorize('update', $attribute);
 
-        if ($this->requiresOptionLifecycleChange($attribute, $request->input('options.existing', []))) {
+        if (
+            $this->requiresOptionLifecycleChange($attribute, $request->input('options.existing', []))
+            || $this->requiresAggregationLifecycleChange($attribute, $request)
+        ) {
             $this->authorize('manageLifecycle', $attribute);
         }
 
@@ -173,6 +176,9 @@ class AttributeDefinitionsController extends Controller
             'allow_custom_values' => $request->boolean('allow_custom_values') && $currentDatatype === AttributeDefinition::DATATYPE_ENUM,
             'allow_asset_override' => $request->boolean('allow_asset_override'),
             'component_spec_display_mode' => $data['component_spec_display_mode'] ?? AttributeDefinition::COMPONENT_SPEC_DISPLAY_VALUE_LABELS,
+            'component_aggregation_mode' => $data['component_aggregation_mode']
+                ?? $attribute?->component_aggregation_mode
+                ?? AttributeDefinition::COMPONENT_AGGREGATION_SUM,
             'constraints' => $this->filterConstraints($data['constraints'] ?? []),
         ];
 
@@ -334,6 +340,23 @@ class AttributeDefinitionsController extends Controller
         }
 
         return false;
+    }
+
+    private function requiresAggregationLifecycleChange(
+        AttributeDefinition $attribute,
+        AttributeDefinitionRequest $request
+    ): bool {
+        $requestedMode = $request->validated('component_aggregation_mode');
+
+        if (
+            $requestedMode === null
+            || $requestedMode === $attribute->component_aggregation_mode
+        ) {
+            return false;
+        }
+
+        return $attribute->componentDefinitionAttributes()->exists()
+            || $attribute->componentInstanceAttributes()->exists();
     }
 
     private function syncCurrentOptionValue(AttributeOption $option): void

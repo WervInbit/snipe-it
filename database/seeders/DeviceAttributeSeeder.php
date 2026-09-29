@@ -42,6 +42,8 @@ class DeviceAttributeSeeder extends Seeder
                 'allow_custom_values' => $config['allow_custom_values'] ?? ($config['datatype'] === AttributeDefinition::DATATYPE_TEXT),
                 'allow_asset_override' => $config['allow_asset_override'] ?? false,
                 'component_spec_display_mode' => $config['component_spec_display_mode'] ?? AttributeDefinition::COMPONENT_SPEC_DISPLAY_VALUE_LABELS,
+                'component_aggregation_mode' => $config['component_aggregation_mode']
+                    ?? AttributeDefinition::COMPONENT_AGGREGATION_SUM,
                 'constraints' => $config['constraints'] ?? [],
             ]);
 

@@ -129,6 +129,70 @@ class ComponentDerivedAttributeResolutionTest extends TestCase
         $this->assertSame('Memory Module x2', $resolved['ram_capacity_gb']->contributorSummary('calculated_components'));
     }
 
+    public function test_distinct_numeric_aggregation_ignores_quantity_and_exposes_mixed_values(): void
+    {
+        $model = AssetModel::factory()->create();
+        $modelNumber = $model->ensurePrimaryModelNumber();
+        $speed = AttributeDefinition::create([
+            'key' => 'ram_speed_mhz',
+            'label' => 'Memory Speed',
+            'datatype' => AttributeDefinition::DATATYPE_INT,
+            'unit' => 'MHz',
+            'component_aggregation_mode' => AttributeDefinition::COMPONENT_AGGREGATION_DISTINCT,
+        ]);
+        $ddr3200 = ComponentDefinition::factory()->create(['name' => 'DDR4-3200 Module']);
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $ddr3200->id,
+            'attribute_definition_id' => $speed->id,
+            'value' => '3200',
+            'raw_value' => '3200',
+            'resolves_to_spec' => true,
+        ]);
+        ModelNumberComponentTemplate::create([
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $ddr3200->id,
+            'expected_name' => 'Memory Module',
+            'expected_qty' => 2,
+            'is_required' => true,
+            'sort_order' => 0,
+        ]);
+
+        $resolved = app(EffectiveAttributeResolver::class)
+            ->resolveForModelNumber($modelNumber->fresh())
+            ->keyBy(fn ($attribute) => $attribute->definition->key);
+
+        $this->assertSame('3200', $resolved['ram_speed_mhz']->value);
+        $this->assertSame('3200 MHz', $resolved['ram_speed_mhz']->formattedValue());
+        $this->assertFalse($resolved['ram_speed_mhz']->hasComponentAggregationConflict());
+        $this->assertNull($resolved['ram_speed_mhz']->formattedCalculatedExpectedSubtotal());
+
+        $ddr2666 = ComponentDefinition::factory()->create(['name' => 'DDR4-2666 Module']);
+        ComponentDefinitionAttribute::create([
+            'component_definition_id' => $ddr2666->id,
+            'attribute_definition_id' => $speed->id,
+            'value' => '2666',
+            'raw_value' => '2666',
+            'resolves_to_spec' => true,
+        ]);
+        ModelNumberComponentTemplate::create([
+            'model_number_id' => $modelNumber->id,
+            'component_definition_id' => $ddr2666->id,
+            'expected_name' => 'Replacement Memory Module',
+            'expected_qty' => 1,
+            'is_required' => false,
+            'sort_order' => 1,
+        ]);
+
+        $mixed = app(EffectiveAttributeResolver::class)
+            ->resolveForModelNumber($modelNumber->fresh())
+            ->keyBy(fn ($attribute) => $attribute->definition->key)['ram_speed_mhz'];
+
+        $this->assertSame('3200, 2666', $mixed->value);
+        $this->assertSame('3200, 2666 MHz', $mixed->formattedValue());
+        $this->assertTrue($mixed->hasComponentAggregationConflict());
+        $this->assertStringContainsString('3200, 2666 MHz', $mixed->componentAggregationConflictMessage());
+    }
+
     public function test_expected_components_drive_text_model_values_when_resolved_to_spec(): void
     {
         $model = AssetModel::factory()->create();

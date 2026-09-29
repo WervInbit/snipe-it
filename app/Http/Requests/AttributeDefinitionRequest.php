@@ -92,6 +92,11 @@ class AttributeDefinitionRequest extends Request
             'allow_custom_values' => ['sometimes', 'boolean'],
             'allow_asset_override' => ['sometimes', 'boolean'],
             'component_spec_display_mode' => ['nullable', 'string', Rule::in(AttributeDefinition::COMPONENT_SPEC_DISPLAY_MODES)],
+            'component_aggregation_mode' => [
+                'nullable',
+                'string',
+                Rule::in(AttributeDefinition::COMPONENT_AGGREGATION_MODES),
+            ],
             'manual_key_override' => ['sometimes', 'boolean'],
             'category_ids' => ['nullable', 'array'],
             'category_ids.*' => ['integer', 'exists:categories,id'],

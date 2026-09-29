@@ -46,6 +46,7 @@
                             <th>{{ __('Name') }}</th>
                             <th>{{ __('Key') }}</th>
                             <th>{{ __('Datatype') }}</th>
+                            <th>{{ __('Numeric Aggregation') }}</th>
                             <th>{{ __('Status') }}</th>
                             <th>{{ __('Categories') }}</th>
                             <th>{{ __('Required') }}</th>
@@ -66,10 +67,22 @@
                                 $definition->categories->isEmpty() ? __('All') : $definition->categories->pluck('name')->implode(' '),
                                 $definition->required_for_category ? __('Required') : null,
                                 $definition->allow_asset_override ? __('Asset Overrides') : null,
+                                $definition->isNumericDatatype()
+                                    ? (\App\Models\AttributeDefinition::componentAggregationModeOptions()[$definition->component_aggregation_mode]
+                                        ?? $definition->component_aggregation_mode)
+                                    : null,
                             ]))) }}">
                                 <td>{{ $definition->label }}</td>
                                 <td><code>{{ $definition->key }}</code></td>
                                 <td>{{ ucfirst($definition->datatype) }}</td>
+                                <td>
+                                    @if($definition->isNumericDatatype())
+                                        {{ \App\Models\AttributeDefinition::componentAggregationModeOptions()[$definition->component_aggregation_mode]
+                                            ?? $definition->component_aggregation_mode }}
+                                    @else
+                                        <span class="text-muted">--</span>
+                                    @endif
+                                </td>
                                 <td>
                                     @if($definition->isDeprecated())
                                         <span class="label label-warning">{{ __('Deprecated') }}</span>
@@ -111,17 +124,17 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center text-muted">{{ __('No attributes defined yet.') }}</td>
+                                <td colspan="10" class="text-center text-muted">{{ __('No attributes defined yet.') }}</td>
                             </tr>
                         @endforelse
                         <tr data-attribute-loading style="display:none;">
-                            <td colspan="9" class="text-center text-muted">
+                            <td colspan="10" class="text-center text-muted">
                                 <i class="fa fa-spinner fa-spin" aria-hidden="true"></i>
                                 <span class="sr-only">{{ __('Searching...') }}</span>
                             </td>
                         </tr>
                         <tr data-attribute-no-matches style="display:none;">
-                            <td colspan="9" class="text-center text-muted">{{ __('No attributes defined yet.') }}</td>
+                            <td colspan="10" class="text-center text-muted">{{ __('No attributes defined yet.') }}</td>
                         </tr>
                         </tbody>
                     </table>

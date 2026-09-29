@@ -167,6 +167,22 @@ class ResolvedAttribute
         return (bool) ($this->meta['reduced_expected_baseline'] ?? false);
     }
 
+    public function hasComponentAggregationConflict(): bool
+    {
+        return (bool) ($this->meta['aggregation_conflict'] ?? false);
+    }
+
+    public function componentAggregationConflictMessage(): ?string
+    {
+        if (!$this->hasComponentAggregationConflict()) {
+            return null;
+        }
+
+        return __('Components provide different values: :values. Review the component specifications.', [
+            'values' => $this->formattedValue() ?? __('Not specified'),
+        ]);
+    }
+
     public function hasHierarchyOverlapWarnings(): bool
     {
         return !empty($this->meta['hierarchy_overlap_warnings']);
@@ -270,7 +286,11 @@ class ResolvedAttribute
 
     private function calculatedSubtotalFor(array $classifications): ?string
     {
-        if (!$this->isCalculatedFromComponents() || !$this->definition->isNumericDatatype()) {
+        if (
+            !$this->isCalculatedFromComponents()
+            || !$this->definition->isNumericDatatype()
+            || !$this->definition->sumsComponentValues()
+        ) {
             return null;
         }
 

@@ -135,7 +135,13 @@ class EffectiveAttributeResolver
                 return null;
             }
 
-            if (!$calculated && $baseline && $definition->isNumericDatatype() && ($baseline->meta['resolves_to_spec'] ?? false)) {
+            if (
+                !$calculated
+                && $baseline
+                && $definition->isNumericDatatype()
+                && $definition->sumsComponentValues()
+                && ($baseline->meta['resolves_to_spec'] ?? false)
+            ) {
                 $calculated = $this->componentAggregator->zeroAggregate($definition, 'calculated_components', [
                     'resolves_to_spec' => true,
                     'expected_component_baseline_value' => $baseline->value,
@@ -333,7 +339,7 @@ class EffectiveAttributeResolver
             $baselineValue = $baseline?->value ?? $modelResolved?->value;
             $reducedExpectedBaseline = false;
 
-            if ($definition->isNumericDatatype()) {
+            if ($definition->isNumericDatatype() && $definition->sumsComponentValues()) {
                 $reducedExpectedBaseline = $baselineValue !== null
                     && $this->numericStringToFloat($calculated->value) < $this->numericStringToFloat($baselineValue);
             }

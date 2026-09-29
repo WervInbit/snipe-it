@@ -114,3 +114,27 @@ performed once, with traffic closed and the writer services controlled.
 - The separate unchanged model-number image API baseline has four known test
   mismatches and is not caused by this release; it remains a follow-up rather
   than hidden release evidence.
+
+## Post-Release Catalogue Update
+
+After explicit owner approval, production received a catalogue-only Cisco
+Aironet addition. No application image, migration, permission, attribute
+definition, custom-field assignment, or physical asset changed.
+
+- Backup: `pre-cisco-catalog-20260929T104432Z` on-host and off-host.
+- Backup SHA-256:
+  `e15375b3fbed5c2a116c83ca1a64d64472ec7c544468ce610c01a0b3b34e8acb`.
+- Added asset category `Access Points` (ID 16).
+- Added manufacturer `Cisco` (ID 7).
+- Added model `Cisco Aironet 2702i` (ID 17).
+- Added primary model number `AIR-CAP2702I-E-K9` (ID 17).
+- Added component definition `RJ-45 Console Port` (ID 114), backed only by the
+  existing `port_connector_type = rj45` attribute/option.
+- Added four required expected-component rows: Wireless 802.11ac, PoE RJ-45
+  1GbE, AUX RJ-45 1GbE, and Console RJ-45.
+
+The resolved model specification reports `802.11ac` and
+`2x RJ-45 1GbE, RJ-45 Console`. The model has no custom fieldset and no physical
+asset. The production asset count remained 15, duplicate tag/serial checks
+remained zero, all seven services remained healthy, HTTPS health returned 200,
+and the post-write log scan was clean.

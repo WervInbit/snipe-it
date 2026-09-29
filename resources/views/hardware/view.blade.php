@@ -1230,6 +1230,9 @@
                                                 $manualComponentConflictMessage = method_exists($attribute, 'manualModelComponentConflictMessage')
                                                     ? $attribute->manualModelComponentConflictMessage()
                                                     : null;
+                                                $aggregationConflictMessage = method_exists($attribute, 'componentAggregationConflictMessage')
+                                                    ? $attribute->componentAggregationConflictMessage()
+                                                    : null;
                                                 $calculatedExpectedSubtotalText = ($calculatedExpectedSubtotal !== null && $calculatedExpectedSubtotal !== '')
                                                     ? __('Default subtotal: :value', ['value' => $calculatedExpectedSubtotal])
                                                     : null;
@@ -1247,6 +1250,7 @@
                                                     || $calculatedExtraSubtotalText
                                                     || $calculatedExtraSummaryText
                                                     || $attribute->hasReducedExpectedBaseline()
+                                                    || $aggregationConflictMessage
                                                     || $hierarchyOverlapSummary
                                                 );
                                                 $compactCalculatedSource = $isCalculatedFromComponents && ! $hasCalculatedException;
@@ -1338,6 +1342,12 @@
                                                     @if($attribute->hasReducedExpectedBaseline())
                                                         <div class="spec-detail-meta text-warning">
                                                             {{ __('Current value is below the default baseline because default parts were removed.') }}
+                                                        </div>
+                                                    @endif
+
+                                                    @if($aggregationConflictMessage)
+                                                        <div class="spec-detail-meta text-warning" data-testid="asset-spec-aggregation-conflict">
+                                                            {{ $aggregationConflictMessage }}
                                                         </div>
                                                     @endif
 

@@ -112,6 +112,26 @@ class DeviceComponentCatalogSeederTest extends TestCase
         ])->count());
     }
 
+    public function test_memory_speed_uses_distinct_component_aggregation_while_capacity_stays_additive(): void
+    {
+        $this->seed(DeviceAttributeSeeder::class);
+
+        $this->assertSame(
+            AttributeDefinition::COMPONENT_AGGREGATION_DISTINCT,
+            AttributeDefinition::query()
+                ->where('key', 'ram_speed_mhz')
+                ->firstOrFail()
+                ->component_aggregation_mode
+        );
+        $this->assertSame(
+            AttributeDefinition::COMPONENT_AGGREGATION_SUM,
+            AttributeDefinition::query()
+                ->where('key', 'ram_size_gb')
+                ->firstOrFail()
+                ->component_aggregation_mode
+        );
+    }
+
     public function test_production_foundation_excludes_unverified_demo_model_numbers(): void
     {
         Config::set('demo.allow_disposable_data_seeding', false);

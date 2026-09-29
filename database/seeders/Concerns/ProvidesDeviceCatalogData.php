@@ -290,6 +290,7 @@ trait ProvidesDeviceCatalogData
                 'label' => 'Geheugensnelheid',
                 'datatype' => AttributeDefinition::DATATYPE_INT,
                 'unit' => 'MHz',
+                'component_aggregation_mode' => AttributeDefinition::COMPONENT_AGGREGATION_DISTINCT,
                 'categories' => ['Memory'],
                 'constraints' => ['min' => 400, 'max' => 10000, 'step' => 1],
             ],
