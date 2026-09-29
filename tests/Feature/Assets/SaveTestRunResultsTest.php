@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class SaveTestRunResultsTest extends TestCase
 {
-    public function test_run_can_be_saved_and_marked_complete(): void
+    public function test_completed_run_can_be_saved_without_rewriting_completion_time(): void
     {
         $asset = Asset::factory()->create();
         $type = TestType::factory()->create(['applies_to_all' => true]);
@@ -25,7 +25,13 @@ class SaveTestRunResultsTest extends TestCase
         ]);
         $hash = app(WorkflowRunDefinitionService::class)
             ->forProfile($asset, $profile)['readiness_context_hash'];
-        $user = User::factory()->refurbisher()->create();
+        $user = User::factory()->create([
+            'permissions' => json_encode([
+                'assets.view' => '1',
+                'tests.execute' => '1',
+                'tests.edit_runs' => '1',
+            ]),
+        ]);
         $run = TestRun::factory()->for($asset)->for($user)->create([
             'workflow_profile_id' => $profile->id,
             'readiness_context_hash' => $hash,
@@ -50,7 +56,7 @@ class SaveTestRunResultsTest extends TestCase
         $response->assertSessionHas('success');
 
         $run->refresh();
-        $this->assertTrue($run->finished_at->gt($oldFinished));
+        $this->assertTrue($run->finished_at->equalTo($oldFinished));
 
         $result->refresh();
         $this->assertEquals(TestResult::STATUS_PASS, $result->status);

@@ -18,8 +18,11 @@ work instructions editable instead of fixing them in seed data.
    - enable **Require a note when changing to this status** for QA or other
      statuses where an explanation is mandatory.
 4. Add **Afgevoerd** manually and assign its lifecycle stage to
-   `Destroyed`. Leaving Sold, Broken/Parts, or Destroyed is then Admin-only and
-   requires a reason plus the exact asset tag/QR confirmation.
+   `Destroyed`. Grant Supervisor both **View** and **Choose/use**; Admin keeps
+   its policy bypass, while Refurbisher and Senior Refurbisher remain denied
+   unless the local matrix deliberately says otherwise. Leaving Sold,
+   Broken/Parts, or Destroyed is then Admin-only and requires a reason plus the
+   exact asset tag/QR confirmation.
 
 Until any explicit access rule exists for a status/capability, legacy access is
 kept. Once rules exist, direct user overrides take precedence and group Allows
@@ -48,9 +51,10 @@ complete, the asset page says so below the final editable workflow.
 
 ## Account, Dashboard, and Scan Behavior
 
-- Refurbishers have a compact account menu containing password change and
-  logout actions. Local passwords require at least eight characters, one
-  uppercase character, and one number.
+- Refurbishers have a compact account menu containing the signed-in display
+  name/username, password change, and logout actions. Standard account menus
+  show the same identity details. Local passwords require at least eight
+  characters, one uppercase character, and one number.
 - **Remember me remains available on desktop and mobile**, including
   non-shared Supervisor phones that are expected to stay signed in.
 - The dashboard action is named **Scan QR**. The browser scanner already asks
@@ -80,9 +84,10 @@ if the production hostname changes.
 ## Creation, Asset Detail, and Attributes
 
 Successful creation opens a focused result page with **Print QR** and
-**Open device** actions. Multi-create uses one summary and reports partial
-failures there instead of stacking messages on the asset list. The Serial row
-appears immediately below the asset tag on asset detail.
+**Open device** actions. Print QR uses an authenticated PDF response and does
+not depend on a public-storage symlink. Multi-create uses one summary and
+reports partial failures there instead of stacking messages on the asset list.
+The Serial row appears immediately below the asset tag on asset detail.
 
 Hidden or deprecated attributes already assigned to a component/model remain
 editable and removable there, but cannot be newly assigned. New assignments

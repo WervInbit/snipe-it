@@ -152,15 +152,19 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                   </a>
                               </li>
                               <li class="dropdown user user-menu" data-testid="refurbisher-account-menu">
-                                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-label="{{ trans('general.user') }}">
+                                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" aria-label="{{ trans('general.signed_in_as', ['name' => Auth::user()->getFullNameAttribute()]) }}">
                                       @if (Auth::user()->present()->gravatar())
                                           <img src="{{ Auth::user()->present()->gravatar() }}" class="user-image" alt="">
                                       @else
                                           <x-icon type="user" />
                                       @endif
-                                      <span class="hidden-xs"><strong class="caret"></strong></span>
+                                      <span class="hidden-xs">
+                                          {{ Auth::user()->getFullNameAttribute() }}
+                                          <strong class="caret"></strong>
+                                      </span>
                                   </a>
                                   <ul class="dropdown-menu">
+                                      @include('partials.current-user-identity', ['currentUser' => Auth::user()])
                                       @if (Auth::user()->ldap_import != '1')
                                           <li>
                                               <a href="{{ route('account.password.index') }}">
@@ -414,6 +418,7 @@ dir="{{ Helper::determineLanguageDirection() }}">
                                         </span>
                                     </a>
                                     <ul class="dropdown-menu">
+                                        @include('partials.current-user-identity', ['currentUser' => Auth::user()])
                                         <!-- User image -->
                                         <li {!! (request()->is('account/profile') ? ' class="active"' : '') !!}>
                                             <a href="{{ route('view-assets') }}">

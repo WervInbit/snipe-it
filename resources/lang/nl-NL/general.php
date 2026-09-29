@@ -751,6 +751,7 @@ return [
     'session_expiring_body' => 'Je bent al even inactief. Wil je ingelogd blijven?',
     'session_expiring_countdown' => 'Automatisch uitloggen over :seconds seconden.',
     'stay_signed_in' => 'Ingelogd blijven',
+    'signed_in_as' => 'Ingelogd als :name',
     'logout_now' => 'Nu uitloggen',
     'session_keepalive_failed' => 'De sessie kon niet actief worden gehouden. Log opnieuw in.',
     'scan_asset_or_component' => 'Scan asset of component',

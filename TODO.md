@@ -25,6 +25,15 @@
 - [ ] Use the document's Manual Administration Work section for approved system
   configuration and its Guide Updates section for newly versioned guides. The
   application handoff is in `docs/refurbisher-follow-up-configuration.md`.
+- [ ] Before production cutover, configure the production status matrix: QA
+  Hold requires a note; Supervisor/Admin can view and choose Afgevoerd;
+  ordinary Refurbisher/Senior cannot; and Supervisor has explicit View plus
+  Choose/use for Broken/Parts if that remains the approved matrix. Recheck the
+  Admin-only locked-status exit with a non-production test asset.
+- [ ] Restore a reliable single-command full PHPUnit gate: remove or recreate
+  the stale `tests/Feature/Maintenances/Api` suite entry, ensure an isolated
+  `.env.testing` supplies the example APP_KEY, and identify what recreates
+  `bootstrap/cache/config.php` during broad shared-container runs.
 - [x] Fix the confirmed attribute lifecycle gap: existing hidden/deprecated
   component/model assignments remain editable/removable, while new assignments
   require current attributes. Foundation workflow reseeding no longer

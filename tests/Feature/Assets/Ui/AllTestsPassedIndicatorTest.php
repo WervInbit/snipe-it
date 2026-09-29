@@ -25,7 +25,13 @@ class AllTestsPassedIndicatorTest extends TestCase
         ]);
         $hash = app(WorkflowRunDefinitionService::class)
             ->forProfile($asset, $profile)['readiness_context_hash'];
-        $user = User::factory()->refurbisher()->viewAssets()->create();
+        $user = User::factory()->create([
+            'permissions' => json_encode([
+                'assets.view' => '1',
+                'tests.execute' => '1',
+                'tests.edit_runs' => '1',
+            ]),
+        ]);
         $run = TestRun::factory()->for($asset)->for($user)->create([
             'workflow_profile_id' => $profile->id,
             'readiness_context_hash' => $hash,

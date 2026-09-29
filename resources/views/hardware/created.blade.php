@@ -5,8 +5,6 @@
 @parent
 @stop
 
-@inject('qrLabels', 'App\\Services\\QrLabelService')
-
 @section('content')
     <div class="row">
         <div class="col-md-10 col-md-offset-1">
@@ -35,7 +33,10 @@
                                 @foreach ($createdAssets as $createdAsset)
                                     @php
                                         $template = $snipeSettings->qr_label_template ?? config('qr_templates.default');
-                                        $qrPdf = $qrLabels->url($createdAsset, 'pdf', $template);
+                                        $qrPdf = route('hardware.qr-label.download', [
+                                            'asset' => $createdAsset,
+                                            'template' => $template,
+                                        ]);
                                     @endphp
                                     <tr>
                                         <td>

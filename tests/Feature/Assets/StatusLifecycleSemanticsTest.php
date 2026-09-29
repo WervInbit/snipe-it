@@ -183,6 +183,15 @@ class StatusLifecycleSemanticsTest extends TestCase
         $this->assertSame(1, (int) $asset->archived);
         $this->assertFalse((bool) $asset->is_sellable);
 
+        // Sold is a locked lifecycle state. Exercise the remaining lifecycle
+        // semantics on a separate asset instead of bypassing the protected
+        // Admin-only exit flow this test is not concerned with.
+        $asset = Asset::factory()->create([
+            'status_id' => $this->pendingStatus()->id,
+            'tests_completed_ok' => true,
+            'is_sellable' => true,
+        ]);
+
         $returned = $this->lifecycleStatus(
             Statuslabel::LIFECYCLE_RETURNED,
             'Terug van klant',

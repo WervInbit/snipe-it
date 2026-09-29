@@ -17,6 +17,7 @@ use App\Models\TestRun;
 use App\Models\User;
 use App\Models\WorkflowProfile;
 use App\Models\WorkflowProfileItem;
+use App\Services\WorkflowProgressionService;
 use App\Services\WorkflowRunDefinitionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
@@ -84,7 +85,12 @@ class AttributeTestRunGenerationTest extends TestCase
         ]);
         $request->setUserResolver(fn () => $user);
 
-        $response = $controller->store($request, $asset, app(WorkflowRunDefinitionService::class));
+        $response = $controller->store(
+            $request,
+            $asset,
+            app(WorkflowRunDefinitionService::class),
+            app(WorkflowProgressionService::class)
+        );
 
         $run = TestRun::first();
         $this->assertNotNull($run, 'Test run was not created');
@@ -155,7 +161,12 @@ class AttributeTestRunGenerationTest extends TestCase
         ]);
         $request->setUserResolver(fn () => $user);
 
-        $response = $controller->store($request, $asset, app(WorkflowRunDefinitionService::class));
+        $response = $controller->store(
+            $request,
+            $asset,
+            app(WorkflowRunDefinitionService::class),
+            app(WorkflowProgressionService::class)
+        );
 
         $run = TestRun::latest('id')->first();
         $this->assertNotNull($run, 'Test run was not created');

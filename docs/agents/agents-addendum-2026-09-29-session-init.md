@@ -18,6 +18,9 @@
   Refurbishers do not receive the tile.
 - Remove the duplicate compact New Asset action from the recent-devices panel
   and cover the tile visibility and presentation with focused tests.
+- Continue with production-readiness verification of account identity,
+  status access/transition controls, workflow ordering, the post-create Print
+  QR action, and attribute/model/component specification management.
 
 ## Safety Boundary
 
@@ -42,3 +45,29 @@
   whitespace validation. The full asset API directory passed 105 tests and
   failed four unchanged model-number image tests; that separate baseline image
   test-health issue is not in the refurbisher branch's changed paths.
+- Added signed-in name/username details to the compact and standard account
+  menus, and covered both header variants with feature tests.
+- Replaced the post-create Print QR static-storage link with an authorized PDF
+  streaming route. Both the controller test and a live `dev.inbit` browser
+  request return the PDF instead of the prior 404.
+- Applied development-only status configuration for acceptance testing: QA
+  Hold requires a note, Afgevoerd is a destroyed/archived status available to
+  Supervisor/Admin, and Broken/Parts explicitly allows Supervisor View and
+  Choose/use. Production remains administrator-owned manual configuration.
+- Live role checks covered Admin, Supervisor, Senior Refurbisher, and
+  Refurbisher. A QA Hold transition without a note was rejected, Supervisor
+  could enter Afgevoerd but not leave it, and Admin had to provide both a
+  reason and exact asset tag to restore the demo asset to Stand-by.
+- Live profile reordering persisted and was restored. Attribute definition,
+  enum option, model-number attribute add/remove, component-contribution, and
+  derived-specification controls were exercised without saving catalogue
+  changes. Workflow-item reorder persistence passed automated coverage; the
+  browser harness could not reproduce the pointer-only drag reliably.
+- Final production-relevant regression: 180 tests / 760 assertions passed on
+  guarded in-memory SQLite. PHP syntax, Blade compilation, route registration,
+  and whitespace checks pass.
+- Full-suite infrastructure remains open: `phpunit.xml` lists a missing
+  maintenance API directory, the shared container recreated a cached config
+  during a broad run and triggered the intended test guard, and this worktree
+  requires the example `APP_KEY` at the command boundary because no
+  `.env.testing` is present.

@@ -1,5 +1,49 @@
 # Session Progress (2026-09-29)
 
+## Production-Readiness Follow-Up Verification
+
+- Added a persistent signed-in identity block to both account menus. It shows
+  the current user's display name and username; the compact Refurbisher header
+  also shows the name on desktop while retaining password and logout actions.
+- Replaced the post-create page's static `/storage/labels/...pdf` Print QR URL
+  with an authenticated, authorized streamed PDF route. This removes the
+  dependency on a public-storage symlink that caused the observed 404.
+- Added regressions for the current-user identity, streamed post-create label,
+  Supervisor access to Afgevoerd, and status-form persistence of the
+  Supervisor access rule. Updated stale workflow/attribute tests to the current
+  controller signature, explicit workflow permissions, stable completion-time
+  rule, and Admin-only locked-status exit behavior.
+- Configured the local development data for acceptance testing only: QA Hold
+  now requires a note; Afgevoerd is a destroyed/archived status selectable by
+  Supervisor (and Admin); and the pre-existing Broken/Parts Supervisor rule now
+  explicitly allows both View and Choose/use. Production configuration remains
+  a manual deployment step.
+- Browser-tested `dev.inbit` as Admin, Supervisor, Senior Refurbisher, and
+  Refurbisher. Verified identity display, role-filtered status choices,
+  Supervisor entry into Afgevoerd, Refurbisher/Senior exclusion, required QA
+  notes, and the Admin protected exit requiring a reason plus exact asset tag.
+  Demo asset `INBIT-AA0004` was restored to its original Stand-by status after
+  the test; the test transitions remain in its audit history.
+- Browser-tested profile reorder and immediate persistence, then restored the
+  original order. Workflow-item reorder persistence passed its controller/UI
+  regression; the browser harness could not reliably synthesize the page's
+  pointer-only drag gesture. Attribute index/edit, enum options, model-number
+  add/remove, component contributions, and derived asset specifications were
+  verified in the live UI without saving catalogue changes.
+- The consolidated production-relevant suite passes 180 tests / 760 assertions
+  against guarded in-memory SQLite. Changed PHP files pass syntax checks,
+  Blade compilation passes, the new route is registered, and `git diff
+  --check` reports no whitespace errors.
+- A single-command full-suite result is still unavailable for repository/test
+  harness reasons: `phpunit.xml` references the missing
+  `tests/Feature/Maintenances/Api` directory, a broad run observed
+  `bootstrap/cache/config.php` reappear mid-run and was then correctly rejected
+  by the test guard, and the worktree has no untracked `.env.testing` so the
+  example test `APP_KEY` must be supplied explicitly. These are recorded as
+  test-infrastructure follow-ups rather than ignored release evidence.
+- No production/remote access, production configuration, migration, or
+  destructive database command was performed.
+
 ## Dashboard New Asset Tile
 
 - Reinitialized the existing refurbisher follow-up feature worktree after

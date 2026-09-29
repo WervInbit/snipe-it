@@ -29,7 +29,20 @@ class StoreAssetWithMinimalDataTest extends TestCase
             ->assertOk()
             ->assertSee('data-testid="asset-creation-result"', false)
             ->assertSee(route('hardware.show', $asset))
+            ->assertSee(route('hardware.qr-label.download', [
+                'asset' => $asset,
+                'template' => config('qr_templates.default'),
+            ]), false)
             ->assertSee(trans('general.print_qr'));
+
+        $this->actingAs($admin)
+            ->get(route('hardware.qr-label.download', [
+                'asset' => $asset,
+                'template' => config('qr_templates.default'),
+            ]))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+
         $this->assertMatchesRegularExpression('/^INBIT-[A-Z]{2}\d{4}$/', $asset->asset_tag);
         $this->assertNull($asset->model_id);
         $this->assertNotNull($asset->status_id);

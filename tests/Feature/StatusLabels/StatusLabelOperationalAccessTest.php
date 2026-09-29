@@ -108,4 +108,99 @@ class StatusLabelOperationalAccessTest extends TestCase
 
         $this->assertSame($target->id, $asset->fresh()->status_id);
     }
+
+    public function test_supervisor_can_view_and_select_afgevoerd_when_refurbisher_is_denied(): void
+    {
+        $afgevoerd = Statuslabel::factory()->create([
+            'name' => 'Afgevoerd',
+            'archived' => 1,
+            'deployable' => 0,
+            'pending' => 0,
+            'lifecycle_stage' => Statuslabel::LIFECYCLE_DESTROYED,
+            'default_label' => 0,
+        ]);
+        $refurbisherGroup = Group::factory()->create(['name' => 'Refurbisher']);
+        $supervisorGroup = Group::factory()->create(['name' => 'Supervisor']);
+        $refurbisher = User::factory()->create();
+        $supervisor = User::factory()->create();
+        $refurbisher->groups()->attach($refurbisherGroup);
+        $supervisor->groups()->attach($supervisorGroup);
+
+        foreach ([
+            [$refurbisherGroup, StatusLabelAccessRule::DENY],
+            [$supervisorGroup, StatusLabelAccessRule::ALLOW],
+        ] as [$group, $access]) {
+            StatusLabelAccessRule::create([
+                'status_label_id' => $afgevoerd->id,
+                'subject_type' => StatusLabelAccessRule::SUBJECT_GROUP,
+                'subject_id' => $group->id,
+                'view_value' => $access,
+                'select_value' => $access,
+            ]);
+        }
+
+        $service = app(StatusLabelAccessService::class);
+
+        $this->assertFalse($service->canView($refurbisher->fresh(), $afgevoerd));
+        $this->assertFalse($service->canSelect($refurbisher->fresh(), $afgevoerd));
+        $this->assertTrue($service->canView($supervisor->fresh(), $afgevoerd));
+        $this->assertTrue($service->canSelect($supervisor->fresh(), $afgevoerd));
+
+        $this->actingAs($refurbisher);
+        $this->assertArrayNotHasKey($afgevoerd->id, Helper::statusLabelList());
+
+        $this->actingAs($supervisor);
+        $this->assertArrayHasKey($afgevoerd->id, Helper::statusLabelList());
+    }
+
+    public function test_status_form_persists_supervisor_afgevoerd_access(): void
+    {
+        $afgevoerd = Statuslabel::factory()->pending()->create([
+            'name' => 'Temporary status',
+            'default_label' => 0,
+        ]);
+        $refurbisherGroup = Group::factory()->create(['name' => 'Refurbisher']);
+        $supervisorGroup = Group::factory()->create(['name' => 'Supervisor']);
+        $admin = User::factory()->superuser()->create();
+
+        $this->actingAs($admin)
+            ->put(route('statuslabels.update', $afgevoerd), [
+                'name' => 'Afgevoerd',
+                'statuslabel_types' => 'archived',
+                'lifecycle_stage' => Statuslabel::LIFECYCLE_DESTROYED,
+                'status_access_groups' => [
+                    $refurbisherGroup->id => [
+                        'view' => StatusLabelAccessRule::DENY,
+                        'select' => StatusLabelAccessRule::DENY,
+                    ],
+                    $supervisorGroup->id => [
+                        'view' => StatusLabelAccessRule::ALLOW,
+                        'select' => StatusLabelAccessRule::ALLOW,
+                    ],
+                ],
+            ])
+            ->assertRedirect(route('statuslabels.index'))
+            ->assertSessionHasNoErrors();
+
+        $this->assertDatabaseHas('status_labels', [
+            'id' => $afgevoerd->id,
+            'name' => 'Afgevoerd',
+            'archived' => 1,
+            'lifecycle_stage' => Statuslabel::LIFECYCLE_DESTROYED,
+        ]);
+        $this->assertDatabaseHas('status_label_access_rules', [
+            'status_label_id' => $afgevoerd->id,
+            'subject_type' => StatusLabelAccessRule::SUBJECT_GROUP,
+            'subject_id' => $supervisorGroup->id,
+            'view_value' => StatusLabelAccessRule::ALLOW,
+            'select_value' => StatusLabelAccessRule::ALLOW,
+        ]);
+        $this->assertDatabaseHas('status_label_access_rules', [
+            'status_label_id' => $afgevoerd->id,
+            'subject_type' => StatusLabelAccessRule::SUBJECT_GROUP,
+            'subject_id' => $refurbisherGroup->id,
+            'view_value' => StatusLabelAccessRule::DENY,
+            'select_value' => StatusLabelAccessRule::DENY,
+        ]);
+    }
 }

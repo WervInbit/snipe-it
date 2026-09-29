@@ -125,15 +125,39 @@ class DashboardTest extends TestCase
     public function testRefurbisherHeaderShowsCompactAccountMenuWithPasswordAndLogout(): void
     {
         $group = Group::factory()->create(['name' => 'Refurbisher']);
-        $user = User::factory()->viewAssets()->create(['ldap_import' => 0]);
+        $user = User::factory()->viewAssets()->create([
+            'first_name' => 'Robin',
+            'last_name' => 'Refurbisher',
+            'username' => 'robinr',
+            'ldap_import' => 0,
+        ]);
         $user->groups()->attach($group);
 
         $this->actingAs($user)
             ->get(route('home'))
             ->assertOk()
             ->assertSee('data-testid="refurbisher-account-menu"', false)
+            ->assertSee('data-testid="current-user-identity"', false)
+            ->assertSeeText('Robin Refurbisher')
+            ->assertSeeText('robinr')
             ->assertSee(route('account.password.index'))
             ->assertSee(route('logout.post'));
+    }
+
+    public function testStandardHeaderIdentifiesCurrentLoggedInUser(): void
+    {
+        $user = User::factory()->viewAssets()->create([
+            'first_name' => 'Sam',
+            'last_name' => 'Supervisor',
+            'username' => 'sams',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('home'))
+            ->assertOk()
+            ->assertSee('data-testid="current-user-identity"', false)
+            ->assertSeeText('Sam Supervisor')
+            ->assertSeeText('sams');
     }
 
     public function testDashboardShowsFiveMostRecentVisibleAssetsAndCreateTile(): void

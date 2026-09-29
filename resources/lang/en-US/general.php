@@ -753,6 +753,7 @@ return [
     'session_expiring_body' => 'You have been inactive for a while. Stay signed in?',
     'session_expiring_countdown' => 'Automatic logout in :seconds seconds.',
     'stay_signed_in' => 'Stay signed in',
+    'signed_in_as' => 'Signed in as :name',
     'logout_now' => 'Log out now',
     'session_keepalive_failed' => 'Could not keep the session active. Please sign in again.',
     'scan_asset_or_component' => 'Scan Asset or Component',
