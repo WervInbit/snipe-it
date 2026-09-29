@@ -5,10 +5,11 @@
 - Added a persistent signed-in identity block to both account menus. It shows
   the current user's display name and username; the compact Refurbisher header
   also shows the name on desktop while retaining password and logout actions.
-- Replaced the post-create page's static `/storage/labels/...pdf` Print QR URL
-  with an authenticated, authorized streamed PDF route. This removes the
-  dependency on a public-storage symlink that caused the observed 404.
-- Added regressions for the current-user identity, streamed post-create label,
+- Replaced the post-create page's broken static `/storage/labels/...pdf`
+  Print QR URL with the existing authenticated server-print endpoint. The
+  action now renders the selected label server-side and dispatches it to the
+  configured default CUPS/`lp` queue instead of opening a PDF in the browser.
+- Added regressions for the current-user identity, post-create printer dispatch,
   Supervisor access to Afgevoerd, and status-form persistence of the
   Supervisor access rule. Updated stale workflow/attribute tests to the current
   controller signature, explicit workflow permissions, stable completion-time
@@ -32,8 +33,10 @@
   verified in the live UI without saving catalogue changes.
 - The consolidated production-relevant suite passes 180 tests / 760 assertions
   against guarded in-memory SQLite. Changed PHP files pass syntax checks,
-  Blade compilation passes, the new route is registered, and `git diff
-  --check` reports no whitespace errors.
+  Blade compilation passes, the print route is registered, and `git diff
+  --check` reports no whitespace errors. The corrective printer-path run also
+  passes 26 tests / 153 assertions with the printer service mocked; no physical
+  label was sent during automated verification.
 - A single-command full-suite result is still unavailable for repository/test
   harness reasons: `phpunit.xml` references the missing
   `tests/Feature/Maintenances/Api` directory, a broad run observed

@@ -8,9 +8,7 @@ use App\Services\QrLabelPrintService;
 use App\Services\QrLabelService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AssetLabelPrintController extends Controller
@@ -18,27 +16,6 @@ class AssetLabelPrintController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-    }
-
-    public function download(
-        Request $request,
-        Asset $asset,
-        QrLabelService $labels,
-        QrLabelPrintService $printer
-    ): Response {
-        $this->authorize('view', $asset);
-
-        $validated = $request->validate([
-            'template' => ['nullable', 'string', Rule::in(array_keys($printer->templates()))],
-        ]);
-
-        $template = $validated['template'] ?? null;
-        $stem = Str::slug($asset->asset_tag ?: (string) $asset->id);
-
-        return response($labels->pdfBinaryFor($asset, $template), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="qr-label-'.$stem.'.pdf"',
-        ]);
     }
 
     public function store(Request $request, Asset $asset, QrLabelService $labels, QrLabelPrintService $printer): JsonResponse

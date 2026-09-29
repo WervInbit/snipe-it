@@ -33,10 +33,6 @@
                                 @foreach ($createdAssets as $createdAsset)
                                     @php
                                         $template = $snipeSettings->qr_label_template ?? config('qr_templates.default');
-                                        $qrPdf = route('hardware.qr-label.download', [
-                                            'asset' => $createdAsset,
-                                            'template' => $template,
-                                        ]);
                                     @endphp
                                     <tr>
                                         <td>
@@ -45,9 +41,14 @@
                                         <td>{{ $createdAsset->serial ?: '-' }}</td>
                                         <td>{{ $createdAsset->model?->name ?: '-' }}</td>
                                         <td class="text-right">
-                                            <a href="{{ $qrPdf }}" target="_blank" rel="noopener" class="btn btn-default btn-sm">
+                                            <button
+                                                type="button"
+                                                class="btn btn-success btn-sm qr-server-print-button"
+                                                data-print-url="{{ route('hardware.print-label', $createdAsset) }}"
+                                                data-template="{{ $template }}"
+                                            >
                                                 <x-icon type="print" /> {{ trans('general.print_qr') }}
-                                            </a>
+                                            </button>
                                             <a href="{{ route('hardware.show', $createdAsset) }}" class="btn btn-primary btn-sm">
                                                 {{ trans('general.open_asset') }}
                                             </a>
@@ -82,4 +83,9 @@
             </div>
         </div>
     </div>
+@stop
+
+@section('moar_scripts')
+    @parent
+    @include('hardware.partials.qr-label-print-script')
 @stop

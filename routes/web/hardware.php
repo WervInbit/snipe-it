@@ -45,9 +45,6 @@ Route::group(
             [AssetsController::class, 'created']
         )->name('hardware.created');
 
-        Route::get('{asset}/qr-label', [AssetLabelPrintController::class, 'download'])
-            ->name('hardware.qr-label.download');
-
         Route::get('{assetId}/label',
             [AssetsController::class, 'getLabel']
         )->name('label/hardware');

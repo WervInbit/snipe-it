@@ -84,10 +84,13 @@ if the production hostname changes.
 ## Creation, Asset Detail, and Attributes
 
 Successful creation opens a focused result page with **Print QR** and
-**Open device** actions. Print QR uses an authenticated PDF response and does
-not depend on a public-storage symlink. Multi-create uses one summary and
-reports partial failures there instead of stacking messages on the asset list.
-The Serial row appears immediately below the asset tag on asset detail.
+**Open device** actions. Print QR sends the generated label directly to the
+configured server-side QR printer queue; it does not open a PDF or depend on a
+public-storage symlink. Configure `LABEL_PRINTER_QUEUE` (and optionally
+`LABEL_PRINTER_QUEUES`, `LABEL_PRINT_COMMAND`, `LABEL_PRINT_OPTIONS`, and
+`CUPS_SERVER`) before deployment. Multi-create uses one summary and reports
+partial failures there instead of stacking messages on the asset list. The
+Serial row appears immediately below the asset tag on asset detail.
 
 Hidden or deprecated attributes already assigned to a component/model remain
 editable and removable there, but cannot be newly assigned. New assignments

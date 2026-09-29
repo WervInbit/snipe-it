@@ -15,9 +15,10 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 - Account menus now identify the active session with the signed-in user's full
   name and username. The compact Refurbisher header also exposes the name on
   desktop without removing password, logout, or Remember Me behavior.
-- The asset-created page now prints its QR label through an authenticated PDF
-  stream instead of linking directly into public storage, preventing a 404 on
-  installations without a public label symlink.
+- The asset-created page now sends its QR label through the authenticated
+  server-print endpoint instead of linking directly into public storage. It
+  renders the label server-side and dispatches it to the configured default
+  CUPS/`lp` queue, preventing the former 404 without opening a browser PDF.
 - Refurbisher release regressions now explicitly cover Supervisor Afgevoerd
   access, status-rule persistence, attribute-generated workflow items, stable
   completed-run timestamps, and locked lifecycle semantics.

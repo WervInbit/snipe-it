@@ -47,9 +47,9 @@
   test-health issue is not in the refurbisher branch's changed paths.
 - Added signed-in name/username details to the compact and standard account
   menus, and covered both header variants with feature tests.
-- Replaced the post-create Print QR static-storage link with an authorized PDF
-  streaming route. Both the controller test and a live `dev.inbit` browser
-  request return the PDF instead of the prior 404.
+- Replaced the post-create Print QR static-storage link with the existing
+  authorized server-print endpoint. It renders the label server-side and sends
+  it to the configured default CUPS/`lp` queue instead of opening a PDF.
 - Applied development-only status configuration for acceptance testing: QA
   Hold requires a note, Afgevoerd is a destroyed/archived status available to
   Supervisor/Admin, and Broken/Parts explicitly allows Supervisor View and
@@ -64,8 +64,10 @@
   changes. Workflow-item reorder persistence passed automated coverage; the
   browser harness could not reproduce the pointer-only drag reliably.
 - Final production-relevant regression: 180 tests / 760 assertions passed on
-  guarded in-memory SQLite. PHP syntax, Blade compilation, route registration,
-  and whitespace checks pass.
+  guarded in-memory SQLite. A corrective focused run for the printer path
+  passes 26 tests / 153 assertions with a mocked CUPS dispatch; no physical
+  label was sent. PHP syntax, Blade compilation, route registration, and
+  whitespace checks pass.
 - Full-suite infrastructure remains open: `phpunit.xml` lists a missing
   maintenance API directory, the shared container recreated a cached config
   during a broad run and triggered the intended test guard, and this worktree
