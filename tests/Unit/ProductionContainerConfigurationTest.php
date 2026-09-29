@@ -280,6 +280,7 @@ class ProductionContainerConfigurationTest extends TestCase
         );
 
         $this->assertStringContainsString('libcrypto3=3.5.8-r0', $dockerfile);
+        $this->assertStringContainsString('libexpat=2.8.5-r0', $dockerfile);
         $this->assertStringContainsString('libssl3=3.5.8-r0', $dockerfile);
     }
 

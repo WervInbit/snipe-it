@@ -5,6 +5,9 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 ## Update Log
 
 ### 2026-09-29
+- Refreshed the production web image's pinned Alpine `libexpat` runtime package
+  from `2.8.4-r0` to `2.8.5-r0` after the older package left the pinned base
+  image's repository; the production container contract tracks the new pin.
 - Moved the permission-aware New Asset action from the recent-device panel to a
   full dashboard tile directly beside Assets. The tile uses the dashboard's
   existing responsive presentation and remains hidden from users, including
