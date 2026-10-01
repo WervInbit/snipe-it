@@ -5859,3 +5859,13 @@ there are multiple duplicate functions that still need to be removed, sku will b
   rebuilds, current vulnerability scans, and the verified pre-deploy backup.
 - Detailed session record:
   `docs/agents/agents-addendum-2026-10-01-session-init.md`.
+- Qualified commit `2f703760d8`: exact staged release coverage passed 79 tests
+  / 794 assertions, both immutable images passed the content verifier, and the
+  current Trivy HIGH/CRITICAL scans found zero unsuppressed vulnerabilities.
+- Pushed the qualified commit to the feature branch and `origin/master` and
+  prepared checksummed source/image transfer bundles locally.
+- Production DNS now targets the migrated `10.10.10.249` server. HTTPS health
+  and login are 200, but SSH rejects both available deployment keys; the former
+  `.33` server is unreachable. No production write occurred. Host preflight,
+  backup, transfer, catalogue seeders, cutover, and verification remain blocked
+  until the new host authorizes the existing deployment key.

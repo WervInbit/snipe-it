@@ -137,3 +137,26 @@
   from the exact LF release archive before deployment.
 - Production remains unchanged while the replacement release is committed,
   rebuilt, rescanned, backed up, and qualified.
+
+## Qualified Candidate And Access Blocker
+
+- Committed the dependency refresh as `2f703760d8`, pushed the feature branch,
+  and fast-forwarded `origin/master` to the same commit.
+- The exact normalized release archive passed 79 tests / 794 assertions across
+  the catalogue/search, production-container, backport, and release-policy
+  boundaries. Both app and web images passed the production content verifier.
+- Trivy 0.66 with the current 2026-10-01 database reported zero unsuppressed
+  HIGH or CRITICAL findings for both exact images.
+- Candidate image IDs are `sha256:590a16b45eee...` (app) and
+  `sha256:47ff9aa73a73...` (web). The prepared source and image bundles are in
+  `C:\dev\snipe-it-transfer-2f703760d8`; their SHA-256 values are respectively
+  `a1a4c5f662bdcd60a0591fecebcf369999076d224f926e1184e2878e64e7c758`
+  and `b7703639972cc04e2627efbbe5c248e20b038dbe95adf6a69c93f4c02435b359`.
+- `snipe.inbit` now resolves to the migrated `10.10.10.249` host and its health
+  and login endpoints return HTTP 200. Port 22 is reachable, but neither the
+  normal existing key nor the documented migration key is authorized there.
+  The old `10.10.10.33` host is unreachable.
+- No production preflight, backup, transfer, seeder, restart, or write was
+  attempted without authenticated host access. Deployment remains blocked
+  until the new server authorizes the existing deployment key for an account
+  with the documented Docker and backup privileges.
