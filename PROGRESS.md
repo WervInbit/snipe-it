@@ -41,6 +41,34 @@
   these files. It is therefore recorded as a non-clean baseline check, not as
   passing release evidence and not as a regression introduced by this slice.
 
+## Controlled Production Deployment
+
+- Deployed application commit `2f703760d8` on the migrated production host
+  using immutable app digest `a36f1eefd733...` and web digest
+  `985c9d1dbd9a...`. The later documentation-only commit does not change the
+  runtime identity.
+- Entered maintenance, stopped queue/scheduler writers, and created verified
+  on-host and off-host recovery set
+  `pre-workflow-catalog-20261001T110153Z`. Its archive SHA-256 is
+  `159cd2a9edbad8b2063e531f72f1add779823158813ce6d521ee4849c61d8a51`.
+- No migration ran. Applied only `DeviceAttributeSeeder`,
+  `DevicePresetSeeder`, and `DeviceComponentCatalogSeeder`; the programmable-
+  key workflow item was compared before/after and remained unchanged.
+- Production now has the corrected visible attribute label and true G8/G9
+  mappings plus two unassigned optical-drive definitions. Catalogue
+  reconciliation also added four previously documented missing generic rows;
+  all six new definitions have zero templates and zero instances.
+- Post-cutover validation passed: all seven services are healthy, recreated
+  services have zero restarts, HTTPS health/login return 200, queues and failed
+  jobs are empty, no migration is pending, duplicate checks are zero, and the
+  fresh service-log scan is clean.
+- Signed-in visual verification of Workflow Items and workflow-profile search
+  remains the normal operator smoke check; automation did not create a
+  production account or authentication bypass.
+- Full identities, backup locations, rollback anchors, and acceptance evidence
+  are recorded in
+  `docs/releases/workflow-catalog-search-production-2026-10-01.md`.
+
 ## Production HP ProBook Catalogue Reverification
 
 - Reopened the existing feature worktree and preserved the uncommitted

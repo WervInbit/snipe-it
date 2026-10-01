@@ -22,6 +22,12 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
   hidden rows cannot produce an ambiguous saved order.
 - The administrator-authored `Geschiedenis wissen` content remains local and
   is not changed by the foundation seeder.
+- Deployed this slice to production from application commit `2f703760d8` with
+  immutable, content-verified, zero-HIGH/CRITICAL app and web images. The
+  controlled rollout ran only the three catalogue seeders, preserved the
+  operator-owned workflow content, retained zero duplicate identifiers, and
+  completed with all services healthy. See the
+  [production release record](releases/workflow-catalog-search-production-2026-10-01.md).
 
 ### 2026-09-29
 - Added the production catalogue baseline for HP ProBook 450 G9 product ID

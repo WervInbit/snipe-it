@@ -160,3 +160,35 @@
   attempted without authenticated host access. Deployment remains blocked
   until the new server authorizes the existing deployment key for an account
   with the documented Docker and backup privileges.
+
+## Production Deployment Completion
+
+- The owner identified the new SSH account as `codex-agent`. Key-based access
+  and non-interactive sudo succeeded; Docker access remained intentionally
+  mediated through sudo.
+- Completed production preflight on `10.10.10.249`, entered maintenance, and
+  stopped queue/scheduler writers before data or container changes.
+- Created and verified the complete recovery set
+  `pre-workflow-catalog-20261001T110153Z` on-host and off-host. The archive
+  SHA-256 is
+  `159cd2a9edbad8b2063e531f72f1add779823158813ce6d521ee4849c61d8a51`.
+- Confirmed no migration was pending and ran only the three approved catalogue
+  seeders. The existing programmable-key workflow item compared exactly equal
+  before and after; no workflow or permission seeder ran.
+- The attribute key remains `programeerbare_toets`, its visible label is now
+  `Programmeerbare toets`, and both G8/G9 target model numbers carry true.
+  Both optical definitions are asset-only and unassigned.
+- Investigated the component-definition count increase before cutover. The
+  other four rows are previously documented generic catalogue definitions
+  that production lacked; all six new rows have zero templates and zero
+  instances, with no duplicate names.
+- Promoted release `/srv/snipeit-v1/releases/2f703760d8` and its immutable
+  image digests atomically while maintenance remained active, verified app/web
+  health, reopened the application, then recreated queue, scheduler, TLS init,
+  and edge.
+- Post-cutover validation passed for service health/restarts, image identities,
+  config, HTTPS, queues, failed jobs, migration status, data counts, duplicate
+  checks, catalogue values, and fresh logs. No production credential or bypass
+  was introduced; signed-in search UI remains an operator smoke check.
+- See `docs/releases/workflow-catalog-search-production-2026-10-01.md` for the
+  retained release evidence and rollback anchors.
