@@ -152,6 +152,7 @@
     "audit": {
       "ignore": {
         "CVE-2026-48019": "Official Laravel f336ba7 CRLF validation fix is pinned by checksum in patches.lock.json and covered by framework-level regression tests.",
+        "CVE-2026-102279": "Production rejects APP_DEBUG=true at container startup, so the vulnerable Laravel debug error page is not exposed.",
         "GHSA-5vg9-5847-vvmq": "Official Laravel f336ba7 CRLF validation fix is pinned by checksum in patches.lock.json and covered by framework-level regression tests.",
         "GHSA-crmm-hgp2-wgrp": "Official Laravel 12df688 local temporary URL path fix is pinned by checksum in patches.lock.json; local serving also remains disabled by default."
       },

@@ -116,3 +116,24 @@
   standard rejects existing CRLF, docblock, private-method, line-length, and
   snake_case PHPUnit conventions throughout the touched files. It is not used
   as passing evidence for this work.
+
+## Production Release Gate
+
+- Committed and pushed the approved catalogue/search implementation as
+  `5ee57f58db` and fast-forwarded `origin/master` to that commit.
+- A fresh 2026-10-01 Trivy database stopped the rollout before any production
+  write because newly published advisories affected locked CommonMark,
+  Flysystem, phpseclib, and brace-expansion versions.
+- Updated only the affected patch releases: CommonMark 2.10.2, Flysystem
+  3.35.3, phpseclib 3.0.57, and brace-expansion 5.0.11. Composer and npm lock
+  installs succeed with those versions.
+- Extended the expiry of the existing Laravel 11 scanner exceptions to
+  2027-02-01. Those exceptions remain limited to checksum-pinned official
+  backports with regression tests. The newly reported low-severity Laravel
+  debug-page advisory is ignored by Composer only because the production
+  entrypoint rejects `APP_DEBUG=true`.
+- The feature tests passed in the mounted development checkout. Static release
+  tests still show the known Windows CRLF false failures there and must pass
+  from the exact LF release archive before deployment.
+- Production remains unchanged while the replacement release is committed,
+  rebuilt, rescanned, backed up, and qualified.

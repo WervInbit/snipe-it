@@ -729,3 +729,17 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
   resolved model and asset specifications change immediately.
 - `ram_speed_mhz` is migrated and seeded as distinct, so two 3200 MHz modules
   resolve to 3200 MHz rather than 6400 MHz. `ram_size_gb` stays additive.
+
+### 2026-10-01
+
+- The existing programmable-key attribute keeps its internal compatibility key
+  and now displays as `Programmeerbare toets`; catalogue seeding enables it for
+  the HP ProBook 450 G8 and an already-present `6A140EA#ABH` G9 model number.
+- The component catalogue includes unassigned asset-only DVD-ROM and DVD+/-RW
+  optical-drive choices. No device gains an optical drive automatically.
+- Workflow Items and per-profile item management now include client-side quick
+  search. Included-item drag ordering is disabled while filtered so a partial
+  list cannot overwrite the persisted full order.
+- Production release dependencies were refreshed to patched CommonMark,
+  Flysystem, phpseclib, and brace-expansion versions after the current scanner
+  database detected newly published advisories during qualification.

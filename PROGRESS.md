@@ -5837,3 +5837,25 @@ there are multiple duplicate functions that still need to be removed, sku will b
 - See `docs/releases/workflow-production-deployment-2026-09-15.md` for release
   identities, qualification evidence, backup checksums, rollback guidance, and
   the remaining signed-in operator interaction check.
+
+## Addendum (2026-10-01 Workflow Search And Catalogue Options)
+
+- Corrected only the visible programmable-key label while retaining the
+  established internal key. The attribute is enabled for seeded HP ProBook 450
+  G8 systems and for an existing `6A140EA#ABH` G9 row when present.
+- Added unassigned asset-only DVD-ROM and DVD+/-RW optical-drive definitions and
+  live filtering to Workflow Items and profile item pages. Reordering is
+  unavailable while the included list is filtered.
+- Kept operator-authored workflow content, including the programmable-key block
+  and `Geschiedenis wissen`, outside catalogue seeding.
+- Focused development tests passed 39 tests / 284 assertions. Commit
+  `5ee57f58db` was pushed and fast-forwarded to `origin/master`.
+- A fresh release scan blocked deployment before production was changed. The
+  replacement release updates CommonMark to 2.10.2, Flysystem to 3.35.3,
+  phpseclib to 3.0.57, and brace-expansion to 5.0.11. Composer validation,
+  install, and audit complete with only explicitly documented Laravel
+  backport/production-debug exceptions.
+- Production remains unchanged pending exact-LF release tests, immutable image
+  rebuilds, current vulnerability scans, and the verified pre-deploy backup.
+- Detailed session record:
+  `docs/agents/agents-addendum-2026-10-01-session-init.md`.
