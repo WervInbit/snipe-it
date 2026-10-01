@@ -138,3 +138,37 @@ The resolved model specification reports `802.11ac` and
 asset. The production asset count remained 15, duplicate tag/serial checks
 remained zero, all seven services remained healthy, HTTPS health returned 200,
 and the post-write log scan was clean.
+
+### HP ProBook 450 G9 catalogue addition
+
+After a read-only SKU and live-catalogue investigation, explicit owner
+approval authorized a second catalogue-only transaction. No application image,
+migration, seeder, restart, custom fieldset, or physical asset changed.
+
+- Backup: `pre-hp-probook-450-g9-20260929T124651Z` on-host and off-host.
+- Backup SHA-256:
+  `41acee3a25b0aaab32cdcab4caa77c6079939fa9f6ccdcf4034f04cf45cc1ec2`.
+- Added model `HP ProBook 450 G9` (ID 18) and primary model number
+  `6A140EA#ABH` (ID 18).
+- Added component definitions for the i5-1235U motherboard (ID 118), 42.8 Wh
+  battery (ID 117), HDMI 2.1b port (ID 115), and 802.11ax wireless with
+  2.4/5/6 GHz plus Bluetooth 5.2 (ID 116). No attribute definition was added.
+- Reused the existing 8 GB DDR4-3200 SO-DIMM, 256 GB NVMe, 15.6-inch FHD IPS
+  display, US International keyboard, touchpad, webcam, speaker, microphone,
+  USB, RJ-45, and headset definitions.
+- Added 11 required top-level component templates and six required motherboard
+  subcomponent templates.
+
+The model resolves to the intended CPU/GPU, 8 GB at 3200 MHz, 256 GB NVMe,
+15.6-inch FHD IPS 60 Hz display, 42.8 Wh, US International keyboard,
+802.11ax/6 GHz/Bluetooth 5.2, and port quantities. The new model has no physical
+assets. Production retains zero duplicate model-number, component-name,
+asset-tag, non-empty asset-serial, component-tag, and target-template groups.
+All seven services remain healthy with zero restarts, HTTPS health and login
+return 200, queues and failed jobs are empty, and no migration is pending.
+
+One read-only verification command initially referenced upstream Snipe-IT's
+absent `hardware` table and logged a SQLSTATE plus console-renderer diagnostic
+at 12:51:24 UTC. The command made no write; the corrected check through this
+fork's `Asset` model passed, and subsequent application/service log scans are
+clean.

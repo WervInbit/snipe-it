@@ -506,6 +506,14 @@ class DeviceComponentCatalogSeeder extends Seeder
             'Surface Connect Port' => $this->port('surface_connect'),
             'Lightning Port' => $this->port('lightning'),
             'eSATA Port' => $this->port('esata'),
+            'Optical Drive - DVD-ROM' => [
+                'category' => 'Optical Drives',
+                'placement_mode' => ComponentDefinition::PLACEMENT_ASSET_ONLY,
+            ],
+            'Optical Drive - DVD+/-RW' => [
+                'category' => 'Optical Drives',
+                'placement_mode' => ComponentDefinition::PLACEMENT_ASSET_ONLY,
+            ],
         ];
     }
 

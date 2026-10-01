@@ -1,4 +1,177 @@
+# Session Progress (2026-10-01)
+
+## Programmable Key, Optical Components, And Workflow Search
+
+- Kept the existing boolean attribute key `programeerbare_toets`, corrected
+  only its visible label to `Programmeerbare toets`, and set it to true on the
+  HP ProBook 450 G8 `2E9F8EA#ABH` and an existing HP ProBook 450 G9
+  `6A140EA#ABH`. The supplemental G9 assignment is skipped when that local
+  catalogue row does not exist.
+- Left the programmable-key workflow block under administrator control. The
+  deployment seeders do not create, rename, rescope, or otherwise rewrite its
+  workflow item, profile membership, instructions, or history.
+- Added an `Optical Drives` component category with asset-only DVD-ROM and
+  DVD+/-RW component definitions. They are intentionally not assigned to any
+  model number, including the G8, until a physical model with that drive is
+  identified.
+- Added immediate client-side search to Workflow Items and to both Included
+  and Available lists in the workflow-profile item editor. Search covers name,
+  slug, applicability/source, instructions, tooltip, requirement, and result
+  mode. Drag handles are disabled with guidance while a filtered list is
+  visible so a partial order cannot be persisted.
+- Preserved the administrator-created `Geschiedenis wissen` item and its text;
+  it remains editable local content and is not overwritten by seed data.
+- Production was not changed during local implementation. The controlled
+  rollout must deploy the code and run only `DeviceAttributeSeeder`,
+  `DevicePresetSeeder`, and `DeviceComponentCatalogSeeder`; it must not run
+  `AttributeTestSeeder` for this change.
+- Reconciled the Docker-backed dev catalogue after the scope correction. It
+  retains attribute ID 49 and workflow item ID 31, uses only the established
+  `programeerbare_toets` key with the corrected label, and keeps the G8 value
+  at `1`. The G9 supplemental assignment was correctly skipped because that
+  production-only model number is absent locally. Optical definitions 116/117
+  are active, asset-only, and have zero model-number templates.
+- Verification: focused PHPUnit suite passed 39 tests / 284 assertions against
+  guarded in-memory SQLite; all touched PHP files passed `php -l`; all Blade
+  templates compiled successfully; `git diff --check` passed (line-ending
+  conversion notices only).
+- Focused `phpcs` was also attempted, but the repository's configured legacy
+  sniff set rejects the existing CRLF files, missing file/class docblocks,
+  snake_case PHPUnit method names, and other pre-existing conventions across
+  these files. It is therefore recorded as a non-clean baseline check, not as
+  passing release evidence and not as a regression introduced by this slice.
+
+## Production HP ProBook Catalogue Reverification
+
+- Reopened the existing feature worktree and preserved the uncommitted
+  2026-09-29 production catalogue documentation.
+- Reverified the live `HP ProBook 450 G9` / `6A140EA#ABH` catalogue data. All
+  24 direct/component-resolved values match, all 11 top-level templates and
+  six motherboard subcomponent templates match, and the four added component
+  definitions remain active with the intended attributes.
+- The model remains unique, active, and without a custom fieldset or physical
+  asset. Model-number, component-name, asset/component tag, asset/component
+  serial, and cross-type collision checks all remain zero.
+- Failed jobs and the default, mail, and reports queues are empty; no migration
+  is pending. HTTPS health and login return 200, and the last-hour service log
+  scan is clean. All seven services are healthy. The queue's 43 restarts are
+  expected clean hourly exits from `queue:work --max-time=3600`; the latest
+  exit is zero and the container is healthy.
+- No production write occurred during revalidation. Authenticated create-form
+  selection/spec rendering and physical confirmation of the first unit's
+  keyboard and replaceable components remain operator-only acceptance checks.
+
+## Read-Only Workflow Gap Investigation
+
+- Inspected the repository configuration contract and the live production
+  catalogue for programmable-key, device-history/data-erasure, and optical-
+  drive coverage. No catalogue, workflow, asset, migration, or service state
+  was changed.
+- Production has a manually created boolean attribute (ID 49), component
+  definition (ID 113), and required Standard Diagnostics workflow item (ID 37)
+  for the programmable key. The workflow item is component-scoped rather than
+  directly attribute-scoped. Neither the component nor the attribute is used
+  by any model number, tracked component, asset override, or subcomponent, so
+  the check currently applies to no device. The three records also use
+  inconsistent misspellings of `Programmeerbare toets`.
+- There is no separate `Geschiedenis wissen` workflow item. Laptop category
+  assets do have the active, sale-blocking `Laptop wipen` profile. Its final
+  `Apparaat succesvol gewiped.` item is required, and the profile is a
+  prerequisite of `Windows Installeren en Updaten`; this covers erasing the
+  original disk data. It does not explicitly cover removing refurbisher-created
+  accounts, browser history, downloads, recent files, or other setup residue
+  before sale.
+- No optical-drive attribute, component definition, component category,
+  expected-component template, model/model-number marker, or workflow item is
+  present in production. The existing component and workflow applicability
+  design can represent an optical drive as a physical component and scope its
+  test to that component, without adding a redundant asset attribute.
+- The foundation seeder deliberately excludes these operator-owned workflow
+  additions. `AttributeTestSeederOwnershipTest` asserts that
+  `programmable-key` and `erase-history` remain absent, while
+  `docs/refurbisher-follow-up-configuration.md` lists them as manual content.
+- Two failed read-only inspection commands produced application-log diagnostics:
+  one PsySH history-directory error and one malformed SQL search caused by
+  shell interpretation. Both failed before returning data and made no database
+  change; corrected bootstrap/collection-based read-only checks succeeded.
+
+## Follow-Up Catalogue And Workflow Search Investigation
+
+- Verified the live G8 catalogue target as `HP ProBook 450 G8`, model number
+  `2E9F8EA#ABH` (model/model-number ID 1). HP's family QuickSpecs identify F12
+  as the Programmable Key, and HP's supported UWP package explicitly includes
+  both the ProBook 450 G8 and the HP Programmable Key application.
+- The existing production boolean attribute and workflow item can support this
+  without a schema or application change. The clean configuration is to assign
+  the boolean attribute directly to model number 1 and scope the workflow item
+  to that attribute. The currently unused synthetic component scope should not
+  be required. Two physical assets currently use this model number, so changing
+  applicability would make the required Standard Diagnostics item visible for
+  them on their next applicable run; there are no historical results for the
+  programmable-key item.
+- Confirmed the owner-created `Geschiedenis wissen` item (ID 39) is required,
+  uses Done/Not Done, belongs to the active sale-blocking Standard Diagnostics
+  profile, and is scoped to Laptops and NUC. Its current instructions cover
+  recordings, screenshots, and browser history, but not temporary accounts,
+  Downloads, recent files, Recycle Bin, or other test residue.
+- No present production model is configured with an optical drive. The clean
+  future representation needs no new attribute: add an Optical Drives component
+  category, add only the concrete drive definitions actually encountered (for
+  example DVD-ROM and DVD+/-RW), and attach the matching component template to
+  the relevant model number. Read and write tests can then be scoped to the
+  component category/definition. The ProBook 450 G8 should not receive an
+  optical-drive component; HP lists an external USB optical drive only as an
+  optional accessory.
+- The Workflow Items index and the per-profile Included/Available Items editor
+  currently load all items and have no quick search. The Component Definitions
+  page provides an existing hybrid live-filter/server-search pattern. Workflow
+  pages can use the same visible search treatment but only need client-side
+  filtering at their current unpaginated size. Search should cover name, slug,
+  applicability/source, instructions, tooltip, requirement, and result mode.
+  Drag reordering must be disabled while a filter is active so a partial visible
+  list cannot produce an ambiguous or colliding persisted order.
+- One additional failed read-only inspection referenced upstream's absent
+  `test_results` table instead of this fork's `workflow_results` table and
+  produced a production log diagnostic. The corrected query succeeded and no
+  database or application state changed.
+
 # Session Progress (2026-09-29)
+
+## Production HP ProBook 450 G9 Catalogue Addition
+
+- Kept the initial investigation read-only, then added the catalogue entry
+  only after explicit owner approval. No application image, migration, seeder,
+  restart, custom fieldset, or physical asset was involved.
+- Confirmed that the full Dutch SKU `6A140EA#ABH` identifies an i5-1235U,
+  1x8 GB DDR4-3200, 256 GB NVMe, 15.6-inch FHD IPS configuration, while the
+  broader ProBook 450 G9 family has multiple CPU, display, battery, memory,
+  storage, and wireless options.
+- Created model `HP ProBook 450 G9` (ID 18) and primary model number
+  `6A140EA#ABH` (ID 18). Reused HP, Laptops, and the existing RAM, storage,
+  display, US International keyboard, touchpad, webcam, speaker, microphone,
+  USB, RJ-45, and headset definitions.
+- Added only four component definitions: G9/i5-1235U motherboard (ID 118),
+  42.8 Wh battery (ID 117; rounded from the 42.75 Wh design capacity), HDMI
+  2.1b port (ID 115), and 802.11ax wireless with 2.4/5/6 GHz plus Bluetooth
+  5.2 (ID 116). These reuse existing attribute definitions.
+- A transaction-consistent MariaDB backup was verified on-host and off-host
+  first as `pre-hp-probook-450-g9-20260929T124651Z`; SHA-256 is
+  `41acee3a25b0aaab32cdcab4caa77c6079939fa9f6ccdcf4034f04cf45cc1ec2`.
+- The model resolves to 2022, 1.74 kg, Windows 11 Pro, Pike Silver,
+  i5-1235U/10 cores, Iris Xe, 8 GB DDR4 SO-DIMM at 3200 MHz, 256 GB NVMe,
+  15.6-inch FHD IPS 60 Hz, 42.8 Wh, US International, Wi-Fi 6E-class
+  802.11ax/Bluetooth 5.2, and the intended port quantities.
+- Treat the SKU as the factory model-number baseline, not proof of a
+  refurbished unit's currently installed RAM, SSD, battery, panel, or wireless
+  module. Confirm mutable parts per physical asset during intake.
+- Post-write checks found exactly one model, model number, and each new
+  component; zero duplicate model-number, component-name, asset-tag, asset
+  serial, component-tag, or target-template groups; zero physical assets for
+  the new model; zero failed/queued jobs; and no pending migrations. All seven
+  services remain healthy with zero restarts and HTTPS health/login return
+  200. One read-only check initially used the absent upstream `hardware` table
+  name and logged an expected SQLSTATE/console-renderer diagnostic at 12:51:24
+  UTC; the corrected `Asset` model check passed and later logs are clean.
 
 ## Production Numeric Component Aggregation Deployment
 

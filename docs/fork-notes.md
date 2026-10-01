@@ -4,7 +4,32 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 
 ## Update Log
 
+### 2026-10-01
+
+- Corrected the visible label of the existing `programeerbare_toets` laptop
+  attribute to `Programmeerbare toets` and assigned it to the verified HP
+  ProBook 450 G8 `2E9F8EA#ABH` plus an existing HP ProBook 450 G9
+  `6A140EA#ABH` model number. The established internal key is retained.
+- Programmable-key workflow content remains administrator-managed. Catalogue
+  seeding does not create or rewrite the item, its applicability, profile
+  membership, instructions, or history.
+- Added an `Optical Drives` component category with unassigned, asset-only
+  DVD-ROM and DVD+/-RW definitions. Models gain an optical drive only when an
+  administrator explicitly adds the matching expected component.
+- Workflow Items and workflow-profile Included/Available lists now have live
+  search across item identity, applicability, help text, requirement, and
+  result mode. Drag reordering is unavailable while a filter is active so the
+  hidden rows cannot produce an ambiguous saved order.
+- The administrator-authored `Geschiedenis wissen` content remains local and
+  is not changed by the foundation seeder.
+
 ### 2026-09-29
+- Added the production catalogue baseline for HP ProBook 450 G9 product ID
+  `6A140EA#ABH` without a deployment or physical asset. It reuses existing
+  laptop components and adds only the missing i5-1235U motherboard, 42.8 Wh
+  battery, HDMI 2.1b, and 802.11ax/6 GHz/Bluetooth 5.2 definitions. See the
+  catalogue update in
+  [the production release record](releases/refurbisher-followups-production-2026-09-29.md).
 - Deployed configurable numeric component aggregation from application commit
   `4751683ac0`. Existing numeric attributes remain additive except
   `ram_speed_mhz`, which keeps distinct speeds so the production NUC now shows

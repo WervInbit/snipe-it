@@ -132,6 +132,49 @@ class DeviceComponentCatalogSeederTest extends TestCase
         );
     }
 
+    public function test_programmable_key_label_and_values_are_seeded_for_probook_g8_and_existing_g9(): void
+    {
+        $g9Model = AssetModel::factory()->create([
+            'name' => 'HP ProBook 450 G9',
+        ]);
+        $g9ModelNumber = $g9Model->modelNumbers()->create([
+            'code' => '6A140EA#ABH',
+            'label' => 'HP ProBook 450 G9 - i5-1235U - 8GB - 256GB',
+        ]);
+
+        $this->seed(ProductionFoundationSeeder::class);
+
+        $definition = AttributeDefinition::query()
+            ->where('key', 'programeerbare_toets')
+            ->firstOrFail();
+        $g8ModelNumber = ModelNumber::query()
+            ->where('code', '2E9F8EA#ABH')
+            ->firstOrFail();
+
+        $this->assertSame('Programmeerbare toets', $definition->label);
+        $this->assertDatabaseHas('model_number_attributes', [
+            'model_number_id' => $g8ModelNumber->id,
+            'attribute_definition_id' => $definition->id,
+            'value' => '1',
+        ]);
+        $this->assertDatabaseHas('model_number_attributes', [
+            'model_number_id' => $g9ModelNumber->id,
+            'attribute_definition_id' => $definition->id,
+            'value' => '1',
+        ]);
+        $this->assertDatabaseMissing('workflow_items', ['slug' => 'programmeerbare-toets']);
+
+        $g9Assignment = ModelNumberAttribute::query()
+            ->where('model_number_id', $g9ModelNumber->id)
+            ->where('attribute_definition_id', $definition->id)
+            ->firstOrFail();
+        $g9Assignment->forceFill(['display_order' => 777])->save();
+
+        $this->seed(DevicePresetSeeder::class);
+
+        $this->assertSame(777, $g9Assignment->fresh()->display_order);
+    }
+
     public function test_production_foundation_excludes_unverified_demo_model_numbers(): void
     {
         Config::set('demo.allow_disposable_data_seeding', false);
@@ -572,6 +615,8 @@ class DeviceComponentCatalogSeederTest extends TestCase
             'Keyboard - Generic',
             'Wireless - Generic',
             'Bluetooth - Generic',
+            'Optical Drive - DVD-ROM',
+            'Optical Drive - DVD+/-RW',
         ];
 
         $genericDefinitions = ComponentDefinition::query()
@@ -633,6 +678,14 @@ class DeviceComponentCatalogSeederTest extends TestCase
             'value' => 'hdd',
             'resolves_to_spec' => true,
         ]);
+        $this->assertSame(
+            'Optical Drives',
+            $genericDefinitions->get('Optical Drive - DVD-ROM')->category->name
+        );
+        $this->assertSame(
+            ComponentDefinition::PLACEMENT_ASSET_ONLY,
+            $genericDefinitions->get('Optical Drive - DVD+/-RW')->placement_mode
+        );
     }
 
     public function test_catalog_seeds_structured_wireless_and_camera_details(): void

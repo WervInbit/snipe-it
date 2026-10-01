@@ -100,10 +100,12 @@ class ManageWorkflowProfilesTest extends TestCase
         $included = TestType::factory()->create([
             'name' => 'Keyboard',
             'slug' => 'keyboard',
+            'instructions' => 'Press every key',
         ]);
         $available = TestType::factory()->create([
             'name' => 'Camera',
             'slug' => 'camera',
+            'tooltip' => 'Inspect focus',
         ]);
         $profileItem = WorkflowProfileItem::factory()->create([
             'workflow_profile_id' => $profile->id,
@@ -127,6 +129,19 @@ class ManageWorkflowProfilesTest extends TestCase
         $response->assertDontSee('<th>Use</th>', false);
         $response->assertSee(route('settings.workflow-profiles.items.update', $profile), false);
         $response->assertSee(route('settings.workflow-profiles.items.reorder', $profile), false);
+        $response->assertSee('data-profile-item-search="included"', false);
+        $response->assertSee('data-profile-item-search="available"', false);
+        $response->assertSee('data-profile-item-filter-body="included"', false);
+        $response->assertSee('data-profile-item-filter-body="available"', false);
+        $response->assertSee('data-search-text="keyboard keyboard', false);
+        $response->assertSee('press every key', false);
+        $response->assertSee('data-search-text="camera camera', false);
+        $response->assertSee('inspect focus', false);
+        $response->assertSee('data-profile-item-no-matches="included"', false);
+        $response->assertSee('data-profile-item-no-matches="available"', false);
+        $response->assertSee("setupWorkflowItemFilter('included')", false);
+        $response->assertSee('handle.disabled = filtering', false);
+        $response->assertSee('reorderBody.dataset.filterActive', false);
     }
 
     public function test_admin_can_update_profile_items_from_subpage(): void

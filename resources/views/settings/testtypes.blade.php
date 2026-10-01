@@ -37,6 +37,15 @@
         cursor: grabbing;
     }
 
+    .testtype-reorder-handle:disabled {
+        cursor: not-allowed;
+        opacity: 0.45;
+    }
+
+    .testtype-search-tools {
+        width: min(320px, 45vw);
+    }
+
     .testtype-reorder-row {
         cursor: default;
     }
@@ -77,6 +86,16 @@
             <div class="box box-default">
                 <div class="box-header with-border">
                     <h3 class="box-title">{{ trans('admin/testtypes/general.existing_title') }}</h3>
+                    <div class="box-tools testtype-search-tools">
+                        <input type="search"
+                               class="form-control input-sm"
+                               data-testtype-search
+                               placeholder="{{ trans('admin/testtypes/general.search_placeholder') }}"
+                               aria-label="{{ trans('admin/testtypes/general.search_placeholder') }}">
+                    </div>
+                </div>
+                <div class="box-body" style="padding-bottom: 0;" data-testtype-reorder-search-help hidden>
+                    <p class="text-muted small">{{ trans('admin/testtypes/general.clear_search_to_reorder') }}</p>
                 </div>
                 <div class="box-body table-responsive no-padding">
                     <table class="table table-striped table-hover">
@@ -109,8 +128,23 @@
                                         $type->componentCategories->isNotEmpty() ? trans('admin/testtypes/general.component_categories_prefix', ['list' => $type->componentCategories->pluck('name')->implode(', ')]) : null,
                                         $type->componentDefinitions->isNotEmpty() ? trans('admin/testtypes/general.component_definitions_prefix', ['list' => $type->componentDefinitions->pluck('name')->implode(', ')]) : null,
                                     ])->filter()->implode(' / ');
+                                    $requirementLabel = $type->is_required ? __('Required') : __('Optional');
+                                    $resultLabel = $labelMode === \App\Models\WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE
+                                        ? __('Done / Not Done')
+                                        : __('Pass / Fail');
+                                    $searchText = \Illuminate\Support\Str::lower(strip_tags(implode(' ', [
+                                        $type->name,
+                                        $type->slug,
+                                        $sourceParts,
+                                        $type->instructions,
+                                        $type->tooltip,
+                                        $requirementLabel,
+                                        $resultLabel,
+                                    ])));
                                 @endphp
-                                <tr class="testtype-reorder-row" data-testtype-id="{{ $type->id }}">
+                                <tr class="testtype-reorder-row"
+                                    data-testtype-id="{{ $type->id }}"
+                                    data-search-text="{{ $searchText }}">
                                     <td class="text-center">
                                         <button type="button"
                                                 class="testtype-reorder-handle"
@@ -124,9 +158,7 @@
                                     <td class="monospace text-muted">{{ $type->slug }}</td>
                                     <td>{{ $sourceParts ?: trans('general.none') }}</td>
                                     <td>{!! $type->is_required ? '<i class="fas fa-check text-success"></i>' : '<span class="text-muted">--</span>' !!}</td>
-                                    <td>
-                                        {{ $labelMode === \App\Models\WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE ? __('Done / Not Done') : __('Pass / Fail') }}
-                                    </td>
+                                    <td>{{ $resultLabel }}</td>
                                     <td title="{{ $type->instructions ?? '' }}">{{ $instructionPreview }}</td>
                                     <td title="{{ $type->tooltip ?? '' }}">{{ $tooltipPreview }}</td>
                                     <td class="text-right">
@@ -159,6 +191,9 @@
                                     <td colspan="9" class="text-center text-muted">{{ trans('general.no_results') }}</td>
                                 </tr>
                             @endforelse
+                            <tr data-testtype-no-matches hidden>
+                                <td colspan="9" class="text-center text-muted">{{ trans('admin/testtypes/general.no_search_results') }}</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -741,6 +776,9 @@
         }
 
         var reorderBody = $reorderBody.get(0);
+        var $searchInput = $('[data-testtype-search]');
+        var $noMatches = $('[data-testtype-no-matches]');
+        var $reorderSearchHelp = $('[data-testtype-reorder-search-help]');
         var csrfToken = document.querySelector('meta[name="csrf-token"]');
         var supportsPointerEvents = typeof window.PointerEvent !== 'undefined';
         var draggingRow = null;
@@ -750,6 +788,28 @@
 
         function rows() {
             return Array.from(reorderBody.querySelectorAll('tr[data-testtype-id]'));
+        }
+
+        function filterRows() {
+            var query = $.trim(($searchInput.val() || '').toString()).toLowerCase();
+            var filtering = query !== '';
+            var matchingRows = 0;
+
+            rows().forEach(function (row) {
+                var matches = !filtering || (row.getAttribute('data-search-text') || '').indexOf(query) !== -1;
+                var handle = row.querySelector('[data-testtype-drag-handle]');
+
+                row.hidden = !matches;
+                matchingRows += matches ? 1 : 0;
+
+                if (handle) {
+                    handle.disabled = filtering;
+                }
+            });
+
+            reorderBody.dataset.filterActive = filtering ? 'true' : 'false';
+            $reorderSearchHelp.prop('hidden', !filtering);
+            $noMatches.prop('hidden', !filtering || rows().length === 0 || matchingRows > 0);
         }
 
         function readOrder() {
@@ -827,6 +887,10 @@
         }
 
         function beginDrag(row, handle, pointerId) {
+            if (reorderBody.dataset.filterActive === 'true') {
+                return;
+            }
+
             draggingRow = row;
             activeHandle = handle;
             activePointerId = typeof pointerId === 'number' ? pointerId : null;
@@ -1004,6 +1068,9 @@
                 finishDrag();
             });
         }
+
+        $searchInput.on('input search', filterRows);
+        filterRows();
     });
 </script>
 @endpush

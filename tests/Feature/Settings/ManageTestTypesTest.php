@@ -79,6 +79,29 @@ class ManageTestTypesTest extends TestCase
         $response->assertSee("width: '100%'", false);
     }
 
+    public function test_workflow_item_index_exposes_live_search_and_disables_reordering_while_filtered(): void
+    {
+        TestType::factory()->create([
+            'name' => 'Camera Check',
+            'slug' => 'camera-check',
+            'instructions' => 'Inspect lens',
+            'tooltip' => 'Hidden calibration',
+            'is_required' => false,
+            'result_label_mode' => WorkflowProfileItem::LABEL_MODE_DONE_NOT_DONE,
+        ]);
+
+        $response = $this->actingAs(User::factory()->superuser()->create())
+            ->get(route('settings.testtypes.index'));
+
+        $response->assertOk();
+        $response->assertSee('data-testtype-search', false);
+        $response->assertSee('data-search-text="camera check camera-check', false);
+        $response->assertSee('inspect lens hidden calibration optional done / not done', false);
+        $response->assertSee('data-testtype-no-matches', false);
+        $response->assertSee('handle.disabled = filtering', false);
+        $response->assertSee('reorderBody.dataset.filterActive', false);
+    }
+
     public function test_admin_create_suffixes_generated_slug_when_name_collides(): void
     {
         $user = User::factory()->superuser()->create();

@@ -113,6 +113,7 @@ class DeviceAttributeSeeder extends Seeder
             'Input' => $this->resolveCategory('Input', 'component'),
             'Network' => $this->resolveCategory('Network', 'component'),
             'Power' => $this->resolveCategory('Power', 'component'),
+            'Optical Drives' => $this->resolveCategory('Optical Drives', 'component'),
         ];
     }
 

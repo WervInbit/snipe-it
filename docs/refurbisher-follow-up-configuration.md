@@ -12,12 +12,20 @@ work instructions editable instead of fixing them in seed data.
    - Refurbisher: no asset creation and no quality edit.
    - Senior Refurbisher: asset creation and quality edit.
    - Supervisor and Admin: asset creation and quality edit.
-3. Review every status under **Settings > Status Labels**:
+3. For the programmable-key and optical-drive catalogue additions, run these
+   idempotent seeders in order:
+   - `DeviceAttributeSeeder`;
+   - `DevicePresetSeeder`;
+   - `DeviceComponentCatalogSeeder`.
+   This corrects the visible programmable-key label, assigns the existing
+   boolean to the G8 and existing G9 catalogue rows, and adds unassigned
+   optical-drive choices. It does not alter workflow configuration.
+4. Review every status under **Settings > Status Labels**:
    - set the desired Dutch name;
    - set group/user **View** and **Choose/use** values;
    - enable **Require a note when changing to this status** for QA or other
      statuses where an explanation is mandatory.
-4. Add **Afgevoerd** manually and assign its lifecycle stage to
+5. Add **Afgevoerd** manually and assign its lifecycle stage to
    `Destroyed`. Grant Supervisor both **View** and **Choose/use**; Admin keeps
    its policy bypass, while Refurbisher and Senior Refurbisher remain denied
    unless the local matrix deliberately says otherwise. Leaving Sold,
@@ -39,10 +47,26 @@ to the foundation seeder:
 - External cleaning.
 - Internal cleaning.
 
+The catalogue retains the existing internal key `programeerbare_toets` but
+shows the corrected label `Programmeerbare toets`. The boolean is enabled for
+HP ProBook 450 G8 `2E9F8EA#ABH` and, when present, HP ProBook 450 G9
+`6A140EA#ABH`. Administrators continue to own the workflow item and its
+applicability; this rollout does not rewrite it.
+
+The component catalogue also provides `Optical Drive - DVD-ROM` and
+`Optical Drive - DVD+/-RW` under `Optical Drives`. These choices are not
+assigned to any model automatically. Add the matching expected component only
+to a model number that physically includes the drive; do not add one to the HP
+ProBook 450 G8.
+
 Workflow profiles and their items can be reordered in Settings. Rerunning
 `AttributeTestSeeder` now creates missing foundation rows only; it preserves
 administrator-edited item text, order, requiredness, button mode, profile
 names, and profile order.
+
+Workflow Items and both lists on the workflow-profile Items page have a live
+quick search. Clear an active search before drag-reordering; drag handles are
+disabled while rows are filtered to prevent saving a partial-list order.
 
 On an active workflow, **Klaar** stays at the bottom and is disabled with an
 explanation until all required results are saved and complete. Finishing it

@@ -117,5 +117,51 @@ class DevicePresetSeeder extends Seeder
                 $position++;
             }
         }
+
+        foreach ($this->supplementalModelNumberAttributes() as $code => $attributes) {
+            $modelNumber = ModelNumber::query()->where('code', $code)->first();
+
+            if (!$modelNumber) {
+                continue;
+            }
+
+            $modelNumber->unsetRelation('componentTemplates');
+            $componentBackedDefinitionIds = app(ModelAttributeManager::class)
+                ->componentResolvedSpecDefinitionIds($modelNumber);
+            $position = ((int) ModelNumberAttribute::query()
+                ->where('model_number_id', $modelNumber->id)
+                ->max('display_order')) + 1;
+
+            foreach ($attributes as $key => $value) {
+                /** @var AttributeDefinition|null $definition */
+                $definition = $definitions->get($key);
+
+                if (!$definition || in_array((int) $definition->id, $componentBackedDefinitionIds, true)) {
+                    continue;
+                }
+
+                try {
+                    $tuple = $valueService->validateAndNormalize($definition, $value);
+                } catch (\Throwable) {
+                    continue;
+                }
+
+                $assignment = ModelNumberAttribute::firstOrNew([
+                    'model_number_id' => $modelNumber->id,
+                    'attribute_definition_id' => $definition->id,
+                ]);
+
+                $assignment->value = $tuple->value;
+                $assignment->raw_value = $tuple->rawValue;
+                $assignment->attribute_option_id = $tuple->attributeOptionId;
+
+                if (!$assignment->exists) {
+                    $assignment->display_order = $position;
+                    $position++;
+                }
+
+                $assignment->save();
+            }
+        }
     }
 }

@@ -25,6 +25,15 @@
         cursor: grabbing;
     }
 
+    .workflow-profile-item-drag-handle:disabled {
+        cursor: not-allowed;
+        opacity: 0.45;
+    }
+
+    .workflow-profile-item-search-tools {
+        width: min(320px, 45vw);
+    }
+
     .workflow-profile-item-position {
         display: inline-block;
         min-width: 2.5em;
@@ -113,6 +122,16 @@
                 <div class="box box-default">
                     <div class="box-header with-border">
                         <h3 class="box-title">{{ __('Included Items') }}</h3>
+                        <div class="box-tools workflow-profile-item-search-tools">
+                            <input type="search"
+                                   class="form-control input-sm"
+                                   data-profile-item-search="included"
+                                   placeholder="{{ trans('admin/testtypes/general.search_included_placeholder') }}"
+                                   aria-label="{{ trans('admin/testtypes/general.search_included_placeholder') }}">
+                        </div>
+                    </div>
+                    <div class="box-body" style="padding-bottom: 0;" data-profile-item-reorder-search-help hidden>
+                        <p class="text-muted small">{{ trans('admin/testtypes/general.clear_search_to_reorder') }}</p>
                     </div>
                     <div class="box-body table-responsive no-padding">
                         <table class="table table-striped table-hover">
@@ -127,6 +146,7 @@
                                 </tr>
                             </thead>
                             <tbody data-profile-item-reorder-body
+                                   data-profile-item-filter-body="included"
                                    data-reorder-url="{{ route('settings.workflow-profiles.items.reorder', $workflowProfile) }}"
                                    data-reorder-failed="{{ __('Failed to reorder workflow profile items.') }}">
                                 @forelse($profileItems as $profileItem)
@@ -134,12 +154,26 @@
                                         $item = $profileItem->item;
                                         $labelMode = $profileItem->result_label_mode
                                             ?: \App\Models\WorkflowProfileItem::LABEL_MODE_PASS_FAIL;
+                                        $source = $item ? $sourceLabel($item) : '';
+                                        $requirementLabel = $profileItem->is_required ? __('Required') : __('Optional');
+                                        $resultLabel = $resultModeLabel($labelMode);
+                                        $searchText = $item ? \Illuminate\Support\Str::lower(strip_tags(implode(' ', [
+                                            $item->name,
+                                            $item->slug,
+                                            $source,
+                                            $item->instructions,
+                                            $item->tooltip,
+                                            $requirementLabel,
+                                            $resultLabel,
+                                        ]))) : '';
                                     @endphp
                                     @if(!$item)
                                         @continue
                                     @endif
                                     <tr class="workflow-profile-item-row"
                                         data-profile-item-id="{{ $profileItem->id }}"
+                                        data-profile-item-search-row
+                                        data-search-text="{{ $searchText }}"
                                         data-testid="workflow-profile-item-row">
                                         <td>
                                             <button type="button"
@@ -162,7 +196,7 @@
                                             <strong>{{ $item->name }}</strong>
                                             <div class="text-muted monospace">{{ $item->slug }}</div>
                                         </td>
-                                        <td>{{ $sourceLabel($item) }}</td>
+                                        <td>{{ $source }}</td>
                                         <td>
                                             <input type="hidden" name="items[{{ $item->id }}][is_required]" value="0">
                                             <div class="checkbox">
@@ -199,6 +233,9 @@
                                         <td colspan="6" class="text-center text-muted">{{ __('No items are included in this profile yet.') }}</td>
                                     </tr>
                                 @endforelse
+                                <tr data-profile-item-no-matches="included" hidden>
+                                    <td colspan="6" class="text-center text-muted">{{ trans('admin/testtypes/general.no_search_results') }}</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -214,6 +251,13 @@
                 <div class="box box-default">
                     <div class="box-header with-border">
                         <h3 class="box-title">{{ __('Available Items') }}</h3>
+                        <div class="box-tools workflow-profile-item-search-tools">
+                            <input type="search"
+                                   class="form-control input-sm"
+                                   data-profile-item-search="available"
+                                   placeholder="{{ trans('admin/testtypes/general.search_available_placeholder') }}"
+                                   aria-label="{{ trans('admin/testtypes/general.search_available_placeholder') }}">
+                        </div>
                     </div>
                     <div class="box-body table-responsive no-padding">
                         <table class="table table-striped table-hover">
@@ -225,12 +269,26 @@
                                     <th>{{ __('Defaults') }}</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody data-profile-item-filter-body="available">
                                 @forelse($availableItems as $item)
                                     @php
                                         $labelMode = $item->result_label_mode ?? \App\Models\WorkflowProfileItem::LABEL_MODE_PASS_FAIL;
+                                        $source = $sourceLabel($item);
+                                        $requirementLabel = $item->is_required ? __('Required') : __('Optional');
+                                        $resultLabel = $resultModeLabel($labelMode);
+                                        $searchText = \Illuminate\Support\Str::lower(strip_tags(implode(' ', [
+                                            $item->name,
+                                            $item->slug,
+                                            $source,
+                                            $item->instructions,
+                                            $item->tooltip,
+                                            $requirementLabel,
+                                            $resultLabel,
+                                        ])));
                                     @endphp
-                                    <tr data-testid="workflow-profile-available-item-row">
+                                    <tr data-profile-item-search-row
+                                        data-search-text="{{ $searchText }}"
+                                        data-testid="workflow-profile-available-item-row">
                                         <td class="workflow-profile-item-flag">
                                             <input type="hidden" name="items[{{ $item->id }}][enabled]" value="0">
                                             <input type="hidden" name="items[{{ $item->id }}][sort_order]" value="{{ $profileItems->count() + $loop->index }}">
@@ -247,12 +305,12 @@
                                             <strong>{{ $item->name }}</strong>
                                             <div class="text-muted monospace">{{ $item->slug }}</div>
                                         </td>
-                                        <td>{{ $sourceLabel($item) }}</td>
+                                        <td>{{ $source }}</td>
                                         <td>
                                             <span class="label {{ $item->is_required ? 'label-primary' : 'label-default' }}">
                                                 {{ $item->is_required ? __('Required') : __('Optional') }}
                                             </span>
-                                            <span class="label label-default">{{ $resultModeLabel($labelMode) }}</span>
+                                            <span class="label label-default">{{ $resultLabel }}</span>
                                         </td>
                                     </tr>
                                 @empty
@@ -260,6 +318,9 @@
                                         <td colspan="4" class="text-center text-muted">{{ __('Every workflow item is already included in this profile.') }}</td>
                                     </tr>
                                 @endforelse
+                                <tr data-profile-item-no-matches="available" hidden>
+                                    <td colspan="4" class="text-center text-muted">{{ trans('admin/testtypes/general.no_search_results') }}</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -272,6 +333,55 @@
 @push('js')
 <script nonce="{{ csrf_token() }}">
     document.addEventListener('DOMContentLoaded', function () {
+        function setupWorkflowItemFilter(name) {
+            var input = document.querySelector('[data-profile-item-search="' + name + '"]');
+            var body = document.querySelector('[data-profile-item-filter-body="' + name + '"]');
+            var noMatches = document.querySelector('[data-profile-item-no-matches="' + name + '"]');
+
+            if (!input || !body) {
+                return;
+            }
+
+            function applyFilter() {
+                var query = (input.value || '').trim().toLowerCase();
+                var filtering = query !== '';
+                var rows = Array.from(body.querySelectorAll('tr[data-profile-item-search-row]'));
+                var matchingRows = 0;
+
+                rows.forEach(function (row) {
+                    var matches = !filtering || (row.getAttribute('data-search-text') || '').indexOf(query) !== -1;
+                    var handle = row.querySelector('[data-profile-item-drag-handle]');
+
+                    row.hidden = !matches;
+                    matchingRows += matches ? 1 : 0;
+
+                    if (handle) {
+                        handle.disabled = filtering;
+                    }
+                });
+
+                body.dataset.filterActive = filtering ? 'true' : 'false';
+
+                if (name === 'included') {
+                    var reorderHelp = document.querySelector('[data-profile-item-reorder-search-help]');
+                    if (reorderHelp) {
+                        reorderHelp.hidden = !filtering;
+                    }
+                }
+
+                if (noMatches) {
+                    noMatches.hidden = !filtering || rows.length === 0 || matchingRows > 0;
+                }
+            }
+
+            input.addEventListener('input', applyFilter);
+            input.addEventListener('search', applyFilter);
+            applyFilter();
+        }
+
+        setupWorkflowItemFilter('included');
+        setupWorkflowItemFilter('available');
+
         var reorderBody = document.querySelector('[data-profile-item-reorder-body]');
         if (!reorderBody) {
             return;
@@ -382,6 +492,10 @@
         }
 
         function beginDrag(row, handle, pointerId) {
+            if (reorderBody.dataset.filterActive === 'true') {
+                return;
+            }
+
             draggingRow = row;
             activeHandle = handle;
             activePointerId = typeof pointerId === 'number' ? pointerId : null;

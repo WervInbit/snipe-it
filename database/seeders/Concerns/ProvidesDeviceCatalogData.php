@@ -153,6 +153,11 @@ trait ProvidesDeviceCatalogData
                     ['value' => 'qwerty_us_intl', 'label' => 'QWERTY US International'],
                 ],
             ],
+            'programeerbare_toets' => [
+                'label' => 'Programmeerbare toets',
+                'datatype' => AttributeDefinition::DATATYPE_BOOL,
+                'categories' => ['Laptops'],
+            ],
             'webcam_present' => [
                 'label' => 'Webcam aanwezig',
                 'datatype' => AttributeDefinition::DATATYPE_BOOL,
@@ -908,6 +913,7 @@ trait ProvidesDeviceCatalogData
                     'battery_capacity' => '45 Wh',
                     'battery_health_percent' => 94,
                     'keyboard_layout' => 'us',
+                    'programeerbare_toets' => true,
                     'webcam_present' => true,
                     'usb_ports_summary' => '1x USB-A 3.1 Gen1 (Sleep/Charge), 1x USB-A 3.1 Gen1, 1x USB-A 3.1 Gen1 DP, 1x USB-C 3.1 Gen2 (DP 1.4 alt, PD)',
                     'video_outputs_summary' => 'HDMI 1.4b, USB-C (DP 1.4 alt)',
@@ -1440,6 +1446,21 @@ trait ProvidesDeviceCatalogData
         }
 
         return $blueprints;
+    }
+
+    /**
+     * Attribute additions for verified model numbers managed outside the
+     * original clean-start catalogue.
+     *
+     * @return array<string,array<string,mixed>>
+     */
+    protected function supplementalModelNumberAttributes(): array
+    {
+        return [
+            '6A140EA#ABH' => [
+                'programeerbare_toets' => true,
+            ],
+        ];
     }
 }
 

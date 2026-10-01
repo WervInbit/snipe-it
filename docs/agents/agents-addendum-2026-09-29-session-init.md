@@ -132,3 +132,11 @@
   queues and failed jobs are empty, HTTPS health/login return 200, and recent
   logs are clean. Full identities and rollback anchors are in
   `docs/releases/numeric-component-aggregation-production-2026-09-29.md`.
+- Investigated and, after explicit owner approval, added `HP ProBook 450 G9`
+  model number `6A140EA#ABH` to production as catalogue data only. A verified
+  on/off-host database backup preceded the atomic transaction. Existing
+  definitions cover most parts; four new definitions cover the G9/i5-1235U
+  motherboard, 42.8 Wh battery, HDMI 2.1b, and 802.11ax/6 GHz/Bluetooth 5.2.
+  The resolved baseline and duplicate checks pass, no physical asset was
+  created, and all services remain healthy. Refurbished-unit RAM, storage,
+  battery, panel, and wireless hardware still require intake verification.
