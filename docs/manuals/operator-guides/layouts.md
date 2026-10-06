@@ -1,5 +1,13 @@
 # Operator Guide Layout Recipes
 
+## USR-05 / CAT-05 / CAT-06 V2 - 2026-09-15
+
+The revised working drafts are USR-05 v2 (3 pages), CAT-05 v2 (8 pages), and
+CAT-06 v2 (3 pages). See the [revision review](reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md) for changes,
+exact artifacts, checks and remaining operator trials. The three v1 PDFs and
+all accepted artifacts are retained unchanged; v2 is not acceptance.
+
+
 Status: authoritative catalog of reusable page and step structures.
 
 This catalog preserves the task-dependent layouts proven by the current guide
@@ -32,7 +40,9 @@ guide needs more text or a wider screenshot.
 | `troubleshooting-grid` | Troubleshooting grid | Non-linear problem lookup using compact independent recovery routes. | HELP-01 v6 |
 | `reference-chapter` | Reference chapter | Multi-page explanation using diagrams, decision tables, examples, and selected interface landmarks. | CAT-00 v9 |
 | `extended-admin-flow` | Extended administration flow | A desktop-first procedure that preserves field explanations and recognizable screenshots over several continuously numbered pages. | CAT-01 v5 |
-| `unassigned` | Not yet selected | A planned guide whose real workflow has not been investigated. It may not be generated as a review candidate. | USR-05 |
+| `branching-admin-maintenance` | Branching administration maintenance | A decision page followed by independent high-impact maintenance branches; operators perform only the branch for their selected object. | CAT-05 v1 |
+| `reference-checklist` | Verification reference checklist | A short multi-page evidence hierarchy and decision checklist that routes verified results into task guides without claiming to perform those tasks. | CAT-06 v1 |
+| `unassigned` | Not yet selected | A planned guide whose real workflow has not been investigated. It may not be generated as a review candidate. | Reserved for future planned guides |
 
 ## Step Patterns
 
@@ -72,20 +82,27 @@ it.
 | USR-02 | `stacked-step-flow` | `mixed-visual-widths`, `single-visual` | One page |
 | USR-03 | `stacked-step-flow` | `parallel-visual-choice` | One page |
 | USR-04 | `stacked-step-flow` | `single-visual`, `two-sided-continuation` | Two-sided |
-| USR-05 | `unassigned` | To be determined from the verified workflow | Unknown |
+| USR-05 | `group-choice-permissions-test` | shared context, route choice, screenshots, permission warning and controlled-user completion | Three-page v2 working draft |
 | CAT-00 | `reference-chapter` | `reused-evidence`, `two-sided-continuation` | Six-page chapter |
 | CAT-01 | `extended-admin-flow` | `single-visual`, `inline-route-alternative`, `inline-warning`, `reused-evidence`, `two-sided-continuation` | Five-page procedure |
 | CAT-02 | `extended-admin-flow` | `single-visual`, decision alternatives, component conflict, `reused-evidence`, `two-sided-continuation` | Six-page working draft |
 | CAT-03 | `extended-admin-flow` | `single-visual`, parallel input alternatives, `reused-evidence`, `two-sided-continuation` | Five-page working draft |
 | CAT-04 | `extended-admin-flow` | `single-visual`, hierarchy warning, `reused-evidence`, `two-sided-continuation` | Six-page working draft |
-| CAT-05 | `unassigned` | Variant and lifecycle workflow | Unknown |
-| CAT-06 | `unassigned` | Verification and source workflow | Unknown |
+| CAT-05 | `independent-maintenance-routes` | page index, local completion/return, actual controls and impact stops | Eight-page v2 working draft |
+| CAT-06 | `worked-source-check` | physical label, manufacturer-source crops, supported/unresolved outcomes | Three-page v2 working draft |
 
 AST-01 is retired. Its historical layouts are evidence of earlier exploration,
 not an active recipe assignment.
 
 ## Selection Rules
 
+- Select a recipe only after the [authoring method](authoring-method.md) has
+  resolved the reader's actions, choices or reference questions. A recipe
+  realizes that structure; it does not choose information ownership or create
+  three steps because three cards fit.
+- Explain a changed recipe or page model through the affected reader decision,
+  recognition job or necessary detail. Judge actual target size and reading
+  relationships alongside preservation of useful baseline support.
 - Begin with the real operator decision structure, not a preferred visual grid.
 - Use `compact-horizontal-sequence` only when every step can remain legible at
   the same height and the complete sequence benefits from one frame.

@@ -135,7 +135,8 @@ The system is component-based, not a fixed page grid:
 - screenshots can use different aspect ratios when context requires it;
 - help can contain fewer or more items;
 - related guides can contain zero through five entries over at most two rows;
-- a guide can be one or two A4 pages.
+- floor task guides normally use one or two A4 sides; declared administration
+  and reference recipes may use more pages under the applicable family plan.
 
 Explanatory cards must use the available interior space. Do not leave a short
 one- or two-line explanation at caption size inside a large, otherwise empty

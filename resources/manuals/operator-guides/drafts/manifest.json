@@ -1,6 +1,6 @@
 {
     "schemaVersion": 1,
-    "updatedOn": "2026-09-03",
+    "updatedOn": "2026-09-15",
     "statusDefinition": "Unaccepted working draft; retained for review and environment transfer only",
     "artifacts": [
         {
@@ -202,6 +202,66 @@
             "pages": 6,
             "file": "CAT-04-componentdefinities-beheren-v2-draft.pdf",
             "sha256": "36635d649cc49c1a99942ea7d08eca65fd3378df56913c778f32561859e1d30a"
+        },
+        {
+            "code": "USR-05",
+            "version": 1,
+            "title": "Groepen beheren",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": null,
+            "pages": 2,
+            "file": "usr-05-groepen-beheren-v1-draft.pdf",
+            "sha256": "7cd6c0b6ae1e7ab1bb8004165fe6de6f40635e079c2867fe53aeb744dd46807c"
+        },
+        {
+            "code": "CAT-05",
+            "version": 1,
+            "title": "Varianten en lifecycle beheren",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": null,
+            "pages": 5,
+            "file": "cat-05-varianten-en-lifecycle-beheren-v1-draft.pdf",
+            "sha256": "e8b8e2baff42956c01a060b3f01589e6722ebdce4512446ef0cd1c0910348921"
+        },
+        {
+            "code": "CAT-06",
+            "version": 1,
+            "title": "Catalogus controleren en bronnen",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": null,
+            "pages": 3,
+            "file": "cat-06-catalogus-controleren-en-bronnen-v1-draft.pdf",
+            "sha256": "1eee3e99c7bb7dfe789688abfe8b1e2f34023334aa6dd77b9f7f570f4fcad59a"
+        },
+        {
+            "code": "USR-05",
+            "version": 2,
+            "title": "Groepen beheren",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": null,
+            "pages": 3,
+            "file": "usr-05-groepen-beheren-v2-draft.pdf",
+            "sha256": "8bd07fb9f003bbb18303ce741ae48bdb62a10c6e51e168c3aa0559cb376540c4"
+        },
+        {
+            "code": "CAT-05",
+            "version": 2,
+            "title": "Bestaande catalogus aanpassen",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": null,
+            "pages": 8,
+            "file": "cat-05-varianten-en-lifecycle-beheren-v2-draft.pdf",
+            "sha256": "46dc2b6ebe8517ece63f73b0c95bdce57e5ea8a237119f17f53faf628b4ed68b"
+        },
+        {
+            "code": "CAT-06",
+            "version": 2,
+            "title": "Productgegevens controleren",
+            "status": "Unaccepted working draft",
+            "acceptedPredecessorVersion": null,
+            "pages": 3,
+            "file": "cat-06-catalogus-controleren-en-bronnen-v2-draft.pdf",
+            "sha256": "0b34ef17d60245baa5d1a5b6e0e94f0aa338bfa252dedafaadc3185fa168d4a3"
         }
     ]
 }

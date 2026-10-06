@@ -96,12 +96,54 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
   for the required manual Dutch status matrix, Afgevoerd, workflow steps,
   camera-permission guidance, and the unresolved 6400/3200 MHz data check.
 
+### 2026-10-06
+- Repaired the shared operator-guide authoring process after owner clarification:
+  reader outcome, relevance and action/choice structure now precede evidence,
+  composition and generation; rendered meaning and baseline support are reviewed
+  separately from artifact checks. AGENTS.md and shared manual contracts require
+  the method; nineteen proposal headers no longer treat generated HTML as
+  instructional authority. Accepted guides establish the direction to develop;
+  required updates and chosen improvements are judged in the complete revision.
+  Reauthoring reconciles current standards, desired targets and retired points
+  before baseline reuse and across the rendered result; historical acceptance
+  does not override later owner decisions.
+  No new PDFs or acceptance. See the
+  [authoring method](manuals/operator-guides/authoring-method.md).
+- Reviewed the twenty-five operator-guide subjects after owner rejection of
+  AC-01 v10 and SC-01 v13 rework feedback. Recommended an editorial hold on the
+  nineteen October replacements: generic added pages, misleading alternatives,
+  reduced screenshot targets and English account-locale overrides need repair.
+  Exact PDFs/accepted selections remain unchanged; see the
+  [purpose and quality audit](manuals/operator-guides/reviews/guide-purpose-and-quality-audit-2026-10-06.md).
+
+### 2026-10-01
+- Generated 19 application-aligned operator-guide drafts / 66 A4 pages, with
+  current account/navigation, handoff/release, creation/quality/status rights
+  and numeric catalogue aggregation. Old/new review links and genuine local
+  evidence are retained; new versions remain unaccepted and accepted selections
+  are unchanged. See [batch review](manuals/operator-guides/reviews/aligned-guides-2026-10-01.md).
+- Revised WF-01 to unaccepted v15 after owner feedback: Standard Diagnostics
+  Start and waiting Cleaning form the entry example; "Bekijk de workflowvolgorde"
+  replaces an unexplained agreement about a row. One page retained; prior PDFs
+  and WF-02 are unchanged. See [v15 review](manuals/operator-guides/reviews/WF-01-v15.md).
+- Created WF-01 v14 and WF-02 v13 as separate, explicitly unaccepted manual
+  drafts for owner comparison. Fresh local captures show row-based workflow
+  progression, result-label variants, evidence controls, and Done/Klaar return.
+  Existing page counts and accepted artifacts are preserved; operational,
+  physical-print, and exact-version reviews remain pending. See the
+  [paired comparison](manuals/operator-guides/reviews/workflow-revisions-2026-10-01.md).
+
 ### 2026-09-17
 - Fixed the workflow-profile dependency Select2 dropdown inside its long edit
   modal. It now positions against stable modal content instead of the scrolling
   modal and no longer lets Select2 reset modal scrolling while open.
 
 ### 2026-09-15
+- Refined the current USR-05/CAT-05/CAT-06 v2 manuals after owner readability
+  review: exact left-menu navigation and permission precedence in USR-05, a
+  screen-based maintenance task finder and plain CAT-05 title, and an explicit
+  verification-only purpose and three-outcome result for CAT-06. All pages and
+  package checks pass; accepted PDFs and application behavior are unchanged.
 - Workflow profiles now support editable dependencies and per-profile repeat
   policy. Dependencies require every Required item to be Pass/Done. Asset workflow surfaces render
   every applicable profile as a numbered progression list with guarded rows
@@ -145,6 +187,13 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 - Asset-detail status and workflow-override dialogs are hoisted to the document
   body before opening. This keeps Bootstrap's body-level backdrop behind the
   dialog instead of invisibly intercepting all pointer input on the asset page.
+
+- Revised USR-05, CAT-05 and CAT-06 operator manuals as new v2 working drafts:
+  group grants versus user access, independent Admin maintenance procedures,
+  and a real manufacturer-source applicability example. No application
+  behavior changed. The v1 and accepted PDFs remain unchanged; operational
+  trials and exact-version acceptance are still pending. See the
+  [revision review](manuals/operator-guides/reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md).
 
 ### 2026-09-10
 - Production application images now include PHP `intl`. This restores Laravel

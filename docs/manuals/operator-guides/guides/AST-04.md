@@ -1,5 +1,15 @@
 # AST-04 Werk Afronden En Overdragen
 
+## Application Alignment Revision - 2026-10-01
+
+Current authoring proposal: **v7, working draft; not accepted**, 2 A4 pages. [Exact-version review](../reviews/AST-04-v7.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+
+Current workflow readiness instead of historical Pass alone, quality read access, required QA audit note.
+
+Added page: Maak de overdracht controleerbaar. Steps: Controleer de actuele workflowstatus; Leg afwijkingen en kwaliteit duidelijk vast; Schrijf de QA-notitie en controleer het resultaat.
+
+The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v6 input.
+
 ## QA Preference Follow-Up - 2026-09-10
 
 The owner prefers Testing completed and no separate Awaiting approval state.
@@ -9,14 +19,14 @@ See [implementation record](../reviews/owner-corrections-2026-09-10.md).
 
 | Field | Current value |
 | --- | --- |
-| Status | Internal review candidate; exact v6 accepted by owner 2026-09-10 |
+| Status | Working draft v7; not accepted |
 | Family | AST |
 | Type | Detail task |
-| Current version | `AST-04-complete-handoff-v6-draft` |
-| Page model | One page |
+| Current version | `AST-04-complete-handoff-v7-draft` |
+| Page model | 2 A4 pages |
 | Layout recipe | `stacked-step-flow` with captions, `reused-evidence`, and `inline-warning` |
-| Generator | `scripts/manuals/generate-guide-followups.mjs AST-04`; use frozen round inputs to reproduce |
-| Role | Senior refurbisher |
+| Generator | `scripts/manuals/generate-aligned-guides-2026-10-01.mjs` |
+| Role | Refurbisher; effective task and status rights required |
 | Needed | Verified asset and completed workflow |
 | Prerequisite | Workflow completed (WF-02) |
 
@@ -25,10 +35,9 @@ See [implementation record](../reviews/owner-corrections-2026-09-10.md).
 Confirm that recorded and physical work is complete, then hand the asset to a
 supervisor with an unmistakable next action.
 
-The v5 draft uses the currently deployed `QA Hold` label and explicitly says it
-means waiting for supervisor review. The guide also records the current
-auto-save behavior and requires the operator to confirm that the status remains
-visible after selection.
+The v7 draft uses `QA Hold` for supervisor review. Supply its required audit
+note, follow the application response and confirm the saved status. Quality
+can be read by Refurbisher; changing it requires the separate quality right.
 
 This is specifically the final refurbishment-to-QA handoff guide. Step 2B is
 only the physical-versus-registered check for components marked `Tracked`; it
@@ -38,14 +47,14 @@ help references.
 
 ## Steps
 
-1. `Bevestig dat de workflow klaar is` - confirm the correct HP ProBook, open
-   Tests, inspect the latest required workflow, and confirm `0 Mislukt` with no
-   required card still open.
+1. `Controleer de verplichte workflows` - confirm identity, inspect current
+   required runs and conditions, and check for incomplete or failed work.
+   Historical Pass does not resolve Changed or a blocked follow-up.
 2. `Vergelijk registratie met het apparaat` - compare tag, S/N, model type,
    QR label, registered components, and necessary notes with the physical item.
-3. `Draag over aan de supervisor` - choose `QA Hold`; the change saves
-   automatically. Confirm that `QA Hold` remains visible, place the asset at
-   the agreed QA location, and identify AST-05 as the supervisor's next guide.
+3. `Draag over aan de supervisor` - choose `QA Hold`, enter the requested note
+   with work and deviations, and check the saved result. Place the asset at
+   the QA location and identify AST-05 as the supervisor's next guide.
 
 Incomplete work and mismatches are amber corrective warnings. They do not use
 oversized red stop text.

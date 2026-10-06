@@ -1,5 +1,15 @@
 # USR-02 Rol En Rechten Wijzigen
 
+## Application Alignment Revision - 2026-10-01
+
+Current authoring proposal: **v12, working draft; not accepted**, 2 A4 pages. [Exact-version review](../reviews/USR-02-v12.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+
+Dedicated quality permission, workflow run permissions and independent per-status See/Choose rules.
+
+Added page: Controleer welk recht de taak werkelijk nodig heeft. Steps: Controleer Create en Edit Quality Grade afzonderlijk; Controleer workflowrol en runrechten; Controleer de toegang van de gekozen status.
+
+The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v11 input.
+
 ## Latest Correction Candidate - 2026-09-10
 
 Current review candidate: [v11](../reviews/USR-02-v11.md), owner-cleared for user review.
@@ -9,13 +19,13 @@ notes below. Previous PDFs and exact acceptance records remain unchanged.
 
 | Field | Current value |
 | --- | --- |
-| Status | Internal review candidate v11; owner cleared for user review 2026-09-10 |
+| Status | Working draft v12; not accepted |
 | Family | USR |
 | Type | Administration task with an exceptional route |
-| Current version | `usr-02-rol-en-rechten-wijzigen-v11-draft` |
-| Page model | One page |
+| Current version | `usr-02-rol-en-rechten-wijzigen-v12-draft` |
+| Page model | 2 A4 pages |
 | Layout recipe | `stacked-step-flow` with `mixed-visual-widths` and `single-visual` |
-| Generator | `scripts/manuals/generate-owner-corrections.mjs USR-02` |
+| Generator | `scripts/manuals/generate-aligned-guides-2026-10-01.mjs` |
 | Role | Admin |
 | Needed | Correct user and the intended access |
 | Prerequisite | Ingelogd (AC-01 Login); user account already exists |

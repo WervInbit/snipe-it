@@ -1,6 +1,6 @@
 {
     "schemaVersion":  1,
-    "updatedOn":  "2026-09-03",
+    "updatedOn":  "2026-09-15",
     "source":  "docs/manuals/operator-guides/screenshots.md",
     "sources":  [
                     {
@@ -16,7 +16,7 @@
                         "file":  "DASH-MOBILE-01.jpg",
                         "sha256":  "26cb6ba96e1243b6b90d0c7be8f7c7b459f561bf56fa65af03a922fc52f8e9bb",
                         "purpose":  "Mobile dashboard with `Apparaten`, `Scan QR`, and the top-bar camera icon",
-                         "uses":  "AC-01 3A; SC-01 1A and 1B; AST-03 v7-v13 page 1 1A",
+                        "uses":  "AC-01 3A; SC-01 1A and 1B; AST-03 v7-v13 page 1 1A",
                         "captureEnvironment":  "Existing device capture"
                     },
                     {
@@ -48,7 +48,7 @@
                         "file":  "AST-LABEL-PLACEMENT-PHOTO-01.jpg",
                         "sha256":  "7ede7ec2dca1f0890c5757a402de2c288f629124257fb75f87542b84e5fb2fd0",
                         "purpose":  "Real full laptop underside with front edge toward the reader and the Inbit QR label at lower right",
-                        "uses":  "AST-03 v11-v13 page 2 7A; AST-04 v4 2A; AST-05 v4 3A",
+                        "uses":  "AST-03 v11-v13 page 2 7A; AST-04 v4 2A; AST-05 v4 3A; CAT-06 v1 1A and 2A",
                         "captureEnvironment":  "Owner-supplied practice photo, 2026-08-18"
                     },
                     {
@@ -104,7 +104,7 @@
                         "file":  "AST-REGISTER-ENTRY-MOBILE-01.png",
                         "sha256":  "ba207608d7ba6f224f99c41f068629f833eb7520fd1d04eb963a2827b33694dc",
                         "purpose":  "Mobile hardware index with the new-asset entry in surrounding navigation context",
-                         "uses":  "AST-03 v2 1A; AST-03 v3-v6 1A and 1B; AST-03 v7-v13 1B and 1C",
+                        "uses":  "AST-03 v2 1A; AST-03 v3-v6 1A and 1B; AST-03 v7-v13 1B and 1C",
                         "captureEnvironment":  "Controlled development capture, refreshed 2026-08-20"
                     },
                     {
@@ -124,10 +124,10 @@
                         "captureEnvironment":  "Controlled development capture, refreshed 2026-08-20; same canonical state as AST-REGISTER-IDENTITY-MOBILE-01"
                     },
                     {
-                         "id":  "AST-REGISTER-SAVED-CHECK-01",
-                         "file":  "AST-REGISTER-SAVED-CHECK-01.png",
-                         "sha256":  "db413c36029308d0b1c26499a375bfc76e70ac35a2f3652e94dd4220bbc83715",
-                         "purpose":  "Compact saved-asset verification with asset tag, Being Processed status, asset name/model, and serial number",
+                        "id":  "AST-REGISTER-SAVED-CHECK-01",
+                        "file":  "AST-REGISTER-SAVED-CHECK-01.png",
+                        "sha256":  "db413c36029308d0b1c26499a375bfc76e70ac35a2f3652e94dd4220bbc83715",
+                        "purpose":  "Compact saved-asset verification with asset tag, Being Processed status, asset name/model, and serial number",
                         "uses":  "AST-03 v6-v13 page 1 4B",
                         "captureEnvironment":  "Controlled development capture, refreshed 2026-08-20; screenshot-only INBIT-HG0421, HP ProBook 450 G8, and 5CD1234ABC identity substitution; no server record changed; unrelated rows hidden only in capture DOM"
                     },
@@ -826,6 +826,134 @@
                         "purpose":  "Replacement custom new-component form with corrected radio and warning-checkbox spacing",
                         "uses":  "CMP-02 next revision, 2B",
                         "captureEnvironment":  "Controlled development recapture, 2026-09-03; mobile viewport, form populated and not submitted"
+                    },
+                    {
+                        "id":  "USR-GROUPS-LIST-DESKTOP-01",
+                        "file":  "USR-GROUPS-LIST-DESKTOP-01.png",
+                        "sha256":  "c1602eec52eb60c73af480e583a637d0615fbcba2b2f1d321679ec6777adf6fa",
+                        "purpose":  "Group list with member counts and create/edit routes",
+                        "uses":  "USR-05 v1, 1A and 2A",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-15; read-only list"
+                    },
+                    {
+                        "id":  "USR-GROUP-CREATE-DESKTOP-01",
+                        "file":  "USR-GROUP-CREATE-DESKTOP-01.png",
+                        "sha256":  "7cdc6dd8ae11d08d617d947f3c236cf136d7c0a722747bfded06f74fbfdd4f46",
+                        "purpose":  "New group form with name, notes, and default-deny permission controls",
+                        "uses":  "USR-05 v1, 2B and 3A",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-15; empty form, not submitted"
+                    },
+                    {
+                        "id":  "USR-GROUP-PERMISSIONS-TOP-DESKTOP-01",
+                        "file":  "USR-GROUP-PERMISSIONS-TOP-DESKTOP-01.png",
+                        "sha256":  "212e6995a08342f0606f4f7f0ebd6b995d0f5229c01c6bf1424e798734ae9d5b",
+                        "purpose":  "Group edit form with high-impact global and administrator permission rows",
+                        "uses":  "USR-05 v1, 3B",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-15; existing group opened read-only"
+                    },
+                    {
+                        "id":  "USR-GROUP-PERMISSIONS-MODELS-DESKTOP-01",
+                        "file":  "USR-GROUP-PERMISSIONS-MODELS-DESKTOP-01.png",
+                        "sha256":  "1106e8c3de88f077d38c58a43d4d32a98382c3b7a225c31350010efe72154908",
+                        "purpose":  "Users and Models permission rows including lifecycle and specification-cleanup grants",
+                        "uses":  "USR-05 v1, 4A",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-15; existing group opened read-only"
+                    },
+                    {
+                        "id":  "USR-GROUP-SAVE-DESKTOP-01",
+                        "file":  "USR-GROUP-SAVE-DESKTOP-01.png",
+                        "sha256":  "02d4952a72fbaac732aedda7f421162f4951e1d5e00e3f61b61fd7a408116fca",
+                        "purpose":  "Bottom of group edit form with Cancel and Save actions",
+                        "uses":  "USR-05 v1, 5A",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-15; existing group opened, Save not selected"
+                    },
+                    {
+                        "id":  "USR-GROUP-DETAIL-DESKTOP-01",
+                        "file":  "USR-GROUP-DETAIL-DESKTOP-01.png",
+                        "sha256":  "0b0c7b781fa6f96b8d47bce49dea20d30a8c00bcf90d2b43368bc97cbe3f0d16",
+                        "purpose":  "Saved group detail with members and effective permission summary",
+                        "uses":  "USR-05 v1, 5B and 6A",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-15; read-only detail"
+                    },
+                    {
+                        "id":  "CAT-MODEL-SPEC-CLEANUP-ATTRIBUTES-DESKTOP-01",
+                        "file":  "CAT-MODEL-SPEC-CLEANUP-ATTRIBUTES-DESKTOP-01.png",
+                        "sha256":  "354d4ea72f732aa89f414ed3141439150078f52e9d696cf439fb4b79df9d9695",
+                        "purpose":  "Saved model-number attributes with administrator-only remove controls",
+                        "uses":  "CAT-05 v1, 3A",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-15; read-only specification, no removal selected"
+                    },
+                    {
+                        "id":  "CAT-MODEL-SPEC-CLEANUP-COMPONENTS-DESKTOP-01",
+                        "file":  "CAT-MODEL-SPEC-CLEANUP-COMPONENTS-DESKTOP-01.png",
+                        "sha256":  "6b4d47f79efe1e631eaa1e38557f88a2b7ca24aaaab8101dd4e038c164adfac8",
+                        "purpose":  "Saved expected-component rows with administrator-only Remove actions and derived-impact context",
+                        "uses":  "CAT-05 v1, 3B",
+                        "captureEnvironment":  "Controlled development capture, 2026-09-15; read-only specification, no removal selected"
+                    },
+                    {
+                        "id":  "USR-GROUP-EDIT-FULL-DESKTOP-02",
+                        "file":  "USR-GROUP-EDIT-FULL-DESKTOP-02.jpg",
+                        "sha256":  "6e60c60c22d799969715d45c89624a8c155243077770ee617e68d42962405019",
+                        "purpose":  "Saved memberless Catalogus lezen group edit: names, column headings, per-row permissions and Save",
+                        "uses":  "USR-05 v2",
+                        "captureEnvironment":  "Local dev.inbit, 2026-09-15; real read-only CUA capture. Only group fixture created via guarded helper; no memberships."
+                    },
+                    {
+                        "id":  "USR-GROUP-DETAIL-DESKTOP-02",
+                        "file":  "USR-GROUP-DETAIL-DESKTOP-02.jpg",
+                        "sha256":  "0f0591cb5f0dc36822ed6b12c39fa1b6d6b7b98da4aeffa1ca7624bdaa8c5624",
+                        "purpose":  "Matching Catalogus lezen stored group rights, member list and Groep bewerken",
+                        "uses":  "USR-05 v2",
+                        "captureEnvironment":  "Local dev.inbit, 2026-09-15; real read-only CUA capture. Only group fixture created via guarded helper; no memberships."
+                    },
+                    {
+                        "id":  "CAT-MODEL-NUMBER-EDIT-DESKTOP-02",
+                        "file":  "CAT-MODEL-NUMBER-EDIT-DESKTOP-02.jpg",
+                        "sha256":  "820295bbf77a137d9089fa1d1b72f93ad3ee147bef74a7db834e271e8430fdb7",
+                        "purpose":  "Global model-number Status, default checkbox and Opslaan; read-only Primary example",
+                        "uses":  "CAT-05 v2",
+                        "captureEnvironment":  "Local dev.inbit, 2026-09-15; real read-only CUA capture. Only group fixture created via guarded helper; no memberships."
+                    },
+                    {
+                        "id":  "CAT-ATTRIBUTE-EXISTING-OPTIONS-DESKTOP-02",
+                        "file":  "CAT-ATTRIBUTE-EXISTING-OPTIONS-DESKTOP-02.jpg",
+                        "sha256":  "02fea2434f6bf4da2f7e594257ab1c827e4f93da996fbd637c8744d2c2d0e17d",
+                        "purpose":  "Geheugentype in-use warning and saved Enum Active/Remove checkboxes",
+                        "uses":  "CAT-05 v2",
+                        "captureEnvironment":  "Local dev.inbit, 2026-09-15; real read-only CUA capture. Only group fixture created via guarded helper; no memberships."
+                    },
+                    {
+                        "id":  "CAT-COMPONENT-EXISTING-EDIT-DESKTOP-02",
+                        "file":  "CAT-COMPONENT-EXISTING-EDIT-DESKTOP-02.jpg",
+                        "sha256":  "fa99b765eda149b8feacd32c95ad76aa1156d35b470a963b0448988739d6f05c",
+                        "purpose":  "Saved motherboard children/contributions, Remove and Save Changes",
+                        "uses":  "CAT-05 v2",
+                        "captureEnvironment":  "Local dev.inbit, 2026-09-15; real read-only CUA capture. Only group fixture created via guarded helper; no memberships."
+                    },
+                    {
+                        "id":  "CAT-SOURCE-HP-PROBOOK-450-G8-02",
+                        "file":  "CAT-SOURCE-HP-PROBOOK-450-G8-02.jpg",
+                        "sha256":  "2e110e17f5fab2579a000b5fb14de6e3386cb790e3da774a609b5584abf33301",
+                        "purpose":  "HP official family product card; title and display fact, not exact SKU proof",
+                        "uses":  "CAT-06 v2",
+                        "captureEnvironment":  "HP official website, 2026-09-15; source URL documented in source-verification review"
+                    },
+                    {
+                        "id":  "USR-GROUP-MODELS-DESKTOP-02",
+                        "file":  "USR-GROUP-MODELS-DESKTOP-02.jpg",
+                        "sha256":  "6be8744266e9879582a680f341aa547f7165a922e9d1c0d67abef8a267580e82",
+                        "purpose":  "Expanded Models rows: only View allowed",
+                        "uses":  "USR-05 v2",
+                        "captureEnvironment":  "Local dev.inbit, 2026-09-15. Real viewport screenshot of owned memberless group fixture; fixture removed after capture."
+                    },
+                    {
+                        "id":  "USR-GROUP-STORED-RIGHTS-DESKTOP-02",
+                        "file":  "USR-GROUP-STORED-RIGHTS-DESKTOP-02.jpg",
+                        "sha256":  "a0bbbb3a6231921cf3cdc8c1865cc79cec4176f6ee49e60022d5ba509019628f",
+                        "purpose":  "Matching stored group permissions with Models view granted and create denied",
+                        "uses":  "USR-05 v2",
+                        "captureEnvironment":  "Local dev.inbit, 2026-09-15. Real viewport screenshot of owned memberless group fixture; fixture removed after capture."
                     }
                 ]
 }

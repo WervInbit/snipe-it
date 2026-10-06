@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-01",
+  "status": "Working drafts - exact-version review pending",
+  "acceptedSelectionChanged": false,
+  "generatorSha256": "8a838a8b715e41ead1d588fd41518dd1a0b6e0b6a5624864fe35743e3986d5c7",
+  "sourceAuditSha256": "5a19fb097da55f4fa82fc65545be589177861a6b2ce3fd6e3681017cbe01a071",
+  "sourceContext": "Read-only dev.inbit captures; refurbisher-followups worktree at 731bb43c88 with concurrent uncommitted changes",
+  "evidence": [
+    {
+      "id": "WF-ACTIVE-INSTRUCTIONS-MOBILE-04",
+      "file": "evidence/WF-ACTIVE-INSTRUCTIONS-MOBILE-04.jpg",
+      "width": 415,
+      "height": 1159,
+      "sha256": "f570aac23fd5688886a378c110a42ffad6996a76efa48012286112e97c819d1b"
+    },
+    {
+      "id": "WF-ACTIVE-NEUTRAL-MOBILE-04",
+      "file": "evidence/WF-ACTIVE-NEUTRAL-MOBILE-04.jpg",
+      "width": 415,
+      "height": 1159,
+      "sha256": "82342dc4d983dd576d63c441a3da82cd19a2eb2b3c27ebeec587a5524c2e3b43"
+    },
+    {
+      "id": "WF-ACTIVE-NOTE-MOBILE-04",
+      "file": "evidence/WF-ACTIVE-NOTE-MOBILE-04.jpg",
+      "width": 415,
+      "height": 1159,
+      "sha256": "e217c0b96dc3b8c87885d0e4fa46f13b03d93b3b559d90209bb8e8b6dc0fe911"
+    },
+    {
+      "id": "WF-ACTIVE-PHOTO-MOBILE-04",
+      "file": "evidence/WF-ACTIVE-PHOTO-MOBILE-04.jpg",
+      "width": 415,
+      "height": 1159,
+      "sha256": "5bf552c356c1a5254425a8bd9686ba5c0d182f9a20d68506017e69d3f52505d8"
+    },
+    {
+      "id": "WF-DONE-READY-MOBILE-04",
+      "file": "evidence/WF-DONE-READY-MOBILE-04.jpg",
+      "width": 415,
+      "height": 1159,
+      "sha256": "93a0e6c45db207c24c7d29bc2c18f13f35800c89036a9ba1867600049452fed9"
+    },
+    {
+      "id": "WF-PROGRESSION-MOBILE-04",
+      "file": "evidence/WF-PROGRESSION-MOBILE-04.jpg",
+      "width": 415,
+      "height": 1081,
+      "sha256": "715316f1bbff282b9a3b71f17fd705e2b04b35025d7c3ae14365b47a7a715ea3"
+    }
+  ],
+  "guides": [
+    {
+      "code": "WF-01",
+      "version": 14,
+      "oldVersion": 13,
+      "pages": 1,
+      "input": "WF-01-workflow-starten-v13-draft.html",
+      "file": "WF-01-workflow-starten-v14-draft",
+      "status": "Working draft - not accepted",
+      "sha256": "8095a6d88b714c43c811f0294797c70183d8c00ab1530fa46ce31ea526004710",
+      "sourceHtmlSha256": "f3e15bb365ff025c6a85dd55bb810f5a75c355df7520e4a045fae49410b6bf1d",
+      "inputSha256": "4d836458653e9144ea2f358bcd7e4b4b787b9e503b8aa0ba2b636df360808631",
+      "bytes": 204192,
+      "qa": {
+        "pages": 1,
+        "images": 5,
+        "layout": [
+          {
+            "rows": "226.766px 393.062px",
+            "mainBottom": 835.609375,
+            "helpTop": 843.921875,
+            "cards": [
+              {
+                "top": 207.453125,
+                "bottom": 434.21875,
+                "height": 226.765625
+              },
+              {
+                "top": 207.453125,
+                "bottom": 434.21875,
+                "height": 226.765625
+              },
+              {
+                "top": 442.53125,
+                "bottom": 835.59375,
+                "height": 393.0625
+              },
+              {
+                "top": 442.53125,
+                "bottom": 835.59375,
+                "height": 393.0625
+              }
+            ]
+          }
+        ],
+        "text": "WF-01 Workflow starten\n\nKies de juiste workflowrij; start eenmaal of open de bestaande run\n\nConcept v14\n2026-10-01\nNiet geaccepteerd\n1 van 1\nRol\nBevoegde uitvoerder\nNodig\nJuiste asset + workflowrechten\nVooraf\nSC\nSC-01 Asset vinden en openen\n1\nOpen Tests / workflows\n\nControleer het apparaat met \nSC\nSC-01 Asset vinden en openen\n. Tik daarna op het test-icoon in de asset.\n\n1A\nHet test-icoon in de volledige tabrij.\n2\nKies de afgesproken rij\n\nLees de profielnaam, status en uitleg. De nummers geven de volgorde aan; kies de workflow die bij je taak hoort.\n\nEen grijze rij kan wachten op eerder werk of meer rechten. Lees de melding; sla de voorwaarde niet over.\n\n2A\nVoorbeeld: Cleaning wacht op Standard Diagnostics.\n3\nKies 3A of 3B. Voer maar een optie uit.\nNieuwe run starten\n\nIs de afgesproken workflow nog niet gestart en is Start actief? Tik eenmaal op Start in diezelfde rij.\n\n3A\nStart hoort bij deze profielrij, niet bij alle workflows.\nOF\nBestaande run openen\n\nOpen via de profielrij: Continue bij lopend werk, Edit voor bestaande resultaten, ook na afronding. Definitie gewijzigd? Vraag eerst een supervisor.\n\n3B\nEdit opent Pre-Sale Check; de waarschuwing blijft gelden.\n4\nControleer de kaarten\n\nControleer de asset en de kaarttitels van het gekozen profiel. Een nieuwe run begint met neutrale knoppen; een bestaande run kan al antwoorden tonen.\n\nGa verder met \nWF\nWF-02 Workflow uitvoeren en afronden\n\n4A\nBestaande Pre-Sale Check: deze kaarten zijn nog neutraal.\nHulp bij kiezen en starten\n!\nVoorwaarde of rechten\n\nLees de melding. Voer het genoemde werk uit of vraag een bevoegde collega.\n\n!\nProfiel klopt niet\n\nNiet ingesteld of gewijzigd? Stop en vraag een supervisor.\n\n!\nNogmaals starten?\n\nStart new / Override: alleen bevoegd, met reden en bevestiging. Vraag een supervisor.\n\n!\nGeen icoon of kaarten\n\nControleer asset en rechten. Vraag hulp; start niet nog een run.\n\nKlaar als\nDe juiste run is open; asset en kaarttitels kloppen. Ga verder met WF-02.\nRelevante gidsen\nSC\nSC-01 Asset vinden en openen\nWF\nWF-02 Workflow uitvoeren en afronden\nHELP\nHELP-01 Problemen en hulp\nBron: ontwikkelomgeving | 2026-10-01 | Niet geaccepteerd\nQR\nvolgt\nDigitale gids volgt",
+        "overflow": [],
+        "mainOverHelp": false,
+        "clippedShots": 0,
+        "choiceOverlap": false
+      }
+    },
+    {
+      "code": "WF-02",
+      "version": 13,
+      "oldVersion": 12,
+      "pages": 2,
+      "input": "WF-02-complete-workflow-v12-draft.html",
+      "file": "WF-02-complete-workflow-v13-draft",
+      "status": "Working draft - not accepted",
+      "sha256": "7b4ff10d60a45c7412a933eaf00b5d5a57f89f184d841736eeebcc575a0270b8",
+      "sourceHtmlSha256": "e4f2ea2dff624cb772226c117cd7c367aad0e188a22ddda402f65ebb882cd14c",
+      "inputSha256": "81d699ff06bd9f316799ee89306f0833ed59b78d3b821b8424a13fa0ca9704dc",
+      "bytes": 309248,
+      "qa": {
+        "pages": 2,
+        "images": 8,
+        "layout": [
+          {
+            "rows": "104px 226.094px 275.859px",
+            "mainBottom": 833.03125,
+            "helpTop": 842.46875,
+            "cards": [
+              {
+                "top": 209.703125,
+                "bottom": 313.703125,
+                "height": 104
+              },
+              {
+                "top": 322.390625,
+                "bottom": 548.484375,
+                "height": 226.09375
+              },
+              {
+                "top": 557.171875,
+                "bottom": 833.03125,
+                "height": 275.859375
+              }
+            ]
+          },
+          {
+            "rows": "224.062px 224.078px 157.812px",
+            "mainBottom": 1955.546875,
+            "helpTop": 1964.984375,
+            "cards": [
+              {
+                "top": 1332.21875,
+                "bottom": 1556.28125,
+                "height": 224.0625
+              },
+              {
+                "top": 1564.96875,
+                "bottom": 1789.046875,
+                "height": 224.078125
+              },
+              {
+                "top": 1797.734375,
+                "bottom": 1955.546875,
+                "height": 157.8125
+              }
+            ]
+          }
+        ],
+        "text": "WF-02 Workflow uitvoeren\n\nVoer de controle uit en leg het echte resultaat vast\n\nConcept v13\n2026-10-01\nNiet geaccepteerd\n1 van 2\nRol\nBevoegde uitvoerder\nNodig\nActieve workflow + fysiek apparaat\nVooraf\nWF\nWF-01 Workflow starten\n1\nControleer apparaat en run\n\nVergelijk assettag en model in het kruimelpad met het apparaat. Gebruik de run die je in WF-01 bij de afgesproken profielrij opende.\n\n1A\nDe breadcrumb toont de asset; WF-01 bepaalt de juiste run.\n2\nLees de instructie\n\nTik op Show instructions (Toon instructies). Lees de hele opdracht voordat je een resultaat kiest.\n\n2A\nDe volledige kaart en de echte opdracht blijven zichtbaar.\n3\nVoer uit en kies resultaat\n\nVoer de controle uit. Kies Pass (Geslaagd) of Fail (Mislukt) naar waarheid.\n\nEen taakkaart gebruikt Done (Gedaan) en Not Done (Niet gedaan). Onuitgevoerd? Kies nog geen positief resultaat.\n\nEen kaart met Optional is optioneel voor de voortgang. Een verplicht item moet positief zijn voor de volgende afhankelijke workflow.\n\n3A\nBoven: controle met Pass/Fail. Onder: taakkaart met Done/Not Done.\nHulp tijdens de controle\n!\nInstructie onduidelijk\n\nStop en vraag een supervisor. Raad geen resultaat.\n\n!\nControle niet mogelijk\n\nLeg de reden vast en vraag hulp. Kies geen Pass of Done zonder uitvoering.\n\n!\nVerkeerd apparaat of run\n\nKies geen resultaat. Open de juiste asset en profielrij via WF-01.\n\nKlaar als\nDe controle is uitgevoerd en eerlijk vastgelegd. Ga verder op de volgende pagina.\nRelevante gidsen\nWF\nWF-01 Workflow starten\nHELP\nHELP-01 Problemen en hulp\nBron: ontwikkelomgeving | 2026-10-01 | Niet geaccepteerd\nQR\nvolgt\nDigitale gids volgt\nWF-02 Bewijs en afronding\n\nVoeg bewijs toe, wacht op opslaan en keer terug naar Workflows\n\nConcept v13\n2026-10-01\nNiet geaccepteerd\n2 van 2\nRol\nBevoegde uitvoerder\nNodig\nDezelfde actieve workflow + apparaat\nVooraf\nWF\nWF-02 Workflow uitvoeren en afronden\n4\nVoeg een notitie toe\n\nOpen Note (Notitie) bij een mislukking, uitzondering of relevante meetwaarde. Schrijf kort wat je zag en deed.\n\nWacht op een bijgewerkte Saved at-melding nadat je hebt getypt. Een oude tijd bij een leeg veld bewijst geen nieuwe opslag.\n\n4A\nNote opent het veld; controleer de nieuwe opslagtijd.\n5\nVoeg foto of schermbeeld toe\n\nOpen Photo (Foto) en kies Add photo (Foto toevoegen) als de opdracht bewijs vraagt.\n\nKies of maak een duidelijk beeld van dit apparaat en het relevante detail. Controleer dat de miniatuur verschijnt.\n\nNeem geen wachtwoorden, herstelcodes of klantgegevens op. Workflowbewijs is afgeschermd.\n\n5A\nVolledige kaart, afgeschermd bewijs en Add photo.\n6\nControleer en kies Klaar\n\nHerhaal stap 2-5. Resultaten slaan automatisch op; wacht tot alle wijzigingen bewaard zijn.\n\nDone (Klaar) blijft uitgeschakeld zolang verplichte antwoorden ontbreken of een opslag loopt. Actief? Tik erop en controleer dezelfde asset op het tabblad Workflows.\n\nLees daar de profielstatus en eventuele blokkade. Mislukt werk blijft mislukt; Klaar geeft de asset niet vrij voor verkoop.\n\n6A\nBoven: ontbrekende antwoorden. Onder: klaar om terug te keren.\nHulp bij bewijs en afronden\n!\nOpslaan of foto mislukt\n\nControleer melding en verbinding. Laat de kaart open en vraag hulp bij een blijvende fout.\n\n!\nKlaar blijft grijs\n\nControleer verplichte kaarten en wacht op opslag. Start geen extra run.\n\n!\nVervolg blijft geblokkeerd\n\nLees de melding. Vraag hulp bij fouten of een gewijzigde definitie.\n\nKlaar als\nResultaten en bewijs zijn opgeslagen; je bent terug bij dezelfde asset en kent de volgende stap.\nRelevante gidsen\nWF\nWF-01 Workflow starten\nAST\nAST-04 Werk afronden en overdragen\nHELP\nHELP-01 Problemen en hulp\nBron: ontwikkelomgeving | 2026-10-01 | Niet geaccepteerd\nQR\nvolgt\nDigitale gids volgt",
+        "overflow": [],
+        "mainOverHelp": false,
+        "clippedShots": 0,
+        "choiceOverlap": false
+      }
+    }
+  ]
+}

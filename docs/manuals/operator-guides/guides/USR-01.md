@@ -1,5 +1,13 @@
 # USR-01 Gebruiker Toevoegen
 
+## Application Alignment Revision - 2026-10-01
+
+Current authoring proposal: **v14, working draft; not accepted**, 1 A4 page. [Exact-version review](../reviews/USR-01-v14.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+
+Remove fixed temporary-password recipe; use Generate and immediate secure handoff, clarify quality/create rights.
+
+The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v13 input.
+
 ## Latest Correction Candidate - 2026-09-10
 
 Current review candidate: [v13](../reviews/USR-01-v13.md), owner-cleared for user review.
@@ -9,13 +17,13 @@ notes below. Previous PDFs and exact acceptance records remain unchanged.
 
 | Field | Current value |
 | --- | --- |
-| Status | Internal review candidate v13; owner cleared for user review 2026-09-10 |
+| Status | Working draft v14; not accepted |
 | Family | USR |
 | Type | Administration task |
-| Current version | `usr-01-gebruiker-toevoegen-v13-draft` |
-| Page model | One page |
+| Current version | `usr-01-gebruiker-toevoegen-v14-draft` |
+| Page model | 1 A4 page |
 | Layout recipe | `stacked-step-flow` with `mixed-visual-widths` and `single-visual` |
-| Generator | `scripts/manuals/generate-owner-corrections.mjs USR-01` |
+| Generator | `scripts/manuals/generate-aligned-guides-2026-10-01.mjs` |
 | Role | Admin |
 | Needed | Approved identity, standard role, verified email when available, and a secure handoff route |
 | Prerequisite | Ingelogd (AC-01 Login) with Admin access |

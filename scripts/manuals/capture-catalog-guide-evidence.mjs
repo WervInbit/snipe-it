@@ -257,6 +257,18 @@ try {
         files.push(await capture(page, 'CAT-MODEL-SPEC-COMPONENTS-DESKTOP-01.png'));
     }
 
+    if (captureMode === 'lifecycle') {
+        const specRoute = `/models/${exampleModelId}/model-numbers/${exampleModelNumberId}/spec`;
+
+        await open(page, specRoute);
+        await page.getByRole('heading', { name: 'Expected Components', exact: true }).waitFor();
+        await scrollTo(page, '[data-testid="model-attributes-builder"]', -125);
+        files.push(await capture(page, 'CAT-MODEL-SPEC-CLEANUP-ATTRIBUTES-DESKTOP-01.png'));
+
+        await scrollTo(page, '#expected-components', -110);
+        files.push(await capture(page, 'CAT-MODEL-SPEC-CLEANUP-COMPONENTS-DESKTOP-01.png'));
+    }
+
     if (captureMode === 'all' || captureMode === 'model-spec') {
         const specRoute = `/models/${exampleModelId}/model-numbers/${exampleModelNumberId}/spec`;
 

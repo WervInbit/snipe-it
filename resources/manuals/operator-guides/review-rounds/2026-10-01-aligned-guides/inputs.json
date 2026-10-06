@@ -1,0 +1,523 @@
+{
+  "date": "2026-10-01",
+  "guides": [
+    {
+      "code": "AC-01",
+      "title": "Login",
+      "version": 9,
+      "pages": 1,
+      "status": "Geaccepteerd",
+      "ownerAccepted": true,
+      "purpose": "Sign in to Snipe-IT with the assigned account and follow the recovery route when login fails.",
+      "sourcePdfPath": "resources/manuals/operator-guides/review-rounds/2026-09-08/AC-01-login-v9-draft.pdf",
+      "packagePdfPath": "guides/AC-01-login-v9-draft.pdf",
+      "sha256": "c9f77eaf5461cb952036eb9ffa9400da0295a9171534f5db3074b574b8fc6785",
+      "bytes": 814868,
+      "sourceHtmlPath": "source-html/AC-01-login-v9-draft.html",
+      "sourceHtmlSha256": "6f03ee9991604b158fac8ca5f9325037c5c3308857c203c4b9d4c7ac6f97aae7",
+      "specPath": "docs/manuals/operator-guides/guides/AC-01.md",
+      "generator": {
+        "command": "node scripts/manuals/generate-guide-followups.mjs AC-01",
+        "scripts": [
+          "scripts/manuals/generate-guide-followups.mjs",
+          "scripts/manuals/generate-ac01-snipe-proof.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 10,
+      "input": "inputs/AC-01-login-v9-draft.html",
+      "inputSha256": "6f03ee9991604b158fac8ca5f9325037c5c3308857c203c4b9d4c7ac6f97aae7"
+    },
+    {
+      "code": "AC-02",
+      "title": "Eigen wachtwoord wijzigen",
+      "version": 4,
+      "pages": 1,
+      "status": "Geaccepteerd",
+      "ownerAccepted": true,
+      "purpose": "Change the signed-in user's own password and verify the success message.",
+      "sourcePdfPath": "resources/manuals/operator-guides/review-rounds/2026-09-08/ac-02-eigen-wachtwoord-wijzigen-v4-draft.pdf",
+      "packagePdfPath": "guides/ac-02-eigen-wachtwoord-wijzigen-v4-draft.pdf",
+      "sha256": "923f185a1b0b594083b507c630c1b54783e50d13fe22a04a79d3b8e5f794f12d",
+      "bytes": 120008,
+      "sourceHtmlPath": "source-html/ac-02-eigen-wachtwoord-wijzigen-v4-draft.html",
+      "sourceHtmlSha256": "7a24ab49bf5389bf713a1f1c3beb59c13e197c07a8fdd274629604738d2d73ad",
+      "specPath": "docs/manuals/operator-guides/guides/AC-02.md",
+      "generator": {
+        "command": "node scripts/manuals/generate-guide-followups.mjs AC-02",
+        "scripts": [
+          "scripts/manuals/generate-guide-followups.mjs",
+          "scripts/manuals/generate-user-account-guide-review.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 5,
+      "input": "inputs/ac-02-eigen-wachtwoord-wijzigen-v4-draft.html",
+      "inputSha256": "7a24ab49bf5389bf713a1f1c3beb59c13e197c07a8fdd274629604738d2d73ad"
+    },
+    {
+      "code": "SC-01",
+      "title": "Asset vinden en openen",
+      "version": 12,
+      "pages": 1,
+      "status": "Gereed voor gebruikersreview",
+      "ownerAccepted": true,
+      "purpose": "Find the correct asset by identifier, compare identifying data, and open its detail page.",
+      "sourcePdfPath": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/SC-01-asset-vinden-en-openen-v12-draft.pdf",
+      "packagePdfPath": "guides/SC-01-asset-vinden-en-openen-v12-draft.pdf",
+      "sha256": "bc29b532a2cea8dad759307c4abcf378a10114eb1205582c88ba1a5b5767461e",
+      "bytes": 1105099,
+      "sourceHtmlPath": "source-html/SC-01-asset-vinden-en-openen-v12-draft.html",
+      "sourceHtmlSha256": "044c9df33ed458f9f77c6e2d0c3ccd86802fb8b76363ad5e64762e71adc8dc00",
+      "specPath": "docs/manuals/operator-guides/guides/SC-01.md",
+      "generator": {
+        "command": "node scripts/manuals/generate-owner-corrections.mjs SC-01",
+        "scripts": [
+          "scripts/manuals/generate-owner-corrections.mjs",
+          "scripts/manuals/generate-guide-followups.mjs",
+          "scripts/manuals/generate-sc01-snipe-proof.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 13,
+      "input": "inputs/SC-01-asset-vinden-en-openen-v12-draft.html",
+      "inputSha256": "044c9df33ed458f9f77c6e2d0c3ccd86802fb8b76363ad5e64762e71adc8dc00"
+    },
+    {
+      "code": "AST-02",
+      "title": "Refurbishment route",
+      "version": 8,
+      "pages": 1,
+      "status": "Gereed voor gebruikersreview",
+      "ownerAccepted": true,
+      "purpose": "Choose the correct refurbishment route for an opened asset and hand off to the matching task guide.",
+      "sourcePdfPath": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/AST-02-refurbishment-route-v8-draft.pdf",
+      "packagePdfPath": "guides/AST-02-refurbishment-route-v8-draft.pdf",
+      "sha256": "f932df1e44ca6fe5a3747efb0d2988e601939f9c9832e2ee6fd295889fb87846",
+      "bytes": 113378,
+      "sourceHtmlPath": "source-html/AST-02-refurbishment-route-v8-draft.html",
+      "sourceHtmlSha256": "bd63f8a3aae85a33875d2ee233363c19db4fa6f339fed3b1f41d49a9333cf342",
+      "specPath": "docs/manuals/operator-guides/guides/AST-02.md",
+      "generator": {
+        "command": "node scripts/manuals/generate-owner-corrections.mjs AST-02",
+        "scripts": [
+          "scripts/manuals/generate-owner-corrections.mjs",
+          "scripts/manuals/generate-guide-followups.mjs",
+          "scripts/manuals/generate-revised-guide-set.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 9,
+      "input": "inputs/AST-02-refurbishment-route-v8-draft.html",
+      "inputSha256": "bd63f8a3aae85a33875d2ee233363c19db4fa6f339fed3b1f41d49a9333cf342"
+    },
+    {
+      "code": "AST-03",
+      "title": "Asset registreren en labelen",
+      "version": 15,
+      "pages": 2,
+      "status": "Geaccepteerd",
+      "ownerAccepted": true,
+      "purpose": "Register a new asset, check its identity, and print and apply the asset label.",
+      "sourcePdfPath": "resources/manuals/operator-guides/review-rounds/2026-09-08/AST-03-asset-registreren-en-labelen-v15-draft.pdf",
+      "packagePdfPath": "guides/AST-03-asset-registreren-en-labelen-v15-draft.pdf",
+      "sha256": "5e838b9e57e868f81c2b7920ea5e4d76cde487a39fb406736912f7082ebe875d",
+      "bytes": 929395,
+      "sourceHtmlPath": "source-html/AST-03-asset-registreren-en-labelen-v15-draft.html",
+      "sourceHtmlSha256": "b14b9e4389a2024a19e9cf3b20fc11e3b222d626725f1d933260b9b8001bf140",
+      "specPath": "docs/manuals/operator-guides/guides/AST-03.md",
+      "generator": {
+        "command": "node scripts/manuals/generate-guide-followups.mjs AST-03",
+        "scripts": [
+          "scripts/manuals/generate-guide-followups.mjs",
+          "scripts/manuals/generate-revised-guide-set.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 16,
+      "input": "inputs/AST-03-asset-registreren-en-labelen-v15-draft.html",
+      "inputSha256": "b14b9e4389a2024a19e9cf3b20fc11e3b222d626725f1d933260b9b8001bf140"
+    },
+    {
+      "code": "AST-04",
+      "title": "Werk afronden en overdragen",
+      "version": 6,
+      "pages": 1,
+      "status": "Geaccepteerd",
+      "ownerAccepted": true,
+      "purpose": "Confirm required work is complete, finish the asset work, and hand it to the next responsible person.",
+      "sourcePdfPath": "resources/manuals/operator-guides/review-rounds/2026-09-08/AST-04-complete-handoff-v6-draft.pdf",
+      "packagePdfPath": "guides/AST-04-complete-handoff-v6-draft.pdf",
+      "sha256": "de991dfcbc70b853f95135116e240e426d5582962accef6c3a26d7b40924b8c7",
+      "bytes": 809636,
+      "sourceHtmlPath": "source-html/AST-04-complete-handoff-v6-draft.html",
+      "sourceHtmlSha256": "077971773f9e5164874f50590a9b1d0bf7af81936c35dfb6d9b40971ad3a9577",
+      "specPath": "docs/manuals/operator-guides/guides/AST-04.md",
+      "generator": {
+        "command": "node scripts/manuals/generate-guide-followups.mjs AST-04",
+        "scripts": [
+          "scripts/manuals/generate-guide-followups.mjs",
+          "scripts/manuals/generate-revised-guide-set.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 7,
+      "input": "inputs/AST-04-complete-handoff-v6-draft.html",
+      "inputSha256": "077971773f9e5164874f50590a9b1d0bf7af81936c35dfb6d9b40971ad3a9577"
+    },
+    {
+      "code": "AST-05",
+      "title": "Asset beoordelen en vrijgeven",
+      "version": 6,
+      "pages": 1,
+      "status": "Te beoordelen",
+      "ownerAccepted": false,
+      "purpose": "Review the completed asset and either release it or return it for correction.",
+      "sourcePdfPath": "resources/manuals/operator-guides/review-rounds/2026-09-08/AST-05-review-release-v6-draft.pdf",
+      "packagePdfPath": "guides/AST-05-review-release-v6-draft.pdf",
+      "sha256": "2311d189b061d7251fe0e4eecc0ce542c1feb7d2ba2ff0a933f05a1ad698ee77",
+      "bytes": 697718,
+      "sourceHtmlPath": "source-html/AST-05-review-release-v6-draft.html",
+      "sourceHtmlSha256": "a4dc01ef2302408875a41559ebd093d73711ef5dbcdcb9774cda11c57e350e3b",
+      "specPath": "docs/manuals/operator-guides/guides/AST-05.md",
+      "generator": {
+        "command": "node scripts/manuals/generate-guide-followups.mjs AST-05",
+        "scripts": [
+          "scripts/manuals/generate-guide-followups.mjs",
+          "scripts/manuals/generate-revised-guide-set.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 7,
+      "input": "inputs/AST-05-review-release-v6-draft.html",
+      "inputSha256": "a4dc01ef2302408875a41559ebd093d73711ef5dbcdcb9774cda11c57e350e3b"
+    },
+    {
+      "code": "HELP-01",
+      "title": "Problemen en hulp",
+      "version": 7,
+      "pages": 1,
+      "status": "Te beoordelen",
+      "ownerAccepted": false,
+      "purpose": "Diagnose common operator problems, stop safely, and choose the correct escalation route.",
+      "sourcePdfPath": "resources/manuals/operator-guides/review-rounds/2026-09-08/HELP-01-problems-v7-draft.pdf",
+      "packagePdfPath": "guides/HELP-01-problems-v7-draft.pdf",
+      "sha256": "c2f49d8598dac156047e5826eab553efb6c103b6645702040ec3943dcc6bf668",
+      "bytes": 116563,
+      "sourceHtmlPath": "source-html/HELP-01-problems-v7-draft.html",
+      "sourceHtmlSha256": "8cfacb2afc9289dd53914b8c2a6d67af77ca1676438408fbdee587c9b7a3f4ab",
+      "specPath": "docs/manuals/operator-guides/guides/HELP-01.md",
+      "generator": {
+        "command": "node scripts/manuals/generate-guide-followups.mjs HELP-01",
+        "scripts": [
+          "scripts/manuals/generate-guide-followups.mjs",
+          "scripts/manuals/generate-component-followup-guides.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 8,
+      "input": "inputs/HELP-01-problems-v7-draft.html",
+      "inputSha256": "8cfacb2afc9289dd53914b8c2a6d67af77ca1676438408fbdee587c9b7a3f4ab"
+    },
+    {
+      "code": "CMP-02",
+      "title": "Nieuw component registreren en plaatsen",
+      "version": 6,
+      "pages": 1,
+      "status": "Gereed voor gebruikersreview",
+      "ownerAccepted": true,
+      "purpose": "Register a new physical component and then place it into the correct asset.",
+      "sourcePdfPath": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CMP-02-register-install-v6-draft.pdf",
+      "packagePdfPath": "guides/CMP-02-register-install-v6-draft.pdf",
+      "sha256": "873f68279de2c3006a635b008ccffb2e6a52a8793b5f5966ff43f0eeecec1961",
+      "bytes": 577700,
+      "sourceHtmlPath": "source-html/CMP-02-register-install-v6-draft.html",
+      "sourceHtmlSha256": "4e1b7b830c9ac26a8ce3326c3b5a24367c39862b38536ba439ab8703086c4a01",
+      "specPath": "docs/manuals/operator-guides/guides/CMP-02.md",
+      "generator": {
+        "command": "node scripts/manuals/generate-owner-corrections.mjs CMP-02",
+        "scripts": [
+          "scripts/manuals/generate-owner-corrections.mjs",
+          "scripts/manuals/generate-guide-followups.mjs",
+          "scripts/manuals/generate-component-followup-guides.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 7,
+      "input": "inputs/CMP-02-register-install-v6-draft.html",
+      "inputSha256": "4e1b7b830c9ac26a8ce3326c3b5a24367c39862b38536ba439ab8703086c4a01"
+    },
+    {
+      "code": "USR-01",
+      "title": "Gebruiker toevoegen",
+      "version": 13,
+      "pages": 1,
+      "status": "Gereed voor gebruikersreview",
+      "ownerAccepted": true,
+      "purpose": "Create a user account with the agreed identity, login state, and group assignment.",
+      "sourcePdfPath": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-reference-followups/usr-01-gebruiker-toevoegen-v13-draft.pdf",
+      "packagePdfPath": "guides/usr-01-gebruiker-toevoegen-v13-draft.pdf",
+      "sha256": "38318811b38adcfb5692e1634fba9ad35c7cca0acb3faf4371bfe370fd462995",
+      "bytes": 771449,
+      "sourceHtmlPath": "source-html/usr-01-gebruiker-toevoegen-v13-draft.html",
+      "sourceHtmlSha256": "fd49838e812a8b7fc459d8ef181d1ab188d012a08ae044dcb7c18d96daf149fc",
+      "specPath": "docs/manuals/operator-guides/guides/USR-01.md",
+      "generator": {
+        "command": "node scripts/manuals/generate-owner-corrections.mjs USR-01",
+        "scripts": [
+          "scripts/manuals/generate-owner-corrections.mjs",
+          "scripts/manuals/generate-guide-followups.mjs",
+          "scripts/manuals/generate-user-account-guide-review.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 14,
+      "input": "inputs/usr-01-gebruiker-toevoegen-v13-draft.html",
+      "inputSha256": "fd49838e812a8b7fc459d8ef181d1ab188d012a08ae044dcb7c18d96daf149fc"
+    },
+    {
+      "code": "USR-02",
+      "title": "Rol en rechten wijzigen",
+      "version": 11,
+      "pages": 1,
+      "status": "Gereed voor gebruikersreview",
+      "ownerAccepted": true,
+      "purpose": "Change a user's group membership or direct rights and verify the stored access result.",
+      "sourcePdfPath": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-reference-followups/usr-02-rol-en-rechten-wijzigen-v11-draft.pdf",
+      "packagePdfPath": "guides/usr-02-rol-en-rechten-wijzigen-v11-draft.pdf",
+      "sha256": "53e581c649a0d10e5ef5677a79166a93ebbd99ba4ad8539c29755a0fcf733651",
+      "bytes": 780166,
+      "sourceHtmlPath": "source-html/usr-02-rol-en-rechten-wijzigen-v11-draft.html",
+      "sourceHtmlSha256": "1a87b20861bbcc859a523b67a7a734caacc7d48310d3ad2fe6b0ba6059d73a6a",
+      "specPath": "docs/manuals/operator-guides/guides/USR-02.md",
+      "generator": {
+        "command": "node scripts/manuals/generate-owner-corrections.mjs USR-02",
+        "scripts": [
+          "scripts/manuals/generate-owner-corrections.mjs",
+          "scripts/manuals/generate-guide-followups.mjs",
+          "scripts/manuals/generate-user-account-guide-review.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 12,
+      "input": "inputs/usr-02-rol-en-rechten-wijzigen-v11-draft.html",
+      "inputSha256": "1a87b20861bbcc859a523b67a7a734caacc7d48310d3ad2fe6b0ba6059d73a6a"
+    },
+    {
+      "code": "USR-03",
+      "title": "Wachtwoord resetten",
+      "version": 4,
+      "pages": 1,
+      "status": "Te beoordelen",
+      "ownerAccepted": false,
+      "purpose": "Reset another user's password without changing the account's login decision.",
+      "sourcePdfPath": "resources/manuals/operator-guides/review-rounds/2026-09-08/usr-03-wachtwoord-resetten-v4-draft.pdf",
+      "packagePdfPath": "guides/usr-03-wachtwoord-resetten-v4-draft.pdf",
+      "sha256": "b71a9279faa78ebc8b04ede3674067f73c563c0caac9cdc4b89c9cbb51ad7e06",
+      "bytes": 724811,
+      "sourceHtmlPath": "source-html/usr-03-wachtwoord-resetten-v4-draft.html",
+      "sourceHtmlSha256": "1ab77672457d976831a75b446a025a21a2aa69b42da73b13c882e648e49b7911",
+      "specPath": "docs/manuals/operator-guides/guides/USR-03.md",
+      "generator": {
+        "command": "node scripts/manuals/generate-guide-followups.mjs USR-03",
+        "scripts": [
+          "scripts/manuals/generate-guide-followups.mjs",
+          "scripts/manuals/generate-user-account-guide-review.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 5,
+      "input": "inputs/usr-03-wachtwoord-resetten-v4-draft.html",
+      "inputSha256": "1ab77672457d976831a75b446a025a21a2aa69b42da73b13c882e648e49b7911"
+    },
+    {
+      "code": "USR-05",
+      "title": "Groepen beheren",
+      "version": 2,
+      "pages": 3,
+      "status": "Unaccepted working draft",
+      "ownerAccepted": false,
+      "purpose": "Open administrator settings, create or edit a permission group, understand conflicting group rights, assign the group, and test the result.",
+      "sourcePdfPath": "resources/manuals/operator-guides/drafts/usr-05-groepen-beheren-v2-draft.pdf",
+      "packagePdfPath": "guides/usr-05-groepen-beheren-v2-draft.pdf",
+      "sha256": "8bd07fb9f003bbb18303ce741ae48bdb62a10c6e51e168c3aa0559cb376540c4",
+      "bytes": 876626,
+      "sourceHtmlPath": "source-html/usr-05-groepen-beheren-v2-draft.html",
+      "sourceHtmlSha256": "dd91d1a45ab34e73b5d7b93dc8c1ed990ca3d6f74b2ddee40a782a7cf23c2eb8",
+      "specPath": "docs/manuals/operator-guides/guides/USR-05.md",
+      "generator": {
+        "command": "set SNIPEIT_GUIDE_FILTER=USR-05 && node scripts/manuals/generate-planned-guide-v2.mjs",
+        "scripts": [
+          "scripts/manuals/generate-planned-guide-v2.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 3,
+      "input": "inputs/usr-05-groepen-beheren-v2-draft.html",
+      "inputSha256": "dd91d1a45ab34e73b5d7b93dc8c1ed990ca3d6f74b2ddee40a782a7cf23c2eb8"
+    },
+    {
+      "code": "CAT-00",
+      "title": "Catalogus begrijpen",
+      "version": 11,
+      "pages": 6,
+      "status": "Gereed voor gebruikersreview",
+      "ownerAccepted": true,
+      "purpose": "Explain how the catalog is structured and route each catalog task to the correct detailed guide.",
+      "sourcePdfPath": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CAT-00-catalogus-begrijpen-v11-draft.pdf",
+      "packagePdfPath": "guides/CAT-00-catalogus-begrijpen-v11-draft.pdf",
+      "sha256": "d8c95c64c70508cdceb43d4aa71d7f1f22027dfd8690349349ec70bb8f09c04c",
+      "bytes": 602021,
+      "sourceHtmlPath": "source-html/CAT-00-catalogus-begrijpen-v11-draft.html",
+      "sourceHtmlSha256": "c0de198aae4914cfb5de2494fb63f3ff3673da7e98317a159aec1994b40b03dd",
+      "specPath": "docs/manuals/operator-guides/guides/CAT-00.md",
+      "generator": {
+        "command": "node scripts/manuals/generate-owner-corrections.mjs CAT-00",
+        "scripts": [
+          "scripts/manuals/generate-owner-corrections.mjs",
+          "scripts/manuals/generate-guide-followups.mjs",
+          "scripts/manuals/generate-catalog-guide-review.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 12,
+      "input": "inputs/CAT-00-catalogus-begrijpen-v11-draft.html",
+      "inputSha256": "c0de198aae4914cfb5de2494fb63f3ff3673da7e98317a159aec1994b40b03dd"
+    },
+    {
+      "code": "CAT-01",
+      "title": "Model en modelnummer aanmaken",
+      "version": 7,
+      "pages": 5,
+      "status": "Gereed voor gebruikersreview",
+      "ownerAccepted": true,
+      "purpose": "Decide whether a base model or model number is missing and create only the required catalog identity.",
+      "sourcePdfPath": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CAT-01-model-en-modelnummer-aanmaken-v7-draft.pdf",
+      "packagePdfPath": "guides/CAT-01-model-en-modelnummer-aanmaken-v7-draft.pdf",
+      "sha256": "bd79bd83124c9c31e52b12bb92e53d238265226cc5a82caebae5cdb5802c2b46",
+      "bytes": 456062,
+      "sourceHtmlPath": "source-html/CAT-01-model-en-modelnummer-aanmaken-v7-draft.html",
+      "sourceHtmlSha256": "9774d9ff1173a7fe366ec533ce08de5f88f44bdc2227f9d8bd4a671d5e9b18e9",
+      "specPath": "docs/manuals/operator-guides/guides/CAT-01.md",
+      "generator": {
+        "command": "node scripts/manuals/generate-owner-corrections.mjs CAT-01",
+        "scripts": [
+          "scripts/manuals/generate-owner-corrections.mjs",
+          "scripts/manuals/generate-guide-followups.mjs",
+          "scripts/manuals/generate-catalog-guide-review.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 8,
+      "input": "inputs/CAT-01-model-en-modelnummer-aanmaken-v7-draft.html",
+      "inputSha256": "9774d9ff1173a7fe366ec533ce08de5f88f44bdc2227f9d8bd4a671d5e9b18e9"
+    },
+    {
+      "code": "CAT-02",
+      "title": "Modelspecificatie opbouwen",
+      "version": 2,
+      "pages": 6,
+      "status": "Te beoordelen",
+      "ownerAccepted": false,
+      "purpose": "Build a model specification from reusable attributes and expected components, including conflict handling.",
+      "sourcePdfPath": "resources/manuals/operator-guides/review-rounds/2026-09-08/CAT-02-modelspecificatie-opbouwen-v2-draft.pdf",
+      "packagePdfPath": "guides/CAT-02-modelspecificatie-opbouwen-v2-draft.pdf",
+      "sha256": "13c8939cbe9a72134983161553c1f0696ac57aff8eca7b1fe99325efb6a2be44",
+      "bytes": 783022,
+      "sourceHtmlPath": "source-html/CAT-02-modelspecificatie-opbouwen-v2-draft.html",
+      "sourceHtmlSha256": "a69041b2cd89dbf61e764e3a739baa5875587d4c9a9334dffb00ca32e9b30dca",
+      "specPath": "docs/manuals/operator-guides/guides/CAT-02.md",
+      "generator": {
+        "command": "node scripts/manuals/generate-guide-followups.mjs CAT-02",
+        "scripts": [
+          "scripts/manuals/generate-guide-followups.mjs",
+          "scripts/manuals/generate-catalog-guide-review.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 3,
+      "input": "inputs/CAT-02-modelspecificatie-opbouwen-v2-draft.html",
+      "inputSha256": "a69041b2cd89dbf61e764e3a739baa5875587d4c9a9334dffb00ca32e9b30dca"
+    },
+    {
+      "code": "CAT-03",
+      "title": "Attributen beheren",
+      "version": 2,
+      "pages": 5,
+      "status": "Te beoordelen",
+      "ownerAccepted": false,
+      "purpose": "Create and maintain reusable attribute definitions, datatypes, limits, and enumeration options.",
+      "sourcePdfPath": "resources/manuals/operator-guides/review-rounds/2026-09-08/CAT-03-attributen-beheren-v2-draft.pdf",
+      "packagePdfPath": "guides/CAT-03-attributen-beheren-v2-draft.pdf",
+      "sha256": "8adb74b5d3d535def133a9f6987a921acad64d3c68641c8a6076f38a2d0e415b",
+      "bytes": 458919,
+      "sourceHtmlPath": "source-html/CAT-03-attributen-beheren-v2-draft.html",
+      "sourceHtmlSha256": "e98025f2d5d4d6d966e1e8cc0ad57ebb7f6182bb00377e11d068c0ab25a0da39",
+      "specPath": "docs/manuals/operator-guides/guides/CAT-03.md",
+      "generator": {
+        "command": "node scripts/manuals/generate-guide-followups.mjs CAT-03",
+        "scripts": [
+          "scripts/manuals/generate-guide-followups.mjs",
+          "scripts/manuals/generate-catalog-guide-review.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 3,
+      "input": "inputs/CAT-03-attributen-beheren-v2-draft.html",
+      "inputSha256": "e98025f2d5d4d6d966e1e8cc0ad57ebb7f6182bb00377e11d068c0ab25a0da39"
+    },
+    {
+      "code": "CAT-04",
+      "title": "Componentdefinities beheren",
+      "version": 4,
+      "pages": 6,
+      "status": "Te beoordelen",
+      "ownerAccepted": false,
+      "purpose": "Create and maintain reusable component definitions, expected subcomponents, contributions, and hierarchy rules.",
+      "sourcePdfPath": "resources/manuals/operator-guides/review-rounds/2026-09-08/CAT-04-componentdefinities-beheren-v4-draft.pdf",
+      "packagePdfPath": "guides/CAT-04-componentdefinities-beheren-v4-draft.pdf",
+      "sha256": "96e99bbeea19a39b7484aaef5d01f8739e7e092916817a7d06e41be8e6dcb0d2",
+      "bytes": 434104,
+      "sourceHtmlPath": "source-html/CAT-04-componentdefinities-beheren-v4-draft.html",
+      "sourceHtmlSha256": "c6cb9dd3204588352806f43e96e891e5bc82514413e4d36f783a76b3429d9422",
+      "specPath": "docs/manuals/operator-guides/guides/CAT-04.md",
+      "generator": {
+        "command": "node scripts/manuals/generate-guide-followups.mjs CAT-04",
+        "scripts": [
+          "scripts/manuals/generate-guide-followups.mjs",
+          "scripts/manuals/generate-catalog-guide-review.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 5,
+      "input": "inputs/CAT-04-componentdefinities-beheren-v4-draft.html",
+      "inputSha256": "c6cb9dd3204588352806f43e96e891e5bc82514413e4d36f783a76b3429d9422"
+    },
+    {
+      "code": "CAT-05",
+      "title": "Bestaande catalogus aanpassen",
+      "version": 2,
+      "pages": 8,
+      "status": "Unaccepted working draft",
+      "ownerAccepted": false,
+      "purpose": "Safely adjust one existing catalog object through independent routes for model data, specifications, attributes, component definitions, and lifecycle state.",
+      "sourcePdfPath": "resources/manuals/operator-guides/drafts/cat-05-varianten-en-lifecycle-beheren-v2-draft.pdf",
+      "packagePdfPath": "guides/cat-05-varianten-en-lifecycle-beheren-v2-draft.pdf",
+      "sha256": "46dc2b6ebe8517ece63f73b0c95bdce57e5ea8a237119f17f53faf628b4ed68b",
+      "bytes": 1049492,
+      "sourceHtmlPath": "source-html/cat-05-varianten-en-lifecycle-beheren-v2-draft.html",
+      "sourceHtmlSha256": "bfd503627c24279a89a6985fb570e04ee7ed8c01b839f765846825bd06708c31",
+      "specPath": "docs/manuals/operator-guides/guides/CAT-05.md",
+      "generator": {
+        "command": "set SNIPEIT_GUIDE_FILTER=CAT-05 && node scripts/manuals/generate-planned-guide-v2.mjs",
+        "scripts": [
+          "scripts/manuals/generate-planned-guide-v2.mjs"
+        ],
+        "note": "The packaged source HTML is the exact final authoring snapshot; the listed scripts are the maintainable generation lineage."
+      },
+      "nextVersion": 3,
+      "input": "inputs/cat-05-varianten-en-lifecycle-beheren-v2-draft.html",
+      "inputSha256": "bfd503627c24279a89a6985fb570e04ee7ed8c01b839f765846825bd06708c31"
+    }
+  ]
+}

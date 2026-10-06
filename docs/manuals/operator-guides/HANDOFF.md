@@ -1,5 +1,126 @@
 # Operator Guide Continuation Handoff
 
+## Manual Work Resume Checkpoint - 2026-10-06
+
+This is the entry point when returning to manuals after work in another area.
+The current checkpoint retains proposals and repairs the common authoring
+method; the next guide PDFs have not yet been reauthored under that method.
+
+- Objective: update guides for the changed system and improve their usefulness
+  while developing the successful direction of the accepted guides.
+- Start with AGENTS.md, [authoring-method.md](authoring-method.md), the current
+  shared standards and owner decisions, and the relevant family/specification
+  and linked version reviews. Reconcile required standards, desired targets,
+  retired points and open gaps before carrying forward baseline content.
+- Distinguish required application/standards corrections from chosen reader
+  improvements. Plan the whole task/choice structure before screenshots and
+  layout. Judge the complete rendered guide for flow, recognition and effort.
+- Use the [method review](reviews/authoring-method-repair-2026-10-06.md) for
+  causal reasoning and countercases, and the
+  [all-guide audit](reviews/guide-purpose-and-quality-audit-2026-10-06.md) for
+  known issues across all 25 subjects. The earlier SC-01-only pilot advice is
+  historical; the method applies to every affected guide in a requested batch.
+- AC-01 v10 is owner-rejected. SC-01 v13 requires rework. The 19 October batch
+  proposals are held as an editorial recommendation, not a blanket owner
+  rejection. WF-01 v15 and WF-02 v13 remain unaccepted comparison drafts;
+  retain their prior feedback and the accepted WF-01 v13 / WF-02 v10 selection.
+- Preserve all exact historical/accepted artifacts. Use the registry and round
+  manifests to select comparison versions and a new unused integer; do not
+  overwrite a retained candidate or equate generation with acceptance.
+- Retained PDFs, HTML, inputs, captures and provenance are under
+  `resources/manuals/operator-guides/`, including accepted-guides-v1 and the
+  three 2026-10-01 review rounds. These are the portable source artifacts.
+  `output/manuals/` review kits and `output/pdf/` delivery copies are ignored
+  convenience exports, not the only copies of the retained review artifacts.
+- Dated generators reproduce their historical proposals. Their generic added
+  pages and frozen HTML do not decide the next revision's content. Exact-byte
+  Git attributes protect hash-locked renderer inputs across Windows checkouts.
+- Before new evidence, verify the running application's actual source/mount
+  and release behavior. Prior captures came from the separate
+  `refurbisher-followups` worktree, not this checkout. Global Dutch did not
+  override the demo accounts' English preferences; verify both and visible
+  labels. Missing Dutch controls remain translation/evidence gaps.
+- Open work: produce and review revised guides under the repaired method;
+  resolve material product/operational gaps; perform relevant save/reopen,
+  restricted-role, operator and physical A4 checks. Report integrity, editorial
+  inference, observed trials and exact acceptance separately. Earlier passing
+  geometry/hash checks did not establish that the October guides improved.
+
+This manual checkpoint excludes concurrent printer/Olimex implementation and
+runtime work. No application/settings change, new PDF or acceptance is made
+by saving this context. The current checkpoint is local; a Git commit is not
+a push or a deployment.
+
+## General Authoring Reasoning Repair On 2026-10-06
+
+Owner requests a general repair of the reasoning used across all guides.
+Accepted guides establish a successful direction to develop: update them for
+current behavior and improve the reader's experience. Distinguish required
+updates from chosen improvements and judge the complete result against that
+direction. Use
+[authoring-method.md](authoring-method.md) and the
+[method review](reviews/authoring-method-repair-2026-10-06.md).
+Reconcile current standards and linked owner decisions with the older guide
+and specification before reuse. The brief distinguishes required standards,
+desired targets, retired approaches and open gaps; the whole rendered guide
+is checked against them. Accepted history cannot restore a superseded point.
+Before new authoring, derive reader outcome, relevance, structure, evidence
+jobs and composition; record a short brief and read back the rendered meaning.
+Apply feedback as principles with boundaries, not universal cosmetic rules.
+This supersedes the earlier next-action advice to make SC-01 first; the guide
+rejections and frozen artifact decisions below remain unchanged. Apply the
+method to every affected guide when a batch is requested. No new PDF or
+application/settings write is part of this reasoning repair.
+
+## Guide Quality Review On 2026-10-06
+
+Start with the [all-guide audit and recovery brief](reviews/guide-purpose-and-quality-audit-2026-10-06.md).
+Owner rejected AC-01 v10 and requires SC-01 v13 rework; no blanket owner
+decision exists for the remaining proposals. The nineteen-guide October batch
+is held as an editorial replacement recommendation. Do not bulk-generate from
+its generic three-step supplement or treat its frozen HTML as approved scope.
+Preserve accepted artifacts and prior workflow feedback. Next authoring should
+use a focused SC-01 proof with one scan/search choice and Dutch evidence,
+followed by necessary handoff/release/registration corrections in their flows.
+Global Dutch is already set locally; capture-account preferences override it
+with English, and some new catalogue labels lack translations. Check both
+before another capture. No new PDFs or application/settings writes in this audit.
+
+## Application-Aligned Review Drafts - 2026-10-01
+
+19 affected guides now have separate unaccepted revisions: 66 A4 pages, with fourteen added instructional pages. The [batch comparison](reviews/aligned-guides-2026-10-01.md) lists each old/new PDF and its scope. A [25-guide review index](../../../output/manuals/aligned-guide-review-kit-2026-10-01/index.html) includes WF-01 v15/WF-02 v13 plus four unchanged guides. No accepted/runtime selection or historical PDF changed. Physical printing, controlled-user/save trials and exact-version review remain pending.
+
+
+## Unaccepted Workflow Comparison - 2026-10-01
+
+WF-01 v15 and WF-02 v13 are the latest working drafts for explicit owner comparison;
+neither is accepted. Read the
+[paired review](reviews/workflow-revisions-2026-10-01.md) before continuing.
+The [v15 correction](reviews/WF-01-v15.md) responds to owner feedback on 2A's
+unnatural blocked first view and "afgesproken rij" wording. V14 remains frozen.
+The new round preserves prior PDFs and uses fresh local workflow evidence.
+Current accepted selections remain WF-01 v13 and WF-02 v10; the previous
+unaccepted WF-02 v12 remains the immediate visual comparison. Do not advance
+selection or acceptance based on this generation or the model change.
+
+## USR-05 / CAT-05 / CAT-06 V2 - 2026-09-15
+
+The revised working drafts are USR-05 v2 (3 pages), CAT-05 v2 (8 pages), and
+CAT-06 v2 (3 pages). See the [revision review](reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md) for changes,
+exact artifacts, checks and remaining operator trials. The three v1 PDFs and
+all accepted artifacts are retained unchanged; v2 is not acceptance.
+
+
+## USR-05 / CAT-05 / CAT-06 Content Audit - 2026-09-15
+
+The owner requested rework for alignment with the other guides. All three v1
+drafts need content revision; use the [audit and concrete v2 briefs](reviews/USR-05-CAT-05-CAT-06-content-audit-2026-09-15.md)
+before authoring. The main issues are effective-access semantics in USR-05,
+incomplete/contradictory maintenance branches in CAT-05, and missing worked
+source verification plus author-facing copy in CAT-06. This audit retains all
+PDFs and records feedback in their exact-version review files. No v2 has been
+generated yet.
+
 ## Accepted Guide Folder - 2026-09-10
 
 Latest delivery: [accepted-guides-v1](../../../resources/manuals/operator-guides/accepted-guides-v1/README.md),
@@ -185,20 +306,21 @@ changes.
 | USR-02 Rol en rechten wijzigen | v9 draft | Visual-correction pass; v7 remains accepted | Review the separate `Machtigingen` and rights-grid focus areas. |
 | USR-03 Wachtwoord resetten | v3 draft | Visual-correction pass; awaiting exact-version review | Review the visible unsaved generated value, `Genereer` focus, and full AC-02 handoff. |
 | USR-04 Gebruiker uitschakelen of herstellen | v3 draft | Visual-correction pass; awaiting exact-version review | Review rectangular actions, contained warning text, and full references on both pages. |
-| USR-05 Groepen beheren | Planned | Investigation required | Investigate group list, add/edit controls, permission behavior, and verification route. |
+| USR-05 Groepen beheren | v2 draft | Unaccepted three-page choice/permissions/test flow | Run the controlled browser-user allowed/forbidden test; resolver checks are not that trial. |
 | CAT-00 Catalogus begrijpen | v9 draft | Portable unaccepted diagram-correction revision | Review the exact six-page overview, especially the unobstructed object-map connectors, page 3 definition branches, page 4 state branch, and guide routing. |
 | CAT-01 Model en modelnummer aanmaken | v5 draft | Portable unaccepted administration flow | Review the two-page duplicate check, action-named Basismodel creation route, default-configuration label rule, complete save flow, and CAT-02/AST-03 handoffs. |
 | CAT-02 Modelspecificatie opbouwen | v1 draft | Portable unaccepted six-page working draft | Review exact-model validation, direct/component choice, both add routes, derived-value conflict handling, Save, and final verification. |
 | CAT-03 Attributen beheren | v1 draft | Portable unaccepted five-page working draft | Build the next draft from the four `-02` attribute-form captures, then review scope/behavior, numeric/Enum alternatives, and the saved-row check. |
 | CAT-04 Componentdefinities beheren | v2 draft | Portable unaccepted six-page working draft | Build the next draft from the five `-02` component-definition captures, then review Required guidance, contributions, hierarchy correction, and Save. |
-| CAT-05 Varianten en lifecycle beheren | Planned | Scope/title review required | Narrow to branching Admin lifecycle and cleanup; do not repeat variant creation from CAT-01 or invent component-definition deletion. |
-| CAT-06 Catalogus controleren en bronnen | Planned | Verification scope ready; recording policy unresolved | Decide whether v1 is verification-only; do not claim durable source storage without an implemented field or approved convention. |
+| CAT-05 Bestaande catalogus aanpassen | v2 draft | Unaccepted eight-page screen-based maintenance task finder | Execute disposable lifecycle/cleanup trials and first-time navigation review. |
+| CAT-06 Productgegevens controleren | v2 draft | Unaccepted three-page evidence check before CAT-01/CAT-02 | Owner review and source-retention/fallback policy; exact-SKU RAM remains unresolved in the example. |
 
 AST-01 is retired into SC-01 and remains historical evidence only.
 
-CAT-02 v1 is generated and awaits exact-version review. The next production
-task is CAT-05 lifecycle and saved-row cleanup; CAT-06 remains dependent on
-the source-recording decision. CAT-03 and CAT-04 are already generated
+USR-05 v2, CAT-05 v2, and CAT-06 v2 supersede the three retained v1 drafts for
+current review. They await exact-version acceptance and the recorded operator
+trials. CAT-06 remains dependent on the source-recording decision for internal
+acceptance. CAT-03 and CAT-04 are already generated
 definition-management references and must not be replanned as downstream work
 from CAT-02.
 

@@ -23,6 +23,19 @@
   and otherwise complete the browser's one-time camera permission prompt.
   Verify **Scan QR** with the phone after both settings are applied.
 
+## Manual Work Checkpoint - 2026-10-06
+
+Resume from [the manual handoff](docs/manuals/operator-guides/HANDOFF.md).
+
+- [x] Record the repaired authoring method, current/desired standards, retired
+  approaches and exact owner feedback in maintained guide documentation.
+- [x] Retain the October proposals, evidence and comparisons as unaccepted
+  history, preserving accepted artifacts and selections.
+- [ ] Reauthor affected guides under the method: reconcile standards and changed
+  behavior, then assess the complete revision against the accepted direction.
+- [ ] Complete relevant operator, actual-A4 and controlled execution checks;
+  record their evidence separately from artifact integrity and exact acceptance.
+
 ## Production Host And CUPS Migration - 2026-09-17
 
 - [x] Move Snipe-IT to `10.10.10.249`. The immutable application deployment,
@@ -143,14 +156,15 @@
   repository asset/runtime contract; keep superseded generators isolated under
   `scripts/manuals/archive/` as non-portable history.
 - [x] Add the operator-guide handoff, authoritative guide sources, maintained
-  generators, 103 canonical evidence files, locked baselines, and nine exact
+  generators, 111 canonical evidence files, locked baselines, and nine exact
   internal-review candidate PDFs to versioned repository storage.
 - [ ] Move the superseded CAT-00 v7 and v8 drafts out of the live draft root
   after the external PDF reader releases them, then rerun the strict package
   verifier without a clean-mirror override.
 - [x] Refresh the repository internal-review package to include USR-01 v8 and
   USR-02 v7 with a checksum manifest.
-- [ ] Investigate, capture, and draft USR-05 Groepen beheren for reusable group creation and editing.
+- [x] Investigate, capture, and draft USR-05 Groepen beheren v1 for reusable group creation and editing.
+- [ ] Review USR-05 v2 as an exact three-page working draft and run its controlled-user required/forbidden-route test.
 - [x] Define USR-03 password handoff as personal transfer followed immediately
   by AC-02; do not use chat, email, notes, tickets, or screenshots.
 - [ ] Decide whether AC-02 needs a controlled success-message capture; the current draft deliberately stops at the empty form and save action.
@@ -184,7 +198,12 @@
   replacement sources and remeasure their source-pixel focus annotations.
 - [ ] Review CAT-02 v1 as an exact six-page working draft; do not mark it
   accepted without explicit approval.
-- [ ] Generate CAT-05 after CAT-01/CAT-02 wording settles.
+- [x] Generate CAT-05 v1 as five alternative Admin lifecycle/cleanup pages without repeating CAT-01 creation.
+- [ ] Review CAT-05 v2 and execute each risky maintenance branch against disposable controlled data.
+- [x] Generate CAT-06 v1 as a verification-only three-page draft without claiming durable source storage.
+- [x] Revise USR-05, CAT-05 and CAT-06 as new v2 drafts from the cross-guide audit; preserve v1/accepted bytes.
+- [ ] Review the exact CAT-06 v2 worked HP source comparison, including its explicitly unresolved exact-variant RAM.
+- [ ] After owner review, revise incoming planned-guide wording in new versions of USR-01/02, CAT-00/02/03/04; never overwrite retained PDFs.
 - [ ] Decide where catalogue source and verification evidence is recorded
   before CAT-06 can become an internal review candidate.
 - [x] Defer battery-health automation to the post-V1 Windows inventory/diagnostic
@@ -252,4 +271,5 @@ Full scope, version targets, evidence, advice and pitfalls:
 - [Implementation and PDFs](docs/manuals/operator-guides/reviews/owner-corrections-2026-09-10.md).
 - [ ] Observe a first-time-reader exercise, including an interrupted unsaved CAT/CMP form and return to the same record.
 - [ ] Scope separate account reactivation, deletion and restoration instructions; USR-04 now only disables login.
-- [ ] Resolve and produce planned USR-05, CAT-05 and CAT-06 tasks; confirm profile/QA responsibilities and local help contacts.
+- [x] Produce versioned USR-05, CAT-05 and verification-only CAT-06 working drafts.
+- [ ] Confirm their profile/QA responsibilities, local help contacts, controlled execution checks, and exact-version review decisions.

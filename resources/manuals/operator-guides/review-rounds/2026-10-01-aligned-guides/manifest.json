@@ -1,0 +1,2451 @@
+{
+  "date": "2026-10-01",
+  "status": "Working drafts - not accepted",
+  "acceptedSelectionChanged": false,
+  "evidenceContext": "Local dev.inbit; source worktree c539b9cd18; old embedded evidence retained where controls are unchanged.",
+  "generator": {
+    "file": "scripts/manuals/generate-aligned-guides-2026-10-01.mjs",
+    "sha256": "7f2df1d38005b0138c9b63227201b974d51f1d67c160de23a68c8e186d86b796"
+  },
+  "content": {
+    "file": "scripts/manuals/aligned-guide-content-2026-10-01.mjs",
+    "sha256": "a3fff251bd7118ff2b72a839be5f366f51612b7f52c3d8d731e6ae115704ea13"
+  },
+  "shared": [
+    {
+      "file": "scripts/manuals/lib/guide-system.mjs",
+      "sha256": "b1d0f5744b30e9cf24f2a125865b6c1917f462f46da6700c4d6e3270945878a1"
+    },
+    {
+      "file": "scripts/manuals/lib/guide-paths.mjs",
+      "sha256": "634b1c0c2944afb1c93b5b5dd9b9fe97f5d7dac96303581a69b51636949a7521"
+    }
+  ],
+  "evidence": [
+    {
+      "file": "evidence/ACCOUNT-MENU-MOBILE-01.jpg",
+      "sha256": "90d8e9bc42a8cc094ae5ea93956d5662667425e4d03f1f20a666b27496fe2f65",
+      "width": 430,
+      "height": 1000,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/ASSET-INFO-READONLY-MOBILE-01.jpg",
+      "sha256": "19a2e7c632b592e52386e452acd69753a016daf79bb1cde39ffe97f2221302de",
+      "width": 415,
+      "height": 4402,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/ASSET-INFO-SUPERVISOR-MOBILE-01.jpg",
+      "sha256": "d22ae59b68aff04c7b77b22f24cce095503a1749bc8cfa2225a99ea1cf366209",
+      "width": 415,
+      "height": 4628,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/ATTRIBUTE-AGGREGATION-DESKTOP-01.jpg",
+      "sha256": "1016d8dff5e488f5977f348cbebc5ddfa48f2f18b48d6730d8d8400405d0a32e",
+      "width": 1424,
+      "height": 1200,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/ATTRIBUTES-LIST-DESKTOP-01.jpg",
+      "sha256": "c88203a076245fa89f3ad7f27dffb85ecb763cd919068582263c6c6dae992834",
+      "width": 1424,
+      "height": 1304,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/COMPONENT-DEFINITION-EDIT-DESKTOP-01.jpg",
+      "sha256": "9c0d495a46ad7db22eef27ad0d042096219aa10b46b9c9e46ee997f20a0d1ba6",
+      "width": 1424,
+      "height": 1300,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/COMPONENT-DEFINITIONS-DESKTOP-01.jpg",
+      "sha256": "8cf42e74fb12275dafcd024c5f8aa4072dd27e35986430f5efc6bd66085b77e2",
+      "width": 1440,
+      "height": 1100,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/CREATE-LAPTOP-MOBILE-01.jpg",
+      "sha256": "c1b6592048d50e2d83ee3630f3bb6d1057edd6be57d695ed36201d57c276e8b8",
+      "width": 415,
+      "height": 1779,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/CREATION-RESULT-MOBILE-01.jpg",
+      "sha256": "0324b052e30404a1b755c519528607f2a7cd610143ac79f0f97f5e4ea7ad6c97",
+      "width": 430,
+      "height": 1000,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/DASH-CREATE-MOBILE-01.jpg",
+      "sha256": "6b4230f19256f28aa8567270c4bd8a3bc45af83cb4f746b19b55057ad4f925bf",
+      "width": 430,
+      "height": 1000,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/DASH-REFURBISHER-MOBILE-01.jpg",
+      "sha256": "52dd4cd49a7c03bfb819f81e2f2def8f629e8f556edb0c91beac8235d86afa3a",
+      "width": 430,
+      "height": 1000,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/LOGIN-MOBILE-01.jpg",
+      "sha256": "3e88b5be3dc949711fa3ed6add59a4fc79714df76143fc97d4f298ebe229c9d7",
+      "width": 430,
+      "height": 1000,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/MODEL-NUMBERS-DESKTOP-01.jpg",
+      "sha256": "f2d93d0edbb9d7e2a510bd2c568fdf0b53acbba64332d77b9a35442631873d4f",
+      "width": 1440,
+      "height": 1100,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/MODEL-SPEC-DESKTOP-01.jpg",
+      "sha256": "52fb56fd26871e038bc3f7c79dd98219041ee6899260057f5ddd7611bdbabad1",
+      "width": 1424,
+      "height": 3709,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/PASSWORD-FORM-MOBILE-01.jpg",
+      "sha256": "fca65a59c2ade901fd5d18255709aa84145d0fb24cded083c5cc5989d8b46636",
+      "width": 430,
+      "height": 1000,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/RELEASE-CONFIRM-ISSUES-MOBILE-01.jpg",
+      "sha256": "6d6b20f4100d2a2ef717797237c992dd9fcdc16e4309148394ad6af5cb7b2a21",
+      "width": 430,
+      "height": 999,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/SCAN-RECOVERY-MOBILE-01.jpg",
+      "sha256": "9eb181a9feba6eb492de9aba8d95872aad9b04af27630d0263fd974503218e25",
+      "width": 415,
+      "height": 1356,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/STATUS-ACCESS-DESKTOP-01.jpg",
+      "sha256": "87eb1564bc224d2a11c8228e83a5b2eae9adc9c4e000e3a1452c2d6008cc57da",
+      "width": 1424,
+      "height": 1296,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/USER-ACCOUNT-FORM-DESKTOP-01.jpg",
+      "sha256": "9e393e1ce5f541a7fe5c379c1b5ddefa3b4d7c8d21e0c26a54a516baac63b821",
+      "width": 1440,
+      "height": 1100,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/USER-ASSET-PERMISSIONS-DESKTOP-01.jpg",
+      "sha256": "683d489d2fd6c7cc730bd1572e8d4f3ef28aaaf584f12002f5e55e7707d41f3d",
+      "width": 1230,
+      "height": 1050,
+      "format": "jpeg"
+    },
+    {
+      "file": "evidence/WORKFLOWS-SUPERVISOR-MOBILE-01.jpg",
+      "sha256": "ea116fef39b335ec838e91ed04ee133f82098ef5cdaa8d41adfd581728d8a60d",
+      "width": 415,
+      "height": 1139,
+      "format": "jpeg"
+    }
+  ],
+  "guides": [
+    {
+      "code": "AC-01",
+      "title": "Login",
+      "version": 10,
+      "status": "Working draft - not accepted",
+      "pages": 1,
+      "file": "AC-01-login-v10-draft.pdf",
+      "bytes": 825850,
+      "sha256": "903b7814d044681dc8f7b0f7df447ef71ceefa6a697f77e6ec0725367d3bb307",
+      "htmlSha256": "9573055ccd72e46a2628a3c8ccfa1c058b18897c57de0ba393ef8c12130b255a",
+      "previous": {
+        "file": "resources/manuals/operator-guides/review-rounds/2026-09-08/AC-01-login-v9-draft.pdf",
+        "version": 9,
+        "sha256": "c9f77eaf5461cb952036eb9ffa9400da0295a9171534f5db3074b574b8fc6785",
+        "pages": 1
+      },
+      "input": {
+        "file": "inputs/AC-01-login-v9-draft.html",
+        "sha256": "6f03ee9991604b158fac8ca5f9325037c5c3308857c203c4b9d4c7ac6f97aae7"
+      },
+      "delta": "Current login, compact session identity menu and role-dependent dashboard.",
+      "patches": [
+        {
+          "index": "16",
+          "previous": "Vul in en tik Inloggen.",
+          "value": "Vul in; tik Inloggen.",
+          "original": {
+            "x": 83.73541259765625,
+            "y": 92.61870574951172,
+            "width": 24.61966896057129,
+            "height": 2.9104652404785156
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "21",
+          "previous": "Klaar als het dashboard zichtbaar is.",
+          "value": "Controleer je eigen account.",
+          "original": {
+            "x": 145.99998474121094,
+            "y": 92.61870574951172,
+            "width": 41.301368713378906,
+            "height": 2.9104652404785156
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "23",
+          "previous": "Dashboard:Scan QR of Apparaten zichtbaar.",
+          "value": "Scan QR en eigen recente apparaten.",
+          "original": {
+            "x": 145.99998474121094,
+            "y": 166.88328552246094,
+            "width": 32.75927734375,
+            "height": 5.6958770751953125
+          },
+          "lines": 2,
+          "maxLines": 2,
+          "tooMany": false
+        },
+        {
+          "index": "38",
+          "previous": "Het dashboard is zichtbaar en je kunt verder met de juiste gids.",
+          "value": "Je eigen account en het dashboard zijn zichtbaar.",
+          "original": {
+            "x": 38,
+            "y": 249.38330078125,
+            "width": 68.43314361572266,
+            "height": 2.6458775997161865
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        }
+      ],
+      "images": [
+        {
+          "index": 1,
+          "file": "LOGIN-MOBILE-01.jpg",
+          "crop": [
+            28,
+            65,
+            365,
+            670
+          ]
+        },
+        {
+          "index": 2,
+          "file": "ACCOUNT-MENU-MOBILE-01.jpg",
+          "crop": [
+            5,
+            90,
+            410,
+            610
+          ]
+        }
+      ],
+      "newPage": null,
+      "qa": {
+        "pages": 1,
+        "images": 3,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "AC-02",
+      "title": "Eigen wachtwoord wijzigen",
+      "version": 5,
+      "status": "Working draft - not accepted",
+      "pages": 1,
+      "file": "ac-02-eigen-wachtwoord-wijzigen-v5-draft.pdf",
+      "bytes": 160601,
+      "sha256": "5d6abe4ae495cc9fd9307e811a5f3106b9d121d1d4c34f5336d1d823e27943ee",
+      "htmlSha256": "ccacd3aad45eb20c592648c5e37aa5080af39dbac4fd12be7dba32c989022002",
+      "previous": {
+        "file": "resources/manuals/operator-guides/review-rounds/2026-09-08/ac-02-eigen-wachtwoord-wijzigen-v4-draft.pdf",
+        "version": 4,
+        "sha256": "923f185a1b0b594083b507c630c1b54783e50d13fe22a04a79d3b8e5f794f12d",
+        "pages": 1
+      },
+      "input": {
+        "file": "inputs/ac-02-eigen-wachtwoord-wijzigen-v4-draft.html",
+        "sha256": "7a24ab49bf5389bf713a1f1c3beb59c13e197c07a8fdd274629604738d2d73ad"
+      },
+      "delta": "Compact account menu, actual repeated New Password label and visible password requirements.",
+      "patches": [
+        {
+          "index": "12",
+          "previous": "Open rechtsboven het accountmenu.Kies Wachtwoord wijzigen.",
+          "value": "Open het accountmenu rechtsboven. Kies Change Password.",
+          "original": {
+            "x": 23,
+            "y": 75.68329620361328,
+            "width": 38.534725189208984,
+            "height": 5.795875549316406
+          },
+          "lines": 2,
+          "maxLines": 2,
+          "tooMany": false
+        },
+        {
+          "index": "17",
+          "previous": "Huidig wachtwoord.Nieuw privéwachtwoord, daarna nogmaals hetzelfde.Hergebruik het tijdelijke wachtwoord niet.",
+          "value": "Vul Current Password in. Nieuw: 8+ tekens, hoofdletter en cijfer. Herhaal onderaan bij New Password.",
+          "original": {
+            "x": 22.999998092651367,
+            "y": 128.6833038330078,
+            "width": 55.116943359375,
+            "height": 8.94586181640625
+          },
+          "lines": 2,
+          "maxLines": 3,
+          "tooMany": false
+        },
+        {
+          "index": "19",
+          "previous": "Vul huidig, nieuw en bevestiging in.",
+          "value": "Onderste veld = herhaling.",
+          "original": {
+            "x": 91.73541259765625,
+            "y": 159.64788818359375,
+            "width": 34.89250946044922,
+            "height": 2.3812899589538574
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "22",
+          "previous": "Kies Opslaan en lees de melding.Gelukt: Uw wachtwoord is bijgewerkt!Foutmelding? Corrigeer het genoemde velden sla opnieuw op. Ga pas verder na succes.Andere aangemelde apparaten worden uitgelogd.",
+          "value": "Kies Save en lees de melding. Bij een fout: herstel het genoemde veld en probeer opnieuw. Ga pas verder na succes. Andere aangemelde apparaten worden uitgelogd.",
+          "original": {
+            "x": 22.735410690307617,
+            "y": 181.68328857421875,
+            "width": 51.86333465576172,
+            "height": 15.245880126953125
+          },
+          "lines": 3,
+          "maxLines": 5,
+          "tooMany": false
+        },
+        {
+          "index": "25",
+          "previous": "Opslaan bevestigt de wijziging en sluit andere sessies.",
+          "value": "Save bewaart na geldige invoer.",
+          "original": {
+            "x": 92,
+            "y": 212.6478729248047,
+            "width": 53.38057327270508,
+            "height": 2.3812899589538574
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "34",
+          "previous": "Volg de zichtbarewachtwoordregel.",
+          "value": "Volg de invoerregel.",
+          "original": {
+            "x": 62.98541259765625,
+            "y": 242.61245727539062,
+            "width": 15.155914306640625,
+            "height": 4.56671142578125
+          },
+          "lines": 2,
+          "maxLines": 2,
+          "tooMany": false
+        }
+      ],
+      "images": [
+        {
+          "index": 0,
+          "file": "ACCOUNT-MENU-MOBILE-01.jpg",
+          "crop": [
+            198,
+            115,
+            220,
+            148
+          ]
+        },
+        {
+          "index": 1,
+          "file": "PASSWORD-FORM-MOBILE-01.jpg",
+          "crop": [
+            15,
+            202,
+            400,
+            284
+          ]
+        },
+        {
+          "index": 2,
+          "file": "PASSWORD-FORM-MOBILE-01.jpg",
+          "crop": [
+            250,
+            488,
+            164,
+            58
+          ]
+        }
+      ],
+      "newPage": null,
+      "qa": {
+        "pages": 1,
+        "images": 3,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "SC-01",
+      "title": "Asset vinden en openen",
+      "version": 13,
+      "status": "Working draft - not accepted",
+      "pages": 2,
+      "file": "SC-01-asset-vinden-en-openen-v13-draft.pdf",
+      "bytes": 1260094,
+      "sha256": "3cd9e27d0b6aceb23ed1aaae8ed7614ed78943e57a85153b36a6a93801d39a95",
+      "htmlSha256": "3b5657c8b96cb71948475b34366e8bcecbc7a05e6ff970b986c3cb6a4b047701",
+      "previous": {
+        "file": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/SC-01-asset-vinden-en-openen-v12-draft.pdf",
+        "version": 12,
+        "sha256": "bc29b532a2cea8dad759307c4abcf378a10114eb1205582c88ba1a5b5767461e",
+        "pages": 1
+      },
+      "input": {
+        "file": "inputs/SC-01-asset-vinden-en-openen-v12-draft.html",
+        "sha256": "044c9df33ed458f9f77c6e2d0c3ccd86802fb8b76363ad5e64762e71adc8dc00"
+      },
+      "delta": "Recent devices, camera fallback, ambiguous identifier handling and identifier-first asset info.",
+      "patches": [
+        {
+          "index": "27",
+          "previous": "Als scannen niet lukt:typ asset tag, QR-code of serienummer.",
+          "value": "Zoek op tag, QR of serienummer.",
+          "original": {
+            "x": 115.73540496826172,
+            "y": 137.38330078125,
+            "width": 43.524681091308594,
+            "height": 5.745880126953125
+          },
+          "lines": 1,
+          "maxLines": 2,
+          "tooMany": false
+        },
+        {
+          "index": "33",
+          "previous": "Vergelijk asset tag, model en apparaat voordat je verdergaat.",
+          "value": "Vergelijk tag, serienummer en model met het apparaat.",
+          "original": {
+            "x": 21.73541259765625,
+            "y": 214.0832977294922,
+            "width": 66.38672637939453,
+            "height": 2.6458775997161865
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "55",
+          "previous": "WF-01 Start",
+          "value": "WF-01 Workflow starten",
+          "original": {
+            "x": 86.73541259765625,
+            "y": 287.90411376953125,
+            "width": 15.670970916748047,
+            "height": 3.439640998840332
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "57",
+          "previous": "HELP-01 Help",
+          "value": "HELP-01 Problemen en hulp",
+          "original": {
+            "x": 130,
+            "y": 287.90411376953125,
+            "width": 17.51228141784668,
+            "height": 3.439640998840332
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        }
+      ],
+      "images": [],
+      "newPage": {
+        "title": "Recente apparaten en zoeken zonder camera",
+        "role": "Refurbisher",
+        "need": "Tag of serienummer",
+        "before": "AC-01",
+        "steps": [
+          {
+            "title": "Open recent werk vanaf het dashboard",
+            "body": "Recent devices toont apparaten die jij eerder hebt geopend. Tik op de asset tag van het apparaat dat je nu voor je hebt. Scan QR blijft de route voor een ander apparaat.",
+            "shot": "DASH-REFURBISHER-MOBILE-01.jpg",
+            "crop": [
+              12,
+              515,
+              400,
+              158
+            ],
+            "caption": "Recent devices: een link is een eerdere bezoekroute."
+          },
+          {
+            "title": "Gebruik Manual entry als de camera niet werkt",
+            "body": "Open Scan QR. Vul onder Manual entry de asset tag, QR-waarde of het serienummer in en kies Search. Bij meerdere treffers: kies pas na vergelijking. Controleer typefouten als er geen resultaat is.",
+            "shot": "SCAN-RECOVERY-MOBILE-01.jpg",
+            "crop": [
+              12,
+              1120,
+              391,
+              190
+            ],
+            "caption": "Onder de camera staat Manual entry met Search."
+          },
+          {
+            "title": "Controleer de identiteit op Info",
+            "body": "Lees asset tag en Serial voordat je een workflow opent. Vergelijk ook model en fysiek label. Een recente link of geslaagde scan is op zichzelf geen identiteitscontrole. Afwijking? Wijzig niets en vraag een supervisor.",
+            "shot": "ASSET-INFO-READONLY-MOBILE-01.jpg",
+            "crop": [
+              15,
+              1155,
+              385,
+              270
+            ],
+            "caption": "Info toont de identificatie en status van dit apparaat."
+          }
+        ],
+        "help": [
+          "Geen camera: gebruik Manual entry; laat een blijvend probleem lokaal oplossen.",
+          "Verkeerde of dubbele match: wijzig niets; toon label en scherm aan de supervisor."
+        ],
+        "done": "De geopende asset komt overeen met het fysieke apparaat.",
+        "related": [
+          "WF-01",
+          "AST-03",
+          "HELP-01"
+        ]
+      },
+      "qa": {
+        "pages": 2,
+        "images": 9,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "AST-02",
+      "title": "Refurbishment route",
+      "version": 9,
+      "status": "Working draft - not accepted",
+      "pages": 2,
+      "file": "AST-02-refurbishment-route-v9-draft.pdf",
+      "bytes": 307146,
+      "sha256": "4ea97a11ce1c0c38267f897dab499e0df652a8c193854469075f946a88728616",
+      "htmlSha256": "184a02f725e95ee4f51603622ec16393abec300a4bb9b51972353ffc10347312",
+      "previous": {
+        "file": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/AST-02-refurbishment-route-v8-draft.pdf",
+        "version": 8,
+        "sha256": "f932df1e44ca6fe5a3747efb0d2988e601939f9c9832e2ee6fd295889fb87846",
+        "pages": 1
+      },
+      "input": {
+        "file": "inputs/AST-02-refurbishment-route-v8-draft.html",
+        "sha256": "bd63f8a3aae85a33875d2ee233363c19db4fa6f339fed3b1f41d49a9333cf342"
+      },
+      "delta": "Ordered workflows, blocked follow-ups, QA note and separate quality/status permissions.",
+      "patches": [
+        {
+          "index": "4",
+          "previous": "Juiste onafgeronde run? Open die. OF start eenmaal een nieuwe run.",
+          "value": "Begin bij de eerste beschikbare workflow. Start OF hervat de juiste run."
+        },
+        {
+          "index": "6",
+          "previous": "Controleer werk en zet klaar voor beoordeling.",
+          "value": "Controleer het werk en draag met een notitie over."
+        },
+        {
+          "index": "7",
+          "previous": "Supervisor beoordeelt en bepaalt de eindstatus.",
+          "value": "Supervisor beoordeelt bewijs en bevestigt het vervolg."
+        }
+      ],
+      "images": [],
+      "newPage": {
+        "title": "Kies de volgende taak vanuit de actuele asset",
+        "role": "Refurbisher",
+        "need": "Juiste asset open",
+        "before": "SC-01",
+        "steps": [
+          {
+            "title": "Lees eerst Info en controleer de identiteit",
+            "body": "Vergelijk tag, Serial en model. Status beschrijft de fase; Quality Grade beschrijft de kwaliteit. Kun je kwaliteit alleen lezen? Laat een bevoegde Senior Refurbisher of supervisor de waarde beoordelen.",
+            "shot": "ASSET-INFO-READONLY-MOBILE-01.jpg",
+            "crop": [
+              15,
+              1300,
+              385,
+              400
+            ],
+            "caption": "Status en kwaliteit hebben elk hun eigen betekenis."
+          },
+          {
+            "title": "Volg de workflowvolgorde",
+            "body": "Open de testtab. Begin bijvoorbeeld bij Wipe of Standard Diagnostics, afhankelijk van het proces voor dit model. Een grijze vervolgstap wacht op eerder werk. Start active? WF-01. Een bestaande run? Hervat met WF-02.",
+            "shot": "WORKFLOWS-SUPERVISOR-MOBILE-01.jpg",
+            "crop": [
+              20,
+              430,
+              379,
+              325
+            ],
+            "caption": "Dit supervisorvoorbeeld toont vervolgvoorwaarden per rij."
+          },
+          {
+            "title": "Rond af en laat beoordelen",
+            "body": "Sla de run met Done op en controleer daarna alle vereiste workflows. Gebruik AST-04 voor de overdracht met QA-notitie. AST-05 beschrijft de supervisorbeoordeling en eventuele statusbevestiging.",
+            "diagram": "route",
+            "caption": "WF-02 > AST-04 > AST-05"
+          }
+        ],
+        "help": [
+          "Blocked: lees de reden; voltooi de voorganger of vraag de bevoegde rol.",
+          "Changed - new run needed: een oude Pass is onvoldoende; laat de actuele run uitvoeren."
+        ],
+        "done": "Je volgt de juiste taakgids voor de zichtbare fase en voorwaarden.",
+        "related": [
+          "WF-01",
+          "WF-02",
+          "AST-04",
+          "AST-05",
+          "HELP-01"
+        ]
+      },
+      "qa": {
+        "pages": 2,
+        "images": 2,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "AST-03",
+      "title": "Asset registreren en labelen",
+      "version": 16,
+      "status": "Working draft - not accepted",
+      "pages": 3,
+      "file": "AST-03-asset-registreren-en-labelen-v16-draft.pdf",
+      "bytes": 1074700,
+      "sha256": "72db4c3f0826589a038d27b52477de062fc60fb2374d8bd49ac853659a123db9",
+      "htmlSha256": "01bac46d36b3334db26503b095064efc304a4e722f837134ab1083bc77469abc",
+      "previous": {
+        "file": "resources/manuals/operator-guides/review-rounds/2026-09-08/AST-03-asset-registreren-en-labelen-v15-draft.pdf",
+        "version": 15,
+        "sha256": "5e838b9e57e868f81c2b7920ea5e4d76cde487a39fb406736912f7082ebe875d",
+        "pages": 2
+      },
+      "input": {
+        "file": "inputs/AST-03-asset-registreren-en-labelen-v15-draft.html",
+        "sha256": "b14b9e4389a2024a19e9cf3b20fc11e3b222d626725f1d933260b9b8001bf140"
+      },
+      "delta": "New Asset dashboard tile, permission-aware registration, Status note and direct QR printing after creation.",
+      "patches": [
+        {
+          "index": "2",
+          "previous": "Ga naar Nieuwe aanmaken",
+          "value": "Open het registratieformulier"
+        },
+        {
+          "index": "3",
+          "previous": "Begin bij 1A: dashboard > Apparaten.",
+          "value": "Nieuwe aanmaken zichtbaar? Open de dashboardtegel."
+        },
+        {
+          "index": "4",
+          "previous": "Kies daarna 1B OF 1C; gebruik maar een knop.",
+          "value": "OF gebruik Apparaten > +. Geen knop? Vraag een bevoegde collega."
+        },
+        {
+          "index": "21",
+          "previous": "Kies bij Status: Being Processed en tik eenmaal op Opslaan.",
+          "value": "Kies de afgesproken werkstatus. Vul een vereiste Status note in; tik eenmaal op Opslaan."
+        },
+        {
+          "index": "22",
+          "previous": "Controleer in 4B de asset tag, status, asset naam/model en het serienummer.",
+          "value": "Controleer tag, serienummer en model in het resultaatpaneel; vervolg op pagina 3."
+        },
+        {
+          "index": "23",
+          "previous": "Being Processed; tik op Opslaan.",
+          "value": "Controleer werkstatus en eventuele Status note."
+        },
+        {
+          "index": "24",
+          "previous": "Controleer tag, status, model en serienummer.",
+          "value": "Voorbeeld assetdetail; jouw nieuwe resultaat staat op pagina 3."
+        },
+        {
+          "index": "31",
+          "previous": "Open de opgeslagen asset",
+          "value": "Print vanuit het resultaatpaneel"
+        },
+        {
+          "index": "32",
+          "previous": "Controleer titel en asset tag voordat je een label print.",
+          "value": "Controleer tag, serienummer en model. Gebruik de printroute op pagina 3."
+        },
+        {
+          "index": "33",
+          "previous": "Geopende asset met herkenbare titel.",
+          "value": "Assetdetail als controle- en herprintroute."
+        },
+        {
+          "index": "35",
+          "previous": "Controleer het labelvoorbeeld en kies het afgesproken formaat.",
+          "value": "Na registratie: Print QR Code in het resultaatpaneel. Herprint: open de juiste asset en controleer het labelvoorbeeld."
+        },
+        {
+          "index": "36",
+          "previous": "Kies de juiste printerlocatie en tik eenmaal op Print QR label.",
+          "value": "Controleer de ingestelde printer; print eenmaal. Zie pagina 3 voor foutafhandeling."
+        }
+      ],
+      "images": [],
+      "newPage": {
+        "title": "Registreren en direct het QR-label printen",
+        "role": "Senior / Supervisor",
+        "need": "Identiteit en printer",
+        "before": "CAT-01",
+        "steps": [
+          {
+            "title": "Open New Asset op het dashboard",
+            "body": "De groene New Asset-tegel verschijnt met aanmaakrecht. Open die tegel, controleer de voorgestelde unieke tag en neem het echte serienummer over. Refurbisher zonder aanmaakrecht vraagt een bevoegde collega.",
+            "shot": "DASH-CREATE-MOBILE-01.jpg",
+            "crop": [
+              14,
+              245,
+              394,
+              155
+            ],
+            "caption": "New Asset is een directe ingang naar registratie."
+          },
+          {
+            "title": "Controleer model en vereiste statusnotitie",
+            "body": "Kies eerst categorie en daarna het exacte model/type. Kies de afgesproken werkstatus. Bij een status die een notitie vereist: schrijf de reden in Status note. Controleer alles en kies eenmaal Save. Duplicaatmelding? Zoek het bestaande record.",
+            "shot": "CREATE-LAPTOP-MOBILE-01.jpg",
+            "crop": [
+              18,
+              600,
+              380,
+              290
+            ],
+            "caption": "Model, Status en Status note in het aanmaakformulier."
+          },
+          {
+            "title": "Controleer de aangemaakte rij en print eenmaal",
+            "body": "Het resultaatpaneel toont tag, Serial en model. Controleer jouw rij en kies Print QR Code. Open Asset brengt je naar het dossier. Lees de printmelding; bij fout herstel je de printerroute en herprint je dezelfde asset. Maak geen tweede asset.",
+            "shot": "CREATION-RESULT-MOBILE-01.jpg",
+            "crop": [
+              14,
+              300,
+              400,
+              250
+            ],
+            "caption": "Voorbeeld resultaatpaneel; controleer jouw eigen rij."
+          }
+        ],
+        "help": [
+          "Printfout: behoud de opgeslagen asset; vraag lokale printerhulp voordat je herprint.",
+          "Meerdere assets: controleer iedere rij en eventuele fouten; print alleen de bedoelde labels."
+        ],
+        "done": "Registratie klopt; label geplaatst volgens pagina 2 en gecontroleerd met SC-01.",
+        "related": [
+          "SC-01",
+          "CAT-01",
+          "HELP-01"
+        ]
+      },
+      "qa": {
+        "pages": 3,
+        "images": 16,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "AST-04",
+      "title": "Werk afronden en overdragen",
+      "version": 7,
+      "status": "Working draft - not accepted",
+      "pages": 2,
+      "file": "AST-04-complete-handoff-v7-draft.pdf",
+      "bytes": 974054,
+      "sha256": "bdfd45891118c3b8ebc5e9b3fd19d492f3c65a51e3642e0b7d5fdc7871ad5263",
+      "htmlSha256": "435255166d7c85350491061f83777861e7706204f7e2c4587bd30439f83bfd0c",
+      "previous": {
+        "file": "resources/manuals/operator-guides/review-rounds/2026-09-08/AST-04-complete-handoff-v6-draft.pdf",
+        "version": 6,
+        "sha256": "de991dfcbc70b853f95135116e240e426d5582962accef6c3a26d7b40924b8c7",
+        "pages": 1
+      },
+      "input": {
+        "file": "inputs/AST-04-complete-handoff-v6-draft.html",
+        "sha256": "077971773f9e5164874f50590a9b1d0bf7af81936c35dfb6d9b40971ad3a9577"
+      },
+      "delta": "Current workflow readiness instead of historical Pass alone, quality read access, required QA audit note.",
+      "patches": [
+        {
+          "index": "4",
+          "previous": "Controleer alle verplichte profielen voor dit model: geen open kaart of Mislukt.",
+          "value": "Controleer alle vereiste workflows: afgerond, actueel en zonder open verplichte controle."
+        },
+        {
+          "index": "5",
+          "previous": "Set of bewijs onduidelijk? Vraag supervisor. Verberg geen mislukking.",
+          "value": "Changed of geblokkeerd? Vraag supervisor; verberg geen mislukking."
+        },
+        {
+          "index": "7",
+          "previous": "Een afgeronde run; controleer ook alle andere verplichte profielen.",
+          "value": "Historische Pass alleen is onvoldoende; controleer actuele workflowstatus."
+        },
+        {
+          "index": "15",
+          "previous": "Kies QA Hold. De wijziging wordt automatisch opgeslagen.",
+          "value": "Kies QA Hold; vul de vereiste overdrachtsnotitie in. Lees de melding."
+        },
+        {
+          "index": "16",
+          "previous": "Controleer dat QA Hold zichtbaar blijft en plaats het apparaat op de QA-locatie.",
+          "value": "Controleer pas daarna QA Hold en de opgeslagen notitie; zet het apparaat op de QA-locatie."
+        }
+      ],
+      "images": [],
+      "newPage": {
+        "title": "Maak de overdracht controleerbaar",
+        "role": "Refurbisher",
+        "need": "Afgerond werk",
+        "before": "WF-02",
+        "steps": [
+          {
+            "title": "Controleer de actuele workflowstatus",
+            "body": "Done slaat de run op. Open daarna de testtab: alle voor dit proces vereiste workflows moeten actueel en volledig zijn. Changed - new run needed of Waiting for prerequisites blijft werk. Een oudere Pass in de historie heft dat niet op.",
+            "shot": "WORKFLOWS-SUPERVISOR-MOBILE-01.jpg",
+            "crop": [
+              20,
+              430,
+              379,
+              325
+            ],
+            "caption": "Actuele voorwaarden blijven zichtbaar boven de runhistorie."
+          },
+          {
+            "title": "Leg afwijkingen en kwaliteit duidelijk vast",
+            "body": "Vergelijk identiteit, fysieke staat, label en onderdelen. Quality Grade is een afzonderlijke beoordeling. Kun je die alleen lezen of klopt hij niet? Geef de afwijking aan de bevoegde Senior Refurbisher of supervisor door; wijzig geen andere velden als omweg.",
+            "shot": "ASSET-INFO-READONLY-MOBILE-01.jpg",
+            "crop": [
+              15,
+              1155,
+              385,
+              270
+            ],
+            "caption": "Lees de assetgegevens voordat je overdraagt."
+          },
+          {
+            "title": "Schrijf de QA-notitie en controleer het resultaat",
+            "body": "Kies QA Hold en vul de gevraagde Status note in: wat is uitgevoerd, welke afwijking blijft en wat moet de supervisor beoordelen? Gebruik de bevestiging die het scherm vraagt. Controleer de status en opgeslagen notitie voordat je het apparaat op de QA-locatie zet.",
+            "diagram": "handoff",
+            "caption": "Tag + uitgevoerd werk + afwijking + gevraagde beoordeling"
+          }
+        ],
+        "help": [
+          "Notitie ontbreekt of status geweigerd: herstel de melding; controleer de opgeslagen status.",
+          "Nog werk open: rond het af of draag de blokkade expliciet aan een supervisor over."
+        ],
+        "done": "Dossier en apparaat zijn samen overgedragen met een begrijpelijke QA-notitie.",
+        "related": [
+          "WF-02",
+          "AST-05",
+          "HELP-01"
+        ]
+      },
+      "qa": {
+        "pages": 2,
+        "images": 7,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "AST-05",
+      "title": "Asset beoordelen en vrijgeven",
+      "version": 7,
+      "status": "Working draft - not accepted",
+      "pages": 2,
+      "file": "AST-05-review-release-v7-draft.pdf",
+      "bytes": 1002866,
+      "sha256": "bbf57c3eaefc1a572454d7780219ec946a57b5b62352fb0c125527a2aa49f033",
+      "htmlSha256": "b11ff482337612e676413c31b66f3b93d2655cfa6284f2d0ffa80392589ef708",
+      "previous": {
+        "file": "resources/manuals/operator-guides/review-rounds/2026-09-08/AST-05-review-release-v6-draft.pdf",
+        "version": 6,
+        "sha256": "2311d189b061d7251fe0e4eecc0ce542c1feb7d2ba2ff0a933f05a1ad698ee77",
+        "pages": 1
+      },
+      "input": {
+        "file": "inputs/AST-05-review-release-v6-draft.html",
+        "sha256": "a4dc01ef2302408875a41559ebd093d73711ef5dbcdcb9774cda11c57e350e3b"
+      },
+      "delta": "Protected release confirmation, explicit override handling, required status notes and quality permission.",
+      "patches": [
+        {
+          "index": "9",
+          "previous": "Overal: afgerond, 0 Mislukt en passend bewijs.",
+          "value": "Overal: actueel, afgerond, 0 Mislukt en passend bewijs."
+        },
+        {
+          "index": "11",
+          "previous": "Controleer meer dan deze ene geslaagde run.",
+          "value": "Controleer actuele voorwaarden naast de oude Pass."
+        },
+        {
+          "index": "18",
+          "previous": "Akkoord: kies Ready for Sale. De wijziging wordt automatisch opgeslagen; controleer de zichtbare status.",
+          "value": "Akkoord: kies Ready for Sale en lees de bevestiging; volg pagina 2. Controleer daarna de status."
+        },
+        {
+          "index": "19",
+          "previous": "OF niet akkoord: kies Being Processed; stuur terug met de relevante gids hieronder.",
+          "value": "OF niet akkoord: kies Being Processed met de gevraagde notitie; leg het herstelwerk vast."
+        }
+      ],
+      "images": [],
+      "newPage": {
+        "title": "Lees de bevestiging voordat je vrijgeeft",
+        "role": "Supervisor",
+        "need": "Bewijs + bevoegdheid",
+        "before": "AST-04",
+        "steps": [
+          {
+            "title": "Controleer bewijs, onderdelen en kwaliteit",
+            "body": "Controleer alle vereiste actuele runs, componenten en fysieke staat. Pas Quality Grade alleen aan met het aparte kwaliteitsrecht. Een oude Pass terwijl de workflow Changed toont, is geen afgeronde actuele controle.",
+            "shot": "WORKFLOWS-SUPERVISOR-MOBILE-01.jpg",
+            "crop": [
+              20,
+              430,
+              379,
+              325
+            ],
+            "caption": "Actuele workflowvoorwaarden bepalen wat nog ontbreekt."
+          },
+          {
+            "title": "Kies Ready for Sale en lees het dialoogvenster",
+            "body": "Controleer asset en van/naar-status. Bij ontbrekende workflows of componentproblemen: kies Cancel en laat het werk herstellen. Confirm override and change status slaat een uitzondering op; gebruik dit alleen als je daarvoor bevoegd bent en de bewuste procesbeslissing kunt onderbouwen.",
+            "shot": "RELEASE-CONFIRM-ISSUES-MOBILE-01.jpg",
+            "crop": [
+              13,
+              10,
+              394,
+              483
+            ],
+            "caption": "Voorbeeld met ontbrekend werk: Cancel is de herstelroute."
+          },
+          {
+            "title": "Leg het vervolg vast en controleer de opgeslagen status",
+            "body": "Geen blokkerend probleem? Bevestig de getoonde wijziging. Een toegestane uitzondering vraagt een concrete Override reason. Terugsturen: kies de werkstatus en schrijf het herstelwerk in de gevraagde notitie. Controleer status en registratie na de melding.",
+            "shot": "ASSET-INFO-SUPERVISOR-MOBILE-01.jpg",
+            "crop": [
+              15,
+              1155,
+              385,
+              510
+            ],
+            "caption": "Controleer de asset opnieuw na de beslissing."
+          }
+        ],
+        "help": [
+          "Ontbrekend recht: laat de bevoegde rol beslissen; verander geen rechten voor een losse vrijgave.",
+          "Sold, Broken / Parts of vernietiging: aparte beheerbeslissing met reden en gevraagde tagcontrole."
+        ],
+        "done": "De beoordeelde uitkomst is bevestigd en het dossier verklaart het vervolg.",
+        "related": [
+          "AST-04",
+          "WF-02",
+          "USR-02",
+          "HELP-01"
+        ]
+      },
+      "qa": {
+        "pages": 2,
+        "images": 9,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "HELP-01",
+      "title": "Problemen en hulp",
+      "version": 8,
+      "status": "Working draft - not accepted",
+      "pages": 2,
+      "file": "HELP-01-problems-v8-draft.pdf",
+      "bytes": 366231,
+      "sha256": "b098ae8fcbd4a6e740dabf92385df3ebd15d8b0ff9f4c0afa8fa85f4a1cfeff9",
+      "htmlSha256": "1d8fb0a48d9c76afd2bc487d524daad13535609ade5e195b4347982acd727bae",
+      "previous": {
+        "file": "resources/manuals/operator-guides/review-rounds/2026-09-08/HELP-01-problems-v7-draft.pdf",
+        "version": 7,
+        "sha256": "c2f49d8598dac156047e5826eab553efb6c103b6645702040ec3943dcc6bf668",
+        "pages": 1
+      },
+      "input": {
+        "file": "inputs/HELP-01-problems-v7-draft.html",
+        "sha256": "8cfacb2afc9289dd53914b8c2a6d67af77ca1676438408fbdee587c9b7a3f4ab"
+      },
+      "delta": "Help routes for workflow guards, Done, status notes/confirmation, quality rights and catalogue aggregation.",
+      "patches": [
+        {
+          "index": "15",
+          "previous": "Controleer asset en rechten. Start niet meerdere keren.",
+          "value": "Lees de reden bij de workflow. Wachtende voorganger? WF-01; actuele run uitvoeren? WF-02."
+        },
+        {
+          "index": "19",
+          "previous": "Probeer eenmaal opnieuw en vraag daarna lokale hulp.",
+          "value": "Lees de printmelding. Bewaar de asset; herstel de printerroute en herprint hetzelfde label."
+        }
+      ],
+      "images": [],
+      "newPage": {
+        "title": "Hulp bij workflow, status en specificatie",
+        "role": "Iedereen",
+        "need": "Tag + zichtbare melding",
+        "before": "SC-01",
+        "steps": [
+          {
+            "title": "Workflow kan niet starten of afronden",
+            "body": "Blocked of Waiting for prerequisites: voltooi de genoemde voorganger. Changed - new run needed: laat een actuele run uitvoeren. Done geweigerd: vul de ontbrekende verplichte antwoorden in. Geef een onbeoordeelde controle geen Pass.",
+            "shot": "WORKFLOWS-SUPERVISOR-MOBILE-01.jpg",
+            "crop": [
+              20,
+              430,
+              379,
+              325
+            ],
+            "caption": "De reden bij de rij bepaalt de herstelroute."
+          },
+          {
+            "title": "Status of kwaliteit kan niet worden gewijzigd",
+            "body": "Status note gevraagd? Beschrijf de reden. Ready for Sale met issues? Annuleer en laat herstellen via AST-05. Kwaliteit alleen leesbaar of een status ontbreekt? Vraag de bevoegde rol; gebruik USR-02 voor een gerichte rechtencontrole.",
+            "shot": "RELEASE-CONFIRM-ISSUES-MOBILE-01.jpg",
+            "crop": [
+              13,
+              10,
+              394,
+              483
+            ],
+            "caption": "Een override is een bewuste uitzondering, geen algemene herstelknop."
+          },
+          {
+            "title": "Specificatie ontbreekt of getal lijkt verkeerd",
+            "body": "Vergelijk exact modelnummer, verwachte en werkelijk geplaatste componenten. Capaciteit telt op; een eigenschap als MHz kan verschillende waarden tonen. CAT-02 controleert de bron; CAT-03 de aggregatieregel. Handmatig attribuut ontbreekt? Vraag catalogusbeheer; verwijder geen component als omweg.",
+            "diagram": "numeric",
+            "caption": "2 x 8 GB = 16 GB; 2 x 3200 MHz blijft 3200 MHz."
+          }
+        ],
+        "help": [
+          "Meld: asset tag, fysieke situatie, schermnaam, exacte fout en al uitgevoerde veilige controle.",
+          "Accountprobleem: deel geen wachtwoord of scherm met een zichtbaar tijdelijk wachtwoord."
+        ],
+        "done": "De blokkade is opgelost of met voldoende context bij de juiste collega.",
+        "related": [
+          "WF-01",
+          "WF-02",
+          "AST-05",
+          "CAT-02",
+          "USR-02"
+        ]
+      },
+      "qa": {
+        "pages": 2,
+        "images": 2,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "CMP-02",
+      "title": "Nieuw component registreren en plaatsen",
+      "version": 7,
+      "status": "Working draft - not accepted",
+      "pages": 2,
+      "file": "CMP-02-register-install-v7-draft.pdf",
+      "bytes": 758413,
+      "sha256": "a9d344cc35ff264da378d11418ff45a1f770131e0f01a9500372ce4e68b68013",
+      "htmlSha256": "82e42c61eb1967c549829b3f704cdfe9cbf0c885dea4be5c7e0b673b7df66e79",
+      "previous": {
+        "file": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CMP-02-register-install-v6-draft.pdf",
+        "version": 6,
+        "sha256": "873f68279de2c3006a635b008ccffb2e6a52a8793b5f5966ff43f0eeecec1961",
+        "pages": 1
+      },
+      "input": {
+        "file": "inputs/CMP-02-register-install-v6-draft.html",
+        "sha256": "4e1b7b830c9ac26a8ce3326c3b5a24367c39862b38536ba439ab8703086c4a01"
+      },
+      "delta": "Current definition choices and numerical effects after installation, avoiding ad-hoc duplicate definitions.",
+      "patches": [
+        {
+          "index": "19",
+          "previous": "Controleer op het asset of Tracked, de nieuwe componenttag en het serienummer zichtbaar zijn.",
+          "value": "Controleer Tracked, componenttag, serienummer en de afgeleide specificatie."
+        }
+      ],
+      "images": [],
+      "newPage": {
+        "title": "Controleer definitie en specificatie na plaatsing",
+        "role": "Senior Refurbisher",
+        "need": "Nieuw fysiek onderdeel",
+        "before": "SC-01",
+        "steps": [
+          {
+            "title": "Hergebruik de juiste bestaande definitie",
+            "body": "Kies Use definition voor een bekend type. Vergelijk naam, part code, categorie en fabrikant. Een nieuwe keuzenaam, zoals Optical Drive - DVD-ROM of DVD +/- RW, is een herbruikbaar type; controleer het echte onderdeel voordat je die kiest.",
+            "shot": "COMPONENT-DEFINITIONS-DESKTOP-01.jpg",
+            "crop": [
+              245,
+              52,
+              1160,
+              275
+            ],
+            "caption": "Catalogusvoorbeeld met twee verschillende optische typen."
+          },
+          {
+            "title": "Ontbreekt een passende keuze? Laat catalogusbeheer helpen",
+            "body": "Kies niet automatisch Custom om een ontbrekende definitie te omzeilen. Laat de Supervisor CAT-04 gebruiken en keer daarna terug naar stap 2A. Een definitie beschrijft het type; jouw component krijgt zijn eigen tag, serienummer en conditie.",
+            "shot": "COMPONENT-DEFINITION-EDIT-DESKTOP-01.jpg",
+            "crop": [
+              465,
+              61,
+              850,
+              420
+            ],
+            "caption": "Een definitie heeft typegegevens, geen uniek assetserienummer."
+          },
+          {
+            "title": "Controleer het geplaatste record en de afgeleide waarde",
+            "body": "Na Create And Install: vergelijk Tracked, componenttag en serienummer op het juiste asset. Controleer ook de specificatie. Twee modules van 8 GB leveren samen 16 GB; twee modules van 3200 MHz worden niet 6400 MHz. Een verschil? Vraag catalogusbeheer; wijzig geen aantallen om het scherm passend te maken.",
+            "diagram": "numeric",
+            "caption": "Hoeveelheid en gedeelde eigenschap vragen een andere controle."
+          }
+        ],
+        "help": [
+          "Duplicaat of verkeerde asset: bevestig niet; zoek het bestaande record en vraag supervisor.",
+          "Een verkeerde bijdrage komt uit definitie, hoeveelheid of override; gebruik CAT-04 voor de broncontrole."
+        ],
+        "done": "Het unieke component staat op het juiste asset en zijn gegevens en bijdrage kloppen.",
+        "related": [
+          "CAT-04",
+          "CAT-03",
+          "CMP-01",
+          "HELP-01"
+        ]
+      },
+      "qa": {
+        "pages": 2,
+        "images": 8,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "USR-01",
+      "title": "Gebruiker toevoegen",
+      "version": 14,
+      "status": "Working draft - not accepted",
+      "pages": 1,
+      "file": "usr-01-gebruiker-toevoegen-v14-draft.pdf",
+      "bytes": 757913,
+      "sha256": "d0594d850d4a1d3209b54a773b97976e66bf60f8745b85593931366839c265ea",
+      "htmlSha256": "2b68b4dd881c343404a6fb263b3b4100bb96d645afc57973cec5b723ba14d764",
+      "previous": {
+        "file": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-reference-followups/usr-01-gebruiker-toevoegen-v13-draft.pdf",
+        "version": 13,
+        "sha256": "38318811b38adcfb5692e1634fba9ad35c7cca0acb3faf4371bfe370fd462995",
+        "pages": 1
+      },
+      "input": {
+        "file": "inputs/usr-01-gebruiker-toevoegen-v13-draft.html",
+        "sha256": "fd49838e812a8b7fc459d8ef181d1ab188d012a08ae044dcb7c18d96daf149fc"
+      },
+      "delta": "Remove fixed temporary-password recipe; use Generate and immediate secure handoff, clarify quality/create rights.",
+      "patches": [
+        {
+          "index": "20",
+          "previous": "Gebruikersnaam: Voornaam + kleine eerste letters vanalle achternaamdelen, zonder punten of spaties.Jan de Vries wordt Jandv. Tijdelijk: Jandv2026.Zet Deze gebruiker kan inloggen aan.",
+          "value": "Gebruikersnaam: voornaam + kleine initialen van achternaamdelen, zonder spaties. Jan de Vries: Jandv. Kies Generate; bevestiging wordt gevuld. Bewaar tijdelijk veilig voor overdracht. Zet login aan als afgesproken.",
+          "original": {
+            "x": 22.735410690307617,
+            "y": 116.68329620361328,
+            "width": 57.1561279296875,
+            "height": 12.095878601074219
+          },
+          "lines": 4,
+          "maxLines": 4,
+          "tooMany": false
+        },
+        {
+          "index": "25",
+          "previous": "Vul account en tijdelijk wachtwoord in; zet inloggen aan.",
+          "value": "Generate vult beide wachtwoordvelden.",
+          "original": {
+            "x": 98.73541259765625,
+            "y": 135.64788818359375,
+            "width": 55.150020599365234,
+            "height": 2.3812899589538574
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "28",
+          "previous": "Open onderaan de balk Optionele informatie.Kies daar bij Groepen de standaardgroep.Normaal: Refurbisher.Extra rechten: open bovenaan Machtigingen.",
+          "value": "Open Optionele informatie en kies de passende groep. Normaal: Refurbisher. Aanmaken en Quality Grade vragen extra rechten; zie USR-02.",
+          "original": {
+            "x": 22.999998092651367,
+            "y": 157.68328857421875,
+            "width": 46.89404296875,
+            "height": 12.095870971679688
+          },
+          "lines": 3,
+          "maxLines": 4,
+          "tooMany": false
+        },
+        {
+          "index": "30",
+          "previous": "Groepsbeheer (gids volgt):",
+          "value": "Groepsbeheer:",
+          "original": {
+            "x": 23,
+            "y": 177.418701171875,
+            "width": 29.674409866333008,
+            "height": 2.9104652404785156
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "37",
+          "previous": "Kies Opslaan en open de gebruiker vanuit Gebruikers.Controleer naam, gebruikersnaam, groep en login.Geef het tijdelijke wachtwoord persoonlijk door.Laat de gebruiker direct inloggen en AC-02 volgen.",
+          "value": "Kies Opslaan en controleer naam, gebruikersnaam, groep en login. Geef het gegenereerde tijdelijke wachtwoord persoonlijk door. Laat de gebruiker direct inloggen en AC-02 volgen.",
+          "original": {
+            "x": 22.999998092651367,
+            "y": 198.6833038330078,
+            "width": 56.555633544921875,
+            "height": 12.095870971679688
+          },
+          "lines": 4,
+          "maxLines": 4,
+          "tooMany": false
+        }
+      ],
+      "images": [
+        {
+          "index": 2,
+          "file": "USER-ACCOUNT-FORM-DESKTOP-01.jpg",
+          "crop": [
+            455,
+            146,
+            675,
+            314
+          ]
+        }
+      ],
+      "newPage": null,
+      "qa": {
+        "pages": 1,
+        "images": 5,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "USR-02",
+      "title": "Rol en rechten wijzigen",
+      "version": 12,
+      "status": "Working draft - not accepted",
+      "pages": 2,
+      "file": "usr-02-rol-en-rechten-wijzigen-v12-draft.pdf",
+      "bytes": 977360,
+      "sha256": "ac481a6a0a42acd7616bbd1ad13a07cade541894d169d354cf5b1f0caac1c71e",
+      "htmlSha256": "8b43ad13b0cd65766f68b485604aaaea29da0689a3bdf878cbb35b764b2b3b84",
+      "previous": {
+        "file": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-reference-followups/usr-02-rol-en-rechten-wijzigen-v11-draft.pdf",
+        "version": 11,
+        "sha256": "53e581c649a0d10e5ef5677a79166a93ebbd99ba4ad8539c29755a0fcf733651",
+        "pages": 1
+      },
+      "input": {
+        "file": "inputs/usr-02-rol-en-rechten-wijzigen-v11-draft.html",
+        "sha256": "1a87b20861bbcc859a523b67a7a734caacc7d48310d3ad2fe6b0ba6059d73a6a"
+      },
+      "delta": "Dedicated quality permission, workflow run permissions and independent per-status See/Choose rules.",
+      "patches": [
+        {
+          "index": "43",
+          "previous": "Vraag Superadmin om een groep; gids volgt:",
+          "value": "Gebruik een passende groep; volg:",
+          "original": {
+            "x": 110.23541259765625,
+            "y": 241.71246337890625,
+            "width": 33.96889114379883,
+            "height": 2.116702079772949
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        }
+      ],
+      "images": [],
+      "newPage": {
+        "title": "Controleer welk recht de taak werkelijk nodig heeft",
+        "role": "Admin / Superadmin",
+        "need": "Goedgekeurde taak",
+        "before": "USR-01",
+        "steps": [
+          {
+            "title": "Controleer Create en Edit Quality Grade afzonderlijk",
+            "body": "Open de juiste gebruiker > Permissions > Assets. Create regelt nieuwe assets; Edit Quality Grade regelt kwaliteit. Gewoon asset-edit is daarvoor onvoldoende. Standaard: Refurbisher leest; Senior Refurbisher, Supervisor en Admin kunnen aanmaken en kwaliteit wijzigen. Controleer lokale uitzonderingen.",
+            "shot": "USER-ASSET-PERMISSIONS-DESKTOP-01.jpg",
+            "crop": [
+              248,
+              403,
+              789,
+              275
+            ],
+            "caption": "Assets heeft aparte rijen voor aanmaken, verkoop en kwaliteit."
+          },
+          {
+            "title": "Controleer workflowrol en runrechten",
+            "body": "Testing bevat Execute Tests, Execute Senior Workflows en Execute Supervisor Workflows. Edit Workflow Runs, Start Additional Workflow Runs en Override Workflow Guards regelen andere acties. Geef alleen het benodigde pakket; een uitvoerrecht heft een ontbrekende voorganger niet vanzelf op.",
+            "diagram": "rights",
+            "caption": "Uitvoeren | run bewerken | extra run | guards overrulen"
+          },
+          {
+            "title": "Controleer de toegang van de gekozen status",
+            "body": "Geen statuskeuze ondanks de bedoelde taak? Open Settings > Status Labels > juiste rij > Edit. Operational access regelt See en Choose / use per groep en gebruiker. See is nodig om te kiezen. Een directe regel gaat voor groepsregels. Admin/Superadmin ziet deze beperking niet als gewone gebruiker.",
+            "shot": "STATUS-ACCESS-DESKTOP-01.jpg",
+            "crop": [
+              643,
+              805,
+              572,
+              380
+            ],
+            "caption": "Statusregels staan bij het statuslabel, niet in Assets-permissions."
+          }
+        ],
+        "help": [
+          "Kies Inherit voor normaal groepsgedrag; directe Grant/Deny is een expliciete uitzondering.",
+          "Controleer na opslaan opnieuw en test met de bedoelde gewone rol; je Admin-sessie is geen roltest."
+        ],
+        "done": "Alleen de bedoelde taak is toegestaan, inclusief status- en workflowvoorwaarden.",
+        "related": [
+          "USR-05",
+          "AST-05",
+          "HELP-01"
+        ]
+      },
+      "qa": {
+        "pages": 2,
+        "images": 8,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "USR-03",
+      "title": "Wachtwoord resetten",
+      "version": 5,
+      "status": "Working draft - not accepted",
+      "pages": 1,
+      "file": "usr-03-wachtwoord-resetten-v5-draft.pdf",
+      "bytes": 724181,
+      "sha256": "f4749c3790869cdc6ba4af442a5bca0ab5ec2ce6ce45ade59f7e83da58b30807",
+      "htmlSha256": "699f920c2994d01c84098074f6513b6bfb205c8a11705338dfccf08fd122cc08",
+      "previous": {
+        "file": "resources/manuals/operator-guides/review-rounds/2026-09-08/usr-03-wachtwoord-resetten-v4-draft.pdf",
+        "version": 4,
+        "sha256": "b71a9279faa78ebc8b04ede3674067f73c563c0caac9cdc4b89c9cbb51ad7e06",
+        "pages": 1
+      },
+      "input": {
+        "file": "inputs/usr-03-wachtwoord-resetten-v4-draft.html",
+        "sha256": "1ab77672457d976831a75b446a025a21a2aa69b42da73b13c882e648e49b7911"
+      },
+      "delta": "Actual Generate control and automatic confirmation, secure handoff before leaving reset form, compact self-password menu.",
+      "patches": [
+        {
+          "index": "21",
+          "previous": "Laat de bestaande loginstand ongewijzigd.Kies eenmaal Genereer.Het tijdelijke wachtwoord verschijnt onder het eerste veld.Kies eenmaal Opslaan.Gebruik geen zelfbedacht vast wachtwoord.",
+          "value": "Laat login ongewijzigd. Kies Generate: tijdelijk wachtwoord verschijnt en bevestiging wordt gevuld. Houd het veilig beschikbaar voor overdracht; kies eenmaal Save. Gebruik geen vast wachtwoord.",
+          "original": {
+            "x": 22.999998092651367,
+            "y": 128.6833038330078,
+            "width": 59.81336975097656,
+            "height": 15.245880126953125
+          },
+          "lines": 4,
+          "maxLines": 5,
+          "tooMany": false
+        },
+        {
+          "index": "23",
+          "previous": "Bedieningsdetail: Genereer toont het tijdelijke wachtwoord onder het veld.",
+          "value": "Leeg formulier: Generate vult beide wachtwoordvelden.",
+          "original": {
+            "x": 92,
+            "y": 159.64788818359375,
+            "width": 72.37301635742188,
+            "height": 2.3812899589538574
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "29",
+          "previous": "AC-02 start bij Wachtwoord wijzigen in het accountmenu.",
+          "value": "Change Password staat in het eigen accountmenu.",
+          "original": {
+            "x": 91.73541259765625,
+            "y": 212.6478729248047,
+            "width": 55.94376754760742,
+            "height": 2.3812899589538574
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        }
+      ],
+      "images": [
+        {
+          "index": 3,
+          "file": "USER-ACCOUNT-FORM-DESKTOP-01.jpg",
+          "crop": [
+            472,
+            305,
+            655,
+            110
+          ]
+        },
+        {
+          "index": 4,
+          "file": "ACCOUNT-MENU-MOBILE-01.jpg",
+          "crop": [
+            198,
+            115,
+            220,
+            148
+          ]
+        }
+      ],
+      "newPage": null,
+      "qa": {
+        "pages": 1,
+        "images": 5,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "USR-05",
+      "title": "Groepen beheren",
+      "version": 3,
+      "status": "Working draft - not accepted",
+      "pages": 4,
+      "file": "usr-05-groepen-beheren-v3-draft.pdf",
+      "bytes": 1008062,
+      "sha256": "206a5e76c95d06485061518d691bd60421066d614b55f0348f55055bbef91329",
+      "htmlSha256": "18e910ac8df42fb1fa80497503b7d06967e81eb9ba015e87e35c42613bf37ecb",
+      "previous": {
+        "file": "resources/manuals/operator-guides/drafts/usr-05-groepen-beheren-v2-draft.pdf",
+        "version": 2,
+        "sha256": "8bd07fb9f003bbb18303ce741ae48bdb62a10c6e51e168c3aa0559cb376540c4",
+        "pages": 3
+      },
+      "input": {
+        "file": "inputs/usr-05-groepen-beheren-v2-draft.html",
+        "sha256": "dd91d1a45ab34e73b5d7b93dc8c1ed990ca3d6f74b2ddee40a782a7cf23c2eb8"
+      },
+      "delta": "Separate operational status access from general group permissions; canonical role matrix and realistic role test.",
+      "patches": [
+        {
+          "index": "13",
+          "previous": "Bepaal eerst welke taken de groep wel en niet mag uitvoeren.",
+          "value": "Bepaal taken en controleer ook statusrechten op pagina 4.",
+          "original": {
+            "x": 22,
+            "y": 73.88330078125,
+            "width": 62.88920211791992,
+            "height": 2.6458775997161865
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "102",
+          "previous": "Je eigen Superadmin-sessie is geen geldige toegangstest voor de groep.Na een geslaagde test: terug naar USR-01 stap 3 of USR-02 stap 2 voor de bedoelde gebruiker.",
+          "value": "Een Superadmin-sessie bewijst geen gewone toegang. Controleer ook statusregels op pagina 4; keer daarna terug naar USR-01 of USR-02.",
+          "original": {
+            "x": 22.999998092651367,
+            "y": 230.88330078125,
+            "width": 100.05138397216797,
+            "height": 6.9458770751953125
+          },
+          "lines": 2,
+          "maxLines": 2,
+          "tooMany": false
+        }
+      ],
+      "images": [],
+      "newPage": {
+        "title": "Controleer statusrechten naast de rechtengroep",
+        "role": "Superadmin",
+        "need": "Groep + testgebruiker",
+        "before": "USR-02",
+        "steps": [
+          {
+            "title": "Houd de standaardrollen herkenbaar",
+            "body": "Refurbisher: geen nieuwe assets en Quality Grade alleen lezen. Senior Refurbisher: aanmaken en kwaliteit wijzigen. Supervisor: ook supervisorwerk en beoordeling. Admin beheert. Dit is het standaardpakket; bestaande groepswijzigingen en directe gebruikersrechten moet je apart controleren.",
+            "diagram": "roles",
+            "caption": "Controleer het lokale pakket voordat je toegang toewijst."
+          },
+          {
+            "title": "Open het statuslabel voor See en Choose / use",
+            "body": "Settings > Status Labels > Edit van de juiste status. See bepaalt zichtbaarheid in operationele lijsten; Choose / use bepaalt selectie. Een status kiezen vereist beide. Geen expliciete regels betekent behoud van bestaande toegang. Zodra regels bestaan, controleer de bedoelde groepen en gebruikers.",
+            "shot": "STATUS-ACCESS-DESKTOP-01.jpg",
+            "crop": [
+              643,
+              805,
+              572,
+              380
+            ],
+            "caption": "Operational access is een afzonderlijk rechtenoverzicht."
+          },
+          {
+            "title": "Test de effectieve toegang met een gewone gebruiker",
+            "body": "Een directe statusregel gaat voor groepen; bij groepsregels geeft een Allow toegang. Algemene actiepermissies en beschermde statusvoorwaarden blijven gelden. Test toegestane en verboden taken zonder echte statuswijziging. Admin/Superadmin passeert statusregels en is daarom geen geldige proefpersoon.",
+            "diagram": "rights",
+            "caption": "Groepen + directe rechten + statusregels + procesvoorwaarden"
+          }
+        ],
+        "help": [
+          "Voor QA Hold: Require a note zorgt voor een reden in de assetactie; wijzig dit niet om een fout te omzeilen.",
+          "Unexpected access: controleer andere groepen, directe uitzonderingen en Admin/Super User."
+        ],
+        "done": "Groepspakket en statusregels geven de bedoelde effectieve toegang.",
+        "related": [
+          "USR-02",
+          "AST-04",
+          "AST-05",
+          "HELP-01"
+        ]
+      },
+      "qa": {
+        "pages": 4,
+        "images": 7,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "CAT-00",
+      "title": "Catalogus begrijpen",
+      "version": 12,
+      "status": "Working draft - not accepted",
+      "pages": 7,
+      "file": "CAT-00-catalogus-begrijpen-v12-draft.pdf",
+      "bytes": 707030,
+      "sha256": "063ab00a1e457dc452e7773588081db2af915166035616e6747f7f4e725fa555",
+      "htmlSha256": "87ccb02280ea79078ed00e71babdd3c41e72d86aeaac2bb5fd71bddeae107c4b",
+      "previous": {
+        "file": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CAT-00-catalogus-begrijpen-v11-draft.pdf",
+        "version": 11,
+        "sha256": "d8c95c64c70508cdceb43d4aa71d7f1f22027dfd8690349349ec70bb8f09c04c",
+        "pages": 6
+      },
+      "input": {
+        "file": "inputs/CAT-00-catalogus-begrijpen-v11-draft.html",
+        "sha256": "c0de198aae4914cfb5de2494fb63f3ff3673da7e98317a159aec1994b40b03dd"
+      },
+      "delta": "Sum versus distinct numeric contribution concepts; current guide names and missing manual-attribute limitation.",
+      "patches": [
+        {
+          "index": "271",
+          "previous": "De componentbijdragen kunnen de getoonde specificatie bepalen.",
+          "value": "Componentbijdragen bepalen waarden; zie ook pagina 7.",
+          "original": {
+            "x": 113,
+            "y": 115.14788818359375,
+            "width": 59.75135803222656,
+            "height": 2.3812899589538574
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "332",
+          "previous": "CAT-05 Varianten en lifecycle beheren",
+          "value": "CAT-05 Bestaande catalogus aanpassen",
+          "original": {
+            "x": 26.499998092651367,
+            "y": 157.91246032714844,
+            "width": 46.90787124633789,
+            "height": 3.175053119659424
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "334",
+          "previous": "Gids volgt; vraag een Admin om lifecycle of opruimen.",
+          "value": "Onderhoud bestaand object; gebruik CAT-05.",
+          "original": {
+            "x": 17,
+            "y": 174.4124755859375,
+            "width": 39.37632369995117,
+            "height": 2.116702079772949
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "335",
+          "previous": "In voorbereiding",
+          "value": "Werkconcept",
+          "original": {
+            "x": 86.0149917602539,
+            "y": 178.9124755859375,
+            "width": 12.141443252563477,
+            "height": 2.116702079772949
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "337",
+          "previous": "CAT-06 Catalogus controleren en bronnen",
+          "value": "CAT-06 Productgegevens controleren",
+          "original": {
+            "x": 121.49999237060547,
+            "y": 157.91246032714844,
+            "width": 51.33557891845703,
+            "height": 3.175053119659424
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "339",
+          "previous": "Gids volgt; laat een Supervisor bron en code controleren.",
+          "value": "Controleer bron en exacte code met CAT-06.",
+          "original": {
+            "x": 111.99999237060547,
+            "y": 174.4124755859375,
+            "width": 41.76276397705078,
+            "height": 2.116702079772949
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "340",
+          "previous": "In voorbereiding",
+          "value": "Werkconcept",
+          "original": {
+            "x": 181.01499938964844,
+            "y": 178.9124755859375,
+            "width": 12.141435623168945,
+            "height": 2.116702079772949
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "360",
+          "previous": "CAT-06 Catalogus controleren en bronnen",
+          "value": "CAT-06 Productgegevens controleren",
+          "original": {
+            "x": 87.5,
+            "y": 278.9124755859375,
+            "width": 51.33557891845703,
+            "height": 3.175053119659424
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        }
+      ],
+      "images": [],
+      "newPage": {
+        "title": "Begrijp hoe componentgetallen worden gecombineerd",
+        "role": "Supervisor",
+        "need": "Waarde + hoeveelheid",
+        "before": "CAT-02",
+        "steps": [
+          {
+            "title": "Tel capaciteiten en aantallen op",
+            "body": "Sum values by quantity vermenigvuldigt iedere bijdrage met het aantal en telt de uitkomsten op. Voorbeeld: twee verwachte modules van 8 GB geven 16 GB. Gebruik dit voor hoeveelheden die samen werkelijk een totaal vormen.",
+            "diagram": "sum",
+            "caption": "8 GB x 2 = 16 GB"
+          },
+          {
+            "title": "Behoud eigenschappen als afzonderlijke waarden",
+            "body": "Keep distinct values telt niet op. Twee bijdragen van 3200 MHz tonen eenmaal 3200 MHz. Bij 2666 en 3200 MHz blijven beide waarden zichtbaar. Een getal is dus niet automatisch een capaciteit; bepaal eerst de betekenis.",
+            "diagram": "distinct",
+            "caption": "3200 + 3200 MHz wordt geen 6400 MHz"
+          },
+          {
+            "title": "Herken regel, bron en weergave",
+            "body": "De attribuutdefinitie kiest Numeric Component Aggregation. Component Spec Display kiest hoe het resultaat wordt getoond. CAT-03 beheert de regel, CAT-04 de bijdragen en kinderen, CAT-02 de modelbaseline. Bij bestaand gebruik beoordeelt de Admin de gevolgen met CAT-05.",
+            "shot": "ATTRIBUTE-AGGREGATION-DESKTOP-01.jpg",
+            "crop": [
+              473,
+              682,
+              624,
+              224
+            ],
+            "caption": "Twee aparte instellingen: weergave en numerieke combinatie."
+          }
+        ],
+        "help": [
+          "Componentbron aanwezig? Dezelfde handmatige attribuutkeuze kan uit Edit Spec worden gefilterd.",
+          "Geen passende bron of tegenstrijdig resultaat: laat catalogusbeheer controleren; maak geen dubbel feit."
+        ],
+        "done": "Je onderscheidt identiteit, bron, hoeveelheid, aggregatieregel en weergave.",
+        "related": [
+          "CAT-02",
+          "CAT-03",
+          "CAT-04",
+          "CAT-05"
+        ]
+      },
+      "qa": {
+        "pages": 7,
+        "images": 8,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "CAT-01",
+      "title": "Model en modelnummer aanmaken",
+      "version": 8,
+      "status": "Working draft - not accepted",
+      "pages": 5,
+      "file": "CAT-01-model-en-modelnummer-aanmaken-v8-draft.pdf",
+      "bytes": 609840,
+      "sha256": "82903311c5edc0ff156bb30f9e90e9ccecdb50d45f75b96bac924d443aeba5cd",
+      "htmlSha256": "9ae8fdd0ac0396ca849ac8f885b64dec42585971bfb8b21616c483f386681079",
+      "previous": {
+        "file": "resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CAT-01-model-en-modelnummer-aanmaken-v7-draft.pdf",
+        "version": 7,
+        "sha256": "bd79bd83124c9c31e52b12bb92e53d238265226cc5a82caebae5cdb5802c2b46",
+        "pages": 5
+      },
+      "input": {
+        "file": "inputs/CAT-01-model-en-modelnummer-aanmaken-v7-draft.html",
+        "sha256": "9774d9ff1173a7fe366ec533ce08de5f88f44bdc2227f9d8bd4a671d5e9b18e9"
+      },
+      "delta": "Current Model Numbers entry and exact-code selection; route to specification editing after identifying a row.",
+      "patches": [
+        {
+          "index": "30",
+          "previous": "Open de aparte pagina Model Numbers en zoek daar de complete fabrikantcode.",
+          "value": "Model Numbers: zoek de volledige code; Edit Spec hoort bij die exacte rij.",
+          "original": {
+            "x": 23.999998092651367,
+            "y": 232.44789123535156,
+            "width": 78.0699234008789,
+            "height": 2.3812899589538574
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "37",
+          "previous": "CAT-06 Catalogus controleren en bronnen",
+          "value": "CAT-06 Productgegevens controleren",
+          "original": {
+            "x": 102.5,
+            "y": 269.9124450683594,
+            "width": 51.33557891845703,
+            "height": 3.175053119659424
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "80",
+          "previous": "CAT-06 Catalogus controleren en bronnen",
+          "value": "CAT-06 Productgegevens controleren",
+          "original": {
+            "x": 102.5,
+            "y": 269.9124450683594,
+            "width": 51.33557891845703,
+            "height": 3.175053119659424
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "129",
+          "previous": "CAT-06 Catalogus controleren en bronnen",
+          "value": "CAT-06 Productgegevens controleren",
+          "original": {
+            "x": 102.5,
+            "y": 269.9124450683594,
+            "width": 51.33557891845703,
+            "height": 3.175053119659424
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "174",
+          "previous": "CAT-05 Varianten en lifecycle beheren",
+          "value": "CAT-05 Bestaande catalogus aanpassen",
+          "original": {
+            "x": 128.5,
+            "y": 233.9124755859375,
+            "width": 46.90786361694336,
+            "height": 3.175053119659424
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "181",
+          "previous": "CAT-05 Varianten en lifecycle beheren",
+          "value": "CAT-05 Bestaande catalogus aanpassen",
+          "original": {
+            "x": 102.5,
+            "y": 269.9124450683594,
+            "width": 46.90787124633789,
+            "height": 3.175053119659424
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "215",
+          "previous": "Specificatie ontbreekt? Gebruik CAT-02. Eén fysiek apparaat registreren? Gebruik AST-03.",
+          "value": "Specificatie? Kies Edit Spec en volg CAT-02. Fysiek apparaat? AST-03.",
+          "original": {
+            "x": 23,
+            "y": 208.14788818359375,
+            "width": 82.1503677368164,
+            "height": 2.3812899589538574
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "230",
+          "previous": "CAT-06 Catalogus controleren en bronnen",
+          "value": "CAT-06 Productgegevens controleren",
+          "original": {
+            "x": 21.5,
+            "y": 278.9124755859375,
+            "width": 51.33557891845703,
+            "height": 3.175053119659424
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        }
+      ],
+      "images": [
+        {
+          "index": 2,
+          "file": "MODEL-NUMBERS-DESKTOP-01.jpg",
+          "crop": [
+            241,
+            54,
+            1162,
+            320
+          ]
+        }
+      ],
+      "newPage": null,
+      "qa": {
+        "pages": 5,
+        "images": 10,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "CAT-02",
+      "title": "Modelspecificatie opbouwen",
+      "version": 3,
+      "status": "Working draft - not accepted",
+      "pages": 7,
+      "file": "CAT-02-modelspecificatie-opbouwen-v3-draft.pdf",
+      "bytes": 1112198,
+      "sha256": "8cb5747c9619c1071fbf4440b1770e83b7ec54d966e23c6a1c05a5376bb7a55b",
+      "htmlSha256": "0dd67280f611b2efe112e6eb12a4a6d5c55a2255f298227ab28328b3d2b5db07",
+      "previous": {
+        "file": "resources/manuals/operator-guides/review-rounds/2026-09-08/CAT-02-modelspecificatie-opbouwen-v2-draft.pdf",
+        "version": 2,
+        "sha256": "13c8939cbe9a72134983161553c1f0696ac57aff8eca7b1fe99325efb6a2be44",
+        "pages": 6
+      },
+      "input": {
+        "file": "inputs/CAT-02-modelspecificatie-opbouwen-v2-draft.html",
+        "sha256": "a69041b2cd89dbf61e764e3a739baa5875587d4c9a9334dffb00ca32e9b30dca"
+      },
+      "delta": "Manual attribute filtering when components supply values; verify aggregated values and current catalogue maintenance routes.",
+      "patches": [
+        {
+          "index": "79",
+          "previous": "Noteer onopgeslagen invoer voordat je het formulier verlaat. Maak de ontbrekende definitie met CAT-03/04.Open daarna dezelfde Edit Spec opnieuw en herstel de invoer. Leg een componentwaarde niet ook direct vast.",
+          "value": "Bewaar onopgeslagen invoer. Ontbrekende definitie: CAT-03/04. Componentbron kan het handmatige attribuut verbergen; zie pagina 7.",
+          "original": {
+            "x": 22.999998092651367,
+            "y": 233.1478729248047,
+            "width": 99.6379623413086,
+            "height": 4.7312774658203125
+          },
+          "lines": 2,
+          "maxLines": 2,
+          "tooMany": false
+        },
+        {
+          "index": "125",
+          "previous": "CAT-06 Catalogus controleren en bronnen",
+          "value": "CAT-06 Productgegevens controleren",
+          "original": {
+            "x": 107.5,
+            "y": 269.9124450683594,
+            "width": 51.33557891845703,
+            "height": 3.175053119659424
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "197",
+          "previous": "CAT-05 Varianten en lifecycle beheren",
+          "value": "CAT-05 Bestaande catalogus aanpassen",
+          "original": {
+            "x": 32.5,
+            "y": 234.9124755859375,
+            "width": 46.90787124633789,
+            "height": 3.175053119659424
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "198",
+          "previous": "Bestaande rij verwijderen? Vraag een Admin; CAT-05 volgt.",
+          "value": "Bestaande rij verwijderen? Admin gebruikt CAT-05.",
+          "original": {
+            "x": 93,
+            "y": 235.4124755859375,
+            "width": 43.3185920715332,
+            "height": 2.116702079772949
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "205",
+          "previous": "CAT-05 Varianten en lifecycle beheren",
+          "value": "CAT-05 Bestaande catalogus aanpassen",
+          "original": {
+            "x": 113.49999237060547,
+            "y": 269.9124450683594,
+            "width": 46.90787124633789,
+            "height": 3.175053119659424
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        }
+      ],
+      "images": [],
+      "newPage": {
+        "title": "Controleer beschikbare attributen en afgeleide getallen",
+        "role": "Supervisor",
+        "need": "Exacte baseline",
+        "before": "CAT-01",
+        "steps": [
+          {
+            "title": "Zoek op Edit Spec bij het juiste modelnummer",
+            "body": "Controleer code en suffix. Available Attributes toont de huidige, passende definities voor de categorie. Een attribuut dat via componenten aan de specificatie wordt geleverd, kan uit Available en Selected Attributes zijn gefilterd.",
+            "shot": "MODEL-SPEC-DESKTOP-01.jpg",
+            "crop": [
+              470,
+              66,
+              845,
+              805
+            ],
+            "caption": "Edit Spec: directe attributen staan boven de componentbaseline."
+          },
+          {
+            "title": "Controleer bron, hoeveelheid en aggregatie",
+            "body": "Lees Derived attributes en Expected child structure bij Expected Components. Voor numerieke bijdragen bepaalt het attribuut Sum values by quantity of Keep distinct values. Twee modules van 8 GB geven 16 GB; gelijke 3200 MHz-bijdragen blijven eenmaal 3200 MHz.",
+            "diagram": "numeric",
+            "caption": "Capaciteit optellen; gedeelde eigenschap behouden."
+          },
+          {
+            "title": "Los een ontbrekende keuze via de bron op",
+            "body": "Verwijder geen verwacht component om een handmatig veld zichtbaar te maken. Controleer categorie, actieve definitie en componentbron met CAT-03/04. Moet het feit anders worden vastgelegd? Laat de cataloguseigenaar het besluit nemen. Sla pas op wanneer bron en uitkomst kloppen.",
+            "diagram": "source",
+            "caption": "Directe modelwaarde OF componentbron voor hetzelfde feit."
+          }
+        ],
+        "help": [
+          "Bestaande relatie of aggregatieregel wijzigen: Admin beoordeelt de impact met CAT-05.",
+          "Sla op, heropen dezelfde code en controleer de volledige baseline; geen fysieke registratie ontstaat."
+        ],
+        "done": "De juiste baseline is opgeslagen zonder dubbele of onverklaarde bron.",
+        "related": [
+          "CAT-03",
+          "CAT-04",
+          "CAT-05",
+          "CAT-06"
+        ]
+      },
+      "qa": {
+        "pages": 7,
+        "images": 13,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "CAT-03",
+      "title": "Attributen beheren",
+      "version": 3,
+      "status": "Working draft - not accepted",
+      "pages": 6,
+      "file": "CAT-03-attributen-beheren-v3-draft.pdf",
+      "bytes": 706113,
+      "sha256": "09cbbe74d9a9cf079fa7f69bf59238776af73f0da8bcafc934da463e554ce76f",
+      "htmlSha256": "3784f918ed44531215720fa72f3acfe0f5ab13f46172f245a455f4c1f04d299c",
+      "previous": {
+        "file": "resources/manuals/operator-guides/review-rounds/2026-09-08/CAT-03-attributen-beheren-v2-draft.pdf",
+        "version": 2,
+        "sha256": "8adb74b5d3d535def133a9f6987a921acad64d3c68641c8a6076f38a2d0e415b",
+        "pages": 5
+      },
+      "input": {
+        "file": "inputs/CAT-03-attributen-beheren-v2-draft.html",
+        "sha256": "e98025f2d5d4d6d966e1e8cc0ad57ebb7f6182bb00377e11d068c0ab25a0da39"
+      },
+      "delta": "Teach both implemented Numeric Component Aggregation options and lifecycle permission for changes in use.",
+      "patches": [
+        {
+          "index": "83",
+          "previous": "bepaal categorie, verplichting, overrides en weergave.",
+          "value": "bepaal gedrag; aggregatie: pagina 6.",
+          "original": {
+            "x": 47,
+            "y": 255.1770477294922,
+            "width": 52.68190383911133,
+            "height": 2.6458775997161865
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "130",
+          "previous": "Value labels toont waarden;Component labels toont onderdeelregels.",
+          "value": "Value labels of Component labels: weergave. Aggregatie: pagina 6.",
+          "original": {
+            "x": 118.73541259765625,
+            "y": 223.07705688476562,
+            "width": 29.054916381835938,
+            "height": 3.9521026611328125
+          },
+          "lines": 2,
+          "maxLines": 2,
+          "tooMany": false
+        },
+        {
+          "index": "210",
+          "previous": "Een latere wijziging werkt door in ieder modelnummer, component, assetoverride of workflow dat deze definitie gebruikt.Lifecycle of bestaande opties/relaties verwijderen? Vraag een Admin; CAT-05 volgt nog.",
+          "value": "Bestaand gebruik? Beoordeel alle geraakte bronnen. Aggregatie: pagina 6. Lifecycle of verwijderen: Admin gebruikt CAT-05.",
+          "original": {
+            "x": 22.999998092651367,
+            "y": 231.14788818359375,
+            "width": 112.75985717773438,
+            "height": 4.6312713623046875
+          },
+          "lines": 2,
+          "maxLines": 2,
+          "tooMany": false
+        },
+        {
+          "index": "221",
+          "previous": "CAT-05 Varianten en lifecycle beheren",
+          "value": "CAT-05 Bestaande catalogus aanpassen",
+          "original": {
+            "x": 87.5,
+            "y": 278.9124755859375,
+            "width": 46.90787124633789,
+            "height": 3.175053119659424
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        }
+      ],
+      "images": [],
+      "newPage": {
+        "title": "Kies de betekenis van numerieke componentbijdragen",
+        "role": "Supervisor / Admin",
+        "need": "Int of Decimal",
+        "before": "CAT-00",
+        "steps": [
+          {
+            "title": "Open Numeric Component Aggregation",
+            "body": "Bij een Int- of Decimal-attribuut bepaalt deze keuze hoe componentbijdragen worden gecombineerd. Sum values by quantity is de standaard. Kies bewust op de betekenis van het attribuut; Minimum, Maximum en Step bepalen geldige invoer, niet de combinatieregel.",
+            "shot": "ATTRIBUTE-AGGREGATION-DESKTOP-01.jpg",
+            "crop": [
+              473,
+              682,
+              624,
+              224
+            ],
+            "caption": "Numeric Component Aggregation staat onder Component Spec Display."
+          },
+          {
+            "title": "Kies Sum OF Keep distinct values",
+            "body": "Sum values by quantity: capaciteit of aantal; 8 GB x 2 = 16 GB. Keep distinct values: gedeelde eigenschap; 3200 MHz x 2 blijft 3200 MHz. Verschillende waarden, zoals 2666 en 3200 MHz, blijven beide zichtbaar.",
+            "diagram": "numeric",
+            "caption": "Hoeveelheden optellen; gelijke eigenschappen eenmaal tonen."
+          },
+          {
+            "title": "Controleer bestaand gebruik voor Opslaan",
+            "body": "Component Spec Display verandert de presentatie en laat de aggregatieregel intact. Bestaande componentwaarden aanwezig? Een aggregatiewijziging vraagt lifecycle-bevoegdheid en impactcontrole met CAT-05. Controleer na Save dezelfde attribuutrij en voorbeelden van modelbaseline en asset.",
+            "shot": "ATTRIBUTES-LIST-DESKTOP-01.jpg",
+            "crop": [
+              235,
+              109,
+              1177,
+              240
+            ],
+            "caption": "De lijst toont Numeric Aggregation naast Datatype."
+          }
+        ],
+        "help": [
+          "Een verkeerde uitkomst kan uit hoeveelheid, kindstructuur of bron komen; controleer CAT-02/04.",
+          "Geen wijzigingsrecht bij bestaand gebruik: vraag Admin; maak geen tweede key als omweg."
+        ],
+        "done": "De opgeslagen regel past bij de betekenis en de geraakte specificaties zijn gecontroleerd.",
+        "related": [
+          "CAT-02",
+          "CAT-04",
+          "CAT-05"
+        ]
+      },
+      "qa": {
+        "pages": 6,
+        "images": 10,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "CAT-04",
+      "title": "Componentdefinities beheren",
+      "version": 5,
+      "status": "Working draft - not accepted",
+      "pages": 7,
+      "file": "CAT-04-componentdefinities-beheren-v5-draft.pdf",
+      "bytes": 664746,
+      "sha256": "0d01276d3116865dc61bba0f88f39a9defb2c7f6938e9f46867c8f29ec585236",
+      "htmlSha256": "1073c0a3d26ec22461879b6f70a449a60d3274f6f95d4a63c5cc4233bf4158bb",
+      "previous": {
+        "file": "resources/manuals/operator-guides/review-rounds/2026-09-08/CAT-04-componentdefinities-beheren-v4-draft.pdf",
+        "version": 4,
+        "sha256": "96e99bbeea19a39b7484aaef5d01f8739e7e092916817a7d06e41be8e6dcb0d2",
+        "pages": 6
+      },
+      "input": {
+        "file": "inputs/CAT-04-componentdefinities-beheren-v4-draft.html",
+        "sha256": "c6cb9dd3204588352806f43e96e891e5bc82514413e4d36f783a76b3429d9422"
+      },
+      "delta": "Verify quantity, child precedence, contribution flags and per-attribute sum/distinct; current Optical Drive choices.",
+      "patches": [
+        {
+          "index": "165",
+          "previous": "Aan: deze componentwaarde telt meein de zichtbare asset-specificatie.",
+          "value": "Aan: bijdrage aan de asset-specificatie; aggregatie staat op pagina 7.",
+          "original": {
+            "x": 32.73541259765625,
+            "y": 198.07704162597656,
+            "width": 26.878196716308594,
+            "height": 3.952117919921875
+          },
+          "lines": 2,
+          "maxLines": 2,
+          "tooMany": false
+        },
+        {
+          "index": "211",
+          "previous": "Opgeslagen relatie verwijderen? Laat een Admin dit doen voordat je verdergaat; CAT-05 volgt nog.",
+          "value": "Opgeslagen relatie verwijderen? Admin volgt CAT-05.",
+          "original": {
+            "x": 23,
+            "y": 235.14788818359375,
+            "width": 95.59521484375,
+            "height": 2.3812899589538574
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        },
+        {
+          "index": "255",
+          "previous": "Vraag een Admin om lifecycle of opruimen. CAT-05 volgt nog.",
+          "value": "Admin: lifecycle of opruimen via CAT-05.",
+          "original": {
+            "x": 110.73541259765625,
+            "y": 216.4124755859375,
+            "width": 44.356746673583984,
+            "height": 2.116702079772949
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        }
+      ],
+      "images": [],
+      "newPage": {
+        "title": "Controleer aantallen en numerieke bijdragen samen",
+        "role": "Supervisor",
+        "need": "Definitie + gebruik",
+        "before": "CAT-03",
+        "steps": [
+          {
+            "title": "Zoek het juiste bestaande onderdeeltype",
+            "body": "Component Definitions heeft een zoekveld voor naam en typegegevens. Vergelijk de gevonden definitie; hetzelfde onderdeeltype hoort niet opnieuw per fysiek serienummer. Optical Drive - DVD-ROM en DVD +/- RW zijn verschillende keuzen: controleer de echte drive.",
+            "shot": "COMPONENT-DEFINITIONS-DESKTOP-01.jpg",
+            "crop": [
+              245,
+              52,
+              1160,
+              275
+            ],
+            "caption": "Zoeken beperkt de lijst met herbruikbare definities."
+          },
+          {
+            "title": "Controleer kinderen, aantallen en bijdragevlaggen",
+            "body": "Expected Subcomponents beschrijft verwachte kinderen met Quantity. Attribute Contributions bevat waarde, Show as asset spec en Use in component label. Dezelfde numerieke spec op ouder en kind kan overlap veroorzaken; een kindbijdrage kan de ouderwaarde vervangen. Controleer alle niveaus.",
+            "shot": "COMPONENT-DEFINITION-EDIT-DESKTOP-01.jpg",
+            "crop": [
+              464,
+              530,
+              852,
+              595
+            ],
+            "caption": "Kindstructuur en bijdragen staan in dezelfde definitie."
+          },
+          {
+            "title": "Controleer de uitkomst met de attribuutregel",
+            "body": "Sum telt waarden met hoeveelheden op. Keep distinct values bewaart verschillende eigenschappen en toont gelijke eenmaal. Show as asset spec bepaalt deelname; Component Spec Display bepaalt presentatie. Heropen na Save Changes de definitie en controleer een modelbaseline en bestaand asset.",
+            "diagram": "numeric",
+            "caption": "Een juiste modulewaarde alleen bewijst het totaal nog niet."
+          }
+        ],
+        "help": [
+          "Bestaand gebruik of relaties verwijderen: CAT-05 met bevoegde Admin.",
+          "Afgeleide waarde klopt niet: controleer bron, kindniveau, hoeveelheid en aggregatie; verander geen fysiek record als omweg."
+        ],
+        "done": "Identiteit, kinderen, bijdragen en afgeleide uitkomsten passen bij het echte onderdeeltype.",
+        "related": [
+          "CAT-02",
+          "CAT-03",
+          "CAT-05",
+          "CMP-02"
+        ]
+      },
+      "qa": {
+        "pages": 7,
+        "images": 10,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    },
+    {
+      "code": "CAT-05",
+      "title": "Bestaande catalogus aanpassen",
+      "version": 3,
+      "status": "Working draft - not accepted",
+      "pages": 9,
+      "file": "cat-05-bestaande-catalogus-aanpassen-v3-draft.pdf",
+      "bytes": 1301055,
+      "sha256": "222f7aa3cf9161edaf2d25e54a6e370b766e7b4a357986a77452de854e53b395",
+      "htmlSha256": "a594170df47df710427276f4e6862a5ddfdf955522ba60039d5c9bb400245531",
+      "previous": {
+        "file": "resources/manuals/operator-guides/drafts/cat-05-varianten-en-lifecycle-beheren-v2-draft.pdf",
+        "version": 2,
+        "sha256": "46dc2b6ebe8517ece63f73b0c95bdce57e5ea8a237119f17f53faf628b4ed68b",
+        "pages": 8
+      },
+      "input": {
+        "file": "inputs/cat-05-varianten-en-lifecycle-beheren-v2-draft.html",
+        "sha256": "bfd503627c24279a89a6985fb570e04ee7ed8c01b839f765846825bd06708c31"
+      },
+      "delta": "Add maintenance route for changing numeric aggregation on definitions already in use, with broad impact validation.",
+      "patches": [
+        {
+          "index": "25",
+          "previous": "Open Attributes. Veld verbergen/herstellen -> pagina 5. Keuzewaarde beheren -> pagina 6.",
+          "value": "Attributes: veldstatus pagina 5, keuzewaarde pagina 6, numerieke aggregatie pagina 9.",
+          "original": {
+            "x": 16,
+            "y": 187.88330078125,
+            "width": 94.70174407958984,
+            "height": 2.6458775997161865
+          },
+          "lines": 1,
+          "maxLines": 1,
+          "tooMany": false
+        }
+      ],
+      "images": [],
+      "newPage": {
+        "title": "Wijzig numerieke aggregatie bij bestaand gebruik",
+        "role": "Admin",
+        "need": "Attribuut + impact",
+        "before": "CAT-03",
+        "steps": [
+          {
+            "title": "Bepaal de juiste betekenis en alle geraakte bronnen",
+            "body": "Open Attributes > Edit bij de exacte key. Bewaar de oude aggregatieregel en controleer componentbijdragen, kindstructuren, modelnummerbaselines, geplaatste en aangenomen componenten en workflows die de uitkomst gebruiken. Een wijziging aan dit attribuut geldt voor alle gebruikers van die regel.",
+            "shot": "ATTRIBUTE-AGGREGATION-DESKTOP-01.jpg",
+            "crop": [
+              473,
+              682,
+              624,
+              224
+            ],
+            "caption": "Controleer de bestaande regel voordat je hem wijzigt."
+          },
+          {
+            "title": "Kies de bedoelde regel en sla bewust op",
+            "body": "Sum values by quantity voor optelbare capaciteit/aantal. Keep distinct values voor gedeelde eigenschappen zoals MHz. Bij bestaande componentwaarden is Manage Attribute Lifecycle nodig. Alleen Component Spec Display aanpassen verandert de presentatie. Houd identiteit, datatype en eenheid intact.",
+            "diagram": "numeric",
+            "caption": "Controlevoorbeeld: 16 GB totaal en 3200 MHz als eigenschap."
+          },
+          {
+            "title": "Heropen en controleer echte voorbeelden",
+            "body": "Kies Save, lees de melding en heropen dezelfde attribuutdefinitie. Controleer de lijstkolom Numeric Aggregation, ten minste een geraakte baseline en een bestaand asset: gelijke waarden, verschillende waarden, aantallen en kindstructuur. Controleer ook de workflowverwachting. Bij afwijking: herstel de oude regel en beoordeel opnieuw.",
+            "shot": "ATTRIBUTES-LIST-DESKTOP-01.jpg",
+            "crop": [
+              235,
+              109,
+              1177,
+              240
+            ],
+            "caption": "De lijst helpt de opgeslagen regel terug te vinden."
+          }
+        ],
+        "help": [
+          "Gebruikstellingen zijn een ingang, geen volledige lijst van indirecte gevolgen.",
+          "Geen lifecycle-recht of impact onzeker: laat de regel staan en vraag de cataloguseigenaar."
+        ],
+        "done": "De bedoelde regel is opgeslagen en de afgesproken geraakte voorbeelden kloppen.",
+        "related": [
+          "CAT-00",
+          "CAT-02",
+          "CAT-03",
+          "CAT-04"
+        ]
+      },
+      "qa": {
+        "pages": 9,
+        "images": 15,
+        "violations": []
+      },
+      "lineCapacityIssues": []
+    }
+  ],
+  "sourceAudit": {
+    "file": "source-audit.json",
+    "sha256": "322b4f268b3d344e7c573da82d421f7a4fcde4bc1196e4a0788660a04f38f0d9"
+  },
+  "provenance": {
+    "file": "evidence-provenance.json",
+    "sha256": "120e870b01482df272cc620c0433fbc18c2fe244598fda28f87f96801ebf224e"
+  },
+  "visualReview": {
+    "file": "visual-review.json",
+    "sha256": "aa01cc4d3f3d15861992312c3f52a22fb203eaf22cb70e9956f1f44e67d76706"
+  },
+  "retention": "Exact visually reviewed proof bytes; separate unused versions; no acceptance decision"
+}

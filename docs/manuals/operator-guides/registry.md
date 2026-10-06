@@ -1,5 +1,46 @@
 # Operator Guide Registry
 
+## Guide Review Disposition On 2026-10-06
+
+AC-01 v10: **owner-rejected**. SC-01 v13: **requires rework**. The
+[twenty-five-guide audit](reviews/guide-purpose-and-quality-audit-2026-10-06.md)
+recommends an editorial hold on the nineteen October batch replacements;
+other seventeen have no new owner decision. WF-01 v15/WF-02 v13 and the four
+unchanged guides retain their prior statuses. Preserved generation-time
+manifests and the tables below are historical, not evidence of later approval.
+Accepted/runtime selection remains unchanged. Reproduction HTML does not
+override the established task specification, branching or image-size rules.
+
+## Application-Aligned Review Drafts - 2026-10-01
+
+19 affected guides now have separate unaccepted revisions: 66 A4 pages, with fourteen added instructional pages. The [batch comparison](reviews/aligned-guides-2026-10-01.md) lists each old/new PDF and its scope. A [25-guide review index](../../../output/manuals/aligned-guide-review-kit-2026-10-01/index.html) includes WF-01 v15/WF-02 v13 plus four unchanged guides. No accepted/runtime selection or historical PDF changed. Physical printing, controlled-user/save trials and exact-version review remain pending.
+
+
+## Separate Unaccepted Workflow Candidates - 2026-10-01
+
+| Guide | New authoring candidate | Pages | Review |
+| --- | --- | ---: | --- |
+| WF-01 | v15; Working draft, explicitly not accepted | 1 | [Exact artifact and review](reviews/WF-01-v15.md) |
+| WF-02 | v13; Working draft, explicitly not accepted | 2 | [Exact artifact and review](reviews/WF-02-v13.md) |
+
+Generator: `scripts/manuals/generate-workflow-revisions-2026-10-01.mjs`.
+Artifact root: `resources/manuals/operator-guides/review-rounds/2026-10-01-workflows`.
+WF-01 v15 uses `scripts/manuals/generate-wf01-v15.mjs` and the separate
+`resources/manuals/operator-guides/review-rounds/2026-10-01-wf01-v15` round.
+WF-01 v14 remains retained in the original paired round.
+These candidates use the existing one-page two-column and two-sided stacked
+recipes. Default accepted/runtime selections remain unchanged. The authoring
+specifications describe these proposals; historical matrices below describe
+their earlier selections. See the [paired comparison](reviews/workflow-revisions-2026-10-01.md).
+
+## USR-05 / CAT-05 / CAT-06 V2 - 2026-09-15
+
+The revised working drafts are USR-05 v2 (3 pages), CAT-05 v2 (8 pages), and
+CAT-06 v2 (3 pages). See the [revision review](reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md) for changes,
+exact artifacts, checks and remaining operator trials. The three v1 PDFs and
+all accepted artifacts are retained unchanged; v2 is not acceptance.
+
+
 ## Accepted Guide Folder - 2026-09-10
 
 The [accepted-guides-v1 manifest](../../../resources/manuals/operator-guides/accepted-guides-v1/manifest.json)
@@ -122,14 +163,14 @@ content and layout while clarifying the step-3 choice; the owner reviewed the di
 | USR-02 Rol en rechten wijzigen | v11; Internal review candidate; cleared for user review 2026-09-10 | 1 | `stacked-step-flow` + `mixed-visual-widths` | `generate-owner-corrections.mjs USR-02` |
 | USR-03 Wachtwoord resetten | v3 draft; visual-correction pass, awaiting exact-version review | 1 | `stacked-step-flow` + `mixed-visual-widths` | `generate-user-account-guide-review.mjs` |
 | USR-04 Gebruiker uitschakelen | v6; Internal review candidate; cleared for user review 2026-09-10 | 1 | `stacked-step-flow` | `generate-owner-corrections.mjs USR-04` |
-| USR-05 Groepen beheren | planned | ? | `unassigned` | Not assigned |
+| USR-05 Groepen beheren | v2 draft; unaccepted, controlled browser-user trial pending | 3 | `group-choice-permissions-test` | `generate-planned-guide-v2.mjs` |
 | CAT-00 Catalogus begrijpen | v11; Internal review candidate; cleared for user review 2026-09-10 | 6 | `reference-chapter` + `reused-evidence` + `two-sided-continuation` | `generate-owner-corrections.mjs CAT-00` |
 | CAT-01 Model en modelnummer aanmaken | v7; Internal review candidate; cleared for user review 2026-09-10 | 5 | `extended-admin-flow` + three-route decision + warnings + `two-sided-continuation` | `generate-owner-corrections.mjs CAT-01` |
 | CAT-02 Modelspecificatie opbouwen | v1 draft; working draft, awaiting exact-version review | 6 | `extended-admin-flow` + decision alternatives + component conflict + `two-sided-continuation` | `generate-catalog-guide-review.mjs` |
 | CAT-03 Attributen beheren | v1 draft; corrected `-02` form evidence captured for next revision | 5 | `extended-admin-flow` + alternatives + `two-sided-continuation` | `generate-catalog-guide-review.mjs` |
 | CAT-04 Componentdefinities beheren | v2 draft; corrected `-02` form evidence captured for next revision | 6 | `extended-admin-flow` + hierarchy warning + `two-sided-continuation` | `generate-catalog-guide-review.mjs` |
-| CAT-05 Varianten en lifecycle beheren | planned; scope/title review required | 5 target | `unassigned` | Not assigned |
-| CAT-06 Catalogus controleren en bronnen | planned; verification scope ready, source policy unresolved | 3 target | `unassigned` | Not assigned |
+| CAT-05 Bestaande catalogus aanpassen | v2 draft; unaccepted, disposable route execution/review pending | 8 | `independent-maintenance-routes` | `generate-planned-guide-v2.mjs` |
+| CAT-06 Productgegevens controleren | v2 draft; unaccepted, source-retention/fallback policy pending | 3 | `worked-source-check` | `generate-planned-guide-v2.mjs` |
 
 AST-01 is retired and replaced by SC-01. It remains in the historical guide
 specification and evidence inventory but not in the active production matrix.
@@ -155,10 +196,13 @@ specification and evidence inventory but not in the active production matrix.
 | USR-02 | `resources/manuals/operator-guides/review-rounds/2026-09-10/owner-reference-followups/usr-02-rol-en-rechten-wijzigen-v11-draft.pdf`; owner-cleared for user review; exact PDF unchanged |
 | USR-03 | `resources/manuals/operator-guides/drafts/usr-03-wachtwoord-resetten-v3-draft.pdf` |
 | USR-04 | `resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/USR-04-gebruiker-uitschakelen-of-herstellen-v6-draft.pdf`; owner-cleared for user review; exact PDF unchanged |
+| USR-05 | `resources/manuals/operator-guides/drafts/usr-05-groepen-beheren-v2-draft.pdf`; unaccepted working draft |
 | CAT-00 | `resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CAT-00-catalogus-begrijpen-v11-draft.pdf`; owner-cleared for user review; exact PDF unchanged |
 | CAT-01 | `resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CAT-01-model-en-modelnummer-aanmaken-v7-draft.pdf`; owner-cleared for user review; exact PDF unchanged |
 | CAT-03 | `resources/manuals/operator-guides/drafts/CAT-03-attributen-beheren-v1-draft.pdf`; unaccepted working draft |
 | CAT-04 | `resources/manuals/operator-guides/drafts/CAT-04-componentdefinities-beheren-v2-draft.pdf`; unaccepted working draft |
+| CAT-05 | `resources/manuals/operator-guides/drafts/cat-05-varianten-en-lifecycle-beheren-v2-draft.pdf`; unaccepted working draft |
+| CAT-06 | `resources/manuals/operator-guides/drafts/cat-06-catalogus-controleren-en-bronnen-v2-draft.pdf`; verification-only unaccepted working draft; current visible title is Productgegevens controleren |
 
 Committed binary inputs live under `resources/manuals/operator-guides/`.
 Generated and superseded proofs remain under ignored output or the historical

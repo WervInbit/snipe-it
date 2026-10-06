@@ -1,15 +1,23 @@
 # CAT-02 Modelspecificatie opbouwen
 
-Status: Unaccepted working draft v1 generated on 2026-09-03.
+## Application Alignment Revision - 2026-10-01
+
+Current authoring proposal: **v3, working draft; not accepted**, 7 A4 pages. [Exact-version review](../reviews/CAT-02-v3.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+
+Manual attribute filtering when components supply values; verify aggregated values and current catalogue maintenance routes.
+
+Added page: Controleer beschikbare attributen en afgeleide getallen. Steps: Zoek op Edit Spec bij het juiste modelnummer; Controleer bron, hoeveelheid en aggregatie; Los een ontbrekende keuze via de bron op.
+
+The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v2 input.
 
 ## Maintenance Metadata
 
 - Family: `CAT`.
 - Type: Extended administration task.
-- Current version: v1.
+- Current version: working draft v3; not accepted.
 - Page model: Six pages with one continuous procedure.
 - Layout recipe: `extended-admin-flow`.
-- Generator: `scripts/manuals/generate-catalog-guide-review.mjs` with
+- Generator: `scripts/manuals/generate-aligned-guides-2026-10-01.mjs`.
   `SNIPEIT_GUIDE_FILTER=CAT-02`.
 - Output: `resources/manuals/operator-guides/drafts/`
   `CAT-02-modelspecificatie-opbouwen-v1-draft.pdf`.
@@ -106,7 +114,7 @@ route.
 
 The component-derived value is used when it conflicts with a direct value.
 Removing an already-saved direct value or expected-component row is an Admin
-cleanup route planned for `CAT-05 Varianten en lifecycle beheren`.
+cleanup route planned for `CAT-05 Bestaande catalogus aanpassen`.
 
 ### Page 6 - Opslaan
 
@@ -153,8 +161,8 @@ saved result has been verified.
 - `CAT-01 Model en modelnummer aanmaken`.
 - `CAT-03 Attributen beheren`.
 - `CAT-04 Componentdefinities beheren`.
-- `CAT-05 Varianten en lifecycle beheren`.
-- `CAT-06 Catalogus controleren en bronnen`.
+- `CAT-05 Bestaande catalogus aanpassen`.
+- `CAT-06 Productgegevens controleren`.
 - `AST-03 Asset registreren en labelen`.
 
 ## Review Status

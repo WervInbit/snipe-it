@@ -1,5 +1,13 @@
 # CAT-01 Model en modelnummer aanmaken
 
+## Application Alignment Revision - 2026-10-01
+
+Current authoring proposal: **v8, working draft; not accepted**, 5 A4 pages. [Exact-version review](../reviews/CAT-01-v8.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+
+Current Model Numbers entry and exact-code selection; route to specification editing after identifying a row.
+
+The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v7 input.
+
 ## Latest Correction Candidate - 2026-09-10
 
 Current review candidate: [v7](../reviews/CAT-01-v7.md), owner-cleared for user review.
@@ -13,12 +21,12 @@ Status: Internal review candidate v7; owner cleared for user review 2026-09-10.
 
 - Family: `CAT`.
 - Type: Extended administration task.
-- Current version: v7; internal review candidate (printed draft label retained).
+- Current version: working draft v8; not accepted.
 - Page model: Five-page procedure with continuous steps and page handoffs.
 - Layout recipe: `extended-admin-flow` with `single-visual`,
   `inline-route-alternative`, `inline-warning`, `reused-evidence`, and
   `two-sided-continuation`.
-- Generator: `scripts/manuals/generate-owner-corrections.mjs CAT-01`.
+- Generator: `scripts/manuals/generate-aligned-guides-2026-10-01.mjs`.
 - Artifact root: `output/manuals/proofs/owner-corrections-2026-09-10/CAT-01-v7/`.
 - Portable review package:
   `resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CAT-01-model-en-modelnummer-aanmaken-v7-draft.pdf`.
@@ -229,7 +237,7 @@ route is used.
 
 ## Help
 
-- Exact code unavailable: use `CAT-06 Catalogus controleren en bronnen`; do
+- Exact code unavailable: use `CAT-06 Productgegevens controleren`; do
   not invent a code.
 - Similar product found: return to CAT-00 and compare product generation and
   complete exact number.
@@ -246,8 +254,8 @@ label, without a duplicate.
 
 - `CAT-00 Catalogus begrijpen`.
 - `CAT-02 Modelspecificatie opbouwen`.
-- `CAT-05 Varianten en lifecycle beheren`.
-- `CAT-06 Catalogus controleren en bronnen`.
+- `CAT-05 Bestaande catalogus aanpassen`.
+- `CAT-06 Productgegevens controleren`.
 - `AST-03 Asset registreren en labelen`.
 
 ## Evidence Manifest

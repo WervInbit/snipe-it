@@ -1,19 +1,21 @@
 # CAT-04 Componentdefinities beheren
 
-Separate comparison proposal: [CAT-04 v3](../reviews/CAT-04-v3.md) is retained
-after the owner rejected the batch's design direction. Its replacement evidence
-and numeric warning correction remain proposals, not acceptance. The selected
-baseline below is unchanged; follow the [feedback](../reviews/2026-09-08-pilot-direction-feedback.md)
-before revising.
+## Application Alignment Revision - 2026-10-01
 
-Status: Working draft v2; workflow and evidence verified, exact-version review pending.
+Current authoring proposal: **v5, working draft; not accepted**, 7 A4 pages. [Exact-version review](../reviews/CAT-04-v5.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+
+Verify quantity, child precedence, contribution flags and per-attribute sum/distinct; current Optical Drive choices.
+
+Added page: Controleer aantallen en numerieke bijdragen samen. Steps: Zoek het juiste bestaande onderdeeltype; Controleer kinderen, aantallen en bijdragevlaggen; Controleer de uitkomst met de attribuutregel.
+
+The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v4 input.
 
 ## Maintenance Metadata
 
 - Family: `CAT`.
 - Type: Extended administration task.
-- Current version: draft v2.
-- Expected page model: Six pages.
+- Current version: working draft v5; not accepted.
+- Expected page model: 7 A4 pages.
 - Layout recipe: `extended-admin-flow`.
 
 ## Purpose
@@ -119,7 +121,7 @@ of this guide.
      component on a model-number baseline.
    - `CMP-02 Nieuw component registreren en plaatsen` to create a physical
      component record from the definition.
-   - `CAT-05 Varianten en lifecycle beheren` for deactivation or removal of
+   - `CAT-05 Bestaande catalogus aanpassen` for deactivation or removal of
      saved contributions or expected-part rows.
 
 ## Mandatory Decisions
@@ -171,7 +173,7 @@ bijdragen en eventuele verwachte onderdelen en is vindbaar voor hergebruik.
 - `CAT-00 Catalogus begrijpen`.
 - `CAT-02 Modelspecificatie opbouwen`.
 - `CAT-03 Attributen beheren`.
-- `CAT-05 Varianten en lifecycle beheren`.
+- `CAT-05 Bestaande catalogus aanpassen`.
 - `CMP-02 Nieuw component registreren en plaatsen`.
 
 ## Evidence Manifest

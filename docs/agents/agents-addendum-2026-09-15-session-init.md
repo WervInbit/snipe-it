@@ -1,4 +1,44 @@
-# Agent Addendum - 2026-09-15 Workflow Feature
+# Agent Addendum - 2026-09-15 Session Init
+
+## Manuals Focus Continuation
+
+- Read the operator-guide README, continuation handoff, authoritative registry,
+  owner-review readiness/TODO records, root TODO entries, and the portable
+  accepted-guide package README.
+- Treat `resources/manuals/operator-guides/accepted-guides-v1/` as the frozen
+  current accepted package: 16 guide codes / 27 pages. Acceptance is exact-
+  version internal-review status, not third-party approval.
+- Preserve accepted artifacts byte-for-byte. Any visible correction receives a
+  new version, focused proof, review record, registry/specification update, and
+  rendered PDF QA.
+- Open work includes other-user and physical A4 tracing; draft review for
+  AST-05, HELP-01, USR-03, CAT-02, CAT-03, and CAT-04; careful handling of newer
+  unaccepted WF-02/CMP-01 proposals; and planned USR-05, CAT-05, and CAT-06.
+- The root README's statement that the guides are not yet a versioned V1 manual
+  now lags the accepted package and should be reconciled in a manuals
+  documentation pass.
+
+## Manuals Batch Outcome
+
+Later owner feedback: all three v1 drafts require content alignment rework.
+The [content audit](../manuals/operator-guides/reviews/USR-05-CAT-05-CAT-06-content-audit-2026-09-15.md)
+records eleven guide-specific findings, shared corrections, exact comparison
+versions, and v2 briefs. All ten v1 pages were inspected; application behavior
+was checked read-only. The original PDFs and their hashes remain comparison
+artifacts. No v2 or operational acceptance test was produced by the audit.
+
+- Created unaccepted USR-05 v1 (2 pages), CAT-05 v1 (5 branching pages), and
+  verification-only CAT-06 v1 (3 pages), with exact review records and portable
+  draft-manifest entries.
+- Captured eight new read-only/unsaved UI evidence sources without submitting
+  forms or changing application data; accepted guide bytes remain unchanged.
+- Added `generate-planned-guide-drafts.mjs`, updated the guide specs, layouts,
+  registry, evidence catalog, inventory, handoff, decisions, README, and TODO.
+- Automated component/geometry/A4/page/title/text checks and visual inspection
+  passed. Package verification passed against a clean manifest-only draft
+  mirror; the live draft root retains the three known unlisted historical CAT
+  files tracked in `TODO.md`. Operational acceptance tests and policy approvals
+  remain open as recorded in each guide review.
 
 ## Feature Change Continuation
 
@@ -101,3 +141,49 @@
   cannot sit above them. Blade compilation and focused asset/status UI coverage
   passed (23 tests, 132 assertions). The Windows inspection helper continued to
   fail at kernel initialization, leaving a hard-reload/manual browser smoke.
+## Manuals V2 Revision Outcome
+
+- Revised USR-05, CAT-05 and CAT-06 from the owner-requested content audit.
+  New v2 PDFs contain 3, 8 and 3 pages, respectively; all remain unaccepted.
+- Corrected permissions, branch/save/result sequencing, affected-override
+  warnings, actual Enum/lifecycle controls and a worked HP source check.
+- Retained all v1 and accepted PDF bytes. Updated specifications, current
+  index/registry metadata, reviews, manifests and version-aware checks.
+- Eight real read-only captures were added. The only fixture was an owned
+  memberless local group; five resolver cases passed and the fixture was
+  removed. No user membership or catalogue content was changed.
+- All 14 final PDF pages passed independent raster inspection; metadata,
+  text, source-link, artifact-hash, shared component tests and helper lint pass.
+  The manifest-only package mirror passes at 119 evidence / 26 drafts / 69
+  pages. Three pre-existing unlisted draft PDFs were preserved.
+- No application suite, destructive catalogue trial or deployment was run.
+  Controlled operator trials, source policy and exact-version acceptance are
+  still required. Existing Docker services and unrelated concurrent code work
+  were left alone. See
+  [v2 review](../manuals/operator-guides/reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md).
+
+## Manuals Owner Readability Follow-up
+
+- Updated the current USR-05/CAT-05/CAT-06 v2 drafts in response to direct
+  owner review. USR-05 now names the left-sidebar route to Groepen and spells
+  out conflicting group/direct-user permission precedence.
+- CAT-05 is now titled `Bestaande catalogus aanpassen` and begins with a
+  screen-based task finder. CAT-06 is now titled `Productgegevens controleren`
+  and explicitly serves only as an evidence check before CAT-01/CAT-02.
+- Regenerated and visually inspected all 14 A4 pages; focused PDF, registry,
+  hash, link and package validation passed. Historical v1 and accepted PDFs
+  were preserved; no application or data mutation was performed.
+
+## Portable Current Guide Kit
+
+- Exported all 25 active current guide PDFs / 61 pages to
+  `output/manuals/current-guide-kit-2026-09-15/`, using the authoritative
+  22-guide v4 selection plus USR-05/CAT-05/CAT-06 v2.
+- Added exact final HTML snapshots, full manuals tooling, evidence, baselines,
+  guide documentation, correction inputs, provenance manifests, a guide map,
+  checksums and context-free agent instructions. Historical rendered proof
+  debris was excluded; the inputs needed to reproduce current correction
+  layers remain present.
+- Standalone verification from inside the kit passed all 400 checksum entries,
+  25 PDF hashes and byte counts, 25 HTML hashes, required path checks and all
+  61 `pdfinfo` page counts. No current artifact or approval state changed.

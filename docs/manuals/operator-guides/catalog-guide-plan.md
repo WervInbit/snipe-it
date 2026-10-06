@@ -1,5 +1,13 @@
 # CAT Guide Set Information Architecture
 
+## USR-05 / CAT-05 / CAT-06 V2 - 2026-09-15
+
+The revised working drafts are USR-05 v2 (3 pages), CAT-05 v2 (8 pages), and
+CAT-06 v2 (3 pages). See the [revision review](reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md) for changes,
+exact artifacts, checks and remaining operator trials. The three v1 PDFs and
+all accepted artifacts are retained unchanged; v2 is not acceptance.
+
+
 ## Implemented Owner Corrections - 2026-09-10
 
 Use the [correction review and plain v4 pair](reviews/owner-corrections-2026-09-10.md)
@@ -461,13 +469,13 @@ There is also no browser delete route for a component definition. CAT-05 may
 teach activate/deactivate and Admin-only saved-row cleanup, but it must not show
 an invented Delete action.
 
-## CAT-05 Varianten En Lifecycle Beheren
+## CAT-05 Bestaande Catalogus Aanpassen
 
-### Recommended Scope Correction
+### Scope
 
-CAT-01 already owns adding exact variants. CAT-05 should not repeat that task.
-Its next title should be reviewed as `Catalogusstatus en opschoning beheren`,
-with the current code retained.
+CAT-01 already owns adding exact variants. CAT-05 does not repeat that task.
+After owner readability feedback, v2 uses the plain title `Bestaande catalogus
+aanpassen` and starts from the screen or action the operator recognizes.
 
 ### Outcome
 
@@ -476,8 +484,10 @@ the affected records, and verifies that active catalogue routes remain usable.
 
 ### Page Plan
 
-Target: five-page branching Admin guide. The branches are alternatives, not a
-sequence that every reader performs.
+Current v2: eight-page Admin guide. Page 1 is a screen-based task finder:
+Model Numbers routes to pages 2-3, Edit Spec to page 4, Attributes to pages
+5-6, and Component Definitions to pages 7-8. Every destination page repeats
+its exact entry screen and has its own completion and return.
 
 1. **Choose the object and inspect its use**
    - Identify Basismodel/model number, specification row, attribute definition,
@@ -487,17 +497,21 @@ sequence that every reader performs.
 2. **Model-number lifecycle and default**
    - Explain Primary as the system fallback/default, not approval.
    - First number becomes Primary automatically.
-   - Primary cannot be deprecated or deleted; making a deprecated number
-     Primary restores it.
+   - Primary cannot be deprecated or deleted. In the global Edit route, save a
+     deprecated number Active and reopen before selecting the default checkbox.
    - In-use model numbers cannot be deleted.
 3. **Model-specification cleanup**
    - Remove an existing direct attribute or expected-component row only after
      reviewing impact.
    - Removing a direct attribute also removes per-asset overrides for that
      definition on assets using the model number.
-   - Verify the model specification and an affected asset after cleanup.
+   - Preserve each affected override and verify all identified affected records;
+     one inspected asset does not establish complete impact. Form removal is
+     committed by Opslaan, not by the X/Remove alone.
 4. **Attribute-definition lifecycle**
-   - Hide/unhide, remove an obsolete Enum option, or delete only when unused.
+   - Hide/unhide immediately, or maintain a saved Enum option using its Active
+     and Remove checkboxes followed by Opslaan. There is no browser action to
+     delete the attribute definition; do not invent one.
    - Do not change the meaning of an in-use key or simulate a datatype change.
 5. **Component-definition lifecycle**
    - Activate/deactivate a definition and remove saved attribute contributions
@@ -509,9 +523,9 @@ sequence that every reader performs.
 the Basismodel form and optionally its base image, not model numbers,
 model-number images, direct specification values, or expected components.
 
-## CAT-06 Catalogus Controleren En Bronnen
+## CAT-06 Productgegevens Controleren
 
-### Recommended V1 Boundary
+### Boundary
 
 Make CAT-06 a verification guide that can work now. Do not claim that a source
 or review result is stored in Snipe-IT while no dedicated field or approved
@@ -526,7 +540,11 @@ for correction.
 
 ### Page Plan
 
-Target: three-page `reference-checklist` or other verified reference recipe.
+Current v2: three-page `worked-source-check`. Page 1 first states when to use
+CAT-06: only before CAT-01 or CAT-02 when a model code or one specification
+fact is uncertain. The guide verifies evidence and never edits catalogue data.
+The actual HP label and official family page support identity and the display
+diagonal; exact-SKU RAM remains explicitly unverified.
 
 1. **Choose the strongest evidence**
    - Physical manufacturer model/SKU label.
@@ -656,8 +674,9 @@ action naming, sparse-text sizing, and the default-configuration label rule.
 CAT-02 v1 completed production step 5 on 2026-09-03 as a six-page Supervisor
 workflow with controlled, non-destructive evidence. CAT-04 v2 supersedes v1
 for sparse-card readability and the current-process Required rule. All exact
-PDFs remain unaccepted; production continues with CAT-05 and the CAT-06
-source-policy decision.
+PDFs remain unaccepted. Verification-only CAT-06 v1 and branching Admin CAT-05
+v1 completed production steps 6 and 7 on 2026-09-15. The source-policy decision,
+controlled maintenance execution, and set-level cold-start review remain open.
 
 ## Set-Level Acceptance Tests
 
@@ -687,11 +706,12 @@ The CAT set is ready for exact-version review only when:
 - the exact versions remain `Working draft` until the user explicitly accepts
   them for internal review.
 
-## Decisions Needed Before Generation
+## Decisions Needed Before Acceptance Or A Later Version
 
-- Confirm the narrower CAT-05 maintenance scope and whether its printed title
-  changes from `Varianten en lifecycle beheren`.
-- Confirm whether CAT-06 v1 is verification-only or waits for a source field.
+- CAT-05 v2 now uses the owner-requested plain maintenance title and a
+  screen-based task finder; confirm it in first-time operator review.
+- CAT-06 v1 is verification-only; decide where durable source evidence belongs
+  before promoting it to an internal review candidate.
 - Decide whether the application will be renamed from `Asset modellen` to
   `Basismodellen` before new CAT evidence is captured.
 - Create a separate WF-family plan for workflow items, profiles,

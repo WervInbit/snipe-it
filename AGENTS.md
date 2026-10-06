@@ -28,6 +28,30 @@ This guide keeps automation agents and human contributors aligned on the expecta
 - `docs/agents/old/` stores archived yearly logs and prior session addenda (read-only).
 - `docs/fork-notes.md` summarizes fork-level feature deltas; reference PRs or issues when logging changes.
 
+## Operator Guide Authoring
+- Before generating, fixing or adjusting manuals, read
+  `docs/manuals/operator-guides/authoring-method.md` and the relevant guide
+  specification. Establish the reader outcome, information relevance and
+  action/choice structure before selecting screenshots or editing a generator.
+- Reconcile current shared standards, family rules and linked owner decisions
+  before reusing a baseline. Record applicable requirements, desired targets,
+  retired approaches and unresolved gaps; check the complete revision against
+  them. Earlier acceptance does not override later decisions.
+- Accepted guides establish the design direction and a basis for improvement.
+  Distinguish required application updates from chosen reader improvements;
+  judge the complete revised guide against that direction.
+- Keep a short reasoning brief in the specification or version review. Local
+  alignment/wording repairs may reuse the existing outline; substantive changes
+  must explain the affected reader decision, placement and preservation tradeoff.
+- Derive composition from the reader's task. Application-change lists, available
+  captures and fixed card/page templates must not determine instructional scope.
+- Read the rendered page for its implied actions and plausible wrong readings;
+  compare useful baseline support and actual target recognition sizes. Geometry,
+  rendering and checksum checks do not establish instructional usability.
+- Frozen HTML and dated generators reproduce proposals. They do not override
+  guide specifications or owner decisions. Preserve historical artifacts and
+  make reasoned new versions within the user's existing authorization.
+
 ## Repository Guidelines
 
 ### Project Structure & Module Organization

@@ -1,5 +1,13 @@
 # Operator Guide Source Inventory
 
+## USR-05 / CAT-05 / CAT-06 V2 - 2026-09-15
+
+The revised working drafts are USR-05 v2 (3 pages), CAT-05 v2 (8 pages), and
+CAT-06 v2 (3 pages). See the [revision review](reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md) for changes,
+exact artifacts, checks and remaining operator trials. The three v1 PDFs and
+all accepted artifacts are retained unchanged; v2 is not acceptance.
+
+
 Status: current classification. No source has been deleted or moved.
 
 ## Planning And Research Files
@@ -33,6 +41,7 @@ Status: current classification. No source has been deleted or moved.
 
 | Folder | Classification | Current artifact |
 | --- | --- | --- |
+| `output/manuals/proofs/2026-09-15-planned-guides` | Historical v1 planned-guide proofs | USR-05 v1 (2 pages), CAT-05 v1 (5 branching pages), and CAT-06 v1 (3 verification pages); all remain unaccepted working drafts |
 | `output/manuals/proofs/2026-08-25-visual-corrections` | Current focused visual-correction proofs | AC-02, USR-01 through USR-04, AST-03 through AST-05, and CMP-02: nine exact drafts across eleven A4 pages, grouped under `user`, `asset`, and `component` |
 | `output/manuals/proofs/2026-08-20-cold-start-rework` | Current 12-guide cold-start rework | User/access, AST lifecycle, component, and catalogue proofs: 12 exact drafts across 21 A4 pages, grouped under `user`, `asset`, `component`, and `catalog` |
 | `output/manuals/proofs/catalog-guide-review` | Current catalogue review proofs plus history | CAT-00 v9 orientation correction, CAT-01 v5 creation, CAT-02 v1 model specification, CAT-03 v1 attributes, and CAT-04 v2 component definitions; prior versions remain review history |
@@ -92,7 +101,7 @@ Consult both before adding or recapturing a screenshot.
 | Folder | Contents |
 | --- | --- |
 | `resources/manuals/operator-guides/pdf` | Exact PDF copies of all nine current V1 internal review candidates and a SHA-256 manifest. |
-| `resources/manuals/operator-guides/drafts` | Latest PDFs for seventeen unaccepted review versions, explicitly marked unaccepted and protected by a SHA-256 manifest. |
+| `resources/manuals/operator-guides/drafts` | 26 unaccepted versions across 23 guide codes / 69 A4 pages; includes the retained v1 and new v2 trio, explicitly marked unaccepted and protected by a SHA-256 manifest. |
 | Historical workstation package | Older six-guide package and exact script snapshots retained as review history. |
 
 AST-03 v14, USR-01 v8, and USR-02 v7 are included in the repository package.
@@ -107,8 +116,12 @@ AST-03 v14, USR-01 v8, and USR-02 v7 are included in the repository package.
 | `scripts/manuals/verify-guide-package.mjs` | Checks evidence/baseline/PDF hashes, status, page counts, A4 dimensions, URLs, and active-script portability. |
 | `scripts/manuals/generate-guide-component-proof.mjs` | Current A4 visual regression proof for shared components. |
 | `scripts/manuals/generate-catalog-guide-review.mjs` | Current CAT-00 v9, CAT-01 v5, CAT-02 v1, CAT-03 v1, and CAT-04 v2 generator with retained catalogue review branches, multi-page A4, context-column, title/version, component-bound, and rendered-geometry checks. |
-| `scripts/manuals/capture-catalog-guide-evidence.mjs` | Controlled catalogue capture harness; fills unsaved examples, can stage screenshot-only conflict/success states, and captures existing records without submitting changes. |
+| `scripts/manuals/generate-planned-guide-v2.mjs` | USR-05 v2 (3 pages), CAT-05 v2 (8 pages) and CAT-06 v2 (3 pages); new proofs under `output/manuals/proofs/2026-09-15-planned-guides-v2`. |
+| `scripts/manuals/prepare-planned-guide-evidence.php` | Guarded local, memberless group fixture and five in-memory permission-resolver checks; inspect/create/remove modes. |
+| `scripts/manuals/generate-planned-guide-drafts.mjs` | Reproducible USR-05 v1, CAT-05 v1, and CAT-06 v1 generator with shared components, SVG geometry checks, per-page proofs, output PDFs, and portable draft copies. |
+| `scripts/manuals/capture-catalog-guide-evidence.mjs` | Controlled catalogue capture harness; fills unsaved examples, can stage screenshot-only conflict/success states, and includes read-only CAT-05 saved-row cleanup capture mode. |
 | `scripts/manuals/generate-user-account-guide-review.mjs` | Current user-account batch/focused generator; defaults to USR-01 v11, USR-02 v9, USR-03 v3, AC-02 v3, and USR-04 v3 while explicit version variables preserve older branches. |
+| `scripts/manuals/capture-user-account-guide-evidence.mjs` | Controlled user/account capture harness with a read-only USR-05 group-list, permission, save-control, and detail mode. |
 | `scripts/manuals/generate-component-followup-guides.mjs` | Current generator for CMP-02 v4, CMP-04 v6, and HELP-01 v6; uses source-pixel crops, measured target padding, and full family-styled help references. |
 | `scripts/manuals/generate-component-guide-review.mjs` | Focused CMP-01 generator; accepted v4 remains the default and version 5 applies the Senior Refurbisher role. |
 | `scripts/manuals/generate-revised-guide-set.mjs` | Data-driven complete-set generator with an optional focused guide filter; accepted AST-02 v5 remains reproducible, while AST-03 v14 and AST-04/05 v5 are the current lifecycle defaults with contained captions, reframed handoff evidence, continuous numbering, real placement evidence, and verified automatic status changes. |

@@ -464,6 +464,100 @@
 - Session notes are in
   `docs/agents/agents-addendum-2026-09-22-session-init.md`.
 
+## Remaining Relevant Guide Revision Batch
+
+- Completed 19 separate unaccepted guide revisions / 66 A4 pages (52 previous),
+  with 14 added instructional pages. Existing WF-01 v15/WF-02 v13 preserved.
+  Four unaffected flows retained; comparison kit has 25 guides / 75 pages.
+- Audited mounted worktree c539b9cd18ed, retained 21 genuine local JPEGs and
+  exact source hashes. Captured no operator saves: release preview cancelled;
+  normal recent history and proposed-tag reservation INBIT-AA0016 are noted.
+  Creation-result example uses an existing-asset fallback; no print trial.
+- Every new page rendered at 144 dpi and visually inspected; geometry, line
+  capacity, A4/page counts, text/version/status, hashes and preservation checks
+  passed. Accepted package and shared guide-system checks run separately.
+  Application tests skipped: artifact-only change, no application code/deploy.
+- Password/status/catalogue save/reopen, controlled-user permissions, camera,
+  physical printing and first-time-reader/exact-version reviews remain pending.
+  The ZIP has 74 entries, all verified; 173 new review/index links resolve.
+  Accepted package (369 files), existing current kit (400 checksums), shared
+  guide-system and prior workflow checks passed.
+  See docs/manuals/operator-guides/reviews/aligned-guides-2026-10-01.md.
+
+## WF-01 V15 Owner Feedback Correction
+
+- Owner identified v14's blocked/Edit first example as unnatural and the
+  phrase "Kies de afgesproken rij" as unclear. Created a separate unaccepted
+  WF-01 v15: "Bekijk de workflowvolgorde", real Standard Diagnostics Start,
+  and blocked Cleaning below it in 2A; 3A targets that same starting workflow.
+- Captured existing local INBIT-AA0004 as Demo Refurbisher, navigation only.
+  No workflow start, result/evidence write or configuration mutation was made.
+  The alternative existing-run examples remain separate retained v14 evidence.
+- Retains one A4 page, four steps, five visuals, help, choice and handoff.
+  Geometry/page/state/hash/A4 and prior-PDF preservation checks passed;
+  final retained page was rendered at 144 dpi and visually inspected.
+  Physical-print, new-run/operator trials and exact acceptance remain pending.
+  WF-02 v13, older PDFs and accepted selections remain unchanged. No application
+  tests or deployment were needed. See `docs/manuals/operator-guides/reviews/WF-01-v15.md`.
+
+## WF-01 / WF-02 New Unaccepted Comparison Drafts
+
+- The owner explicitly requested new-model revisions without automatic
+  acceptance. Created WF-01 v14 (one A4 page) and WF-02 v13 (two A4 pages),
+  both visibly labelled `Niet geaccepteerd`, in a separate retained review round.
+  Accepted/current-selection manifests, older PDFs and the portable kit are
+  unchanged. Delivery copies are in `output/pdf/`.
+- WF-01 retains four steps, five visuals and the start/open choice while
+  replacing obsolete selector/start evidence with numbered profile rows,
+  prerequisite/definition explanations, and current Start/Continue/Edit meaning.
+- WF-02 retains six steps and two sides, with eight raster placements across
+  six visual groups. It shows both control/task result labels, real identity,
+  note-save timestamp checks, photo evidence controls, required versus optional
+  progression, and disabled/enabled Done with same-asset Workflows return.
+- Local browser evidence came from the other agent's mounted refurbisher
+  worktree, not master. Captures began at `731bb43c88`; the final source audit
+  recorded `5ee57f58db77`. Audited workflow files are unchanged between those
+  commits. Source hashes and six real JPEGs are retained. No result, note,
+  upload, status, profile, permission, database command or deployment was made.
+  Ordinary asset-view recent-history tracking may occur during navigation.
+- An existing answered run's Done action was verified to return to the same
+  asset's Workflows tab without removing its prerequisite/definition blockers.
+  No fresh start, live result/evidence save, failed-save, restricted-role,
+  override, physical-print, or first-time-reader pass is claimed.
+- Focused checks passed for page/card bounds, image clipping, choice spacing,
+  main/help separation, page counts, unaccepted version text, hashes and A4.
+  All three final retained PDF pages were rasterized at 144 dpi and visually
+  reviewed. Shared guide-system checks pass (25 codes / five related checks).
+  Accepted-package integrity and exact previous-PDF preservation were rechecked.
+  No Laravel suite was needed for this documentation/artifact-only change.
+- Updated the two authoring specifications, separate-candidate registry,
+  handoff, manual index, screenshot catalog, review records and fork notes.
+  Comparison, benefits/tradeoffs and exact hashes:
+  `docs/manuals/operator-guides/reviews/workflow-revisions-2026-10-01.md`.
+
+## Manuals Session Initialization And Initial Change Map
+
+- Initialized from `AGENTS.md`, current progress/fork notes, contributor
+  guidance, manual handoff/system/maintenance rules, guide registry, retained
+  review records, and the September refurbisher implementation backlog.
+- Another agent is working in the project. This session owns documentation
+  assessment and its new session/review notes; preserve all existing changes
+  and coordinate before overlapping application, generator, or shared-manual
+  edits. No runtime, database, deployment, or account change was performed.
+- Recorded the initial guide impact and revision order in
+  `docs/manuals/operator-guides/reviews/application-change-map-2026-10-01.md`.
+  Prioritize WF-01/WF-02 and AST-05: September workflow guards and protected
+  sale-status confirmation are implemented but absent from older guide steps.
+  Keep planned refurbisher behavior separate until implementation and configured
+  UI evidence are available.
+- Accepted-package integrity verification passed: 16 current guides, seven
+  historical PDFs, and 369 verified files. This verifies preservation, not
+  alignment with the changed application or operational/user acceptance.
+- No application tests or PDF generation were needed for initialization.
+  Live UI evidence, full generator/PDF audit, and revised operator trials remain
+  for the focused revision blocks.
+- Session notes: `docs/agents/agents-addendum-2026-10-01-session-init.md`.
+
 # Session Progress (2026-09-17)
 
 ## Debugging And Small Bug-Fix Session Initialization
@@ -500,6 +594,27 @@
   browser session.
 
 # Session Progress (2026-09-15)
+
+## Portable Current Operator Guide Kit
+
+- Built `output/manuals/current-guide-kit-2026-09-15/` as a self-contained
+  handoff of all 25 active guide codes / 61 current PDF pages. The selection is
+  the exact 22-guide `current-guide-selection-v4` set plus the revised USR-05,
+  CAT-05 and CAT-06 v2 drafts.
+- Included the 25 exact final HTML snapshots, all `scripts/manuals` generators
+  and shared libraries, locked Node dependencies, 119 evidence sources, three
+  baselines, guide specifications/reviews, selection provenance and the ten
+  frozen HTML inputs required by the owner-correction layer. Superseded proof
+  renders were intentionally omitted from the portable set.
+- Added a guide-by-guide README, machine-readable manifest, full checksum list,
+  a context-free `AGENTS.md`, an idempotent kit builder, a standalone integrity
+  verifier and a guarded HTML-to-PDF renderer that refuses the frozen `guides/`
+  destination.
+- The verifier passed from inside the exported folder: 25 unique guides, 61
+  pages, 400 checksum entries, all PDF/HTML/spec/generator paths present, exact
+  PDF and HTML hashes, byte counts and `pdfinfo` page counts. No guide PDF,
+  evidence file, acceptance state, application code, database or deployment
+  was changed by the export.
 
 ## Feature Change Session Initialization
 
@@ -646,6 +761,51 @@
   compilation and the two focused asset-detail/status suites passed (23 tests,
   132 assertions); the Windows browser helper still fails before initialization,
   so the already-open development page needs a hard reload and manual smoke.
+
+## Manuals Focus Continuation
+
+- Reinitialized from `AGENTS.md`, this progress log, `docs/fork-notes.md`,
+  `docs/manuals/operator-guides/README.md`, `HANDOFF.md`, `registry.md`, the
+  current owner-review records, `TODO.md`, and the accepted-guide package.
+- Manuals are the active scope for the next working block. Preserve all exact
+  accepted PDFs and hashes; visible changes require a new guide version and
+  review record.
+- The authoritative accepted package contains 16 current guide codes / 27
+  pages. Other-user feedback, physical A4/first-time-user tracing, and
+  third-party approval remain pending.
+- Current unaccepted work includes AST-05, newer WF-02 and CMP-01 proposals,
+  HELP-01, USR-03, and CAT-02 through CAT-06 plus USR-05.
+- Documentation drift noted for later correction: the root `README.md` still
+  says the operator guides are not yet a versioned V1 manual, while the
+  repository now contains the versioned `accepted-guides-v1` package.
+- No guide source, PDF, evidence, generator, application state, or database was
+  changed during the initialization pass itself.
+
+### USR-05 / CAT-05 / CAT-06 Draft Batch
+
+- Generated three new unaccepted working drafts with shared components:
+  USR-05 v1 (2 A4 pages), CAT-05 v1 (5 branching A4 pages), and CAT-06 v1
+  (3 verification A4 pages). Accepted PDFs and hashes were not changed.
+- Added six read-only/unsaved group-management captures and two read-only
+  model-specification cleanup captures. No form was submitted and no server or
+  database record changed. The local `db`, `app`, and `web` services were
+  started only for evidence capture and stopped after validation.
+- Registered exact draft hashes, page models, layouts, generator, evidence,
+  guide specifications, and per-version review records. The portable draft
+  manifest now contains 23 PDFs / 55 A4 pages; evidence contains 111 sources.
+- CAT-05 preserves the registered title while narrowing v1 to Admin lifecycle
+  and saved-row cleanup; CAT-01 continues to own creation. CAT-06 is explicitly
+  verification-only because the catalogue UI has no durable source field.
+- Generator definition, shared-component, rendered geometry, title metadata,
+  exact A4/page-count, text, and full-page visual checks passed. Package
+  verification passed against a clean manifest-only draft mirror; the live
+  draft root still reports the three known unlisted historical CAT files
+  already tracked in `TODO.md`. The ten latest raster pages were inspected;
+  no clipping or overlap remains.
+- Still required before acceptance: one controlled-user permission test for
+  USR-05, disposable-data execution of all CAT-05 branches, fallback-source
+  policy approval for CAT-06, physical A4/first-time-user review, and final QR
+  targets.
 
 # Session Progress (2026-09-10)
 
@@ -6035,3 +6195,180 @@ there are multiple duplicate functions that still need to be removed, sku will b
   PHP/Blade files, and `git diff --check` is clean. Temporary OAuth keys and
   generated uploads were removed; production and shared databases were not
   accessed or changed.
+
+## 2026-10-06 - Manual Change List Review
+
+- Owner requested one consolidated list of the October 1 guide changes.
+  Read the frozen 19-guide batch manifest and WF-01/WF-02 exact-version reviews;
+  mapped substantive changes to the new PDF pages and retained guide versions.
+- Summary covers 19 batch revisions plus the earlier two workflow revisions,
+  including added pages, account controls, handoff/release, rights and numeric
+  aggregation. Four unaffected guides remain unchanged. No guide regeneration,
+  application edit or acceptance decision. No tests needed for this read-only
+  artifact review; existing print/operator trial limits remain in force.
+
+## 2026-10-06 - Guide Purpose And Quality Audit
+
+- Owner rejected the latest AC-01 proposal and identified SC-01 route/numbering
+  defects, smaller accepted screenshot targets and English evidence. Reviewing
+  all 25 guides against preserved baselines and the established design rules.
+- Review/advice only in this block: preserve PDF/package bytes and the other
+  agent's printer changes. Record exact review decisions and a focused recovery
+  plan before any further guide generation.
+- Final focused PHPStan analysis passed for both print controllers, the print
+  service, printer configuration/discovery and the new admin controller.
+  Added the JSON attribute's optional-field model type declaration; focused
+  PSR-12 and tracked/new-file whitespace checks passed.
+- Read-only follow-up: central CUPS still lists dymo400_olimex_pilot, accepting,
+  with socket://10.10.10.245:19100/?waiteof=false. Current dev container uses
+  another checkout without the new panel, CUPS_SERVER=172.22.110.249 and the
+  legacy dymo25 list/default. Plugging the node into the LAN alone cannot
+  update dev's list or the pilot bind/source ACL/forwarding route. No runtime
+  configuration changed; direct LAN placement and dev activation remain work.
+
+## 2026-10-06 - Guide Quality Audit Findings
+
+- Completed the twenty-five-guide / seventy-five-page review against preserved
+  task/layout rules. Recorded owner rejection of AC-01 v10 (latest proposal
+  matching the owner's v1 reference) and SC-01 v13 rework feedback. Recommended
+  an editorial hold on all nineteen batch replacements; did not infer owner
+  rejection of the other seventeen or new acceptance of unchanged/WF guides.
+- Confirmed reduced AC-01 control scale, removed SC-01 fallback condition,
+  fourteen generic three-step added pages, duplicated completion/numbering,
+  reference/help material presented as procedures and mismatched success-state
+  examples. Recovery brief covers the purpose and specific repair for all 25:
+  docs/manuals/operator-guides/reviews/guide-purpose-and-quality-audit-2026-10-06.md.
+- Read-only locale diagnosis: global setting nl-NL, all four demo capture
+  account preferences en-US; authenticated user preference overrides global.
+  New numeric-aggregation labels also lack Dutch translations. No settings,
+  account, status, workflow or catalogue write was made in this block.
+- Updated review decisions, index/handoff/registry and AC-01/SC-01 specification
+  status, screenshot guidance and fork notes. Original frozen PDFs/HTML/kits,
+  manifests and accepted/runtime selections remain unchanged. No new PDFs.
+- Verification passed: 19 frozen PDFs, 66 raster hashes, all 25 comparison PDFs
+  and 21 previous PDFs; accepted-package 369-file and prior-kit 400-checksum
+  verifiers; report links, 25 unique guide rows and focused whitespace checks.
+  No application tests required for documentation/read-only review. Physical
+  A4/operator/save/print trials remain pending. Concurrent printer changes and
+  progress entries were preserved.
+
+## 2026-10-06 - Guide Authoring Reasoning Repair
+
+- Owner clarified the task: repair the general reasoning used to generate,
+  fix and adjust guides, rather than propose individual fixes or another pilot.
+  Scope is a shared authoring method applied across guide types. No PDF batch.
+- Inspecting where feature changes become content, where structure is chosen,
+  how evidence/layout decisions are justified and what review actually proves.
+  Preserve concurrent application work and frozen artifacts.
+
+## 2026-10-06 - Guide Authoring Method Repair Outcome
+
+- Repaired the common reasoning process for guide creation, substantive
+  revision and local correction. Reader outcome/knowledge and information
+  relevance determine action/choice structure, then evidence jobs and
+  composition. Review reads visible meaning and plausible wrong interpretations
+  and compares useful baseline support. Feedback records principle and boundary.
+- Added docs/manuals/operator-guides/authoring-method.md and the method review
+  with twelve contrasting exercises and coverage of all twenty-five subjects.
+  These are editorial desk exercises, not new-PDF or operator-trial results.
+- Made the method part of AGENTS.md, system/maintenance, layout/evidence rules,
+  root/manual indexes and current handoff. Superseded the earlier individual
+  pilot emphasis. Replaced output-as-authority wording in all nineteen proposal
+  specification headers; frozen HTML now has reproduction authority only.
+- Integrity, editorial judgment, actual reader trials and exact acceptance are
+  recorded separately. No automatic quality score or extra owner permission
+  stage. No PDF generation, application/settings edit or new acceptance.
+- Verification passed: method links and ASCII text, all 25 coverage codes,
+  19 corrected headers and unchanged PDFs/HTML/predecessors, four frozen
+  generator dependencies, accepted-package verifier (369 files), and focused
+  whitespace checks. No application tests needed for this documentation change.
+  Concurrent agent application/documentation work remains preserved.
+
+## 2026-10-06 - Guide Revision Objective Clarification
+
+- Owner clarified that accepted guides establish a successful direction and can
+  improve further. Significant application changes require real guide updates;
+  recent proposals regressed while applying those updates.
+- Refine the shared method to distinguish required system alignment from chosen
+  reader improvements, and judge the complete revision against that direction.
+  This block changes authoring documentation; no guide PDF generation.
+
+## 2026-10-06 - Guide Revision Objective Outcome
+
+- Refined authoring-method.md: accepted guides establish a successful direction
+  to develop, with current application alignment and deliberate reader gains.
+  Improvements may address clarity, recognition or effort without a known error.
+- Separate required behavior changes from editorial choices, then compare the
+  complete guide for gains, new burdens and useful baseline support. Required
+  new content does not establish that its chosen presentation is unavoidable.
+  Added comparison guidance for guides without an accepted predecessor.
+- Updated AGENTS.md, system/maintenance, current indexes/handoff, decisions and
+  method review to carry this objective. The review now includes an accepted
+  guide improvement countercase. Earlier exact acceptance/rejection remains.
+- Focused whitespace checks, two method documents' ASCII and relative links
+  passed; reviewed the objective, reasoning brief and complete-guide comparison
+  for consistency. These checks establish documentation integrity, not the
+  effectiveness of future guide revisions. No application tests needed.
+- No PDFs, frozen generators, manifests, accepted selections or application
+  settings changed. Concurrent agent work and log entries remain preserved.
+
+## 2026-10-06 - Guide Standards Reconciliation
+
+- Check the reauthoring method against current and desired guide standards and
+  owner decisions, including approaches explicitly abandoned after older guides.
+- Identify missing reconciliation steps and document how standards constrain
+  baseline reuse and review. Preserve current artifacts and concurrent work.
+
+## 2026-10-06 - Guide Standards Reconciliation Outcome
+
+- Found that standards were referenced but the reauthoring brief/workflow did
+  not explicitly reconcile inherited content with later decisions. Added this
+  step before baseline reuse and in complete-render review, including old text
+  and supplementary pages outside the local edit.
+- authoring-method.md maps existing language/reader, identity/navigation,
+  action/choice, evidence, warning, composition and operational-scope standards
+  to their sources. Briefs distinguish current requirements, desired targets,
+  retired approaches and open evidence/product decisions. Historical exact
+  acceptance does not reinstate a superseded direction.
+- Updated AGENTS.md, system QA, maintenance steps, handoff/indexes and decisions.
+  Corrected components.md's two-page statement to floor-task scope, matching
+  current administration/reference recipe and CAT exceptions.
+- Extended the method review with inherited USR-04 scope and preferred future
+  QA-state countercases. These are desk exercises, not observed reader trials.
+  A desired product state stays a target until implemented and verified.
+- Focused whitespace checks, method/review ASCII, 20 relative links and the new
+  standards anchor passed. No application tests needed for documentation-only
+  work. No PDFs, generator outputs, accepted selections or app settings changed;
+  concurrent work and log entries remain preserved.
+
+## 2026-10-06 - Manual Work Git Checkpoint
+
+- Owner intends to move to another work area and requests committing manual
+  work and relevant continuation context. Current manual context exists on disk
+  but is uncommitted; preserve concurrent application/printer changes.
+- Add a concise resume entry to the manual handoff, retain generated proposals
+  as unaccepted history, and stage only manual paths and manual context hunks.
+- Preserve raw bytes of hash-locked renderer dependencies across Windows Git
+  checkouts; normal line-ending conversion would break the retained manifest.
+
+## 2026-10-06 - Manual Checkpoint Validation And Commit Scope
+
+- Saved the current resume entry in docs/manuals/operator-guides/HANDOFF.md
+  and open reauthoring work in TODO.md. Context includes owner feedback,
+  accepted-direction/standards reasoning, proposal status, retained artifacts,
+  capture-environment/locale limits and remaining reader/operational checks.
+- Prepared a scoped local manual commit from master 50a1c056d0. Retained the
+  September/October drafts, evidence, review records and authoring tooling.
+  Shared AGENTS/README/TODO/progress/fork/session files stage manual context
+  only; concurrent printer/Olimex application and runtime work is excluded.
+- Verification passed: shared guide-system checks, JavaScript syntax, accepted
+  package integrity (369 files), 626 exact staged artifact/dependency blobs,
+  six hash-locked inputs after a Windows-style checkout, and preservation of
+  existing historical log content. Git attributes protect frozen input bytes.
+- Whitespace review retains five intentional Markdown hard-break lines and a
+  hash-locked generator's existing extra EOF; no renderer bytes were changed
+  to satisfy formatting. Other newly staged whitespace checks passed.
+- No application tests needed for this manual checkpoint; no new PDFs,
+  application/settings edits, deployment, push or acceptance decision.
+  Commit completion is recorded in Git history. Resume reauthoring from the
+  handoff; the repaired method has not yet produced new reviewed guide PDFs.

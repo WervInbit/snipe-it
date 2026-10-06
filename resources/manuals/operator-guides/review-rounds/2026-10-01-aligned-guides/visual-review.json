@@ -1,0 +1,474 @@
+{
+  "date": "2026-10-01",
+  "result": "Passed",
+  "pages": 66,
+  "method": "Every final page rendered at 144 dpi; all 19 final contact sheets inspected. Full-size checks on account forms, scan references, registration fields/result panel, route/handoff, release confirmation, permissions/status rules and dense catalogue additions.",
+  "checks": [
+    "No page/card/footer overflow",
+    "Version and unaccepted state on every page",
+    "Page counts and continuation references",
+    "Readable main copy and figures at intended A4 scale",
+    "Actual screenshot labels retained; no invented controls",
+    "Full related-guide names and family styling"
+  ],
+  "pending": [
+    "Physical print/readability and first-time-reader trials",
+    "Operational save/reopen and controlled-user access trials"
+  ],
+  "guides": [
+    {
+      "code": "AC-01",
+      "version": 10,
+      "pages": 1,
+      "sha256": "903b7814d044681dc8f7b0f7df447ef71ceefa6a697f77e6ec0725367d3bb307",
+      "result": "Passed",
+      "contactSheetSha256": "c7effd0250a20233caafdcf10fe26e99f546d227596a391281a1d4583a613e22",
+      "rasters": [
+        {
+          "file": "AC-01/page-1.png",
+          "sha256": "b7616c84daa40d5cb91eb7b1435d39b85fc36c92b4c14506fe72bc4e7fbbf393"
+        }
+      ]
+    },
+    {
+      "code": "AC-02",
+      "version": 5,
+      "pages": 1,
+      "sha256": "5d6abe4ae495cc9fd9307e811a5f3106b9d121d1d4c34f5336d1d823e27943ee",
+      "result": "Passed",
+      "contactSheetSha256": "ef89a1be2a9784936720ea6538f0485dc05f141947da578ea4f3f9f10f18c854",
+      "rasters": [
+        {
+          "file": "AC-02/page-1.png",
+          "sha256": "264e000beed48c1c7e2496b5476622bcbfe089a795fa8836fda718122d0b20d0"
+        }
+      ]
+    },
+    {
+      "code": "SC-01",
+      "version": 13,
+      "pages": 2,
+      "sha256": "3cd9e27d0b6aceb23ed1aaae8ed7614ed78943e57a85153b36a6a93801d39a95",
+      "result": "Passed",
+      "contactSheetSha256": "8004df0d02f3d40757146ed266493609ab2209988381de5c9aeae0ccb72fd1a8",
+      "rasters": [
+        {
+          "file": "SC-01/page-1.png",
+          "sha256": "ac9c179181228908a9592000835df3f1ff3790851e61cc533d6b6a9bdd150462"
+        },
+        {
+          "file": "SC-01/page-2.png",
+          "sha256": "8b0b7444b5ff985045c7c83ebad166afb3d31921aa40c3f382495c6e15c21b84"
+        }
+      ]
+    },
+    {
+      "code": "AST-02",
+      "version": 9,
+      "pages": 2,
+      "sha256": "4ea97a11ce1c0c38267f897dab499e0df652a8c193854469075f946a88728616",
+      "result": "Passed",
+      "contactSheetSha256": "5a2f9169889884d31498912e3ccf2afa703e4008fff82f8f2847385c8e4835bf",
+      "rasters": [
+        {
+          "file": "AST-02/page-1.png",
+          "sha256": "2b0b72ecb8ec9ef10473af4798b18f598c218c834b6855fcbad3a3236272ebbd"
+        },
+        {
+          "file": "AST-02/page-2.png",
+          "sha256": "1ecdceee0568c273d2c1beb646a6ce92839ab20378a773b45d95b2f6ff8b1a38"
+        }
+      ]
+    },
+    {
+      "code": "AST-03",
+      "version": 16,
+      "pages": 3,
+      "sha256": "72db4c3f0826589a038d27b52477de062fc60fb2374d8bd49ac853659a123db9",
+      "result": "Passed",
+      "contactSheetSha256": "fc37d74a8fd053e493dafd7e020dbe3ce459cc01b0b4fd8a5c47391732e20489",
+      "rasters": [
+        {
+          "file": "AST-03/page-1.png",
+          "sha256": "c55b08c2cf91e91e0f3fdaf22370055deaccbf1327f3e8a81ffc9c6d069a2ae2"
+        },
+        {
+          "file": "AST-03/page-2.png",
+          "sha256": "dd9678cf8c6bd1a8cbf57b2f79c99ed6a92c177ce54573f91baa2efa1f46d1e4"
+        },
+        {
+          "file": "AST-03/page-3.png",
+          "sha256": "5284f769d4cfe9e4f99d0bd2a31080455ff1f9d052ffd14048530dd5f623c5e4"
+        }
+      ]
+    },
+    {
+      "code": "AST-04",
+      "version": 7,
+      "pages": 2,
+      "sha256": "bdfd45891118c3b8ebc5e9b3fd19d492f3c65a51e3642e0b7d5fdc7871ad5263",
+      "result": "Passed",
+      "contactSheetSha256": "9a6a20c842eb44118d3adf0521bcf3ae9109e07ac81c9ba1a8c511205db1f06c",
+      "rasters": [
+        {
+          "file": "AST-04/page-1.png",
+          "sha256": "f6cf980f6a9085a838453545e73abb711f7081392b6850bb484b40cee32db8b6"
+        },
+        {
+          "file": "AST-04/page-2.png",
+          "sha256": "f1ae7f19466f8c4383d736958208bc411ecb99f238e2cfa29d5b4c72aaaa73e6"
+        }
+      ]
+    },
+    {
+      "code": "AST-05",
+      "version": 7,
+      "pages": 2,
+      "sha256": "bbf57c3eaefc1a572454d7780219ec946a57b5b62352fb0c125527a2aa49f033",
+      "result": "Passed",
+      "contactSheetSha256": "ff1a6b686b23121a64be31acb6500e37a28dbf9b0efb0d470ea6ffb00a53a024",
+      "rasters": [
+        {
+          "file": "AST-05/page-1.png",
+          "sha256": "aeb26ebee43e74cb16a67b61791ad5ddb872e8cde7ae735db3398161c9561124"
+        },
+        {
+          "file": "AST-05/page-2.png",
+          "sha256": "9387d117c460057dca2f336791c3c1ec2c762b9c70974e5f7f537917de05c00f"
+        }
+      ]
+    },
+    {
+      "code": "HELP-01",
+      "version": 8,
+      "pages": 2,
+      "sha256": "b098ae8fcbd4a6e740dabf92385df3ebd15d8b0ff9f4c0afa8fa85f4a1cfeff9",
+      "result": "Passed",
+      "contactSheetSha256": "59a46699faa876caad62917e4cd4ec9d819815e2ce5129cef95b9cc08bcde38c",
+      "rasters": [
+        {
+          "file": "HELP-01/page-1.png",
+          "sha256": "895fc2317a1cf996d07f8aa8c4f95dd165919091dc7f4ef4a0dc429a0a207369"
+        },
+        {
+          "file": "HELP-01/page-2.png",
+          "sha256": "0553391a312f0e95a6eadf4c94864572f7929f3e547c9fce6db9b6a7748a425c"
+        }
+      ]
+    },
+    {
+      "code": "CMP-02",
+      "version": 7,
+      "pages": 2,
+      "sha256": "a9d344cc35ff264da378d11418ff45a1f770131e0f01a9500372ce4e68b68013",
+      "result": "Passed",
+      "contactSheetSha256": "01a296675d0a8e3394c4932828479bdd56372e019667049e5c34401ee1a6627c",
+      "rasters": [
+        {
+          "file": "CMP-02/page-1.png",
+          "sha256": "1625e6be4c2167b83cd1c7884873669ee7ce3c1967caab9794ca03cb2cbfd6a0"
+        },
+        {
+          "file": "CMP-02/page-2.png",
+          "sha256": "a5deba2ac85d493fabfff0bb0df37cb3ca2f7292718552d26085d5523b2a4ca9"
+        }
+      ]
+    },
+    {
+      "code": "USR-01",
+      "version": 14,
+      "pages": 1,
+      "sha256": "d0594d850d4a1d3209b54a773b97976e66bf60f8745b85593931366839c265ea",
+      "result": "Passed",
+      "contactSheetSha256": "394133092b1ab3c45b2e22414a2bb784dd208a6ff98452610d741c802296e638",
+      "rasters": [
+        {
+          "file": "USR-01/page-1.png",
+          "sha256": "776a15ef61f6520097daee7094037f764eb30048f15d0922d73c5d5fee7ee41d"
+        }
+      ]
+    },
+    {
+      "code": "USR-02",
+      "version": 12,
+      "pages": 2,
+      "sha256": "ac481a6a0a42acd7616bbd1ad13a07cade541894d169d354cf5b1f0caac1c71e",
+      "result": "Passed",
+      "contactSheetSha256": "35f7254c0074c9eb15f7ddcd71dedf068ad66fa98d8b1c407a400f697a763cb5",
+      "rasters": [
+        {
+          "file": "USR-02/page-1.png",
+          "sha256": "7d8d46b26e175da68bb38257fcb029b8713f303b640331ef7960398144572ac4"
+        },
+        {
+          "file": "USR-02/page-2.png",
+          "sha256": "0a841d0a3287b2f809a5db8d3f57a99704de90bafe2fc501d535859016f77c0c"
+        }
+      ]
+    },
+    {
+      "code": "USR-03",
+      "version": 5,
+      "pages": 1,
+      "sha256": "f4749c3790869cdc6ba4af442a5bca0ab5ec2ce6ce45ade59f7e83da58b30807",
+      "result": "Passed",
+      "contactSheetSha256": "cdb979cf390bce64a0ab064bec4762f520536abf5d6bdeed8063d379c7021e6e",
+      "rasters": [
+        {
+          "file": "USR-03/page-1.png",
+          "sha256": "89804002f5d765392ecb160399c1f33e9f3787ed44c4616dc23540685f7cdba1"
+        }
+      ]
+    },
+    {
+      "code": "USR-05",
+      "version": 3,
+      "pages": 4,
+      "sha256": "206a5e76c95d06485061518d691bd60421066d614b55f0348f55055bbef91329",
+      "result": "Passed",
+      "contactSheetSha256": "c1259d62ad6745b6545ce4796d0e5d5f555ed75b77fc4a51e15670edab51ecc3",
+      "rasters": [
+        {
+          "file": "USR-05/page-1.png",
+          "sha256": "9f97e1ac96eecb19bc2a0a21daee1fac16c6c24febf9a3c5ee3edc8856730d2a"
+        },
+        {
+          "file": "USR-05/page-2.png",
+          "sha256": "2a9503aec47678923dd94ad76be85a381130ba19aa934f5058f1c937f5d4ea6f"
+        },
+        {
+          "file": "USR-05/page-3.png",
+          "sha256": "8a92e350b09b8903d6b181f02662778c87f552dacb31cdd141457074cc492717"
+        },
+        {
+          "file": "USR-05/page-4.png",
+          "sha256": "2c9c423abb7c711edb77ff17a0d240b2432612a51644c551495182bdfa40c23f"
+        }
+      ]
+    },
+    {
+      "code": "CAT-00",
+      "version": 12,
+      "pages": 7,
+      "sha256": "063ab00a1e457dc452e7773588081db2af915166035616e6747f7f4e725fa555",
+      "result": "Passed",
+      "contactSheetSha256": "4adf9a3c243b0b7eaa6c5b490c7d3e763368b5f206d26b8247f673c69eb21830",
+      "rasters": [
+        {
+          "file": "CAT-00/page-1.png",
+          "sha256": "fdc09affcd12053dbdb99a2e84da9aba0e346e8529767b4848ee0b2a180a0e70"
+        },
+        {
+          "file": "CAT-00/page-2.png",
+          "sha256": "fd0cb6b75004754c79329cac7c7bd5662675e52db2b8ee1c091e39e99c5da285"
+        },
+        {
+          "file": "CAT-00/page-3.png",
+          "sha256": "193be2c6d0c60bf0d3c8b7b284944bf97173b454359417062aa91b283869a8d8"
+        },
+        {
+          "file": "CAT-00/page-4.png",
+          "sha256": "c20b47fe57792a0d77071bdfcd12e26fedccbe9a06eb31c680202ef9947cb74e"
+        },
+        {
+          "file": "CAT-00/page-5.png",
+          "sha256": "b9626453175026cceae850faf10e979bc90bb0d92171aaae0a85380df02bafc7"
+        },
+        {
+          "file": "CAT-00/page-6.png",
+          "sha256": "93c0e5682312aa1aab1f0c8492fcf82a4b64874af96b088289d411baf8c0833b"
+        },
+        {
+          "file": "CAT-00/page-7.png",
+          "sha256": "f10204010dab462954a3880216373f6fe67a9028869bd33e2719bcac98428dff"
+        }
+      ]
+    },
+    {
+      "code": "CAT-01",
+      "version": 8,
+      "pages": 5,
+      "sha256": "82903311c5edc0ff156bb30f9e90e9ccecdb50d45f75b96bac924d443aeba5cd",
+      "result": "Passed",
+      "contactSheetSha256": "a4572ee4e62a9db7fd44f461fd5d43e530a9d32d3c7171491e4e8923ee91d69a",
+      "rasters": [
+        {
+          "file": "CAT-01/page-1.png",
+          "sha256": "5bc72d8bf37a094f58a27ae3c0700ee525f2eeb2b20c991c469ceaa29e041040"
+        },
+        {
+          "file": "CAT-01/page-2.png",
+          "sha256": "2069afc7330f62c5c5b3c13587281b4cb43f84d1e9405593e09d0698ca077a74"
+        },
+        {
+          "file": "CAT-01/page-3.png",
+          "sha256": "6cb0d3630cae070b92061792c1106af0bbdbeed737f66acd5bd7eae6e818bf64"
+        },
+        {
+          "file": "CAT-01/page-4.png",
+          "sha256": "362958f9c509f129b5ecec3158b45a336d7aaac80a18badec17ae992dc72fd57"
+        },
+        {
+          "file": "CAT-01/page-5.png",
+          "sha256": "8f562e3aebbf04509a9ed0c2a0e2846b3392af914c881c630842c310dc0856fb"
+        }
+      ]
+    },
+    {
+      "code": "CAT-02",
+      "version": 3,
+      "pages": 7,
+      "sha256": "8cb5747c9619c1071fbf4440b1770e83b7ec54d966e23c6a1c05a5376bb7a55b",
+      "result": "Passed",
+      "contactSheetSha256": "79df311dd88a6e5241b329440492a8dab81b13467ea8efca879bc595529681af",
+      "rasters": [
+        {
+          "file": "CAT-02/page-1.png",
+          "sha256": "0a6ce390ca301be6e0e44c633863b70e0532cd123e02d36bb5b6badf45c51f74"
+        },
+        {
+          "file": "CAT-02/page-2.png",
+          "sha256": "575ac0b86a090ef444aef9e7d5a63d5ba39ee5fb4c8aa3a6a36c117b64d90b8c"
+        },
+        {
+          "file": "CAT-02/page-3.png",
+          "sha256": "ed97a6d7bf3ba3a301aeed8c91c55439e07d0ffb49f42dfca241d32afc5d7f39"
+        },
+        {
+          "file": "CAT-02/page-4.png",
+          "sha256": "f591c5abe0b08a80866cffa9c0f1ea5dc1c10a04633d14118c8ad7d48f96751b"
+        },
+        {
+          "file": "CAT-02/page-5.png",
+          "sha256": "f44f45d90367166ff03d6f431aadc09ca043a71d7189cfd6d0a50be571817e59"
+        },
+        {
+          "file": "CAT-02/page-6.png",
+          "sha256": "f410f551daa5fdab8dcee5dfe7c3f043525f73963543c61d36a7d12d6c868710"
+        },
+        {
+          "file": "CAT-02/page-7.png",
+          "sha256": "47ca1a31a55b5a5923bc6e5d60ce35107b7ab1941bb05b8343dfbad75fee4d8c"
+        }
+      ]
+    },
+    {
+      "code": "CAT-03",
+      "version": 3,
+      "pages": 6,
+      "sha256": "09cbbe74d9a9cf079fa7f69bf59238776af73f0da8bcafc934da463e554ce76f",
+      "result": "Passed",
+      "contactSheetSha256": "b59747f93129eac69694cda6092c2028b21f671b299802d9b49f6af85c43ed26",
+      "rasters": [
+        {
+          "file": "CAT-03/page-1.png",
+          "sha256": "bfd834ffb8f8a7937e6300835e1fbd54092f67c03a5ad27bf4185c9a0397f6a6"
+        },
+        {
+          "file": "CAT-03/page-2.png",
+          "sha256": "e7a41aa209cc53eb2b1635125298fdd226a21f0474e6bd4a898cf634aa74f9dd"
+        },
+        {
+          "file": "CAT-03/page-3.png",
+          "sha256": "9ea7f004148cc31e0620ae3a1e8cf14b8feda3052cf7af3ee0383d6cefc48ac5"
+        },
+        {
+          "file": "CAT-03/page-4.png",
+          "sha256": "91d97611de945b3b941f4d360f6492c8bd326727e581c47d877787bbeaee8416"
+        },
+        {
+          "file": "CAT-03/page-5.png",
+          "sha256": "f78ad20c329850ac82ff409406c2f9aaaedc9dc17cec62e961b14ea196a51c68"
+        },
+        {
+          "file": "CAT-03/page-6.png",
+          "sha256": "81eb4f3f733f4154a628f670086536c0ad6dc006df9e789fa447825e6ac889c7"
+        }
+      ]
+    },
+    {
+      "code": "CAT-04",
+      "version": 5,
+      "pages": 7,
+      "sha256": "0d01276d3116865dc61bba0f88f39a9defb2c7f6938e9f46867c8f29ec585236",
+      "result": "Passed",
+      "contactSheetSha256": "51bbfd784d2b7c060e2dedc1142e0df8db04ae8f94c8c413fe6d9fb8cb522027",
+      "rasters": [
+        {
+          "file": "CAT-04/page-1.png",
+          "sha256": "379892a91103c4dd87eda7b27b204a854cb1913879961d5435f6e7c7b5243965"
+        },
+        {
+          "file": "CAT-04/page-2.png",
+          "sha256": "34e004abf5eb1a94399bb702755f8b99c7fa58af9b67e56f30c82d76795ac1c5"
+        },
+        {
+          "file": "CAT-04/page-3.png",
+          "sha256": "c16b12aaec5f6b25a6ea2fc71479b5f4a6394eafb3ee770aba5cbf849de24cd1"
+        },
+        {
+          "file": "CAT-04/page-4.png",
+          "sha256": "9ddf9dd2559daccda4e3d0819d50ebf0989a7814d28bf59fea7c23de796bba4d"
+        },
+        {
+          "file": "CAT-04/page-5.png",
+          "sha256": "2a294e9be5374fb072d5e9c78bcb17e05546ca8cf07f264625e56532b542ec93"
+        },
+        {
+          "file": "CAT-04/page-6.png",
+          "sha256": "0d76544c5b0982f3ba4242f950fb67ae0d69519ea685c41d29ce8f9cb9b9267f"
+        },
+        {
+          "file": "CAT-04/page-7.png",
+          "sha256": "77fe832a52307bfb95cfd2e8d7e821eea8a138b7b2a8ad6e324768ada84941ee"
+        }
+      ]
+    },
+    {
+      "code": "CAT-05",
+      "version": 3,
+      "pages": 9,
+      "sha256": "222f7aa3cf9161edaf2d25e54a6e370b766e7b4a357986a77452de854e53b395",
+      "result": "Passed",
+      "contactSheetSha256": "25a67b9aa92d9b21fdd655067758834416f6fd0545a0e91c1ce82654b4e80603",
+      "rasters": [
+        {
+          "file": "CAT-05/page-1.png",
+          "sha256": "8d5a4c254306ef8f6384b4b31231583275cb5ab2d3f507e8bf1e893034d53f16"
+        },
+        {
+          "file": "CAT-05/page-2.png",
+          "sha256": "9e8c56de5110df8c90df7eea150c8e850214ee222da6f374b09f3856b0a70a56"
+        },
+        {
+          "file": "CAT-05/page-3.png",
+          "sha256": "f705b76232fe7ff815175f72f3799be0eaa479aa74d4d291891aae45c16f3180"
+        },
+        {
+          "file": "CAT-05/page-4.png",
+          "sha256": "6f1545ea706649dd46f0abf56a8428ef9575f8ea097e0870e612b996da18cdc2"
+        },
+        {
+          "file": "CAT-05/page-5.png",
+          "sha256": "260c691b3139c516c3e8845934c1fba09e437cff7c058657eca77ec71e130af3"
+        },
+        {
+          "file": "CAT-05/page-6.png",
+          "sha256": "81acd106021754dff733e7933eb1a5ab2fab6371157dd02f21dea04121c79441"
+        },
+        {
+          "file": "CAT-05/page-7.png",
+          "sha256": "9492861be62a73a624d9a996d6c1b6afe131c8937e10a8beb3a6e6118c351bc3"
+        },
+        {
+          "file": "CAT-05/page-8.png",
+          "sha256": "c3d54f22a5bd09154ca83dbce80f4050602fa20d6f24e7428d86cdb5ccc2677e"
+        },
+        {
+          "file": "CAT-05/page-9.png",
+          "sha256": "b0d67728dae04943272faa32f9a5f98b06ff504c1476a8d133aca81fe6b8741d"
+        }
+      ]
+    }
+  ]
+}

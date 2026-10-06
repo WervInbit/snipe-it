@@ -75,8 +75,8 @@ function verifyMarkdownLinks(directory) {
 }
 
 const evidenceManifest = readJson(path.join(evidenceRoot, 'manifest.json'));
-assert.equal(evidenceManifest.sources.length, 103, 'Canonical evidence count changed without review');
-assert.equal(new Set(evidenceManifest.sources.map((entry) => entry.id)).size, 103, 'Duplicate evidence source ID');
+assert.equal(evidenceManifest.sources.length, 119, 'Canonical evidence count changed without review');
+assert.equal(new Set(evidenceManifest.sources.map((entry) => entry.id)).size, 119, 'Duplicate evidence source ID');
 verifyManifestFiles(evidenceRoot, evidenceManifest.sources, 'Evidence manifest');
 
 const screenshotCatalog = fs.readFileSync(
@@ -129,13 +129,22 @@ for (const artifact of pdfManifest.artifacts) {
 }
 
 const draftManifest = readJson(path.join(draftPdfRoot, 'manifest.json'));
-assert.equal(draftManifest.artifacts.length, 20, 'Draft PDF count changed without review');
-assert.equal(new Set(draftManifest.artifacts.map((entry) => entry.code)).size, 20, 'Duplicate draft guide code');
+assert.equal(draftManifest.artifacts.length, 26, 'Draft PDF count changed without review');
+assert.equal(new Set(draftManifest.artifacts.map((entry) => entry.code)).size, 23, 'Draft guide-code coverage changed');
+assert.equal(new Set(draftManifest.artifacts.map((entry) => `${entry.code}@${entry.version}`)).size, 26, 'Duplicate draft guide version');
 verifyManifestFiles(draftPdfRoot, draftManifest.artifacts, 'Draft PDF manifest');
+
+const preservedLegacyDraftTitles = new Map([
+    ['USR-04@3', 'Gebruiker uitschakelen of herstellen'],
+    ['CAT-05@1', 'Varianten en lifecycle beheren'],
+    ['CAT-06@1', 'Catalogus controleren en bronnen'],
+]);
 
 for (const artifact of draftManifest.artifacts) {
     assert.equal(artifact.status, 'Unaccepted working draft', `${artifact.code} draft has an ambiguous status`);
-    assert.equal(GUIDE_REGISTRY[artifact.code]?.title, artifact.title, `${artifact.code} draft title drift`);
+    const expectedTitle = preservedLegacyDraftTitles.get(`${artifact.code}@${artifact.version}`)
+        ?? GUIDE_REGISTRY[artifact.code]?.title;
+    assert.equal(expectedTitle, artifact.title, `${artifact.code} draft title drift`);
     assert.ok(artifact.file.toLowerCase().includes('draft'), `${artifact.code} unaccepted filename is not marked draft`);
 
     const accepted = pdfManifest.artifacts.find((entry) => entry.code === artifact.code);

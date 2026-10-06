@@ -1,0 +1,151 @@
+<!DOCTYPE html><html lang="nl"><head><meta charset="utf-8"><title>HELP-01 v7</title><style>
+  @page { size: A4 portrait; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #E5E7EB; color: #102033; font-family: Arial, Helvetica, sans-serif; }
+  body { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .page { width: 210mm; height: 297mm; margin: 0 auto; padding: 12mm; background: #FFF; overflow: hidden; display: grid; gap: 2mm; --family:#C17A00; }
+  header { display: grid; grid-template-columns: minmax(0,1fr) 37mm; gap: 5mm; align-items: start; }
+  .title { border-left: 2.4mm solid var(--family); padding-left: 4mm; }
+  h1 { margin: 0; font-size: 7.2mm; line-height: 1.02; letter-spacing: 0; }
+  .subtitle { margin: 2mm 0 0; color: #53657A; font-size: 3mm; }
+  .version { height: 22mm; border: .4mm solid #6EE7A0; border-radius: 2mm; background: #ECFDF3; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #047857; font-weight: 900; font-size: 2.7mm; line-height: 1.25; }
+  .version small { color: #53657A; font-size: 2mm; }
+  .context { display: grid; grid-template-columns: 1fr 1.55fr 1.35fr; gap: 4mm; padding: 2.2mm 4mm; border: .4mm solid #C8D5E2; border-radius: 2mm; background: #F8FAFC; align-items: center; }
+  .context > div { min-width: 0; }
+  .context .label { display: block; margin-bottom: .6mm; color: #53657A; font-size: 2.1mm; font-weight: 800; }
+  .context strong { display: block; font-size: 2.65mm; line-height: 1.1; }
+  .steps { display: grid; gap: 2mm; padding-top: 1mm; }
+  .step { position: relative; display: grid; grid-template-columns: minmax(0,1fr) 83mm; gap: 4mm; align-items: center; padding: 3mm 3mm 2.2mm 10mm; border: .4mm solid #C8D5E2; border-radius: 2mm; background: #FFF; min-height: 0; }
+  .step-number { position: absolute; left: -7mm; top: -6mm; width: 13mm; height: 13mm; border: 1.1mm solid var(--family); border-radius: 50%; background: rgba(255,255,255,.9); color: var(--family); display: flex; align-items: center; justify-content: center; font-size: 4.7mm; font-weight: 900; z-index: 5; }
+  .step-copy { align-self: center; min-width: 0; }
+  .step-copy h2 { margin: 0 0 1.2mm; font-size: 4mm; line-height: 1.08; }
+  .step-copy p { margin: .7mm 0; color: #334155; font-size: 2.45mm; line-height: 1.25; }
+  .step-copy .inline-stop { color: #E83448; font-weight: 900; }
+  .step-visuals { min-width: 0; min-height: 0; display: grid; gap: 2mm; align-items: center; }
+  .visual { position: relative; min-width: 0; min-height: 0; margin: 0; display: flex; flex-direction: column; gap: .6mm; }
+  .shot { min-height: 0; border: .4mm solid #C8D5E2; border-radius: 1.7mm; background: #EEF2F6; overflow: hidden; }
+  .shot svg { width: 100%; height: 100%; display: block; }
+  .visual figcaption { margin: 0; color: #334155; font-size: 1.9mm; line-height: 1.15; }
+  .image-badge { position: absolute; left: -2.4mm; top: -2.4mm; min-width: 6.5mm; height: 6.5mm; padding: 0 .6mm; border: .5mm solid var(--family); border-radius: 50%; background: rgba(255,255,255,.45); color: var(--family); display: flex; align-items: center; justify-content: center; font-size: 1.9mm; font-weight: 900; z-index: 4; }
+  .target { fill: none; stroke: #E83448; stroke-width: 2.4; vector-effect: non-scaling-stroke; }
+  .help h2 { margin: 0 0 1mm; color: #53657A; font-size: 2.6mm; }
+  .help-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5mm; }
+  .help-item { min-width: 0; height: 16.5mm; padding: 2mm; border: .4mm solid #FDBA74; border-radius: 1.7mm; background: #FFF8E6; display: grid; grid-template-columns: 5.5mm minmax(0,1fr); gap: 1.5mm; }
+  .help-icon { width: 5.5mm; height: 5.5mm; border: .45mm solid #F59E0B; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #B45309; font-size: 2.1mm; font-weight: 900; }
+  .help-item strong { display: block; font-size: 2.3mm; line-height: 1.1; }
+  .help-item p { margin: 1mm 0 0; color: #334155; font-size: 1.85mm; line-height: 1.18; }
+  .help-item.help-reference { height: 19.5mm; padding: 1.6mm 2mm; }
+  .help-reference .guide-chip { margin-top: .8mm; padding: .45mm 1.2mm .45mm .7mm; font-size: 1.85mm; }
+  .help-reference .guide-chip b { width: 3.8mm; height: 3.8mm; font-size: 1.15mm; }
+  .done { display: flex; align-items: center; gap: 6mm; padding: 1.7mm 4mm; border: .4mm solid #6EE7A0; border-radius: 1.8mm; background: #ECFDF3; color: #047857; }
+  .done strong { min-width: 20mm; font-size: 3mm; }
+  .done span { font-size: 2.4mm; }
+  footer { display: grid; grid-template-columns: minmax(0,1fr) 22mm; gap: 4mm; align-items: end; }
+  .footer-copy { min-width: 0; display: flex; flex-direction: column; gap: 1mm; }
+  .footer-label { color: #53657A; font-size: 2.1mm; font-weight: 800; }
+  .related { display: flex; flex-wrap: wrap; gap: 1.1mm; }
+  .guide-chip { display: inline-flex; align-items: center; gap: 1.2mm; padding: .9mm 2mm .9mm 1mm; border: .35mm solid var(--chip); border-radius: 2.2mm; background: var(--chip-fill); color: var(--chip); font-size: 2.3mm; font-weight: 800; white-space: nowrap; }
+  .guide-chip b { width: 4.6mm; height: 4.6mm; border: .35mm solid var(--chip); border-radius: 50%; background: rgba(255,255,255,.6); display: inline-flex; align-items: center; justify-content: center; font-size: 1.35mm; }
+  .source { color: #64748B; font-size: 1.65mm; }
+  .qr { width: 22mm; display: flex; flex-direction: column; align-items: center; gap: .7mm; }
+  .qr div { width: 22mm; height: 22mm; border: .5mm solid #102033; border-radius: 1mm; background: #F8FAFC; color: #64748B; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 2.8mm; font-weight: 900; line-height: 1.05; }
+  .qr span { font-size: 1.8mm; font-weight: 800; }
+
+    .help01 { --family:#E83448; grid-template-rows: 25mm 14mm 12mm 176mm 11mm 25mm; }
+    .help01 .general-stop { display: grid; grid-template-columns: 14mm minmax(0,1fr); align-items: center; gap: 2mm; padding: 2mm 4mm; border: .5mm solid #FDA4AF; border-radius: 2mm; background: #FFF1F3; color: #BE123C; }
+    .help01 .general-stop strong { font-size: 3.4mm; }
+    .help01 .general-stop span { font-size: 2.55mm; font-weight: 800; line-height: 1.15; }
+    .problem-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); grid-template-rows: repeat(6,1fr); gap: 2mm; }
+    .problem { min-width: 0; display: grid; grid-template-columns: 9mm minmax(0,1fr); gap: 2.3mm; padding: 2.4mm 3mm; border: .4mm solid #C8D5E2; border-radius: 2mm; background: #FFF; }
+    .problem-icon { width: 8mm; height: 8mm; border: .7mm solid #E83448; border-radius: 50%; color: #E83448; display: flex; align-items: center; justify-content: center; font-size: 2.25mm; font-weight: 900; }
+    .problem h2 { margin: 0; font-size: 3mm; line-height: 1.05; }
+    .problem p { margin: .8mm 0 1.1mm; color: #334155; font-size: 2.15mm; line-height: 1.18; }
+    .problem .guide-chip { padding: .55mm 1.6mm .55mm .8mm; font-size: 1.9mm; }
+    .problem .guide-chip b { width: 3.9mm; height: 3.9mm; font-size: 1.15mm; }
+    .problem-ref { margin-top: auto; }
+  </style></head>
+  <body><article class="page help01">
+    <header style="--family:#E83448">
+    <div class="title"><h1>HELP-01 Problemen en hulp</h1><p class="subtitle">Kies het probleem en voer alleen de veilige herstelactie uit</p></div>
+    <div class="version">Draft v7<span>2026-09-08</span><small>1 van 1</small></div>
+  </header>
+    <section class="context">
+    <div><span class="label">Rol</span><strong>Iedereen</strong></div>
+    <div><span class="label">Nodig</span><strong>Apparaat + gids waarbij het probleem ontstond</strong></div>
+    <div><span class="label">Vooraf</span><span class="guide-chip" style="--chip:#2563EB;--chip-fill:#EFF6FF">
+    <b>AC</b><span>AC-01 Login</span>
+  </span></div>
+  </section>
+    <section class="general-stop"><strong>STOP</strong><span>Als apparaat, label, serienummer of digitaal record niet overeenkomt: wijzig niets en vraag een supervisor.</span></section>
+    <main class="problem-grid"><article class="problem">
+    <span class="problem-icon">@</span>
+    <div><h2>Geen account</h2><p>Vraag een supervisor om een account.</p><div class="problem-ref"><span class="guide-chip" style="--chip:#2563EB;--chip-fill:#EFF6FF">
+    <b>AC</b><span>AC-01 Login</span>
+  </span></div></div>
+  </article><article class="problem">
+    <span class="problem-icon">*</span>
+    <div><h2>Wachtwoord kwijt</h2><p>Vraag je supervisor om hulp; een Admin voert de wachtwoordreset uit.</p><div class="problem-ref"><span class="guide-chip" style="--chip:#2563EB;--chip-fill:#EFF6FF">
+    <b>AC</b><span>AC-01 Login</span>
+  </span></div></div>
+  </article><article class="problem">
+    <span class="problem-icon">P</span>
+    <div><h2>Geen telefoon</h2><p>Open een browser en ga naar https://snipe.inbit/.</p><div class="problem-ref"><span class="guide-chip" style="--chip:#2563EB;--chip-fill:#EFF6FF">
+    <b>AC</b><span>AC-01 Login</span>
+  </span></div></div>
+  </article><article class="problem">
+    <span class="problem-icon">C</span>
+    <div><h2>Camera werkt niet</h2><p>Zoek handmatig op QR-waarde, assettag of serienummer.</p><div class="problem-ref"><span class="guide-chip" style="--chip:#0F8F7B;--chip-fill:#ECFDF8">
+    <b>SC</b><span>SC-01 Asset vinden en openen</span>
+  </span></div></div>
+  </article><article class="problem">
+    <span class="problem-icon">QR</span>
+    <div><h2>QR beschadigd</h2><p>Zoek handmatig en laat het label controleren.</p><div class="problem-ref"><span class="guide-chip" style="--chip:#0F8F7B;--chip-fill:#ECFDF8">
+    <b>SC</b><span>SC-01 Asset vinden en openen</span>
+  </span></div></div>
+  </article><article class="problem">
+    <span class="problem-icon">X</span>
+    <div><h2>Verkeerde asset</h2><p>Wijzig niets. Toon apparaat en scherm aan een supervisor.</p><div class="problem-ref"><span class="guide-chip" style="--chip:#0F8F7B;--chip-fill:#ECFDF8">
+    <b>SC</b><span>SC-01 Asset vinden en openen</span>
+  </span></div></div>
+  </article><article class="problem">
+    <span class="problem-icon">WF</span>
+    <div><h2>Geen workflow</h2><p>Controleer asset en rechten. Start niet meerdere keren.</p><div class="problem-ref"><span class="guide-chip" style="--chip:#F97316;--chip-fill:#FFF7ED">
+    <b>WF</b><span>WF-01 Workflow starten</span>
+  </span></div></div>
+  </article><article class="problem">
+    <span class="problem-icon">!</span>
+    <div><h2>Geen rechten</h2><p>Vraag een bevoegde supervisor; probeer geen andere route.</p><div class="problem-ref"></div></div>
+  </article><article class="problem">
+    <span class="problem-icon">PR</span>
+    <div><h2>Printer of label faalt</h2><p>Probeer eenmaal opnieuw en vraag daarna lokale hulp.</p><div class="problem-ref"><span class="guide-chip" style="--chip:#138A43;--chip-fill:#ECFDF3">
+    <b>AST</b><span>AST-03 Asset registreren en labelen</span>
+  </span></div></div>
+  </article><article class="problem">
+    <span class="problem-icon">2x</span>
+    <div><h2>Dubbele assettag of serienummer</h2><p>Stop. Zoek het bestaande assetrecord en vraag supervisor.</p><div class="problem-ref"><span class="guide-chip" style="--chip:#138A43;--chip-fill:#ECFDF3">
+    <b>AST</b><span>AST-03 Asset registreren en labelen</span>
+  </span></div></div>
+  </article><article class="problem">
+    <span class="problem-icon">TR</span>
+    <div><h2>Component niet in tray</h2><p>Maak geen duplicaat. Controleer tray of opslag.</p><div class="problem-ref"><span class="guide-chip" style="--chip:#C17A00;--chip-fill:#FFF8E6">
+    <b>CMP</b><span>CMP-01 Bestaand component plaatsen</span>
+  </span></div></div>
+  </article><article class="problem">
+    <span class="problem-icon">CMP</span>
+    <div><h2>Component klopt niet</h2><p>Stop. Kies het juiste onderdeel of annuleer de actie.</p><div class="problem-ref"><span class="guide-chip" style="--chip:#C17A00;--chip-fill:#FFF8E6">
+    <b>CMP</b><span>CMP-04 Component naar tray verplaatsen</span>
+  </span></div></div>
+  </article></main>
+    <section class="done"><strong>Klaar als</strong><span>Je weet welke veilige herstelactie, gids of persoon nodig is voordat je verdergaat.</span></section>
+    <footer><div class="footer-copy"><span class="footer-label">Relevante gidsen</span><div class="related"><span class="guide-chip" style="--chip:#2563EB;--chip-fill:#EFF6FF">
+    <b>AC</b><span>AC-01 Login</span>
+  </span><span class="guide-chip" style="--chip:#0F8F7B;--chip-fill:#ECFDF8">
+    <b>SC</b><span>SC-01 Asset vinden en openen</span>
+  </span><span class="guide-chip" style="--chip:#C17A00;--chip-fill:#FFF8E6">
+    <b>CMP</b><span>CMP-01 Bestaand component plaatsen</span>
+  </span><span class="guide-chip" style="--chip:#F97316;--chip-fill:#FFF7ED">
+    <b>WF</b><span>WF-01 Workflow starten</span>
+  </span></div>
+    <div class="source">Bron: gecontroleerde testopnamen | 2026-09-08 | concept voor review</div></div>
+    <div class="qr"><div>QR<br>volgt</div><span>Digitale gids</span></div></footer>
+  </article></body></html>

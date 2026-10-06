@@ -1,5 +1,49 @@
 # Operator Guide Decisions
 
+## Owner Authoring Scope Clarification On 2026-10-06
+
+Owner requests repair of the general reasoning used to generate, fix and
+adjust guides, so it can be applied across the whole set. The
+[authoring method](authoring-method.md) establishes reader outcome and
+information relevance before structure, evidence and layout. Its
+[method review](reviews/authoring-method-repair-2026-10-06.md) explains the
+causes and checks the principles against countercases. This supersedes the
+earlier emphasis on an individual pilot as the requested solution. Existing
+guide rejections/acceptances remain exact-version decisions; this work does
+not generate or accept PDFs.
+
+The owner clarified that accepted guides are already close to the desired
+direction and can improve further. Significant application changes require
+guide updates. Develop the accepted direction, distinguish required alignment
+from chosen improvements, and judge the complete guide for current accuracy,
+clarity, recognition and effort. Improvement does not require a known defect.
+
+Current and desired standards must also inform reauthoring. Reconcile the
+shared contracts and later owner decisions with inherited guide content,
+including points already retired or superseded. Record applicable requirements,
+preferred targets and unresolved gaps in the brief, then check the entire
+rendered revision against them. See the
+[standards reconciliation](authoring-method.md#reconcile-standards-and-decisions-before-reusing-a-baseline).
+
+## Owner Quality Feedback On 2026-10-06
+
+Owner rejected AC-01 v10 for smaller 2A/3A screenshot targets and irrelevant
+recent-device content. SC-01 v13 requires an explicit scan/search alternative
+and coherent page/step structure. Dutch is required for capture settings.
+Owner stopped reviewing the remaining guides; no blanket exact-version
+decision is inferred. See the [all-guide audit](reviews/guide-purpose-and-quality-audit-2026-10-06.md)
+for confirmed findings and recommended nineteen-guide editorial hold.
+Preserve all exact PDF bytes and accepted decisions. Generation-time QA/status
+records are historical where this feedback differs. No new PDF acceptance.
+
+## USR-05 / CAT-05 / CAT-06 V2 - 2026-09-15
+
+The revised working drafts are USR-05 v2 (3 pages), CAT-05 v2 (8 pages), and
+CAT-06 v2 (3 pages). See the [revision review](reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md) for changes,
+exact artifacts, checks and remaining operator trials. The three v1 PDFs and
+all accepted artifacts are retained unchanged; v2 is not acceptance.
+
+
 ## Owner Clearance For User Review - 2026-09-10
 
 The owner cleared the ten current changed versions in the v5 pair for review
@@ -125,6 +169,9 @@ or `Superseded`. `Accepted` therefore does not mean third-party approval.
 | 2026-08-13 | In USR-02, group membership means adding or removing a group on one user and is Superadmin-only. Direct per-user `Toestaan` or `Weigeren` choices take priority over inherited group rights. | Accepted direction |
 | 2026-08-13 | Preserve the task-dependent structures from accepted guides as named layout recipes and step patterns; do not force later guides through one generic step grid. | Accepted |
 | 2026-08-13 | Every active guide records its exact version, page model, layout recipe, generator, and artifact root. Visible shared changes create new versions for every affected guide; accepted artifacts remain immutable. | Accepted |
+| 2026-09-15 | USR-05 v1 separates reusable group-definition management from per-user assignment in USR-02, defaults to minimum rights, and requires a controlled-user test before acceptance. | Working-draft direction |
+| 2026-09-15 | CAT-05 v1 keeps the registered title and uses five branching Admin pages for lifecycle and saved-row cleanup. Ordinary variant creation remains in CAT-01; a narrower title would require a later version. | Working-draft direction |
+| 2026-09-15 | CAT-06 v1 is verification-only. It teaches an evidence hierarchy, exact-code checks, fact classification, and routing without claiming a durable source record in the current UI. | Working-draft direction |
 
 ## Open Decisions
 
@@ -138,8 +185,7 @@ or `Superseded`. `Accepted` therefore does not mean third-party approval.
 | What is the approved secure channel for the USR-03 generated temporary-password alternative, and how is immediate self-change confirmed? | Before USR-03 can be `Third-party approved`. |
 | What email-address convention should administrators use? | Before USR-01 can instruct administrators to enter anything beyond an existing verified address. |
 | Where must a catalogue administrator record the source and verification result for an exact model number or critical specification? | Before CAT-06 can become an internal review candidate; the current UI has no dedicated source field. |
-| Should CAT-05 be retitled and narrowed to Admin-only catalogue lifecycle and saved-row cleanup? | Before the CAT-05 specification is generated; CAT-01 already owns ordinary variant creation. |
-| Should CAT-06 v1 be verification-only, or wait for a structural source field? | Before CAT-06 generation. A verification-only draft must not claim a saved audit trail. |
+| Should CAT-05 be retitled to `Catalogusstatus en opschoning beheren`? | Before a later CAT-05 version; v1 keeps the registered title and is already narrowed to Admin lifecycle/cleanup. |
 | Will the Dutch UI label change from `Asset modellen` to `Basismodellen` before new CAT evidence is captured? | Before CAT-00 v9/CAT-01 v5 evidence is frozen; a later UI rename creates new guide versions. |
 
 ## Version Review Record
@@ -175,11 +221,11 @@ Review state is version-specific. Later changes require a new version record.
 | USR-03 | v3 draft | Visual-correction pass; awaiting exact-version review | 2026-08-25 | Shows the unsaved generated temporary value, focuses `Genereer`, and presents the AC-02 handoff as a full guide reference. |
 | AC-02 | v3 draft | Visual-correction pass; awaiting exact-version review | 2026-08-25 | Uses tight action focus, leaves the fields unobscured, keeps the no-sharing warning with step 3, and uses full USR-03 handoffs. |
 | USR-04 | v3 draft | Visual-correction pass; awaiting exact-version review | 2026-08-25 | Uses rectangular action focus, contained warnings, full references, and continuous steps 1-8. |
-| USR-05 | planned | Workflow and evidence investigation required | 2026-08-13 | Create or edit reusable group definitions; distinct from per-user group assignment and direct rights in USR-02. |
+| USR-05 | v2 draft | Unaccepted working draft | 2026-09-15 | Content-audit revision; see [v2 review](reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md). Original v1 remains unchanged. |
 | CAT-00 | v9 draft | Connector and alignment correction; awaiting exact-version review | 2026-09-03 | Preserves the v8 six-part content while removing connector masks, joining every diagram branch to its target, giving page 3 attribute rows sufficient height, and attaching the page 4 Removed explanation to the state branch. |
 | CAT-01 | v5 draft | Duplicate-route and standard-label correction; awaiting exact-version review | 2026-09-03 | Preserves the v4 evidence and continuous flow while enlarging sparse step text, making the separate global Model Numbers search explicit, naming Basismodel creation as route C, and separating a model-number default configuration from one-asset exceptions. |
 | CAT-02 | v1 draft | Six-page Supervisor workflow; awaiting exact-version review | 2026-09-03 | Validates the exact model number, separates direct attributes from expected components, shows both add routes, resolves component-derived conflicts without duplicate input, saves, and verifies. Saved-row cleanup routes to Admin CAT-05. |
 | CAT-03 | v1 draft | Working draft; awaiting exact-version review | 2026-09-01 | Five-page ordinary-Supervisor flow with duplicate prevention, plain datatype choices, scope, constraints/Enum alternatives, Save, and result verification. Lifecycle and option cleanup route to CAT-05. |
 | CAT-04 | v2 draft | Required-policy and readability correction; awaiting exact-version review | 2026-09-03 | Preserves the six-page reusable-definition flow, enlarges sparse identity-card copy, and treats unchecked Required as unsupported because it is not separately enforced and unchecked rows still affect calculated specifications. |
-| CAT-05 | planned | Scope/title review and evidence pending | 2026-09-01 | Branching Admin lifecycle and saved-row cleanup only; ordinary exact-variant creation stays in CAT-01. Every branch must show its own result and dependency checks. |
-| CAT-06 | planned | Verification scope ready; source-recording policy unresolved | 2026-09-01 | Evidence hierarchy and exact-code verification are defined. Do not claim durable source storage until the application provides a field or an owner-approved convention. |
+| CAT-05 | v2 draft | Unaccepted working draft | 2026-09-15 | Content-audit revision; see [v2 review](reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md). Original v1 remains unchanged. |
+| CAT-06 | v2 draft | Unaccepted working draft | 2026-09-15 | Content-audit revision; see [v2 review](reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md). Original v1 remains unchanged. |

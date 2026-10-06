@@ -13,6 +13,7 @@ const username = process.env.SNIPEIT_GUIDE_USER || 'admin';
 const password = process.env.SNIPEIT_GUIDE_PASSWORD;
 const phase = process.argv[2] || 'active';
 const outDir = process.env.GUIDE_CAPTURE_DIR || captureOutputDir('user-management');
+const exampleGroupId = process.env.SNIPEIT_GUIDE_GROUP_ID || '4';
 
 if (!password) {
     throw new Error('Set SNIPEIT_GUIDE_PASSWORD for the local screenshot account.');
@@ -38,6 +39,9 @@ async function open(page, route) {
         await login(page);
         await page.goto(`${baseUrl}${route}`, { waitUntil: 'domcontentloaded' });
     }
+    await page.addStyleTag({ content: `
+        footer.main-footer { display: none !important; }
+    ` });
 }
 
 async function capture(page, fileName) {
@@ -110,6 +114,54 @@ async function captureRestored(page) {
     return [await capture(page, 'USR-RESTORED-DESKTOP-01.png')];
 }
 
+async function expandSettingsNavigation(page) {
+    await page.evaluate(() => {
+        document.body.classList.remove('sidebar-collapse');
+        const tree = [...document.querySelectorAll('.sidebar-menu > li.treeview')]
+            .find((item) => item.querySelector(':scope > a')?.textContent.includes('Instellingen'));
+        if (!tree) return;
+        tree.classList.add('active', 'menu-open');
+        const submenu = tree.querySelector(':scope > ul.treeview-menu');
+        if (submenu) submenu.style.display = 'block';
+    });
+    await page.waitForTimeout(250);
+}
+
+async function scrollTo(page, selector, offset = -120) {
+    await page.locator(selector).first().scrollIntoViewIfNeeded();
+    await page.evaluate((scrollOffset) => window.scrollBy(0, scrollOffset), offset);
+    await page.waitForTimeout(300);
+}
+
+async function captureGroups(page) {
+    const files = [];
+
+    await open(page, '/admin/groups');
+    await page.locator('#groupsTable').waitFor({ state: 'visible', timeout: 10000 });
+    await page.waitForFunction(() => document.querySelectorAll('#groupsTable tbody tr').length > 0);
+    await expandSettingsNavigation(page);
+    files.push(await capture(page, 'USR-GROUPS-LIST-DESKTOP-01.png'));
+
+    await open(page, '/admin/groups/create');
+    await page.locator('#name').waitFor({ state: 'visible' });
+    files.push(await capture(page, 'USR-GROUP-CREATE-DESKTOP-01.png'));
+
+    await open(page, `/admin/groups/${exampleGroupId}/edit`);
+    await page.locator('#name').waitFor({ state: 'visible' });
+    files.push(await capture(page, 'USR-GROUP-PERMISSIONS-TOP-DESKTOP-01.png'));
+    await scrollTo(page, 'input[aria-label="permission[models.manage_specification_cleanup]"]', -290);
+    files.push(await capture(page, 'USR-GROUP-PERMISSIONS-MODELS-DESKTOP-01.png'));
+    await scrollTo(page, '#submit_button', 120);
+    files.push(await capture(page, 'USR-GROUP-SAVE-DESKTOP-01.png'));
+
+    await open(page, `/admin/groups/${exampleGroupId}`);
+    await page.getByRole('heading', { name: /Groep|Group/i }).first().waitFor();
+    await page.waitForTimeout(1000);
+    files.push(await capture(page, 'USR-GROUP-DETAIL-DESKTOP-01.png'));
+
+    return files;
+}
+
 const browser = await chromium.launch(browserLaunchOptions({ headless: true }));
 const context = await browser.newContext({
     ignoreHTTPSErrors: true,
@@ -120,7 +172,9 @@ const page = await context.newPage();
 
 try {
     await login(page);
-    const files = phase === 'deleted'
+    const files = phase === 'groups'
+        ? await captureGroups(page)
+        : phase === 'deleted'
         ? await captureDeleted(page)
         : phase === 'restored'
             ? await captureRestored(page)

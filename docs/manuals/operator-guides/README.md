@@ -1,5 +1,55 @@
 # Operator Guide Project
 
+## Shared Authoring Method On 2026-10-06
+
+The current work repairs the general reasoning for creating and revising all
+guide types. Accepted guides establish the direction to develop; required
+system updates and chosen reader improvements are evaluated together in the
+complete revision. Read [authoring-method.md](authoring-method.md). Reconcile
+inherited content with current standards and linked decisions, keeping desired
+targets and open gaps explicit. Reader outcome, information relevance and
+action/choice structure precede evidence and layout; review then checks what
+the rendered page implies. Keep a short reasoning
+brief per substantive revision. The [method review](reviews/authoring-method-repair-2026-10-06.md)
+checks known failures and valid countercases across the twenty-five subjects.
+This direction replaces the earlier emphasis on repairing one pilot first.
+No PDF generation or new acceptance is included in the method repair.
+
+## Guide Quality Review On 2026-10-06
+
+AC-01 v10 is owner-rejected; SC-01 v13 requires rework. Read the
+[all-guide purpose and quality audit](reviews/guide-purpose-and-quality-audit-2026-10-06.md)
+before using the October batch for further review or generation. It recommends
+holding all nineteen batch proposals and preserving established task layouts,
+useful screenshot sizes, Dutch capture language and explicit alternatives.
+This is not an owner rejection of all nineteen. The audit includes a repair
+brief for each of the twenty-five subjects and one focused SC-01 recovery flow.
+PDFs, frozen kits and accepted selections remain unchanged. Earlier generation
+and visual-QA descriptions below are historical where this review differs.
+
+## Application-Aligned Review Drafts - 2026-10-01
+
+19 affected guides now have separate unaccepted revisions: 66 A4 pages, with fourteen added instructional pages. The [batch comparison](reviews/aligned-guides-2026-10-01.md) lists each old/new PDF and its scope. A [25-guide review index](../../../output/manuals/aligned-guide-review-kit-2026-10-01/index.html) includes WF-01 v15/WF-02 v13 plus four unchanged guides. No accepted/runtime selection or historical PDF changed. Physical printing, controlled-user/save trials and exact-version review remain pending.
+
+
+## Unaccepted Workflow Comparison - 2026-10-01
+
+Latest working drafts: WF-01 v15 (one page) and WF-02 v13 (two pages).
+The [v15 correction](reviews/WF-01-v15.md) shows a natural Standard Diagnostics
+start and replaces the unexplained "afgesproken rij" wording; v14 is retained.
+The owner explicitly withheld acceptance. Use the
+[paired comparison](reviews/workflow-revisions-2026-10-01.md) for previous/new
+PDFs, changes, source context and remaining trials. Accepted selections,
+the portable current kit, and older artifacts remain unchanged.
+
+## USR-05 / CAT-05 / CAT-06 V2 - 2026-09-15
+
+The revised working drafts are USR-05 v2 (3 pages), CAT-05 v2 (8 pages), and
+CAT-06 v2 (3 pages). See the [revision review](reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md) for changes,
+exact artifacts, checks and remaining operator trials. The three v1 PDFs and
+all accepted artifacts are retained unchanged; v2 is not acceptance.
+
+
 ## Accepted Guide Folder - 2026-09-10
 
 Use [accepted-guides-v1](../../../resources/manuals/operator-guides/accepted-guides-v1/README.md)
@@ -312,9 +362,13 @@ extensive working drafts:
 - The current [CAT guide-set plan](catalog-guide-plan.md) assigns one owner to
   every catalogue concept and action. CAT-00 v9, CAT-01 v5, CAT-02 v1,
   CAT-03 v1, and CAT-04 v2 are the generated drafts aligned to that plan.
-- CAT-05 still requires lifecycle/cleanup evidence, and CAT-06 requires the
-  source-recording decision before generation. Normal setup belongs to
-  Supervisor; lifecycle and saved-row cleanup belong to Admin.
+- USR-05 v1, CAT-05 v1, and CAT-06 v1 were generated on 2026-09-15 as ten
+  additional A4 working-draft pages. USR-05 uses a two-sided minimum-rights
+  flow; CAT-05 uses five alternative Admin maintenance branches; CAT-06 is a
+  three-page verification-only guide that does not claim durable source storage.
+- All three exact PDFs are unaccepted. USR-05 needs a controlled-user permission
+  test, CAT-05 needs controlled execution of its risky branches, and CAT-06
+  still needs the source-policy decision before internal acceptance.
 
 ## Active Guide Set
 
@@ -337,14 +391,14 @@ extensive working drafts:
 | [USR-02 Change Role And Rights](guides/USR-02.md) | Administration task | Admin | Change groups where permitted and configure understandable direct user rights. |
 | [USR-03 Reset Password](guides/USR-03.md) | Administration task | Admin | Issue one generated temporary password through personal handoff. |
 | [USR-04 Disable Or Restore User](guides/USR-04.md) | Two-sided lifecycle task | Admin | Deactivate by default; delete or restore only after ownership and access checks. |
-| [USR-05 Manage Groups](guides/USR-05.md) | Planned administration task | Superadmin | Create or edit a reusable group and verify its minimum required rights. |
+| [USR-05 Manage Groups](guides/USR-05.md) | Three-page v2 working draft | Superadmin | Create or edit a reusable group, verify minimum rights, and test one controlled user. |
 | [CAT-00 Understand The Catalogue](guides/CAT-00.md) | Six-page reference chapter | Supervisor | Understand identities, reusable definitions, model-number baselines, actual asset state, value placement, and the correct follow-up guide. |
 | [CAT-01 Create Model And Model Number](guides/CAT-01.md) | Five-page administration task | Supervisor | Reuse or create the correct Basismodel and add one exact manufacturer model number. |
 | [CAT-02 Build Model Specification](guides/CAT-02.md) | Six-page administration task | Supervisor | Build direct attributes and expected components without duplicate or conflicting values. |
 | [CAT-03 Manage Attributes](guides/CAT-03.md) | Five-page administration task | Supervisor | Reuse or create a definition, choose datatype and behavior, constrain valid input, and verify reuse. |
 | [CAT-04 Manage Component Definitions](guides/CAT-04.md) | Six-page administration task | Supervisor | Configure reusable component identity, expected parts, attribute contributions, overlap handling, and reuse. |
-| [CAT-05 Manage Variants And Lifecycle](guides/CAT-05.md) | Planned administration task | Admin | Add variants and manage default, active, deprecated, delete, and partial-copy behavior. |
-| [CAT-06 Verify Catalogue And Sources](guides/CAT-06.md) | Planned verification task | Supervisor target | Validate exact identifiers and specification facts against authoritative evidence. |
+| [CAT-05 Manage Variants And Lifecycle](guides/CAT-05.md) | Eight-page v2 independent maintenance routes | Admin | Manage model-number status/defaults and clean up saved catalogue relationships after impact review. |
+| [CAT-06 Verify Catalogue And Sources](guides/CAT-06.md) | Three-page v2 worked source check | Supervisor | Validate exact identifiers and specification facts against authoritative evidence without inventing a source record. |
 
 ## Retired Or Deferred Scope
 
@@ -352,13 +406,13 @@ extensive working drafts:
 - `CMP-03 Add Custom Component` is retired; its custom path is an alternative inside CMP-02.
 - The old `AST-04 Add New Device From Scratch` belongs to later catalog/admin guidance.
 - Broad remove/retire/sell asset guidance is not one floor guide. Operator handoff is AST-04 and supervisor release is AST-05; destructive lifecycle actions need separate later investigation.
-- Duplicate merging, bulk user import/edit, two-factor reset, work orders, and catalog configuration remain later scopes. Reusable group management is now planned as USR-05 but has not yet been investigated or generated.
+- Duplicate merging, bulk user import/edit, two-factor reset, work orders, and catalog configuration remain later scopes. Reusable group management now has a USR-05 v2 working draft but still requires the controlled-user test.
 
 ## Production Order
 
 1. Review the 12 cold-start revisions recorded in the 2026-08-20 retest.
 2. Preserve any exact version explicitly accepted during that review.
-3. Investigate and generate USR-05, CAT-05, and CAT-06 in small batches; CAT-02 v1 now awaits review.
+3. Review the exact USR-05 v2, CAT-05 v2, and CAT-06 v2 working drafts and close their recorded operational gaps.
 4. Repeat the cold-start gate and exact-version review for every new batch.
 5. Consider Affinity only after the generated set is confirmed or an explicit green light is given.
 
@@ -367,8 +421,7 @@ desktop evidence is available:
 
 1. Generate USR-01 account creation and USR-02 role/rights together because
    they reuse user-list, group, permission, and detail evidence.
-2. Investigate and generate USR-05 group management after confirming the
-   live group list, add/edit controls, permission model, and verification route.
+2. Review USR-05 v2 and execute its controlled-user required/forbidden-route test.
 3. Generate USR-03 administrator password reset and AC-02 user self-change
    together so the handoff is visually continuous.
 4. Generate two-sided USR-04 after deactivated, deleted, and restored states
@@ -379,8 +432,8 @@ desktop evidence is available:
 The catalogue set follows this sequence:
 
 1. Review CAT-00 through CAT-04 separately; preserve each exact working draft.
-2. Generate CAT-05 after the base-model and specification workflows settle.
-3. Resolve the source-recording policy, then generate CAT-06.
+2. Review CAT-05 v2 against controlled disposable lifecycle/cleanup cases.
+3. Resolve the source-recording policy and review CAT-06 v2 and its worked source check.
 4. Register physical assets through AST-03 only after CAT-01 and CAT-02 are
    complete; do not merge asset creation into the catalogue guides.
 

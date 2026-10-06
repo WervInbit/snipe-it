@@ -1,0 +1,80 @@
+{
+  "worktree": "C:/Users/Gebruiker/.codex/worktrees/refurbisher-followups/snipe-it-fork",
+  "head": "c539b9cd18ed064d91f416cbb2fc5e1bf844fa23",
+  "date": "2026-10-01",
+  "files": [
+    {
+      "file": "resources/views/auth/login.blade.php",
+      "sha256": "fb72ebee6399deefe337b0177572c850c28de6ecc0437d0262f0d207c7357904"
+    },
+    {
+      "file": "resources/views/dashboard.blade.php",
+      "sha256": "471b4cbffab51978fb4feb9c8560432eb3d33c5d873f651c5100b7937a7d3b3b"
+    },
+    {
+      "file": "resources/views/layouts/default.blade.php",
+      "sha256": "d02c3700845302bff0c457244007fb7eb887fcbdf1b9111b241bf164e9240a81"
+    },
+    {
+      "file": "resources/views/users/edit.blade.php",
+      "sha256": "1702342f44f3faee6d6a8a325c3b340134981eb520709f21b615115e16165461"
+    },
+    {
+      "file": "resources/views/statuslabels/edit.blade.php",
+      "sha256": "7d885c65fb826401872d80a240d66115662f0fa7d2028226586843ff3b4770d5"
+    },
+    {
+      "file": "app/Services/Assets/StatusLabelAccessService.php",
+      "sha256": "af019b3318ac96ddd7f6c1ed390cc550878504019d354a9b697f7eaa55c5222c"
+    },
+    {
+      "file": "app/Services/Assets/AssetStatusTransitionGuardService.php",
+      "sha256": "72d2193392115f421059db7a2c4f6ba7aee622d7fb8c263c9f20fc9b40e00f99"
+    },
+    {
+      "file": "app/Http/Controllers/Assets/AssetsController.php",
+      "sha256": "a8ad41753ec2779c1071b2821b4927fdb9ce7f3726d6649347b3a8bc22d4f4ae"
+    },
+    {
+      "file": "resources/views/hardware/created.blade.php",
+      "sha256": "6fbbb8abd3781d85391131227bed2c651a6fbb11d25900ab522b78cbb8d0c60c"
+    },
+    {
+      "file": "resources/views/hardware/partials/qr-label-print-script.blade.php",
+      "sha256": "35ef1137ca6db8f6fe651d5e0996bb53b4c73b927ca75dbf0a7d7798502e3dac"
+    },
+    {
+      "file": "app/Http/Controllers/Admin/ModelSpecificationController.php",
+      "sha256": "36402daf339e3432a6b5a5d44fd373941634348b767aa28a431f5996d404649d"
+    },
+    {
+      "file": "app/Http/Requests/AttributeDefinitionRequest.php",
+      "sha256": "6aeca1f6c96a22dd61d96d97fa290a7b9c4190e9a0d840138ceae18ae5a311cb"
+    },
+    {
+      "file": "app/Models/AttributeDefinition.php",
+      "sha256": "6e46be5fe0ff956a11660ce204487d1834480fc34ff7f62a69460b474bee910b"
+    },
+    {
+      "file": "app/Services/ModelAttributes/ComponentAttributeAggregator.php",
+      "sha256": "d67cfe9a958add3f0eb994f58637c19a6742c983b2ebd486e8f51d89c6511d32"
+    },
+    {
+      "file": "database/seeders/ProductionPermissionGroupSeeder.php",
+      "sha256": "25bb0ef7a1e2f595ccad46b5d096c2f77fa0ca81650e3896db586059e4cb7328"
+    },
+    {
+      "file": "resources/views/account/change-password.blade.php",
+      "sha256": "ec678f06b5bc19a505b55bd129bce824060564e684f75aaea227ebd2b901072f"
+    },
+    {
+      "file": "app/Services/ModelAttributes/EffectiveAttributeResolver.php",
+      "sha256": "22731747177df7ce7d77fd05f7768f618c83935311214bdcfa7c2e79eb1def43"
+    },
+    {
+      "file": "app/Http/Controllers/StatuslabelsController.php",
+      "sha256": "826f475dc4d57b7778dde4e116c9fd574282f5fe3118f3f5cf29db5c5709d702"
+    }
+  ],
+  "method": "Read-only source inspection and local dev.inbit UI recognition; no production browser validation."
+}

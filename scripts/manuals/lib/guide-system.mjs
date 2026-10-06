@@ -96,8 +96,8 @@ export const GUIDE_REGISTRY = Object.freeze({
     'CAT-02': Object.freeze({ family: 'CAT', title: 'Modelspecificatie opbouwen', status: GUIDE_STATUSES.WORKING_DRAFT }),
     'CAT-03': Object.freeze({ family: 'CAT', title: 'Attributen beheren', status: GUIDE_STATUSES.WORKING_DRAFT }),
     'CAT-04': Object.freeze({ family: 'CAT', title: 'Componentdefinities beheren', status: GUIDE_STATUSES.WORKING_DRAFT }),
-    'CAT-05': Object.freeze({ family: 'CAT', title: 'Varianten en lifecycle beheren', status: GUIDE_STATUSES.WORKING_DRAFT }),
-    'CAT-06': Object.freeze({ family: 'CAT', title: 'Catalogus controleren en bronnen', status: GUIDE_STATUSES.WORKING_DRAFT }),
+    'CAT-05': Object.freeze({ family: 'CAT', title: 'Bestaande catalogus aanpassen', status: GUIDE_STATUSES.WORKING_DRAFT }),
+    'CAT-06': Object.freeze({ family: 'CAT', title: 'Productgegevens controleren', status: GUIDE_STATUSES.WORKING_DRAFT }),
 });
 
 export function xml(value) {

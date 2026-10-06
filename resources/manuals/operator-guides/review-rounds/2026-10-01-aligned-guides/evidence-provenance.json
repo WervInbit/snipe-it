@@ -1,0 +1,45 @@
+{
+  "date": "2026-10-01",
+  "environment": "Local https://dev.inbit; Docker application mounted from refurbisher-followups worktree",
+  "sourceHead": "c539b9cd18ed064d91f416cbb2fc5e1bf844fa23",
+  "captureMethod": "Genuine browser JPEG screenshots; no generated UI, image repainting or invented controls. Crops are recorded per guide in manifest.json.",
+  "actions": [
+    "Navigated as seeded local Refurbisher, Supervisor and Admin accounts; original Refurbisher session restored afterward.",
+    "Viewed login, blank own-password and user forms, current asset information, workflow rows, catalogue forms and operational status rules.",
+    "Opened the New Asset form without submitting it; normal identifier reservation proposed INBIT-AA0016. This may leave a sequence gap.",
+    "Opened /hardware/12/created using the controller's existing-asset fallback for recognition of the result panel; no asset creation trial or physical print was performed.",
+    "Previewed Ready for Sale on asset 12; captured the protected confirmation with issues; cancelled and verified Stand-by was restored.",
+    "Camera initialization was unavailable in the capture environment; inspected Manual entry. Camera permission, retry and physical QR scanning were not exercised.",
+    "Admin group detail access returned 403; retained previous group evidence and inspected current source. No elevation or group write was performed."
+  ],
+  "notPerformed": [
+    "No asset creation, workflow start/result/evidence save, quality/status save, password change, permission/group save or catalogue write.",
+    "No database command, application deployment or production browser test.",
+    "No physical print, create-to-label trial, real password generation/reset or controlled-user effective-access trial."
+  ],
+  "navigationSideEffects": "Normal recent-device tracking and the proposed asset-tag reservation can write application bookkeeping during navigation.",
+  "retainedEvidence": "Exact September 15 source HTML retains earlier screenshots and physical-label examples where those steps are unchanged. HG0421, AA0003 and AA0004 are separate illustrative records, not one claimed end-to-end journey.",
+  "screenshots": [
+    {"id":"ACCOUNT-MENU-MOBILE-01","role":"Refurbisher","subject":"Own account menu; Change Password"},
+    {"id":"ASSET-INFO-READONLY-MOBILE-01","role":"Refurbisher","subject":"Asset 12; identity/status/read-only quality"},
+    {"id":"ASSET-INFO-SUPERVISOR-MOBILE-01","role":"Supervisor","subject":"Asset 12; status note and quality controls"},
+    {"id":"ATTRIBUTE-AGGREGATION-DESKTOP-01","role":"Admin","subject":"Attribute 20; Numeric Component Aggregation"},
+    {"id":"ATTRIBUTES-LIST-DESKTOP-01","role":"Admin","subject":"Attribute list and aggregation column"},
+    {"id":"COMPONENT-DEFINITION-EDIT-DESKTOP-01","role":"Admin","subject":"Optical definition 116; type, children and contribution controls"},
+    {"id":"COMPONENT-DEFINITIONS-DESKTOP-01","role":"Admin","subject":"Filtered Optical definitions"},
+    {"id":"CREATE-LAPTOP-MOBILE-01","role":"Supervisor","subject":"Unsubmitted New Asset form; model/status/note"},
+    {"id":"CREATION-RESULT-MOBILE-01","role":"Supervisor","subject":"Existing asset 12 result-panel fallback; recognition only"},
+    {"id":"DASH-CREATE-MOBILE-01","role":"Supervisor","subject":"Dashboard New Asset tile"},
+    {"id":"DASH-REFURBISHER-MOBILE-01","role":"Refurbisher","subject":"Dashboard and own Recent devices"},
+    {"id":"LOGIN-MOBILE-01","role":"Signed out","subject":"Current Dutch login form"},
+    {"id":"MODEL-NUMBERS-DESKTOP-01","role":"Admin","subject":"Model 2; exact model-number rows"},
+    {"id":"MODEL-SPEC-DESKTOP-01","role":"Admin","subject":"Model 2/model number 2; full Edit Spec form"},
+    {"id":"PASSWORD-FORM-MOBILE-01","role":"Refurbisher","subject":"Blank own-password form; actual duplicate New Password label"},
+    {"id":"RELEASE-CONFIRM-ISSUES-MOBILE-01","role":"Supervisor","subject":"Asset 12; cancelled protected Ready for Sale dialog"},
+    {"id":"SCAN-RECOVERY-MOBILE-01","role":"Refurbisher","subject":"Camera initialization and Manual entry fallback"},
+    {"id":"STATUS-ACCESS-DESKTOP-01","role":"Admin","subject":"QA Hold status 10; See and Choose/use rules"},
+    {"id":"USER-ACCOUNT-FORM-DESKTOP-01","role":"Admin","subject":"Blank create-user form; password Generate control"},
+    {"id":"USER-ASSET-PERMISSIONS-DESKTOP-01","role":"Admin","subject":"User 10; Assets permission rows; screenshot viewport clip"},
+    {"id":"WORKFLOWS-SUPERVISOR-MOBILE-01","role":"Supervisor","subject":"Asset 11; Changed and prerequisite-blocked rows"}
+  ]
+}

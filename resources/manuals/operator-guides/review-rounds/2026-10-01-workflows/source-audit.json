@@ -1,0 +1,44 @@
+{
+  "date": "2026-10-01",
+  "source": "dev.inbit development snapshot",
+  "branch": "codex/refurbisher-followups-2026-09-22",
+  "head": "5ee57f58db77eaa8eb349e82f59d3c658dc67955",
+  "caveat": "Concurrent uncommitted changes exist; captures do not establish production alignment.",
+  "viewport": "430 CSS pixel requested viewport; screenshot content is 415 pixels wide",
+  "asset": "INBIT-AA0003 / HP ProBook 430 G3",
+  "runs": [
+    12,
+    14
+  ],
+  "actions": "Read-only navigation and drawer opening; Done return on already answered run 14; no result, note, photo, profile, or permission change",
+  "files": [
+    {
+      "path": "resources/views/tests/active.blade.php",
+      "sha256": "2413a4ff0f8c96740b0ac82d4f98bd8f55b505c7685f50928aca7cd7d882a576"
+    },
+    {
+      "path": "resources/views/tests/partials/active-card.blade.php",
+      "sha256": "9af0d45cb73acb264d33186abd4c0eaccfc81dd8682d3d8555c228246f83cff9"
+    },
+    {
+      "path": "resources/views/tests/partials/workflow-progression.blade.php",
+      "sha256": "6e40c5c9c792a08f2d5393470548d81f3481ddbb4b618ff8d4716ebd4f56a309"
+    },
+    {
+      "path": "resources/js/tests-active.js",
+      "sha256": "6866883206148e4cc2c78b9e5304adaa24337ee360df5a912c89efff6f60c4f5"
+    },
+    {
+      "path": "app/Models/TestRun.php",
+      "sha256": "26fe192fd31d1d70e2104f4b7ef782fbbb15e876744e718660c2fdee30eebf93"
+    },
+    {
+      "path": "app/Services/WorkflowProgressionService.php",
+      "sha256": "97bf7314d85c6c76b8fd193be7df13f55cd813c3e5c42c010984eada1ccdf33a"
+    },
+    {
+      "path": "app/Http/Controllers/TestResultController.php",
+      "sha256": "152350c15ea9e98ece33882d66e795f6134ff104d2906d59a2483808bea22b81"
+    }
+  ]
+}

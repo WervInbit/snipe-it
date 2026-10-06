@@ -2,7 +2,34 @@
 
 Status: current shared content, production, and QA rules for generated guides.
 
+## Authoring Reasoning
+
+Use [authoring-method.md](authoring-method.md) before creating or revising a
+specification, choosing evidence or editing a generator. Establish the reader
+outcome, relevant information and action/choice relationships first. Keep the
+short reasoning brief in the specification or version review and read back
+what the rendered page implies. This method applies across task, route,
+troubleshooting, reference and independent-maintenance guides. The rules below
+supply constraints; matching them mechanically does not choose a useful guide.
+
+Accepted guides establish the direction to develop. Revisions must match current
+behavior and may improve clarity and ease of use without a known defect. Keep
+required updates distinct from chosen improvements, and assess their combined
+effect on the complete guide against that direction.
+
+Reconcile the current contracts and linked owner decisions before baseline
+reuse. The reasoning brief names applicable requirements, desired targets,
+retired approaches and unresolved gaps. Review the complete revision against
+them as well as the reader outcome. Historical acceptance cannot restore a
+superseded scope or rule; a desired future product state cannot be illustrated
+as available merely because it is preferred.
+
 ## Document Precedence
+
+The authoring method governs how decisions are made. The narrow documents
+below govern their content. Current owner decisions and explicit session
+instructions constrain every level. A generated HTML snapshot or proposal
+header cannot establish instructional authority over those decisions.
 
 Use the narrowest current document:
 
@@ -27,7 +54,7 @@ Use the narrowest current document:
 ## Production Model
 
 ```text
-Specification -> Evidence ready -> Working draft -> Internal review candidate -> Third-party approved
+Reader outcome and outline -> Specification -> Evidence ready -> Working draft -> Internal review candidate -> Third-party approved
 ```
 
 Generated guides are the active production format. Affinity is deferred until every guide in the active set is confirmed or the user explicitly gives a green light. Do not spend Computer Use time on Affinity preparation during generated-guide production.
@@ -196,6 +223,16 @@ change.
 
 Before a guide can be `Internal review candidate`:
 
+- its reasoning brief establishes why the content belongs and how the reader
+  reaches the intended outcome;
+- the brief reconciles current requirements, desired targets and retired
+  approaches with the baseline/specification, using the relevant decisions;
+- the complete rendered guide follows those current requirements and does not
+  reintroduce superseded points; remaining desired/open gaps are recorded;
+- a read-back of the rendered page checks implied sequence, choices,
+  completion and plausible wrong readings, with the findings recorded;
+- revisions account for previously useful baseline support and recognition
+  size; a necessary regression or tradeoff is explicit;
 - PDF page count matches the declared one-page, two-sided, or multi-page guide;
 - no unintended blank pages exist;
 - no missing-evidence placeholders exist;
@@ -212,6 +249,10 @@ Before a guide can be `Internal review candidate`:
 
 Third-party approval is a later exact-version decision. Until that review is
 recorded, an internally accepted guide remains an `Internal review candidate`.
+Record integrity checks, editorial judgment, observed reader trials and exact
+acceptance separately. A script's `passed` result does not certify the other
+three. See the [method review](reviews/authoring-method-repair-2026-10-06.md)
+for how the reasoning handles both known failures and legitimate countercases.
 
 ## Feedback Records
 

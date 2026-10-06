@@ -1,5 +1,14 @@
 # Operator Guide Review Records
 
+## Authoring Reasoning Review On 2026-10-06
+
+Use the [shared authoring method](../authoring-method.md) for new guides,
+revisions and local repairs. The [method repair review](authoring-method-repair-2026-10-06.md)
+records the causal change in the process and exercises it against known failures
+and legitimate countercases. This is a general method change, not PDF approval.
+Version records carry the brief or its specification link, the rendered
+read-back, baseline comparison and scope of the evidence for each review claim.
+
 ## Owner Clearance For User Review - 2026-09-10
 
 The owner cleared the ten current changed versions in the v5 pair for review

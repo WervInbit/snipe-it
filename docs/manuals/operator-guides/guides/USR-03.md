@@ -1,17 +1,12 @@
 # USR-03 Wachtwoord Resetten
 
-| Field | Current value |
-| --- | --- |
-| Status | Working draft v3; visual-correction pass and awaiting exact-version review |
-| Family | USR |
-| Type | Administration task |
-| Current version | `usr-03-wachtwoord-resetten-v3-draft` |
-| Page model | One page |
-| Layout recipe | `stacked-step-flow` with `mixed-visual-widths` |
-| Generator | `scripts/manuals/generate-user-account-guide-review.mjs` |
-| Role | Admin |
-| Needed | Correct local account and personal handoff route |
-| Prerequisite | Ingelogd (AC-01 Login) |
+## Application Alignment Revision - 2026-10-01
+
+Current authoring proposal: **v5, working draft; not accepted**, 1 A4 page. [Exact-version review](../reviews/USR-03-v5.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+
+Actual Generate control and automatic confirmation, secure handoff before leaving reset form, compact self-password menu.
+
+The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v4 input.
 
 ## Purpose
 

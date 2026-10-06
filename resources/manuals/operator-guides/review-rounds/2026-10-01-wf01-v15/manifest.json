@@ -1,0 +1,81 @@
+{
+  "date": "2026-10-01",
+  "status": "Working draft - not accepted",
+  "acceptedSelectionChanged": false,
+  "guide": "WF-01",
+  "version": 15,
+  "pages": 1,
+  "file": "WF-01-workflow-starten-v15-draft.pdf",
+  "bytes": 248481,
+  "sha256": "3c4431a525cc38f7d92d255e9af86fafaae1d8b1ebd1d0eaad1e201717f9ccc8",
+  "htmlSha256": "49bfa0a8f7fcab895de99095c97ba8cd3716d0612d457210020b54c31d545e31",
+  "generatorSha256": "5c8631ec2c80f2bbde67106bf1d497f247dbfdf2a4a69c9f12cc5fa5357987db",
+  "input": {
+    "file": "../2026-10-01-workflows/WF-01-workflow-starten-v14-draft.html",
+    "sha256": "f3e15bb365ff025c6a85dd55bb810f5a75c355df7520e4a045fae49410b6bf1d"
+  },
+  "evidence": {
+    "file": "evidence/WF-START-STANDARD-DIAGNOSTICS-MOBILE-05.jpg",
+    "sha256": "6c954ddfae8d3fabb98da8576ef720a396c7357677f2525e6eddf907bd692c3a",
+    "width": 430,
+    "height": 1000,
+    "asset": "INBIT-AA0004",
+    "url": "https://dev.inbit/hardware/12#tests",
+    "role": "Demo Refurbisher",
+    "actions": "Navigation only; no workflow start or result submitted",
+    "crops": {
+      "1A": [
+        12,
+        308,
+        397,
+        55
+      ],
+      "2A": [
+        22,
+        371,
+        386,
+        226
+      ],
+      "3A": [
+        22,
+        371,
+        386,
+        108
+      ]
+    },
+    "targets": {
+      "1A": [
+        204,
+        313,
+        48,
+        46
+      ],
+      "3A": [
+        66,
+        440,
+        48,
+        33
+      ]
+    }
+  },
+  "retainedVisuals": "3B and 4A remain existing Pre-Sale Check run 12 on INBIT-AA0003, embedded from v14; separate alternative example, not the new asset after a start",
+  "preserved": [
+    {
+      "file": "WF-01-workflow-starten-v14-draft.pdf",
+      "sha256": "8095a6d88b714c43c811f0294797c70183d8c00ab1530fa46ce31ea526004710"
+    },
+    {
+      "file": "WF-02-complete-workflow-v13-draft.pdf",
+      "sha256": "7b4ff10d60a45c7412a933eaf00b5d5a57f89f184d841736eeebcc575a0270b8"
+    }
+  ],
+  "qa": {
+    "pages": 1,
+    "images": 5,
+    "text": "WF-01 Workflow starten\n\nBegin bij de eerstvolgende workflow; start of ga verder met een bestaande run\n\nConcept v15\n2026-10-01\nNiet geaccepteerd\n1 van 1\nRol\nBevoegde uitvoerder\nNodig\nJuiste asset + workflowrechten\nVooraf\nSC\nSC-01 Asset vinden en openen\n1\nOpen Tests / workflows\n\nControleer het apparaat met \nSC\nSC-01 Asset vinden en openen\n. Tik daarna op het test-icoon in de asset.\n\n1A\nHet test-icoon in de volledige tabrij.\n2\nBekijk de workflowvolgorde\n\nBegin bij de eerste workflow die nog moet worden uitgevoerd. Een grijze vervolgstap wacht op eerder werk.\n\n2A\nStandard Diagnostics kan starten; Cleaning wacht.\n3\nKies 3A of 3B. Voer maar een optie uit.\nNieuwe run starten\n\nNog niet gestart en Start actief? Tik eenmaal op Start bij de workflow die je gaat uitvoeren.\n\n3A\nStart bij Standard Diagnostics.\nOF\nBestaande run openen\n\nOpen via de profielrij: Continue bij lopend werk, Edit voor bestaande resultaten, ook na afronding. Definitie gewijzigd? Vraag eerst een supervisor.\n\n3B\nVoorbeeld bestaande run: Pre-Sale Check.\n4\nControleer de kaarten\n\nControleer de asset en de kaarttitels van het gekozen profiel. Een nieuwe run begint met neutrale knoppen; een bestaande run kan al antwoorden tonen.\n\nGa verder met \nWF\nWF-02 Workflow uitvoeren en afronden\n\n4A\nBestaande Pre-Sale Check: deze kaarten zijn nog neutraal.\nHulp bij kiezen en starten\n!\nVoorwaarde of rechten\n\nLees de melding. Voer het genoemde werk uit of vraag een bevoegde collega.\n\n!\nProfiel klopt niet\n\nNiet ingesteld of gewijzigd? Stop en vraag een supervisor.\n\n!\nNogmaals starten?\n\nStart new / Override: alleen bevoegd, met reden en bevestiging. Vraag een supervisor.\n\n!\nGeen icoon of kaarten\n\nControleer asset en rechten. Vraag hulp; start niet nog een run.\n\nKlaar als\nDe juiste run is open; asset en kaarttitels kloppen. Ga verder met WF-02.\nRelevante gidsen\nSC\nSC-01 Asset vinden en openen\nWF\nWF-02 Workflow uitvoeren en afronden\nHELP\nHELP-01 Problemen en hulp\nBron: ontwikkelomgeving | 2026-10-01 | Niet geaccepteerd\nQR\nvolgt\nDigitale gids volgt",
+    "overflow": [],
+    "mainOverHelp": false,
+    "clippedShots": 0,
+    "choiceOverlap": false
+  }
+}

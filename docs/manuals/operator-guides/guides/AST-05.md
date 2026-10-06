@@ -1,43 +1,38 @@
 # AST-05 Asset Beoordelen En Vrijgeven
 
-| Field | Current value |
-| --- | --- |
-| Status | Working draft v5; visual-correction pass and awaiting exact-version review |
-| Family | AST |
-| Type | Detail task |
-| Current version | `AST-05-review-release-v5-draft` |
-| Page model | One page |
-| Layout recipe | `two-column-step-grid` with `reused-evidence`, `inline-warning`, and `inline-return` |
-| Generator | `scripts/manuals/generate-revised-guide-set.mjs`; use `SNIPEIT_AST05_VERSION=5` explicitly when reproducing this version |
-| Role | Supervisor |
-| Needed | Asset awaiting review and access to status changes |
-| Prerequisite | Operator handoff completed (AST-04) |
+## Application Alignment Revision - 2026-10-01
+
+Current authoring proposal: **v7, working draft; not accepted**, 2 A4 pages. [Exact-version review](../reviews/AST-05-v7.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+
+Protected release confirmation, explicit override handling, required status notes and quality permission.
+
+Added page: Lees de bevestiging voordat je vrijgeeft. Steps: Controleer bewijs, onderdelen en kwaliteit; Kies Ready for Sale en lees het dialoogvenster; Leg het vervolg vast en controleer de opgeslagen status.
+
+The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v6 input.
 
 ## Purpose
 
 Review the transferred asset and its evidence, then record whether it is
 released or returned for correction.
 
-The v5 draft uses the currently deployed `QA Hold`, `Ready for Sale`, and
-`Being Processed` labels. It explains each next route and the current automatic
-save behavior instead of instructing the supervisor to find a separate Save
-action.
-
-Version 5 also renders every guide handoff in help and related guides with its
-family color, symbol, code, and full name.
+The v7 draft uses `QA Hold`, `Ready for Sale`, and `Being Processed`.
+Protected release requires reading and confirming the displayed dialog.
+Missing work follows Cancel and repair; an authorized override is a separate,
+reasoned exception. Every status decision ends with checking the saved result.
 
 ## Steps
 
 1. `Open de wachtende beoordeling` - open the correct asset, verify its name
    and asset tag, and separately confirm that `QA Hold` means it is waiting for
    supervisor review.
-2. `Controleer het bewijs` - review workflow results, notes, and warnings;
-   release requires complete evidence and `0 Mislukt`.
+2. `Controleer het bewijs` - review current required runs, results, notes and
+   warnings. Historical Pass does not satisfy Changed or blocked requirements.
 3. `Controleer het apparaat` - compare label, S/N, model type, physical
    condition, registered components, destination, and included parts.
-4. `Leg de uitkomst vast` - when approved, choose `Ready for Sale`; when
-   rejected, choose `Being Processed` and return the asset through AST-04 or
-   WF-02. Both choices save automatically; verify the visible resulting status.
+4. `Kies vrijgeven OF terugsturen` - when approved, choose `Ready for Sale`
+   and follow page 2's confirmation. When rejected, choose `Being Processed`,
+   supply the requested note and return through AST-04 or WF-02. Verify the
+   saved status after the application response.
 
 The proof currently names those routes `Ready for Sale` and `Being Processed`.
 The focus rectangles surround the status and workflow controls instead of
@@ -57,8 +52,10 @@ crossing their labels.
 `AST-WORKFLOW-ISSUE-MOBILE-01` remains canonical exception evidence but is not
 needed in the compact main path.
 
-All application captures use the controlled `INBIT-HG0421` / `HP ProBook 450
-G8` / `5CD1234ABC` identity.
+The retained first-page captures use `INBIT-HG0421` / `HP ProBook 450 G8` /
+`5CD1234ABC`. Page 2 adds separate local AA0003/AA0004 examples for current
+guards and a cancelled release dialog. These are recognition examples, not
+one continuous release trial. See the batch provenance for hashes and crops.
 
 ## Complete When
 

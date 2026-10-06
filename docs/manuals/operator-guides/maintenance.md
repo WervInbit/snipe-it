@@ -1,5 +1,26 @@
 # Operator Guide Maintenance And Change Impact
 
+## Reasoning Before Implementation
+
+Apply [authoring-method.md](authoring-method.md) to every creation or revision.
+Reconcile shared standards, family/guide requirements and linked owner
+decisions before carrying forward baseline content. Distinguish current
+requirements, desired targets, retired approaches and unresolved gaps.
+Establish the reader's outcome and outline; then decide whether the
+application change affects an action, choice, recognition job or result in this
+guide. Put the change at its point of use and explain the structural tradeoff
+before editing the generator. A small text patch can be insufficient when the
+underlying relationship changed. A broad redesign needs its own reader reason.
+Keep the brief with the specification/version review. A local cosmetic repair
+can reuse the established reasoning and record only its affected comparison.
+
+Use the accepted guides as the design direction to develop. Distinguish what
+current behavior requires from the improvements chosen for the reader. A
+revision can improve an already usable guide without a known error; judge the
+whole result for clarity, recognition and effort as well as current accuracy.
+The historical instruction below to repair one identified problem at a time
+does not restrict the owner's current request to update and improve the guides.
+
 ## Accepted Guide Snapshot - 2026-09-10
 
 [accepted-guides-v1](../../../resources/manuals/operator-guides/accepted-guides-v1/README.md)
@@ -125,21 +146,34 @@ instructional completeness or first-time-user usability.
    label, and reporter where applicable.
 2. Classify it as global, family, recipe, guide, evidence, policy, or
    version-specific.
-3. Use `registry.md` and `screenshots.md` to produce the complete impact list
+3. Reconcile applicable standards and owner decisions with the baseline and
+   specification. Write or update the brief: reader outcome/type, current
+   requirements, desired/open targets, retired points, baseline strengths,
+   required updates, chosen improvements, structure and evidence jobs.
+   Resolve instructional ownership and ordering before generator edits.
+4. Use `registry.md` and `screenshots.md` to produce the complete impact list
    before editing a generator.
-4. Update the narrowest authoritative document first.
-5. Promote reusable feedback to `components.md`, `layouts.md`, or
+5. Update the narrowest authoritative document first.
+6. Promote reusable feedback to `components.md`, `layouts.md`, or
    `system.md`; do not leave a shared rule only inside one generator.
-6. Increment every visibly affected guide version and create its review record.
-7. Change shared code or guide generator data without modifying historical
-   output folders.
-8. Generate focused proofs first. Generate a batch only after focused QA.
-9. Run automated geometry, text, page-count, evidence, and reference checks.
-10. Render every page and review it at full page and actual A4 size.
-11. Record the exact review decision. Acceptance applies only to that version.
-12. Refresh the internal review package only after the affected versions have
+   Record the principle and its boundary, including a legitimate countercase.
+7. Increment every visibly affected guide version and create its review record.
+8. Implement the resolved specification in shared code or guide data without
+   letting an available capture or fixed template choose the guide's scope.
+   Do not modify historical output folders.
+9. Generate focused proofs first. Apply the reasoning per guide in a requested
+   batch; shared rendering does not supply shared instructional decisions.
+10. Run automated geometry, text, page-count, evidence, and reference checks.
+11. Render every page and review it at full page and actual A4 size. Read what
+    it implies without relying on authoring intent, trace plausible wrong
+    readings and compare the complete guide with the accepted direction: gains,
+    new burdens and previously useful baseline support. Check the whole guide
+    against the reconciled standards, including inherited copy and new pages.
+12. Record integrity results, editorial judgment, actual reader trials and the
+    exact review decision separately. Acceptance applies only to that version.
+13. Refresh the internal review package only after the affected versions have
     regained `Internal review candidate` status.
-13. Update `HANDOFF.md` when the current creation stage, next action, published
+14. Update `HANDOFF.md` when the current creation stage, next action, published
     artifact state, or environment dependency changes.
 
 ## Impact Search Checklist
@@ -159,6 +193,10 @@ Before a cross-guide change, search for:
 
 Every new review record should include:
 
+- the short reasoning brief or its guide-specification link, plus rendered
+  read-back and baseline comparison findings;
+- applicable standards/decisions, inherited points corrected or retired, and
+  remaining desired targets or unresolved gaps;
 - previous version and reason for change;
 - feedback source: internal review, floor test, user test, management, or
   application change;

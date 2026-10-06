@@ -1,54 +1,67 @@
-# CAT-06 Catalogus controleren en bronnen
+# CAT-06 Productgegevens controleren
 
-Status: Planned specification; operational source policy requires review.
+| Field | Current value |
+| --- | --- |
+| Status | Unaccepted working draft; catalogue-owner review and source-retention/fallback policy pending |
+| Family | CAT |
+| Type | Worked source-verification task |
+| Current version | v2 draft |
+| Page model | Three A4 pages |
+| Layout recipe | worked-source-check |
+| Generator | scripts/manuals/generate-planned-guide-v2.mjs |
+| Artifact | resources/manuals/operator-guides/drafts/cat-06-catalogus-controleren-en-bronnen-v2-draft.pdf |
+| Role | Supervisor |
+| Needed | Physical manufacturer label and manufacturer source |
+| Prerequisite | CAT-00 Catalogus begrijpen |
 
-## Maintenance Metadata
+## Purpose And V2 Flow
 
-- Family: `CAT`.
-- Type: Reference and verification task.
-- Current version: planned.
-- Expected page model: Three pages.
-- Layout recipe: to be assigned after source-recording policy is confirmed.
+Use this guide only before CAT-01 or CAT-02 when a complete model code or one
+specification fact is uncertain. It verifies whether the evidence is strong
+enough; it never creates or edits catalogue data itself. Do not confuse
+supported family facts, optional configurations, maximum capacities and
+current physical hardware.
 
-## Purpose
+1. Choose one concrete question: is the complete model code correct, does the
+   source cover that exact variant, or does it support this one fact? Read the
+   real HP label: ProBook 450 G8, ProdID 2E9F8EA#ABH. Distinguish
+   the complete variant code/suffix from S/N, Inbit tag and software Product ID.
+   Compare exact characters; input follows CAT-01's uppercase/Aa behavior.
+2. Open the official HP ProBook 450 G8 product page. Its family and generation
+   match, but it does not list the exact SKU. It supports the 15.6-inch family
+   display diagonal, not optional FHD/Touch/Sure View or exact-variant RAM.
+   Two narrow source crops show only the title and display line.
+3. Follow one result: confirmed identity returns to CAT-01; a confirmed
+   specification returns to CAT-02; an unconfirmed required identity stops
+   creation, while an unconfirmed optional fact stays empty and is handed to
+   the catalogue owner. Missing meanings go to CAT-03, missing part definitions
+   to CAT-04, and maintenance of an existing object to CAT-05. Later per-asset
+   hardware changes stay outside the factory baseline.
 
-Verify catalogue identity and specification values against trustworthy evidence,
-and prevent demo placeholders or invented codes from becoming production data.
+## Source And Applicability
 
-## Audience And Context
+[HP - HP ProBook 450 G8 official product page](https://www.hp.com/us-en/laptops/business/probook-400/product-card/hp-probook-450-g8.html),
+checked 2026-09-15. Source image ID: CAT-SOURCE-HP-PROBOOK-450-G8-02.
+Physical label: AST-LABEL-PLACEMENT-PHOTO-01.
 
-- Role: Supervisor for verification; Admin for lifecycle or saved-row cleanup.
-- Needed: Physical product label and/or authoritative manufacturer documentation.
-- Prerequisite: `CAT-00 Catalogus begrijpen`.
+The source's general 15.6-inch display statement is interpreted as a family
+characteristic; it is not presented as an exact-SKU configuration lookup.
+The worked result explicitly leaves RAM unresolved. No exact-SKU manufacturer
+document is claimed. A vendor/distributor listing is not silently approved as
+a fallback, and no device serial was transmitted to an external lookup.
 
-## Planned Pages
+## Completion And Unresolved Outcome
 
-1. Evidence hierarchy: physical model/SKU label, manufacturer support/product
-   documentation, then another approved authoritative source. A manufacturer
-   Product ID/P/N (for example the HP product code) can identify an exact
-   variant. A software Product ID, serial number, or Inbit asset tag does not.
-2. Exact-code verification: preserve meaningful punctuation and regional
-   suffixes, use normal uppercase behavior unless the printed code requires `Aa`,
-   and distinguish verified production codes from clearly marked demo values.
-3. Record the source and review result, resolve conflicts, and route uncertain
-   records for correction rather than inventing uniqueness.
+Successful verification and unresolved handoff are separate outcomes.
+Required identity unresolved means stop creation without placeholder codes.
+An optional fact unresolved means leave only that fact empty; do not invent a
+baseline or revise it to match one modified device. Send the label, source
+and precise open question to the catalogue owner for a decision.
 
-## Open Product Decision
+The current UI has no dedicated durable catalogue-source field. Source
+retention and fallback approval remain a review/product-policy issue, not
+operator-facing instructions to use a fictitious field or record type.
 
-The current catalogue UI has no dedicated verification-source field. Until an
-implemented field or approved notes convention exists, the guide must not claim
-that source evidence is stored structurally in Snipe-IT. This policy needs an
-operational owner decision before CAT-06 can become an internal review candidate.
-
-## Completion
-
-`Klaar als`: the exact model number and each critical specification value can be
-traced to approved evidence, or the uncertain record is explicitly withheld
-from creation/correction.
-
-## Related Guides
-
-- `CAT-00 Catalogus begrijpen`.
-- `CAT-01 Model en modelnummer aanmaken`.
-- `CAT-02 Modelspecificatie opbouwen`.
-- `CAT-05 Varianten en lifecycle beheren`.
+See the [v2 review](../reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md).
+The [v1 review](../reviews/CAT-06-v1.md) and PDF remain unchanged.
+Related: CAT-00 through CAT-05 and the appropriate AST/CMP physical task.

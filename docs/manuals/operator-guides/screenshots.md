@@ -1,11 +1,74 @@
 # Canonical Screenshot Catalog
 
-Status: current reusable evidence registry through 2026-09-03.
+## Dutch Capture Review On 2026-10-06
+
+Owner requires Dutch screenshots. The [quality audit](reviews/guide-purpose-and-quality-audit-2026-10-06.md)
+found global `nl-NL` but English preferences on the demo capture accounts;
+authenticated account locale overrides the global setting. Verify both plus
+the visible labels after login before capturing. Missing Dutch translations
+on new catalogue controls need an application correction before Dutch evidence
+can be complete. Do not replace labels in image pixels. The English sources
+below remain preserved historical draft evidence, not an approved language
+exception. Reuse established Dutch sources for unchanged states and preserve
+their useful recognition size when fitting replacement crops.
+
+## Application Alignment Evidence - 2026-10-01
+
+21 genuine local JPEGs are scoped to the [new round](../../../resources/manuals/operator-guides/review-rounds/2026-10-01-aligned-guides/README.md); exact hashes and crop coordinates are in its manifest. The [provenance](../../../resources/manuals/operator-guides/review-rounds/2026-10-01-aligned-guides/evidence-provenance.json) records roles, navigation, cancelled release preview, proposed-tag reservation, existing-asset result-panel fallback and retained baseline evidence. No password/permission/catalogue write or physical-print trial. Earlier canonical evidence remains unchanged.
+
+
+Status: current reusable evidence registry through 2026-10-01.
+
+## WF-01 V15 Natural Start Evidence - 2026-10-01
+
+`WF-START-STANDARD-DIAGNOSTICS-MOBILE-05` is a real 430 x 1000 JPEG scoped to
+`resources/manuals/operator-guides/review-rounds/2026-10-01-wf01-v15/evidence`.
+The manifest records its hash, crops and target coordinates. It shows the full
+tab row (1A), Standard Diagnostics with active Start above blocked Cleaning
+(2A), and the same Standard Diagnostics Start action (3A).
+Asset: INBIT-AA0004, HP ProBook 430 G3, ID 12; role: Demo Refurbisher.
+Navigation only; no workflow start or other form was submitted. V15's 3B/4A
+retain the separate existing-run example from v14. Older sources are unchanged.
+
+## Separate Workflow Draft Evidence - 2026-10-01
+
+Six new real JPEG sources are retained in
+`resources/manuals/operator-guides/review-rounds/2026-10-01-workflows/evidence`.
+Their source IDs and hashes are scoped by that round's manifest, not added to
+the older flat evidence manifest. The new generator reads this frozen round
+directly. Earlier canonical screenshots are unchanged.
+
+| Source ID | Recognition purpose | New use |
+| --- | --- | --- |
+| `WF-PROGRESSION-MOBILE-04` | Complete tab row, Cleaning prerequisite, row-specific Shipping Laptop Start, matching Pre-Sale Check Edit | WF-01 v14: 1A, 2A, 3A, 3B |
+| `WF-ACTIVE-NEUTRAL-MOBILE-04` | Real matching asset breadcrumb, neutral control/task cards, disabled Done | WF-01 v14: 4A; WF-02 v13: 1A, 3A, 6A |
+| `WF-ACTIVE-INSTRUCTIONS-MOBILE-04` | Full Behuizing card with its actual instruction | WF-02 v13: 2A |
+| `WF-ACTIVE-NOTE-MOBILE-04` | Full card, empty Note field, historical Saved at time | WF-02 v13: 4A |
+| `WF-ACTIVE-PHOTO-MOBILE-04` | Full card, private-evidence warning, Add photo | WF-02 v13: 5A |
+| `WF-DONE-READY-MOBILE-04` | Existing answered Cleaning run with enabled Done and return explanation | WF-02 v13: 6A |
+
+Captures use `INBIT-AA0003 / HP ProBook 430 G3` in the local development app.
+The screenshot content is 415 pixels wide. Existing runs were inspected;
+no results, notes or uploads were changed. English controls remain genuine,
+with Dutch meanings in guide prose. There are no identity/text overlays.
+Two crops in 6A are an explicit control comparison across existing runs, not
+a claimed before/after result-write trial. See the
+[paired review](reviews/workflow-revisions-2026-10-01.md) for source context and
+operational limits; exact source-pixel crops are in the new generator.
+
 
 Use this catalog before capturing or copying screenshots. When two guides show the same application state, they should reference the same source ID and file. A guide may use a different crop or target annotation without creating a new source asset.
 
 ## Capture Rules
 
+- Use the [authoring brief](authoring-method.md) to name each visual's
+  recognition job before choosing or capturing its source. Capture availability
+  must not choose the flow, role, result or scope of the guide.
+- Verify application and account `nl-NL` plus the visible control labels.
+  Record the actual role, state and recognition target. Choose evidence for
+  the claimed action/result; an exception example needs explicit context.
+- Compare the needed control's final recognition size, not just its frame.
+  Retain enough context to locate it and enough scale to recognize it.
 - Reuse a canonical source when the application state and device context are the same.
 - Create a new source ID only for a materially different state, device context, or replacement capture.
 - Keep annotations out of the source file. Add circles, rectangles, labels, and crops in the guide generator.
@@ -24,7 +87,7 @@ Use this catalog before capturing or copying screenshots. When two guides show t
 | `DASH-DESKTOP-01` | Desktop dashboard top bar and camera icon | `C:\Users\Gebruiker\Documents\snipe-it manuals\layout-proofs\2026-07-07-sc01-snipe-scan\captures\SC-01-live-dashboard.jpg` | Historical SC-01 experiments only; not used in the current mobile-first guide | Live capture |
 | `SCAN-CAMERA-QR-01` | Mobile scanner view aimed at a physical QR label | `resources/manuals/operator-guides/evidence/SCAN-CAMERA-QR-01.jpg` | SC-01 2A; AST-03 v2/v3 page 2 3A/3B/4A; AST-03 v4 page 2 4A; AST-05 v2 3A | Existing device capture; intentionally not repeated in AST-03 v5-v13 |
 | `AST-LABEL-PLACEMENT-GENERATED-01` | Full laptop underside with the front edge facing the reader and a lower-right QR label | `resources/manuals/operator-guides/evidence/AST-LABEL-PLACEMENT-GENERATED-01.png` | AST-03 v4 page 2 3A only | Rejected generated instructional image retained for v4 reproducibility; not used by v5-v13 |
-| `AST-LABEL-PLACEMENT-PHOTO-01` | Real full laptop underside, front edge facing the reader, with the Inbit QR label at lower right | `resources/manuals/operator-guides/evidence/AST-LABEL-PLACEMENT-PHOTO-01.jpg` | AST-03 v11-v14 page 2 7A; AST-04 v4-v5 2A; AST-05 v4-v5 3A | Owner-supplied practice photo, 2026-08-18 |
+| `AST-LABEL-PLACEMENT-PHOTO-01` | Real full laptop underside, front edge facing the reader, with the Inbit QR label at lower right and a physical manufacturer label | `resources/manuals/operator-guides/evidence/AST-LABEL-PLACEMENT-PHOTO-01.jpg` | AST-03 v11-v14 page 2 7A; AST-04 v4-v5 2A; AST-05 v4-v5 3A; CAT-06 v1 1A and 2A | Owner-supplied practice photo, 2026-08-18 |
 | `SEARCH-FIELD-01` | Manual asset search field | `resources/manuals/operator-guides/evidence/SEARCH-FIELD-01.png` | SC-01 3A | Existing controlled capture |
 | `SEARCH-RESULT-01` | Asset search result | `resources/manuals/operator-guides/evidence/SEARCH-RESULT-01.png` | SC-01 3B | Existing controlled capture |
 | `ASSET-VERIFY-01` | Opened asset title and identifying details | `resources/manuals/operator-guides/evidence/ASSET-VERIFY-01.png` | SC-01 4A; AST-03 4A/1A; AST-05 1A | Existing controlled capture |
@@ -114,15 +177,22 @@ directory is `resources/manuals/operator-guides/evidence/`.
 | `USR-DELETED-LIST-DESKTOP-01` | Removed-user list containing the fictional identity | USR-04 side 2, 2A |
 | `USR-RESTORE-DESKTOP-01` | Removed-user Restore action | USR-04 side 2, 3A |
 | `USR-RESTORED-DESKTOP-01` | Restored identity, group, and login state | USR-04 side 2, 4A |
+| `USR-GROUPS-LIST-DESKTOP-01` | Group list with member counts and create/edit routes | USR-05 v1 1A and 2A |
+| `USR-GROUP-CREATE-DESKTOP-01` | Empty new-group form with name, note, and default-deny permissions | USR-05 v1 2B and 3A |
+| `USR-GROUP-PERMISSIONS-TOP-DESKTOP-01` | Existing-group edit view with high-impact global and Admin rights | USR-05 v1 3B |
+| `USR-GROUP-PERMISSIONS-MODELS-DESKTOP-01` | Users and Models permission rows, including Admin lifecycle/cleanup grants | USR-05 v1 4A |
+| `USR-GROUP-SAVE-DESKTOP-01` | Bottom of group form with Cancel and Save | USR-05 v1 5A |
+| `USR-GROUP-DETAIL-DESKTOP-01` | Group members and effective permission summary | USR-05 v1 5B and 6A |
 
-The group captures used an existing controlled Superadmin session. No live
-access was elevated. AC-02 intentionally does not include a success-state
+The group captures used an existing controlled Superadmin session. The USR-05
+set was refreshed on 2026-09-15; no form was submitted and no access was
+elevated. AC-02 intentionally does not include a success-state
 capture because producing one would require entering and submitting a real
 password; the draft shows the empty form and save control instead.
 
 ## Catalogue Evidence
 
-CAT-00 through CAT-04 use desktop administration captures from the controlled
+CAT-00 through CAT-05 use desktop administration captures from the controlled
 development environment. Search and form values were prepared only in the
 browser; no model, model number, attribute, or component definition was saved.
 Annotations and crops remain generator-owned.
@@ -145,7 +215,9 @@ Annotations and crops remain generator-owned.
 | `CAT-MODEL-SPEC-SAVED-DESKTOP-01` | Screenshot-only saved confirmation with exact model-number selector | CAT-02 6B |
 | `CAT-ATTRIBUTE-LIST-DESKTOP-01` | Attribute-definition administration | CAT-00 3A; CAT-03 orientation context |
 | `CAT-COMPONENT-DEFINITION-LIST-DESKTOP-01` | Component-definition administration | CAT-00 3B; CAT-04 orientation context |
-| `CAT-MODEL-NUMBER-LIFECYCLE-DESKTOP-01` | Global exact-number lifecycle and primary controls | CAT-05 planned |
+| `CAT-MODEL-NUMBER-LIFECYCLE-DESKTOP-01` | Global exact-number lifecycle and primary controls | CAT-05 v1 1A and 2A |
+| `CAT-MODEL-SPEC-CLEANUP-ATTRIBUTES-DESKTOP-01` | Saved direct attributes with Admin remove controls | CAT-05 v1 3A |
+| `CAT-MODEL-SPEC-CLEANUP-COMPONENTS-DESKTOP-01` | Saved expected-component rows with Admin Remove actions and derived-impact context | CAT-05 v1 3B |
 | `CAT-ATTRIBUTE-ENTRY-DESKTOP-01` | Expanded Settings route to Attributes and the searchable definition list | CAT-03 1A and 1B |
 | `CAT-ATTRIBUTE-CREATE-IDENTITY-DESKTOP-01` | Unsaved attribute form with label, generated Key, datatype, unit, and behavior controls | CAT-03 2A and 3A |
 | `CAT-ATTRIBUTE-CONSTRAINTS-NUMERIC-DESKTOP-01` | Unsaved numeric constraints example | CAT-03 4A |
@@ -195,3 +267,28 @@ CONTRIBUTIONS-DESKTOP-02, CAT-MODEL-SPEC-ROSTER-DESKTOP-01 and
 CAT-MODEL-SPEC-SAVED-DESKTOP-01. Its asset result panels are clearly schematic;
 a matched real asset/component detail and replacement result are pending.
 See [review record](reviews/owner-corrections-2026-09-10.md).
+
+
+## V2 Content-Revision Evidence - 2026-09-15
+
+Eight new source files are versioned without replacing the 111 earlier files.
+The v2 generator defines the exact crops. All are real read-only browser captures;
+the owned memberless group fixture was removed after capture. No catalogue or
+user membership was changed. See the [revision review](reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md).
+
+| Source ID | Purpose | Used by |
+| --- | --- | --- |
+| `USR-GROUP-EDIT-FULL-DESKTOP-02` | Saved memberless Catalogus lezen group edit: names, column headings, per-row permissions and Save | USR-05 v2 |
+| `USR-GROUP-DETAIL-DESKTOP-02` | Matching Catalogus lezen stored group rights, member list and Groep bewerken | USR-05 v2 |
+| `CAT-MODEL-NUMBER-EDIT-DESKTOP-02` | Global model-number Status, default checkbox and Opslaan; read-only Primary example | CAT-05 v2 |
+| `CAT-ATTRIBUTE-EXISTING-OPTIONS-DESKTOP-02` | Geheugentype in-use warning and saved Enum Active/Remove checkboxes | CAT-05 v2 |
+| `CAT-COMPONENT-EXISTING-EDIT-DESKTOP-02` | Saved motherboard children/contributions, Remove and Save Changes | CAT-05 v2 |
+| `CAT-SOURCE-HP-PROBOOK-450-G8-02` | HP official family product card; title and display fact, not exact SKU proof | CAT-06 v2 |
+| `USR-GROUP-MODELS-DESKTOP-02` | Expanded Models rows: only View allowed | USR-05 v2 |
+| `USR-GROUP-STORED-RIGHTS-DESKTOP-02` | Matching stored group permissions with Models view granted and create denied | USR-05 v2 |
+
+HP source: [official ProBook 450 G8 product page](https://www.hp.com/us-en/laptops/business/probook-400/product-card/hp-probook-450-g8.html),
+checked 2026-09-15. Only the source title and display line are printed. The
+page is family information, not an exact-SKU RAM source. The final crops avoid
+full-page capture stitching seams. Original raw captures remain identifiable
+by their manifest hashes; new files are JPEG data with .jpg filenames.

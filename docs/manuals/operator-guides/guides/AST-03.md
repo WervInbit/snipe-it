@@ -1,17 +1,14 @@
 # AST-03 Asset Registreren En Labelen
 
-| Field | Current value |
-| --- | --- |
-| Status | Internal review candidate; exact v15 accepted by owner 2026-09-10 |
-| Family | AST |
-| Type | Two-sided detail task |
-| Current version | `AST-03-asset-registreren-en-labelen-v15-draft` |
-| Page model | Two-sided |
-| Layout recipe | `stacked-step-flow` with captions, `parallel-visual-choice`, `reused-evidence`, `inline-warning`, and `two-sided-continuation` |
-| Generator | `scripts/manuals/generate-guide-followups.mjs AST-03`; use frozen round inputs to reproduce |
-| Role | Supervisor |
-| Needed | Physical device, asset tag, S/N, exact model/type details, and label printer |
-| Prerequisite | Ingelogd (AC-01 Login) |
+## Application Alignment Revision - 2026-10-01
+
+Current authoring proposal: **v16, working draft; not accepted**, 3 A4 pages. [Exact-version review](../reviews/AST-03-v16.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+
+New Asset dashboard tile, permission-aware registration, Status note and direct QR printing after creation.
+
+Added page: Registreren en direct het QR-label printen. Steps: Open New Asset op het dashboard; Controleer model en vereiste statusnotitie; Controleer de aangemaakte rij en print eenmaal.
+
+The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v15 input.
 
 ## Purpose
 
@@ -28,7 +25,8 @@ flow.
 
 ## Page 1: Register
 
-1. `Ga naar Nieuwe aanmaken` - start on the dashboard, open `Apparaten`, then
+1. `Open het registratieformulier` - with asset-creation rights, start on the
+   dashboard's New Asset tile (page 3), or open `Apparaten`, then
    use either `Nieuwe aanmaken` in the top bar or the `+` action in the
    hardware toolbar.
 2. `Vul asset tag en serienummer in` - keep the proposed tag unless an assigned
@@ -37,9 +35,9 @@ flow.
 3. `Kies categorie, model en type` - choose the category and exact model, then
    compare the type/model code after the model name. On an HP device, Product
    ID or P/N may identify that model type.
-4. `Kies status en sla op` - select `Being Processed` in the interface field
-   named `Status`, save once, and verify the saved asset tag, status, asset
-   name/model, and serial number.
+4. `Kies status en sla op` - choose the agreed work status, fill Status note
+   if required, save once, and verify tag, status, model and serial in the
+   result panel. Read duplicate guidance before creating another record.
 
 Tag and serial fields uppercase values automatically. `Unlock` only makes the
 generated asset tag editable. `Aa` preserves an intentionally different case
@@ -50,9 +48,11 @@ the existing record before deciding whether another asset should exist.
 
 ## Page 2: Label And Verify
 
-5. `Open de opgeslagen asset` - confirm the title and asset tag before printing.
+5. `Print vanuit het resultaatpaneel` - compare tag, serial and model; use
+   Print QR Code on the intended result row. Open Asset returns to its dossier.
 6. `Kies label en print eenmaal` - inspect the QR preview and template, choose
-   the correct printer location, and print once.
+   the correct printer location, and print once. On failure, retain the saved
+   asset and repair the print route before reprinting that same label.
 7. `Plaats het label rechtsonder` - use the real full-device underside photo
    with the front edge facing the reader. Place the label on a flat area at the
    lower right without covering vents, ports, screws, or service labels. The

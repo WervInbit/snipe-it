@@ -1,0 +1,7 @@
+# Hash-locked review inputs retain exact bytes across Git checkouts.
+generate-aligned-guides-2026-10-01.mjs -text
+aligned-guide-content-2026-10-01.mjs -text
+generate-workflow-revisions-2026-10-01.mjs -text
+generate-wf01-v15.mjs -text
+lib/guide-system.mjs -text
+lib/guide-paths.mjs -text

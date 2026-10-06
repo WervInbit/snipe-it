@@ -1,5 +1,15 @@
 # CAT-00 Catalogus begrijpen
 
+## Application Alignment Revision - 2026-10-01
+
+Current authoring proposal: **v12, working draft; not accepted**, 7 A4 pages. [Exact-version review](../reviews/CAT-00-v12.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+
+Sum versus distinct numeric contribution concepts; current guide names and missing manual-attribute limitation.
+
+Added page: Begrijp hoe componentgetallen worden gecombineerd. Steps: Tel capaciteiten en aantallen op; Behoud eigenschappen als afzonderlijke waarden; Herken regel, bron en weergave.
+
+The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v11 input.
+
 ## Latest Correction Candidate - 2026-09-10
 
 Current review candidate: [v11](../reviews/CAT-00-v11.md), owner-cleared for user review.
@@ -13,11 +23,11 @@ Status: Internal review candidate v11; owner cleared for user review 2026-09-10.
 
 - Family: `CAT`.
 - Type: Reference chapter and guide router.
-- Current version: v11; internal review candidate (printed draft label retained).
+- Current version: working draft v12; not accepted.
 - Page model: Six-page reference chapter with continuous section numbering.
 - Layout recipe: `reference-chapter` with `reused-evidence` and
   `two-sided-continuation`.
-- Generator: `scripts/manuals/generate-owner-corrections.mjs CAT-00`.
+- Generator: `scripts/manuals/generate-aligned-guides-2026-10-01.mjs`.
 - Artifact root: `output/manuals/proofs/owner-corrections-2026-09-10/CAT-00-v11/`.
 - Portable review package:
   `resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CAT-00-catalogus-begrijpen-v11-draft.pdf`.
@@ -154,8 +164,8 @@ Route by the object or question:
 | Missing baseline for one exact code | `CAT-02 Modelspecificatie opbouwen` |
 | Missing reusable meaning or input rule | `CAT-03 Attributen beheren` |
 | Missing reusable physical-part type | `CAT-04 Componentdefinities beheren` |
-| Existing default/lifecycle/cleanup state | `CAT-05 Varianten en lifecycle beheren` |
-| Uncertain identity, code, or source | `CAT-06 Catalogus controleren en bronnen` |
+| Existing default/lifecycle/cleanup state | `CAT-05 Bestaande catalogus aanpassen` |
+| Uncertain identity, code, or source | `CAT-06 Productgegevens controleren` |
 | One physical device after the catalogue is complete | `AST-03 Asset registreren en labelen` |
 | Register or place a physical component | `CMP-01` or `CMP-02` |
 
@@ -172,7 +182,7 @@ the required change.
 - `CAT-01 Model en modelnummer aanmaken`.
 - `CAT-02 Modelspecificatie opbouwen`.
 - `CAT-04 Componentdefinities beheren`.
-- `CAT-06 Catalogus controleren en bronnen`.
+- `CAT-06 Productgegevens controleren`.
 
 ## Evidence Manifest
 

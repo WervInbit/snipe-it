@@ -1,5 +1,15 @@
 # CMP-02 Nieuw Component Registreren En Plaatsen
 
+## Application Alignment Revision - 2026-10-01
+
+Current authoring proposal: **v7, working draft; not accepted**, 2 A4 pages. [Exact-version review](../reviews/CMP-02-v7.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+
+Current definition choices and numerical effects after installation, avoiding ad-hoc duplicate definitions.
+
+Added page: Controleer definitie en specificatie na plaatsing. Steps: Hergebruik de juiste bestaande definitie; Ontbreekt een passende keuze? Laat catalogusbeheer helpen; Controleer het geplaatste record en de afgeleide waarde.
+
+The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v6 input.
+
 ## Latest Correction Candidate - 2026-09-10
 
 Current review candidate: [v6](../reviews/CMP-02-v6.md), owner-cleared for user review.
@@ -9,13 +19,13 @@ notes below. Previous PDFs and exact acceptance records remain unchanged.
 
 | Field | Current value |
 | --- | --- |
-| Status | Internal review candidate v6; owner cleared for user review 2026-09-10 |
+| Status | Working draft v7; not accepted |
 | Family | CMP |
 | Type | Detail task with alternatives |
-| Current version | `CMP-02-register-install-v6-draft` |
-| Page model | One page |
+| Current version | `CMP-02-register-install-v7-draft` |
+| Page model | 2 A4 pages |
 | Layout recipe | `stacked-step-flow` with `parallel-visual-choice`, `reused-evidence`, and targeted `inline-stop` |
-| Generator | `scripts/manuals/generate-owner-corrections.mjs CMP-02` |
+| Generator | `scripts/manuals/generate-aligned-guides-2026-10-01.mjs` |
 | Role | Senior Refurbisher |
 | Needed | Correct open asset and the new physical component |
 | Prerequisite | Asset verified (SC-01) |

@@ -1,13 +1,21 @@
 # CAT-03 Attributen beheren
 
-Status: Working draft v1; workflow and evidence verified, exact-version review pending.
+## Application Alignment Revision - 2026-10-01
+
+Current authoring proposal: **v3, working draft; not accepted**, 6 A4 pages. [Exact-version review](../reviews/CAT-03-v3.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+
+Teach both implemented Numeric Component Aggregation options and lifecycle permission for changes in use.
+
+Added page: Kies de betekenis van numerieke componentbijdragen. Steps: Open Numeric Component Aggregation; Kies Sum OF Keep distinct values; Controleer bestaand gebruik voor Opslaan.
+
+The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v2 input.
 
 ## Maintenance Metadata
 
 - Family: `CAT`.
 - Type: Extended administration task.
-- Current version: draft v1.
-- Expected page model: Five pages.
+- Current version: working draft v3; not accepted.
+- Expected page model: 6 A4 pages.
 - Layout recipe: `extended-admin-flow`.
 
 ## Purpose
@@ -100,7 +108,7 @@ The two routes are alternatives, not a sequence every definition follows:
 3. State that editing a reused definition affects every model number,
    component definition, physical asset override, or workflow that uses it.
 4. Route activation/deactivation, removal of saved options, and deletion to
-   `CAT-05 Varianten en lifecycle beheren`.
+   `CAT-05 Bestaande catalogus aanpassen`.
 5. Return to the guide that required the definition.
 
 ## Mandatory Decisions
@@ -131,8 +139,8 @@ duplicaat worden hergebruikt en accepteert alleen de bedoelde waarden.
 - `CAT-00 Catalogus begrijpen`.
 - `CAT-02 Modelspecificatie opbouwen`.
 - `CAT-04 Componentdefinities beheren`.
-- `CAT-05 Varianten en lifecycle beheren`.
-- `CAT-06 Catalogus controleren en bronnen`.
+- `CAT-05 Bestaande catalogus aanpassen`.
+- `CAT-06 Productgegevens controleren`.
 
 ## Evidence Manifest
 

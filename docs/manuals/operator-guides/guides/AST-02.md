@@ -1,5 +1,15 @@
 # AST-02 Refurbishment Route
 
+## Application Alignment Revision - 2026-10-01
+
+Current authoring proposal: **v9, working draft; not accepted**, 2 A4 pages. [Exact-version review](../reviews/AST-02-v9.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+
+Ordered workflows, blocked follow-ups, QA note and separate quality/status permissions.
+
+Added page: Kies de volgende taak vanuit de actuele asset. Steps: Lees eerst Info en controleer de identiteit; Volg de workflowvolgorde; Rond af en laat beoordelen.
+
+The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v8 input.
+
 ## Latest Correction Candidate - 2026-09-10
 
 Current review candidate: [v8](../reviews/AST-02-v8.md), owner-cleared for user review.
@@ -9,13 +19,13 @@ notes below. Previous PDFs and exact acceptance records remain unchanged.
 
 | Field | Current value |
 | --- | --- |
-| Status | Internal review candidate v8; owner cleared for user review 2026-09-10 |
+| Status | Working draft v9; not accepted |
 | Family | AST |
 | Type | Route overview |
-| Current version | `AST-02-refurbishment-route-v8-draft` |
-| Page model | One page |
+| Current version | `AST-02-refurbishment-route-v9-draft` |
+| Page model | 2 A4 pages |
 | Layout recipe | `route-list` with `help-alternative` |
-| Generator | `scripts/manuals/generate-owner-corrections.mjs AST-02` |
+| Generator | `scripts/manuals/generate-aligned-guides-2026-10-01.mjs` |
 | Role | Refurbisher |
 | Needed | Device, account, and the task guides referenced by the route |
 

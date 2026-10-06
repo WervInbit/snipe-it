@@ -1,5 +1,27 @@
 # Inbit Device Refurbishment Platform
 
+## Operator guide authoring method
+
+Guide creation and revisions use the
+[shared authoring method](docs/manuals/operator-guides/authoring-method.md):
+establish the reader outcome, relevant information and action/choice structure
+before evidence and layout, then review what the rendered page communicates.
+Develop the accepted direction with required application updates and deliberate
+reader improvements. Reconcile inherited content with current standards and
+owner decisions, then compare the complete guide with the baseline and those
+standards. Track desired targets and retired approaches explicitly.
+See the [method review](docs/manuals/operator-guides/reviews/authoring-method-repair-2026-10-06.md)
+for the reasoning change and its application across the current guide subjects.
+Existing PDF acceptance decisions and frozen artifacts remain separate.
+
+## Operator manuals revised - 2026-09-15
+
+The revised working drafts are USR-05 v2 (3 pages), CAT-05 v2 (8 pages), and
+CAT-06 v2 (3 pages). See the [revision review](docs/manuals/operator-guides/reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md) for changes,
+exact artifacts, checks and remaining operator trials. The three v1 PDFs and
+all accepted artifacts are retained unchanged; v2 is not acceptance.
+
+
 This repository is an independent, refurbishment-focused fork of
 [Snipe-IT](https://github.com/grokability/snipe-it). It supports device intake,
 identification, hardware-component traceability, diagnostic and operational
@@ -318,8 +340,9 @@ audits rather than relying on this snapshot.
 - [Agent handbook](AGENTS.md)
 - [Security policy](SECURITY.md)
 
-Operator guides under `docs/manuals/operator-guides/` are being developed
-separately and are not yet a versioned V1 manual.
+Operator guides under `docs/manuals/operator-guides/` are versioned separately.
+The repository contains an immutable internally accepted review package plus
+explicitly unaccepted working drafts; neither is third-party-approved yet.
 
 ## Contributing
 

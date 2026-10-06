@@ -1,15 +1,14 @@
 # HELP-01 Problemen En Hulp
 
-| Field | Current value |
-| --- | --- |
-| Status | Working draft; awaiting review |
-| Family | HELP |
-| Type | Troubleshooting |
-| Current version | `HELP-01-problems-v6-draft` |
-| Page model | One page |
-| Layout recipe | `troubleshooting-grid` |
-| Generator | `scripts/manuals/generate-component-followup-guides.mjs` |
-| Role | Iedereen |
+## Application Alignment Revision - 2026-10-01
+
+Current authoring proposal: **v8, working draft; not accepted**, 2 A4 pages. [Exact-version review](../reviews/HELP-01-v8.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+
+Help routes for workflow guards, Done, status notes/confirmation, quality rights and catalogue aggregation.
+
+Added page: Hulp bij workflow, status en specificatie. Steps: Workflow kan niet starten of afronden; Status of kwaliteit kan niet worden gewijzigd; Specificatie ontbreekt of getal lijkt verkeerd.
+
+The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v7 input.
 
 ## Purpose
 
