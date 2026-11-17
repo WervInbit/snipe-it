@@ -12,11 +12,13 @@ The source commits are local until deliberately pushed. The surrounding
 application/onboarding/backlog reconciliation still contains unrelated pending
 work; manual publication does not merge, deploy or qualify that work.
 
-Source checkpoint: **f51593d906**, followed by the delivery/handoff record.
-This is publication into local Git history, without a remote push or a clean
-application/environment qualification. The shared root documentation is staged
-by manual section; its newer cross-project reconciliation remains in the
-working tree for its owning task.
+Original source checkpoint: `f51593d906`. It was replayed onto current
+`origin/master` as `c894800423`, followed by delivery/handoff record
+`19b9c81996` on branch `codex/guide-checkpoint-rebased`. This is publication
+into local Git history, without a remote push or a clean application/environment
+qualification. The shared root documentation is staged by manual section; its
+newer cross-project reconciliation remains in the working tree for its owning
+task.
 
 ## Delivered Native/PDF Baseline
 
@@ -54,6 +56,13 @@ a clone, consult the manifest and obtain this exact archive from its holder.
 Validate its hash and extract to a separate evidence checkout, retaining the
 repository-relative paths. Do not overwrite a newer file or invent missing
 evidence. Existing tracked accepted artifacts remain unchanged in Git.
+
+Some historical notes also link to generated `output/` files or the ignored
+`Handleidingen` delivery. The exact link targets that are intentionally absent
+from a fresh clone are recorded in
+[`local-link-targets-2026-11-17.json`](local-link-targets-2026-11-17.json).
+The package verifier permits only missing paths declared by that file or the
+historical review-artifact manifest; any other missing relative link fails.
 
 ## Tool Scope And Dependencies
 

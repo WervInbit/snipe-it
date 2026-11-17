@@ -8,3 +8,6 @@ patches/*.patch text eol=lf
 public/js/** binary
 public/css/** binary
 *.patch whitespace=-blank-at-eol
+
+# Hash manifests cover the repository bytes of the locked SVG baselines.
+resources/manuals/operator-guides/baselines/*.svg -text

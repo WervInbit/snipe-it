@@ -60,9 +60,7 @@ older decisions and rejected artifacts remain in the manual history.
   version decisions. Preserve login-disable versus deletion/restoration scope,
   field-to-result support, newer NAS edits and all historical acceptance.
   Legacy generator/runtime metadata must not select or accept a newer native
-  artifact by implication. The old package checker also finds three historical
-  CAT PDFs absent from its draft manifest; reconcile that drift without deleting
-  evidence or rewriting frozen acceptance. Do not reconnect the cleaned NUC.
+  artifact by implication. Do not reconnect the cleaned NUC.
 
 The unrelated sections below retain their previous committed contents.
 The newer global backlog/onboarding reconciliation remains in the shared

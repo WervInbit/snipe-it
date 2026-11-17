@@ -104,10 +104,11 @@ updates and chosen reader improvements remain distinguishable.
 
 ## Settle The Application Target Before Final Evidence
 
-The [developer checkpoint](../../../developer-checkpoint.md) identifies the
-recorded production application as `2f703760d8649d3a75e519c9a7083a34cc249d0f`.
-Its [release record](../../../releases/workflow-catalog-search-production-2026-10-01.md)
-and later operating notes must be reconciled with the actual target when work
+The committed
+[release record](../../../releases/workflow-catalog-search-production-2026-10-01.md)
+identifies the recorded production application as
+`2f703760d8649d3a75e519c9a7083a34cc249d0f`. Later operating notes must be
+reconciled with the actual target when work
 starts. Root `a766abedee` is divergent; capture checkout `c539b9cd18` includes
 later documentation and is not a different deployed application merely by name.
 The inspected registration/dashboard/QR-widget paths do not differ between

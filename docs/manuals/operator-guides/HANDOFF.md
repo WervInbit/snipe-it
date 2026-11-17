@@ -22,8 +22,10 @@ files. All 582 recorded hashes match on November 17. ZIP:
 `output/manuals/Handleidingen-2026-11-12.zip`, 383665275 bytes, SHA256
 `d62409d7bde326951ea241a6ff4b0e9c5071967d1197ecf4242f7966aab5119a`.
 Delivery output is ignored and not supplied by a fresh clone. Manual sources,
-skill and selected tooling are committed locally in **f51593d906**; no push.
-The delivery/handoff commit records the remaining publication work separately
+skill and selected tooling were originally committed locally in `f51593d906`
+and replayed onto current `origin/master` as `c894800423`; no push. The
+delivery/handoff record is `19b9c81996` on the rebased branch and keeps the
+remaining publication work separate
 from unrelated pending application/onboarding changes. All four installed
 skill files match their maintained source. Read
 [source/artifact availability](source-availability.md) and the

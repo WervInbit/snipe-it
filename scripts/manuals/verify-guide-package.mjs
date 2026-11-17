@@ -61,17 +61,36 @@ function filesBelow(directory) {
     });
 }
 
-function verifyMarkdownLinks(directory) {
+function repositoryPath(file) {
+    return path.relative(repoRoot, file).split(path.sep).join('/');
+}
+
+function verifyMarkdownLinks(directory, unavailableTargets) {
     const markdownFiles = filesBelow(directory).filter((file) => file.endsWith('.md'));
+    const referencedTargets = new Set();
+    let checked = 0;
+    let unavailable = 0;
+
     for (const file of markdownFiles) {
         const source = fs.readFileSync(file, 'utf8');
         for (const match of source.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)) {
             const target = match[1].trim().replace(/^<|>$/g, '').split('#')[0];
             if (!target || target.startsWith('#') || /^[a-z][a-z0-9+.-]*:/i.test(target)) continue;
             const resolved = path.resolve(path.dirname(file), decodeURIComponent(target));
-            assert.ok(fs.existsSync(resolved), `Broken Markdown link in ${file}: ${match[1]}`);
+            const relativeTarget = repositoryPath(resolved);
+            referencedTargets.add(relativeTarget);
+            checked += 1;
+
+            if (fs.existsSync(resolved)) continue;
+            assert.ok(
+                unavailableTargets.has(relativeTarget),
+                `Broken Markdown link in ${file}: ${match[1]}`,
+            );
+            unavailable += 1;
         }
     }
+
+    return { checked, unavailable, referencedTargets };
 }
 
 const evidenceManifest = readJson(path.join(evidenceRoot, 'manifest.json'));
@@ -83,7 +102,45 @@ const screenshotCatalog = fs.readFileSync(
     path.join(repoRoot, 'docs', 'manuals', 'operator-guides', 'screenshots.md'),
     'utf8',
 );
-verifyMarkdownLinks(path.join(repoRoot, 'docs', 'manuals', 'operator-guides'));
+const guideDocsRoot = path.join(repoRoot, 'docs', 'manuals', 'operator-guides');
+const reviewArtifactManifest = readJson(path.join(guideDocsRoot, 'review-artifacts-2026-11-17.json'));
+assert.equal(
+    reviewArtifactManifest.artifacts.length,
+    reviewArtifactManifest.files,
+    'Historical review artifact count does not match its manifest',
+);
+const reviewArtifactTargets = reviewArtifactManifest.artifacts.map((entry) => entry.file);
+assert.equal(
+    new Set(reviewArtifactTargets).size,
+    reviewArtifactTargets.length,
+    'Historical review artifact manifest contains duplicate paths',
+);
+
+const localArtifactManifest = readJson(path.join(guideDocsRoot, 'local-link-targets-2026-11-17.json'));
+assert.equal(localArtifactManifest.schema_version, 1, 'Unsupported local artifact link manifest schema');
+assert.equal(
+    localArtifactManifest.targets_included_in_git,
+    false,
+    'Local artifact targets have ambiguous availability',
+);
+assert.equal(
+    new Set(localArtifactManifest.targets).size,
+    localArtifactManifest.targets.length,
+    'Local artifact link manifest contains duplicate paths',
+);
+for (const target of localArtifactManifest.targets) {
+    assert.ok(!path.isAbsolute(target), `Local artifact link target is absolute: ${target}`);
+    assert.ok(
+        target === 'Handleidingen/START HIER.html' || target.startsWith('output/'),
+        `Local artifact link target is outside the documented output roots: ${target}`,
+    );
+}
+
+const unavailableTargets = new Set([...reviewArtifactTargets, ...localArtifactManifest.targets]);
+const markdownLinkResult = verifyMarkdownLinks(guideDocsRoot, unavailableTargets);
+for (const target of localArtifactManifest.targets) {
+    assert.ok(markdownLinkResult.referencedTargets.has(target), `Unused local artifact link target: ${target}`);
+}
 for (const source of evidenceManifest.sources) {
     assert.match(screenshotCatalog, new RegExp(`\\x60${source.id}\\x60`), `Evidence ID is not documented: ${source.id}`);
 }
@@ -129,9 +186,9 @@ for (const artifact of pdfManifest.artifacts) {
 }
 
 const draftManifest = readJson(path.join(draftPdfRoot, 'manifest.json'));
-assert.equal(draftManifest.artifacts.length, 26, 'Draft PDF count changed without review');
+assert.equal(draftManifest.artifacts.length, 29, 'Draft PDF count changed without review');
 assert.equal(new Set(draftManifest.artifacts.map((entry) => entry.code)).size, 23, 'Draft guide-code coverage changed');
-assert.equal(new Set(draftManifest.artifacts.map((entry) => `${entry.code}@${entry.version}`)).size, 26, 'Duplicate draft guide version');
+assert.equal(new Set(draftManifest.artifacts.map((entry) => `${entry.code}@${entry.version}`)).size, 29, 'Duplicate draft guide version');
 verifyManifestFiles(draftPdfRoot, draftManifest.artifacts, 'Draft PDF manifest');
 
 const preservedLegacyDraftTitles = new Map([
@@ -203,6 +260,8 @@ for (const file of activeScripts) {
 
 console.log(JSON.stringify({
     status: 'ok',
+    markdownLinks: markdownLinkResult.checked,
+    unavailableMarkdownLinks: markdownLinkResult.unavailable,
     evidence: evidenceManifest.sources.length,
     acceptedPdfs: pdfManifest.artifacts.length,
     acceptedPages: pdfManifest.artifacts.reduce((total, artifact) => total + artifact.pages, 0),

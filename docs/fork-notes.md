@@ -111,6 +111,20 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
   ignored; repository source publication is separate from the owner's NAS copy.
   [Manual entry](manuals/operator-guides/README.md).
 
+### 2026-11-17 - Manual Checkpoint Made Clone-Verifiable
+
+- Replayed the scoped manual checkpoint onto current `origin/master` without
+  importing the dirty root checkout's application/printer work. Shared history
+  conflicts retain both product and manual records; no deployment is implied.
+- The guide package verifier now distinguishes committed links from exact
+  historical/local artifact paths declared in manifests. Undeclared missing
+  relative links still fail, so a fresh clone no longer needs a 198 MB ignored
+  archive merely to run its source checks.
+- Registered the three retained CAT draft PDFs that were previously outside
+  their manifest, and fixed cross-platform bytes for the two hash-locked SVG
+  baselines. Manual tooling now uses patched Sharp0.35.5. Package tests and the
+  dependency audit pass; no native/PDF guide content or acceptance changed.
+
 ### 2026-11-12 - Portable Shared Handleidingen Folder
 
 - Created the approved flat PDF/Affinity delivery with descriptive paired

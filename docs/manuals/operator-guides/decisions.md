@@ -345,8 +345,11 @@ choices still govern: exact access-group names, Dutch settings, task-dependent
 composition, preserved useful recognition scale, explicit alternatives and
 conditional warnings. All versions remain working drafts. No accepted or
 runtime selection is advanced. See the
-[central changes/reasoning](reviews/remaining-guides-2026-10-20.md) and
-[baseline comparison](../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/review.html).
+[central changes/reasoning](reviews/remaining-guides-2026-10-20.md). The
+baseline comparison is retained at
+`resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/review.html`
+inside the separate [historical review archive](source-availability.md#historical-review-evidence);
+it is not supplied by a fresh clone.
 
 ## 2026-10-08 - Three Reauthoring Test Examples
 

@@ -7116,3 +7116,29 @@ there are multiple duplicate functions that still need to be removed, sku will b
   delivery hashes and the delivery ZIP remain unchanged; no unrelated working
   file changed. The exact six archived review rounds are ignored deliberately
   to prevent accidental bulk staging; their bytes and archive remain intact.
+
+### 2026-11-17 - Guide Checkpoint Rebase And Clean-Clone Repair
+
+- Replayed the three scoped manual commits onto current `origin/master`
+  (`c539b9cd18`) in clean branch `codex/guide-checkpoint-rebased`. Reconciled
+  shared progress/backlog/fork-note conflicts without touching the dirty root
+  checkout or its application/printer work. Rebased records are `0c76e52e18`,
+  `c894800423` and `19b9c81996`; nothing was pushed or deployed.
+- A clean checkout exposed that Markdown verification depended on ignored local
+  review/output files. The verifier now permits only exact absent paths declared
+  by the retained-review manifest or the new local-output link manifest. A real
+  uncommitted checkpoint link was replaced with its committed release source;
+  the current decision log explains how to obtain its archived comparison.
+- Reconciled the known draft drift without deleting evidence: CAT-00 v7/v8 and
+  CAT-01 v4 are now explicit unaccepted entries. The draft manifest covers29
+  PDFs /88 A4 pages and retains exact hashes. Locked SVG baselines are marked
+  `-text`, so Windows checkout conversion no longer invalidates their hashes.
+- Updated manual tooling from Sharp0.35.3 to0.35.5 after `npm audit` reported
+  high-severity bundled-image-library advisories. `npm audit` now reports zero
+  vulnerabilities. `npm test` passes registry/component checks and the package
+  verifier:1549 relative Markdown links checked,251 explicitly unavailable
+  historical/local links,119 evidence sources,9 accepted PDFs,29 unaccepted
+  PDFs,2 baselines and79 active scripts.
+- No guide content/native/PDF delivery, application/runtime/database, NAS,
+  printer or NUC state changed. Operator/release/fresh-device and exact-version
+  acceptance work remains in START-05, START-06 and NEXT-08.

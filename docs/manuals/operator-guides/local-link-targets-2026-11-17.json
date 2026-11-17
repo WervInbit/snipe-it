@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "recorded": "2026-11-17",
+  "meaning": "Known Markdown targets retained as local-output provenance and intentionally absent from a fresh clone",
+  "targets_included_in_git": false,
+  "targets": [
+    "Handleidingen/START HIER.html",
+    "output/manuals/affinity-conversion-2026-11-05/convert-all-25-guides.js",
+    "output/manuals/affinity-conversion-2026-11-05/README.md",
+    "output/manuals/affinity-conversion-2026-11-05/RUN-ME.html",
+    "output/manuals/affinity-portable-handoff-2026-11-05-v2.zip",
+    "output/manuals/affinity-portable-handoff-2026-11-05-v2/REVIEW.html",
+    "output/manuals/affinity-portable-handoff-2026-11-05-v2/RUN-ME.html",
+    "output/manuals/affinity-text-defaults-probe-2026-11-05/README.md",
+    "output/manuals/aligned-guide-review-kit-2026-10-01/index.html",
+    "output/manuals/aligned-guide-review-kit-2026-10-01/manifest.json",
+    "output/manuals/current-guide-kit-2026-09-15/manifest.json",
+    "output/manuals/final-guide-set-2026-11-04/EDITING-HANDOFF.md",
+    "output/manuals/final-guide-set-2026-11-04/review/CHANGES.md",
+    "output/manuals/final-guide-set-2026-11-04/review/index.html",
+    "output/manuals/final-guide-set-2026-11-04/source/inventory.json",
+    "output/pdf/intake-refurbishment-2026-11-10/pdf-verification.json",
+    "output/pdf/intake-refurbishment-2026-11-10/README.txt"
+  ]
+}

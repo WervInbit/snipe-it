@@ -178,3 +178,37 @@
   and the unchanged ZIP, with zero outside-scope working modifications. Exact
   archived review-round directories are ignored to prevent accidental staging;
   their original files and the verified history archive remain preserved.
+
+## Guide Checkpoint Rebase And Clean-Clone Verification - November17
+
+- User reports the manual author has finished committing and requests repository
+  reconciliation. The original root checkout remains dirty and divergent, so
+  integration uses clean worktree `guide-checkpoint-rebase` and branch
+  `codex/guide-checkpoint-rebased` from `origin/master` `c539b9cd18`.
+- Replayed the three manual commits as `0c76e52e18`, `c894800423` and
+  `19b9c81996`. Conflicts were limited to shared progress/backlog/fork-note and
+  October1 addendum records; resolutions retain both product and manual history.
+  No root working file, remote branch, runtime, database, NAS or device changed.
+
+### Clean-Clone Findings And Repair
+
+- `npm test` initially failed because the strict Markdown checker assumed the
+  ignored1133-file review archive and generated output were present. The
+  committed review-artifact manifest covers201 missing link occurrences; a new
+  exact local-output manifest covers the remaining generated delivery targets.
+  Undeclared missing links still fail. The current decision log now points a
+  fresh-clone reader to source availability instead of a dead local link.
+- The next failure confirmed the older recorded drift: three tracked CAT drafts
+  were outside the package manifest. They are preserved and registered as
+  unaccepted CAT-00 v7/v8 and CAT-01 v4 artifacts, producing29 draft PDFs /88
+  pages with exact hashes. No frozen PDF byte or acceptance status changed.
+- Windows `text=auto` conversion changed the worktree bytes of two hash-locked
+  SVG baselines. The path-specific `-text` rule keeps repository bytes stable;
+  both manifest hashes now verify.
+- Sharp was updated from0.35.3 to0.35.5 because the first clean install reported
+  one high-severity direct dependency advisory. The patched exact version has a
+  clean `npm audit` result.
+- Final evidence: `npm test` passes with25 registry guides,1549 checked relative
+  links,251 explicitly unavailable historical/local links,119 evidence files,
+  9 accepted PDFs/11 pages,29 unaccepted PDFs/88 pages,2 locked baselines and79
+  active scripts. Remaining user/release/physical acceptance is unchanged.
