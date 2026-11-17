@@ -1221,6 +1221,13 @@ class Asset extends Depreciable
             ->currentFirst();
     }
 
+    public function legacyWorkflowAttestations()
+    {
+        return $this->hasMany(\App\Models\WorkflowLegacyAttestation::class, 'asset_id')
+            ->orderBy('accepted_at')
+            ->orderBy('id');
+    }
+
     /**
      * Legacy asset-specific tests.
      */

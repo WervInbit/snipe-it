@@ -27,7 +27,8 @@ class WorkflowRunDefinitionService
      *     resolved_attributes: Collection,
      *     resolved_by_definition: Collection,
      *     readiness_context_hash: string,
-     *     legacy_readiness_context_hash: string
+     *     legacy_readiness_context_hash: string,
+     *     profile_item_context_hashes: Collection<int, string>
      * }
      */
     public function forProfile(
@@ -36,14 +37,16 @@ class WorkflowRunDefinitionService
         ?int $legacyProfileDisplayOrder = null
     ): array
     {
-        foreach ([
-            'model',
-            'modelNumber',
-            'expectedComponentStates',
-            'sourcedComponents',
-            'trackedComponents',
-        ] as $relation) {
-            $asset->unsetRelation($relation);
+        if ($asset->exists) {
+            foreach ([
+                'model',
+                'modelNumber',
+                'expectedComponentStates',
+                'sourcedComponents',
+                'trackedComponents',
+            ] as $relation) {
+                $asset->unsetRelation($relation);
+            }
         }
 
         $resolved = $this->attributeResolver->resolveForAsset($asset);
@@ -68,6 +71,25 @@ class WorkflowRunDefinitionService
                 && in_array($profileItem->workflow_item_id, $applicableItemIds, true))
             ->values();
 
+        $componentContexts = $roster->rows
+            ->filter(fn ($row): bool => $row instanceof AssetComponentRosterRow)
+            ->map(function (AssetComponentRosterRow $row): array {
+                $definition = $row->component?->componentDefinition
+                    ?? $row->template?->componentDefinition;
+
+                return [
+                    'component_definition_id' => $definition?->id !== null
+                        ? (int) $definition->id
+                        : null,
+                    'component_category_id' => $definition?->category_id !== null
+                        ? (int) $definition->category_id
+                        : null,
+                    'context' => $this->componentRowContext($row),
+                ];
+            })
+            ->sortBy(fn (array $row): string => json_encode($row['context'], JSON_THROW_ON_ERROR))
+            ->values();
+
         $context = [
             'schema' => 2,
             'asset' => [
@@ -84,11 +106,8 @@ class WorkflowRunDefinitionService
                 'blocks_sale_readiness' => (bool) $profile->blocks_sale_readiness,
                 'category_ids' => $profile->categories->pluck('id')->map(fn ($id) => (int) $id)->sort()->values()->all(),
             ],
-            'components' => $roster->rows
-                ->filter(fn ($row): bool => $row instanceof AssetComponentRosterRow)
-                ->map(fn (AssetComponentRosterRow $row): array => $this->componentRowContext($row))
-                ->sortBy(fn (array $row): string => json_encode($row, JSON_THROW_ON_ERROR))
-                ->values()
+            'components' => $componentContexts
+                ->pluck('context')
                 ->all(),
             'items' => $profileItems->map(function (WorkflowProfileItem $profileItem) use ($resolvedByDefinition): array {
                 $item = $profileItem->item;
@@ -168,6 +187,46 @@ class WorkflowRunDefinitionService
             ->values()
             ->all();
 
+        $profileItemContextHashes = collect($context['items'])
+            ->mapWithKeys(function (array $itemContext) use ($componentContexts, $context): array {
+                $componentScoped = $itemContext['component_category_ids'] !== []
+                    || $itemContext['component_definition_ids'] !== [];
+                $itemHashContext = $itemContext;
+                unset($itemHashContext['display_order'], $itemHashContext['sort_order']);
+                $relevantComponents = $componentScoped
+                    ? $componentContexts
+                        ->filter(fn (array $row): bool => in_array(
+                            $row['component_definition_id'],
+                            $itemContext['component_definition_ids'],
+                            true
+                        ) || in_array(
+                            $row['component_category_id'],
+                            $itemContext['component_category_ids'],
+                            true
+                        ))
+                        ->pluck('context')
+                        ->values()
+                        ->all()
+                    : [];
+                $itemRequirementContext = [
+                    'schema' => 1,
+                    'asset' => $context['asset'],
+                    'profile_id' => $context['profile']['id'],
+                    'item' => $itemHashContext,
+                    'components' => $relevantComponents,
+                ];
+
+                return [
+                    $itemContext['profile_item_id'] => hash(
+                        'sha256',
+                        json_encode(
+                            $itemRequirementContext,
+                            JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+                        )
+                    ),
+                ];
+            });
+
         return [
             'profile_items' => $profileItems,
             'resolved_attributes' => $resolved,
@@ -183,6 +242,7 @@ class WorkflowRunDefinitionService
                     JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
                 )
             ),
+            'profile_item_context_hashes' => $profileItemContextHashes,
         ];
     }
 

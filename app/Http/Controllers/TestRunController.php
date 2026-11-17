@@ -11,6 +11,7 @@ use App\Models\WorkflowProfileItem;
 use App\Services\WorkflowEvidencePhotoService;
 use App\Services\WorkflowProgressionService;
 use App\Services\WorkflowRunDefinitionService;
+use App\Services\WorkflowItemEvidenceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +27,10 @@ class TestRunController extends Controller
             ->with(['profile', 'results.type', 'results.attributeDefinition', 'results.photos', 'user', 'guardOverrideUser'])
             ->orderByDesc('created_at')
             ->get();
+        $legacyAttestations = $asset->legacyWorkflowAttestations()
+            ->with(['audits.user'])
+            ->get();
+        $testSummary = $asset->latestTestIssueSummary();
         $manualWorkflowItems = TestType::query()
             ->ordered()
             ->get();
@@ -41,7 +46,9 @@ class TestRunController extends Controller
             'workflowProgression',
             'canStartRun',
             'canOverrideWorkflowGuards',
-            'canStartNewRun'
+            'canStartNewRun',
+            'legacyAttestations',
+            'testSummary'
         ));
     }
 
@@ -49,9 +56,14 @@ class TestRunController extends Controller
         Request $request,
         Asset $asset,
         WorkflowRunDefinitionService $definitions,
-        WorkflowProgressionService $progression
+        WorkflowProgressionService $progression,
+        ?WorkflowItemEvidenceService $evidence = null
     ): RedirectResponse
     {
+        // Keep direct controller callers compatible with the historical
+        // four-argument signature while normal route dispatch still uses
+        // the container-managed resolver.
+        $evidence ??= app(WorkflowItemEvidenceService::class);
         Gate::authorize('tests.execute');
         $this->authorize('view', $asset);
 
@@ -68,6 +80,7 @@ class TestRunController extends Controller
             $data,
             $definitions,
             $progression,
+            $evidence,
             $request
         ): array {
             $lockedAsset = Asset::query()->lockForUpdate()->findOrFail($asset->id);
@@ -151,6 +164,19 @@ class TestRunController extends Controller
 
             $profileItems = $definition['profile_items'];
             $resolvedByDefinition = $definition['resolved_by_definition'];
+            $legacyEvidence = $evidence->forProfile($lockedAsset, $profile);
+            $legacyByProfileItem = $legacyEvidence['usable_attestations']
+                ->keyBy('workflow_profile_item_id');
+            $allApplicableItemsAreLegacy = $profileItems->isNotEmpty()
+                && $profileItems->every(fn ($profileItem): bool =>
+                    $legacyByProfileItem->has((int) $profileItem->id)
+                );
+            if ($allApplicableItemsAreLegacy) {
+                // An explicit start means the operator is replacing historical
+                // evidence with a real run. Never create an empty run merely
+                // because legacy evidence already satisfied every item.
+                $legacyByProfileItem = collect();
+            }
             $extraItems = TestType::query()
                 ->whereIn('id', array_values($data['extra_workflow_item_ids'] ?? []))
                 ->ordered()
@@ -174,6 +200,16 @@ class TestRunController extends Controller
             $run->profile_display_order_snapshot = $profile->display_order;
             $run->readiness_context_hash = $definition['readiness_context_hash'];
             $run->prerequisite_snapshot = $decision['prerequisites']->all();
+            $run->legacy_attestation_snapshot = $legacyEvidence['usable_attestations']
+                ->reject(fn ($attestation): bool => $allApplicableItemsAreLegacy)
+                ->map(fn ($attestation): array => [
+                    'id' => (int) $attestation->id,
+                    'workflow_profile_item_id' => (int) $attestation->workflow_profile_item_id,
+                    'workflow_item_id' => (int) $attestation->workflow_item_id,
+                    'profile_name' => $attestation->profile_name_snapshot,
+                    'item_name' => $attestation->item_name_snapshot,
+                    'requirement_context_hash' => $attestation->requirement_context_hash,
+                ])->values()->all();
             $run->started_at = now();
 
             if ($overrideTypes->isNotEmpty()) {
@@ -190,6 +226,10 @@ class TestRunController extends Controller
             $run->save();
 
             foreach ($profileItems as $profileItem) {
+                if ($legacyByProfileItem->has((int) $profileItem->id)) {
+                    continue;
+                }
+
                 $testType = $profileItem->item;
                 $attribute = null;
 

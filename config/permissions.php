@@ -819,6 +819,12 @@ return [
             'note'       => 'Allows the user to remove test runs.',
             'display'    => true,
         ],
+        [
+            'permission' => 'tests.manage_legacy_evidence',
+            'label'      => 'Manage Legacy Test Evidence',
+            'note'       => 'Allows accepting and revoking pre-Snipe-IT workflow evidence.',
+            'display'    => true,
+        ],
     ],
 
     'Workflow Configuration' => [

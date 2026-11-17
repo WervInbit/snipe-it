@@ -157,6 +157,7 @@
                         WorkflowProgressionService::STATE_IN_PROGRESS => __('In progress'),
                         WorkflowProgressionService::STATE_COMPLETED_WITH_ISSUES => __('Completed with issues'),
                         WorkflowProgressionService::STATE_COMPLETED_SUCCESSFULLY => __('Completed successfully'),
+                        WorkflowProgressionService::STATE_COMPLETED_WITH_LEGACY_EVIDENCE => trans('tests.legacy_accepted'),
                         WorkflowProgressionService::STATE_STALE => __('Changed - new run needed'),
                         default => __('Not started'),
                     };
@@ -173,7 +174,9 @@
                             ? 'label-success'
                             : ($row['state'] === WorkflowProgressionService::STATE_COMPLETED_WITH_ISSUES
                                 ? 'label-warning'
-                                : 'label-default'));
+                                : ($row['state'] === WorkflowProgressionService::STATE_COMPLETED_WITH_LEGACY_EVIDENCE
+                                    ? 'label-info'
+                                    : 'label-default')));
                     $guardMessages = collect();
                     if ($row['configuration_blocked']) {
                         $guardMessages->push(__('This workflow has no applicable items for this asset. Configure its items before starting it.'));
@@ -285,6 +288,7 @@
                     && $workflowRows->every(fn (array $row): bool => in_array($row['state'], [
                         WorkflowProgressionService::STATE_COMPLETED_SUCCESSFULLY,
                         WorkflowProgressionService::STATE_COMPLETED_WITH_ISSUES,
+                        WorkflowProgressionService::STATE_COMPLETED_WITH_LEGACY_EVIDENCE,
                     ], true));
             @endphp
             @if($allAvailableWorkflowsDone)

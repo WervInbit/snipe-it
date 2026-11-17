@@ -19,6 +19,7 @@ class RolePermissionSeeder extends DestructiveFixtureSeeder
             'tests.edit_runs' => '1',
             'tests.start_new_run' => '1',
             'tests.override_dependencies' => '1',
+            'tests.manage_legacy_evidence' => '1',
             'assets.override_sale_readiness' => '1',
             'assets.create' => '1',
             'audits.view'   => '1',

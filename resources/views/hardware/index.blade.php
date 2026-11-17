@@ -60,6 +60,23 @@
           <div class="row">
             <div class="col-md-12">
 
+                <form method="GET" action="{{ route('hardware.index') }}" class="form-inline" style="margin-bottom:10px">
+                    @foreach (request()->except('legacy_evidence') as $key => $value)
+                        @if (is_scalar($value))
+                            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                        @endif
+                    @endforeach
+                    <label for="legacy_evidence_filter">{{ trans('tests.legacy_filter_label') }}</label>
+                    <select class="form-control input-sm" name="legacy_evidence" id="legacy_evidence_filter" onchange="this.form.submit()">
+                        <option value="">{{ trans('tests.legacy_filter_all') }}</option>
+                        <option value="active" @selected(request('legacy_evidence') === 'active')>{{ trans('tests.legacy_filter_active') }}</option>
+                        <option value="none" @selected(request('legacy_evidence') === 'none')>{{ trans('tests.legacy_filter_none') }}</option>
+                        <option value="superseded" @selected(request('legacy_evidence') === 'superseded')>{{ trans('tests.legacy_filter_superseded') }}</option>
+                        <option value="revoked" @selected(request('legacy_evidence') === 'revoked')>{{ trans('tests.legacy_filter_revoked') }}</option>
+                    </select>
+                    <noscript><button class="btn btn-default btn-sm" type="submit">{{ __('Apply') }}</button></noscript>
+                </form>
+
                 @include('partials.asset-bulk-actions', ['status' => Request::get('status')])
                    
               <table
@@ -83,7 +100,8 @@
                     array('status' => e(Request::get('status')),
                     'order_number'=>e(strval(Request::get('order_number'))),
                     'company_id'=>e(Request::get('company_id')),
-                    'status_id'=>e(Request::get('status_id')))) }}"
+                    'status_id'=>e(Request::get('status_id')),
+                    'legacy_evidence'=>e(Request::get('legacy_evidence')))) }}"
                 data-export-options='{
                 "fileName": "export{{ (Request::has('status')) ? '-'.str_slug(Request::get('status')) : '' }}-assets-{{ date('Y-m-d') }}",
                 "ignoreColumn": ["actions","image","change","checkbox","icon"]

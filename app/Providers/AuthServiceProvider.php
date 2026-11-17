@@ -367,6 +367,10 @@ class AuthServiceProvider extends ServiceProvider
               return $user->hasAccess('tests.delete');
           });
 
+          Gate::define('tests.manage_legacy_evidence', function ($user) {
+              return $user->isAdmin() || $user->hasAccess('tests.manage_legacy_evidence');
+          });
+
         Gate::define('assets.create', function ($user) {
             return $user->hasAccess('assets.create');
         });

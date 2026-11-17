@@ -3,20 +3,19 @@
 namespace App\Services;
 
 use App\Models\Asset;
-use App\Models\TestResult;
 use App\Models\TestRun;
 use App\Models\WorkflowProfile;
 use Illuminate\Support\Collection;
 
 class WorkflowReadinessService
 {
-    public function __construct(private readonly WorkflowRunDefinitionService $definitions)
+    public function __construct(private readonly WorkflowItemEvidenceService $evidence)
     {
     }
 
     /**
      * @param Collection<int, WorkflowProfile> $profiles
-     * @return array{run: mixed, runs: Collection, failed: Collection, incomplete: Collection, missing_run: bool, missing_profiles: Collection}
+     * @return array<string, mixed>
      */
     public function summary(Asset $asset, Collection $profiles): array
     {
@@ -24,6 +23,8 @@ class WorkflowReadinessService
         $failed = collect();
         $incomplete = collect();
         $missingProfiles = collect();
+        $itemStates = collect();
+        $profileEvidence = collect();
 
         foreach ($profiles as $profile) {
             $run = TestRun::query()
@@ -32,61 +33,43 @@ class WorkflowReadinessService
                 ->with(['results.type', 'results.attributeDefinition'])
                 ->currentFirst()
                 ->first();
-            $definition = $this->definitions->forProfile(
-                $asset,
-                $profile,
-                $run?->profile_display_order_snapshot
-            );
-            $requiredItems = $definition['profile_items']
-                ->filter(fn ($profileItem): bool => (bool) $profileItem->is_required)
-                ->values();
-            $knownHashes = [
-                $definition['readiness_context_hash'],
-                $definition['legacy_readiness_context_hash'],
-            ];
-
-            if (
-                !$run
-                || !$run->finished_at
-                || $requiredItems->isEmpty()
-                || (int) $run->model_number_id !== (int) $asset->getAttribute('model_number_id')
-                || !is_string($run->readiness_context_hash)
-                || strlen($run->readiness_context_hash) !== 64
-                || !collect($knownHashes)->contains(
-                    fn (string $hash): bool => hash_equals($hash, $run->readiness_context_hash)
-                )
-            ) {
-                $missingProfiles->push($profile->name);
-                if ($run) {
-                    $runs->push($run);
-                }
-                continue;
+            if ($run) {
+                $runs->push($run);
             }
 
-            $runs->push($run);
-            $resultsByItem = $run->results->groupBy('workflow_item_id');
+            $resolved = $this->evidence->forProfile($asset, $profile, $run);
+            $profileEvidence->put((int) $profile->id, $resolved);
+            $itemStates = $itemStates->concat($resolved['entries']);
 
-            foreach ($requiredItems as $profileItem) {
-                $item = $profileItem->item;
-                $matchingResults = $resultsByItem->get($item->id, collect());
-                $label = $profile->name . ': ' . $item->name;
-
-                if (
-                    $matchingResults->count() !== 1
-                    || (int) $matchingResults->first()->workflow_profile_item_id !== (int) $profileItem->id
-                ) {
-                    $incomplete->push($label);
-                    continue;
+            foreach ($resolved['gating_entries'] as $entry) {
+                if ($entry['state'] === WorkflowItemEvidenceService::STATE_FAILED) {
+                    $failed->push($entry['label']);
+                } elseif (in_array($entry['state'], [
+                    WorkflowItemEvidenceService::STATE_PENDING,
+                    WorkflowItemEvidenceService::STATE_LEGACY_STALE,
+                ], true)) {
+                    $incomplete->push($entry['label']);
                 }
+            }
 
-                $result = $matchingResults->first();
-                if ($result->status === TestResult::STATUS_FAIL) {
-                    $failed->push($label);
-                } elseif ($result->status !== TestResult::STATUS_PASS) {
-                    $incomplete->push($label);
-                }
+            if (!$resolved['ready']) {
+                $missingProfiles->push($profile->name);
             }
         }
+
+        $legacyAccepted = $itemStates->where('state', WorkflowItemEvidenceService::STATE_LEGACY_ACCEPTED)->values();
+        $legacyStale = $itemStates->where('state', WorkflowItemEvidenceService::STATE_LEGACY_STALE)->values();
+        $hasActual = $itemStates->contains(fn (array $entry): bool => in_array(
+            $entry['state'],
+            [WorkflowItemEvidenceService::STATE_PASSED, WorkflowItemEvidenceService::STATE_FAILED],
+            true
+        ));
+        $basis = match (true) {
+            $missingProfiles->isNotEmpty() || $failed->isNotEmpty() || $incomplete->isNotEmpty() => 'pending',
+            $hasActual && $legacyAccepted->isNotEmpty() => 'mixed',
+            $legacyAccepted->isNotEmpty() => 'legacy',
+            default => 'actual',
+        };
 
         return [
             'run' => $runs->sortByDesc(fn ($run) => sprintf(
@@ -95,10 +78,18 @@ class WorkflowReadinessService
                 $run->id
             ))->first(),
             'runs' => $runs,
-            'failed' => $failed->values(),
-            'incomplete' => $incomplete->values(),
+            'failed' => $failed->unique()->values(),
+            'incomplete' => $incomplete->unique()->values(),
+            // Compatibility: this now means unsatisfied requirements, not
+            // literally that a workflow_runs row is absent.
             'missing_run' => $missingProfiles->isNotEmpty(),
-            'missing_profiles' => $missingProfiles->values(),
+            'missing_profiles' => $missingProfiles->unique()->values(),
+            'missing_requirements' => $incomplete->unique()->values(),
+            'item_states' => $itemStates->values(),
+            'legacy_accepted' => $legacyAccepted,
+            'legacy_stale' => $legacyStale,
+            'evidence_basis' => $basis,
+            'profile_evidence' => $profileEvidence,
         ];
     }
 

@@ -159,6 +159,55 @@
             'selectedModelNumber' => $selectedModelNumber ?? null,
         ])
     </div>
+    @if (!$item->id && Gate::allows('tests.manage_legacy_evidence'))
+        @php
+            $legacySelectedIds = collect(old('legacy_profile_item_ids', []))->map(fn ($id) => (int) $id)->values();
+            $legacyOpen = $legacySelectedIds->isNotEmpty()
+                || $errors->has('legacy_profile_item_ids')
+                || $errors->has('legacy_source_note')
+                || $errors->has('legacy_source_tested_at');
+        @endphp
+        <div class="col-md-12 col-sm-12" id="legacy-workflow-fieldset">
+            <fieldset name="legacy-workflow-evidence">
+                <legend class="highlight">
+                    <a id="legacy_workflow_info" href="#legacy_workflow_details" aria-expanded="{{ $legacyOpen ? 'true' : 'false' }}">
+                        <x-icon type="caret-{{ $legacyOpen ? 'down' : 'right' }}" id="legacy_workflow_info_icon" />
+                        {{ trans('tests.legacy_evidence_title') }}
+                    </a>
+                </legend>
+
+                <div id="legacy_workflow_details" class="col-md-12" style="display:{{ $legacyOpen ? 'block' : 'none' }}">
+                    <div class="alert alert-warning">
+                        {{ trans('tests.legacy_form_explanation') }}
+                    </div>
+                    <div id="legacy-workflow-selection-cleared" class="alert alert-info" style="display:none">
+                        {{ trans('tests.legacy_selection_cleared') }}
+                    </div>
+                    <div id="legacy-workflow-options" aria-live="polite">
+                        <p class="text-muted">{{ trans('tests.legacy_select_model') }}</p>
+                    </div>
+                    {!! $errors->first('legacy_profile_item_ids', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+
+                    <div class="form-group{{ $errors->has('legacy_source_note') ? ' has-error' : '' }}">
+                        <label for="legacy_source_note" class="col-md-3 control-label">{{ trans('tests.legacy_source_note') }}</label>
+                        <div class="col-md-7">
+                            <textarea class="form-control" name="legacy_source_note" id="legacy_source_note" maxlength="2000" rows="3">{{ old('legacy_source_note') }}</textarea>
+                            <p class="help-block">{{ trans('tests.legacy_source_note_help') }}</p>
+                            {!! $errors->first('legacy_source_note', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+                        </div>
+                    </div>
+                    <div class="form-group{{ $errors->has('legacy_source_tested_at') ? ' has-error' : '' }}">
+                        <label for="legacy_source_tested_at" class="col-md-3 control-label">{{ trans('tests.legacy_original_date') }}</label>
+                        <div class="col-md-7">
+                            <input type="date" class="form-control" name="legacy_source_tested_at" id="legacy_source_tested_at" value="{{ old('legacy_source_tested_at') }}" max="{{ now()->toDateString() }}">
+                            <p class="help-block">{{ trans('tests.legacy_original_date_help') }}</p>
+                            {!! $errors->first('legacy_source_tested_at', '<span class="alert-msg"><i class="fas fa-times"></i> :message</span>') !!}
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+    @endif
     @include ('partials.forms.edit.location-cascade-select', ['translated_name' => trans('admin/hardware/form.default_location'), 'fieldname' => 'rtd_location_id', 'help_text' => trans('general.rtd_location_help')])
     <div class="form-group">
         <div class="col-md-7 col-md-offset-3">
@@ -443,6 +492,7 @@
                         $(this).val(transformed_spec_vals[this.name]);
                     }
                 });
+                $(document).trigger('model-specification-loaded', [modelId, $('#model_number_id').val()]);
             }
         });
     }
@@ -521,6 +571,106 @@
         fetchSpecification(initialSelection.modelId, initialSelection.modelNumberId || $('#model_number_id').val());
 
     });
+
+    @if (!$item->id && Gate::allows('tests.manage_legacy_evidence'))
+    $(function () {
+        var $details = $('#legacy_workflow_details');
+        var $icon = $('#legacy_workflow_info_icon');
+        var $options = $('#legacy-workflow-options');
+        var selectedFromValidation = @json($legacySelectedIds->all());
+        var restoreSelectionOnce = selectedFromValidation.length > 0;
+        var requestSequence = 0;
+        var activeRequest = null;
+        var lastContextKey = null;
+
+        $('#legacy_workflow_info').on('click', function (event) {
+            event.preventDefault();
+            $details.fadeToggle(100);
+            $icon.toggleClass('fa-caret-right fa-caret-down');
+            $(this).attr('aria-expanded', $icon.hasClass('fa-caret-down') ? 'true' : 'false');
+        });
+
+        function clearLegacySelection(showNotice) {
+            $options.find('.js-legacy-workflow-item').prop('checked', false);
+            if (showNotice) {
+                $('#legacy_source_note').val('');
+                $('#legacy_source_tested_at').val('');
+                $('#legacy-workflow-selection-cleared').show();
+            }
+        }
+
+        function loadLegacyOptions(modelId, modelNumberId, isInitial) {
+            var contextKey = String(modelId || '') + ':' + String(modelNumberId || '');
+            if (!modelId || !modelNumberId) {
+                lastContextKey = contextKey;
+                clearLegacySelection(!isInitial);
+                $options.html('<p class="text-muted">{{ trans('tests.legacy_select_model') }}</p>');
+                return;
+            }
+
+            if (!isInitial && lastContextKey !== null && lastContextKey !== contextKey) {
+                restoreSelectionOnce = false;
+                clearLegacySelection(true);
+            }
+            lastContextKey = contextKey;
+            requestSequence += 1;
+            var thisSequence = requestSequence;
+            if (activeRequest) {
+                activeRequest.abort();
+            }
+            $options.html('<p class="text-muted"><i class="fas fa-spinner fa-spin"></i> {{ trans('tests.legacy_loading') }}</p>');
+
+            activeRequest = $.ajax({
+                type: 'GET',
+                url: @json(route('hardware.legacy-workflow-items')),
+                data: { model_id: modelId, model_number_id: modelNumberId },
+                dataType: 'html'
+            }).done(function (html) {
+                if (thisSequence !== requestSequence) {
+                    return;
+                }
+                $options.html(html);
+                if (restoreSelectionOnce) {
+                    selectedFromValidation.forEach(function (id) {
+                        $options.find('.js-legacy-workflow-item[value="' + id + '"]').prop('checked', true);
+                    });
+                    restoreSelectionOnce = false;
+                }
+            }).fail(function (xhr, status) {
+                if (status === 'abort' || thisSequence !== requestSequence) {
+                    return;
+                }
+                $options.html('<div class="alert alert-danger">{{ trans('tests.legacy_load_failed') }}</div>');
+            });
+        }
+
+        $options.on('click', '.js-legacy-profile-select', function () {
+            $(this).closest('.legacy-workflow-profile').find('.js-legacy-workflow-item').prop('checked', true);
+        });
+        $options.on('click', '.js-legacy-profile-clear', function () {
+            $(this).closest('.legacy-workflow-profile').find('.js-legacy-workflow-item').prop('checked', false);
+        });
+
+        $('#model_select_id').on('change.legacy-evidence', function () {
+            var context = getModelSelectionContext();
+            if (context.modelNumberId) {
+                loadLegacyOptions(context.modelId, context.modelNumberId, false);
+            } else {
+                loadLegacyOptions(context.modelId, null, false);
+            }
+        });
+        $(document).on('model-specification-loaded.legacy-evidence', function (event, modelId, modelNumberId) {
+            loadLegacyOptions(modelId, modelNumberId, lastContextKey === null);
+        });
+
+        var initialLegacyContext = getModelSelectionContext();
+        loadLegacyOptions(
+            initialLegacyContext.modelId,
+            initialLegacyContext.modelNumberId || $('#model_number_id').val(),
+            true
+        );
+    });
+    @endif
 
 
     // Add another asset tag + serial combination if the plus sign is clicked

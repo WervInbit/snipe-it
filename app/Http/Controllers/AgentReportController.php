@@ -10,6 +10,8 @@ use App\Models\User;
 use App\Models\WorkflowProfile;
 use App\Services\WorkflowProgressionService;
 use App\Services\WorkflowRunDefinitionService;
+use App\Services\WorkflowItemEvidenceService;
+use App\Services\LegacyWorkflowAttestationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -154,6 +156,12 @@ class AgentReportController extends Controller
             });
 
         $provided = collect($validated['results'])->keyBy('test_slug');
+        $legacyEvidence = app(WorkflowItemEvidenceService::class)->forProfile($asset, $profile);
+        $legacySlugs = $legacyEvidence['entries']
+            ->where('state', WorkflowItemEvidenceService::STATE_LEGACY_ACCEPTED)
+            ->pluck('item.slug')
+            ->filter()
+            ->values();
 
         $unknown = $provided->keys()->diff($types->keys());
         if ($unknown->isNotEmpty()) {
@@ -169,7 +177,7 @@ class AgentReportController extends Controller
             ? $types
                 ->filter(fn (array $payload) => $payload['profile_item']->is_required)
                 ->keys()
-                ->diff($provided->keys())
+                ->diff($provided->keys()->merge($legacySlugs))
             : collect();
 
         if ($missingBlocking->isNotEmpty()) {
@@ -235,6 +243,24 @@ class AgentReportController extends Controller
             $run->profile_display_order_snapshot = $lockedProfile->display_order;
             $run->readiness_context_hash = $lockedDefinition['readiness_context_hash'];
             $run->prerequisite_snapshot = $lockedDecision['prerequisites']->all();
+            $lockedLegacyEvidence = app(WorkflowItemEvidenceService::class)
+                ->forProfile($lockedAsset, $lockedProfile);
+            $usedLegacy = $lockedLegacyEvidence['usable_attestations']
+                ->filter(function ($attestation) use ($provided, $types): bool {
+                    $payload = $types->first(fn (array $candidate): bool =>
+                        (int) $candidate['profile_item']->id === (int) $attestation->workflow_profile_item_id
+                    );
+
+                    return $payload && !$provided->has($payload['type']->slug);
+                })->values();
+            $run->legacy_attestation_snapshot = $usedLegacy->map(fn ($attestation): array => [
+                'id' => (int) $attestation->id,
+                'workflow_profile_item_id' => (int) $attestation->workflow_profile_item_id,
+                'workflow_item_id' => (int) $attestation->workflow_item_id,
+                'profile_name' => $attestation->profile_name_snapshot,
+                'item_name' => $attestation->item_name_snapshot,
+                'requirement_context_hash' => $attestation->requirement_context_hash,
+            ])->all();
             if ($agentUserId) {
                 $run->user_id = $agentUserId;
             }
@@ -250,10 +276,17 @@ class AgentReportController extends Controller
                 $profileItem = $payload['profile_item'];
                 $data = $provided->get($slug);
 
+                if (!$data && $usedLegacy->contains(
+                    fn ($attestation): bool =>
+                        (int) $attestation->workflow_profile_item_id === (int) $profileItem->id
+                )) {
+                    continue;
+                }
+
                 $status = $data['status'] ?? TestResult::STATUS_NVT;
                 $note = $data['note'] ?? ($data ? null : 'Not tested by agent');
 
-                $run->results()->create([
+                $result = $run->results()->create([
                     'workflow_item_id' => $type->id,
                     'workflow_profile_item_id' => $profileItem->id,
                     'attribute_definition_id' => $attribute?->definition->id,
@@ -266,6 +299,10 @@ class AgentReportController extends Controller
                         ?: \App\Models\WorkflowProfileItem::LABEL_MODE_PASS_FAIL,
                     'sort_order' => $profileItem->sort_order,
                 ]);
+                if ($result->status !== TestResult::STATUS_NVT) {
+                    app(LegacyWorkflowAttestationService::class)
+                        ->supersedeForResult($lockedAsset, $result);
+                }
             }
 
             $run->syncFinishedAtFromResults();

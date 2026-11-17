@@ -162,7 +162,12 @@ class AssetsController extends Controller
                 'model.fieldset',
                 'supplier'
             )
-            ->withCount(['tests as test_runs_count']); // it might be tempting to add 'assetlog' here, but don't. It blows up update-heavy users.
+            ->withCount([
+                'tests as test_runs_count',
+                'legacyWorkflowAttestations as legacy_evidence_active_count' => fn ($query) => $query->active(),
+                'legacyWorkflowAttestations as legacy_evidence_superseded_count' => fn ($query) => $query->whereNotNull('superseded_at'),
+                'legacyWorkflowAttestations as legacy_evidence_revoked_count' => fn ($query) => $query->whereNotNull('revoked_at'),
+            ]); // it might be tempting to add 'assetlog' here, but don't. It blows up update-heavy users.
 
         $latestRunIdSub = TestRun::query()
             ->select('id')
@@ -407,6 +412,16 @@ class AssetsController extends Controller
             $assets->where('assets.order_number', '=', strval($request->get('order_number')));
         }
 
+        if ($request->filled('legacy_evidence')) {
+            match ($request->input('legacy_evidence')) {
+                'active' => $assets->whereHas('legacyWorkflowAttestations', fn ($query) => $query->active()),
+                'none' => $assets->whereDoesntHave('legacyWorkflowAttestations', fn ($query) => $query->active()),
+                'superseded' => $assets->whereHas('legacyWorkflowAttestations', fn ($query) => $query->whereNotNull('superseded_at')),
+                'revoked' => $assets->whereHas('legacyWorkflowAttestations', fn ($query) => $query->whereNotNull('revoked_at')),
+                default => null,
+            };
+        }
+
         // This is kinda gross, but we need to do this because the Bootstrap Tables
         // API passes custom field ordering as custom_fields.fieldname, and we have to strip
         // that out to let the default sorter below order them correctly on the assets table.
@@ -512,32 +527,68 @@ class AssetsController extends Controller
         $summary = $asset->latestTestIssueSummary();
         $runs = collect($summary['runs'] ?? []);
         $missingProfiles = collect($summary['missing_profiles'] ?? []);
-        $requiredResults = $runs->flatMap(function (TestRun $run) {
-            return $run->results
-                ->filter(fn (TestResult $result) => $result->is_required)
-                ->map(fn (TestResult $result) => [
-                    'run' => $run,
-                    'result' => $result,
-                ]);
-        })->values();
-
-        $failedPayload = $requiredResults
-            ->filter(fn (array $item) => $item['result']->status === TestResult::STATUS_FAIL)
-            ->map(fn (array $item) => $this->workflowResultIssuePayload($item['run'], $item['result']))
+        $gatingEntries = collect($summary['profile_evidence'] ?? [])
+            ->flatMap(fn (array $profileEvidence) => $profileEvidence['gating_entries'])
             ->values();
+        $profileOnlyMissingIds = collect($summary['profile_evidence'] ?? [])
+            ->filter(fn (array $profileEvidence): bool =>
+                $profileEvidence['run'] === null
+                    && $profileEvidence['entries']->doesntContain(
+                        fn (array $entry): bool => $entry['attestation'] !== null
+                    )
+            )->keys()->map(fn ($id): int => (int) $id);
+        $failedPayload = $gatingEntries
+            ->where('state', \App\Services\WorkflowItemEvidenceService::STATE_FAILED)
+            ->map(function (array $entry) {
+                if ($entry['result'] && $entry['result']->testRun) {
+                    return $this->workflowResultIssuePayload($entry['result']->testRun, $entry['result']);
+                }
 
-        $missingPayload = $missingProfiles
-            ->map(fn (string $profile) => [
-                'label' => $profile,
-                'type' => 'workflow_profile',
-            ])
-            ->merge($requiredResults
-                ->filter(fn (array $item) => $item['result']->status !== TestResult::STATUS_PASS && $item['result']->status !== TestResult::STATUS_FAIL)
-                ->map(fn (array $item) => $this->workflowResultIssuePayload($item['run'], $item['result']))
-                ->values())
+                return ['label' => $entry['label'], 'type' => 'workflow_item'];
+            })->values();
+        $missingPayload = $gatingEntries
+            ->reject(fn (array $entry): bool => $profileOnlyMissingIds->contains((int) $entry['profile']->id))
+            ->filter(fn (array $entry): bool => in_array($entry['state'], [
+                \App\Services\WorkflowItemEvidenceService::STATE_PENDING,
+                \App\Services\WorkflowItemEvidenceService::STATE_LEGACY_STALE,
+            ], true))
+            ->map(fn (array $entry): array => [
+                'label' => $entry['label'],
+                'type' => $entry['state'] === \App\Services\WorkflowItemEvidenceService::STATE_LEGACY_STALE
+                    ? 'legacy_stale'
+                    : 'workflow_item',
+            ])->values()
+            ->concat(collect($summary['profile_evidence'] ?? [])
+                ->filter(fn (array $profileEvidence, $profileId): bool =>
+                    $profileOnlyMissingIds->contains((int) $profileId)
+                )->map(fn (array $profileEvidence): array => [
+                    'label' => $profileEvidence['profile']->name,
+                    'type' => 'workflow_profile',
+                ])->values())
             ->values();
+        $legacyAccepted = collect($summary['legacy_accepted'] ?? [])->map(fn (array $entry): array => [
+            'profile' => $entry['profile']->name,
+            'item' => $entry['item']->name,
+            'profile_item_id' => (int) $entry['profile_item']->id,
+            'state' => 'legacy_accepted',
+            'source_tested_at' => optional($entry['attestation']->source_tested_at)->toDateString(),
+            'accepted_by' => $entry['attestation']->accepted_by_name_snapshot,
+        ])->values();
+        $legacyStale = collect($summary['legacy_stale'] ?? [])->map(fn (array $entry): array => [
+            'profile' => $entry['profile']->name,
+            'item' => $entry['item']->name,
+            'profile_item_id' => (int) $entry['profile_item']->id,
+            'state' => 'legacy_stale',
+        ])->values();
 
         $run = $summary['run'] ?? null;
+        $workflowStatus = match (true) {
+            $failedPayload->isNotEmpty() => 'attention',
+            $missingPayload->isNotEmpty() || (bool) ($summary['missing_run'] ?? false) => 'missing',
+            ($summary['evidence_basis'] ?? null) === 'legacy' => 'legacy',
+            ($summary['evidence_basis'] ?? null) === 'mixed' => 'mixed',
+            default => 'ok',
+        };
 
         return response()->json([
             'run_id' => $run ? (int) $run->id : null,
@@ -550,16 +601,24 @@ class AssetsController extends Controller
                     'finished_at' => optional($run->finished_at)->toIso8601String(),
                 ];
             })->values(),
-            'total' => $requiredResults->count() + $missingProfiles->count(),
-            'completed' => $requiredResults
-                ->filter(fn (array $item) => $item['result']->status !== TestResult::STATUS_NVT)
-                ->count(),
+            'total' => $gatingEntries->count(),
+            'completed' => $gatingEntries->filter(fn (array $entry): bool => in_array($entry['state'], [
+                \App\Services\WorkflowItemEvidenceService::STATE_PASSED,
+                \App\Services\WorkflowItemEvidenceService::STATE_FAILED,
+                \App\Services\WorkflowItemEvidenceService::STATE_LEGACY_ACCEPTED,
+            ], true))->count(),
             'failed_count' => $failedPayload->count(),
             'missing_count' => $missingPayload->count(),
             'missing_run' => (bool) ($summary['missing_run'] ?? false),
             'missing_profiles' => $missingProfiles->values(),
             'failed' => $failedPayload,
             'missing' => $missingPayload,
+            'legacy_accepted_count' => $legacyAccepted->count(),
+            'legacy_stale_count' => $legacyStale->count(),
+            'legacy_accepted' => $legacyAccepted,
+            'legacy_stale' => $legacyStale,
+            'evidence_basis' => $summary['evidence_basis'] ?? 'pending',
+            'workflow_status' => $workflowStatus,
         ]);
     }
 
@@ -843,6 +902,21 @@ class AssetsController extends Controller
      */
     public function store(StoreAssetRequest $request): JsonResponse
     {
+        if ($request->hasAny([
+            'legacy_profile_item_ids',
+            'legacy_source_note',
+            'legacy_source_tested_at',
+        ])) {
+            return response()->json(
+                Helper::formatStandardApiResponse(
+                    'error',
+                    null,
+                    trans('tests.legacy_web_only')
+                ),
+                422
+            );
+        }
+
         if ($request->hasAny(self::LEGACY_ASSIGNMENT_FIELDS)) {
             return response()->json(
                 Helper::formatStandardApiResponse(

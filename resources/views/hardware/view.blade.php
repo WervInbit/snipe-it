@@ -2045,6 +2045,10 @@
                 @endcan
 
                     <div class="tab-pane fade" id="tests">
+                        @include('tests.partials.legacy-evidence', [
+                            'legacyAttestations' => $asset->legacyWorkflowAttestations,
+                            'testSummary' => $testSummary,
+                        ])
                         <div class="hardware-tests-tab-actions" data-testid="hardware-tests-tab-actions">
                             @include('tests.partials.workflow-progression', ['workflowContext' => 'hardware-tests'])
                             <a href="{{ route('test-runs.index', $asset->id) }}" class="hardware-tests-tab-actions__link">
@@ -2163,6 +2167,7 @@
                             @php
                                 $audits = $asset->tests->flatMap->audits
                                     ->merge($asset->tests->flatMap->results->flatMap->audits)
+                                    ->merge($asset->legacyWorkflowAttestations->flatMap->audits)
                                     ->sortByDesc('created_at');
                             @endphp
                             @if($audits->isNotEmpty())

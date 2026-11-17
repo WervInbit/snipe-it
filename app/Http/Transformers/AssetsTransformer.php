@@ -31,10 +31,18 @@ class AssetsTransformer
         $setting = Setting::getSettings();
 
         $testRunsCount = (int) ($asset->test_runs_count ?? 0);
-        $liveTestsCompletedOk = $asset->liveTestsCompletedOk();
-        $testWorkflowStatus = $testRunsCount === 0
-            ? 'missing'
-            : ($liveTestsCompletedOk ? 'ok' : 'attention');
+        $testSummary = $asset->latestTestIssueSummary();
+        $liveTestsCompletedOk = !$testSummary['missing_run']
+            && $testSummary['failed']->isEmpty()
+            && $testSummary['incomplete']->isEmpty();
+        $testWorkflowStatus = match (true) {
+            !$liveTestsCompletedOk && $testSummary['failed']->isNotEmpty() => 'attention',
+            !$liveTestsCompletedOk && $testRunsCount > 0 => 'attention',
+            !$liveTestsCompletedOk => 'missing',
+            ($testSummary['evidence_basis'] ?? null) === 'legacy' => 'legacy',
+            ($testSummary['evidence_basis'] ?? null) === 'mixed' => 'mixed',
+            default => 'ok',
+        };
 
         $array = [
             'id' => (int) $asset->id,
@@ -50,6 +58,9 @@ class AssetsTransformer
             'tests_completed_ok' => $liveTestsCompletedOk,
             'test_runs_count' => $testRunsCount,
             'test_workflow_status' => $testWorkflowStatus,
+            'legacy_evidence_active_count' => (int) ($asset->legacy_evidence_active_count ?? 0),
+            'legacy_evidence_superseded_count' => (int) ($asset->legacy_evidence_superseded_count ?? 0),
+            'legacy_evidence_revoked_count' => (int) ($asset->legacy_evidence_revoked_count ?? 0),
             'latest_test_run_id' => $asset->latest_test_run_id ? (int) $asset->latest_test_run_id : null,
             'latest_tests_total' => (int) ($asset->latest_tests_total ?? 0),
             'latest_tests_completed' => (int) ($asset->latest_tests_completed ?? 0),

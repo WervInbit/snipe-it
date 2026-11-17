@@ -33,6 +33,7 @@ class TestRun extends SnipeModel
         'profile_display_order_snapshot',
         'readiness_context_hash',
         'prerequisite_snapshot',
+        'legacy_attestation_snapshot',
         'user_id',
         'guard_override_by',
         'guard_override_reason',
@@ -51,6 +52,7 @@ class TestRun extends SnipeModel
         'profile_display_order_snapshot',
         'readiness_context_hash',
         'prerequisite_snapshot',
+        'legacy_attestation_snapshot',
         'user_id',
         'guard_override_by',
         'guard_override_reason',
@@ -65,6 +67,7 @@ class TestRun extends SnipeModel
         'finished_at' => 'datetime',
         'profile_display_order_snapshot' => 'int',
         'prerequisite_snapshot' => 'array',
+        'legacy_attestation_snapshot' => 'array',
         'guard_override_at' => 'datetime',
         'guard_override_details' => 'array',
     ];
@@ -97,24 +100,7 @@ class TestRun extends SnipeModel
      */
     public function syncFinishedAtFromResults(): void
     {
-        $results = $this->results()->get(['is_required', 'status']);
-        $requiredResults = $results->where('is_required', true)->values();
-        $completionResults = $requiredResults->isNotEmpty() ? $requiredResults : $results;
-
-        $isComplete = $completionResults->isNotEmpty()
-            && !$completionResults->contains(
-                fn (TestResult $result): bool => $result->status === TestResult::STATUS_NVT
-            );
-
-        if ($isComplete && $this->finished_at === null) {
-            $this->finished_at = now();
-        } elseif (!$isComplete && $this->finished_at !== null) {
-            $this->finished_at = null;
-        }
-
-        if ($this->isDirty('finished_at')) {
-            $this->save();
-        }
+        app(\App\Services\WorkflowItemEvidenceService::class)->syncRunFinishedAt($this);
     }
 
     public function scopeCurrentFirst(Builder $query): Builder

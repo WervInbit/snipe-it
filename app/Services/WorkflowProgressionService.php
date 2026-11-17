@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Asset;
-use App\Models\TestResult;
 use App\Models\TestRun;
 use App\Models\TestType;
 use App\Models\WorkflowProfile;
@@ -15,9 +14,10 @@ class WorkflowProgressionService
     public const STATE_IN_PROGRESS = 'in_progress';
     public const STATE_COMPLETED_WITH_ISSUES = 'completed_with_issues';
     public const STATE_COMPLETED_SUCCESSFULLY = 'completed_successfully';
+    public const STATE_COMPLETED_WITH_LEGACY_EVIDENCE = 'completed_with_legacy_evidence';
     public const STATE_STALE = 'stale';
 
-    public function __construct(private readonly WorkflowRunDefinitionService $definitions)
+    public function __construct(private readonly WorkflowItemEvidenceService $evidence)
     {
     }
 
@@ -112,7 +112,10 @@ class WorkflowProgressionService
                     : $prerequisiteRow['state'];
                 $prerequisiteChainSatisfied = $prerequisiteRow['dependencies_satisfied'];
                 $satisfied = !$prerequisiteRow['configuration_blocked']
-                    && $actualState === self::STATE_COMPLETED_SUCCESSFULLY
+                    && in_array($actualState, [
+                        self::STATE_COMPLETED_SUCCESSFULLY,
+                        self::STATE_COMPLETED_WITH_LEGACY_EVIDENCE,
+                    ], true)
                     && $prerequisiteChainSatisfied;
 
                 return [
@@ -164,70 +167,31 @@ class WorkflowProgressionService
 
     public function runState(Asset $asset, WorkflowProfile $profile, ?TestRun $run): string
     {
-        if (!$run) {
-            return self::STATE_NOT_STARTED;
-        }
+        $resolved = $this->evidence->forProfile($asset, $profile, $run);
 
-        $definition = $this->definitions->forProfile(
-            $asset,
-            $profile,
-            $run->profile_display_order_snapshot
-        );
-        $knownHashes = [
-            $definition['readiness_context_hash'],
-            $definition['legacy_readiness_context_hash'],
-        ];
-        if (
-            (int) $run->model_number_id !== (int) $asset->getAttribute('model_number_id')
-            || !is_string($run->readiness_context_hash)
-            || strlen($run->readiness_context_hash) !== 64
-            || !collect($knownHashes)->contains(
-                fn (string $hash): bool => hash_equals($hash, $run->readiness_context_hash)
-            )
-        ) {
+        if ($run && !$resolved['run_is_current']) {
             return self::STATE_STALE;
         }
 
-        $results = $run->relationLoaded('results') ? $run->results : $run->results()->get();
-        $requiredProfileItems = $definition['profile_items']
-            ->filter(fn ($profileItem): bool => (bool) $profileItem->is_required)
-            ->values();
-        $completionProfileItems = $requiredProfileItems->isNotEmpty()
-            ? $requiredProfileItems
-            : $definition['profile_items'];
-
-        if ($completionProfileItems->isEmpty()) {
-            return self::STATE_IN_PROGRESS;
+        if (!$resolved['answered']) {
+            return $run ? self::STATE_IN_PROGRESS : self::STATE_NOT_STARTED;
         }
 
-        $completionResults = collect();
-        foreach ($completionProfileItems as $profileItem) {
-            $matchingResults = $results
-                ->where('workflow_profile_item_id', $profileItem->id)
-                ->values();
-
-            if ($matchingResults->count() !== 1) {
-                return self::STATE_IN_PROGRESS;
-            }
-
-            /** @var TestResult $result */
-            $result = $matchingResults->first();
-            if (
-                (int) $result->workflow_item_id !== (int) $profileItem->workflow_item_id
-                || (bool) $result->is_required !== (bool) $profileItem->is_required
-                || $result->status === TestResult::STATUS_NVT
-            ) {
-                return self::STATE_IN_PROGRESS;
-            }
-
-            $completionResults->push($result);
+        if ($resolved['has_failure']) {
+            return self::STATE_COMPLETED_WITH_ISSUES;
         }
 
-        return $completionResults->contains(
-            fn (TestResult $result): bool => $result->status !== TestResult::STATUS_PASS
-        )
-            ? self::STATE_COMPLETED_WITH_ISSUES
-            : self::STATE_COMPLETED_SUCCESSFULLY;
+        if (!$resolved['ready']) {
+            return $run ? self::STATE_IN_PROGRESS : self::STATE_NOT_STARTED;
+        }
+
+        if ($resolved['has_legacy']) {
+            return self::STATE_COMPLETED_WITH_LEGACY_EVIDENCE;
+        }
+
+        return $run && $run->finished_at
+            ? self::STATE_COMPLETED_SUCCESSFULLY
+            : self::STATE_IN_PROGRESS;
     }
 
     /**

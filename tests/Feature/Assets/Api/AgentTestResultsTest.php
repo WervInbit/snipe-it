@@ -8,8 +8,10 @@ use App\Models\ModelNumberComponentTemplate;
 use App\Models\TestResult;
 use App\Models\TestType;
 use App\Models\TestRun;
+use App\Models\User;
 use App\Models\WorkflowProfile;
 use App\Models\WorkflowProfileItem;
+use App\Services\LegacyWorkflowAttestationService;
 use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
@@ -178,6 +180,97 @@ class AgentTestResultsTest extends TestCase
             'status' => TestResult::STATUS_NVT,
             'is_required' => 0,
         ]);
+    }
+
+    public function test_agent_can_omit_a_required_result_covered_by_active_legacy_evidence(): void
+    {
+        $agent = User::factory()->create();
+        $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAGLEGACYAGENT']);
+        $this->assignWorkflowComponentsToAsset($asset, [$this->keyboardSlug, $this->wifiSlug]);
+        $profile = WorkflowProfile::query()->where('slug', 'agent-diagnostics')->firstOrFail();
+        $keyboardItem = $profile->items()
+            ->whereHas('item', fn ($query) => $query->where('slug', $this->keyboardSlug))
+            ->firstOrFail();
+        $attestation = app(LegacyWorkflowAttestationService::class)->createForNewAsset(
+            $asset,
+            [$keyboardItem->id],
+            'Accepted from the pre-Snipe-IT cabinet record.',
+            '2026-01-05',
+            $agent
+        )->sole();
+        config([
+            'agent.api_token' => 'secrettoken',
+            'agent.user_id' => $agent->id,
+        ]);
+
+        $this->postJson('/api/v1/agent/reports', [
+            'type' => 'workflow_results',
+            'asset_tag' => $asset->asset_tag,
+            'workflow_profile_slug' => $profile->slug,
+            'results' => [
+                ['test_slug' => $this->wifiSlug, 'status' => TestResult::STATUS_PASS],
+            ],
+        ], [
+            'Authorization' => 'Bearer secrettoken',
+        ])->assertOk();
+
+        $run = TestRun::query()->where('asset_id', $asset->id)->firstOrFail();
+        $this->assertSame($attestation->id, $run->legacy_attestation_snapshot[0]['id']);
+        $this->assertNotNull($run->finished_at);
+        $this->assertDatabaseMissing('workflow_results', [
+            'workflow_run_id' => $run->id,
+            'workflow_profile_item_id' => $keyboardItem->id,
+        ]);
+        $this->assertDatabaseHas('workflow_results', [
+            'workflow_run_id' => $run->id,
+            'status' => TestResult::STATUS_PASS,
+        ]);
+        $this->assertNull($attestation->fresh()->superseded_at);
+    }
+
+    public function test_agent_real_result_supersedes_legacy_evidence_for_the_same_item(): void
+    {
+        $agent = User::factory()->create();
+        $asset = Asset::factory()->laptopMbp()->create(['asset_tag' => 'TAGLEGACYREAL']);
+        $this->assignWorkflowComponentsToAsset($asset, [$this->keyboardSlug, $this->wifiSlug]);
+        $profile = WorkflowProfile::query()->where('slug', 'agent-diagnostics')->firstOrFail();
+        $keyboardItem = $profile->items()
+            ->whereHas('item', fn ($query) => $query->where('slug', $this->keyboardSlug))
+            ->firstOrFail();
+        $attestation = app(LegacyWorkflowAttestationService::class)->createForNewAsset(
+            $asset,
+            [$keyboardItem->id],
+            'Accepted from the pre-Snipe-IT cabinet record.',
+            null,
+            $agent
+        )->sole();
+        config([
+            'agent.api_token' => 'secrettoken',
+            'agent.user_id' => $agent->id,
+        ]);
+
+        $this->postJson('/api/v1/agent/reports', [
+            'type' => 'workflow_results',
+            'asset_tag' => $asset->asset_tag,
+            'workflow_profile_slug' => $profile->slug,
+            'results' => [
+                ['test_slug' => $this->keyboardSlug, 'status' => TestResult::STATUS_PASS],
+                ['test_slug' => $this->wifiSlug, 'status' => TestResult::STATUS_PASS],
+            ],
+        ], [
+            'Authorization' => 'Bearer secrettoken',
+        ])->assertOk();
+
+        $run = TestRun::query()->where('asset_id', $asset->id)->firstOrFail();
+        $keyboardResult = $run->results()
+            ->where('workflow_profile_item_id', $keyboardItem->id)
+            ->firstOrFail();
+        $attestation->refresh();
+
+        $this->assertSame([], $run->legacy_attestation_snapshot);
+        $this->assertNotNull($attestation->superseded_at);
+        $this->assertSame($keyboardResult->id, $attestation->superseded_by_result_id);
+        $this->assertNull($attestation->active_slot);
     }
 
     public function test_agent_gets_404_for_unknown_asset_tag(): void

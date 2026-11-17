@@ -944,7 +944,10 @@
         photo: '{{ trans('tests.photo_cta') }}',
         workflowOk: '{{ trans('tests.latest_run_ok_short') }}',
         workflowAttention: '{{ trans('tests.latest_run_attention_short') }}',
-        workflowMissing: '{{ trans('tests.latest_run_missing_short') }}'
+        workflowMissing: '{{ trans('tests.latest_run_missing_short') }}',
+        workflowLegacy: '{{ trans('tests.legacy_accepted') }}',
+        workflowMixed: '{{ trans('tests.legacy_mixed') }}',
+        legacyNotExecuted: '{{ trans('tests.legacy_not_executed_short') }}'
     };
 
     var latestTestsSummaryBaseUrl = '/api/v1/hardware/';
@@ -996,6 +999,12 @@
             }
             summary.missing.forEach(function (item) {
                 html += '<div style="margin-bottom:4px;"><span class="label label-warning">' + escapeHtml(latestTestsLabels.missing) + '</span> ' + escapeHtml(item.label || '') + '</div>';
+            });
+        }
+
+        if (summary.legacy_accepted && summary.legacy_accepted.length) {
+            summary.legacy_accepted.forEach(function (item) {
+                html += '<div style="margin-bottom:4px;"><span class="label label-info">' + escapeHtml(latestTestsLabels.workflowLegacy) + '</span> ' + escapeHtml((item.profile || '') + ': ' + (item.item || '')) + ' <span class="text-muted small">(' + escapeHtml(latestTestsLabels.legacyNotExecuted) + ')</span></div>';
             });
         }
 
@@ -1057,6 +1066,12 @@
         } else if (status === 'attention') {
             labelClass = 'label-warning';
             labelText = latestTestsLabels.workflowAttention;
+        } else if (status === 'legacy') {
+            labelClass = 'label-info';
+            labelText = latestTestsLabels.workflowLegacy;
+        } else if (status === 'mixed') {
+            labelClass = 'label-primary';
+            labelText = latestTestsLabels.workflowMixed;
         }
 
         return '<span class="label ' + labelClass + ' js-latest-tests" data-asset-id="' + row.id + '" data-tooltip="true" data-html="true" title="' + escapeHtml(tooltip) + '">' + escapeHtml(labelText) + '</span>';

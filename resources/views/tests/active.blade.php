@@ -282,12 +282,31 @@
         @else
             <main>
                 <div id="testGrid" class="testing-grid" data-mode="one">
+                    @foreach ($legacyEntries as $entry)
+                        <article class="testing-card" data-testid="legacy-workflow-card">
+                            <div class="testing-card__body">
+                                <div class="testing-card__head">
+                                    <div>
+                                        <div class="testing-card__title">{{ $entry['item']->name }}</div>
+                                        <div class="text-muted">{{ $entry['profile']->name }}</div>
+                                    </div>
+                                    <span class="label label-info">{{ trans('tests.legacy_accepted') }}</span>
+                                </div>
+                                <p class="mb-0">{{ trans('tests.legacy_not_executed') }}</p>
+                                @if ($entry['attestation']?->source_tested_at)
+                                    <p class="text-muted mb-0">{{ trans('tests.legacy_original_date_value', ['date' => $entry['attestation']->source_tested_at->format('Y-m-d')]) }}</p>
+                                @endif
+                            </div>
+                        </article>
+                    @endforeach
                     @forelse ($results as $result)
                         @include('tests.partials.active-card', ['result' => $result, 'canUpdate' => $canUpdate])
                     @empty
-                        <div class="alert alert-info mb-0">
-                            {{ trans('tests.no_results_in_group') }}
-                        </div>
+                        @if ($legacyEntries->isEmpty())
+                            <div class="alert alert-info mb-0">
+                                {{ trans('tests.no_results_in_group') }}
+                            </div>
+                        @endif
                     @endforelse
                 </div>
                 <div class="testing-complete" data-testid="workflow-done-area">

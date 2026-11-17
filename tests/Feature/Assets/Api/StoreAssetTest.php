@@ -10,6 +10,7 @@ use App\Models\Location;
 use App\Models\Statuslabel;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Models\WorkflowProfileItem;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
@@ -107,6 +108,26 @@ class StoreAssetTest extends TestCase
         foreach (Asset::LEGACY_READ_ONLY_FIELDS as $field) {
             $this->assertNotNull($response->json("messages.{$field}"));
         }
+
+        $this->assertSame($assetCount, Asset::count());
+    }
+
+    public function testLegacyWorkflowEvidenceCannotBeSubmittedThroughTheApi(): void
+    {
+        $assetCount = Asset::count();
+
+        $this->actingAsForApi(User::factory()->superuser()->create())
+            ->postJson(route('api.assets.store'), [
+                'asset_tag' => 'LEGACY-EVIDENCE-WEB-ONLY',
+                'model_id' => AssetModel::factory()->create()->id,
+                'status_id' => Statuslabel::factory()->readyToDeploy()->create()->id,
+                'legacy_profile_item_ids' => [WorkflowProfileItem::factory()->create()->id],
+                'legacy_source_note' => 'Must be rejected before asset creation.',
+                'legacy_source_tested_at' => '2026-01-05',
+            ])
+            ->assertUnprocessable()
+            ->assertStatusMessageIs('error')
+            ->assertJsonPath('messages', trans('tests.legacy_web_only'));
 
         $this->assertSame($assetCount, Asset::count());
     }

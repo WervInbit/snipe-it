@@ -180,6 +180,11 @@
         'manualWorkflowItems' => $manualWorkflowItems ?? collect(),
     ])
 
+    @include('tests.partials.legacy-evidence', [
+        'legacyAttestations' => $legacyAttestations,
+        'testSummary' => $testSummary,
+    ])
+
     <div class="tests-run-list">
         @foreach ($runs as $run)
             @php
@@ -289,6 +294,7 @@
         @php
             $audits = $runs->flatMap->audits
                 ->merge($runs->flatMap->results->flatMap->audits)
+                ->merge($legacyAttestations->flatMap->audits)
                 ->sortByDesc('created_at');
         @endphp
         @if($audits->isNotEmpty())

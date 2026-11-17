@@ -51,6 +51,8 @@ class ProductionOperationalRoleMatrixTest extends TestCase
         $this->assertTrue($refurbisher->hasAccess('tests.execute'));
         $this->assertTrue($refurbisher->hasAccess('tests.edit_runs'));
         $this->assertTrue(Gate::forUser($refurbisher)->allows('tests.execute'));
+        $this->assertFalse($refurbisher->hasAccess('tests.manage_legacy_evidence'));
+        $this->assertFalse(Gate::forUser($refurbisher)->allows('tests.manage_legacy_evidence'));
         $this->assertFalse($refurbisher->hasAccess('tests.start_new_run'));
         $this->assertFalse($refurbisher->hasAccess('assets.images.manage'));
         $this->assertFalse($refurbisher->hasAccess('assets.create'));
@@ -60,6 +62,8 @@ class ProductionOperationalRoleMatrixTest extends TestCase
         $this->assertTrue($senior->hasAccess('tests.execute'));
         $this->assertTrue($senior->hasAccess('tests.execute.senior'));
         $this->assertTrue($senior->hasAccess('tests.edit_runs'));
+        $this->assertTrue($senior->hasAccess('tests.manage_legacy_evidence'));
+        $this->assertTrue(Gate::forUser($senior)->allows('tests.manage_legacy_evidence'));
         $this->assertFalse($senior->hasAccess('tests.start_new_run'));
         $this->assertTrue(Gate::forUser($senior)->allows('tests.execute'));
         $this->assertTrue($senior->hasAccess('assets.images.manage'));
@@ -87,6 +91,8 @@ class ProductionOperationalRoleMatrixTest extends TestCase
         $this->assertTrue($supervisor->hasAccess('assets.override_sale_readiness'));
         $this->assertTrue($supervisor->hasAccess('tests.execute.supervisor'));
         $this->assertTrue($supervisor->hasAccess('tests.start_new_run'));
+        $this->assertTrue($supervisor->hasAccess('tests.manage_legacy_evidence'));
+        $this->assertTrue(Gate::forUser($supervisor)->allows('tests.manage_legacy_evidence'));
         $this->assertTrue(Gate::forUser($supervisor)->allows('tests.execute'));
         $this->assertTrue(Gate::forUser($supervisor)->allows('assets.sale_transition'));
         $this->assertTrue(Gate::forUser($supervisor)->allows('delete', $component));
@@ -122,6 +128,8 @@ class ProductionOperationalRoleMatrixTest extends TestCase
         $this->assertTrue($admin->hasAccess('attributes.lifecycle'));
         $this->assertTrue($admin->hasAccess('workflows.delete'));
         $this->assertTrue($admin->hasAccess('config.manage'));
+        $this->assertTrue($admin->hasAccess('tests.manage_legacy_evidence'));
+        $this->assertTrue(Gate::forUser($admin)->allows('tests.manage_legacy_evidence'));
         $this->assertFalse($refurbisher->hasAccess('tests.override_dependencies'));
         $this->assertFalse($senior->hasAccess('tests.override_dependencies'));
         $this->assertTrue($supervisor->hasAccess('tests.override_dependencies'));

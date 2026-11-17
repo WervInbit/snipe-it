@@ -10,6 +10,8 @@ use App\Models\TestRun;
 use App\Models\WorkflowProfileItem;
 use App\Services\WorkflowEvidencePhotoService;
 use App\Services\WorkflowProgressionService;
+use App\Services\LegacyWorkflowAttestationService;
+use App\Services\WorkflowItemEvidenceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,11 +24,17 @@ use Throwable;
 
 class TestResultController extends Controller
 {
-    public function __construct(private readonly WorkflowEvidencePhotoService $workflowEvidencePhotos)
-    {
+    public function __construct(
+        private readonly WorkflowEvidencePhotoService $workflowEvidencePhotos,
+        private readonly LegacyWorkflowAttestationService $legacyAttestations
+    ) {
     }
 
-    public function active(Asset $asset, WorkflowProgressionService $progressionService)
+    public function active(
+        Asset $asset,
+        WorkflowProgressionService $progressionService,
+        WorkflowItemEvidenceService $itemEvidence
+    )
     {
         $this->authorize('view', $asset);
 
@@ -62,6 +70,7 @@ class TestResultController extends Controller
                 'asset' => $asset,
                 'run' => null,
                 'results' => collect(),
+                'legacyEntries' => collect(),
                 'progress' => [
                     'total' => 0,
                     'completed' => 0,
@@ -123,13 +132,27 @@ class TestResultController extends Controller
             ];
         })->values();
 
+        $resolvedEvidence = $run->profile
+            ? $itemEvidence->forProfile($asset, $run->profile, $run)
+            : null;
+        $legacyEntries = collect($resolvedEvidence['entries'] ?? [])
+            ->where('state', WorkflowItemEvidenceService::STATE_LEGACY_ACCEPTED)
+            ->values();
+
         $requiredResults = $results->where('is_required', true);
         $optionalResults = $results->where('is_required', false);
 
-        $total = $requiredResults->count();
+        $legacyRequiredCount = $legacyEntries->where('required', true)->count();
+        $total = $requiredResults->count() + $legacyRequiredCount;
+        if ($total === 0) {
+            $total = $results->count() + $legacyEntries->count();
+        }
         $requiredFailCount = $requiredResults->where('status', TestResult::STATUS_FAIL)->count();
         $optionalFailCount = $optionalResults->where('status', TestResult::STATUS_FAIL)->count();
         $openCount = $requiredResults->where('status', TestResult::STATUS_NVT)->count();
+        if ($requiredResults->isEmpty() && $legacyRequiredCount === 0) {
+            $openCount = $results->where('status', TestResult::STATUS_NVT)->count();
+        }
 
         $progress = [
             'total' => $total,
@@ -137,6 +160,7 @@ class TestResultController extends Controller
             'remaining' => $openCount,
             'failures' => $requiredFailCount + $optionalFailCount,
             'blocking_failures' => $requiredFailCount,
+            'legacy_accepted' => $legacyEntries->count(),
         ];
 
         $failingLabels = $results
@@ -147,6 +171,7 @@ class TestResultController extends Controller
             'asset' => $asset,
             'run' => $run,
             'results' => $results,
+            'legacyEntries' => $legacyEntries,
             'progress' => $progress,
             'failingLabels' => $failingLabels,
             'canUpdate' => $canUpdateResults,
@@ -226,6 +251,9 @@ class TestResultController extends Controller
                     }
 
                     $result->save();
+                    if ($result->status !== TestResult::STATUS_NVT) {
+                        $this->legacyAttestations->supersedeForResult($testRun->asset, $result);
+                    }
                 }
 
                 $testRun->syncFinishedAtFromResults();
@@ -494,6 +522,9 @@ class TestResultController extends Controller
 
                 if ($updated) {
                     $result->save();
+                    if ($result->status !== TestResult::STATUS_NVT) {
+                        $this->legacyAttestations->supersedeForResult($testRun->asset, $result);
+                    }
                     $testRun->syncFinishedAtFromResults();
                 }
             });

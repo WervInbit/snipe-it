@@ -5,6 +5,7 @@ use App\Http\Controllers\Assets\AssetsController;
 use App\Http\Controllers\Assets\AssetComponentsController;
 use App\Http\Controllers\Assets\AssetLabelPrintController;
 use App\Http\Controllers\Assets\BulkAssetsController;
+use App\Http\Controllers\Assets\LegacyWorkflowAttestationController;
 use App\Http\Controllers\TestRunController;
 use App\Http\Controllers\TestResultController;
 use App\Http\Controllers\AssetTestController;
@@ -28,6 +29,9 @@ Route::group(
     ],
     
     function () {
+
+        Route::get('create/legacy-workflow-items', [LegacyWorkflowAttestationController::class, 'options'])
+            ->name('hardware.legacy-workflow-items');
         
         Route::get('bytag/{any?}',
             [AssetsController::class, 'getAssetByTag']
@@ -95,6 +99,8 @@ Route::group(
         )->name('hardware/bulksave');
 
         // Asset tests
+        Route::patch('{asset}/legacy-workflow-attestations/{attestation}/revoke', [LegacyWorkflowAttestationController::class, 'revoke'])
+            ->name('hardware.legacy-workflow-attestations.revoke');
         Route::get('{asset}/tests', [TestRunController::class, 'index'])
             ->name('test-runs.index');
         Route::get('{asset}/tests/active', [TestResultController::class, 'active'])

@@ -23,6 +23,7 @@ use App\Models\Statuslabel;
 use App\Models\User;
 use App\View\Label;
 use App\Services\QrLabelService;
+use App\Services\LegacyWorkflowAttestationService;
 use App\Services\Assets\LegacyAssetAssignmentCleanupService;
 use App\Services\Assets\AssetStatusTransitionGuardService;
 use App\Services\Components\AttachedComponentIssueService;
@@ -40,6 +41,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use TypeError;
+use Throwable;
 use Illuminate\Support\Collection;
 
 /**
@@ -117,7 +119,12 @@ class AssetsController extends Controller
      * @author [A. Gianotto] [<snipe@snipe.net>]
      * @since [v1.0]
      */
-    public function store(StoreAssetRequest $request, ModelAttributeManager $attributeManager, EffectiveAttributeResolver $resolver) : RedirectResponse
+    public function store(
+        StoreAssetRequest $request,
+        ModelAttributeManager $attributeManager,
+        EffectiveAttributeResolver $resolver,
+        LegacyWorkflowAttestationService $legacyAttestations
+    ) : RedirectResponse
     {
         $this->authorize(Asset::class);
 
@@ -192,7 +199,20 @@ class AssetsController extends Controller
         $asset = null;
         $qr = app(QrLabelService::class);
         $rowKeys = array_unique(array_merge(array_keys($requestedTags), array_keys($serials))) ?: [1];
+        $legacyItemIds = array_values($request->input('legacy_profile_item_ids', []));
+        $usesLegacyEvidence = $legacyItemIds !== [];
 
+        if ($usesLegacyEvidence) {
+            Gate::authorize('tests.manage_legacy_evidence');
+            if (count($rowKeys) !== 1) {
+                throw ValidationException::withMessages([
+                    'legacy_profile_item_ids' => trans('tests.legacy_single_asset_only'),
+                ]);
+            }
+            DB::beginTransaction();
+        }
+
+        try {
         foreach ($rowKeys as $a) {
             $asset = new Asset();
             $asset->allowDuplicateTag($request->boolean("allow_duplicate_tags.$a"));
@@ -300,13 +320,42 @@ class AssetsController extends Controller
                     }
                 }
 
-                $qr->generate($asset);
+                if ($usesLegacyEvidence) {
+                    $legacyAttestations->createForNewAsset(
+                        $asset,
+                        $legacyItemIds,
+                        (string) $request->input('legacy_source_note'),
+                        $request->input('legacy_source_tested_at'),
+                        $request->user()
+                    );
+                } else {
+                    $qr->generate($asset);
+                }
 
                 $createdAssets[] = $asset;
                 $successes[] = $asset->id;
 
             } else {
                 $failures[] = join(",", $asset->getErrors()->all());
+            }
+        }
+        } catch (Throwable $exception) {
+            if ($usesLegacyEvidence && DB::transactionLevel() > 0) {
+                DB::rollBack();
+            }
+            throw $exception;
+        }
+
+        if ($usesLegacyEvidence) {
+            if (count($successes) !== 1 || $failures !== []) {
+                DB::rollBack();
+                $successes = [];
+                $createdAssets = [];
+            } else {
+                DB::commit();
+                // QR generation is intentionally after the atomic database
+                // commit and never submits a print job.
+                $qr->generate($createdAssets[0]);
             }
         }
         $redirectOption = $request->get('redirect_option');
@@ -460,6 +509,7 @@ class AssetsController extends Controller
                 'tests.results.attributeDefinition',
                 'tests.results.photos',
                 'tests.user',
+                'legacyWorkflowAttestations.audits.user',
                 'trackedComponents.componentDefinition.category',
                 'trackedComponents.componentDefinition.manufacturer',
                 'trackedComponents.storageLocation.siteLocation',
