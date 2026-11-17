@@ -1,5 +1,56 @@
 # AST-04 Werk Afronden En Overdragen
 
+<!-- delivered-baseline:start -->
+## Delivered Baseline - 2026-11-17
+
+**v9 / 1 A4 page(s) / Refurbisher**. Native/PDF preparation
+and delivery are complete; exact-version acceptance and release alignment
+remain separate. [Register](../registry.md), [exact files/hashes](../current-set.json)
+and [current handoff](../HANDOFF.md) govern the delivered selection. Compare
+the actual NAS files before edits; they may be newer than this baseline.
+Dated preparation/pending statements below retain their historical scope.
+<!-- delivered-baseline:end -->
+
+<!-- final-preparation-2026-11-04:start -->
+## Prepared Revision - 2026-11-04
+
+Proposed **v9**, 1 A4 page(s). Status: prepared source;
+native Affinity import/edit/save/export and final PDF release remain incomplete.
+This follows the owner's all25 execution authorization. No exact-version
+acceptance or runtime selection is inferred.
+
+Reader outcome: Check completed work and hand the asset over for assessment.
+
+- Prepare the selected single-page task and its saved status-note evidence for editing.
+
+Preserve: Whole-work check, honest unresolved work, real status transition and its required later note, saved verification and handoff.
+
+Placement and tradeoff: Registration-note policy is not applied to later status-transition auditing. No proposed future QA status.
+
+Use the [all25 execution record](../reviews/final-set-preparation-2026-11-04.md)
+and [complete changes/comparison index](../../../../output/manuals/final-guide-set-2026-11-04/review/index.html#AST-04).
+The retained baseline below supplies the domain contract and historical evidence;
+this brief owns the changed outline and placements in the prepared proposal.
+The original capture/role/locale, application-target and native-proof limits
+are recorded centrally.
+<!-- final-preparation-2026-11-04:end -->
+
+
+## Operational Revision - 2026-10-20
+
+Current proposal: **v8, Working draft; not accepted**, one A4 side. Generator:
+`scripts/manuals/generate-operational-guides-2026-10-20.mjs`.
+See the [reasoning and preservation brief](../reviews/operational-guides-2026-10-20.md)
+and [exact v8 review](../reviews/AST-04-v8.md). Role: exact `Refurbisher`.
+Three steps integrate current required work, physical/actual component checks
+and note-before-status handoff. Preserve the physical-label location example
+and conditional Tracked check; Assumed model baseline is an expectation.
+Fresh source GUIDE-20261020-01 actually saved Being Processed -> QA Hold with
+the audit note and was reopened. The note screenshot uses the native resize
+handle to show the same saved demonstration text; it does not resubmit it.
+The physical QA location remains a local operational choice. Earlier metadata,
+sources and automatic-save-only wording below are historical proposals.
+
 ## Application Alignment Revision - 2026-10-01
 
 Current authoring proposal: **v7, working draft; not accepted**, 2 A4 pages. [Exact-version review](../reviews/AST-04-v7.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
@@ -19,14 +70,14 @@ See [implementation record](../reviews/owner-corrections-2026-09-10.md).
 
 | Field | Current value |
 | --- | --- |
-| Status | Working draft v7; not accepted |
+| Status | Working draft v8; not accepted |
 | Family | AST |
 | Type | Detail task |
-| Current version | `AST-04-complete-handoff-v7-draft` |
-| Page model | 2 A4 pages |
+| Current version | `AST-04-complete-handoff-v8-draft` |
+| Page model | 1 A4 page |
 | Layout recipe | `stacked-step-flow` with captions, `reused-evidence`, and `inline-warning` |
-| Generator | `scripts/manuals/generate-aligned-guides-2026-10-01.mjs` |
-| Role | Refurbisher; effective task and status rights required |
+| Generator | `scripts/manuals/generate-operational-guides-2026-10-20.mjs` |
+| Role | Refurbisher |
 | Needed | Verified asset and completed workflow |
 | Prerequisite | Workflow completed (WF-02) |
 
@@ -35,7 +86,7 @@ See [implementation record](../reviews/owner-corrections-2026-09-10.md).
 Confirm that recorded and physical work is complete, then hand the asset to a
 supervisor with an unmistakable next action.
 
-The v7 draft uses `QA Hold` for supervisor review. Supply its required audit
+The current draft uses `QA Hold` for supervisor review. Supply its required audit
 note, follow the application response and confirm the saved status. Quality
 can be read by Refurbisher; changing it requires the separate quality right.
 
@@ -52,7 +103,8 @@ help references.
    Historical Pass does not resolve Changed or a blocked follow-up.
 2. `Vergelijk registratie met het apparaat` - compare tag, S/N, model type,
    QR label, registered components, and necessary notes with the physical item.
-3. `Draag over aan de supervisor` - choose `QA Hold`, enter the requested note
+3. `Draag over aan de supervisor` - enter the requested Statusnotitie first,
+   then choose `QA Hold`,
    with work and deviations, and check the saved result. Place the asset at
    the QA location and identify AST-05 as the supervisor's next guide.
 

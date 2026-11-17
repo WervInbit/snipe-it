@@ -1,209 +1,127 @@
 # CAT-04 Componentdefinities beheren
 
-## Application Alignment Revision - 2026-10-01
+<!-- delivered-baseline:start -->
+## Delivered Baseline - 2026-11-17
 
-Current authoring proposal: **v5, working draft; not accepted**, 7 A4 pages. [Exact-version review](../reviews/CAT-04-v5.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+**v8 / 6 A4 page(s) / Supervisor**. Native/PDF preparation
+and delivery are complete; exact-version acceptance and release alignment
+remain separate. [Register](../registry.md), [exact files/hashes](../current-set.json)
+and [current handoff](../HANDOFF.md) govern the delivered selection. Compare
+the actual NAS files before edits; they may be newer than this baseline.
+Dated preparation/pending statements below retain their historical scope.
+<!-- delivered-baseline:end -->
 
-Verify quantity, child precedence, contribution flags and per-attribute sum/distinct; current Optical Drive choices.
+## Current Native Revision - 2026-11-12
 
-Added page: Controleer aantallen en numerieke bijdragen samen. Steps: Zoek het juiste bestaande onderdeeltype; Controleer kinderen, aantallen en bijdragevlaggen; Controleer de uitkomst met de attribuutregel.
+CAT-04 **v8**, six continuous A4 pages, is the selected working candidate;
+not accepted. [Reasoning and comparison](../reviews/CAT-04-v8.md). Add Expected
+Subcomponent (3B) and Add Attribute Contribution (4B) are now shown at first
+use, with the bottom-of-section location explained. All existing field views,
+explanations, Save/reopen and recovery remain; no field image is reduced.
+Full genuine source images remain inside editable crop frames. Prepared v7
+and all previous artifacts remain historical; the frozen November4 set is
+unchanged. Input: output/manuals/affinity-native-2026-11-10/idml-inputs/idml/
+CAT-04-v8-controls.idml; current exact output paths are in converted/CAT-04-v8.json.
 
-The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v4 input.
+<!-- final-preparation-2026-11-04:start -->
+## Prepared Revision - 2026-11-04
 
-## Maintenance Metadata
+Proposed **v7**, 6 A4 page(s). Status: prepared source;
+native Affinity import/edit/save/export and final PDF release remain incomplete.
+This follows the owner's all25 execution authorization. No exact-version
+acceptance or runtime selection is inferred.
 
-- Family: `CAT`.
-- Type: Extended administration task.
-- Current version: working draft v5; not accepted.
-- Expected page model: 7 A4 pages.
-- Layout recipe: `extended-admin-flow`.
+Reader outcome: Save one reusable part definition with the right identity, children and contributions.
 
-## Purpose
+- Recompose all six pages with settings entry, full-width identity/child/contribution crops and actual Save.
+- Explain Instances/Templates, Quantity/Required, both display flags, source precedence and return to the calling task.
 
-Reuse, create, or edit one reusable component definition, including its
-identity, optional expected parts, and attribute contributions.
+Preserve: RAM example, explicitly different motherboard example, optional-field restraint, always-present child boundary, missing-attribute return, saved verification and physical-record distinction.
 
-## Audience And Context
+Placement and tradeoff: A unique serial/tag never becomes another reusable definition. Lifecycle remains Admin maintenance.
 
-- Role: Supervisor with the minimum right
-  `components.manage_definitions`. Admin access is not required for ordinary
-  create/edit work.
-- Needed: A verified physical-part type, its identifying source information,
-  any existing component definitions for expected parts, and any existing attribute
-  definitions that describe the part.
-- Prerequisite: `CAT-00 Catalogus begrijpen`; use
-  `CAT-03 Attributen beheren` first only when a reusable fact is missing.
-- Return route: normally `CAT-02 Modelspecificatie opbouwen` or a CMP guide.
+Use the [all25 execution record](../reviews/final-set-preparation-2026-11-04.md)
+and [complete changes/comparison index](../../../../output/manuals/final-guide-set-2026-11-04/review/index.html#CAT-04).
+The retained baseline below supplies the domain contract and historical evidence;
+this brief owns the changed outline and placements in the prepared proposal.
+The original capture/role/locale, application-target and native-proof limits
+are recorded centrally.
+<!-- final-preparation-2026-11-04:end -->
 
-## Operator Outcome
 
-One reusable component type can be selected in a model-number baseline or a
-physical-component workflow without creating a duplicate or confusing the
-definition with one tagged physical part.
+## Baseline Specification - 2026-10-20
 
-## Page And Step Plan
+Status: **Working draft v6; not accepted**. 6 A4 page(s).
+Type: Reusable component-definition composition. Recipe: `extended-admin-flow; six continuous phases`.
+Intended role: **Supervisor**. Needed: Supported reusable part type and existing attribute definitions.
+Prerequisite: CAT-00. [Exact review](../reviews/CAT-04-v6.md).
 
-### Page 1 - Search and reuse first
+This current specification replaces contradictory earlier procedure/metadata.
+The [previous complete specification](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/inputs/CAT-04-previous-specification.md)
+preserves historical detail and exact acceptance links. Accepted artifacts,
+runtime selections and the other eight current proposals are unchanged.
 
-1. Open `Instellingen > Component Definitions`.
-2. Search name, part code, model number, category, and manufacturer.
-3. Compare the matching row before choosing `Create New`:
-   - `Instances` counts physical component records based on the definition.
-   - `Templates` counts model-number baselines that expect the definition.
-4. Reuse or edit the existing definition when it describes the same physical
-   part type. Use an attribute definition instead when the subject is only one
-   recurring fact and not a part.
+## Reader Outcome
 
-### Page 2 - Enter the reusable identity
+A reusable definition has the correct identity, contributions and expected children and can be reused by the caller.
 
-Explain the visible fields in operator language:
+## Action And Choice Structure
 
-- `Name`: the recognizable reusable part type; never an Inbit tag or one
-  physical serial number.
-- `Part Code`: a verified supplier/manufacturer part code when present.
-- `Model Number`: the verified component model identifier when present.
-- `Category`: the component category, not the category of the complete asset.
-- `Manufacturer`: the actual maker when known; leave blank rather than guess.
-- `Specification Summary`: short recognition information that is not already
-  represented by reusable attributes.
-- `Spec Display Label`: optional readable label used in asset specifications.
-  Leave blank to use the generated component label.
+- 1-2: search/reuse the part type and enter reusable identity, category/manufacturer and readable labels.
+- 3: only where normally fixed children exist, choose each child definition/name/quantity/Required/Notes; otherwise continue.
+- 4: add contributions using existing attributes, valid values and deliberate display/label flags.
+- 5-6: check children, quantities, contribution precedence and numeric meaning before Save, then reopen/verify and return.
 
-`Active` is shown as current state but ordinary lifecycle changes are not part
-of this guide.
+## Operating Contract And Boundaries
 
-### Page 3 - Add expected parts when relevant
+- A component definition is not one physical tagged part. Do not put an Inbit tag or unique serial into its reusable name.
+- Instances counts physical registrations; Templates counts model-number expectations and does not enumerate every child relationship.
+- Use only children normally present. Keep Required on in this operational route; unchecked children still contribute and optional behavior is not separately enforced.
+- Expected Name is recognizable and can be generated; Notes provides recognition/placement context, not a substitute attribute. The motherboard/port screenshot is explicitly another example; ordinary RAM has no fixed port children.
+- Show as asset spec determines contribution to the asset specification; Use in component label helps construct the readable component label.
+- A child's same attribute takes precedence over the parent's. Check both levels, quantities and aggregation meaning before saving. Numeric rule configuration belongs in CAT-03.
+- Missing definitions require a caller handoff preserving unsubmitted input. Existing relationship removal/lifecycle belongs to Admin/CAT-05; do not invent browser deletion or placement/tracking settings.
 
-1. Under `Expected Subcomponents`, search and select an existing `Component
-   Definition` for the expected part.
-2. Leave `Expected Name` blank to reuse the selected definition name, or enter
-   a short recognition name only when operators need a clearer local label.
-3. Enter the normal `Quantity` (at least one) and leave `Required` selected in
-   the current operational process.
-4. Use optional Notes for recognition or placement context, not as a substitute
-   for a reusable attribute.
-5. Add only parts that should normally always be present. Optional or
-   per-device varying parts do not belong in this expected structure.
-6. Keep the structure to one supported level: component definition -> expected
-   part. Do not create an expected part for a descriptive fact.
+## Revision Reasoning
 
-### Page 4 - Add attribute contributions
+Required alignment: Quantity, child precedence and contribution/display flags before Save.
 
-1. Search and select an existing attribute definition.
-2. Enter a value that follows that definition's datatype, unit, options, and
-   constraints.
-3. `Show as asset spec`: the component value contributes to the displayed
-   model and asset specification.
-4. `Use in component label`: the value helps build the readable component
-   label when the attribute is configured to show component labels.
-5. A component definition may use several attributes, and one attribute may be
-   reused by several component definitions. Missing meanings route to CAT-03;
-   do not create near-duplicate attributes in this form.
+Chosen improvement: Use actual complete form groups and the native Save control; label the distinct child example explicitly.
 
-### Page 5 - Check overlap and save
+Preserve: Six phases and all identity, child, attribute, overlap and reuse explanations.
 
-1. Review contributions on the current definition and its expected parts
-   before Save.
-2. If the hierarchy warning names the same attribute on both levels, decide
-   which definition level owns the fact. A value from the expected part
-   overrides the value from the above definition in the calculated asset
-   specification.
-3. Remove or correct an unintended duplicate contribution before reusing the
-   definition. This is an amber correction route, not a red STOP.
-4. Choose `Create Definition` or `Save Changes` and verify the success state.
+Placement and tradeoff: Replace the simulated overlap state with readable current contributions and a pre-save source check, preserving the field-support chapter.
 
-### Page 6 - Verify reuse and return
+## Standards, Desired Targets And Retired Approaches
 
-1. Search the saved definition and verify name, category, manufacturer,
-   Instances, Templates, and Active state.
-2. Return to the original task:
-   - `CAT-02 Modelspecificatie opbouwen` to add the definition as an expected
-     component on a model-number baseline.
-   - `CMP-02 Nieuw component registreren en plaatsen` to create a physical
-     component record from the definition.
-   - `CAT-05 Bestaande catalogus aanpassen` for deactivation or removal of
-     saved contributions or expected-part rows.
+Current [authoring method](../authoring-method.md), shared contracts and
+owner decisions govern this revision. Keep exact access-group names, Dutch
+application/account locale, recognizable context, complete relevant controls
+and useful A4 target scale. Review the unmarked crop first; annotate only a
+remaining search or distinction. Routine checks use ordinary instructions,
+recoverable exceptions are conditional, and a genuine halt states its trigger
+and recovery. Preserve the task's sequence or explicit alternatives; complete
+the required work before declaring completion. No acceptance is inferred.
 
-## Mandatory Decisions
+Target complete Dutch UI and clear field-to-result recognition. Retire invented
+role labels, redundant group outlines, fixed password recipes, blanket STOP
+wording, simulated screenshot states and post-completion alignment appendices.
+Do not invent unavailable settings, a source field/policy or a future QA status.
+The mounted application is the separate refurbisher-followups checkout,
+not the root checkout. Source fingerprints, actual actors, Dutch locale,
+owned synthetic fixtures and save/trial boundaries are recorded in the batch
+provenance. Genuine English strings and narrow native status-choice text
+remain product gaps. Header roles preserve the intended task allocation;
+local seeded/custom grants can be wider than the operational-role document.
+Physical printing/component work, destructive catalogue branches and an
+unfamiliar-reader/A4 paper trial are unperformed. Artifact checks and editorial
+read-back do not establish reader performance or exact acceptance.
 
-- A component definition is a reusable physical-part type, not one tagged
-  component instance.
-- Search before create; similar names, part codes, model numbers, categories,
-  and manufacturer must be compared together.
-- Expected parts are existing component definitions, not free-text facts.
-- Quantity is the normal expected count. Under the current process every saved
-  expected-part row remains `Required`; an optional or per-device varying part
-  is recorded only when it is physically present.
-- Attribute contributions reuse CAT-03 definitions and valid values.
-- Overlap between definition levels is reviewed deliberately because values
-  from expected parts take precedence in calculated asset specifications.
+## Evidence And Maintenance
 
-## Current Product Boundary
-
-The data model contains serial-tracking and placement modes, but the current
-browser form has no controls for them. This guide must not instruct an operator
-to choose those modes. Controller defaults are application behavior, not an
-operator step.
-
-The `Required` flag is persisted and displayed, but it currently does not
-enforce a separate completion check and unchecked rows still participate in
-calculated specifications. CAT-04 therefore does not present unchecked
-`Required` as an operator choice. Optional or per-device varying parts are not
-added to the expected structure.
-
-There is no browser Delete action for a component definition. Activation,
-deactivation, and removal of saved contribution or expected-part rows require lifecycle
-rights and belong in CAT-05.
-
-## Exclusions
-
-- Creating or installing a physical component instance.
-- Adding the definition to a model-number baseline.
-- Creating an attribute definition inline.
-- Browser-inaccessible tracking or placement settings.
-- Admin lifecycle cleanup or an invented Delete route.
-
-## Completion
-
-`Klaar als`: de herbruikbare componentdefinitie heeft de juiste identiteit,
-bijdragen en eventuele verwachte onderdelen en is vindbaar voor hergebruik.
-
-## Related Guides
-
-- `CAT-00 Catalogus begrijpen`.
-- `CAT-02 Modelspecificatie opbouwen`.
-- `CAT-03 Attributen beheren`.
-- `CAT-05 Bestaande catalogus aanpassen`.
-- `CMP-02 Nieuw component registreren en plaatsen`.
-
-## Evidence Manifest
-
-| Label | Source ID | Purpose |
-| --- | --- | --- |
-| 1A/1B/6A | `CAT-COMPONENT-DEFINITION-ENTRY-DESKTOP-01` | Find Component Definitions, compare use counts, and verify that the saved definition is reusable. |
-| 2A | `CAT-COMPONENT-DEFINITION-IDENTITY-DESKTOP-01` | Explain reusable identity fields with a read-only existing definition. |
-| 3A | `CAT-COMPONENT-DEFINITION-CHILDREN-DESKTOP-01` | Show complete Expected Subcomponents rows, quantity, required state, and notes. |
-| 4A | `CAT-COMPONENT-DEFINITION-CONTRIBUTIONS-DESKTOP-01` | Show several complete attribute contributions and their display choices. |
-| 5A | `CAT-COMPONENT-DEFINITION-OVERLAP-DESKTOP-01` | Show the implemented hierarchy-overlap warning without changing a saved record. |
-| 5B | `CAT-COMPONENT-DEFINITION-SAVE-DESKTOP-01` | Show a complete contribution row and Save Changes on the read-only existing definition. |
-
-## Validation Notes
-
-- Steps remain 1-6 across six A4 pages; expected parts and attribute
-  contributions retain full-width readable screenshots.
-- No component-definition form was submitted. The overlap warning is a
-  screenshot-only DOM example of implemented application behavior.
-- Operator text describes definition levels and expected parts; native English
-  field labels remain visible only where they occur in the application.
-- Browser-inaccessible tracking/placement modes and lifecycle cleanup remain
-  outside this ordinary Supervisor route.
-
-## Focused Candidate - 2026-09-08
-
-The separate [v4 review](../reviews/CAT-04-v4.md)
-records the focused follow-up to baseline v2, with the exact
-PDF and checksum. The owner requested this pass across all existing guides
-after reviewing WF-01 v12 positively. Earlier selections and their policies
-remain traceable; this candidate is not automatically accepted. See the
-[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
-source/crop exceptions, and remaining operational or evidence gaps.
+The exact PDF, HTML/SVG, baseline, current source captures, measured crop plan,
+source/role/locale provenance and recognition placements are retained in the
+[round](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/README.md).
+The generator is `scripts/manuals/generate-remaining-guides-2026-10-20.mjs`.
+Frozen artifacts reproduce a proposal; the current specification and owner
+decisions govern future revisions. Create a new version after sealing.

@@ -1,5 +1,54 @@
 # AST-02 Refurbishment Route
 
+<!-- delivered-baseline:start -->
+## Delivered Baseline - 2026-11-17
+
+**v11 / 1 A4 page(s) / Refurbisher**. Native/PDF preparation
+and delivery are complete; exact-version acceptance and release alignment
+remain separate. [Register](../registry.md), [exact files/hashes](../current-set.json)
+and [current handoff](../HANDOFF.md) govern the delivered selection. Compare
+the actual NAS files before edits; they may be newer than this baseline.
+Dated preparation/pending statements below retain their historical scope.
+<!-- delivered-baseline:end -->
+
+<!-- final-preparation-2026-11-04:start -->
+## Prepared Revision - 2026-11-04
+
+Proposed **v11**, 1 A4 page(s). Status: prepared source;
+native Affinity import/edit/save/export and final PDF release remain incomplete.
+This follows the owner's all25 execution authorization. No exact-version
+acceptance or runtime selection is inferred.
+
+Reader outcome: Choose the task guide that belongs to the current refurbishment position.
+
+- Prepare the existing route and component detours as editable references.
+
+Preserve: AC-01 -> SC-01 -> WF-01 -> WF-02 -> AST-04 -> Supervisor/AST-05, with component choices and return.
+
+Placement and tradeoff: The overview remains a router; it does not duplicate execution instructions.
+
+Use the [all25 execution record](../reviews/final-set-preparation-2026-11-04.md)
+and [complete changes/comparison index](../../../../output/manuals/final-guide-set-2026-11-04/review/index.html#AST-02).
+The retained baseline below supplies the domain contract and historical evidence;
+this brief owns the changed outline and placements in the prepared proposal.
+The original capture/role/locale, application-target and native-proof limits
+are recorded centrally.
+<!-- final-preparation-2026-11-04:end -->
+
+
+## Operational Revision - 2026-10-20
+
+Current proposal: **v10, Working draft; not accepted**, one A4 side,
+`route-list` with `help-alternative`. Generator:
+`scripts/manuals/generate-operational-guides-2026-10-20.mjs`.
+See the [reasoning brief](../reviews/operational-guides-2026-10-20.md) and
+[exact v10 review](../reviews/AST-02-v10.md).
+Preserve the compact v8 route and full styled choices. Current workflow order,
+truthful stored results and QA handoff belong in their owning stages. Stage 6
+explicitly transfers responsibility to Supervisor. Component work returns to
+WF-02; registration returns to SC-01. No repeated screenshot procedure or
+post-completion page restart. Earlier proposal sections are historical.
+
 ## Application Alignment Revision - 2026-10-01
 
 Current authoring proposal: **v9, working draft; not accepted**, 2 A4 pages. [Exact-version review](../reviews/AST-02-v9.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
@@ -19,13 +68,13 @@ notes below. Previous PDFs and exact acceptance records remain unchanged.
 
 | Field | Current value |
 | --- | --- |
-| Status | Working draft v9; not accepted |
+| Status | Working draft v10; not accepted |
 | Family | AST |
 | Type | Route overview |
-| Current version | `AST-02-refurbishment-route-v9-draft` |
-| Page model | 2 A4 pages |
+| Current version | `AST-02-refurbishment-route-v10-draft` |
+| Page model | 1 A4 page |
 | Layout recipe | `route-list` with `help-alternative` |
-| Generator | `scripts/manuals/generate-aligned-guides-2026-10-01.mjs` |
+| Generator | `scripts/manuals/generate-operational-guides-2026-10-20.mjs` |
 | Role | Refurbisher |
 | Needed | Device, account, and the task guides referenced by the route |
 

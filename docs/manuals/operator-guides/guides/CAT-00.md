@@ -1,222 +1,116 @@
 # CAT-00 Catalogus begrijpen
 
-## Application Alignment Revision - 2026-10-01
+<!-- delivered-baseline:start -->
+## Delivered Baseline - 2026-11-17
 
-Current authoring proposal: **v12, working draft; not accepted**, 7 A4 pages. [Exact-version review](../reviews/CAT-00-v12.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+**v14 / 6 A4 page(s) / Supervisor**. Native/PDF preparation
+and delivery are complete; exact-version acceptance and release alignment
+remain separate. [Register](../registry.md), [exact files/hashes](../current-set.json)
+and [current handoff](../HANDOFF.md) govern the delivered selection. Compare
+the actual NAS files before edits; they may be newer than this baseline.
+Dated preparation/pending statements below retain their historical scope.
+<!-- delivered-baseline:end -->
 
-Sum versus distinct numeric contribution concepts; current guide names and missing manual-attribute limitation.
+<!-- final-preparation-2026-11-04:start -->
+## Prepared Revision - 2026-11-04
 
-Added page: Begrijp hoe componentgetallen worden gecombineerd. Steps: Tel capaciteiten en aantallen op; Behoud eigenschappen als afzonderlijke waarden; Herken regel, bron en weergave.
+Proposed **v14**, 6 A4 page(s). Status: prepared source;
+native Affinity import/edit/save/export and final PDF release remain incomplete.
+This follows the owner's all25 execution authorization. No exact-version
+acceptance or runtime selection is inferred.
 
-The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v11 input.
+Reader outcome: Recognize the catalogue object and select its owning task guide.
 
-## Latest Correction Candidate - 2026-09-10
+- Recompose reusable definitions as editable concepts/relationships, replacing unreadable list miniatures with the owning CAT-03/04 handoffs.
+- Enlarge the Assumed and Tracked/Extra examples; explain quantity, Sum and distinct beside their actual examples.
+- Remove stale guide-follows wording from maintenance/source routes.
 
-Current review candidate: [v11](../reviews/CAT-00-v11.md), owner-cleared for user review.
-Attached the Asset-to-component arrow; explained multiple and optional records, component values/children/tray cases; aligned page 3 optionality; ordered learning cards CAT-03, CAT-04, CAT-01, CAT-02.
-This current correction takes precedence over conflicting historical version
-notes below. Previous PDFs and exact acceptance records remain unchanged.
+Preserve: Six reference parts, complete first relationship map, two identity examples, reusable meanings, Removed boundary and learning/task router.
 
-Status: Internal review candidate v11; owner cleared for user review 2026-09-10.
+Placement and tradeoff: Concept headings remain reference material; they are not mandatory numbered application actions.
 
-## Maintenance Metadata
+Use the [all25 execution record](../reviews/final-set-preparation-2026-11-04.md)
+and [complete changes/comparison index](../../../../output/manuals/final-guide-set-2026-11-04/review/index.html#CAT-00).
+The retained baseline below supplies the domain contract and historical evidence;
+this brief owns the changed outline and placements in the prepared proposal.
+The original capture/role/locale, application-target and native-proof limits
+are recorded centrally.
+<!-- final-preparation-2026-11-04:end -->
 
-- Family: `CAT`.
-- Type: Reference chapter and guide router.
-- Current version: working draft v12; not accepted.
-- Page model: Six-page reference chapter with continuous section numbering.
-- Layout recipe: `reference-chapter` with `reused-evidence` and
-  `two-sided-continuation`.
-- Generator: `scripts/manuals/generate-aligned-guides-2026-10-01.mjs`.
-- Artifact root: `output/manuals/proofs/owner-corrections-2026-09-10/CAT-00-v11/`.
-- Portable review package:
-  `resources/manuals/operator-guides/review-rounds/2026-09-10/owner-corrections/CAT-00-catalogus-begrijpen-v11-draft.pdf`.
-  Its frozen generation manifest retains the former draft state; the dated owner clearance records the current status.
 
-## Purpose
+## Baseline Specification - 2026-10-20
 
-Give a Supervisor an approachable map of catalogue identity, reusable
-definitions, model-number baselines, and physical asset state. The chapter
-must make the next task guide predictable without becoming a compressed field
-manual for every CAT form.
+Status: **Working draft v13; not accepted**. 6 A4 page(s).
+Type: Reference chapter and task router. Recipe: `reference-chapter; six conceptual parts`.
+Intended role: **Supervisor**. Needed: Catalogue read access and a physical product context.
+Prerequisite: AC-01. [Exact review](../reviews/CAT-00-v13.md).
 
-CAT-00 explains and routes. It does not create, edit, or save application data.
+This current specification replaces contradictory earlier procedure/metadata.
+The [previous complete specification](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/inputs/CAT-00-previous-specification.md)
+preserves historical detail and exact acceptance links. Accepted artifacts,
+runtime selections and the other eight current proposals are unchanged.
 
-## Audience And Context
+## Reader Outcome
 
-- Role: Supervisor.
-- Needed: catalogue read rights.
-- Prerequisite: `AC-01 Login`.
-- Reader knowledge: physical product work, but no Snipe-IT, database, or
-  programming knowledge is assumed.
-- Diagrams explain relationships; selected screenshots identify real
-  interface landmarks.
+The reader recognizes the catalogue object, understands its contribution and selects the owning task guide.
 
-## Part 1 - The Catalogue In One View
+## Action And Choice Structure
 
-Show these relationships without crossing connectors:
+- 1: relationship map from Basismodel to exact Modelnummer and physical Asset.
+- 2-3: distinguish identities and reusable attribute/component definitions.
+- 4: compare Assumed expectations with real Tracked/Extra records as different meanings, not mandatory state steps.
+- 5: direct facts versus expected components, quantities, sum/distinct and source precedence.
+- 6: learn building blocks, then select the missing-object or maintenance/source route.
 
-1. `Basismodel -> Modelnummer -> Asset` is the identity chain.
-2. A direct attribute value and an expected component belong to the exact
-   Modelnummer baseline.
-3. A direct value uses one Attribuutdefinitie.
-4. A Componentdefinitie uses one or more Attribuutdefinities.
-5. A registered component is physical state on exactly one Asset and uses a
-   reusable Componentdefinitie.
+## Operating Contract And Boundaries
 
-CAT purple identifies model and attribute structures, CMP amber identifies
-component structures and states, and AST green identifies physical asset
-identity/state. Headings and border/fill treatment distinguish definitions,
-baseline uses, and physical records.
+- One Basismodel is product/generation; one Modelnummer is the full manufacturer variant code; one Asset is a uniquely tagged physical device.
+- A definition is reusable meaning/type, not one physical part or one model-number value.
+- Assumed, Tracked, Extra and Removed must not be drawn as one compulsory progression. An Extra Tracked record can coexist with an Assumed baseline.
+- Direct intrinsic facts differ from replaceable/countable expected components. Avoid two competing sources for the same fact.
+- Sum multiplies contributing capacity/count by quantities; distinct retains unique shared properties, including differing values. A child source takes precedence over the parent's same attribute.
+- This is reference, not a task declaring catalogue edits completed. No configuration procedure is appended after the final guide selector.
 
-The closing note states: a definition describes what is reusable, a baseline
-describes what is expected, and a physical record describes what is actually
-present.
+## Revision Reasoning
 
-## Part 2 - Which Identity Am I Looking At?
+Required alignment: Current tracked/baseline coexistence, quantities and numeric aggregation semantics.
 
-Use two aligned examples:
+Chosen improvement: Present expectation and reality side by side, then teach calculation in the specification chapter before route selection.
 
-| Basismodel | Exact modelnummer | Fysiek asset |
-| --- | --- | --- |
-| HP ProBook 450 G8 | 2E9F8EA#ABH | INBIT-HG0042 / S/N 5CD1234ABC |
-| Samsung Galaxy A5 | SM-A520F | INBIT-TF0187 / S/N R58M1234ABC |
+Preserve: Six reference chapters, relationship diagram, identity examples, reusable building blocks and guide router.
 
-Explain:
+Placement and tradeoff: Replace the misleading state chain without forcing reference concepts into a sequential task template.
 
-- Basismodel is product plus generation and can contain several exact codes.
-- Modelnummer is the complete manufacturer variant/SKU code and can be reused
-  by many physical assets.
-- Asset is one physical device with its own Inbit tag and serial number.
-- Another printed manufacturer code is another exact model number.
-- RAM or storage replaced later on one device changes physical asset state; it
-  does not invent another manufacturer code.
+## Standards, Desired Targets And Retired Approaches
 
-Visual `2A` shows the Basismodel breadcrumb and complete exact-number row in
-one recognizable crop.
+Current [authoring method](../authoring-method.md), shared contracts and
+owner decisions govern this revision. Keep exact access-group names, Dutch
+application/account locale, recognizable context, complete relevant controls
+and useful A4 target scale. Review the unmarked crop first; annotate only a
+remaining search or distinction. Routine checks use ordinary instructions,
+recoverable exceptions are conditional, and a genuine halt states its trigger
+and recovery. Preserve the task's sequence or explicit alternatives; complete
+the required work before declaring completion. No acceptance is inferred.
 
-## Part 3 - Reusable Building Blocks
+Target complete Dutch UI and clear field-to-result recognition. Retire invented
+role labels, redundant group outlines, fixed password recipes, blanket STOP
+wording, simulated screenshot states and post-completion alignment appendices.
+Do not invent unavailable settings, a source field/policy or a future QA status.
+The mounted application is the separate refurbisher-followups checkout,
+not the root checkout. Source fingerprints, actual actors, Dutch locale,
+owned synthetic fixtures and save/trial boundaries are recorded in the batch
+provenance. Genuine English strings and narrow native status-choice text
+remain product gaps. Header roles preserve the intended task allocation;
+local seeded/custom grants can be wider than the operational-role document.
+Physical printing/component work, destructive catalogue branches and an
+unfamiliar-reader/A4 paper trial are unperformed. Artifact checks and editorial
+read-back do not establish reader performance or exact acceptance.
 
-### Attribuutdefinitie
+## Evidence And Maintenance
 
-Describe it as the reusable meaning and input rules for one fact. Use the
-small example `Werkgeheugen`, datatype `Int`, unit `GB`. Do not reproduce the
-complete CAT-03 field form.
-
-### Componentdefinitie
-
-Describe it as a reusable physical-part type with identity, attribute values,
-display information, and optional expected children. Use `RAM 8 GB DDR4`,
-which uses `Werkgeheugen = 8 GB` and `Geheugentype = DDR4`.
-
-The relationship diagram explicitly shows one Componentdefinitie using several
-Attribuutdefinities. It also states that one Attribuutdefinitie can be reused by
-many component definitions, model numbers, or workflow features.
-
-Visual `3A` shows the attribute-definition list. Visual `3B` shows the
-component-definition list. Neither visual teaches its complete create form.
-
-## Part 4 - Expectation Versus Reality
-
-Explain the states around one expected component:
-
-- `Verwachte component`: component definition plus quantity on the exact
-  model-number baseline.
-- `Aangenomen (Assumed)`: the asset still uses that baseline expectation
-  without a separately registered physical record.
-- `Geregistreerd (Tracked)`: a component registration or movement has created
-  a physical record on the asset.
-- `Verwijderd (Removed)`: expected quantity is no longer merely assumed in its
-  original place.
-
-Do not present the states as mandatory sequential work. A baseline row may
-remain Assumed. A generic status change does not materialize a Tracked record.
-
-Visual `4A` shows a tracked RAM row. Visual `4B` shows storage still assumed
-from the baseline.
-
-## Part 5 - How A Model Specification Is Formed
-
-Use one decision:
-
-- Direct value: stable intrinsic fact of this manufacturer variant, such as
-  introduction year, weight, colour, or screen size.
-- Expected component: hardware that is replaceable, countable, transferable,
-  or separately inspectable, such as RAM, storage, battery, or motherboard.
-
-Use the HP example throughout. State that component contributions may determine
-the displayed model and asset specification. The same fact must not be entered
-again as a competing direct value.
-
-Visual `5A` shows a direct value on `Edit Spec`. Visual `5B` shows expected
-components and quantities on the same specification route.
-
-Detailed datatype fields, contribution controls, overlap resolution, and value
-precedence belong to CAT-02 through CAT-04, not this orientation page.
-
-## Part 6 - Choose The Correct Follow-Up Guide
-
-Route by the object or question:
-
-| Need | Guide |
-| --- | --- |
-| Missing product/generation or exact manufacturer code | `CAT-01 Model en modelnummer aanmaken` |
-| Missing baseline for one exact code | `CAT-02 Modelspecificatie opbouwen` |
-| Missing reusable meaning or input rule | `CAT-03 Attributen beheren` |
-| Missing reusable physical-part type | `CAT-04 Componentdefinities beheren` |
-| Existing default/lifecycle/cleanup state | `CAT-05 Bestaande catalogus aanpassen` |
-| Uncertain identity, code, or source | `CAT-06 Productgegevens controleren` |
-| One physical device after the catalogue is complete | `AST-03 Asset registreren en labelen` |
-| Register or place a physical component | `CMP-01` or `CMP-02` |
-
-Mark CAT-02 through CAT-06 as `In voorbereiding` until their artifacts exist.
-Do not infer anything about the reader's suitability from completion.
-
-## Completion
-
-`Klaar als`: the reader can identify the object and choose the guide that owns
-the required change.
-
-## Related Guides
-
-- `CAT-01 Model en modelnummer aanmaken`.
-- `CAT-02 Modelspecificatie opbouwen`.
-- `CAT-04 Componentdefinities beheren`.
-- `CAT-06 Productgegevens controleren`.
-
-## Evidence Manifest
-
-| Label | Source ID | Purpose |
-| --- | --- | --- |
-| 2A | `CAT-MODEL-DETAIL-DESKTOP-01` | Basismodel breadcrumb and exact-number row. |
-| 3A | `CAT-ATTRIBUTE-LIST-DESKTOP-01` | Reusable attribute definitions. |
-| 3B | `CAT-COMPONENT-DEFINITION-LIST-DESKTOP-01` | Reusable component definitions. |
-| 4A/4B | `CMP-INSTALL-RESULT-MOBILE-02` | Tracked and assumed states on one asset roster. |
-| 5A | `CAT-MODEL-SPEC-DESKTOP-01` | Direct value on one exact model number. |
-| 5B | `CAT-MODEL-SPEC-COMPONENTS-DESKTOP-01` | Expected components and quantities. |
-
-## Validation Notes
-
-- The six numbered bodies are reference sections, not execution steps.
-- Every relationship arrow has a clear path and no text intersection.
-- Operator copy does not expose internal field names or source-code terms.
-- Cross-guide references use family colour, icon, code, and complete title.
-- Screenshots retain recognizable application context and short captions.
-- CAT-00 v9 remains a working draft until this exact PDF is explicitly
-  accepted.
-
-## Focused Candidate - 2026-09-08
-
-The separate [v10 review](../reviews/CAT-00-v10.md)
-records the focused follow-up to baseline v9, with the exact
-PDF and checksum. The owner requested this pass across all existing guides
-after reviewing WF-01 v12 positively. Earlier selections and their policies
-remain traceable; this candidate is not automatically accepted. See the
-[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
-source/crop exceptions, and remaining operational or evidence gaps.
-
-## Owner Feedback Follow-Up - 2026-09-10
-
-MR-06/MR-10: fix the part-1 detached connector and verify plain-language relationship quantities. MR-12/MR-13: later reconsider field-to-result mapping and learning order.
-See [owner review TODOs](../reviews/owner-review-todos-2026-09-10.md).
-The existing PDF is unchanged; these are next-version or decision items.
+The exact PDF, HTML/SVG, baseline, current source captures, measured crop plan,
+source/role/locale provenance and recognition placements are retained in the
+[round](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/README.md).
+The generator is `scripts/manuals/generate-remaining-guides-2026-10-20.mjs`.
+Frozen artifacts reproduce a proposal; the current specification and owner
+decisions govern future revisions. Create a new version after sealing.

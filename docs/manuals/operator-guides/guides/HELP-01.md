@@ -1,5 +1,59 @@
 # HELP-01 Problemen En Hulp
 
+<!-- delivered-baseline:start -->
+## Delivered Baseline - 2026-11-17
+
+**v10 / 2 A4 page(s) / Iedereen**. Native/PDF preparation
+and delivery are complete; exact-version acceptance and release alignment
+remain separate. [Register](../registry.md), [exact files/hashes](../current-set.json)
+and [current handoff](../HANDOFF.md) govern the delivered selection. Compare
+the actual NAS files before edits; they may be newer than this baseline.
+Dated preparation/pending statements below retain their historical scope.
+<!-- delivered-baseline:end -->
+
+<!-- final-preparation-2026-11-04:start -->
+## Prepared Revision - 2026-11-04
+
+Proposed **v10**, 2 A4 page(s). Status: prepared source;
+native Affinity import/edit/save/export and final PDF release remain incomplete.
+This follows the owner's all25 execution authorization. No exact-version
+acceptance or runtime selection is inferred.
+
+Reader outcome: Look up the observed problem and take the matching recovery or role handoff.
+
+- Account creation and password-reset help now name Admin, consistently with the owning account guides.
+- Prepare the selected two independent lookup sides as editable blocks.
+
+Preserve: Practical login/search/workflow/component/status/printing recovery and exact role handoffs.
+
+Placement and tradeoff: No mandatory read-all sequence, blind print retry or retired Windows setup procedure.
+
+Use the [all25 execution record](../reviews/final-set-preparation-2026-11-04.md)
+and [complete changes/comparison index](../../../../output/manuals/final-guide-set-2026-11-04/review/index.html#HELP-01).
+The retained baseline below supplies the domain contract and historical evidence;
+this brief owns the changed outline and placements in the prepared proposal.
+The original capture/role/locale, application-target and native-proof limits
+are recorded centrally.
+<!-- final-preparation-2026-11-04:end -->
+
+
+## Operational Revision - 2026-10-20
+
+Current proposal: **v9, Working draft; not accepted**, two independent lookup
+sides, `troubleshooting-grid`. Role: `Iedereen`. Generator:
+`scripts/manuals/generate-operational-guides-2026-10-20.mjs`.
+See the [reasoning and preservation brief](../reviews/operational-guides-2026-10-20.md)
+and [exact v9 review](../reviews/HELP-01-v9.md).
+Preserve all twelve existing problem subjects and full guide routes. Four
+additional problem groups cover changed workflows, save/evidence problems,
+required status notes and protected release. Split access/lookup/labels from
+workflow/status/components so text stays readable. These are alternatives
+selected by problem, with no numbered procedure or general STOP banner.
+The genuine identity halt lives in its own condition-specific tile. Printer
+help checks outcome and asks local support; no blind duplicate job, withdrawn
+Windows setup or CUPS administration instruction belongs here. Earlier
+proposal descriptions below are historical.
+
 ## Application Alignment Revision - 2026-10-01
 
 Current authoring proposal: **v8, working draft; not accepted**, 2 A4 pages. [Exact-version review](../reviews/HELP-01-v8.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).

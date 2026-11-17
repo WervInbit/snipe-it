@@ -1,182 +1,116 @@
 # CAT-02 Modelspecificatie opbouwen
 
-## Application Alignment Revision - 2026-10-01
+<!-- delivered-baseline:start -->
+## Delivered Baseline - 2026-11-17
 
-Current authoring proposal: **v3, working draft; not accepted**, 7 A4 pages. [Exact-version review](../reviews/CAT-02-v3.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+**v5 / 6 A4 page(s) / Supervisor**. Native/PDF preparation
+and delivery are complete; exact-version acceptance and release alignment
+remain separate. [Register](../registry.md), [exact files/hashes](../current-set.json)
+and [current handoff](../HANDOFF.md) govern the delivered selection. Compare
+the actual NAS files before edits; they may be newer than this baseline.
+Dated preparation/pending statements below retain their historical scope.
+<!-- delivered-baseline:end -->
 
-Manual attribute filtering when components supply values; verify aggregated values and current catalogue maintenance routes.
+<!-- final-preparation-2026-11-04:start -->
+## Prepared Revision - 2026-11-04
 
-Added page: Controleer beschikbare attributen en afgeleide getallen. Steps: Zoek op Edit Spec bij het juiste modelnummer; Controleer bron, hoeveelheid en aggregatie; Los een ontbrekende keuze via de bron op.
+Proposed **v5**, 6 A4 page(s). Status: prepared source;
+native Affinity import/edit/save/export and final PDF release remain incomplete.
+This follows the owner's all25 execution authorization. No exact-version
+acceptance or runtime selection is inferred.
 
-The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v2 input.
+Reader outcome: Save the correct variant baseline with direct facts and expected parts from the intended sources.
 
-## Maintenance Metadata
+- Recompose all six pages with full-width natural crops, explicit Edit Spec entry and direct/expected choice.
+- Explain definitions, quantities, child precedence, Sum/distinct and why a component-supplied attribute is unavailable as a duplicate manual fact.
+- Show Save, reentry and the required complete stored-baseline check.
 
-- Family: `CAT`.
-- Type: Extended administration task.
-- Current version: working draft v3; not accepted.
-- Page model: Six pages with one continuous procedure.
-- Layout recipe: `extended-admin-flow`.
-- Generator: `scripts/manuals/generate-aligned-guides-2026-10-01.mjs`.
-  `SNIPEIT_GUIDE_FILTER=CAT-02`.
-- Output: `resources/manuals/operator-guides/drafts/`
-  `CAT-02-modelspecificatie-opbouwen-v1-draft.pdf`.
+Preserve: Missing-definition handoff and unsaved-input return, Up/Down/X meanings, required expected rows, no physical-record creation and Admin removal boundary.
 
-## Purpose
+Placement and tradeoff: The reference to quantities stays at the component choice; aggregation maintenance stays in CAT-03/05.
 
-Build the reusable specification baseline for one exact model number. The
-operator decides which facts belong directly to the manufacturer variant and
-which facts come from separate expected components, then saves and verifies
-the result without recording the same fact twice.
+Use the [all25 execution record](../reviews/final-set-preparation-2026-11-04.md)
+and [complete changes/comparison index](../../../../output/manuals/final-guide-set-2026-11-04/review/index.html#CAT-02).
+The retained baseline below supplies the domain contract and historical evidence;
+this brief owns the changed outline and placements in the prepared proposal.
+The original capture/role/locale, application-target and native-proof limits
+are recorded centrally.
+<!-- final-preparation-2026-11-04:end -->
 
-## Audience And Context
 
-- Role: Supervisor.
-- Needed: the verified exact model number and an authoritative product
-  specification or product source.
-- Prerequisite: `CAT-01 Model en modelnummer aanmaken`.
-- Orientation when the catalogue structure is unclear:
-  `CAT-00 Catalogus begrijpen`.
+## Baseline Specification - 2026-10-20
 
-## Operator Terms
+Status: **Working draft v4; not accepted**. 6 A4 page(s).
+Type: Exact model-number specification composition. Recipe: `extended-admin-flow; six continuous phases`.
+Intended role: **Supervisor**. Needed: Verified exact code and supported product facts.
+Prerequisite: CAT-01. [Exact review](../reviews/CAT-02-v4.md).
 
-- **Direct attribuut**: a stable fact about the whole exact model-number
-  variant. It is not a separate replaceable or countable part. Example:
-  `Introductiejaar = 2021`.
-- **Verwacht component**: a separate replaceable, countable, or inspectable
-  part in the factory baseline. Example: one `RAM 8GB DDR4` component.
-- **Afgeleide waarde**: a specification value supplied by an expected
-  component. The operator does not enter the same fact directly as well.
-- **Baseline**: what an asset with this exact model number is expected to
-  contain. Saving a baseline does not create a physical asset, component tag,
-  or serial-number record.
+This current specification replaces contradictory earlier procedure/metadata.
+The [previous complete specification](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/inputs/CAT-02-previous-specification.md)
+preserves historical detail and exact acceptance links. Accepted artifacts,
+runtime selections and the other eight current proposals are unchanged.
 
-## Page And Step Flow
+## Reader Outcome
 
-### Page 1 - Openen
+The exact model number has saved direct values and a correct non-competing expected-component baseline.
 
-1. Open the saved Basismodel from CAT-01, or navigate through
-   `Instellingen > Asset modellen`.
-2. Compare the Basismodel, complete manufacturer code including suffix, and
-   recognition label.
-3. Choose `Edit Spec` on the correct exact model-number row.
-4. Validate the breadcrumb and `Model Number` selector before changing any
-   value.
+## Action And Choice Structure
 
-Do not compensate for a wrong selection by changing the specification. Return
-to the correct exact model-number row first.
+- 1: verify the correct owning model/code and open Edit Spec.
+- 2: choose a direct intrinsic fact OR a replaceable/countable expected component.
+- 3: reuse an already selected direct definition OR add a missing available one, then enter the confirmed value.
+- 4: add a component definition and quantity to the expected baseline.
+- 5-6: check contributed sources, children, quantities, numeric meaning and overlap before Save, then reopen/verify.
 
-### Page 2 - Kiezen
+## Operating Contract And Boundaries
 
-1. Decide where each verified fact belongs.
-2. Use a direct attribute for a fact of the whole variant.
-3. Use an expected component for a separate factory-baseline part.
-4. If the reusable meaning is missing, use
-   `CAT-03 Attributen beheren` and return.
-5. If the reusable part type is missing, use
-   `CAT-04 Componentdefinities beheren` and return.
+- The selected model-number label alone is not a substitute for verifying the full code in its owning row.
+- Available versus already selected direct attributes are alternatives. A component-derived property may intentionally be absent from Available Attributes; do not delete its correct source to expose it.
+- A missing reusable meaning/type hands off to CAT-03/CAT-04, preserving unsaved input and returning to the same Edit Spec.
+- Quantities and definition contribution flags determine derived values. Sum counts quantities, distinct preserves unique shared properties, and child contributions supersede the parent's same fact.
+- Conflicting direct/component input resolves in favor of the component source. Correct the intended source before Save; saved-row cleanup requires Admin/CAT-05.
+- An expected row is a required baseline expectation here; it is not a physical tracked component and has no new tag/serial. Do not teach an unsupported optional baseline toggle.
 
-A fact must have one source. For example, do not enter RAM directly when the
-expected RAM component already supplies the RAM value.
+## Revision Reasoning
 
-### Page 3 - Attribuut
+Required alignment: Current filtering, source precedence, quantities and sum/distinct before persistence.
 
-1. Search `Available Attributes` for the existing reusable definition.
-2. Choose the plus action next to the exact definition.
-3. Select the new row under `Selected Attributes`.
-4. Enter or select the value in `Attribute Details` using the displayed input
-   type.
-5. Use `Up` and `Down` only when the display order should change.
+Chosen improvement: Replace simulated conflict/success panels with genuine current form/source examples and ordinary result checks.
 
-A newly added, unsaved row can be removed from the current edit with its red
-X. Removing an already-saved row is not taught as a Supervisor action.
+Preserve: Six-phase workflow, direct/component alternatives, field-to-result explanations and save/reopen verification.
 
-### Page 4 - Component
+Placement and tradeoff: Use the existing review phase for the new semantics; no post-save calculation appendix or new Step 1.
 
-1. Scroll to `Expected Components`.
-2. Choose `Add Expected Component`.
-3. Select the existing `Catalog Definition`.
-4. Enter the expected quantity under `Stks`.
-5. Use drag, `Up`, or `Down` only to change display order.
+## Standards, Desired Targets And Retired Approaches
 
-Rows added on this page are required by default in the current interface.
-There is no separate required/optional choice in this model-specification
-route.
+Current [authoring method](../authoring-method.md), shared contracts and
+owner decisions govern this revision. Keep exact access-group names, Dutch
+application/account locale, recognizable context, complete relevant controls
+and useful A4 target scale. Review the unmarked crop first; annotate only a
+remaining search or distinction. Routine checks use ordinary instructions,
+recoverable exceptions are conditional, and a genuine halt states its trigger
+and recovery. Preserve the task's sequence or explicit alternatives; complete
+the required work before declaring completion. No acceptance is inferred.
 
-### Page 5 - Controleren
+Target complete Dutch UI and clear field-to-result recognition. Retire invented
+role labels, redundant group outlines, fixed password recipes, blanket STOP
+wording, simulated screenshot states and post-completion alignment appendices.
+Do not invent unavailable settings, a source field/policy or a future QA status.
+The mounted application is the separate refurbisher-followups checkout,
+not the root checkout. Source fingerprints, actual actors, Dutch locale,
+owned synthetic fixtures and save/trial boundaries are recorded in the batch
+provenance. Genuine English strings and narrow native status-choice text
+remain product gaps. Header roles preserve the intended task allocation;
+local seeded/custom grants can be wider than the operational-role document.
+Physical printing/component work, destructive catalogue branches and an
+unfamiliar-reader/A4 paper trial are unperformed. Artifact checks and editorial
+read-back do not establish reader performance or exact acceptance.
 
-1. Review `Derived attributes` on every expected component.
-2. Review any `Expected child structure` shown for that component.
-3. If a conflict reports both a manual model value and a component value,
-   keep the intended source and remove the new duplicate input before saving.
-4. If the wrong component definition was selected, replace it with the
-   correct reusable definition.
+## Evidence And Maintenance
 
-The component-derived value is used when it conflicts with a direct value.
-Removing an already-saved direct value or expected-component row is an Admin
-cleanup route planned for `CAT-05 Bestaande catalogus aanpassen`.
-
-### Page 6 - Opslaan
-
-1. Recheck the exact model number, direct values, component definitions, and
-   quantities.
-2. Choose `Opslaan`.
-3. Confirm the success message and recheck the selected exact model number.
-4. Reopen or scroll through the saved baseline and verify the direct values,
-   expected components, quantities, derived values, and child structure.
-5. Continue to `AST-03 Asset registreren en labelen` only when a physical
-   device must now be registered.
-
-## Permission Boundary
-
-- A Supervisor can add and update direct model-number values and expected
-  component rows.
-- A Supervisor can remove a row added during the current unsaved edit.
-- Removing an already-saved direct value or expected-component row requires
-  the Admin cleanup permission and belongs in CAT-05.
-- Creating missing reusable definitions belongs in CAT-03 or CAT-04, not in
-  this guide.
-
-## Completion
-
-`Klaar als`: the correct exact model number has saved direct values and an
-expected component baseline, every fact has one intended source, and the
-saved result has been verified.
-
-## Evidence
-
-- `CAT-MODEL-DETAIL-DESKTOP-01`.
-- `CAT-MODEL-SPEC-DESKTOP-01`.
-- `CAT-MODEL-SPEC-ATTRIBUTE-ADD-DESKTOP-01`.
-- `CAT-MODEL-SPEC-EXPECTED-START-DESKTOP-01`.
-- `CAT-MODEL-SPEC-EXPECTED-ADD-DESKTOP-01`.
-- `CAT-MODEL-SPEC-CONFLICT-DESKTOP-01`.
-- `CAT-MODEL-SPEC-SAVE-DESKTOP-01`.
-- `CAT-MODEL-SPEC-ROSTER-DESKTOP-01`.
-- `CAT-MODEL-SPEC-SAVED-DESKTOP-01`.
-
-## Related Guides
-
-- `CAT-00 Catalogus begrijpen`.
-- `CAT-01 Model en modelnummer aanmaken`.
-- `CAT-03 Attributen beheren`.
-- `CAT-04 Componentdefinities beheren`.
-- `CAT-05 Bestaande catalogus aanpassen`.
-- `CAT-06 Productgegevens controleren`.
-- `AST-03 Asset registreren en labelen`.
-
-## Review Status
-
-CAT-02 v1 is a first unaccepted working draft. It must not be marked approved
-until explicit review confirms the wording, focus marks, crop context, and
-workflow against the intended Supervisor process.
-
-## Focused Candidate - 2026-09-08
-
-The separate [v2 review](../reviews/CAT-02-v2.md)
-records the focused follow-up to baseline v1, with the exact
-PDF and checksum. The owner requested this pass across all existing guides
-after reviewing WF-01 v12 positively. Earlier selections and their policies
-remain traceable; this candidate is not automatically accepted. See the
-[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
-source/crop exceptions, and remaining operational or evidence gaps.
+The exact PDF, HTML/SVG, baseline, current source captures, measured crop plan,
+source/role/locale provenance and recognition placements are retained in the
+[round](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/README.md).
+The generator is `scripts/manuals/generate-remaining-guides-2026-10-20.mjs`.
+Frozen artifacts reproduce a proposal; the current specification and owner
+decisions govern future revisions. Create a new version after sealing.

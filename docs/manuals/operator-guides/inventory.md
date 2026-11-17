@@ -1,5 +1,19 @@
 # Operator Guide Source Inventory
 
+## Current Source Authority - 2026-11-17
+
+All 25 native/PDF pairs / 68 pages are delivered; the owner reports the
+Handleidingen set copied to the NAS. [The register](registry.md),
+[delivered baseline](current-set.json) and [handoff](HANDOFF.md) own current
+selection and remaining evidence. Compare actual shared native masters before
+editing. Local Handleidingen/output files are generated/ignored and may be
+older than human edits on the NAS; they are not supplied by a fresh clone.
+
+The dated inventories below preserve earlier source classification and
+reproduction history. Frozen generators/HTML/IDML remain provenance, not
+authority to replace a newer saved `.af`. Affinity authorization and conversion
+are complete; earlier planning or deferred wording does not reopen that work.
+
 ## USR-05 / CAT-05 / CAT-06 V2 - 2026-09-15
 
 The revised working drafts are USR-05 v2 (3 pages), CAT-05 v2 (8 pages), and
@@ -8,7 +22,7 @@ exact artifacts, checks and remaining operator trials. The three v1 PDFs and
 all accepted artifacts are retained unchanged; v2 is not acceptance.
 
 
-Status: current classification. No source has been deleted or moved.
+Status: historical classification, subject to the current authority above.
 
 ## Planning And Research Files
 
@@ -18,26 +32,30 @@ Status: current classification. No source has been deleted or moved.
 | `docs/manuals/operator-guide-design-foundation-2026-07-02.md` | Supporting design source | Detailed rationale and patterns extracted into `system.md`. |
 | `docs/manuals/operator-guide-feedback-replan-2026-06-30.md` | Historical feedback synthesis | Explains feedback that shaped the current system. |
 | `docs/manuals/operator-guide-visual-fit-postmortem-2026-06-30.md` | Historical rejected-proof analysis | Documents failure modes to avoid. |
-| `docs/manuals/operator-guide-clean-design-plan-2026-06-30.md` | Deferred Affinity source | Relevant only after an explicit Affinity green light. |
-| `docs/manuals/affinity-development-blocks-2026-06-25.md` | Deferred Affinity source | Relevant only after an explicit Affinity green light. |
+| `docs/manuals/operator-guide-clean-design-plan-2026-06-30.md` | Historical Affinity research | Compare with current rules and verified native production; no pending authorization. |
+| `docs/manuals/affinity-development-blocks-2026-06-25.md` | Historical Affinity research | Current tested procedures are in the maintained skill/native reviews. |
 | `C:\Users\Gebruiker\Downloads\affinity research deep-research-report.md` | Supporting research | Recommendations, not hard project requirements. |
 
 ## Current Maintenance Sources
 
 | File | Ownership |
 | --- | --- |
-| `docs/manuals/operator-guides/HANDOFF.md` | Current creation-stage tracker, resume order, and environment migration map. |
+| `docs/manuals/operator-guides/HANDOFF.md` | Delivered state, current ownership, evidence limits and remaining work. |
 | `docs/manuals/operator-guides/catalog-guide-plan.md` | CAT-family information ownership, operator route, page plans, role boundaries, and generation order. |
 | `docs/manuals/operator-guides/system.md` | Shared content, production, and QA behavior. |
 | `docs/manuals/operator-guides/components.md` | Shared visual primitives and feedback promotion. |
 | `docs/manuals/operator-guides/layouts.md` | Named base layouts and step patterns. |
-| `docs/manuals/operator-guides/registry.md` | Current versions, layouts, generators, artifacts, and review states. |
+| `docs/manuals/operator-guides/registry.md` and `current-set.json` | Last delivered version/page/role/file/hash baseline; not a live NAS inventory. |
+| Actual shared `Affinity/`, `PDF/` and `_Beheer/handleidingen.json` | Current saved artwork and subsequent human edits; compare before local proposals. |
 | `docs/manuals/operator-guides/maintenance.md` | Change impact, versioning, and multi-guide propagation. |
 | `docs/manuals/operator-guides/screenshots.md` | Canonical reusable evidence. |
 | `docs/manuals/operator-guides/decisions.md` | Cross-guide decisions and exact-version review records. |
 | `docs/manuals/operator-guides/guides/` | Per-guide content, evidence, and maintenance metadata. |
 
-## Current Proof Outputs
+## Historical Proof Output Inventory
+
+The current/superseded descriptions in this table belong to its original dated
+proof stages. They do not select today's delivered native/PDF files.
 
 | Folder | Classification | Current artifact |
 | --- | --- | --- |
@@ -134,4 +152,10 @@ AST-03 v14, USR-01 v8, and USR-02 v7 are included in the repository package.
 
 ## Native Affinity Files
 
-Native files are retained but inactive. Do not inspect or modify them during generated-guide production. The latest useful native reference is AST-01 v12; other native files are experiments, older pilots, or imported batches. Affinity work resumes only after all active base guides are confirmed or the user gives an explicit green light.
+All 25 current `.af` files are active editing masters in the delivered Affinity
+folder, with full embedded image sources. The owner reports copying that set
+to the NAS. Their exact delivered versions/hashes are in current-set.json;
+compare actual shared files before editing and follow maintenance.md.
+Earlier native experiments (including retired AST-01) remain historical
+references. Native conversion/editing proof is in the current handoff and the
+November10/12 native reviews; no remaining conversion is queued.

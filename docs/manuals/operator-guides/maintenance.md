@@ -63,15 +63,47 @@ changes.
 
 | Concern | Primary source | Required secondary updates |
 | --- | --- | --- |
-| Guide scope, steps, warnings, help, and completion | `guides/<CODE>.md` | Review record, generator data, affected references |
-| Current version, layout, generator, and artifact | `registry.md` | Guide metadata, decision log, runtime registry when status/name changes |
+| Manual scope, steps, warnings, help, and completion | `guides/<CODE>.md` | Review record, selected native/source content, affected references |
+| Last delivered versions and exact file identity | `registry.md` and `current-set.json` | Shared `_Beheer/handleidingen.json`, guide metadata and exact-version review |
+| Subsequent human edits and current shared artwork | Actual shared saved native `.af` master; compare against the last delivered hashes | Paired PDF, version/register, specification and review; preserve earlier copies |
+| Layout reasoning and generation/import provenance | Specification/review and retained source evidence | Register; generator metadata only where the generator still represents the selected source |
 | Base page and step structure | `layouts.md` | Components contract, recipe implementation, affected guide metadata |
 | Colors, typography, badges, icons, references, focus marks, QR geometry | `components.md` and shared tokens | Component tests, visual proof, all affected guide versions |
 | Screenshot source and reuse | `screenshots.md` | Guide evidence manifest, generator crop/target data |
-| Portable screenshot/PDF bytes and checksums | `resources/manuals/operator-guides/` manifests | Registry, screenshot catalog, accepted-artifact links |
+| Current delivery resources and checksums | Shared `_Beheer/` sources/register/checks and exact native/PDF files | Last-delivered ledger and review; local generated copies are not fresh-clone resources |
+| Historical accepted screenshot/PDF bytes | `resources/manuals/operator-guides/` manifests | Preserve exact acceptance and artifact links |
 | Cross-guide policy or ownership boundary | `decisions.md` | Every affected specification and reference |
 | Version feedback and exact correction | `reviews/<CODE>-vN.md` | Promote reusable feedback to the appropriate shared source |
 | Current creation stage and environment mapping | `HANDOFF.md` | Registry, inventory, TODO, and progress checkpoint |
+
+## Shared Manual Updates
+
+The owner reports the November12 Handleidingen set copied to the NAS. Its path
+and file integrity are not independently verified. The local ignored delivery
+and [current-set.json](current-set.json) are a last-delivered baseline, not
+authority to overwrite later shared work.
+
+1. Obtain the actual shared native/PDF/register files for the requested scope.
+   Compare their hashes, version and visible content with the last delivered
+   baseline. Preserve an unchanged copy; reconcile any newer human edits before
+   applying a repository proposal. If the shared files are unavailable, prepare
+   an isolated proposal and keep that comparison pending.
+2. Apply the authoring method and the narrow owning specification/decision.
+   Record the affected reader need and preservation tradeoff. Update the saved
+   native master or selected source deliberately; do not rerun an old generator
+   over native work. Keep full embedded original images and editable objects.
+3. Give visible/instructional changes a new unused version. Save/reopen, export
+   the paired PDF and inspect every affected page. Keep source integrity,
+   editorial review, actual use and exact acceptance as separate evidence.
+4. Update the specification/review, paired filenames as needed and shared
+   `_Beheer/handleidingen.json` together. Refresh its text, checksums and index
+   when affected. Record the new exact delivered files/hashes in the repository
+   register/ledger only when handed over; preserve the earlier baseline/history.
+
+The sealed November12 local folder/ZIP remain comparison artifacts. A later
+change uses a new delivery path; technical qualification does not approve a
+new version. Runtime `GUIDE_REGISTRY` and frozen reproduction tools retain their
+own scope and are not a substitute for this shared/native selection.
 
 ## Change Classes And Impact
 
@@ -88,8 +120,8 @@ changes.
 
 ## Versioning Rule
 
-Any visible, instructional, behavioral, evidence, or review-status change to a
-generated guide creates a new integer version. Do not overwrite an internally
+Any visible, instructional, behavioral, evidence, or rendered review-status
+change to a manual creates a new integer version. Do not overwrite an internally
 accepted or third-party-approved artifact.
 
 Recording an owner decision about an unchanged existing PDF does not regenerate
@@ -152,16 +184,16 @@ instructional completeness or first-time-user usability.
    required updates, chosen improvements, structure and evidence jobs.
    Resolve instructional ownership and ordering before generator edits.
 4. Use `registry.md` and `screenshots.md` to produce the complete impact list
-   before editing a generator.
+   before editing the selected source or native master.
 5. Update the narrowest authoritative document first.
 6. Promote reusable feedback to `components.md`, `layouts.md`, or
    `system.md`; do not leave a shared rule only inside one generator.
    Record the principle and its boundary, including a legitimate countercase.
 7. Increment every visibly affected guide version and create its review record.
-8. Implement the resolved specification in shared code or guide data without
+8. Implement the resolved specification in the selected source/native copy without
    letting an available capture or fixed template choose the guide's scope.
    Do not modify historical output folders.
-9. Generate focused proofs first. Apply the reasoning per guide in a requested
+9. Produce focused proofs first. Apply the reasoning per guide in a requested
    batch; shared rendering does not supply shared instructional decisions.
 10. Run automated geometry, text, page-count, evidence, and reference checks.
 11. Render every page and review it at full page and actual A4 size. Read what

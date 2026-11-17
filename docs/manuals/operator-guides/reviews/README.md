@@ -1,5 +1,73 @@
 # Operator Guide Review Records
 
+## Current Delivery And Review Boundaries - 2026-11-17
+
+All 25 manuals / 68 pages have native/PDF delivery files; the owner reports the
+Handleidingen set copied to the NAS. [Current register](../registry.md),
+[exact delivered baseline](../current-set.json) and [handoff](../HANDOFF.md)
+own current selection and remaining work. Earlier planning/pending statements
+below retain their dated scope and do not reopen conversions.
+
+Read the [native production evidence](native-conversion-2026-11-10.md),
+[skill tests](guide-skill-2026-11-12.md), [CAT-04 v8](CAT-04-v8.md) and
+[USR-04 v9](USR-04-v9.md) for actual changes/checks. The handoff also records
+the separately qualified AC-01 native-export colour variation, unchanged print
+PDFs and remaining application, reader/A4/fresh-device and acceptance gaps.
+No technical check, skill use or distribution implies exact-version acceptance.
+
+## Final Set And Affinity Plan - 2026-11-04
+
+[Scope, investigation and production plan](final-set-and-affinity-plan-2026-11-04.md).
+The owner selects the newer set and requests an Affinity edition, with an
+explicit planning-only hold. All 25 guide/version inputs are mapped; no new
+PDF or native conversion has started.
+
+## AST-03 Complete Task Pilot - 2026-11-04
+
+[AST-03 v19](AST-03-v19.md): before-composition brief, concrete preservation
+comparison, rendered read-back, changes and remaining gaps. Two continuous A4
+sides; working draft, not accepted. [Compare v15/v18 with v19](../../../../resources/manuals/operator-guides/review-rounds/2026-11-04-ast03-pilot/review.html).
+
+## Navigation, Guidance And Space - 2026-10-27
+
+[Owner feedback and remaining-batch audit](navigation-and-space-feedback-2026-10-27.md)
+governs this pass. [AC-02 v7](AC-02-v7.md) and [AST-03 v18](AST-03-v18.md)
+are new working drafts; the other fifteen batch subjects remain unrevised.
+See the [same-scale comparison](../../../../resources/manuals/operator-guides/review-rounds/2026-10-27-navigation-and-space/review.html).
+
+## Remaining Guides - 2026-10-20
+
+[Changes, reader briefs and limits](remaining-guides-2026-10-20.md). Seventeen
+new working drafts / 56 A4 pages; no acceptance is inferred.
+
+## Operational Set - 2026-10-20
+
+- [Reader briefs, changes, read-back and limits](operational-guides-2026-10-20.md).
+- New drafts: [AST-02 v10](AST-02-v10.md), [WF-01 v16](WF-01-v16.md),
+  [WF-02 v14](WF-02-v14.md), [AST-04 v8](AST-04-v8.md), [HELP-01 v9](HELP-01-v9.md).
+- [Visual baseline/new comparison](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-operational-guides/review.html).
+
+Seven A4 sides. Approval to continue from the corrected examples does not
+automatically accept these five drafts or establish reader performance.
+
+## Role And Focus Feedback - 2026-10-08
+
+- [Cause, general rule and per-visual correction](emphasis-feedback-2026-10-08.md):
+  the previous three test examples require rework; keep access-group names
+  exactly and omit annotation that adds no guidance to a complete crop.
+- Corrected unaccepted drafts: [AC-01 v12](AC-01-v12.md),
+  [SC-01 v15](SC-01-v15.md), [AST-05 v9](AST-05-v9.md).
+
+## Reauthored Test Examples - 2026-10-08
+
+- [Three-example reasoning, changes and comparison](reauthoring-test-2026-10-08.md):
+  AC-01 v11, SC-01 v14 and AST-05 v8, all unaccepted working drafts.
+- Exact records: [AC-01 v11](AC-01-v11.md), [SC-01 v14](SC-01-v14.md),
+  [AST-05 v8](AST-05-v8.md).
+
+Artifact integrity and rendered editorial review are separate from the owned
+synthetic UI/save trial. No unfamiliar-reader or physical A4 trial is claimed.
+
 ## Authoring Reasoning Review On 2026-10-06
 
 Use the [shared authoring method](../authoring-method.md) for new guides,

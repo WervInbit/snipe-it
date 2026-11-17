@@ -1,106 +1,113 @@
-# CMP-02 Nieuw Component Registreren En Plaatsen
+# CMP-02 Nieuw component registreren en plaatsen
 
-## Application Alignment Revision - 2026-10-01
+<!-- delivered-baseline:start -->
+## Delivered Baseline - 2026-11-17
 
-Current authoring proposal: **v7, working draft; not accepted**, 2 A4 pages. [Exact-version review](../reviews/CMP-02-v7.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+**v9 / 2 A4 page(s) / Senior Refurbisher**. Native/PDF preparation
+and delivery are complete; exact-version acceptance and release alignment
+remain separate. [Register](../registry.md), [exact files/hashes](../current-set.json)
+and [current handoff](../HANDOFF.md) govern the delivered selection. Compare
+the actual NAS files before edits; they may be newer than this baseline.
+Dated preparation/pending statements below retain their historical scope.
+<!-- delivered-baseline:end -->
 
-Current definition choices and numerical effects after installation, avoiding ad-hoc duplicate definitions.
+<!-- final-preparation-2026-11-04:start -->
+## Prepared Revision - 2026-11-04
 
-Added page: Controleer definitie en specificatie na plaatsing. Steps: Hergebruik de juiste bestaande definitie; Ontbreekt een passende keuze? Laat catalogusbeheer helpen; Controleer het geplaatste record en de afgeleide waarde.
+Proposed **v9**, 2 A4 page(s). Status: prepared source;
+native Affinity import/edit/save/export and final PDF release remain incomplete.
+This follows the owner's all25 execution authorization. No exact-version
+acceptance or runtime selection is inferred.
 
-The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v6 input.
+Reader outcome: Create exactly one new physical component and link it to the intended asset.
 
-## Latest Correction Candidate - 2026-09-10
+- Recompose side two with a full-width Create And Install control and a larger complete identity result.
+- Explain that the action creates the record and links it immediately; integrate duplicate, condition and unexpected Extra recovery as ordinary conditional guidance.
 
-Current review candidate: [v6](../reviews/CMP-02-v6.md), owner-cleared for user review.
-Recentered radio targets using the selected-control pixels in the canonical -04 screenshots.
-This current correction takes precedence over conflicting historical version
-notes below. Previous PDFs and exact acceptance records remain unchanged.
+Preserve: Complete definition/custom alternatives on side one, missing-definition handoff, true serial/condition, replacement prerequisite, continuous steps 1-4 and physical verification.
 
-| Field | Current value |
-| --- | --- |
-| Status | Working draft v7; not accepted |
-| Family | CMP |
-| Type | Detail task with alternatives |
-| Current version | `CMP-02-register-install-v7-draft` |
-| Page model | 2 A4 pages |
-| Layout recipe | `stacked-step-flow` with `parallel-visual-choice`, `reused-evidence`, and targeted `inline-stop` |
-| Generator | `scripts/manuals/generate-aligned-guides-2026-10-01.mjs` |
-| Role | Senior Refurbisher |
-| Needed | Correct open asset and the new physical component |
-| Prerequisite | Asset verified (SC-01) |
+Placement and tradeoff: The sparse warning-shaped block is retired; its concrete recovery moves to the result check.
 
-## Purpose
+Use the [all25 execution record](../reviews/final-set-preparation-2026-11-04.md)
+and [complete changes/comparison index](../../../../output/manuals/final-guide-set-2026-11-04/review/index.html#CMP-02).
+The retained baseline below supplies the domain contract and historical evidence;
+this brief owns the changed outline and placements in the prepared proposal.
+The original capture/role/locale, application-target and native-proof limits
+are recorded centrally.
+<!-- final-preparation-2026-11-04:end -->
 
-Register a new physical component using either an approved component definition or the custom-component path, then install it on the asset.
 
-This guide creates a new tracked component record. When the physical component already has a tracked record in tray/storage, use CMP-01 instead.
+## Baseline Specification - 2026-10-20
 
-Version 4 presents the missing-definition handoff as the full CAT-04 guide
-reference and keeps the route text in operator language rather than using an
-unexplained guide code in the step body.
+Status: **Working draft v8; not accepted**. 2 A4 page(s).
+Type: New tracked-component registration and installation. Recipe: `parallel-visual-choice plus continuous two-sided flow`.
+Intended role: **Senior Refurbisher**. Needed: Verified asset and new physical component.
+Prerequisite: SC-01. [Exact review](../reviews/CMP-02-v8.md).
 
-## Steps
+This current specification replaces contradictory earlier procedure/metadata.
+The [previous complete specification](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/inputs/CMP-02-previous-specification.md)
+preserves historical detail and exact acceptance links. Accepted artifacts,
+runtime selections and the other eight current proposals are unchanged.
 
-1. `Open Nieuw component` - open Components, choose `Add / Install Component`, then `Show New Component Form`.
-2. `Kies een registratieroute` - use `Gebruik definitie` for a known reusable
-   component type. Use `Aangepast` only for one agreed exception that will not
-   be reused. If the reusable type is missing, a supervisor follows CAT-04;
-   do not choose `Aangepast` automatically. Enter the definition/name, serial
-   number, and condition in the selected route.
-3. `Plaats en maak aan` - install the component physically, compare the entered identity, then choose `Create And Install` once.
-4. `Controleer het asset` - verify `Tracked`, the generated component tag, and the entered serial number appear on the correct asset.
+## Reader Outcome
 
-## Stop
+One new correctly identified component record is created and installed on the intended asset.
 
-- Stop in step 3 for duplicate feedback or a physical/digital identity mismatch.
-- Stop in step 4 when the resulting tracked record does not match the physical component.
+## Action And Choice Structure
 
-## Evidence Manifest
+- 1: Open the new component form; an existing record hands off to CMP-01.
+- 2: Choose definition A OR agreed one-off custom B; resolve a missing reusable type through Supervisor/CAT-04 before Create.
+- 3-4 on side two: compare/place the physical part, Create And Install once, then verify identity, link, Extra and specification.
 
-| Label | Job | Source | Status |
-| --- | --- | --- | --- |
-| 1A | Components tab and `Add / Install Component` | `CMP-INSTALL-ENTRY-MOBILE-02` | Ready for draft; canonical reuse |
-| 1B | `Show New Component Form` entry | `CMP-NEW-ENTRY-MOBILE-03` | Ready for draft |
-| 2A | Definition-backed route with serial and condition | `CMP-NEW-DEFINITION-MOBILE-03` | Ready for draft |
-| 2B | Custom route with custom name, serial, and condition | `CMP-NEW-CUSTOM-MOBILE-03` | Ready for draft; no custom record submitted |
-| 3A | `Create And Install` after physical placement | `CMP-NEW-DEFINITION-MOBILE-03` | Ready for draft; reused with a separate target |
-| 4A | Installed tracked row with generated tag and entered serial | `CMP-NEW-INSTALLED-MOBILE-03` | Ready for draft |
+## Operating Contract And Boundaries
 
-## Evidence Note
+- A missing definition is not permission to use an ad-hoc custom record. Preserve caller input and return after the reusable definition is supplied.
+- The definition and custom panels are alternatives, not successive forms to submit.
+- Serial and condition belong to the physical component. A reusable definition does not establish the physical identity by itself.
+- Duplicate feedback or physical/digital mismatch halts further registration while the identity is resolved.
+- The actual Extra result alongside Assumed is shown and checked before completion. Attribute aggregation configuration belongs in CAT-03, not this guide.
+- For replacement, check that the old component has already been unlinked from this asset before Install/Create; unresolved removal/expectation goes to Supervisor. This is not an automatic baseline replacement action.
 
-Version 3 retains the verified four-step interface flow and evidence from v2,
-names the minimum operational role, explains reusable definition versus one-off
-custom in operator language, routes missing definitions to CAT-04, and removes
-the recoverable route-choice STOP. The controlled definition-backed record
-`INBIT-C-HH9376` / `CMP02-RAM-0001` was created and installed once. The custom
-route was opened and filled only for evidence; it was not submitted. CMP-04
-capture then moved the controlled record to tray, which is its final
-development state.
+## Revision Reasoning
 
-## Complete When
+Required alignment: Current form controls, definition handoff and actual tracked/baseline behavior.
 
-The physical component is installed and one correctly identified component record appears on the correct asset.
+Chosen improvement: Give both complete alternative forms and the resulting identity enough space to read.
 
-## Related Guides
+Preserve: The four-action outcome, definition/custom choice, physical comparison and verified tracked result.
 
-- SC-01 Asset vinden en openen
-- CMP-01 Bestaand component plaatsen
-- CMP-04 Component naar tray verplaatsen
-- HELP-01 Problemen en hulp
+Placement and tradeoff: Two continuous sides replace a crowded single side; there is no completion before the necessary result check and no appended new Step 1.
 
-## Focused Candidate - 2026-09-08
+## Standards, Desired Targets And Retired Approaches
 
-The separate [v5 review](../reviews/CMP-02-v5.md)
-records the focused follow-up to baseline v4, with the exact
-PDF and checksum. The owner requested this pass across all existing guides
-after reviewing WF-01 v12 positively. Earlier selections and their policies
-remain traceable; this candidate is not automatically accepted. See the
-[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
-source/crop exceptions, and remaining operational or evidence gaps.
+Current [authoring method](../authoring-method.md), shared contracts and
+owner decisions govern this revision. Keep exact access-group names, Dutch
+application/account locale, recognizable context, complete relevant controls
+and useful A4 target scale. Review the unmarked crop first; annotate only a
+remaining search or distinction. Routine checks use ordinary instructions,
+recoverable exceptions are conditional, and a genuine halt states its trigger
+and recovery. Preserve the task's sequence or explicit alternatives; complete
+the required work before declaring completion. No acceptance is inferred.
 
-## Owner Feedback Follow-Up - 2026-09-10
+Target complete Dutch UI and clear field-to-result recognition. Retire invented
+role labels, redundant group outlines, fixed password recipes, blanket STOP
+wording, simulated screenshot states and post-completion alignment appendices.
+Do not invent unavailable settings, a source field/policy or a future QA status.
+The mounted application is the separate refurbisher-followups checkout,
+not the root checkout. Source fingerprints, actual actors, Dutch locale,
+owned synthetic fixtures and save/trial boundaries are recorded in the batch
+provenance. Genuine English strings and narrow native status-choice text
+remain product gaps. Header roles preserve the intended task allocation;
+local seeded/custom grants can be wider than the operational-role document.
+Physical printing/component work, destructive catalogue branches and an
+unfamiliar-reader/A4 paper trial are unperformed. Artifact checks and editorial
+read-back do not establish reader performance or exact acceptance.
 
-MR-04: remeasure v5 image 2A/2B radio focus centres against the actual recaptured sources.
-See [owner review TODOs](../reviews/owner-review-todos-2026-09-10.md).
-The existing PDF is unchanged; these are next-version or decision items.
+## Evidence And Maintenance
+
+The exact PDF, HTML/SVG, baseline, current source captures, measured crop plan,
+source/role/locale provenance and recognition placements are retained in the
+[round](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/README.md).
+The generator is `scripts/manuals/generate-remaining-guides-2026-10-20.mjs`.
+Frozen artifacts reproduce a proposal; the current specification and owner
+decisions govern future revisions. Create a new version after sealing.

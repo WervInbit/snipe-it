@@ -1,72 +1,113 @@
-# CMP-04 Component Naar Tray Verplaatsen
+# CMP-04 Component naar tray verplaatsen
 
-## Latest Correction Candidate - 2026-09-10
+<!-- delivered-baseline:start -->
+## Delivered Baseline - 2026-11-17
 
-Current review candidate: [v7](../reviews/CMP-04-v7.md), owner-cleared for user review.
-Replaced the incomplete 1B control crop with the complete Naar tray control from existing controlled evidence.
-This current correction takes precedence over conflicting historical version
-notes below. Previous PDFs and exact acceptance records remain unchanged.
+**v9 / 1 A4 page(s) / Senior Refurbisher**. Native/PDF preparation
+and delivery are complete; exact-version acceptance and release alignment
+remain separate. [Register](../registry.md), [exact files/hashes](../current-set.json)
+and [current handoff](../HANDOFF.md) govern the delivered selection. Compare
+the actual NAS files before edits; they may be newer than this baseline.
+Dated preparation/pending statements below retain their historical scope.
+<!-- delivered-baseline:end -->
 
-| Field | Current value |
-| --- | --- |
-| Status | Internal review candidate v7; owner cleared for user review 2026-09-10 |
-| Family | CMP |
-| Type | Detail task |
-| Current version | `CMP-04-component-to-tray-v7-draft` |
-| Page model | One page |
-| Layout recipe | `stacked-step-flow` with `single-visual`, `reused-evidence`, and `inline-stop` |
-| Generator | `scripts/manuals/generate-owner-corrections.mjs CMP-04` |
-| Role | Senior Refurbisher |
-| Needed | Correct open asset, identified physical component, intended tray/storage destination |
-| Prerequisite | Asset verified (SC-01) |
+<!-- final-preparation-2026-11-04:start -->
+## Prepared Revision - 2026-11-04
 
-## Purpose
+Proposed **v9**, 1 A4 page(s). Status: prepared source;
+native Affinity import/edit/save/export and final PDF release remain incomplete.
+This follows the owner's all25 execution authorization. No exact-version
+acceptance or runtime selection is inferred.
 
-Remove the correct physical component from an asset, preserve its identity/serial decision, and confirm its intended tray/storage destination.
+Reader outcome: Move the same tracked identity to the operator tray with no current asset link.
 
-## Steps
+- Show Components, the tracked identity and Naar tray as complementary details from the same record.
+- Retain locked-serial/cancel/missing-serial/access recovery and the actual confirmation.
+- Crop the result to readable Status/In Tray and Asset/N.v.t. labels, removing unused horizontal area.
 
-1. `Kies het juiste onderdeel` - compare the component name, tag, and serial number with the physical part, then choose `Naar tray` on the same row.
-2. `Controleer het venster` - verify the component name and locked serial number in the confirmation window.
-3. `Verwijder en bevestig` - remove the physical part, place it in the operator's tray, and choose `Naar tray bevestigen` once.
-4. `Controleer de eindstaat` - open the component and verify `Status: In Tray` and `Asset: N.v.t.`.
+Preserve: Four actions, tag/SN continuity, physical move, actual stored result, reinstallation and workflow references.
 
-## Stop
+Placement and tradeoff: Two linked result details replace a small entire detail page; the full screenshot stays available in each editable frame.
 
-Stop in step 1 or 2 when component identity does not match. Do not invent or overwrite a serial number. Stop in step 4 when the record remains attached to an asset.
+Use the [all25 execution record](../reviews/final-set-preparation-2026-11-04.md)
+and [complete changes/comparison index](../../../../output/manuals/final-guide-set-2026-11-04/review/index.html#CMP-04).
+The retained baseline below supplies the domain contract and historical evidence;
+this brief owns the changed outline and placements in the prepared proposal.
+The original capture/role/locale, application-target and native-proof limits
+are recorded centrally.
+<!-- final-preparation-2026-11-04:end -->
 
-## Evidence Manifest
 
-| Label | Job | Source | Status |
-| --- | --- | --- | --- |
-| 1A | Tracked row identity | `CMP-NEW-INSTALLED-MOBILE-03` | Ready for draft; canonical reuse |
-| 1B | `Naar tray` action on the same row | `CMP-NEW-INSTALLED-MOBILE-03` | Ready for draft; separate crop and target |
-| 2A | Locked component and serial confirmation | `CMP-TRAY-CONFIRM-MOBILE-03` | Ready for draft |
-| 3A | `Naar tray bevestigen` after physical removal | `CMP-TRAY-CONFIRM-MOBILE-03` | Ready for draft; separate crop and target |
-| 4A | `Status: In Tray` | `CMP-TRAY-RESULT-MOBILE-03` | Ready for draft |
-| 4B | `Asset: N.v.t.` | `CMP-TRAY-RESULT-MOBILE-03` | Ready for draft; separate crop and target |
+## Baseline Specification - 2026-10-20
 
-## Evidence Note
+Status: **Working draft v8; not accepted**. 1 A4 page(s).
+Type: Move tracked component to own tray. Recipe: `stacked-step-flow; four actions`.
+Intended role: **Senior Refurbisher**. Needed: Verified asset, same component and own tray.
+Prerequisite: SC-01. [Exact review](../reviews/CMP-04-v8.md).
 
-Version 6 keeps the verified v5 four-step route and focus geometry while naming
-the minimum operational role. The confirmation keeps the existing serial
-locked. Controlled component `INBIT-C-HH9376` / `CMP02-RAM-0001` was removed
-from the asset and now ends in `Status: In Tray` with no asset attached.
+This current specification replaces contradictory earlier procedure/metadata.
+The [previous complete specification](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/inputs/CMP-04-previous-specification.md)
+preserves historical detail and exact acceptance links. Accepted artifacts,
+runtime selections and the other eight current proposals are unchanged.
 
-## Complete When
+## Reader Outcome
 
-The physical component is in the intended tray/storage, is no longer listed on the asset, and its tracked identity is preserved.
+The same tracked identity is in the operator's tray and has no current asset link.
 
-## Related Guides
+## Action And Choice Structure
 
-- SC-01 Asset vinden en openen
-- CMP-01 Bestaand component plaatsen
-- CMP-02 Nieuw component registreren en plaatsen
-- WF-02 Workflow uitvoeren en afronden
-- HELP-01 Problemen en hulp
+- Identify the component and choose Naar tray.
+- Recheck the actual dialog and locked serial.
+- Remove/place the physical part and confirm once.
+- Verify In Tray, Asset: N.v.t. and unchanged identity.
 
-## Owner Feedback Follow-Up - 2026-09-10
+## Operating Contract And Boundaries
 
-MR-05: v6 was unchanged in the prior pass, but image 1B clips the Naar tray control. Expand the crop in a new version.
-See [owner review TODOs](../reviews/owner-review-todos-2026-09-10.md).
-The existing PDF is unchanged; these are next-version or decision items.
+- A move preserves tag and serial. A different identity calls for Cancel and Supervisor.
+- Do not teach removing an Assumed baseline with the tracked-record action.
+- The full Naar tray and confirmation controls must remain visible.
+- Status and current asset are separate result details, linked by the same record; both must be readable.
+
+## Revision Reasoning
+
+Required alignment: Current full action/dialog and the genuine saved unlinked-tray result.
+
+Chosen improvement: Use separate close result details instead of shrinking an entire component-detail page.
+
+Preserve: Four actions, locked-serial explanation, physical move and final link/status check.
+
+Placement and tradeoff: The complete result check replaces a whole-page miniature; it does not broaden the guide into inventory lifecycle work.
+
+## Standards, Desired Targets And Retired Approaches
+
+Current [authoring method](../authoring-method.md), shared contracts and
+owner decisions govern this revision. Keep exact access-group names, Dutch
+application/account locale, recognizable context, complete relevant controls
+and useful A4 target scale. Review the unmarked crop first; annotate only a
+remaining search or distinction. Routine checks use ordinary instructions,
+recoverable exceptions are conditional, and a genuine halt states its trigger
+and recovery. Preserve the task's sequence or explicit alternatives; complete
+the required work before declaring completion. No acceptance is inferred.
+
+Target complete Dutch UI and clear field-to-result recognition. Retire invented
+role labels, redundant group outlines, fixed password recipes, blanket STOP
+wording, simulated screenshot states and post-completion alignment appendices.
+Do not invent unavailable settings, a source field/policy or a future QA status.
+The mounted application is the separate refurbisher-followups checkout,
+not the root checkout. Source fingerprints, actual actors, Dutch locale,
+owned synthetic fixtures and save/trial boundaries are recorded in the batch
+provenance. Genuine English strings and narrow native status-choice text
+remain product gaps. Header roles preserve the intended task allocation;
+local seeded/custom grants can be wider than the operational-role document.
+Physical printing/component work, destructive catalogue branches and an
+unfamiliar-reader/A4 paper trial are unperformed. Artifact checks and editorial
+read-back do not establish reader performance or exact acceptance.
+
+## Evidence And Maintenance
+
+The exact PDF, HTML/SVG, baseline, current source captures, measured crop plan,
+source/role/locale provenance and recognition placements are retained in the
+[round](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/README.md).
+The generator is `scripts/manuals/generate-remaining-guides-2026-10-20.mjs`.
+Frozen artifacts reproduce a proposal; the current specification and owner
+decisions govern future revisions. Create a new version after sealing.

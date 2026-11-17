@@ -1,67 +1,115 @@
 # USR-05 Groepen beheren
 
-## Application Alignment Revision - 2026-10-01
+<!-- delivered-baseline:start -->
+## Delivered Baseline - 2026-11-17
 
-Current authoring proposal: **v3, working draft; not accepted**, 4 A4 pages. [Exact-version review](../reviews/USR-05-v3.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+**v5 / 3 A4 page(s) / Superadmin**. Native/PDF preparation
+and delivery are complete; exact-version acceptance and release alignment
+remain separate. [Register](../registry.md), [exact files/hashes](../current-set.json)
+and [current handoff](../HANDOFF.md) govern the delivered selection. Compare
+the actual NAS files before edits; they may be newer than this baseline.
+Dated preparation/pending statements below retain their historical scope.
+<!-- delivered-baseline:end -->
 
-Separate operational status access from general group permissions; canonical role matrix and realistic role test.
+<!-- final-preparation-2026-11-04:start -->
+## Prepared Revision - 2026-11-04
 
-Added page: Controleer statusrechten naast de rechtengroep. Steps: Houd de standaardrollen herkenbaar; Open het statuslabel voor See en Choose / use; Test de effectieve toegang met een gewone gebruiker.
+Proposed **v5**, 3 A4 page(s). Status: prepared source;
+native Affinity import/edit/save/export and final PDF release remain incomplete.
+This follows the owner's all25 execution authorization. No exact-version
+acceptance or runtime selection is inferred.
 
-The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v2 input.
+Reader outcome: Reuse or save the correct shared group and verify both permitted and excluded user tasks.
 
-## Purpose And Boundaries
+- Reflow the three pages around larger settings/list, permission, Save and stored-rights evidence.
+- Show both Nieuwe aanmaken and Groep bewerken and preserve reuse as a route that needs no Save.
+- Make reopening and the ordinary-user test concrete; update creation handoffs to USR-01 step 4.
 
-Define a reusable group without confusing its stored grants with a user's
-effective access. USR-01 owns user creation; USR-02 owns group assignment and
-direct user exceptions. Editing a group affects all its members.
+Preserve: Gear/Groepen entry, reuse/edit/create alternatives, own names for new packages, additive rights/direct precedence, status boundary and useful help.
 
-## V2 Page Contract
+Placement and tradeoff: The existing six-action continuation remains; no universal step reset or new rights policy.
 
-1. In the dark left sidebar, choose Instellingen (gear), scroll within its
-   submenu, and choose Groepen. `Beheerder Instellingen` is the resulting page
-   title, not the first navigation control. Compare a candidate's rights and
-   members. Reuse unchanged returns immediately to USR-01 step 3 or USR-02
-   step 2. Edit for all members uses Groep bewerken. Create a missing package
-   uses Nieuwe aanmaken. Preserve unsaved caller input before leaving.
-2. Named custom example Catalogus lezen: Models View allowed; other Models,
-   Admin and Super User rights denied. Show both column headings and actual
-   per-row controls. Section radios affect every row; clicking the section
-   title expands/collapses it. Group permissions are additive: if one assigned
-   group allows a right and another assigned group denies it, Allow wins. If
-   no assigned group allows it, the user lacks it. A direct user setting is
-   evaluated before all groups: direct Deny blocks group Allows and direct
-   Allow grants the right regardless of group Denies.
-3. Opslaan, reopen, check the same group and all changed rights. Use USR-02
-   to prepare a test user with known groups and direct exceptions. Model
-   viewing must work; creation/editing must not. A Superadmin's own session is
-   not evidence of this group's effective access. Return to the original user
-   assignment only after checking the intended task boundary.
+Use the [all25 execution record](../reviews/final-set-preparation-2026-11-04.md)
+and [complete changes/comparison index](../../../../output/manuals/final-guide-set-2026-11-04/review/index.html#USR-05).
+The retained baseline below supplies the domain contract and historical evidence;
+this brief owns the changed outline and placements in the prepared proposal.
+The original capture/role/locale, application-target and native-proof limits
+are recorded centrally.
+<!-- final-preparation-2026-11-04:end -->
 
-The standard foundation roles are not the example for a permanently narrowed
-custom task; their seeded required grants may be restored. Keep that behavior
-in mind when choosing reuse versus a new group.
 
-## Evidence And Verification
+## Baseline Specification - 2026-10-20
 
-The v2 generator lists the exact evidence IDs. New read-only captures show the
-same memberless custom group in edit and saved-detail states. A guarded local
-fixture helper created only that group, checked five resolver cases without
-creating a user, and removed it after capture. No memberships were changed.
+Status: **Working draft v4; not accepted**. 3 A4 page(s).
+Type: Reusable group definition with alternative reuse route. Recipe: `extended-admin-flow; three pages, six continuous actions`.
+Intended role: **Superadmin**. Needed: Agreed task, membership impact and ordinary test user.
+Prerequisite: AC-01. [Exact review](../reviews/USR-05-v4.md).
 
-Resolver checks do not replace the printed browser trial. See the
-[v2 revision review](../reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md).
+This current specification replaces contradictory earlier procedure/metadata.
+The [previous complete specification](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/inputs/USR-05-previous-specification.md)
+preserves historical detail and exact acceptance links. Accepted artifacts,
+runtime selections and the other eight current proposals are unchanged.
 
-## Completion And History
+## Reader Outcome
 
-Complete when stored group rights match the agreed task and the controlled
-user passes both allowed and prohibited-task checks. Reuse-only completion
-does not require editing the existing group.
+A reused or saved group fits the agreed task and an ordinary member passes both allowed and prohibited-task checks.
 
-V1's effective-rights wording is superseded, not carried forward as procedure.
-Its PDF and hash remain unchanged in the [v1 review](../reviews/USR-05-v1.md).
-The [audit](../reviews/USR-05-CAT-05-CAT-06-content-audit-2026-09-15.md)
-records why v2 was required.
+## Action And Choice Structure
 
-Related: USR-01 Gebruiker toevoegen; USR-02 Rol en rechten wijzigen;
-AC-01 Login; HELP-01 Problemen en hulp.
+- 1-2: open Beheerder Instellingen via the top gear, choose Groepen, compare the candidate and choose reuse OR edit-for-all OR create.
+- 3-4: name a custom package, set only its actual task grants and distinguish status access where relevant.
+- 5-6: Save/reopen the same group, inspect stored grants, then test actual member access and return to the originating assignment.
+
+## Operating Contract And Boundaries
+
+- Reuse unchanged returns immediately to USR-01 step 3 or USR-02 step 2; it does not require saving the group.
+- Groepen is under the top Beheerder Instellingen page, not the catalogue Instellingen submenu in the dark sidebar.
+- For the Catalogus lezen example only Models View is allowed; all other grants including Admin/Super User remain off.
+- Section radios affect every row; clicking its title expands/collapses. Group grants add; a direct user setting is resolved first.
+- Editing a group changes all members. Use USR-02 for one person's exception. Foundation roles can regain seeded required grants, so use a distinct custom name for a deliberately narrower package.
+- General action rights and Zien/Kiezen status access are separate. Group-definition rights alone do not prove an ordinary user's outcome.
+- The controlled trial requires known groups, no unexplained direct exceptions and no Admin/Superadmin bypass. Allowed Models view and refused creation are actual local observations, not a full negative test suite.
+
+## Revision Reasoning
+
+Required alignment: Correct effective-rights semantics and separate status boundary before final verification.
+
+Chosen improvement: Replace the stale sidebar route with the genuine top gear and Groepen tile, then make reuse/edit/create a clear three-way choice.
+
+Preserve: Three-page explanation, custom read-only example, stored-grant review and ordinary-user trial.
+
+Placement and tradeoff: Integrate current status rules into the rights chapter, preserving three pages rather than a post-completion fourth-page restart.
+
+## Standards, Desired Targets And Retired Approaches
+
+Current [authoring method](../authoring-method.md), shared contracts and
+owner decisions govern this revision. Keep exact access-group names, Dutch
+application/account locale, recognizable context, complete relevant controls
+and useful A4 target scale. Review the unmarked crop first; annotate only a
+remaining search or distinction. Routine checks use ordinary instructions,
+recoverable exceptions are conditional, and a genuine halt states its trigger
+and recovery. Preserve the task's sequence or explicit alternatives; complete
+the required work before declaring completion. No acceptance is inferred.
+
+Target complete Dutch UI and clear field-to-result recognition. Retire invented
+role labels, redundant group outlines, fixed password recipes, blanket STOP
+wording, simulated screenshot states and post-completion alignment appendices.
+Do not invent unavailable settings, a source field/policy or a future QA status.
+The mounted application is the separate refurbisher-followups checkout,
+not the root checkout. Source fingerprints, actual actors, Dutch locale,
+owned synthetic fixtures and save/trial boundaries are recorded in the batch
+provenance. Genuine English strings and narrow native status-choice text
+remain product gaps. Header roles preserve the intended task allocation;
+local seeded/custom grants can be wider than the operational-role document.
+Physical printing/component work, destructive catalogue branches and an
+unfamiliar-reader/A4 paper trial are unperformed. Artifact checks and editorial
+read-back do not establish reader performance or exact acceptance.
+
+## Evidence And Maintenance
+
+The exact PDF, HTML/SVG, baseline, current source captures, measured crop plan,
+source/role/locale provenance and recognition placements are retained in the
+[round](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/README.md).
+The generator is `scripts/manuals/generate-remaining-guides-2026-10-20.mjs`.
+Frozen artifacts reproduce a proposal; the current specification and owner
+decisions govern future revisions. Create a new version after sealing.

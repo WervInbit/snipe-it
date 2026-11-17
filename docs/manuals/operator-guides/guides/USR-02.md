@@ -1,136 +1,116 @@
-# USR-02 Rol En Rechten Wijzigen
+# USR-02 Rol en rechten wijzigen
 
-## Application Alignment Revision - 2026-10-01
+<!-- delivered-baseline:start -->
+## Delivered Baseline - 2026-11-17
 
-Current authoring proposal: **v12, working draft; not accepted**, 2 A4 pages. [Exact-version review](../reviews/USR-02-v12.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+**v14 / 2 A4 page(s) / Admin / Superadmin**. Native/PDF preparation
+and delivery are complete; exact-version acceptance and release alignment
+remain separate. [Register](../registry.md), [exact files/hashes](../current-set.json)
+and [current handoff](../HANDOFF.md) govern the delivered selection. Compare
+the actual NAS files before edits; they may be newer than this baseline.
+Dated preparation/pending statements below retain their historical scope.
+<!-- delivered-baseline:end -->
 
-Dedicated quality permission, workflow run permissions and independent per-status See/Choose rules.
+<!-- final-preparation-2026-11-04:start -->
+## Prepared Revision - 2026-11-04
 
-Added page: Controleer welk recht de taak werkelijk nodig heeft. Steps: Controleer Create en Edit Quality Grade afzonderlijk; Controleer workflowrol en runrechten; Controleer de toegang van de gekozen status.
+Proposed **v14**, 2 A4 page(s). Status: prepared source;
+native Affinity import/edit/save/export and final PDF release remain incomplete.
+This follows the owner's all25 execution authorization. No exact-version
+acceptance or runtime selection is inferred.
 
-The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v11 input.
+Reader outcome: Save groups, direct choices and any necessary status rule, then test the ordinary-user boundary.
 
-## Latest Correction Candidate - 2026-09-10
+- Recompose both sides with the editor entry, Machtigingen tab/columns and larger representative rows.
+- Show user Save before the separate status editor and the separate status Save.
+- Explain groups/direct precedence, concrete quality/workflow rights, and an allowed plus excluded task trial.
 
-Current review candidate: [v11](../reviews/USR-02-v11.md), owner-cleared for user review.
-Updated the USR-04 reference to Gebruiker uitschakelen.
-This current correction takes precedence over conflicting historical version
-notes below. Previous PDFs and exact acceptance records remain unchanged.
+Preserve: Continuous steps 1-6, Superadmin membership boundary, additive groups, direct deny precedence and status visibility/use distinction.
 
-| Field | Current value |
-| --- | --- |
-| Status | Working draft v12; not accepted |
-| Family | USR |
-| Type | Administration task with an exceptional route |
-| Current version | `usr-02-rol-en-rechten-wijzigen-v12-draft` |
-| Page model | 2 A4 pages |
-| Layout recipe | `stacked-step-flow` with `mixed-visual-widths` and `single-visual` |
-| Generator | `scripts/manuals/generate-aligned-guides-2026-10-01.mjs` |
-| Role | Admin |
-| Needed | Correct user and the intended access |
-| Prerequisite | Ingelogd (AC-01 Login); user account already exists |
+Placement and tradeoff: Representative complete rows remain readable; no miniature of the entire long permissions table. The retained status dropdowns truncate their native displayed values; obtain an opened-choice capture or a real UI-width repair against the selected release before final delivery. Recropping cannot recover UI text that the application itself clipped.
 
-## Purpose
+Use the [all25 execution record](../reviews/final-set-preparation-2026-11-04.md)
+and [complete changes/comparison index](../../../../output/manuals/final-guide-set-2026-11-04/review/index.html#USR-02).
+The retained baseline below supplies the domain contract and historical evidence;
+this brief owns the changed outline and placements in the prepared proposal.
+The original capture/role/locale, application-target and native-proof limits
+are recorded centrally.
+<!-- final-preparation-2026-11-04:end -->
 
-Change a user's operational access through group membership and, when needed,
-direct user permissions.
 
-Version 9 adds a separate rectangular focus around the `Machtigingen` tab in
-3A while retaining the existing focus around the effective-rights controls.
+## Baseline Specification - 2026-10-20
 
-## Steps
+Status: **Working draft v13; not accepted**. 2 A4 page(s).
+Type: Effective user-access change. Recipe: `stacked-step-flow; continuous 1-6 over two sides`.
+Intended role: **Admin / Superadmin**. Needed: Correct user and agreed allowed/prohibited tasks.
+Prerequisite: AC-01. [Exact review](../reviews/USR-02-v13.md).
 
-1. `Open het juiste account` - open `Personen > Toon Alles`, search by name or
-   username, open the correct user, and choose `Gebruiker aanpassen` on that
-   user's detail page.
-2. `Wijzig de standaardrol via Groepen` - only a Superadmin can add groups to
-   this user or remove them. On desktop, use `Ctrl+klik` to add another group
-   or deselect a selected group. Admin can view group membership but cannot
-   change it.
-3. `Pas rechten per gebruiker aan` - open `Machtigingen` and choose per right:
-   - `Overnemen`: use the combined result of all selected groups; no direct
-     user-specific choice is stored for that right;
-   - `Toestaan`: grant this right directly to the user, even when no selected
-     group grants it;
-   - `Weigeren`: block this right directly for the user, including when a
-     selected group grants it.
-   A direct `Toestaan` or `Weigeren` choice takes priority over group rights.
-   Admin and Superadmin can manage ordinary direct rights. Only Superadmin can
-   change `Global: Super User`.
-4. `Sla op en controleer opnieuw` - verify the groups on the user page. Reopen
-   `Machtigingen` and confirm that the direct choices produce the intended
-   combined access.
+This current specification replaces contradictory earlier procedure/metadata.
+The [previous complete specification](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/inputs/USR-02-previous-specification.md)
+preserves historical detail and exact acceptance links. Accepted artifacts,
+runtime selections and the other eight current proposals are unchanged.
 
-## Decision Rule
+## Reader Outcome
 
-Use one or more standard groups when they represent the work. When several
-users need the same direct choices, follow USR-05 and place those rights in a
-reusable group instead of repeating them per user. An unclear right remains on
-`Overnemen` until its description and effect are understood.
+The saved groups, direct rights and applicable status access allow the intended task and deny the prohibited task.
 
-## Compact Help
+## Action And Choice Structure
 
-- `Groepen vergrendeld` - only Superadmin can change group memberships.
-- `Effect van recht onduidelijk` - leave `Overnemen` selected and read the
-  permission description before changing it.
-- `Meerdere gebruikers` - follow USR-05 Groepen beheren for a reusable group
-  instead of repeating direct choices. The help tile renders this handoff with
-  the USR family marker, full guide code/name, and family color.
-- `Toegang te ruim` - check for both an old group and direct Toestaan entries.
+- 1-3: identify/edit user, have Superadmin change groups, then inspect Overnemen/Toestaan/Weigeren.
+- 4: map the real task to Create, Edit Quality Grade and current workflow rights; save/reopen the user form.
+- 5: only when a status boundary matters, open its separate Statuslabels form, check Zien and Kiezen / gebruiken, save that form if changed.
+- 6: test both allowed and prohibited tasks as the ordinary user.
 
-## Evidence Manifest
+## Operating Contract And Boundaries
 
-| Label | Job | Source ID | Status |
-| --- | --- | --- | --- |
-| 1A | Expanded Dutch dashboard sidebar with `Personen` and `Toon Alles` | `USR-DASHBOARD-PEOPLE-NAV-DESKTOP-01` | Captured 2026-08-13; canonical navigation reuse |
-| 1B | User search and recognizable user result | `USR-LIST-DESKTOP-01` | Captured 2026-08-11; search targeted; shared with USR-01 |
-| 1C | Correct user's `Gebruiker aanpassen` action | `USR-DETAIL-DESKTOP-01` | Captured 2026-08-11; edit action targeted |
-| 2A | Editable group selector and standard role choices | `USR-GROUP-EDIT-DESKTOP-01` | Captured 2026-08-11 in controlled Superadmin session |
-| 3A | Permissions tab and Toestaan/Weigeren/Overnemen columns | `USR-PERMISSIONS-DESKTOP-01` | Captured 2026-08-11 |
-| 4A | Saved user role and account detail | `USR-DETAIL-DESKTOP-01` | Captured 2026-08-11; shared with USR-01 |
+- Groups are additive: one group Allow can grant a right despite another group's Deny. Direct user choices are evaluated first; Overnemen delegates to groups.
+- Only Superadmin changes membership. Ordinary Admin rights management does not imply every sensitive grant is assignable.
+- Use the actually visible Execute Tests, Execute Senior Workflows, Execute Supervisor Workflows, Edit Workflow Runs, Start Additional Workflow Runs and Override Workflow Guards labels. Do not invent separate own/all run-edit grants.
+- Task execution/edit also depends on asset access and the operational workflow role/policy; a visible row alone does not prove effective access.
+- Save the user before navigating to a separate status editor, preventing lost changes.
+- Per-user status choices take precedence over groups; choosing requires the appropriate visibility/use access. Admin/Superadmin bypass cannot validate the ordinary-user boundary.
+- Several users needing the same package hand off to USR-05; unexpected broad access calls for checking all groups and direct choices.
 
-## Complete When
+## Revision Reasoning
 
-The correct user's selected groups and direct rights combine to give the
-intended access, without obsolete groups or unexplained direct overrides.
+Required alignment: Independent quality/workflow grants and per-status access, with current policy names.
 
-## Related Guides
+Chosen improvement: A continuous second side keeps concrete rights and two separate saves at their actual points of use.
 
-- USR-01 Gebruiker toevoegen
-- USR-05 Groepen beheren
-- USR-04 Gebruiker uitschakelen of herstellen
-- HELP-01 Problemen en hulp
+Preserve: Effective-rights reasoning, group/direct distinction, Superadmin membership boundary and saved verification.
 
-## Version Notes
+Placement and tradeoff: Show readable column headings and representative complete rows; a miniature of the whole permissions table would not support the task.
 
-- v2 preserves the verified v1 workflow and evidence while migrating the page
-  to shared badge, prerequisite, focus, completion, and full-reference
-  components. Long headings and image badges no longer overlap.
-- v3 removes approval and redundant stop wording, documents multi-group
-  selection/deselection, distinguishes Admin from Superadmin capabilities, and
-  explains `Overnemen`, `Toestaan`, and `Weigeren` in full.
-- v4 separates user search/opening from the real `Gebruiker aanpassen` action,
-  states explicitly that only Superadmin can add or remove group memberships,
-  explains that direct choices take priority over group rights, and clarifies
-  the second help label.
-- v5 renders the `Meerdere gebruikers` help handoff as a complete,
-  family-colored `USR-05 Groepen beheren` reference instead of leaving an
-  unstyled code inside body text.
-- v6 increases the USR-02 help-row height and gives the USR-05 handoff a
-  dedicated lower line with clear border spacing. The accepted USR-01 layout
-  and other guide pages that share the generator remain unchanged.
-- v7 shortens the 3A direct-rights focus area to the three permission rows
-  actually visible in the screenshot. Its complete lower stroke now remains
-  inside the image frame.
-- v8 adds the canonical `Personen > Toon Alles` dashboard navigation before
-  search and edit, without changing the accepted v7 rights semantics.
+## Standards, Desired Targets And Retired Approaches
 
-## Focused Candidate - 2026-09-08
+Current [authoring method](../authoring-method.md), shared contracts and
+owner decisions govern this revision. Keep exact access-group names, Dutch
+application/account locale, recognizable context, complete relevant controls
+and useful A4 target scale. Review the unmarked crop first; annotate only a
+remaining search or distinction. Routine checks use ordinary instructions,
+recoverable exceptions are conditional, and a genuine halt states its trigger
+and recovery. Preserve the task's sequence or explicit alternatives; complete
+the required work before declaring completion. No acceptance is inferred.
 
-The separate [v10 review](../reviews/USR-02-v10.md)
-records the focused follow-up to baseline v9, with the exact
-PDF and checksum. The owner requested this pass across all existing guides
-after reviewing WF-01 v12 positively. Earlier selections and their policies
-remain traceable; this candidate is not automatically accepted. See the
-[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
-source/crop exceptions, and remaining operational or evidence gaps.
+Target complete Dutch UI and clear field-to-result recognition. Retire invented
+role labels, redundant group outlines, fixed password recipes, blanket STOP
+wording, simulated screenshot states and post-completion alignment appendices.
+Do not invent unavailable settings, a source field/policy or a future QA status.
+The mounted application is the separate refurbisher-followups checkout,
+not the root checkout. Source fingerprints, actual actors, Dutch locale,
+owned synthetic fixtures and save/trial boundaries are recorded in the batch
+provenance. Genuine English strings and narrow native status-choice text
+remain product gaps. Header roles preserve the intended task allocation;
+local seeded/custom grants can be wider than the operational-role document.
+Physical printing/component work, destructive catalogue branches and an
+unfamiliar-reader/A4 paper trial are unperformed. Artifact checks and editorial
+read-back do not establish reader performance or exact acceptance.
+
+## Evidence And Maintenance
+
+The exact PDF, HTML/SVG, baseline, current source captures, measured crop plan,
+source/role/locale provenance and recognition placements are retained in the
+[round](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/README.md).
+The generator is `scripts/manuals/generate-remaining-guides-2026-10-20.mjs`.
+Frozen artifacts reproduce a proposal; the current specification and owner
+decisions govern future revisions. Create a new version after sealing.

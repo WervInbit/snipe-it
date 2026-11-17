@@ -1,0 +1,654 @@
+{
+  "schema_version": 1,
+  "recorded": "2026-11-17",
+  "baseline_delivered": "2026-11-12",
+  "set": "Handleidingen",
+  "meaning": "Last delivered baseline; not an inventory of subsequent NAS edits or an acceptance ledger",
+  "status": "Native working candidates; exact-version acceptance remains separate",
+  "manual_count": 25,
+  "pages": 68,
+  "artifact_paths_relative_to": "Handleidingen delivery root, including its owner-reported NAS copy",
+  "artifacts_in_git": false,
+  "shared_copy": {
+    "location": "NAS",
+    "path": null,
+    "copy_reported_by": "owner",
+    "recorded": "2026-11-17",
+    "integrity_independently_verified": false,
+    "update_rule": "Compare the actual shared files first; preserve human edits and update native, PDF and metadata together"
+  },
+  "local_baseline": {
+    "directory": "Handleidingen",
+    "verified": "2026-11-17",
+    "files": 583,
+    "recorded_hashes": 582,
+    "hashes_match": true,
+    "archive": "output/manuals/Handleidingen-2026-11-12.zip",
+    "archive_bytes": 383665275,
+    "archive_sha256": "d62409d7bde326951ea241a6ff4b0e9c5071967d1197ecf4242f7966aab5119a"
+  },
+  "fonts": [
+    "Arial"
+  ],
+  "native_images": {
+    "placements": 170,
+    "resources": "Embedded at full decoded source dimensions"
+  },
+  "export_comparison": {
+    "dpi": 150,
+    "exact_pages": 67,
+    "total_pages": 68,
+    "exception": "AC-01 v13 page 1 phone image: maximum 4/255 per channel; exact technical copy qualified separately, not a general tolerance or acceptance",
+    "print_pdfs_unchanged_from_previous_delivery": true
+  },
+  "evidence": {
+    "handoff": "docs/manuals/operator-guides/HANDOFF.md",
+    "native_review": "docs/manuals/operator-guides/reviews/native-conversion-2026-11-10.md",
+    "delivered_register": "Handleidingen/_Beheer/handleidingen.json",
+    "open_points": "Handleidingen/_Beheer/OPEN-PUNTEN.md",
+    "qualification": "output/manuals/shared-folder-2026-11-12/embedding-qualification.json",
+    "standalone_tests": "output/manuals/shared-folder-2026-11-12/standalone-verification.json"
+  },
+  "manuals": [
+    {
+      "code": "AC-01",
+      "title": "Login",
+      "category": "Account",
+      "role": "Iedereen",
+      "version": 13,
+      "pages": 1,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/AC-01.md",
+      "native": {
+        "file": "Affinity/AC-01 - Login.af",
+        "sha256": "6392ef74d49508159eee14b828a85ba9f3837c5f5b1036b59c9abaee26067a35",
+        "embedded_image_placements": 3
+      },
+      "pdf": {
+        "file": "PDF/AC-01 - Login.pdf",
+        "sha256": "24594a77609a03836f97849813533a425c5f555df746a34ff46607d264e79cba",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "3e022c3befbfe922db9ec913aa69554df1ac96bf0f799a64742b1fad53e557ef",
+        "pixel_identical": false
+      }
+    },
+    {
+      "code": "AC-02",
+      "title": "Eigen wachtwoord wijzigen",
+      "category": "Account",
+      "role": "Iedereen",
+      "version": 8,
+      "pages": 1,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/AC-02.md",
+      "native": {
+        "file": "Affinity/AC-02 - Eigen wachtwoord wijzigen.af",
+        "sha256": "915ab81e9be1436b41f63b46c699a2892f5be2f999ca6cea87341b6aee078976",
+        "embedded_image_placements": 4
+      },
+      "pdf": {
+        "file": "PDF/AC-02 - Eigen wachtwoord wijzigen.pdf",
+        "sha256": "e4bedeb90b0a595d1117dd7fda8d7d49a440e7d0360d5ed16954a6732697cf26",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "3a6e2d2390f9af5e22e8e06cc27641db2295995b06c28de0caa9b0760da6944e",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "AST-02",
+      "title": "Refurbishment route",
+      "category": "Apparaten",
+      "role": "Refurbisher",
+      "version": 11,
+      "pages": 1,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/AST-02.md",
+      "native": {
+        "file": "Affinity/AST-02 - Refurbishment route.af",
+        "sha256": "d133d300e9f9cac6d5c079331fd7305638d06b3271fd45bd5b56fd98568cf1d5",
+        "embedded_image_placements": 0
+      },
+      "pdf": {
+        "file": "PDF/AST-02 - Refurbishment route.pdf",
+        "sha256": "ca202d32144ff4d324a6b9a239fafe10e6d3ea4f39e769e0b8e2d460004f21a7",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "a99774ca8b8516a0ccc94a858a45afca79795be80708baabf2eba1c5f1a28d90",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "AST-03",
+      "title": "Asset registreren en labelen",
+      "category": "Apparaten",
+      "role": "Supervisor",
+      "version": 20,
+      "pages": 2,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/AST-03.md",
+      "native": {
+        "file": "Affinity/AST-03 - Asset registreren en labelen.af",
+        "sha256": "b6501c0561f6312bf43eb2637a4250e2bee7649d69c3eeaa8b6c5810b2cec55d",
+        "embedded_image_placements": 11
+      },
+      "pdf": {
+        "file": "PDF/AST-03 - Asset registreren en labelen.pdf",
+        "sha256": "82402f9bf4124ec863ba14b75b103036f4ea531c62db20dcb530ffe6a3f2190f",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "db657d1497d953d424f5de896639186a5471ecf00d77db963838b6e89c35e005",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "AST-04",
+      "title": "Werk afronden en overdragen",
+      "category": "Apparaten",
+      "role": "Refurbisher",
+      "version": 9,
+      "pages": 1,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/AST-04.md",
+      "native": {
+        "file": "Affinity/AST-04 - Werk afronden en overdragen.af",
+        "sha256": "d258a7432fc7f0a9c5aefebbffede761fe087f83f5108b6fa6e464265464b771",
+        "embedded_image_placements": 5
+      },
+      "pdf": {
+        "file": "PDF/AST-04 - Werk afronden en overdragen.pdf",
+        "sha256": "dc509f8a8b5aad76decf775ac25b3bfc2647019df534f619491303a54c539928",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "4d3767591b8835ec4b47af1c00c830f6eae4d93250354a912e4b5149112a5961",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "AST-05",
+      "title": "Asset beoordelen en vrijgeven",
+      "category": "Apparaten",
+      "role": "Supervisor",
+      "version": 10,
+      "pages": 2,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/AST-05.md",
+      "native": {
+        "file": "Affinity/AST-05 - Asset beoordelen en vrijgeven.af",
+        "sha256": "655d1084dddc7f75187d9911484c60278edb854154963304d04a0d6372b47e26",
+        "embedded_image_placements": 9
+      },
+      "pdf": {
+        "file": "PDF/AST-05 - Asset beoordelen en vrijgeven.pdf",
+        "sha256": "4d29280b9852f28760956b3a5dc1005d352cd10ce41e857e6b48e6783e4ad7d2",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "e81258b24ed97f50ec3d45b94bf896be2113e787d412e24c0ba2be3976dc80b3",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "CAT-00",
+      "title": "Catalogus begrijpen",
+      "category": "Catalogus",
+      "role": "Supervisor",
+      "version": 14,
+      "pages": 6,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/CAT-00.md",
+      "native": {
+        "file": "Affinity/CAT-00 - Catalogus begrijpen.af",
+        "sha256": "46665ef42be497636275cb3946f8065165238104a5e7c8eacbc1dd7a3352bab2",
+        "embedded_image_placements": 5
+      },
+      "pdf": {
+        "file": "PDF/CAT-00 - Catalogus begrijpen.pdf",
+        "sha256": "f8b59be6040a6004757db721dbb17513d4900917d904f52cf128b8db4a4a3f41",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "f1abf394c359a0cf7bac78b6d9d65a5ac4740bb7b0cd03c91661f71e55653dec",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "CAT-01",
+      "title": "Model en modelnummer aanmaken",
+      "category": "Catalogus",
+      "role": "Supervisor",
+      "version": 10,
+      "pages": 5,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/CAT-01.md",
+      "native": {
+        "file": "Affinity/CAT-01 - Model en modelnummer aanmaken.af",
+        "sha256": "ac2c3cf03f19009136aa346e1ba14a1e173312975759a9ec323ec9f7866d59e7",
+        "embedded_image_placements": 12
+      },
+      "pdf": {
+        "file": "PDF/CAT-01 - Model en modelnummer aanmaken.pdf",
+        "sha256": "5e831e2e4d586c8221aabfa8cb429d64c34e5d3076997845f3daa321c9f5a400",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "0c5698a8e686d123c9ff381b8f8c61183e6e1736b66166496209e74590128aee",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "CAT-02",
+      "title": "Modelspecificatie opbouwen",
+      "category": "Catalogus",
+      "role": "Supervisor",
+      "version": 5,
+      "pages": 6,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/CAT-02.md",
+      "native": {
+        "file": "Affinity/CAT-02 - Modelspecificatie opbouwen.af",
+        "sha256": "5c876957866631249f82aa1acb4b28f05d52df8e5e506a740b8b13053d9cd266",
+        "embedded_image_placements": 10
+      },
+      "pdf": {
+        "file": "PDF/CAT-02 - Modelspecificatie opbouwen.pdf",
+        "sha256": "c16f09e319e01cb5432a4fd8199a0083ccc08ac3ea6ac31bbf6d7e4425aa60c3",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "515e6f5aa6821b40417cb2ce80d26584c50e063c8bbcac520e6caa4a0623e456",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "CAT-03",
+      "title": "Attributen beheren",
+      "category": "Catalogus",
+      "role": "Supervisor",
+      "version": 5,
+      "pages": 6,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/CAT-03.md",
+      "native": {
+        "file": "Affinity/CAT-03 - Attributen beheren.af",
+        "sha256": "ba2f22a1576f2cb0087057e19f6836dd491b9e651dce551b64afe85caf408413",
+        "embedded_image_placements": 10
+      },
+      "pdf": {
+        "file": "PDF/CAT-03 - Attributen beheren.pdf",
+        "sha256": "f34a03821df65aabe6ca61b6db11a884a70af3a3e1419f0f504139804c0df606",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "4a97e5cecd230a769700957dee9b31c3d7eb72c906283f972b5f3aa8a88cc3be",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "CAT-04",
+      "title": "Componentdefinities beheren",
+      "category": "Catalogus",
+      "role": "Supervisor",
+      "version": 8,
+      "pages": 6,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/CAT-04.md",
+      "native": {
+        "file": "Affinity/CAT-04 - Componentdefinities beheren.af",
+        "sha256": "61492163e1b5f7d08bf34d4bee4645843dc03b849be71119cd4349cb9bdb4ddd",
+        "embedded_image_placements": 10
+      },
+      "pdf": {
+        "file": "PDF/CAT-04 - Componentdefinities beheren.pdf",
+        "sha256": "2f70981fb7f13f7070ba5d4f10e15d83e55a7213e3eb7dc7b47c545f1ba709f1",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "3a22c00c8df936003aeb2f10346754af0222977e3ce965a1057405a5b6215b55",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "CAT-05",
+      "title": "Bestaande catalogus aanpassen",
+      "category": "Catalogus",
+      "role": "Admin",
+      "version": 5,
+      "pages": 9,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/CAT-05.md",
+      "native": {
+        "file": "Affinity/CAT-05 - Bestaande catalogus aanpassen.af",
+        "sha256": "91cc6fde4b11486740730e257bbb788ddbfa8a479870972b9f48fc3e6a6aec13",
+        "embedded_image_placements": 18
+      },
+      "pdf": {
+        "file": "PDF/CAT-05 - Bestaande catalogus aanpassen.pdf",
+        "sha256": "954065abf4e843766d575f09371c08aa55c31329ca2492d8cec374bfc2eb4b79",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "f78332dc6be8c6548c3a23ebbbb188c0376edee78ed929669bf2d778eeaaddc6",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "CAT-06",
+      "title": "Productgegevens controleren",
+      "category": "Catalogus",
+      "role": "Supervisor",
+      "version": 4,
+      "pages": 3,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/CAT-06.md",
+      "native": {
+        "file": "Affinity/CAT-06 - Productgegevens controleren.af",
+        "sha256": "fcf7c31496fbb26892d2a2e5464ffb1de54d245b90e8d2e8e036e28177ef7ec0",
+        "embedded_image_placements": 3
+      },
+      "pdf": {
+        "file": "PDF/CAT-06 - Productgegevens controleren.pdf",
+        "sha256": "5137e65a5cb5a3b993ac4517e863c1016c046efe31ce5e6eabbcbd978fb79af2",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "0e95c985a948e30e241d34bfcecdb2de11d27f7cb2107cdc8eb2f7f9ff559c1f",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "CMP-01",
+      "title": "Bestaand component plaatsen",
+      "category": "Componenten",
+      "role": "Senior Refurbisher",
+      "version": 8,
+      "pages": 1,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/CMP-01.md",
+      "native": {
+        "file": "Affinity/CMP-01 - Bestaand component plaatsen.af",
+        "sha256": "4e7878e80ce43aa5c1004febe09e800d363de2b4c4770e335120a4e69cc1f51a",
+        "embedded_image_placements": 4
+      },
+      "pdf": {
+        "file": "PDF/CMP-01 - Bestaand component plaatsen.pdf",
+        "sha256": "0d90b02ff0933b6550098a84cf91c795ac36c70571574cce8d678588c8a547f2",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "54ff03e1e301d5aaafe5093e73d2e925d86a822f9602d9a9d172d6ed262f2493",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "CMP-02",
+      "title": "Nieuw component registreren en plaatsen",
+      "category": "Componenten",
+      "role": "Senior Refurbisher",
+      "version": 9,
+      "pages": 2,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/CMP-02.md",
+      "native": {
+        "file": "Affinity/CMP-02 - Nieuw component registreren en plaatsen.af",
+        "sha256": "4deda1f6ecdc2f1596bf1bc1f922933103e05e2baa45e57ac76ba3e5cdc3e46b",
+        "embedded_image_placements": 6
+      },
+      "pdf": {
+        "file": "PDF/CMP-02 - Nieuw component registreren en plaatsen.pdf",
+        "sha256": "a7b93e1b641e1ce05b94785991771cd012c0b4e7ea3cd8988fded63e50c391e5",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "bff1d0501e97ba08b5d6d3d46fd9dd4dc97869a814f03075fc5756fd9062b60f",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "CMP-04",
+      "title": "Component naar tray verplaatsen",
+      "category": "Componenten",
+      "role": "Senior Refurbisher",
+      "version": 9,
+      "pages": 1,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/CMP-04.md",
+      "native": {
+        "file": "Affinity/CMP-04 - Component naar tray verplaatsen.af",
+        "sha256": "55baa40f436434b552bb55a778994206ff307a0a81a029a2d5045441923077f1",
+        "embedded_image_placements": 7
+      },
+      "pdf": {
+        "file": "PDF/CMP-04 - Component naar tray verplaatsen.pdf",
+        "sha256": "98c4b805f1462be42e034b8caf37775e3301b53331ee56f87644798923d8042b",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "05ca0245e1d96bfa93b1d57aade80908d11af1c103e9a6db126e580bb026e353",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "HELP-01",
+      "title": "Problemen en hulp",
+      "category": "Hulp",
+      "role": "Iedereen",
+      "version": 10,
+      "pages": 2,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/HELP-01.md",
+      "native": {
+        "file": "Affinity/HELP-01 - Problemen en hulp.af",
+        "sha256": "63962a32f739b07657280d6c188ca447655f9247c34186012d30041190ef5cb6",
+        "embedded_image_placements": 0
+      },
+      "pdf": {
+        "file": "PDF/HELP-01 - Problemen en hulp.pdf",
+        "sha256": "1f8a0011faca7daed1f3c3b3bfe6b36fa6a5b6c747975d638f1d5e75046e6a5d",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "5961be3d5be476b52a4d0c0c08d313391f00b6d55e9231250abba1d70b2bbcbd",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "SC-01",
+      "title": "Asset vinden en openen",
+      "category": "Apparaten",
+      "role": "Refurbisher",
+      "version": 16,
+      "pages": 1,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/SC-01.md",
+      "native": {
+        "file": "Affinity/SC-01 - Asset vinden en openen.af",
+        "sha256": "19e1db3edc0fc21514dc8a6e23c4bf129ad79b5c77e27c0bdf90ed35f4a6f38d",
+        "embedded_image_placements": 6
+      },
+      "pdf": {
+        "file": "PDF/SC-01 - Asset vinden en openen.pdf",
+        "sha256": "ad2d7c5f280b66b28b1e8f332d89cc70edf597c59ff461aabddea2c2a3031fec",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "f014ba1871518a7a9f5ff343d0f53681a2b5e3e7d3bc000a91ccc0f402a7ee45",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "USR-01",
+      "title": "Gebruiker toevoegen",
+      "category": "Gebruikersbeheer",
+      "role": "Admin / Superadmin",
+      "version": 16,
+      "pages": 2,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/USR-01.md",
+      "native": {
+        "file": "Affinity/USR-01 - Gebruiker toevoegen.af",
+        "sha256": "3852baae99aa3c69b36ef42a8058a98b598f9ac8e8d4f1bbe0776520b00accbf",
+        "embedded_image_placements": 10
+      },
+      "pdf": {
+        "file": "PDF/USR-01 - Gebruiker toevoegen.pdf",
+        "sha256": "28fb81bf75c3b13db2389ddd6600e2b0d5717702f63aebe7324c26e6fbcf204d",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "16734b0e02229d5bf8b5367366ffd35e7e3c1a1f59e35263b9f3beb9f5771bdd",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "USR-02",
+      "title": "Rol en rechten wijzigen",
+      "category": "Gebruikersbeheer",
+      "role": "Admin / Superadmin",
+      "version": 14,
+      "pages": 2,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/USR-02.md",
+      "native": {
+        "file": "Affinity/USR-02 - Rol en rechten wijzigen.af",
+        "sha256": "e05efb68cde13a38aee1211f7f459e0267fae758232b1e677ba919304346b658",
+        "embedded_image_placements": 8
+      },
+      "pdf": {
+        "file": "PDF/USR-02 - Rol en rechten wijzigen.pdf",
+        "sha256": "d9db9d2325ffce170e99457e463ed2beb626a0ed1d949e0a1422b38890b0a452",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "4502f03c4e743e889742c5d3fa24b32017a2ccf9e63886fd599505688061adc6",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "USR-03",
+      "title": "Wachtwoord resetten",
+      "category": "Gebruikersbeheer",
+      "role": "Admin",
+      "version": 7,
+      "pages": 1,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/USR-03.md",
+      "native": {
+        "file": "Affinity/USR-03 - Wachtwoord resetten.af",
+        "sha256": "77d86e600a55957e6a239d6b5e803c4349bf111ca57f910f4ad1966f17e3d919",
+        "embedded_image_placements": 4
+      },
+      "pdf": {
+        "file": "PDF/USR-03 - Wachtwoord resetten.pdf",
+        "sha256": "9c085670a1b5802ad5198cddbee31ac906b4dc609ec07384d774a3ae91ad7853",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "d60008d6fb85cd9494484c36309cba4be87391fcc4de6baf882cefecb967cc24",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "USR-04",
+      "title": "Gebruiker uitschakelen",
+      "category": "Gebruikersbeheer",
+      "role": "Admin",
+      "version": 9,
+      "pages": 1,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/USR-04.md",
+      "native": {
+        "file": "Affinity/USR-04 - Gebruiker uitschakelen.af",
+        "sha256": "e4ebd66126fbfcaa4533ab5a5804a9d850f3b948e227d081e3f45dd54ccddca6",
+        "embedded_image_placements": 5
+      },
+      "pdf": {
+        "file": "PDF/USR-04 - Gebruiker uitschakelen.pdf",
+        "sha256": "9fe725522ea776a1c313e44e3d013b6d2c6ebe27ea3488d2ec8c32c53ca4bfbc",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "951401a8cdcd9f2aeaa3fcc054e5a5b57aeb98ff4e997100af6185f04d1484db",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "USR-05",
+      "title": "Groepen beheren",
+      "category": "Gebruikersbeheer",
+      "role": "Superadmin",
+      "version": 5,
+      "pages": 3,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/USR-05.md",
+      "native": {
+        "file": "Affinity/USR-05 - Groepen beheren.af",
+        "sha256": "08d637042619d4c28f698973aee8ca20ec0d9e75517769b5ad5aa216a8eb2029",
+        "embedded_image_placements": 8
+      },
+      "pdf": {
+        "file": "PDF/USR-05 - Groepen beheren.pdf",
+        "sha256": "f7867cbd4d9a4497e5e0048ea4f849e0304be6e9af14154d3573b1d016f83f0a",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "b6a5e860b63a892b31e2b77f0058b84c7a74cd06a04b2c0d91315bbbe01ca1bb",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "WF-01",
+      "title": "Workflow starten",
+      "category": "Workflows",
+      "role": "Refurbisher",
+      "version": 17,
+      "pages": 1,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/WF-01.md",
+      "native": {
+        "file": "Affinity/WF-01 - Workflow starten.af",
+        "sha256": "63bf28ee7e3a256ff26409c21d79e9613f46b13e9afd8f05344ff818b6869c6c",
+        "embedded_image_placements": 5
+      },
+      "pdf": {
+        "file": "PDF/WF-01 - Workflow starten.pdf",
+        "sha256": "bf8f2da5c8a2ff3be809fe9a5f32bc7e61242cffe5e07c001d9eb3cac937f48c",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "5afad92aabe6c5dfa6f7b4aebb793adb843015e81f05d3c8a8810833fc07a913",
+        "pixel_identical": true
+      }
+    },
+    {
+      "code": "WF-02",
+      "title": "Workflow uitvoeren en afronden",
+      "category": "Workflows",
+      "role": "Refurbisher",
+      "version": 15,
+      "pages": 2,
+      "review_state": "Working draft; exact-version acceptance open",
+      "specification": "guides/WF-02.md",
+      "native": {
+        "file": "Affinity/WF-02 - Workflow uitvoeren en afronden.af",
+        "sha256": "f0021b23834736117cc272f6c5cb1c1f0cc940866ecd5124b744b8379372ec52",
+        "embedded_image_placements": 7
+      },
+      "pdf": {
+        "file": "PDF/WF-02 - Workflow uitvoeren en afronden.pdf",
+        "sha256": "f3c82b0368454f983b83f5deed1a5d35e799059d5dd9ec4ec31a7ff30dd8a51d",
+        "unchanged_from_previous_delivery": true
+      },
+      "native_export_verification": {
+        "sha256": "c49effda11ac5555e96c35e8835abac4f2d74cc341713016656873fa7b49c1e7",
+        "pixel_identical": true
+      }
+    }
+  ]
+}

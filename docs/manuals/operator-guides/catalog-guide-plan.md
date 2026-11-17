@@ -1,5 +1,16 @@
 # CAT Guide Set Information Architecture
 
+## Current Delivery Context - 2026-11-17
+
+CAT-00 through CAT-06 are included in the completed 25-manual PDF/native
+delivery, copied to the NAS according to the owner. [The register](registry.md)
+and [exact delivered baseline](current-set.json) select their current versions;
+compare actual shared masters before editing. The topic ownership and handoff
+rules below still apply. Earlier version counts, planned generation sequences
+and dated review states are historical; they do not queue fresh conversions or
+override later specifications and owner decisions. Source-policy/application,
+reader/fresh-device and exact acceptance evidence remain in the current handoff.
+
 ## USR-05 / CAT-05 / CAT-06 V2 - 2026-09-15
 
 The revised working drafts are USR-05 v2 (3 pages), CAT-05 v2 (8 pages), and

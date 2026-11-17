@@ -104,6 +104,38 @@ The crucial generalization is the cause and its limit. "Never restart at 1",
 "always make screenshots larger", "never add a page" and "preserve every old
 layout" would each fail a legitimate case in this table.
 
+## Rules Clarity Review On 2026-10-08
+
+The focus interpretation in this initial desk check was too broad. Later
+owner feedback on the three rendered examples requires reviewing the crop
+without marks first and distinguishing competing targets from a complete
+joint check. See the [feedback correction](emphasis-feedback-2026-10-08.md).
+That later interpretation governs the current contracts; the table below
+records the earlier reasoning that the test disproved in practice.
+
+Owner feedback on screenshot recognition, target marks and pervasive STOP
+messages exposed three remaining ambiguities in the shared wording. These
+changes refine the existing method; the following are editorial desk checks,
+not reader trials or review of newly generated PDFs.
+
+| Ambiguity | Current criterion | Boundary or contrasting case |
+| --- | --- | --- |
+| "Enough context" and "understandable target" did not distinguish orientation from recognition. | The reader can locate the pictured screen/tab/panel and identify the named target at A4 size. Retain landmarks and readable target detail. | A close detail can use a clearly linked nearby overview. A large isolated generic button still fails when the reader cannot locate it. |
+| System rules called focus marks optional; the component rule said "only when" several actions were plausible without requiring a mark in that case. | Mark the target when an instruction selects an item among several visible controls, rows or values; also mark an easy-to-miss target. | A clearly located isolated target needs no mark. An orientation overview need not mark each navigation item. The mark cannot fix a tiny target or lost context. |
+| STOP severity was defined, but routine checks, conditional wording and repetition were insufficiently constrained. | Routine checks use ordinary instructions. Exceptions state the observable trigger, next action and resumption condition. Reserve red STOP for a genuine halt and keep the unaffected route clear. | A distinct risk or independently entered route can need another warning. A correctable field discrepancy can be ordinary correction/amber; uncertain physical device identity can require a halt. |
+
+For example, "Vergelijk het serienummer" is a routine action. "Als het
+serienummer niet overeenkomt, ga niet verder met dit apparaat. Laat de
+identiteit controleren voordat je verdergaat" describes a conditional halt.
+The operational source must establish the actual recovery owner and route;
+this wording example does not assign them or create a new policy.
+
+The [concise criteria](../authoring-method.md#reader-review-criteria) provide
+one review entry point. The system, focus and capture contracts express the
+same requirements. Exact crop, annotation shape and wording remain editorial
+choices evaluated through those reader effects and actual-size rendering.
+No fixed warning count or screenshot size can replace that judgment.
+
 ## Coverage Across All Twenty Five Subjects
 
 The method is applied by reading relationship, not by the subject's family

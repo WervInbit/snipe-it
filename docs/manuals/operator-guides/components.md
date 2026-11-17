@@ -1,6 +1,13 @@
 # Operator Guide Components
 
-Status: authoritative shared rendering contract for generated guide drafts.
+Status: authoritative shared visual contract for operator manuals.
+
+All 25 current manuals have native/PDF delivery files. The contract applies to
+native edits as well as generated proposals. [The register](registry.md) owns
+the delivered baseline; compare actual shared `.af` masters for later edits.
+Implementation sources below retain the generator's rendering/provenance role;
+they do not reproduce or override later native artwork automatically. Use the
+current handoff and maintenance procedure before applying a shared change.
 
 This document defines the reusable visual components and the review-feedback
 rules used by guide generators. Guide-specific content remains in
@@ -122,13 +129,35 @@ The complete focus stroke must remain visible inside the screenshot frame. If
 a target continues beyond the visible crop, tighten the target to the visible
 controls or revise the crop; do not accept a stroke clipped by the image edge.
 
-Use a focus mark only when the screenshot contains multiple plausible actions
-or the target is otherwise easy to miss. A screenshot that already isolates a
-single clear state does not need a red mark.
+Decide whether a mark is needed before measuring one. Review the unmarked
+crop with its instruction and caption at A4 size. Use a focus mark for a
+target that remains easy to miss or confused with a competing item after
+considering the crop, visible labels and native emphasis. The presence of
+several controls or values alone does not require annotation.
+
+A complete small form, jointly checked identity fields, a status-and-note
+panel or an isolated result can be the target as a whole. When the crop
+already isolates that group, leave it unmarked; outlining every member or
+nearly the whole crop adds no useful distinction. A mark on one icon in a
+toolbar or one row among plausible results can still be necessary. Orientation
+evidence need not single out a control. Remove a mark if its absence loses no
+useful guidance at the same printed size; do not impose a fixed mark count.
+
+Choose the shape that encloses the target clearly without including unrelated
+items. A rectangle usually suits a field or row; a circle can suit a compact
+icon or control. Preserve measured padding and keep labels readable. A mark
+directs attention, without implying an error or halt. It cannot substitute for
+recognizable screen context or readable detail; apply the
+[screenshot rules](system.md#screenshots-and-photos) as well.
 
 ## Flexible Layout Rules
 
 The system is component-based, not a fixed page grid:
+
+After moving or removing guidance, resize/reflow the affected content rather
+than keeping its old empty frame. Judge actual screenshot content, target size
+and instructional support together. Preserve useful hint/help content even
+when changing its presentation. See the [authoring method](authoring-method.md).
 
 - guides can contain different numbers of steps and screenshots;
 - alternatives can be stacked, adjacent, or embedded in one step;
@@ -189,11 +218,21 @@ center. The outcome describes a visible or verifiable end state.
 
 ### Inline Warning Hierarchy
 
-Use amber inline warning text for recoverable duplicate, validation, missing
-catalog, mismatch, or incomplete-work conditions. Use red `STOP` only when the
-operator must halt because continuing creates a meaningful safety, identity,
-irreversible-state, or data-integrity risk. A warning must not be promoted to a
-stop merely to make it more visible.
+Routine checks and ordinary required-field instructions use normal body text.
+Use amber inline warnings for recoverable exceptions needing attention, such
+as validation, duplicates or missing catalogue information. Use red `STOP`
+only when continuing creates a meaningful safety, identity, irreversible-state
+or data-integrity risk requiring a halt. A correctable field discrepancy and
+uncertainty about the device/record identity can need different responses;
+the label "mismatch" does not determine severity.
+
+State the observable trigger before the instruction and explain the next action
+and resumption condition. Keep the unaffected route clear and use calm factual
+wording. Do not repeat the same STOP as a standing banner through consecutive
+steps. A distinct risk or independently entered route may need its own warning.
+See [Stop And Help](system.md#stop-and-help). Greater visual prominence alone
+does not justify promoting a message to a stop or replacing routine text with
+an amber warning.
 
 Focus rectangles surround the named control with visible padding. Their stroke
 must not cross a dropdown label, result count, icon, or other instructional

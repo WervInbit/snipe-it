@@ -1,5 +1,105 @@
 # Operator Guide Decisions
 
+## 2026-11-17 - Shared NAS Set And Delivered Baseline
+
+The owner confirms copying the delivered Handleidingen set to the NAS and asks
+to align the repository. Record the copy as owner-reported; no NAS path or hash
+verification was supplied. All 25 native/PDF pairs / 68 pages are prepared and
+packaged. [The register](registry.md) and [current-set.json](current-set.json)
+identify the last delivered baseline, not later shared edits or acceptance.
+
+Saved shared native `.af` files own subsequent human changes. Compare them
+before updating from local output, and synchronize native, PDF and relevant
+specification/version records under [maintenance](maintenance.md#shared-manual-updates).
+The local generated folder/ZIP remain immutable comparison evidence and are
+not fresh-clone resources. No remaining conversion or app input is scheduled.
+The earlier planning-only hold below was followed by explicit execution
+authorization and completed delivery; it is historical, not a current blocker.
+
+The owner requires manual/handleiding wording for new user-facing names/prose.
+Keep internal existing paths, exact access-group names and historical artifacts.
+Delivery/distribution changes no exact acceptance, application behavior or
+remaining operator/fresh-device/release evidence requirement.
+
+## 2026-11-04 - Newer Set Selected For Final Consolidation Planning
+
+The owner states "we'll use your new versions" and requests one last complete
+revision incorporating the rules, advice and known problems, plus an edition
+fully editable in Affinity. Treat the newer 25-guide index, including AST-03
+v19, as the selected starting direction. Preserve useful accepted support and
+apply later owner corrections; do not restart from rejected earlier drafts.
+
+The same instruction expressly limits this turn to planning and investigation.
+The [plan](reviews/final-set-and-affinity-plan-2026-11-04.md) records scope,
+per-guide repairs, app/source dependencies and native editing requirements.
+Affinity is now a requested handoff outcome, while its generation/conversion
+is deferred by the owner's current hold. Existing artifacts and runtime
+selections are unchanged; an unproduced final release has no acceptance yet.
+
+## 2026-10-27 - Preserve Guidance And Teach Navigation
+
+Owner feedback rejects the October20 batch's loss of useful hints, unused
+image space and assumed knowledge. AC-02 explicitly needs red focus around
+the profile icon and Wachtwoord wijzigen. AST-03 must illustrate duplicate
+search, locate creation, show Save and treat new-registration notes as optional.
+Recompose useful content and actual targets after moving/removing guidance.
+Do not infer that removing warnings authorizes removing ordinary help.
+
+AC-02 v7 and AST-03 v18 are separate working drafts, not accepted. The other
+fifteen remain proposals with [specific follow-ups](reviews/navigation-and-space-feedback-2026-10-27.md).
+Affinity is under consideration; editable interchange for these examples does
+not qualify native Affinity import or replace content completeness.
+
+## Continued Authoring - 2026-10-20
+
+The owner finds the corrected AC-01 v12, SC-01 v15 and AST-05 v9 examples
+fine and asks to generate more. Carry their corrected direction into the next
+operational set: AST-02 v10, WF-01 v16, WF-02 v14, AST-04 v8 and HELP-01 v9.
+Exact group names, readable evidence and necessary focus govern this set.
+Read the [per-guide reasoning and changes](reviews/operational-guides-2026-10-20.md).
+The five new versions remain working drafts for review. Existing exact PDFs,
+accepted selections and their earlier decisions remain traceable.
+
+## Owner Feedback On Test Examples - 2026-10-08
+
+The owner describes AC-01 v11, SC-01 v14 and AST-05 v8 as degradation,
+identifying role names and excessive focus rings when the screenshot already
+encompasses the complete relevant content. The owner then explicitly chose:
+`Keep the existing access-group names exactly`.
+
+This refines the earlier focus interpretation below: several visible items
+are not, by themselves, a reason to annotate. Review the unmarked crop with
+its instruction first; use a mark when it resolves remaining search or
+confusion. A complete jointly used or checked group can already be isolated
+by the crop. Keep established group names without invented qualifications;
+permission evidence stays separate from the reader-facing name.
+
+The [feedback review](reviews/emphasis-feedback-2026-10-08.md) records the
+cause, per-visual decisions and bounded correction. All three test versions
+require rework and remain unaccepted. Retain their exact artifacts. Neither
+this feedback nor a corrective generation accepts a guide or replaces the
+accepted selections. Other guides need the same judgment at their next
+revision; this is not a mark-removal quota or a blanket batch regeneration.
+
+## Owner Rules Clarification On 2026-10-08
+
+Manual work continues in this checkout; the owner reports no intervening work
+in other locations. The owner asks whether the rules are clear and identifies
+three reader needs: recognize where a screenshot was taken, locate the relevant
+item when several items are visible, and avoid pervasive STOP messages that
+make an ordinary step appear threatening or imply an incident.
+
+The working contracts now turn those needs into
+[reader review criteria](authoring-method.md#reader-review-criteria): separate
+screen orientation from target recognition at A4 size, use focus marks to
+resolve target search or confusion, and use conditional warnings
+with a next action and resumption condition. Routine checks use ordinary text;
+amber flags recoverable exceptions and red STOP remains for genuine halts.
+The [rules clarity review](reviews/authoring-method-repair-2026-10-06.md#rules-clarity-review-on-2026-10-08)
+records the ambiguities and boundaries of this interpretation. These criteria
+guide editorial decisions; they do not impose a fixed crop, shape or warning
+count, change operational policy, or accept any guide version.
+
 ## Owner Authoring Scope Clarification On 2026-10-06
 
 Owner requests repair of the general reasoning used to generate, fix and
@@ -229,3 +329,32 @@ Review state is version-specific. Later changes require a new version record.
 | CAT-04 | v2 draft | Required-policy and readability correction; awaiting exact-version review | 2026-09-03 | Preserves the six-page reusable-definition flow, enlarges sparse identity-card copy, and treats unchecked Required as unsupported because it is not separately enforced and unchecked rows still affect calculated specifications. |
 | CAT-05 | v2 draft | Unaccepted working draft | 2026-09-15 | Content-audit revision; see [v2 review](reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md). Original v1 remains unchanged. |
 | CAT-06 | v2 draft | Unaccepted working draft | 2026-09-15 | Content-audit revision; see [v2 review](reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md). Original v1 remains unchanged. |
+
+## 2026-10-20 - Remaining Guide Revisions Authorized
+
+After reviewing the corrected role/focus examples, the owner requested the
+remaining guides using the same approach. This authorizes seventeen new
+versions, not automatic acceptance: AC-02 v6, AST-03 v17, CMP-01 v7,
+CMP-02 v8, CMP-04 v8, USR-01 v15, USR-02 v13, USR-03 v6, USR-04 v7,
+USR-05 v4, CAT-00 v13, CAT-01 v9, CAT-02 v4, CAT-03 v4, CAT-04 v6,
+CAT-05 v4 and CAT-06 v3. The previous eight revisions stay unchanged.
+
+The October8 bounded-test restriction is superseded for this requested scope;
+it remains historical evidence about acceptance. The current method and owner
+choices still govern: exact access-group names, Dutch settings, task-dependent
+composition, preserved useful recognition scale, explicit alternatives and
+conditional warnings. All versions remain working drafts. No accepted or
+runtime selection is advanced. See the
+[central changes/reasoning](reviews/remaining-guides-2026-10-20.md) and
+[baseline comparison](../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/review.html).
+
+## 2026-10-08 - Three Reauthoring Test Examples
+
+The owner requested three remade examples. AC-01 v11, SC-01 v14 and AST-05 v8
+are **Working drafts; not accepted**. See the
+[test review](reviews/reauthoring-test-2026-10-08.md) for concrete reasoning,
+source/target measurements, preserved baselines, current behavior and gaps.
+Their creation does not approve a layout, promote desired product terminology,
+accept the method's reader-effect predictions or advance runtime selections.
+The method remains general; this limited exercise does not authorize a new
+batch replacement. Existing acceptance and the October hold remain traceable.

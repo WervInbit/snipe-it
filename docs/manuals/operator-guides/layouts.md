@@ -1,5 +1,53 @@
 # Operator Guide Layout Recipes
 
+## Current Use - 2026-11-17
+
+These recipes guide composition in both native and generated revisions. The
+[current register](registry.md) selects the delivered versions/page counts;
+the dated assignments below retain their original proposal context. All 25
+manuals are converted and delivered. Compare actual shared native masters
+before changes; a recipe or generator does not override later human artwork.
+
+## AST-03 Pilot - 2026-11-04
+
+AST-03 v19 retains `stacked-step-flow` and two-sided continuous numbering 1-8.
+It uses `inline-route-alternative`, `reused-evidence`, `inline-warning` and
+`two-sided-continuation`. Dashboard orientation and the list search are
+successive support within step1; the plus and named Dashboard creation control
+are alternatives only after the duplicate check. [Exact unaccepted pilot](reviews/AST-03-v19.md).
+
+## Operational Set - 2026-10-20
+
+AST-02 v10 uses one-side `route-list`; WF-01 v16 one-side
+`two-column-step-grid` with an explicit route alternative; WF-02 v14 two-side
+`stacked-step-flow` with continuous numbering; AST-04 v8 one-side
+`stacked-step-flow`; HELP-01 v9 two independent `troubleshooting-grid` sides.
+See the [per-guide reasoning](reviews/operational-guides-2026-10-20.md).
+These are draft assignments. The help expansion supports sixteen current
+problem groups without shrinking old topics into a numbered procedure.
+
+## Reauthoring Test Assignments - 2026-10-08
+
+The initial v11/v14/v8 examples below require rework following owner feedback.
+The bounded v12/v15/v9 corrections retain these same recipe assignments,
+page counts and frame dimensions. See the
+[role and focus correction](reviews/emphasis-feedback-2026-10-08.md).
+This correction does not approve the broader composition.
+
+The [three unaccepted examples](reviews/reauthoring-test-2026-10-08.md) use:
+
+| Guide | Base recipe | Step patterns | Page model |
+| --- | --- | --- | --- |
+| AC-01 v11 | `compact-horizontal-sequence` | `single-visual`, `reused-evidence` | One side |
+| SC-01 v14 | `mixed-asymmetric-flow` | `parallel-visual-choice`, `reused-evidence`, `inline-stop` | One side |
+| AST-05 v8 | `stacked-step-flow` | `inline-route-alternative`, `reused-evidence`, `inline-warning`, `inline-stop`, `two-sided-continuation` | Two continuous sides |
+
+AST-05 changes from the earlier grid so current review, decision, confirmation
+and saved-state evidence have readable space in one numbered task. SC-01's
+asymmetric blocks give its alternative routes and shared check distinct jobs.
+These assignments describe the new proposals; retained selections and older
+recipe tables below do not change their acceptance state.
+
 ## USR-05 / CAT-05 / CAT-06 V2 - 2026-09-15
 
 The revised working drafts are USR-05 v2 (3 pages), CAT-05 v2 (8 pages), and

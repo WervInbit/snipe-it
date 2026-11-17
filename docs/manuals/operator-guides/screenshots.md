@@ -1,5 +1,90 @@
 # Canonical Screenshot Catalog
 
+## Delivered Image Sources - 2026-11-17
+
+All 170 image placements in the 25 delivered native manuals are embedded at
+full original decoded dimensions. The delivered `_Beheer/handleidingen.json`
+records original image files/hashes and native crop maps. See the
+[current register](registry.md) and [handoff](HANDOFF.md) for exact selections
+and proof limits; compare actual shared masters for later edits. The dated
+capture records below remain provenance, not evidence of current deployment.
+No fresh UI capture or image-content change follows from this repository update.
+
+## AST-03 Pilot Reuse - 2026-11-04
+
+AST-03 v19 reuses genuine October27 nl-NL captures; no new application state
+was captured. The [pilot manifest](../../../resources/manuals/operator-guides/review-rounds/2026-11-04-ast03-pilot/authoring-manifest.json)
+retains complete sources/state, source-measured crops and recognition jobs.
+The enlarged AST-DASH crop keeps both Apparaten and Nieuwe Asset; the new
+AST-ASSET crop shows native opened-record tag/S/N for the final check. The
+other field, saved-row, print, preview and full physical-photo sources are
+unchanged. No pixels were translated or painted. Root/captured-checkout
+differences and the pending fresh live UI check are explicit in the provenance
+and [version review](reviews/AST-03-v19.md).
+
+## Navigation And Space Corrections - 2026-10-27
+
+The [new round](../../../resources/manuals/operator-guides/review-rounds/2026-10-27-navigation-and-space/README.md)
+retains genuine nl-NL menu/password, dashboard/asset-list, applied search,
+creation form, saved-record and QR controls. Thirteen exact crops and the
+unchanged physical photo support AC-02 v7 / AST-03 v18. The red profile/menu
+marks are explicit owner targets; the list-search/plus and Asset openen marks
+distinguish competing controls. Whole forms and jointly checked fields remain
+unoutlined. The saved-password result is a tighter crop of the same genuine
+older success source, not a newly performed password change.
+
+Source provenance records the root/mounted registration-note validator mismatch,
+one actual saved synthetic asset and unsubmitted empty-note form states. Notes
+are optional in the current root project. No native label translation, fake
+success, physical label/print trial or source change is implied by these images.
+
+## Remaining Guide Evidence - 2026-10-20
+
+The seventeen remaining drafts use genuine Dutch-account application captures,
+103 measured crops and unchanged canonical examples. The
+[source/crop inventory](../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/authoring-manifest.json),
+[actors and source provenance](../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/evidence-provenance.json)
+and [trial boundaries](reviews/remaining-guides-2026-10-20.md#actual-evidence-and-trials)
+record what was actually observed. Exact screenshots, state files, crop pixels,
+source code fingerprints and final fixture state are retained in that round.
+
+Fresh evidence covers account menus/forms and saved login state, asset
+registration and print selection, the same tracked component's install/tray
+journey, user/group permissions, catalogue search and complete editor controls.
+An owned numeric attribute was genuinely saved; the alternative Enum form was
+staged without saving. Status permissions and destructive catalogue controls
+were captured without submitting them. No physical print or device work is
+claimed. Unchanged physical/source photographs remain separate examples.
+
+Global and capture-account settings are nl-NL. Genuine untranslated controls
+and native truncated status choices remain product gaps, recorded rather than
+painted over. Historical DOM-simulated evidence below is not authority to
+invent screenshots for these versions. Review the unmarked crop before adding
+focus; a complete form or result does not need an enclosing target outline.
+Do not recapture or regenerate into this round once its manifest is sealed.
+
+## Operational Set Evidence - 2026-10-20
+
+Sixteen fresh mobile captures use nl-NL and Refurbisher on owned demo asset18,
+GUIDE-20261020-01. Sources, crops and recognition jobs are retained in the
+[authoring manifest](../../../resources/manuals/operator-guides/review-rounds/2026-10-20-operational-guides/authoring-manifest.json)
+and [provenance](../../../resources/manuals/operator-guides/review-rounds/2026-10-20-operational-guides/evidence-provenance.json).
+Do not recapture into the sealed round.
+
+| Evidence group | Jobs / uses |
+| --- | --- |
+| WF-ASSET, WF-ENTRY, WF-CONTINUE | Tab row, natural Start before waiting Cleaning and same-row Continue; WF-01 v16 |
+| WF-CARDS, WF-INSTRUCTIONS, WF-NOTE, WF-PHOTO, WF-ANSWER | Same run, complete instruction, saved note, demo upload and result controls; WF-01 v16 / WF-02 v14 |
+| WF-TASK | Separate Cleaning example for Gedaan/Niet gedaan; explicit label-mode comparison |
+| WF-DONE, WF-RETURN | Enabled Klaar and observed same-asset return; WF-02 v14 |
+| HANDOFF-READY, HANDOFF-COMPONENTS | Current required-work summary and assumed component baseline; AST-04 v8 |
+| HANDOFF-NOTE, HANDOFF-SAVED, HANDOFF-HISTORY | Same note, saved QA Hold and history; native field resize, no repeated transition; AST-04 v8 |
+
+Names above carry `-NL-20261020`. The physical label photo is a separate
+canonical example. Some workflow/component labels remain English; history has
+an untranslated heading and mobile overflow. Required results are synthetic
+demonstration values; no physical work or novice-reader trial is claimed.
+
 ## Dutch Capture Review On 2026-10-06
 
 Owner requires Dutch screenshots. The [quality audit](reviews/guide-purpose-and-quality-audit-2026-10-06.md)
@@ -68,7 +153,17 @@ Use this catalog before capturing or copying screenshots. When two guides show t
   Record the actual role, state and recognition target. Choose evidence for
   the claimed action/result; an exception example needs explicit context.
 - Compare the needed control's final recognition size, not just its frame.
-  Retain enough context to locate it and enough scale to recognize it.
+  Keep recognizable screen/tab/panel landmarks and enough printed scale to
+  identify the target. Review location and target recognition separately at
+  A4 size. A close detail may use a clearly linked nearby overview; a generic
+  isolated button cannot establish its own location.
+- Review the unmarked crop first, with its instruction at A4 size. Plan a
+  focus circle/rectangle only for remaining search, an easy-to-miss target or
+  confusion with a competing item. A crop that isolates the complete action,
+  joint check or result needs no extra outline on each member or the whole
+  group. Record the difficulty a retained mark resolves, not the number of
+  visible controls. Apply the [focus contract](components.md#focus-contract);
+  a mark cannot repair missing context or unreadable detail.
 - Reuse a canonical source when the application state and device context are the same.
 - Create a new source ID only for a materially different state, device context, or replacement capture.
 - Keep annotations out of the source file. Add circles, rectangles, labels, and crops in the guide generator.

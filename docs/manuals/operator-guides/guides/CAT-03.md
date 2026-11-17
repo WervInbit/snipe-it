@@ -1,174 +1,117 @@
 # CAT-03 Attributen beheren
 
-## Application Alignment Revision - 2026-10-01
+<!-- delivered-baseline:start -->
+## Delivered Baseline - 2026-11-17
 
-Current authoring proposal: **v3, working draft; not accepted**, 6 A4 pages. [Exact-version review](../reviews/CAT-03-v3.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+**v5 / 6 A4 page(s) / Supervisor**. Native/PDF preparation
+and delivery are complete; exact-version acceptance and release alignment
+remain separate. [Register](../registry.md), [exact files/hashes](../current-set.json)
+and [current handoff](../HANDOFF.md) govern the delivered selection. Compare
+the actual NAS files before edits; they may be newer than this baseline.
+Dated preparation/pending statements below retain their historical scope.
+<!-- delivered-baseline:end -->
 
-Teach both implemented Numeric Component Aggregation options and lifecycle permission for changes in use.
+<!-- final-preparation-2026-11-04:start -->
+## Prepared Revision - 2026-11-04
 
-Added page: Kies de betekenis van numerieke componentbijdragen. Steps: Open Numeric Component Aggregation; Kies Sum OF Keep distinct values; Controleer bestaand gebruik voor Opslaan.
+Proposed **v5**, 6 A4 page(s). Status: prepared source;
+native Affinity import/edit/save/export and final PDF release remain incomplete.
+This follows the owner's all25 execution authorization. No exact-version
+acceptance or runtime selection is inferred.
 
-The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v2 input.
+Reader outcome: Save one reusable attribute meaning with the intended valid input rules.
 
-## Maintenance Metadata
+- Recompose all six pages with the actual settings entry, field meanings and larger natural editor crops.
+- Retain numerical rule examples, show Enum Add to list in context, and show actual Save plus reentry.
 
-- Family: `CAT`.
-- Type: Extended administration task.
-- Current version: working draft v3; not accepted.
-- Expected page model: 6 A4 pages.
-- Layout recipe: `extended-admin-flow`.
+Preserve: Search/reuse, generated key, fixed datatype, unit, category/required/override/display settings, numeric/Enum alternatives, regex boundary and existing-use impact.
 
-## Purpose
+Placement and tradeoff: No new key for an existing meaning; in-use rule/lifecycle changes still hand off to Admin/CAT-05.
 
-Reuse, create, or edit one attribute definition so one recurring fact has one
-stable meaning, datatype, unit, scope, and set of input rules.
+Use the [all25 execution record](../reviews/final-set-preparation-2026-11-04.md)
+and [complete changes/comparison index](../../../../output/manuals/final-guide-set-2026-11-04/review/index.html#CAT-03).
+The retained baseline below supplies the domain contract and historical evidence;
+this brief owns the changed outline and placements in the prepared proposal.
+The original capture/role/locale, application-target and native-proof limits
+are recorded centrally.
+<!-- final-preparation-2026-11-04:end -->
 
-## Audience And Context
 
-- Role: Supervisor with the minimum rights `attributes.view`,
-  `attributes.create`, and `attributes.edit` for the route being performed.
-  Admin access is not required for ordinary create/edit work.
-- Needed: The fact to record, a source or operational agreement for its unit
-  and allowed values, and the asset categories that use it.
-- Prerequisite: `CAT-00 Catalogus begrijpen`.
-- Return route: normally `CAT-02 Modelspecificatie opbouwen` or
-  `CAT-04 Componentdefinities beheren`.
+## Baseline Specification - 2026-10-20
 
-## Operator Outcome
+Status: **Working draft v4; not accepted**. 6 A4 page(s).
+Type: Reusable attribute definition. Recipe: `extended-admin-flow; six continuous phases`.
+Intended role: **Supervisor**. Needed: One agreed meaning, unit, category and valid-value source.
+Prerequisite: CAT-00. [Exact review](../reviews/CAT-03-v4.md).
 
-One current definition can be selected from the relevant catalogue form
-without duplicating an existing meaning or requiring programmer knowledge.
+This current specification replaces contradictory earlier procedure/metadata.
+The [previous complete specification](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/inputs/CAT-03-previous-specification.md)
+preserves historical detail and exact acceptance links. Accepted artifacts,
+runtime selections and the other eight current proposals are unchanged.
 
-## Page And Step Plan
+## Reader Outcome
 
-### Page 1 - Search and reuse first
+One reusable non-duplicated definition accepts the intended values and can be selected by the caller.
 
-1. Open `Instellingen > Attributes`.
-2. Search by visible label and generated key.
-3. Compare the meaning, datatype, unit, category scope, required state,
-   asset-override state, and option count.
-4. Reuse or edit an existing definition when those items represent the same
-   fact. Choose `New Attribute` only when the meaning is genuinely missing.
+## Action And Choice Structure
 
-The guide must state the duplicate-prevention reason next to the search step;
-it is not a STOP condition.
+- 1: search label/key and reuse the same meaning.
+- 2: readable Label, generated systeemnaam (Key), datatype and unit before first Save.
+- 3: numeric only: choose Sum OR Keep distinct values before scope/behavior; other types continue to page 4.
+- 4: choose category scope, Required, asset overrides, custom Enum policy and Component Spec Display deliberately.
+- 5: numeric constraints A OR Enum values/labels/order B; Bool/Text skip these to page 6.
+- 6: review, save/reopen, verify the list and return to the originating task.
 
-### Page 2 - Name the fact and choose the datatype
+## Operating Contract And Boundaries
 
-1. Enter a short human-readable `Label` that describes one fact.
-2. Leave `Manual key override` off in the normal route. The application creates
-   the stable lowercase `Key` from the label. The guide calls this the
-   `systeemnaam (Key)`, not an API or database field.
-3. Choose the datatype before Save. Datatype cannot be changed after creation:
-   - `Bool`: a yes/no fact, for example whether a touchscreen is present.
-   - `Int`: a whole number, for example the number of memory slots.
-   - `Decimal`: a measured value that may contain decimals, for example a
-     screen diagonal.
-   - `Enum`: one value from a controlled list, for example DDR3, DDR4, or DDR5.
-   - `Text`: free text only when a controlled list or number is unsuitable.
-4. Add `Unit` only when the value needs one, for example `MHz`, `GB`, or `inch`.
-   Do not repeat the unit inside every saved value.
+- One key keeps one meaning and unit. Manual key override is normally off; datatype is immutable after creation.
+- Bool is yes/no; Int whole count; Decimal measured decimals; Enum controlled list; Text only when structured input is unsuitable. Units are not repeated inside values.
+- Sum is for additive capacities/counts; distinct is for shared properties such as MHz. Component Spec Display chooses presentation, not calculation.
+- Blank Category Scope applies everywhere. Required, asset override and custom Enum values require an actual operational reason. An override does not repair the wrong model or component definition.
+- Use Minimum/Maximum/Step to reject invalid numeric values; ordinary Regex stays empty unless the owner supplies an agreed pattern.
+- Enum Value is stable stored meaning, Label is readable, Sort orders it, Active controls availability and Add to list stages the entry before Save. The new Enum example is client-only and explicitly an alternative to the numeric example.
+- Ordinary work does not rename/remove existing Enum values or alter in-use aggregation casually. Existing-use lifecycle maintenance routes to Admin/CAT-05; no browser definition Delete action is invented.
 
-### Page 3 - Set scope and allowed behavior
+## Revision Reasoning
 
-Explain every visible choice in operator language and give a safe default:
+Required alignment: Numeric aggregation at the owning definition and real saved numeric evidence.
 
-- `Category Scope`: select the categories that use the fact. Blank means every
-  asset category, so leave it blank only for a genuinely universal fact.
-- `Required for category`: use only when a model specification for the scoped
-  category may not be saved without this value.
-- `Allow asset overrides`: allow only when one physical asset may legitimately
-  differ from its model-number baseline. It is not a repair for a wrong model
-  number or component definition.
-- `Allow custom values (enum only)`: normally off. Enable only when the agreed
-  controlled list intentionally permits an exceptional value.
-- `Component Spec Display`: `Value labels` shows the contributed values;
-  `Component labels` shows readable component labels. It does not choose how
-  values are calculated.
+Chosen improvement: Place calculation after datatype and before Save; show complete Add to list in the actual unsaved Enum alternative.
 
-### Page 4 - Set constraints or Enum options
+Preserve: Datatype, unit, key, scope, flags, constraints, Enum explanations and reuse/save verification.
 
-The two routes are alternatives, not a sequence every definition follows:
+Placement and tradeoff: One integrated extra chapter preserves field support; stage numbers and all skip/return references advance to six pages.
 
-- Numeric route: use `Minimum`, `Maximum`, and `Step` only when they reject
-  impossible values. Example: memory-slot count `0` through `8`, step `1`.
-- Enum route: add one stable machine value and one readable label per option,
-  then set the intended order. Example values `ddr4` / `ddr5` with labels
-  `DDR4` / `DDR5`.
-- Leave `Regex` blank in the ordinary Supervisor route unless an agreed pattern
-  has been supplied by the system owner. The guide does not teach regular
-  expressions.
+## Standards, Desired Targets And Retired Approaches
 
-### Page 5 - Save, verify, and return
+Current [authoring method](../authoring-method.md), shared contracts and
+owner decisions govern this revision. Keep exact access-group names, Dutch
+application/account locale, recognizable context, complete relevant controls
+and useful A4 target scale. Review the unmarked crop first; annotate only a
+remaining search or distinction. Routine checks use ordinary instructions,
+recoverable exceptions are conditional, and a genuine halt states its trigger
+and recovery. Preserve the task's sequence or explicit alternatives; complete
+the required work before declaring completion. No acceptance is inferred.
 
-1. Review label, generated key, datatype, unit, scope, behavior, constraints,
-   and options before choosing Save/Create.
-2. Verify the resulting list row: label, key, datatype, active status,
-   categories, required state, asset-override state, and option count.
-3. State that editing a reused definition affects every model number,
-   component definition, physical asset override, or workflow that uses it.
-4. Route activation/deactivation, removal of saved options, and deletion to
-   `CAT-05 Bestaande catalogus aanpassen`.
-5. Return to the guide that required the definition.
+Target complete Dutch UI and clear field-to-result recognition. Retire invented
+role labels, redundant group outlines, fixed password recipes, blanket STOP
+wording, simulated screenshot states and post-completion alignment appendices.
+Do not invent unavailable settings, a source field/policy or a future QA status.
+The mounted application is the separate refurbisher-followups checkout,
+not the root checkout. Source fingerprints, actual actors, Dutch locale,
+owned synthetic fixtures and save/trial boundaries are recorded in the batch
+provenance. Genuine English strings and narrow native status-choice text
+remain product gaps. Header roles preserve the intended task allocation;
+local seeded/custom grants can be wider than the operational-role document.
+Physical printing/component work, destructive catalogue branches and an
+unfamiliar-reader/A4 paper trial are unperformed. Artifact checks and editorial
+read-back do not establish reader performance or exact acceptance.
 
-## Mandatory Decisions
+## Evidence And Maintenance
 
-- One key keeps one meaning and one unit.
-- Datatype is selected before the first Save and is immutable afterwards.
-- An attribute describes one reusable fact. A physical part type belongs in a
-  component definition.
-- Category Scope, Required, and asset override are deliberate behavior, not
-  defaults to enable without a reason.
-- Existing Enum values are not renamed or removed in this ordinary route.
-
-## Exclusions
-
-- Entering model-number values, component values, asset overrides, or workflow
-  expected values.
-- Admin lifecycle actions: hide, unhide, deactivate, delete, or remove saved
-  options/relationships.
-- Tutorials on APIs, databases, source code, or regular-expression syntax.
-
-## Completion
-
-`Klaar als`: de attribuutdefinitie heeft een duidelijke betekenis, kan zonder
-duplicaat worden hergebruikt en accepteert alleen de bedoelde waarden.
-
-## Related Guides
-
-- `CAT-00 Catalogus begrijpen`.
-- `CAT-02 Modelspecificatie opbouwen`.
-- `CAT-04 Componentdefinities beheren`.
-- `CAT-05 Bestaande catalogus aanpassen`.
-- `CAT-06 Productgegevens controleren`.
-
-## Evidence Manifest
-
-| Label | Source ID | Purpose |
-| --- | --- | --- |
-| 1A/1B | `CAT-ATTRIBUTE-ENTRY-DESKTOP-01` | Find Attributes from Settings, search the list, and compare the existing result before creating. |
-| 2A/3A | `CAT-ATTRIBUTE-CREATE-IDENTITY-DESKTOP-01` | Show the unsaved identity, datatype, unit, scope, and behavior controls. |
-| 4A | `CAT-ATTRIBUTE-CONSTRAINTS-NUMERIC-DESKTOP-01` | Show the numeric minimum, maximum, and step alternative. |
-| 4B | `CAT-ATTRIBUTE-OPTIONS-ENUM-DESKTOP-01` | Show ordered Enum Value and Label pairs as the other input alternative. |
-| 5A | `CAT-ATTRIBUTE-SAVE-DESKTOP-01` | Review the complete unsaved form and Create control. |
-| 5B | `CAT-ATTRIBUTE-RESULT-DESKTOP-01` | Verify the expected resulting list-row fields without changing the server. |
-
-## Validation Notes
-
-- Steps remain 1-5 across five A4 pages; the two page-4 input routes are
-  explicit alternatives.
-- Source forms were not submitted. The result row is a screenshot-only DOM
-  example of the implemented list shape.
-- Operator copy uses `systeemnaam (Key)` and explains every behavior control
-  without requiring API, database, or regular-expression knowledge.
-- Lifecycle changes remain outside this ordinary Supervisor route.
-
-## Focused Candidate - 2026-09-08
-
-The separate [v2 review](../reviews/CAT-03-v2.md)
-records the focused follow-up to baseline v1, with the exact
-PDF and checksum. The owner requested this pass across all existing guides
-after reviewing WF-01 v12 positively. Earlier selections and their policies
-remain traceable; this candidate is not automatically accepted. See the
-[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
-source/crop exceptions, and remaining operational or evidence gaps.
+The exact PDF, HTML/SVG, baseline, current source captures, measured crop plan,
+source/role/locale provenance and recognition placements are retained in the
+[round](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/README.md).
+The generator is `scripts/manuals/generate-remaining-guides-2026-10-20.mjs`.
+Frozen artifacts reproduce a proposal; the current specification and owner
+decisions govern future revisions. Create a new version after sealing.

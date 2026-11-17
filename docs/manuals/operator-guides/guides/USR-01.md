@@ -1,150 +1,115 @@
-# USR-01 Gebruiker Toevoegen
+# USR-01 Gebruiker toevoegen
 
-## Application Alignment Revision - 2026-10-01
+<!-- delivered-baseline:start -->
+## Delivered Baseline - 2026-11-17
 
-Current authoring proposal: **v14, working draft; not accepted**, 1 A4 page. [Exact-version review](../reviews/USR-01-v14.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+**v16 / 2 A4 page(s) / Admin / Superadmin**. Native/PDF preparation
+and delivery are complete; exact-version acceptance and release alignment
+remain separate. [Register](../registry.md), [exact files/hashes](../current-set.json)
+and [current handoff](../HANDOFF.md) govern the delivered selection. Compare
+the actual NAS files before edits; they may be newer than this baseline.
+Dated preparation/pending statements below retain their historical scope.
+<!-- delivered-baseline:end -->
 
-Remove fixed temporary-password recipe; use Generate and immediate secure handoff, clarify quality/create rights.
+<!-- final-preparation-2026-11-04:start -->
+## Prepared Revision - 2026-11-04
 
-The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v13 input.
+Proposed **v16**, 2 A4 page(s). Status: prepared source;
+native Affinity import/edit/save/export and final PDF release remain incomplete.
+This follows the owner's all25 execution authorization. No exact-version
+acceptance or runtime selection is inferred.
 
-## Latest Correction Candidate - 2026-09-10
+Reader outcome: Create one local account, save its intended group and transfer the temporary password privately.
 
-Current review candidate: [v13](../reviews/USR-01-v13.md), owner-cleared for user review.
-Updated the USR-04 reference to Gebruiker uitschakelen.
-This current correction takes precedence over conflicting historical version
-notes below. Previous PDFs and exact acceptance records remain unchanged.
+- Use two continuous pages and five actions: search/create, identity, Generate/Save, group assignment/Save, verification/handoff.
+- Show Persons navigation, list search and plus, name/username/email, both actual saves and saved identity.
+- Explain a group as a task-rights package and save the new account before Superadmin edits it.
+- Preserve uncertainty help for an older/deleted account and an unavailable verified email; do not invent an address or require a duplicate.
 
-| Field | Current value |
-| --- | --- |
-| Status | Working draft v14; not accepted |
-| Family | USR |
-| Type | Administration task |
-| Current version | `usr-01-gebruiker-toevoegen-v14-draft` |
-| Page model | 1 A4 page |
-| Layout recipe | `stacked-step-flow` with `mixed-visual-widths` and `single-visual` |
-| Generator | `scripts/manuals/generate-aligned-guides-2026-10-01.mjs` |
-| Role | Admin |
-| Needed | Approved identity, standard role, verified email when available, and a secure handoff route |
-| Prerequisite | Ingelogd (AC-01 Login) with Admin access |
+Preserve: Exact Admin/Superadmin boundary, username convention, generated temporary password, intended login state, duplicate prevention, private handoff and AC-02/USR-02/USR-05.
 
-## Purpose
+Placement and tradeoff: One additional side protects readable entry/field/save evidence instead of compressing several unfamiliar actions into one.
 
-Create one active local account, assign its approved standard group, and verify
-the saved identity before giving the user access.
+Use the [all25 execution record](../reviews/final-set-preparation-2026-11-04.md)
+and [complete changes/comparison index](../../../../output/manuals/final-guide-set-2026-11-04/review/index.html#USR-01).
+The retained baseline below supplies the domain contract and historical evidence;
+this brief owns the changed outline and placements in the prepared proposal.
+The original capture/role/locale, application-target and native-proof limits
+are recorded centrally.
+<!-- final-preparation-2026-11-04:end -->
 
-Version 11 preserves the accepted account-creation structure and renders the
-USR-02 help handoff with its family color, symbol, code, and full guide name.
 
-## Username Convention
+## Baseline Specification - 2026-10-20
 
-Use the first name with an initial capital, followed immediately by the
-lowercase first letter of each last-name part. Do not use periods or spaces.
+Status: **Working draft v15; not accepted**. 1 A4 page(s).
+Type: Local user creation with Superadmin handoff. Recipe: `stacked-step-flow; four actions`.
+Intended role: **Admin / Superadmin**. Needed: Person, username agreement and intended group.
+Prerequisite: AC-01. [Exact review](../reviews/USR-01-v15.md).
 
-Example: `Jan de Vries` becomes `Jandv`.
+This current specification replaces contradictory earlier procedure/metadata.
+The [previous complete specification](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/inputs/USR-01-previous-specification.md)
+preserves historical detail and exact acceptance links. Accepted artifacts,
+runtime selections and the other eight current proposals are unchanged.
 
-If that username already exists, stop and ask for the approved exception. Do
-not invent a number or suffix.
+## Reader Outcome
 
-## Temporary Password Convention
+The intended person has one saved local account, the agreed group and a private-password handoff.
 
-Use the exact username followed immediately by the current four-digit year,
-without a separator. Example: username `Jandv` becomes temporary password
-`Jandv2026` in 2026.
+## Action And Choice Structure
 
-This is only a first-login password. Give it to the user personally and have
-the user change it immediately through AC-02. Do not keep it as the user's
-private password.
+- Search first and open Nieuwe aanmaken.
+- Enter identity/username, Generate the temporary password and choose the agreed login state.
+- Superadmin selects the group, or ordinary Admin saves the account before handing group assignment over.
+- Save any still-open form, reopen/verify and hand off the temporary password privately to AC-02.
 
-## Steps
+## Operating Contract And Boundaries
 
-1. `Open Nieuwe gebruiker` - open `Personen` in the expanded left navigation,
-   choose `Toon Alles`, then choose the add-user action above the user list.
-   When the person may already exist, first search by name, username, and
-   email and check removed users. Reuse or restore an existing record instead
-   of creating a duplicate.
-2. `Vul account en wachtwoord in` - enter first name, last name, the agreed
-   username, and the existing verified email address. Enter the temporary
-   password as username plus current year and select
-   `Deze gebruiker kan inloggen`. Do not invent an email address.
-3. `Open Optionele informatie` - remain on the `Informatie` tab,
-   open the collapsed `Optionele informatie` bar near the bottom, then find
-   `Groepen` inside that section and choose the approved standard group.
-   `Refurbisher` is normal. The second tab at the top is `Machtigingen`; it contains direct
-   rights including `Global: Super User` for Superadmin. Use the minimum rights
-   needed for the person's work. When the standard group is insufficient, add
-   only the required user-specific rights; USR-02 documents that route. Use
-   USR-05 to create or edit a reusable group definition.
-4. `Controleer en draag over` - choose Save, return to Users, and open the
-   saved user. Verify name, username, active state, email, and group. Give the
-   temporary password to the user personally and have the user log in and
-   follow AC-02 immediately.
+- An ordinary Admin can create an ordinary local user. Only Superadmin assigns/removes groups; do not label all creation Superadmin-only.
+- Never leave an unsaved new account while asking another person to edit its groups.
+- Use Genereer rather than a fixed predictable password recipe. It fills both fields; no generated value appears in retained images.
+- Check name, username, group and intended login state after saving. A successful creation alone does not prove effective rights.
+- The user chooses the definitive private password via AC-02. Rights exceptions belong in USR-02.
 
-## Step-Specific Stops
+## Revision Reasoning
 
-- Step 1: stop when an active or removed matching account exists; the search
-  is a secondary safeguard before opening a duplicate account.
-- Step 2: stop when the identity, username exception, or email is uncertain.
-- Step 4: the temporary password is not complete handoff until the user has
-  been directed to AC-02 for immediate replacement.
+Required alignment: Actual user-privilege boundary, generated temporary credentials and saved group state.
 
-Step 3 is not a stop condition. Start with the lowest group that permits the
-work, then use the `Machtigingen` tab only for the specific extra rights that
-user needs.
+Chosen improvement: Place the ordinary Admin/Superadmin split at group assignment with an explicit save-before-handoff.
 
-## Compact Help
+Preserve: Compact creation flow, duplicate prevention, account verification and private handoff.
 
-- `Gebruikersnaam bestaat` - reuse/restore or ask for the approved exception.
-- `Geen e-mailadres` - creation may continue only when locally approved; the
-  reset-link route will not be available.
-- `Minimale rechten` - choose the lowest group that permits the work.
-- `Maatwerk nodig` - add only the required direct rights through
-  `Machtigingen`; follow USR-02.
+Placement and tradeoff: Show only the necessary credential and group controls; unrelated user-list contents do not earn space.
 
-## Evidence Manifest
+## Standards, Desired Targets And Retired Approaches
 
-| Label | Job | Source ID | Status |
-| --- | --- | --- | --- |
-| 1A | Expanded Dutch dashboard sidebar with `Personen` and `Toon Alles` visible | `USR-DASHBOARD-PEOPLE-NAV-DESKTOP-01` | Captured 2026-08-13 |
-| 1B | User list with add action; search remains visible as a secondary safeguard | `USR-LIST-DESKTOP-01` | Captured 2026-08-11 |
-| 2A | Create form with identity, password, and login controls; only login is targeted | `USR-CREATE-FORM-DESKTOP-01` | Captured 2026-08-11; no password visible |
-| 3A | Editable group selector reached after opening `Optionele informatie` | `USR-GROUP-EDIT-DESKTOP-01` | Captured 2026-08-11 in controlled Superadmin session |
-| 4A | Saved fictional user identity and group without an unnecessary focus overlay | `USR-DETAIL-DESKTOP-01` | Captured 2026-08-11 |
+Current [authoring method](../authoring-method.md), shared contracts and
+owner decisions govern this revision. Keep exact access-group names, Dutch
+application/account locale, recognizable context, complete relevant controls
+and useful A4 target scale. Review the unmarked crop first; annotate only a
+remaining search or distinction. Routine checks use ordinary instructions,
+recoverable exceptions are conditional, and a genuine halt states its trigger
+and recovery. Preserve the task's sequence or explicit alternatives; complete
+the required work before declaring completion. No acceptance is inferred.
 
-## Complete When
+Target complete Dutch UI and clear field-to-result recognition. Retire invented
+role labels, redundant group outlines, fixed password recipes, blanket STOP
+wording, simulated screenshot states and post-completion alignment appendices.
+Do not invent unavailable settings, a source field/policy or a future QA status.
+The mounted application is the separate refurbisher-followups checkout,
+not the root checkout. Source fingerprints, actual actors, Dutch locale,
+owned synthetic fixtures and save/trial boundaries are recorded in the batch
+provenance. Genuine English strings and narrow native status-choice text
+remain product gaps. Header roles preserve the intended task allocation;
+local seeded/custom grants can be wider than the operational-role document.
+Physical printing/component work, destructive catalogue branches and an
+unfamiliar-reader/A4 paper trial are unperformed. Artifact checks and editorial
+read-back do not establish reader performance or exact acceptance.
 
-One active account exists for the correct person, with the agreed username,
-verified email when available, approved standard group, no unintended direct
-permissions, and an immediate AC-02 handoff for the temporary password.
+## Evidence And Maintenance
 
-## Related Guides
-
-- AC-02 Eigen wachtwoord wijzigen
-- USR-02 Rol en rechten wijzigen
-- USR-03 Wachtwoord resetten
-- USR-04 Gebruiker uitschakelen of herstellen
-- USR-05 Groepen beheren
-
-## Version Notes
-
-- v7 migrates this page to the shared component system. It retains the v6
-  content and two-row footer while centralizing badge alignment, family and
-  guide references, focus padding, completion alignment, and geometry QA.
-- v8 adds a small expanded-sidebar visual for the route through `Personen` and
-  `Toon Alles`, then relabels the existing add-user toolbar visual as `1B`.
-- v9 replaces the ambiguous `Onderaan` direction in step 3 with the complete
-  route through `Informatie` and the collapsed `Optionele informatie` bar
-  before the operator selects `Groepen`.
-- v10 retains that route and makes the capitalization, lowercase surname
-  initials, no-period/no-space username rule and `username + current year`
-  temporary-password example explicit in the page itself.
-
-## Focused Candidate - 2026-09-08
-
-The separate [v12 review](../reviews/USR-01-v12.md)
-records the focused follow-up to baseline v11, with the exact
-PDF and checksum. The owner requested this pass across all existing guides
-after reviewing WF-01 v12 positively. Earlier selections and their policies
-remain traceable; this candidate is not automatically accepted. See the
-[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
-source/crop exceptions, and remaining operational or evidence gaps.
+The exact PDF, HTML/SVG, baseline, current source captures, measured crop plan,
+source/role/locale provenance and recognition placements are retained in the
+[round](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/README.md).
+The generator is `scripts/manuals/generate-remaining-guides-2026-10-20.mjs`.
+Frozen artifacts reproduce a proposal; the current specification and owner
+decisions govern future revisions. Create a new version after sealing.

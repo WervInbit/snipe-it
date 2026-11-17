@@ -1,119 +1,145 @@
-# AST-03 Asset Registreren En Labelen
+# AST-03 Asset registreren en labelen
 
-## Application Alignment Revision - 2026-10-01
+<!-- delivered-baseline:start -->
+## Delivered Baseline - 2026-11-17
 
-Current authoring proposal: **v16, working draft; not accepted**, 3 A4 pages. [Exact-version review](../reviews/AST-03-v16.md) and [batch comparison](../reviews/aligned-guides-2026-10-01.md).
+**v20 / 2 A4 page(s) / Supervisor**. Native/PDF preparation
+and delivery are complete; exact-version acceptance and release alignment
+remain separate. [Register](../registry.md), [exact files/hashes](../current-set.json)
+and [current handoff](../HANDOFF.md) govern the delivered selection. Compare
+the actual NAS files before edits; they may be newer than this baseline.
+Dated preparation/pending statements below retain their historical scope.
+<!-- delivered-baseline:end -->
 
-New Asset dashboard tile, permission-aware registration, Status note and direct QR printing after creation.
+<!-- final-preparation-2026-11-04:start -->
+## Prepared Revision - 2026-11-04
 
-Added page: Registreren en direct het QR-label printen. Steps: Open New Asset op het dashboard; Controleer model en vereiste statusnotitie; Controleer de aangemaakte rij en print eenmaal.
+Proposed **v20**, 2 A4 page(s). Status: prepared source;
+native Affinity import/edit/save/export and final PDF release remain incomplete.
+This follows the owner's all25 execution authorization. No exact-version
+acceptance or runtime selection is inferred.
 
-The frozen new HTML preserves this generated proposal for reproduction. It does not define approved instructional scope or supersede the guide specification, [authoring method](../authoring-method.md), or owner decisions. Resolve conflicting walkthroughs before a new revision. Earlier artifacts and acceptance decisions are unchanged. Generator: scripts/manuals/generate-aligned-guides-2026-10-01.mjs; hash-locked v15 input.
+Reader outcome: Register one physical device, label it and verify the resulting identity.
 
-## Purpose
+- Carry pilot v19 into the editable two-sided source without substituting either creation entry.
 
-Register known hardware once, verify its exact identity and model type, assign
-the current work status, print and attach its QR label, and confirm that the
-label opens the same asset.
+Preserve: Both Dashboard tiles, duplicate search, list plus alternative, identity/model fields, optional registration note, actual Save, saved row, print/QR/photo and recovery.
 
-Work location is optional registration metadata. It is not a numbered primary
-step in this guide.
+Placement and tradeoff: The owner-required optional note is retained. Its contradiction with the recorded deployed validator remains a release-target issue, not rewritten policy.
 
-Version 14 removes the step 4 lower-left text collision and keeps both 4A and
-4B captions inside their image block without changing the approved two-page
-flow.
+Use the [all25 execution record](../reviews/final-set-preparation-2026-11-04.md)
+and [complete changes/comparison index](../../../../output/manuals/final-guide-set-2026-11-04/review/index.html#AST-03).
+The retained baseline below supplies the domain contract and historical evidence;
+this brief owns the changed outline and placements in the prepared proposal.
+The original capture/role/locale, application-target and native-proof limits
+are recorded centrally.
+<!-- final-preparation-2026-11-04:end -->
 
-## Page 1: Register
 
-1. `Open het registratieformulier` - with asset-creation rights, start on the
-   dashboard's New Asset tile (page 3), or open `Apparaten`, then
-   use either `Nieuwe aanmaken` in the top bar or the `+` action in the
-   hardware toolbar.
-2. `Vul asset tag en serienummer in` - keep the proposed tag unless an assigned
-   tag requires `Unlock`; copy the value after `S/N` from the device label.
-   Example: `5CD1234ABC`. Do not enter Product ID or `ProdID` as the serial.
-3. `Kies categorie, model en type` - choose the category and exact model, then
-   compare the type/model code after the model name. On an HP device, Product
-   ID or P/N may identify that model type.
-4. `Kies status en sla op` - choose the agreed work status, fill Status note
-   if required, save once, and verify tag, status, model and serial in the
-   result panel. Read duplicate guidance before creating another record.
+## Baseline Specification - 2026-11-04
 
-Tag and serial fields uppercase values automatically. `Unlock` only makes the
-generated asset tag editable. `Aa` preserves an intentionally different case
-and is not part of the normal path.
+Status: **Working draft v19; not accepted**. 2 A4 page(s).
+Type: Registration and physical label task. Recipe: `stacked-step-flow; continuous 1-8 over two sides`.
+Intended role: **Supervisor**. Needed: Physical device, manufacturer label and label printer.
+Prerequisite: AC-01. [Reasoning, preservation basis and exact review](../reviews/AST-03-v19.md).
 
-A duplicate warning is recoverable guidance, not a red stop: open and compare
-the existing record before deciding whether another asset should exist.
+The [complete v18 specification](../../../../resources/manuals/operator-guides/review-rounds/2026-11-04-ast03-pilot/inputs/AST-03-v18-specification.md) is retained in the new pilot's inputs. The v19
+brief was established before composition. Compare against accepted v15 and
+owner decisions directly; v18's rejected entry design is not the baseline.
 
-## Page 2: Label And Verify
+This current specification replaces contradictory earlier procedure/metadata.
+The [previous complete specification](../../../../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/inputs/AST-03-previous-specification.md)
+preserves historical detail and exact acceptance links. Accepted artifacts,
+runtime selections and the other 24 current proposals are unchanged.
 
-5. `Print vanuit het resultaatpaneel` - compare tag, serial and model; use
-   Print QR Code on the intended result row. Open Asset returns to its dossier.
-6. `Kies label en print eenmaal` - inspect the QR preview and template, choose
-   the correct printer location, and print once. On failure, retain the saved
-   asset and repair the print route before reprinting that same label.
-7. `Plaats het label rechtsonder` - use the real full-device underside photo
-   with the front edge facing the reader. Place the label on a flat area at the
-   lower right without covering vents, ports, screws, or service labels. The
-   7A focus frame identifies the physical QR label in the owner-supplied photo.
-8. `Scan ter controle` - follow SC-01 and confirm that the label opens the same
-   asset. The repeated scanner photo is omitted; only the opened asset result
-   is shown. A mismatched result routes to help without an oversized stop block.
+## Reader Outcome
 
-If an existing label is damaged and cannot be scanned, search manually by the
-unique Inbit asset tag or serial number. Do not instruct the operator to print
-a replacement as the recovery action for this guide.
+One physical device has one matching registration and an applied label opening that same asset.
 
-## Evidence
+## Action And Choice Structure
 
-| Label | Canonical source | Job |
-| --- | --- | --- |
-| 1A | `DASH-MOBILE-01` | Dashboard `Apparaten` entry before the create alternatives |
-| 1B/1C | `AST-REGISTER-ENTRY-MOBILE-01` | Top-bar `Nieuwe aanmaken` and toolbar `+` alternatives with source-measured target frames |
-| 2A | `AST-REGISTER-IDENTITY-MOBILE-01` | Tag, `Unlock`, `Aa`, and realistic unsubmitted `S/N` example |
-| 3A/3B | `AST-REGISTER-IDENTITY-MOBILE-01` | Category and exact model/type selection |
-| 4A | `AST-REGISTER-STATUS-MOBILE-01` | Actual `Status` field with `Being Processed` and the complete `Opslaan` action |
-| Page 1 4B | `AST-REGISTER-SAVED-CHECK-01` | Saved asset tag, status, asset name/model, and serial number in one compact detail context |
-| Page 2 5A/8A | `AST-ASSET-SAVED-MOBILE-01` | Saved title and navigation with the controlled fictional identity |
-| Page 2 6A/6B | `AST-LABEL-CONTROL-MOBILE-01` | QR preview/template and printer location/action |
-| Page 2 7A | `AST-LABEL-PLACEMENT-PHOTO-01` | Real full underside, front edge facing the reader, with the attached QR at lower right |
+- 1-4: show Apparaten and Nieuwe Asset / Nieuwe aanmaken together on Dashboard.
+  Open Apparaten and apply the list search before either creation entry. A
+  matching existing identity opens that record and goes to step5. Otherwise
+  use the list-toolbar plus, or browser Back to Dashboard and the named Nieuwe
+  Asset tile. Keep these creation controls as alternatives after searching.
+  Retain the reserved tag, copy physical serial, choose exact manufacturer
+  model code and status, leave both note fields optional and use the visible
+  Save control once.
+- 5-6: compare saved identity, open the asset, choose label template, loaded size and printer before one print.
+- 7-8: place the physical label with orientation support, scan and compare the same identity.
 
-The controlled create form was not submitted. Saved, label, workflow,
-component, and status evidence use the same documented screenshot-only
-`INBIT-HG0421` / `HP ProBook 450 G8` / `5CD1234ABC` identity. No server record
-was created or renamed for that substitution.
+## Operating Contract And Boundaries
 
-The rejected v4 generated placement image remains historical evidence only and
-is not used by v5-v14. HP's official ProBook 450 G8 parts locator confirms the
-underside orientation and service-tag area, but it does not show Inbit's QR
-placement and is therefore reference material rather than guide evidence:
-<https://h10032.www1.hp.com/ctg/Manual/c06974341.pdf>.
+- Keep asset tag, physical serial and manufacturer model/SKU code distinct. Unlock and Aa are deliberate exceptions, not normal required actions.
+- A duplicate response calls for comparing the existing record before another submission.
+- Registration notes are optional under the current root StoreAssetRequest and explicit owner direction. Do not import a later status-transition audit rule into new-device registration. Catalogue identity must be resolved before saving an approximate substitute.
+- The result-panel quick print uses defaults; opening the asset provides explicit printer, template and size selection first.
+- The underside photo is an explicitly separate placement example; it is not evidence that the synthetic asset was physically labelled.
+- Maintain continuous numbering and declare completion only after scan verification. Missing identity and failed printing have different recovery routes.
 
-## Complete When
+## Revision Reasoning
 
-The asset exists once, has the verified tag, S/N, category, model type, and
-current work status, and its safely placed QR label opens that same record.
+Required alignment: Show the complete duplicate-check/creation/Save route, preserve reserved identifier and exact-model meaning, keep new-registration notes optional, and retain managed printer/size controls before printing.
 
-## Related Guides
+Chosen improvement: Separate saved tag/serial, model title, print controls and physical orientation into recognition jobs.
 
-- AC-01 Login
-- SC-01 Asset vinden en openen
-- AST-02 Refurbishment-route
-- HELP-01 Problemen en hulp
+Preserve: The accepted two-sided, eight-step registration-to-verified-label flow and full physical placement photo.
 
-## Focused Candidate - 2026-09-08
+Placement and tradeoff: No third-page registration restart. Use focused result details while retaining the physical photo and the final identity check.
 
-The separate [v15 review](../reviews/AST-03-v15.md)
-records the focused follow-up to baseline v14, with the exact
-PDF and checksum. The owner requested this pass across all existing guides
-after reviewing WF-01 v12 positively. Earlier selections and their policies
-remain traceable; this candidate is not automatically accepted. See the
-[set comparison](../reviews/guide-set-comparison-2026-09-08.md) for scope,
-source/crop exceptions, and remaining operational or evidence gaps.
+Owner correction, October27: reflow the actual content and use recovered space
+for useful images and guidance. Preserve or relocate duplicate, missing-model,
+Unlock/Aa, printing, damaged-label and wrong-identity recovery. Show search and
+the creation control in context; a sentence saying to search is insufficient.
+Retain one continuous eight-step task over two sides. Root and mounted create
+validation differ; record this in authoring evidence rather than teaching the
+older mounted note requirement as policy.
 
-## Exact Acceptance - 2026-09-10
+November4 pilot: preserve concrete controls and context rather than merely an
+abstract working route. Restore the named Dashboard creation control alongside
+the search route; account for the accepted guide's useful support before fitting
+the pages. Retain readable fields, whole-device placement, normal recovery and
+visual opened-record verification. The version review fixes the comparison
+basis before generator edits and records remaining live-evidence gaps.
 
-The owner accepted v15, selecting the unchanged PDF/hash in the
-[v15 review](../reviews/AST-03-v15.md). The earlier candidate-pending
-notes are historical. Preserve prior versions and the source checkpoint.
+## Standards, Desired Targets And Retired Approaches
+
+Current [authoring method](../authoring-method.md), shared contracts and
+owner decisions govern this revision. Keep exact access-group names, Dutch
+application/account locale, recognizable context, complete relevant controls
+and useful A4 target scale. Review the unmarked crop first; annotate only a
+remaining search or distinction. Routine checks use ordinary instructions,
+recoverable exceptions are conditional, and a genuine halt states its trigger
+and recovery. Preserve the task's sequence or explicit alternatives; complete
+the required work before declaring completion. No acceptance is inferred.
+
+Target complete Dutch UI and clear field-to-result recognition. Retire invented
+role labels, redundant group outlines, fixed password recipes, blanket STOP
+wording, simulated screenshot states and post-completion alignment appendices.
+Do not invent unavailable settings, a source field/policy or a future QA status.
+The mounted application is the separate refurbisher-followups checkout,
+not the root checkout. Source fingerprints, actual actors, Dutch locale,
+owned synthetic fixtures and save/trial boundaries are recorded in the batch
+provenance. Genuine English strings and narrow native status-choice text
+remain product gaps. Header roles preserve the intended task allocation;
+local seeded/custom grants can be wider than the operational-role document.
+Physical printing/component work, destructive catalogue branches and an
+unfamiliar-reader/A4 paper trial are unperformed. Artifact checks and editorial
+read-back do not establish reader performance or exact acceptance.
+
+## Evidence And Maintenance
+
+The current PDF, HTML/SVG, accepted v15 and previous v18 comparison, measured
+crops, source/role/locale provenance and recognition placements are retained in
+the [pilot round](../../../../resources/manuals/operator-guides/review-rounds/2026-11-04-ast03-pilot/README.md).
+The current generator is `scripts/manuals/generate-ast03-pilot-2026-11-04.mjs`.
+Use the [visual comparison](../../../../resources/manuals/operator-guides/review-rounds/2026-11-04-ast03-pilot/review.html)
+and [exact review](../reviews/AST-03-v19.md). Earlier v17/v18 rounds are preserved.
+See the [cross-guide feedback](../reviews/navigation-and-space-feedback-2026-10-27.md).
+This pilot reuses genuine October27 captures; a fresh production UI check is
+pending because the local Docker capture environment is unavailable. Root and
+the captured checkout differ, including the Dashboard tile. The evidence record
+does not establish that either checkout is today's deployed production source.
+Frozen artifacts reproduce a proposal; the current specification and owner
+decisions govern future revisions. Create a new version after sealing.
