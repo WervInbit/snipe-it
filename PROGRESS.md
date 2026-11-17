@@ -7142,3 +7142,24 @@ there are multiple duplicate functions that still need to be removed, sku will b
 - No guide content/native/PDF delivery, application/runtime/database, NAS,
   printer or NUC state changed. Operator/release/fresh-device and exact-version
   acceptance work remains in START-05, START-06 and NEXT-08.
+
+### 2026-11-17 - Feature And Guide Checkpoints Reconciled
+
+- Committed the qualified legacy workflow implementation as `f307df415d`, the
+  portable Windows test-gate repair as `da9a13d3bb`, and its release/readme
+  documentation as `2e48e63517` on `codex/legacy-workflow-attestations`.
+- Replayed the four clean guide-checkpoint commits afterward as `012986af05`,
+  `51bcbac793`, `72ac3bcc8a`, and `057296d9f6`. Shared progress, backlog, and
+  same-day addendum conflicts retain both workstreams. The completed RAM-speed
+  correction remains authoritative over the guide branch's older pending copy.
+- The combined branch passes the guide registry and strict package verifier:
+  25 registered guides, 1,549 checked relative links, 251 explicitly declared
+  unavailable historical/local links, 119 evidence files, 9 accepted PDFs,
+  29 unaccepted draft PDFs, 2 locked baselines, and 79 active scripts.
+  `npm audit --audit-level=high` reports zero vulnerabilities.
+- This pre-existing Windows checkout still held the two locked baseline SVGs
+  with CRLF worktree bytes when the new `-text` rule arrived. Both files were
+  refreshed from their unchanged Git blobs with LF bytes; their manifest
+  SHA-256 values now verify and no content diff remains.
+- The branch and index are clean. Nothing was pushed or deployed, and no
+  application runtime, database, NAS, printer, CUPS node, or NUC was changed.

@@ -212,3 +212,23 @@
   links,251 explicitly unavailable historical/local links,119 evidence files,
   9 accepted PDFs/11 pages,29 unaccepted PDFs/88 pages,2 locked baselines and79
   active scripts. Remaining user/release/physical acceptance is unchanged.
+
+## Combined Repository Reconciliation
+
+- The qualified legacy feature is committed in three scoped changes:
+  `f307df415d`, `da9a13d3bb`, and `2e48e63517`. The clean guide checkpoint was
+  then transplanted in four commits ending at `057296d9f6`.
+- Conflict resolution preserved the legacy, mobile/history, printer, CUPS, and
+  manual workstreams together. One stale guide-side RAM-speed investigation
+  entry was omitted because the repository's production record proves that
+  correction complete.
+- The combined guide gate initially exposed worktree-only CRLF conversion in
+  the two locked baseline SVGs. Refreshing those files from their identical Git
+  blobs under the committed `-text` policy restored the expected checksums; no
+  tracked content changed.
+- Final combined verification: `npm test` passes the registry and package
+  verifier, and `npm audit --audit-level=high` reports zero vulnerabilities.
+  The previously completed PHP evidence remains 2,290 tests / 11,316
+  assertions with four expected environment skips and zero failures.
+- Worktree and index are clean. No push, immutable build, production deploy,
+  database write, NAS change, printer/CUPS operation, or NUC access occurred.
