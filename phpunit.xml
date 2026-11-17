@@ -33,7 +33,6 @@
       <exclude>./tests/Feature/Importing/Api</exclude>
       <exclude>./tests/Feature/Licenses/Api</exclude>
       <exclude>./tests/Feature/Locations/Api</exclude>
-      <exclude>./tests/Feature/Maintenances/Api</exclude>
       <exclude>./tests/Feature/Manufacturers/Api</exclude>
       <exclude>./tests/Feature/PredefinedKits/Api</exclude>
       <exclude>./tests/Feature/StatusLabels/Api</exclude>
@@ -59,7 +58,6 @@
       <directory suffix="Test.php">./tests/Feature/Importing/Api</directory>
       <directory suffix="Test.php">./tests/Feature/Licenses/Api</directory>
       <directory suffix="Test.php">./tests/Feature/Locations/Api</directory>
-      <directory suffix="Test.php">./tests/Feature/Maintenances/Api</directory>
       <directory suffix="Test.php">./tests/Feature/Manufacturers/Api</directory>
       <directory suffix="Test.php">./tests/Feature/PredefinedKits/Api</directory>
       <directory suffix="Test.php">./tests/Feature/StatusLabels/Api</directory>

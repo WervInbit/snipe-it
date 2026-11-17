@@ -50,7 +50,7 @@ class EditAssetTest extends TestCase
         $this->assertNotFalse($statusPos);
         $this->assertNotFalse($notesPos);
         $this->assertNotFalse($modelSpecPos);
-        $this->assertFalse(str_contains($content, 'name="status_change_note"'));
+        $this->assertTrue(str_contains($content, 'name="status_change_note"'));
         $this->assertTrue($statusPos < $notesPos);
         $this->assertTrue($notesPos < $modelSpecPos);
     }

@@ -1,5 +1,10 @@
 * text=auto
 *.sh text eol=lf
+.dockerignore text eol=lf
+.env.example text eol=lf
+.env.dusk.example text eol=lf
+docker/production/Dockerfile text eol=lf
+patches/*.patch text eol=lf
 public/js/** binary
 public/css/** binary
 *.patch whitespace=-blank-at-eol

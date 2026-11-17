@@ -347,8 +347,10 @@ class TestEnvironmentGuardTest extends TestCase
     public function test_dusk_guard_creates_the_dedicated_sqlite_file_for_a_clean_base_path(): void
     {
         $cleanBasePath = sys_get_temp_dir() . '/snipeit-dusk-guard-' . bin2hex(random_bytes(6));
-        $database = $cleanBasePath . '/database/dusk.sqlite';
         mkdir($cleanBasePath, 0775, true);
+        $canonicalBasePath = realpath($cleanBasePath);
+        $this->assertNotFalse($canonicalBasePath);
+        $database = $canonicalBasePath . '/database/dusk.sqlite';
         $this->setRuntimeEnvironment([
             'SNIPEIT_DUSK_GUARD' => '1',
             'APP_ENV' => 'testing',
@@ -357,7 +359,7 @@ class TestEnvironmentGuardTest extends TestCase
         ]);
 
         try {
-            TestEnvironmentGuard::prepareDuskProcess($cleanBasePath);
+            TestEnvironmentGuard::prepareDuskProcess($canonicalBasePath);
 
             $this->assertFileExists($database);
             $this->assertSame(0, filesize($database));
@@ -367,15 +369,16 @@ class TestEnvironmentGuardTest extends TestCase
             $this->assertSame([], $connection->query(
                 "SELECT name FROM sqlite_master WHERE type = 'table'"
             )->fetchAll(\PDO::FETCH_COLUMN));
+            $connection = null;
         } finally {
             if (is_file($database)) {
                 unlink($database);
             }
-            if (is_dir($cleanBasePath . '/database')) {
-                rmdir($cleanBasePath . '/database');
+            if (is_dir($canonicalBasePath . '/database')) {
+                rmdir($canonicalBasePath . '/database');
             }
-            if (is_dir($cleanBasePath)) {
-                rmdir($cleanBasePath);
+            if (is_dir($canonicalBasePath)) {
+                rmdir($canonicalBasePath);
             }
         }
     }
