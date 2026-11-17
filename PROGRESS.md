@@ -5897,3 +5897,141 @@ there are multiple duplicate functions that still need to be removed, sku will b
   `.33` server is unreachable. No production write occurred. Host preflight,
   backup, transfer, catalogue seeders, cutover, and verification remain blocked
   until the new host authorizes the existing deployment key.
+## Addendum (2026-11-10 Legacy Workflow Evidence Implementation)
+
+- Created isolated branch `codex/legacy-workflow-attestations` from
+  `origin/master` (`c539b9cd18`); production was not accessed or changed.
+- Added item-level, audited pre-Snipe-IT workflow evidence with protected
+  revocation/supersession, per-requirement context hashes, a shared evidence
+  resolver, mixed-run behavior, agent parity, history/UI/API states, and list
+  filtering.
+- Single-asset creation saves the asset, final overrides, and all evidence in
+  one transaction. It creates no workflow run/result; QR generation happens
+  only after commit and printing remains an explicit later action.
+- Guarded test preflight resolves exactly to `testing`, `sqlite`, `:memory:`.
+  Focused feature and adjacent regression results are recorded in
+  `docs/agents/agents-addendum-2026-11-10-session-init.md`.
+- Final supported non-LDAP gate passed with `2,281` tests, `11,251`
+  assertions, `2` expected external-MariaDB concurrency skips, and zero
+  failures. Gate repairs removed the stale maintenance-suite path, normalized
+  the exact LF-sensitive release fixtures, and corrected one stale edit-form
+  assertion; no unsafe cached test configuration was recreated.
+- Local Docker qualification used `APP_ENV=local`, `DB_CONNECTION=mysql`,
+  `DB_DATABASE=snipeit`. Pending forward migrations and the additive
+  production foundation/demo-role seeders were applied only to that local
+  database. The documented Senior Refurbisher account successfully loaded the
+  create form and grouped legacy options.
+- Local qualification asset `LOCAL-LEGACY-20261110` (asset 16) was created
+  with two attestations and zero intake workflow runs/results. Starting its
+  applicable profile snapshotted both accepted steps and created only the
+  uncovered results. Revoking one accepted step retained the original record,
+  wrote its field audit trail, and materialized a pending `nvt` result in the
+  open run.
+- The desktop browser-control runtime failed before window initialization with
+  a missing kernel-assets path. A clean installed-Chrome DevTools pass covered
+  the actual page JavaScript instead: the fieldset started collapsed, opened,
+  loaded 3 profile groups/22 items through AJAX, exposed all profile select/
+  clear controls, and cleared selected evidence/source/date on model change.
+  The temporary browser profile and harness were removed after the run.
+- Local implementation and qualification are complete. Production remains
+  unchanged; backup, additive migration, permission seeder, immutable build,
+  and post-deploy smoke are the next separately authorized release sequence.
+
+## Addendum (2026-11-12 Status And Backlog Audit)
+
+- Reopened `codex/legacy-workflow-attestations` at unchanged base commit
+  `c539b9cd18`. The complete legacy-evidence implementation remains present as
+  uncommitted tracked/untracked work; no release commit, remote push, immutable
+  build, or production deployment has occurred.
+- The 2026-11-10 qualification remains the latest valid evidence because the
+  application diff has not changed: 2,281 non-LDAP SQLite tests, 11,251
+  assertions, two expected external-MariaDB skips, authenticated local
+  create/start/revoke checks, and real Chrome AJAX interaction coverage.
+- Docker Desktop is stopped on this workstation today, so the local containers,
+  migration state, and retained qualification asset could not be re-read. The
+  failed connection was environmental; no database command reached a server
+  and no state changed.
+- Reconciled stale TODO entries against retained production release records:
+  the Snipe-IT move to `10.10.10.249`, production status-access matrix, and
+  numeric RAM-speed aggregation fix are complete. The remaining host-migration
+  work is limited to reconciling/qualifying CUPS against the newer printer-node
+  setup.
+- Added missing active backlog entries for the reported intermittent mobile
+  hardware-page scroll lock, slow History feedback, operator-facing printer
+  locations (`Office`/`Storage`), and bounded physical Zebra qualification.
+- No application code or production system was changed during this audit.
+
+## Addendum (2026-11-17 Weekly Status Recheck)
+
+- Rechecked `codex/legacy-workflow-attestations`; HEAD remains `c539b9cd18`
+  and the legacy-evidence implementation is still uncommitted and undeployed.
+  No application changes have landed since the 2026-11-10 qualification.
+- Confirmed the intermittent phone scrolling and slow History feedback items
+  are not fixed. They remain one open TODO entry, but code inspection shows
+  they should be treated as separate investigations.
+- The History tab renders status events synchronously and initializes a
+  server-paginated Bootstrap table against `api.activity.index`. A loading
+  message exists, but the shared stylesheet forces the table loading layer to
+  `z-index: 0`, so a slow request may provide little or no visible feedback.
+  The API performs a count plus paged action-log query with five eager-loaded
+  relationships; production timing/query-plan evidence is still required
+  before selecting an optimization.
+- No mobile scroll-lock remediation is present. The intermittent nature still
+  requires reproduction on an affected phone while recording open modals,
+  `body` classes/overflow, tab state, viewport, and console errors; do not
+  assume it shares the History query cause.
+- No tests or runtime mutations were performed during this status-only check.
+- Repository reconciliation found that the manual-review checkpoint currently
+  exists as local `master` commit `a766abedee`, but that commit branches from
+  `50a1c056d0` and is 17 application commits behind `origin/master`/this
+  feature base. A trial three-way merge reports four conflicts: `PROGRESS.md`,
+  `TODO.md`, `docs/fork-notes.md`, and the independently added
+  `docs/agents/agents-addendum-2026-10-01-session-init.md`. The guide commit
+  contains no application-runtime paths; rebase/transplant it separately and
+  preserve both sides of the checkpoint records instead of merging local
+  `master` wholesale.
+- The legacy-evidence working tree has no staged files and passes
+  `git diff --check`. Six files shown as modified by `git status` have content
+  hashes identical to the index and are line-ending/stat noise; they must not
+  be staged as feature changes. The implementation, release-test cleanup,
+  feature documentation, and later status/TODO notes form separate commit
+  groups.
+- The 2026-11-10 full-suite result remains the latest execution evidence, but
+  fresh verification is currently unavailable because Docker Desktop is
+  stopped and the host has neither PHP nor Composer. Before committing the
+  runtime feature, add focused assertions for the newly exposed agent-report,
+  summary/list API, revocation-authorization, and production-permission seeder
+  paths, then rerun the guarded focused and supported non-LDAP gates after the
+  guide checkpoint is rebased.
+
+## Addendum (2026-11-17 Legacy Evidence Commit Qualification)
+
+- The guide checkpoint is now cleanly replayed onto current `origin/master` on
+  `codex/guide-checkpoint-rebased`; four commits end at `49b3eee1c3` and its
+  guide verification passes. The stale local-master base is no longer the
+  proposed integration source.
+- Added the missing focused contracts for agent legacy omission and real-result
+  supersession, summary/list API states, web-only API intake rejection,
+  revocation authorization/asset boundaries, and production role grants.
+- Reconciliation found and fixed two runtime gaps: stale legacy evidence now
+  remains visible as a specific review-required API item, and component-scoped
+  evidence is invalidated only by relevant component definitions/categories.
+  Revocation also locks the asset before its attestation to serialize against
+  concurrent workflow creation.
+- Added fully localized English/Dutch legacy filter and evidence labels.
+- Docker Desktop is still blocked by its stale local `dockerInference`
+  endpoint. A verified temp-only PHP 8.3.36/Composer 2.11.2 runtime restored
+  dependencies without installing system PHP. All test processes used
+  `APP_ENV=testing`, `DB_CONNECTION=sqlite`, and `DB_DATABASE=:memory:` with
+  the executable guard enabled.
+- Focused legacy/API/permission coverage passes 64 tests / 477 assertions.
+  Adjacent workflow, readiness, result, summary, and index coverage passes 87
+  tests / 406 assertions.
+- The full supported non-LDAP gate passes 2,290 tests / 11,316 assertions with
+  four expected skips: two external-MariaDB concurrency cases and two
+  Windows symbolic-link cases. No failures remain.
+- The portable run exposed and fixed a test-only Windows canonical-path issue
+  in the Dusk SQLite guard. Static parser coverage passes for 41 changed
+  PHP/Blade files, and `git diff --check` is clean. Temporary OAuth keys and
+  generated uploads were removed; production and shared databases were not
+  accessed or changed.

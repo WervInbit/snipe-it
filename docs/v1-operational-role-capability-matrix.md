@@ -5,7 +5,8 @@ This matrix is the implemented least-privilege baseline for the four production 
 | Capability | Refurbisher | Senior Refurbisher | Supervisor | Admin |
 | --- | ---: | ---: | ---: | ---: |
 | View and edit an existing asset | Yes | Yes | Yes | Yes |
-| Create or soft-delete an asset | No | No | Yes | Yes |
+| Create an asset | No | Yes | Yes | Yes |
+| Soft-delete an asset | No | No | Yes | Yes |
 | Upload/caption asset images | Yes | Yes | Yes | Yes |
 | Remove asset images | No | Yes | Yes | Yes |
 | View/upload/delete private asset files | No | No | No | Yes |
@@ -13,6 +14,7 @@ This matrix is the implemented least-privilege baseline for the four production 
 | View licenses, keys, and license files | No | No | No | Yes |
 | Scan asset/component labels | Yes | Yes | Yes | Yes |
 | Execute and complete workflows | Yes | Yes | Yes | Yes |
+| Accept/revoke pre-Snipe-IT workflow evidence during asset creation | No | Yes | Yes | Yes |
 | Delete workflow history | No | No | Yes | Yes |
 | View/register/update components | Yes | Yes | Yes | Yes |
 | Extract/install/move/verify components | Yes | Yes | Yes | Yes |
@@ -57,6 +59,10 @@ This matrix is the implemented least-privilege baseline for the four production 
   reports, and CSV exports omit product keys without `licenses.keys`;
   `licenses.files` gates attachment list, download, upload, and deletion.
 - Scanning and workflow work use `scanning`, `tests.execute`, and the separately granted `tests.delete`.
+  `tests.manage_legacy_evidence` permits Senior Refurbisher, Supervisor, and
+  Admin to record exact pre-Snipe-IT steps while creating one asset and to
+  revoke that evidence later. It does not fabricate a workflow run/result and
+  does not grant asset creation by itself.
 - Operational component work uses `components.view`, `components.create`, `components.update`, `components.extract`, `components.install`, `components.move`, and `components.verify`.
 - Component record deletion, lifecycle destruction, and catalog administration remain separate: `components.delete`, `components.destroy`, `components.manage_definitions`, and `components.manage_storage_locations`.
 - Work orders use `workorders.view`, `workorders.create`, `workorders.update`, and the separately granted `workorders.manage_visibility`.

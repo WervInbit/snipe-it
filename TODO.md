@@ -1,3 +1,20 @@
+## Legacy Workflow Evidence - 2026-11-10
+
+- [x] Implement audited, item-level pre-Snipe-IT workflow attestations for the
+  single-asset web create path, including per-item context invalidation,
+  readiness/dependency integration, mixed real runs, revocation, history,
+  summary API states, and asset-list filtering.
+- [x] Keep label printing as a separate explicit post-create action and verify
+  that intake creates no workflow run or result rows.
+- [x] Complete the supported full non-LDAP SQLite gate and local Senior
+  Refurbisher journey. The refreshed 2026-11-17 guarded gate passed with 2,290
+  tests and 11,316 assertions (2 expected external-MariaDB skips and 2
+  expected Windows symbolic-link skips); focused/adjacent coverage and the
+  prior authenticated create/start/revoke plus Chrome AJAX journeys pass.
+- [ ] After local acceptance, prepare the additive migration/permission-seeder
+  production release and take a fresh verified backup. No production action is
+  authorized by the implementation checkpoint.
+
 ## Phone Preparation - 2026-09-29
 
 - [ ] Prepare every assigned work phone before handoff: disable automatic page
@@ -6,14 +23,17 @@
   and otherwise complete the browser's one-time camera permission prompt.
   Verify **Scan QR** with the phone after both settings are applied.
 
-## Production Host Migration - 2026-09-17
+## Production Host And CUPS Migration - 2026-09-17
 
-- [ ] Prepare and execute the approved Snipe-IT and CUPS relocation from
-  `10.10.10.33` to `10.10.10.249` using
-  `docs/plans/production-host-migration-2026-09-17.md`. Complete the stable-IP,
-  Docker/Compose, firewall, backup, isolated restore, Snipe-only edge, and DYMO
-  gates before cutover; leave Frigate on `.33` and do not combine the move with
-  application/schema/catalogue changes.
+- [x] Move Snipe-IT to `10.10.10.249`. The immutable application deployment,
+  recovery set, health checks, and production catalogue release completed on
+  2026-10-01; see
+  `docs/releases/workflow-catalog-search-production-2026-10-01.md`.
+- [ ] Reconcile the remaining CUPS portion of
+  `docs/plans/production-host-migration-2026-09-17.md` against the current
+  printer-node setup. Verify the active production `CUPS_SERVER`, queue owners,
+  and physical locations before moving anything; do not combine this with the
+  legacy-evidence application release.
 
 ## Refurbisher Review Backlog - 2026-09-17
 
@@ -25,24 +45,41 @@
 - [ ] Use the document's Manual Administration Work section for approved system
   configuration and its Guide Updates section for newly versioned guides. The
   application handoff is in `docs/refurbisher-follow-up-configuration.md`.
-- [ ] Before production cutover, configure the production status matrix: QA
+- [x] Configure and verify the production status matrix: QA
   Hold requires a note; Supervisor/Admin can view and choose Afgevoerd;
   ordinary Refurbisher/Senior cannot; and Supervisor has explicit View plus
-  Choose/use for Broken/Parts if that remains the approved matrix. Recheck the
-  Admin-only locked-status exit with a non-production test asset.
-- [ ] Restore a reliable single-command full PHPUnit gate: remove or recreate
+  Choose/use for Broken/Parts. The 2026-09-29 production release and four-role
+  browser matrix verified this contract, including the Admin-only locked-status
+  exit.
+- [x] Restore a reliable single-command full PHPUnit gate: remove or recreate
   the stale `tests/Feature/Maintenances/Api` suite entry, ensure an isolated
   `.env.testing` supplies the example APP_KEY, and identify what recreates
-  `bootstrap/cache/config.php` during broad shared-container runs.
+  `bootstrap/cache/config.php` during broad shared-container runs. The stale
+  suite entry and Windows LF-sensitive release checks are fixed; the guarded
+  non-LDAP command completed cleanly without recreating unsafe cached config.
 - [x] Fix the confirmed attribute lifecycle gap: existing hidden/deprecated
   component/model assignments remain editable/removable, while new assignments
   require current attributes. Foundation workflow reseeding no longer
   overwrites administrator-managed content/order.
-- [ ] Investigate the reported asset/component specification mismatch where an
-  asset shows 6400 MHz instead of the expected 3200 MHz. Trace and expose value
-  provenance in the affected live record before correcting any source data; no
-  matching 6400 MHz repository source was found. See AT-07 in the consolidated
-  backlog.
+- [x] Fix the reported 6400 MHz/3200 MHz component-derived specification error.
+  The root cause was additive aggregation of repeated RAM speed; the distinct
+  aggregation migration was deployed on 2026-09-29 and production asset
+  `INBIT-AA0010` now resolves to 3200 MHz while retaining 16 GB.
+- [ ] Reproduce and fix intermittent phone scrolling on hardware detail pages.
+  Separately profile the slow History tab and add immediate loading/progress
+  feedback so operators can distinguish a long request from a frozen page.
+
+## Printer Operations - 2026-11-12
+
+- [ ] Replace raw printer queue/network labels with stable operator-facing
+  locations. Preserve queue IDs for routing, but present the approved mapping:
+  LabelWriter 400 Turbo = `Office`; LabelWriter 330 and Twin Turbo = `Storage`.
+  Record the mapping in configuration/runbooks rather than relying on chat
+  context.
+- [ ] Physically qualify each printer/stock/template combination before staff
+  use. Keep the Zebra ZD421 25x25 path as an additional-printer investigation
+  until media sensing, calibration, centering, and single-label test output are
+  repeatable; avoid unbounded self-test/calibration runs that waste stock.
 
 ## Current Guide Review Clearance - 2026-09-10
 

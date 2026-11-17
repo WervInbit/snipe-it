@@ -749,3 +749,26 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
 - Production release dependencies were refreshed to patched CommonMark,
   Flysystem, phpseclib, and brace-expansion versions after the current scanner
   database detected newly published advisories during qualification.
+### 2026-11-10
+
+- Single-asset registration can now record exact refurbishment workflow items
+  completed before Snipe-IT adoption. These are audited legacy attestations,
+  not fabricated pass results or workflow runs.
+- Readiness and workflow dependencies accept current matching attestations
+  while labelling legacy-only and mixed evidence distinctly. Requirement,
+  model, expected-value, or relevant component changes make affected evidence
+  stale; unrelated new items remain pending without invalidating old items.
+- Real results take precedence permanently. Revocation retains the original
+  evidence and, when necessary, exposes the item as pending in an open mixed
+  run. Asset detail/history, the summary API, and asset-list status/filtering
+  share the same evidence semantics.
+- Senior Refurbisher, Supervisor, and Admin receive the dedicated
+  `tests.manage_legacy_evidence` ability; the create path still independently
+  requires `assets.create`.
+- Refreshed local qualification passed the complete supported non-LDAP gate
+  (2,290 tests, 11,316 assertions, 2 expected external-MariaDB skips and 2
+  expected Windows symbolic-link skips), an
+  authenticated Senior Refurbisher create/start/revoke journey, and real
+  Chrome execution of the collapsed/AJAX/model-change controls. Production was
+  not changed; migration, permission seeding, immutable-image qualification,
+  backup, and deploy smoke remain a separate release operation.
