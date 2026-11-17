@@ -21,9 +21,14 @@ The local root Handleidingen folder has 25 PDFs/25 .af files, 68 pages and 583
 files. All 582 recorded hashes match on November 17. ZIP:
 `output/manuals/Handleidingen-2026-11-12.zip`, 383665275 bytes, SHA256
 `d62409d7bde326951ea241a6ff4b0e9c5071967d1197ecf4242f7966aab5119a`.
-Delivery output is ignored and not supplied by a fresh clone. Source/tooling
-changes remain local/uncommitted. All four installed skill files match their
-maintained source. Do not treat this documentation update as publication.
+Delivery output is ignored and not supplied by a fresh clone. Manual sources,
+skill and selected tooling are committed locally in **f51593d906**; no push.
+The delivery/handoff commit records the remaining publication work separately
+from unrelated pending application/onboarding changes. All four installed
+skill files match their maintained source. Read
+[source/artifact availability](source-availability.md) and the
+[publication checks](reviews/source-publication-2026-11-17.md) before relying on
+historical local paths. No complete archive transfer to the NAS is inferred.
 
 ## Remaining Evidence
 

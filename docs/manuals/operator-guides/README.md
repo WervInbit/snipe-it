@@ -25,8 +25,10 @@ Use **manual/handleiding** in new user-facing names and prose. Existing internal
 [current-set.json](current-set.json) records their filenames/hashes as the
 last delivered baseline, not a live NAS inventory. The local `Handleidingen/`
 and `output/manuals/Handleidingen-2026-11-12.zip` are generated/ignored; a fresh
-clone does not supply those artifacts. Source changes in this shared working
-tree also require scoped publication before a clone can use them.
+clone does not supply those artifacts. Manual sources/skill/tooling are now
+committed locally in **f51593d906**, followed by the scoped delivery/handoff
+record. No push is part of this work. Unrelated application/onboarding changes
+remain separate pending work in the shared checkout.
 
 [Source/artifact availability](source-availability.md) identifies what the
 manual source commits contain, external review archives and tool dependencies.

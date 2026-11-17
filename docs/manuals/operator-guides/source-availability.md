@@ -12,6 +12,12 @@ The source commits are local until deliberately pushed. The surrounding
 application/onboarding/backlog reconciliation still contains unrelated pending
 work; manual publication does not merge, deploy or qualify that work.
 
+Source checkpoint: **f51593d906**, followed by the delivery/handoff record.
+This is publication into local Git history, without a remote push or a clean
+application/environment qualification. The shared root documentation is staged
+by manual section; its newer cross-project reconciliation remains in the
+working tree for its owning task.
+
 ## Delivered Native/PDF Baseline
 
 [current-set.json](current-set.json) records the 25 exact delivered pairs / 68

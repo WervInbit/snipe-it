@@ -74,3 +74,107 @@
 - PHP/Blade parser: 41 changed files parsed, zero failures. `git diff --check`
   has no errors. Ephemeral Passport keys and generated test uploads were
   removed after the run.
+## Manual Guide Workstream Notes
+
+## Operator Manual Status Review - November17
+
+- User-authorized scope: status report for manuals and the flat shared delivery.
+- Actual checkout: C:/dev/snipe-it-fork, master a766abedee, shared dirty changes.
+  No application runtime/image/database target is needed or assumed for this
+  file-only status check; do not treat dated operating evidence as freshly verified.
+- Sources: developer checkpoint/TODO, current manual HANDOFF, November12 progress,
+  fork notes and the shared folder's register/qualification/sealing evidence.
+- Verification: read-only folder/registered-file/checksum and archive identity;
+  preserve sealed output and any independent manual changes. No Computer Use.
+- Unknowns: NAS copy/location, fresh-device/fonts, actual operator/A4 acceptance,
+  and the previously documented application-target/content gaps.
+
+### Verified Results
+
+- 25 PDF files,25 .af files,68 registered pages and583 total delivery files.
+  All582 recorded checksums match, with no missing/changed artifact.
+- ZIP remains383665275 bytes and retains the November12 SHA256
+  d62409d7bde326951ea241a6ff4b0e9c5071967d1197ecf4242f7966aab5119a.
+- Installed reusable skill matches its four maintained files exactly.
+- No new manual generation/content changes or Computer Use. NAS copy/location
+  not verified; do not overwrite a potentially newer NAS master from this local
+  snapshot. Existing reader/A4/fresh-device/acceptance and application gaps remain.
+
+### Owner-Reported NAS Copy
+
+- Owner confirms copying the delivered set to the NAS. Future work must compare
+  that shared copy before overwriting from the local delivery snapshot. NAS path
+  and file integrity remain unverified here. No artifact or NAS operation.
+
+## Manual Repository Alignment - November17
+
+- User-authorized follow-up: align repository status and maintenance sources
+  with the finished native/PDF delivery and owner-reported NAS copy.
+- Backlog: START-05/NEXT-08. Checkout remains C:/dev/snipe-it-fork,
+  master a766abedee, with unrelated shared application changes preserved.
+- Repository documentation/metadata only. No runtime/database target is
+  selected or implied; no GUI work, conversion or NAS access is scheduled.
+- Capture a lightweight last-delivered register, reconcile active documentation
+  and distinguish completed production from remaining release/reader evidence.
+  Preserve dated decisions and per-version history without treating old pending
+  statements as current. Verify metadata, links and scoped changes afterward.
+- NAS location/integrity, newer shared edits and exact-version acceptance remain
+  unknown. The sealed local output is comparison evidence, not overwrite authority.
+
+### Alignment Outcome And Verification
+
+- Current manual entry points, all 25 specification headers, root navigation,
+  checkpoint and backlog agree on completed PDF/native production and packaging.
+  Former project/registry entries are preserved as history; no stale planning
+  hold or conversion count controls current work.
+- Added current-set.json with all exact delivered versions, roles, pages,
+  relative filenames and hashes. NAS copy remains owner-reported, with no known
+  path/integrity check. Native masters may contain newer human edits; the
+  maintenance contract now requires comparison and synchronized native/PDF/
+  specification/review/register updates without overwriting them from a generator.
+- Verification passed: 25 exact register/specification matches, all prior
+  specification bodies and both former indexes preserved, 130 current links,
+  170 image placements, all 582 sealed file hashes and unchanged archive hash.
+  Scoped working-file comparison found no unrelated modifications; HEAD stays
+  a766abedee and whitespace checks pass. Local report:
+  output/manuals/repository-alignment-2026-11-17/verification.json.
+- Remaining release/app, USR-02/AST-03, fresh-device/Arial, operator/A4/labels and
+  exact acceptance evidence is explicit. No manual content/output, NAS file,
+  application/runtime/database/printer/NUC state, commit or push changed.
+  Application tests skipped: documentation/metadata-only scope.
+
+## Scoped Manual Publication Commits - November17
+
+- Owner accepts the recommended scoped manual commits. Starting HEAD remains
+  a766abedee on the dirty shared master checkout; the index is empty.
+- Preserve manual methods/specifications/skill and useful production tooling,
+  then current delivery/handoff metadata and only relevant shared-file sections.
+  Application/printer work, attachments, scratch files, caches and generated
+  delivery/ZIP files remain outside these commits.
+- Verify source/dependency scope, external evidence availability and staged
+  diffs. No push, pull/rebase, GUI, runtime/database or NAS write is authorized
+  by this publication step. Retain uncommitted work belonging to other tasks.
+
+### Source Commit And Validation
+
+- f51593d906 commits156 manual source/tooling files. Current native/PDF bytes,
+  sealed delivery, historical binary rounds and unrelated app/printer changes
+  are excluded. The handoff commit uses selective shared-file staging, keeping
+  the newer global backlog/onboarding/application reconciliation in the worktree.
+- Exact1133-file historical archive is preserved at
+  output/manuals/Manual-review-history-2026-11-17.zip,163554075 bytes, SHA256
+  062078b6ce709a788006d59b59c0f3e851c1eea4b8f57746fe1ddcf7bbaa330f.
+  The source manifest records every file/hash; no NAS transfer is claimed.
+- Checks pass: skill structure, selected Python parsing,26 JavaScript syntax
+  checks, shared primitives/registry,25 offline SDK fault cases, six real index
+  filter cases and current AST-03 v20 source/PDF text/A4 check. No native app
+  input or new guide version is involved.
+- Legacy package check fails on three pre-existing unlisted CAT draft PDFs.
+  All three and the checker match starting HEAD; retain the evidence and record
+  this drift independently. Current delivery integrity remains unchanged.
+- No push or synchronization of the divergent branch, runtime/database change,
+  printer access or NAS write. Other tasks remain uncommitted and preserved.
+- Final handoff verification passes for17 scoped paths, all582 delivery hashes
+  and the unchanged ZIP, with zero outside-scope working modifications. Exact
+  archived review-round directories are ignored to prevent accidental staging;
+  their original files and the verified history archive remain preserved.

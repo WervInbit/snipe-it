@@ -29,6 +29,20 @@ This guide keeps automation agents and human contributors aligned on the expecta
 - `docs/fork-notes.md` summarizes fork-level feature deltas; reference PRs or issues when logging changes.
 
 ## Operator Guide Authoring
+- Start at `docs/manuals/operator-guides/README.md` and `HANDOFF.md` for the
+  current manual state. `current-set.json` records the last delivered 25-manual
+  baseline; it is not a live NAS inventory or an acceptance ledger. The owner
+  reports copying the set to the NAS. Compare the actual shared files before
+  revisions and preserve later human edits in the saved native `.af` masters.
+  Update the paired PDF and relevant version/specification records together.
+  Local `Handleidingen/` and delivery ZIPs are generated/ignored, not resources
+  supplied by a fresh clone. Use manual/handleiding in new user-facing wording;
+  preserve existing internal paths and historical artifact names.
+- The reusable `snipeit-operator-guides` skill is maintained at
+  `docs/manuals/operator-guides/skill/SKILL.md`. Use it for guide authoring,
+  review and Affinity preparation; the method and owning standards below
+  remain authoritative. Install the personal copy with
+  `scripts/manuals/install-operator-guide-skill.py` when needed.
 - Before generating, fixing or adjusting manuals, read
   `docs/manuals/operator-guides/authoring-method.md` and the relevant guide
   specification. Establish the reader outcome, information relevance and

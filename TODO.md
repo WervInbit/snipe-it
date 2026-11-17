@@ -1,3 +1,5 @@
+# Prioritized Product Backlog
+
 ## Legacy Workflow Evidence - 2026-11-10
 
 - [x] Implement audited, item-level pre-Snipe-IT workflow attestations for the
@@ -17,24 +19,54 @@
 
 ## Phone Preparation - 2026-09-29
 
-- [ ] Prepare every assigned work phone before handoff: disable automatic page
-  translation/translation prompts for the production Snipe-IT site, allow
-  camera access for that site in advance where the phone/browser supports it,
-  and otherwise complete the browser's one-time camera permission prompt.
-  Verify **Scan QR** with the phone after both settings are applied.
+## Manual Work Checkpoint - 2026-11-17
 
-## Manual Work Checkpoint - 2026-10-06
+The manual source/delivery checkpoint is now committed locally. All25
+PDF/native pairs /68 pages are prepared; the owner reports the NAS copy.
+Use [the current handoff](docs/manuals/operator-guides/HANDOFF.md) and
+[exact delivered register](docs/manuals/operator-guides/registry.md).
+These tasks supersede earlier per-version manual queues in this file;
+older decisions and rejected artifacts remain in the manual history.
 
-Resume from [the manual handoff](docs/manuals/operator-guides/HANDOFF.md).
+- [ ] **START-05 - Align daily operator manuals with the release and record decisions.**
+  Native production and packaging are complete:25 PDF/.af pairs,68 A4 pages,
+  full embedded images and an offline Handleidingen index. The owner confirms
+  copying the set to the NAS. Use the [handoff](docs/manuals/operator-guides/HANDOFF.md)
+  and [exact delivered register](docs/manuals/operator-guides/registry.md);
+  compare actual shared files before edits because the local snapshot may be
+  older. No conversion or Computer Use task remains scheduled.
+  Remaining: check the selected daily route against the actual chosen application release,
+  including AST-03 optional-note validation and workflow/QA/status handoffs;
+  record exact-version review and coordinate real operator/A4/label trials
+  with the staff-journey trial below. Fresh-device/fonts remain unqualified. Done when the chosen
+  staff-route versions match the named target and have explicit decisions.
+  Technical conversion or NAS distribution does not transfer older acceptance.
+  Keep the bounded AC-01 export variation and all historical artifacts recorded.
+- [ ] **START-06 - Observe and accept the complete staff journey.**
+  Owner/intended users: sign in as each operational role; verify permitted and
+  forbidden actions, workflow search/reordering, saving/evidence/private files,
+  interruption/recovery, QA and the final device identity. Prepare every work
+  phone's translation/camera settings; physically print and scan the intended
+  stock and test the guides on A4. Done when actual users' results, wrong turns,
+  fixes and remaining exceptions are recorded against exact app/guide versions.
 
-- [x] Record the repaired authoring method, current/desired standards, retired
-  approaches and exact owner feedback in maintained guide documentation.
-- [x] Retain the October proposals, evidence and comparisons as unaccepted
-  history, preserving accepted artifacts and selections.
-- [ ] Reauthor affected guides under the method: reconcile standards and changed
-  behavior, then assess the complete revision against the accepted direction.
-- [ ] Complete relevant operator, actual-A4 and controlled execution checks;
-  record their evidence separately from artifact integrity and exact acceptance.
+- [ ] **NEXT-08 - Validate the delivered admin/catalogue manuals against the release.**
+  Administrative/catalogue PDF/native production and packaging are complete
+  within the same25-manual NAS delivery as START-05. Follow the same
+  [handoff](docs/manuals/operator-guides/HANDOFF.md) and exact register; this
+  is not a second conversion queue. Remaining: fresh USR-02 open-choice/UI
+  evidence for clipped status labels, risky/interrupted routes on disposable
+  data, the owner's source-recording policy, reader/fresh-device checks and exact
+  version decisions. Preserve login-disable versus deletion/restoration scope,
+  field-to-result support, newer NAS edits and all historical acceptance.
+  Legacy generator/runtime metadata must not select or accept a newer native
+  artifact by implication. The old package checker also finds three historical
+  CAT PDFs absent from its draft manifest; reconcile that drift without deleting
+  evidence or rewriting frozen acceptance. Do not reconnect the cleaned NUC.
+
+The unrelated sections below retain their previous committed contents.
+The newer global backlog/onboarding reconciliation remains in the shared
+working tree for its owning task; this manual commit does not publish it.
 
 ## Production Host And CUPS Migration - 2026-09-17
 

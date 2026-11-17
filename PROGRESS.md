@@ -6372,3 +6372,747 @@ there are multiple duplicate functions that still need to be removed, sku will b
   application/settings edits, deployment, push or acceptance decision.
   Commit completion is recorded in Git history. Resume reauthoring from the
   handoff; the repaired method has not yet produced new reviewed guide PDFs.
+
+### 2026-10-08 - Manual Role And Focus Feedback Corrections
+
+- Owner describes AC-01 v11, SC-01 v14 and AST-05 v8 as degradation: role
+  names and redundant rings on complete crops. Recorded requires-rework
+  status without changing their exact artifact bytes or accepted selections.
+- Owner explicitly chose existing access-group names exactly. Corrected
+  context to Iedereen / Refurbisher / Supervisor, omitting the invented
+  Supervisor qualification. Verified established names in production seeding.
+- Repaired the shared reasoning: review the unmarked crop first; mark a target
+  when remaining search/confusion warrants it. Complete joint forms/checks
+  need no extra outlines. Updated method, focus/capture/system contracts,
+  decisions, guide specs, exact reviews and continuation indexes. See
+  docs/manuals/operator-guides/reviews/emphasis-feedback-2026-10-08.md.
+- Bounded new drafts AC-01 v12, SC-01 v15, AST-05 v9: four A4 pages. Preserved
+  task text, 18 source/crop hashes and all 18 figure frame sizes; only role
+  wording, version labels and focus marks changed. All four rendered pages
+  inspected at144dpi; role/version-normalized PDF text equality and retained
+  previous81-file integrity passed. New review round retains sources by
+  immutable reference to the previous round, self-contained HTML/SVG, PDFs,
+  crops, rendered comparisons, input snapshots and verification.
+- No new capture, application/database mutation, app test, physical print or
+  unfamiliar-reader trial. Generator/component/geometry checks cover this
+  manual-only change; wider composition alignment, translation and mobile
+  history gaps remain open. Drafts remain unaccepted. No commit, push,
+  accepted/runtime selection or concurrent printer/Olimex work changed.
+
+### 2026-10-20 - More Operator Guides (Session Start)
+
+- Owner finds the AC-01 v12 / SC-01 v15 / AST-05 v9 corrected examples fine
+  and requests more guides. Carry their direction into the next operational
+  set: AST-02, WF-01, WF-02, AST-04 and HELP-01. Preserve exact existing group
+  names, useful screenshot scale and focus only for unresolved recognition.
+- Read current handbook, progress/fork notes, shared method/contracts, guide
+  specifications and prior owner feedback. Existing app/printer/camera changes
+  are another agent's work and are outside this manual task. No card/node or
+  production printer changes are authorized by this request.
+- Confirmed dev Docker still mounts the separate refurbisher-followups source.
+  Verify current UI, Dutch locale and actual workflow/handoff behavior before
+  evidence. New guides remain drafts for review; generation is not acceptance.
+
+### 2026-10-20 - Five Operational Manual Drafts Delivered
+
+- Owner finds the corrected three examples fine and requests more. Produced
+  AST-02 v10, WF-01 v16, WF-02 v14, AST-04 v8 and HELP-01 v9: seven A4 sides,
+  all working drafts for review. Existing exact accepted selections retained.
+- Per-guide scope, current/desired/retired requirements, evidence jobs and
+  baseline support were recorded before generator work. Current exact role
+  names and restrained focus carried forward. Route overview and problem
+  lookup keep their own structures; no generic post-completion supplement.
+- Sixteen fresh nl-NL captures from existing dev mount c539b9cd18. Only owned
+  synthetic asset18 GUIDE-20261020-01 was created/changed intentionally. UI
+  start, Continue, note save, one demonstration PNG upload, result selection,
+  Klaar return and Being Processed -> QA Hold plus audit note were observed.
+  Other required values were prepared demonstration data, not physical tests.
+  Runs20/21/22 and asset18 remain in dev; no existing asset changed by this work.
+- Post-status reload collided with app navigation; persisted status checked
+  before read-only saved/history capture, no repeated transition. The same
+  saved note was re-entered without submission and native textarea resized
+  from 54 to 72 CSS pixels for readable proof. No UI text painting/translation.
+- All seven pages and full prior comparison pages inspected. Corrected local
+  image overflow, body/badge spacing, missing Assumed context and textarea
+  scrolling before retention. Script syntax/PHP lint, shared component QA,
+  image containment, source/crop/focus bounds, A4/text/page checks, exact PDF
+  delivery equality and previous two rounds' 134-file integrity pass.
+- Updated specs, registry, layouts, screenshot catalog, decisions, indexes and
+  handoff. Review artifacts, sources, input snapshots, comparison and hashes:
+  resources/manuals/operator-guides/review-rounds/2026-10-20-operational-guides.
+  Reasoning/change list: docs/manuals/operator-guides/reviews/operational-guides-2026-10-20.md.
+- Remaining: untranslated workflow/component copy, mobile history width,
+  local physical QA location, negative/override/error trials, physical print
+  and novice-reader testing. No app unit suite: no application code changes;
+  focused artifact checks and owned UI trials cover this documentation work.
+  No commit/push, app deployment, accepted/runtime selection, printer, camera,
+  card or other agent changes were made.
+
+- Final manual retention verified: 345 local links and accepted package's
+  369 files pass; new seven-page round is sealed with manifest.json/SHA256.
+  No further generator/capture writes into that retained round are permitted.
+
+### 2026-10-20 - Remaining Operator Guides: Session Start
+
+- Owner authorized all seventeen remaining active guides using the corrected
+  approach. Scope: AC-02, AST-03, CMP-01/02/04, USR-01 through USR-05,
+  CAT-00 through CAT-06. The eight remade examples/operational guides remain.
+- Read current authoring method, shared contracts, guide specifications,
+  catalogue family ownership and owner feedback. Preserve task-dependent
+  composition, exact access-group names and useful target recognition scale;
+  use focus only where search remains. Integrate changes before completion.
+- Separate unaccepted versions, comparisons, a consolidated change list and
+  retained authoring/evidence inputs will be produced. Existing accepted and
+  historical artifacts stay immutable. No other agent's source work is touched.
+- Verify actual mounted development behavior and Dutch account locale. Only
+  guarded synthetic manual fixtures may change; no physical printing or
+  destructive catalogue/production operations. PDF visual QA is required.
+
+### 2026-10-20 - Remaining Operator Guides: Delivered Drafts
+
+- Produced all seventeen authorized drafts, 56 A4 pages: AC-02 v6, AST-03 v17,
+  CMP-01 v7, CMP-02 v8, CMP-04 v8, USR-01 v15, USR-02 v13, USR-03 v6,
+  USR-04 v7, USR-05 v4, CAT-00 v13, CAT-01 v9, CAT-02 v4, CAT-03 v4,
+  CAT-04 v6, CAT-05 v4 and CAT-06 v3. Existing eight revisions are unchanged;
+  all 25 active subjects have current proposals. No acceptance is inferred.
+- Updated seventeen specifications and exact version reviews, the current
+  authoring index, registry, screenshot/decision context and handoff. The
+  [change list/reasoning](docs/manuals/operator-guides/reviews/remaining-guides-2026-10-20.md)
+  and [visual comparison](resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/review.html)
+  retain exact prior PDFs and useful baseline support. Preserved task shapes,
+  exact groups, Dutch settings, recognizable controls and restrained focus.
+- Verified the actual follow-up application mount and 28 relevant source
+  fingerprints. Owned UI trials covered account create/reset/private change/
+  disable, asset registration, same tracked component install/tray, numeric
+  definition save, custom-group save and ordinary-user view200/create403.
+  Final fixture states and recovery boundaries are retained. No shared HP
+  catalogue save, destructive branch, physical device or print action.
+- All 56 final pages and 52 baseline pages were visually reviewed. Artifact
+  checks pass: 103 pixel-exact crops, embedded-source/PDF delivery hashes,
+  467 local links, text/image containment and 621 historical files unchanged.
+  All seven scripts pass syntax checks. Seven frozen-HTML pages reproduce
+  byte-identical 144dpi renders. Comparison loads all 110 images at equal A4
+  widths. Reproduction inputs, rendered pages and QA are retained and sealed.
+- Skipped application unit tests: no application source changed. Translation,
+  native narrow-choice text, documented-role/local-grant drift, unexercised
+  destructive/status/override branches and physical/novice-reader trials remain
+  explicit limits. No accepted/runtime selection, commit, deployment or other
+  agent's printer/camera/card changes were made.
+
+### 2026-10-27 - Operator Guide Navigation And Space Review: Start
+
+- Owner reports lost hints/help, unused screenshot space and assumed navigation
+  in the remaining-guide batch. Specific corrections: AC-02 profile/menu focus;
+  AST-03 duplicate search, visible creation entry, optional registration note
+  and actual Save control. Reconcile reader guidance before layout changes.
+- Read current method, shared contracts, AC-02/AST-03 specifications and prior
+  review context. Preserve sealed outputs and concurrent printer work. Produce
+  new, reviewable versions and a batch-level content/space audit; an Affinity
+  migration is under consideration, not accepted as a substitute for completeness.
+
+### 2026-10-29 - Operator Guide Authoring: Alignment Advice
+
+- Owner asks how to obtain dependable guides after repeated regressions and
+  whether a better prompt is needed. Read current handbook, progress/fork
+  context, authoring method, component contract and AST-03 follow-up.
+- Existing standards already cover the reported failures. The proposed next
+  step is one AST-03 pilot using concrete reader actions/controls from the
+  accepted direction and owner decisions as the comparison basis, followed by
+  a different guide structure before returning to small batches. Review must
+  compare the actual output against those sources, not only its revised spec.
+- Recommendations are advice, not a newly accepted owner decision or proof
+  that the method is repaired. No PDF, screenshot, generator, application or
+  shared authoring standard changed. Concurrent printer work is untouched.
+
+### 2026-11-04 - Operator Guide AST-03 Pilot: Session Start
+
+- Owner resumes guide work after the system became relatively usable.
+- Continue the proposed AST-03 pilot: concrete task walkthrough, preservation
+  comparison against accepted v15 and later owner decisions, then a complete
+  new working draft and review comparison. V18 remains rejected as an entry
+  design and is not the aligned baseline.
+- Preserve frozen rounds and all concurrent printer/application/security work.
+  No acceptance, deployment, physical printing or batch reauthoring is inferred.
+
+### 2026-11-04 - Final Guide Set And Affinity: Planning Only
+
+- Owner selects the newer guide versions for the last complete revision and
+  requests fully editable Affinity output, explicitly holding execution.
+- Backlog START-05/NEXT-08; START-04 configuration is a dependency. Read the
+  updated checkpoint, handbook/backlog, guide standards, decisions and audits.
+  Work remains in root a766abedee with extensive unrelated shared changes.
+- Resolved25 selected guides/67 pages from owning manifests; all25 PDF hashes
+  match and all67 SVG pages are retained. Eight combined-index entries lack
+  page/HTML metadata; normalize only in a future release, preserving frozen data.
+- Read-only package inventory finds Canva.Affinity3.2.2.4557. Documented IDML
+  import can retain page/text/style structure; native .af editing and PDF export
+  require an actual local proof. Public SDK33001 is not proof of installed
+  version support. No Affinity app/document was opened or settings changed.
+- Recorded production2f703760d8 still conditionally requires registration notes;
+  root is nullable and owner requires optional intake notes. Preserve that
+  decision and resolve target/application alignment before final evidence.
+- Saved plan with all25 baseline/next versions, per-guide repairs, complete
+  standards/preservation review, production sequence, native editability tests,
+  asset portability and one-master editing/export ownership. Linked it from
+  handoff, decisions, reviews/project index and the existing backlog items.
+- No guide, PDF, generator, template, native file, capture fixture, application,
+  database/printer/runtime-selection change. No execution prototype or app test.
+- Plan: docs/manuals/operator-guides/reviews/final-set-and-affinity-plan-2026-11-04.md.
+
+### 2026-11-04 - All25 Final Guides And Native Affinity: Execution Start
+
+- Owner explicitly authorizes executing the final-set plan for all25 guides,
+  including fully editable native Affinity files. This supersedes the earlier
+  planning hold. Backlog START-05/NEXT-08, target/configuration START-04.
+- Reuse the current25-guide/67-page source selection, preserving frozen history
+  and the extensive unrelated dirty worktree. Root revision a766abedee;
+  recorded production2f703760d8, captured checkoutc539b9cd18; distinguish these.
+- First prove native Affinity3.2.2 import/edit/save/export and reconcile source
+  and optional registration-note boundaries. Then complete per-guide content/
+  navigation repairs, render/read every page, compare and package exact masters.
+- No destructive database action, shared data reset, production deployment or
+  physical printing is part of this authoring authorization.
+
+- Console follow-up: owner asks why another host is needed and how Cisco
+  documents PuTTY/console connection. Reconfirmed mini-USB Windows driver and
+  default9600/8N1/no-flow procedure plus separate RJ-45 serial-console option.
+  Current-user PuTTY has no saved serial profile. SetupAPI reports successful
+  Microsoft usbser installation/start; actual writes still failed as above.
+  No NUC cable move is confirmed; Linux comparison remains optional. No driver
+  cause is proven and no package or hardware/configuration change was made.
+
+### 2026-11-04 - All25 Guides Prepared Before Desktop Restart
+
+- START-05/NEXT-08: prepared25 proposed guide versions/68 A4 pages,25 IDML
+  preparations and82 retained original image assets. USR-01 now has two sides;
+  the other page counts remain. See docs/manuals/operator-guides/reviews/
+  final-set-preparation-2026-11-04.md and the working review under output/manuals/
+  final-guide-set-2026-11-04/review/index.html for all changes and comparisons.
+- Preserved exact group names, Dutch evidence, concrete entry/Save controls,
+  real alternatives/continuations, conditional recovery and full-source crops.
+  Source-page screening corrected mismatched catalogue use/aggregation examples
+  and duplicate inherited footers; geometry alone did not expose those errors.
+- All68 source pages pass overflow/intersection/shared-component checks;262
+  review links and filtering pass. All25 IDML packages pass ZIP/XML/reference,
+  UTF-8, original hashes, image crop/resource and version-footer checks. Original
+  selected PDF hashes still match. No same-crop target scale was reduced.
+- Both desktop runtimes fail before initialization (failed to write kernel
+  assets, Windows error3). Owner instructs continued preparation and will
+  restart later. No native .af or final PDF is claimed; native import/edit/save/
+  reopen/relocation/export, shared native template and native A4 QA remain.
+- Production-note validator contradicts optional registration-note policy;
+  START-04 target/configuration checks remain. USR-02's real status dropdowns
+  clip native values; final evidence needs opened choices or an actual UI fix.
+- No app/fixture/database, printer/node, deployment, physical work, staging or
+  commit. PHP tests are not applicable to documentation/artifact preparation.
+  Unrelated dirty work and all sealed historical rounds were preserved.
+
+### 2026-11-05 - Affinity Continuation After Desktop Restart
+
+- START-05/NEXT-08: owner reports the desktop app restarted and asks what remains.
+  Resume the already authorized native delivery from the prepared 25-guide,
+  68-page set. Current checkout is C:/dev/snipe-it-fork, master at
+  a766abedeeaddd0d5e0452c3dc0bc48749993099, with shared unrelated dirty work.
+- Re-read the checkpoint, backlog, guide handoff/method, preparation record and
+  computer-use skill. Preserve source preparation and historical artifacts.
+- The supported node_repl/sky import and app inventory now succeed. Verify
+  Affinity import/edit/reopen/relocation/export before batch native conversion.
+  No application/database runtime, deployment or physical printing is targeted.
+- Open inputs remain production registration-note validation/configuration
+  alignment and USR-02's clipped native status choices. Native proof and final
+  PDF/A4 checks are pending; no exact-version acceptance is inferred.
+
+### 2026-11-05 - Owner-Run All25 Conversion Script
+
+- START-05/NEXT-08: owner explicitly requests an all25 conversion script for
+  manual execution inside Affinity and prohibits computer control. No desktop,
+  app API execution, screenshots, settings or connector operations in this block.
+- Owner reports sign-in complete. Read-only package inventory now identifies
+  Affinity3.3.3.5004; earlier3.2.2 observations are historical. Current checkout
+  remains shared dirty master at a766abedeeaddd0d5e0452c3dc0bc48749993099.
+- Prepare a self-contained in-app script from the retained25 IDML/68-page
+  sources, with per-run outputs, clear reports and guarded document ownership.
+  Check SDK contracts, source identities and mocked failure paths offline.
+  Native execution/editability/export/A4/relocation proof remains owner-run.
+- No application/DB/deployment/physical-printer target; no existing input or
+  human-edited native master may be overwritten. Do not repeat the PDF marker
+  already recorded for the original all25 production operation.
+
+### 2026-11-05 - NUC Affinity Work Coordinated From Laptop
+
+- Owner explicitly authorizes sending the Affinity preflight and subsequent
+  guide instructions to their paired NUC chat from this laptop chat. Remote
+  thread01a1ab45-0304-7993-9dde-cbc5363cf224 is on DESKTOP-LK9RHT5; LAP-J-DEV
+  remains the controller and its desktop must not be controlled.
+- Read-only remote preflight confirms Windows11Pro build26200, Affinity3.3.3.5004,
+  Computer Use tools/skill, and an owned AffinityGPT working folder. Prepared
+  guides/script are absent. SSH client exists; no sshd was found. Paired-chat
+  messaging/status reads work, so SSH installation is not a prerequisite.
+- Continue the authorized all25 guide task through that NUC chat. Verify app
+  readiness and arrange a bounded artifact transfer before AST-03/CAT-00/CAT-05
+  native proof. No app/DB/printer/node deployment is in scope. Shared dirty root
+  remains at a766abedeeaddd0d5e0452c3dc0bc48749993099.
+- Shared-NUC cleanup is a separate local working/profile-data step after output
+  preservation; do not delete account conversations or unrelated user data.
+
+#### Frigate Global30-Day Sessions Deployed
+
+- Applied owner-approved30day sessions/final7day renewal window for all accounts.
+  Deployed schema and exact semantic diff validated; restarted only Frigate with
+  same image/JWT identity. Other services unchanged; protected rollback retained.
+- Effective auth API confirms2592000/604800/enabled. Shop5.1FPS/new recordings,
+  HTTPS/login metadata and anonymous access protection pass; Snipe health200.
+  C270 outage remains separate. Memory761MiB after restart; old growth unexplained.
+- See docs/releases/frigate-session-policy-production-2026-11-05.md for evidence,
+  cookie renewal limits and rollback. No migrations/PHP suite or account change.
+
+#### NUC Transfer And Scripting Pilot State
+
+- Remote supported Computer Use runtime works; Affinity3.3.3.5004 Home is ready
+  with no login/update/startup blocker. No laptop desktop input.
+- A temporary LAN HTTP endpoint served only the two approved archives to the
+  verified NUC IP, with an unguessable path and fixed file map. Both source
+  archive SHA-256 values/lengths match. Endpoint closed after both downloads;
+  temporary token/config removed. No firewall, SMB share or SSH changes.
+- NUC revalidated archives and safely extracted to original C:/dev/... paths;
+  all712 guide-package and6 script-package checksums passed,25 IDML/82 retained
+  assets/68 pages. Its owned download directory and extracted paths are recorded
+  in its cleanup checklist. No profile/app data was removed.
+- AST-03 pilot script is loaded. First Run is blocked by Affinity Scripting
+  disabled. Owner reports enabling on the NUC and asks why we cannot verify;
+  subsequent fresh observation still shows the Enable Affinity Scripting switch
+  OFF. Reported that result and left Settings open for the owner's manual change.
+  No native/PDF output, code-execution security toggle or broad batch run.
+- Owner's NUC message gives about one hour from10:53UTC, ending11:53UTC/12:53
+  Amsterdam. Preserve outputs and actual cleanup checklist before disconnect.
+  Only that NUC is authorized for desktop work. Native proof and final delivery
+  remain pending. A bounded return-artifact receiver is prepared but not started.
+
+#### NUC Native Pilot Exposed Conversion Defects
+
+- Normal GUI import/save/reopen/PDF export succeeds for AST-03 in Affinity3.3.3.
+  Rejected first result has black panels, hidden master headers and typography/
+  focus defects. Its genuine native/PDF diagnostic returned to laptop and exact
+  archive SHA/length passed. No bulk conversion or acceptance is claimed.
+- Confirmed writer mapped named SVG white to black; common page-level white
+  canvases covered master content. Separate25-IDML compatibility preparation
+  uses resolved colors and correct master stacking. All712 original file hashes,
+  story content and image placement/crop/link checks pass. Its actual corrected
+  AST-03 export restores panels/header/footer; typography/focus still fail.
+- Sent a separate AST-03 probe with typed leading, ascent first baseline,
+  original text anchors and CSS-pixel non-scaling focus weights. Native proof
+  pending. Original preparation/archives/script stay unchanged; handoff/TODO
+  explicitly warn against bulk conversion with the original inputs/script.
+- Plugin Management search found no Affinity integration and installed skill
+  search found no Affinity-specific skill. General Computer Use works; SDK
+  scripting remains visibly OFF and was not changed. See
+  docs/manuals/operator-guides/reviews/native-conversion-2026-11-05.md.
+- Temporary fixed-file/IP-restricted transfer and return helpers close after
+  use; first diagnostic return and corrected25-IDML download servers closed.
+  No firewall/SSH/share, laptop-desktop, DB/printer or account cleanup changes.
+
+#### NUC Cutoff And Native Candidate Preserved
+
+- Final AST-03 baseline .af/PDF returned; both pages visually verified with
+  bundled Poppler. Number/caption placement, leading, white panels/master
+  stacking and focus weights repaired. The apparent missing page2 header was
+  PDFium/optional-PDF-layer rendering, not absent master assignment/content.
+- A normal no-PDF-layers export attempt was canceled after filename input
+  failed; no such PDF produced. Include layers preference remains OFF on NUC.
+  All .af originals unchanged. Text insertion proof caused fallback/overflow
+  and was undone; full editability/recrop/master/resource relocation unproven.
+- Prepared separate25-IDML native candidate and newly bound script; all712
+  source hashes/story/image checks and24 offline script checks pass. Native
+  CAT proof, all25 masters, shared template and final68-page review unfinished.
+- Received and independently verified original/comparison/baseline native/PDF
+  ZIPs and report-only cutoff checklist. Temporary transfer/return listeners
+  closed after use. NUC work stopped before11:53UTC owner cutoff. No personal
+  logout, deletion or cloud-chat removal; actual checklist returned to laptop.
+  Current evidence/handoff: docs/manuals/operator-guides/reviews/native-conversion-2026-11-05.md.
+
+#### NUC Cleanup Preservation And Privacy Instructions
+
+- Owner requests manual NUC cleanup and prioritizes account/history privacy.
+  Read-only NUC audit confirms all9 distinct saved .af/PDF outputs match returned
+  copies; local recheck passes712 prepared/6 script hashes and all82 originals.
+- Found extra temp AST-03 PDF without optional layers plus task-session autosaves.
+  Preserved8 exact named files in a separate recovery ZIP; independently verified
+  6709054bytes/SHA c02d2888b145bf63430e2868ae21b1d6f63afb380f6168707732358e3fb1581a,
+  ZIP paths/CRC, and extracted locally. No credentials/account data transferred.
+- Consolidated exact cleanup paths in output/manuals/NUC-CLEANUP-2026-11-05.txt.
+  All guide continuation data is on the laptop; no further NUC access required.
+  Owner handles sign-outs, Windows app reset and local Codex/cache/browser-data
+  cleanup. No deletion, reset, logout or further desktop control by the agent.
+
+- Cleanup follow-up: owner reports .codex locked and ordinary AppData Codex
+  folders absent. MSIX can redirect those apparent paths into package LocalCache.
+  Explained exact package cache and targeted Task Manager/Resource Monitor lock
+  identification; no new NUC access, process termination or deletion performed.
+
+### 2026-11-05 - Guide Continuation After NUC Cleanup
+
+- Owner leaves laptop running and requests as much guide progress as possible;
+  battery exhaustion is acceptable and work should remain resumable. NUC cleanup
+  is reported done. Continue with locally preserved sources/native proof copies,
+  keeping the NUC signed out and disconnected. Original START-05/NEXT-08 scope.
+- Root remains a766abedee on a heavily dirty/shared master. No app, database,
+  printer or deployment work. Preserve other agents' files and all original
+  source/candidate/native artifacts. No new commit or broad staging authorized.
+- Earlier laptop desktop-control exclusion is ambiguous under the new idle-device
+  instruction; one asynchronous clarification is pending. Continue non-UI guide
+  QA, conversion tooling and portable handoff work without depending on a reply.
+
+#### Portable Handoff And Editing-Defaults Probe Prepared
+
+- Built separate portable v2 handoff:25 IDMLs,68 previews/scenes,82 original
+  images, specifications/standards, genuine AST-03 native/PDF evidence and a
+  standalone offline PowerShell path rebinder. No guide wording, roles, crops,
+  geometry or proposed versions changed; originals/native edits preserved.
+- Real relocated preparations under Windows PowerShell5.1 and7 preserve168
+  image placements,2206 story parts,25 masters and244 source hashes. Caught and
+  fixed .NET Framework NoCompression using ZIP method8 for mimetype; v2 preserves
+  a stored seed entry. Earlier unqualified v1 retained/marked, not recommended.
+-25 mocked SDK flow/failure checks pass on the rebound script, including default
+  representative-proof selection. Corrupt-image input rejected before outputs.
+  Main review/copy page passes25 guide/68 image/191 link/exact-code checks.
+- Recovered AST-03 no-layer PDF displays full header in PDFium. Separate source
+  text-defaults probe adds Arial/normal paragraph/default-next-style metadata;
+  only2 resource XML parts differ, all content/placement byte-identical. Native
+  typing/paste/Enter diagnosis and read-only font inspector remain unexecuted.
+- No NUC access, laptop desktop input, account, runtime, DB or printer change.
+  No application tests needed; native editing/relocation/reader trials still
+  pending. All25 native .af/shared template/final exports not complete.
+  Current evidence and exact next steps:
+  docs/manuals/operator-guides/reviews/offline-continuation-2026-11-05.md.
+
+### 2026-11-10 - Guide Progress Review
+
+- Owner clarifies that Affinity use was intended during the November5 idle
+  laptop window. Recorded that resolved authorization rather than retaining a
+  global pending question. Device is in use again; current scope is reporting
+  progress, with no desktop/Affinity operation or NUC access.
+- Verified checkout C:/dev/snipe-it-fork at a766abedee, retained shared dirty
+  documentation.25 proposed sources/68 pages and82 originals remain present.
+  Portable-v2 ZIP is38366997 bytes and still matches SHA256
+  9c930a4ca47206e0c6a62fac0ce11ed7ad9bb767707db19814be0edfd0397345.
+- Native output guide codes still contain only AST-03. Its saved/reopened/PDF
+  pilot is not a fully qualified editable master. No subsequent native guide
+  conversion, shared native template, full final exports or owner acceptance.
+- Updated current handoff/backlog status without changing guides or historical
+  artifact records. No test suite required for this status-only documentation
+  pass; native editing/relocation/reader/release-target checks remain open.
+
+#### Review Access Repaired
+
+- Owner could not load the REVIEW.html file link. Actual file and images exist;
+  provided an alternative HTTP preview serving only the prepared guide folder
+  on127.0.0.1, with a12-hour lifetime and no directory listing or file mutation.
+- Live index returns200 with25 guide sections; all68 image URLs return200 with
+  image MIME types. Requested opening the local URL in the Codex browser panel;
+  UI tool reports queued, not confirmed visible. No native app/desktop control.
+- Helper scripts/manuals/serve-operator-review.py; access metadata and HTTP check
+  under output/manuals/review-access-2026-11-10. Frozen review/ZIP unchanged.
+
+### 2026-11-10 - Laptop Native Affinity Editing Proof Resumed
+
+- Owner explicitly authorizes this laptop's Computer Use for the25 native
+  guides and requests pause/explicit-continue on interruptions. Supersedes the
+  previous laptop exclusion; NUC remains excluded. Two physical Escape stops
+  were respected, with fresh UI observations on each user-authorized resume.
+- Affinity3.3.3.5004 opened the separate AST-03 text-defaults IDML and saved a
+  genuine native proof under output/manuals/affinity-native-2026-11-10/proofs.
+  Body typing, paste and Enter retained Arial Regular7.5pt/10.5pt leading;
+  text reflow/overflow responded to added content. Test edits undone. This is
+  limited text-formatting evidence, not complete native editing qualification.
+- Script Editor's read-only font/resource inspector reached the explicit
+  Scripting disabled dialog. Owner action requested for the security toggle;
+  Computer Use guidance prohibits changing it. No script/report or setting
+  change. Independent source/SDK review continues while awaiting response.
+- No source guide words/crops/versions, app runtime/database/deployment or
+  physical printer changed. All25 final masters/template/native exports and
+  remaining editing/layout/relocation checks are still open.
+- Follow-up: scripting/file-access switches are now visibly ON, but no folder
+  grant is listed. Actual Script Editor Run requires a top-level main() call;
+  exported-main-only sources did not execute the workflow. The explicit call
+  opened the read-only inspector, which then failed PERMISSION DENIED at report
+  directory access. Owner action requested for the remaining guide-folder grant.
+- Prepared a separate25-guide text-default candidate.712 original hashes and
+  all ZIP part comparisons pass; only Styles/Preferences changed and AST-03
+  matches the typed proof input. Prepared a one-guide-per-explicit-Run converter
+  with fresh native/PDF/package/report outputs and next-guide records. Syntax
+  passes; actual conversion/export/remaining native editing not executed yet.
+
+#### Actual Native Inspection And Style Proof
+
+- Owner explicitly directs Affinity folder setup; added only output/manuals.
+  Fresh script saved the real font/image report:90 live frames,11 original
+  placements, named paragraph styles and installed Arial fonts, no inspection
+  errors. Local module loading works; copied native AST-03 reopens with styles.
+- Edited shared Beeldlabel style to6pt on an isolated native copy, saved it and
+  preserved a separate style-change proof. Structural edit/package checks are
+  prepared with syntax passing but have not executed. No25-guide native run.
+- Windows relocked at14:49 after an earlier recovery. Stopped app input and
+  requested owner unlock. Exact evidence, current-task pointer and native resume
+  steps: docs/manuals/operator-guides/reviews/native-conversion-2026-11-10.md.
+- Delivered standalone current AC-02 v8 one-page A4 print PDF; source unchanged,
+  Poppler150dpi visually checked, local HTTP200. Original intake packets intact.
+
+#### Native Conversion And Packaging Follow-Up
+
+- The owner unlocked/resumed and later paused with physical Escape; input
+  stopped immediately and resumed only after an explicit continue. Current
+  control is active on this laptop; the NUC remains excluded.
+- Native style propagation to11 frames, image recrop, independent focus-vector,
+  step-group and master edits pass with undo restoration. The attempted
+  ReplaceBitmap SDK operation does not replace a linked image; that technical
+  check remains open. Earlier diagnostic evidence is preserved.
+- A copied resource package, excluding its Fonts folder, saves/reopens with
+  2 pages/90 live frames/11 image placements. Extracted original-image hashes
+  all match. Affinity's IncludeImages package operation also copies font files,
+  so final assembly must filter actual contents. No source guide was changed.
+- Checked native PDF/X-3 export, without optional layers, in Poppler/PDFium.
+  The25-output creation marker ran exactly once. AST-03/CAT-00/CAT-05 and
+  AC-01/AC-02 now have native save/reopen/PDF/package candidates without
+  conversion warnings. First17 pages preserve source text and A4 dimensions;
+  native text/image/group counts survive reopen. Full visual review continues.
+- Exact state, runner and evidence:
+  docs/manuals/operator-guides/reviews/native-conversion-2026-11-10.md.
+  All25 final delivery, shared template, remaining editing proof and final
+  assembly are still open; no application/DB/runtime/physical printer changed.
+
+### 2026-11-10 - Refurbisher Guide Login Observation Diagnosed
+
+- START-06 live production guide trial reported that a Refurbisher appeared to
+  log into a404/error page while the same account later appeared to work as
+  Senior Refurbisher. Read-only production access evidence identifies a different
+  cause: the device first requested `/admin/security` without authentication,
+  received the login redirect, then POSTed valid credentials and resumed that
+  remembered URL. `/admin/security` returned403 because its route requires
+  `authorize:superuser`; it is unavailable to both Refurbisher and Senior.
+- The failed intended URL was consumed. A later login from the same device went
+  directly to `/` and returned200, so the apparent role fix was coincidental.
+  Production health remained200 and no application exception was logged. No
+  account, group, session, database, source or deployment change was made.
+- Acceptance retest: restore the intended Refurbisher role, log out, start from
+  `https://snipe.inbit/` or `/login`, and verify the dashboard plus the selected
+  Refurbisher guide routes. Treat the sad-panda page as a403 authorization result,
+  not a failed authentication or404. Investigate the browser's prior/restored
+  `/admin/security` navigation separately; no current operator guide links there.
+
+### 2026-11-12 - Operator Guide Native Progress Rechecked
+
+- START-05/NEXT-08 status review only; Computer Use remains paused after the
+  November10 Escape. No GUI/native conversion, runtime, DB or printer operation.
+- Verified19 saved native/PDF/package conversion candidates covering58 pages;
+  USR-01 completed before the pause. Six native conversions remain (USR-02/03/
+  04/05 and WF-01/02), with10 pages; their guide sources already exist.
+- All712 frozen preparation hashes,19 imported-source hashes and native reopen
+  object counts match; no missing/empty conversion artifact or conversion error.
+  CAT-06's clipped HP address remains the one known native text-overflow defect;
+  a separate frame repair is prepared but unexecuted.
+- Reconciled the visual ledger with44 pages viewed on November10, recording the
+  failed CAT-06 page2 rather than implying a full-set pass. Independent PDF
+  audit last covers18 guides/56 pages; USR-01 and the exact input-name check
+  need its next run. Shared native template, remaining editing proof, full
+  review, package filtering and final relocation remain open.
+- Both temporary review servers are unavailable; existing print PDFs remain
+  on disk. Updated handoff/backlog counts and removed obsolete NUC/laptop
+  authorization contradictions. Details and evidence are in
+  [today's addendum](docs/agents/agents-addendum-2026-11-12-session-init.md) and
+  [the native record](docs/manuals/operator-guides/reviews/native-conversion-2026-11-10.md#verified-continuation-state---12-november).
+
+### 2026-11-12 - Guide Skill And Native Continuation Started
+
+- Owner requested a reusable skill based on existing rules/feedback, tested on
+  representative guides before the remaining conversions. Laptop Affinity use
+  is resumed under the interruption/explicit-continue rule; NUC stays excluded.
+- Building a versioned skill source and installed personal copy, with separate
+  editorial comparisons and native/PDF checks. Preserve all chosen guide
+  versions, historical artifacts and shared checkout changes. Results follow
+  in today's addendum and the guide handoff.
+- Built/installed the maintained snipeit-operator-guides skill and exact-source
+  installer. Three rendered guide comparisons pass without new editorial
+  redesign; a reusable IDML/PDF check detects CAT-06's clipped address.
+- Executed and checked the narrow CAT-06 frame repair, retaining its original
+  artifacts, then converted USR-02/03/04/05 and WF-01/02. All25 guides/68 pages
+  now have native .af/PDF/package candidates. Full audit finds no failed hash,
+  reopen-count/A4/layer checks, missing source fragments or warnings/errors.
+- Native editing/template, complete visual and final portable handoff checks
+  remain open. [Skill tests](docs/manuals/operator-guides/reviews/guide-skill-2026-11-12.md)
+  and [current handoff](docs/manuals/operator-guides/HANDOFF.md) retain exact scope.
+- Finished native image replacement through the toolbar, retained-frame recrop
+  and full-image hashes across save/reopen. CAT-00 text/connector and CAT-05
+  independent route-group edits persist. Shared A4 scaffold is saved/reopened
+  with18 live frames/23 declared styles; widened its role/footer frames after
+  the text checker exposed clipping. No type reduction.
+- Full-page review found two further bounded repairs: CAT-04 v8 adds its two
+  Add controls at first use without shrinking field views; USR-04 v9's caption
+  now matches the empty checkbox. Their predecessor markers/files are retained.
+  Updated the skill from these different-family/state examples.
+- All68 selected pages have recorded visual review. The filtered handoff holds
+  all25 native/PDF/image packages, source preparation, scaffold, standards/skill,
+  old/new links and one change list. Four representative copied packages reopen
+  and export23 pixel-identical pages with matching full image hashes. All25
+  source/PDF pairs find2580 fragments;100 package image files and712 frozen
+  source hashes pass. No font binaries copied. Review's240 links and loopback
+  HTTP/PDF endpoint pass. Original source locations remained available, so a
+  fresh-device test is not claimed.
+- Installer initial/repeated/protected-independent-edit cases pass; maintained
+  and installed skill validate/match. No application tests were run because
+  this block changes manuals/tooling only; live-target/reader/A4 and exact
+  owner acceptance remain separate. No application/DB/printer/deployment or
+  commit/push; all new source/doc work remains local and uncommitted.
+- Sealed the1296-file,278948279-byte handoff ZIP and checked its integrity;
+  archive SHA256196807dc8c2166b174a2709047a52f3d698c3a6e1daa1adce023b7977378b66e.
+  Added three exact before-correction PDFs;243 review links pass. Loopback
+  review is currently http://127.0.0.1:60158/REVIEW.html. Affinity input is
+  finished, no conversion remains and no further app action is scheduled.
+
+### 2026-11-12 - Shared Guide Folder Investigated
+
+- Checked the owner's visual-equivalence and simpler shared-folder questions.
+  All25 native/PDF pairs still match their manifest hashes; PDFs are exported
+  from saved/reopened native files. Existing four-package proof reproduces23
+  pages exactly; a separate every-page native UI/fresh-device check is not claimed.
+- Proposed two flat, descriptively named user folders (PDF and Affinity), a
+  local task index, root model-neutral AGENTS.md and one _Beheer area for rules,
+  guide text/specifications, skill, originals, tools, evidence and history.
+  [Proposal](docs/manuals/operator-guides/HANDOFF.md#shared-folder-proposal---2026-11-12)
+  records current-file/acceptance authority and resource-portability conditions.
+- Investigation/documentation only: no guide conversion, Computer Use,
+  shared-folder deployment or modification of the sealed deliverable/ZIP.
+
+### 2026-11-12 - Shared Handleidingen Folder Setup Started
+
+- Owner approved the proposed layout and requests manual/handleiding wording
+  instead of gidsen. Building a root Handleidingen delivery with flat PDF and
+  Affinity folders, a relative-link task index and model-neutral AGENTS.md.
+- Preserve the sealed November12 bundle and all human/native edits. Qualify
+  full image resources in new copies before claiming independent native files.
+  Laptop Affinity input is authorized, with immediate pause on interruption;
+  no runtime/database/printer operation or cleaned-NUC access is involved.
+
+### 2026-11-12 - Shared Handleidingen Folder Prepared
+
+- Built the owner-approved root Handleidingen folder with25 flat descriptive
+  PDF filenames and25 matching Affinity filenames, an offline Dutch task index,
+  root AGENTS.md and a single _Beheer area. The new folder/register use
+  handleidingen rather than gidsen; older immutable artifacts retain their text.
+- Embedded all170 native image placements with full decoded original pixels,
+  retained crop transforms and matching native reopen counts. Four isolated
+  copies containing only the .af file retain full images and recrop/undo,
+  exporting23 exact pages. Original print PDFs remain byte-identical.
+- Full native test exports match67/68 pages at150dpi. AC-01's phone screenshot
+  has a measured4/255 colour variation only within its existing image area;
+  Resource Manager embedding reproduces it. The strict checker stays non-identical;
+  a separate pinned technical-copy qualification records the actual boundary.
+  No new owner acceptance or universal render tolerance is inferred.
+- Integrity/index/1311 Markdown file links, approximate fragments and six actual
+  offline filter-logic cases pass. The in-app browser blocks file URLs; no visual
+  browser test or workaround was attempted. Four standalone tests are same-device;
+  fresh-device/fonts, operator/A4 and application-target gaps remain separate.
+- Updated/installed the maintained skill's production reference with the tested
+  embedding route and failure boundaries. Root delivery is ignored; source/tools
+  remain local/uncommitted. No app/runtime/DB/printer/NUC/commit/push operation.
+  Affinity control is finished; final checksum/archive sealing follows.
+- Sealed583 files into output/manuals/Handleidingen-2026-11-12.zip,
+  383665275 bytes, ZIP integrity pass, no extra enclosing folder.
+  SHA256d62409d7bde326951ea241a6ff4b0e9c5071967d1197ecf4242f7966aab5119a.
+  User copies the root Handleidingen folder to the share and opens START HIER.html.
+
+### 2026-11-17 - Manual Status Review Started
+
+- START-05/NEXT-08, owner requests a status update after the November12 delivery.
+  Scope is local artifact/handoff verification and reporting; no new conversion,
+  computer control, NAS write, runtime, database or printer operation.
+- Root master a766abedee remains a dirty shared checkout; preserve existing work.
+  Recheck the delivered folder/checksums and archive without modifying them.
+  NAS location/copy and fresh application/reader acceptance remain unverified.
+- Outcome: the local delivery still has25 PDFs,25 native .af files,68 pages and
+  583 files; all582 recorded file hashes match. Archive length383665275 and
+  SHA256d62409d7bde326951ea241a6ff4b0e9c5071967d1197ecf4242f7966aab5119a
+  still match the sealed November12 delivery. No independent manual edit found.
+- Installed skill matches all four maintained source files. Source/installer/
+  tooling remain uncommitted, and the delivery itself remains ignored.
+- No conversions remain. NAS verification, fresh-device/fonts, operator/A4 and
+  exact-version acceptance plus recorded USR-02/AST-03 app-alignment gaps stay
+  open. Only status notes changed; no artifact/GUI/runtime/DB/printer operation.
+- Owner subsequently confirms that the delivered set has been copied to the NAS.
+  Record it as the shared set; compare before any update from the local snapshot
+  to preserve later NAS edits. NAS path/integrity are not independently verified.
+  No delivery artifact, checksum, native file or PDF was modified.
+
+### 2026-11-17 - Manual Repository Alignment Started
+
+- START-05/NEXT-08: owner requests repository alignment after confirming the
+  Handleidingen set has been copied to the NAS. Reconcile current entry points,
+  version selection, ownership and remaining work with the delivered baseline.
+- Preserve the shared dirty root at a766abedee and all historical artifacts.
+  Documentation/metadata only; no manual regeneration, Affinity control, NAS
+  write, application/runtime/database operation, commit or push is planned.
+- Verify the 25-version register against the sealed local delivery, check
+  documentation consistency and preserve unrelated working changes. NAS path,
+  integrity and any edits made there remain unknown.
+
+### 2026-11-17 - Manual Repository Alignment Completed
+
+- Reconciled root README/AGENTS, developer checkpoint, START-05/NEXT-08,
+  manual entry points and shared ownership rules with the finished delivery
+  and owner-reported NAS copy. No remaining conversion/Computer Use queue.
+- Added current-set.json: all 25 versions, exact role names, 68 pages and 50
+  native/PDF filenames/hashes. It records the last delivered baseline, not a
+  verified live NAS inventory or acceptance. Later shared native edits must be
+  compared and preserved before local proposals are applied.
+- Added current selection headers to all 25 specifications, preserving their
+  prior bodies byte for byte. Preserved both former entry-point documents
+  exactly inside explicit history files; current indexes are concise.
+- Verification passed: 25 register/specification/version/role pairs, 130 current
+  links, 170 image placements, all 582 sealed delivery hashes, unchanged ZIP
+  identity and git diff --check. No outside-scope working file changed and HEAD
+  remains a766abedee. Report: output/manuals/repository-alignment-2026-11-17/
+  verification.json (ignored local evidence).
+- Application/release, USR-02/AST-03, fresh-device/fonts, actual operator/A4/label
+  and exact acceptance checks stay open. No application tests were run because
+  this block changed documentation/metadata only. No artifacts, NAS files,
+  application/runtime/DB/printer/NUC settings, commit or push changed.
+
+### 2026-11-17 - Scoped Manual Commits Started
+
+- Owner accepts the two-commit recommendation: preserve the manual sources,
+  skill and selected tooling, then record the current delivery and handoff.
+- Preserve unrelated application/printer work and all existing artifacts.
+  Select shared-file sections deliberately; no bulk staging, push, rebase,
+  application execution or NAS operation is included.
+- Check source dependencies and external artifact references, exclude scratch
+  files/attachments/generated delivery, inspect both staged patches and verify
+  that the resulting commits leave unrelated work untouched.
+
+### 2026-11-17 - Manual Source Commit And Handoff Publication
+
+- Source commit f51593d906 preserves 156 manual source/tooling files, including
+  maintained skill, all25 specifications, exact delivered ledger and reviews.
+  No application/DB/printer code, native/PDF delivery or historical binary round
+  was staged. The second scoped commit records current delivery/handoff and
+  only relevant shared-file manual sections.
+- Preserved1133 historical review files /198343825 bytes in a separate ignored
+  local ZIP,163554075 bytes, SHA256
+  062078b6ce709a788006d59b59c0f3e851c1eea4b8f57746fe1ddcf7bbaa330f.
+  A tracked file/hash manifest and availability note distinguish it from the
+  owner's existing NAS delivery; a NAS copy of this full history is not verified.
+- Skill validation, all selected Python parsing,26 JavaScript syntax checks,
+  shared component/registry checks,25 offline SDK fault cases, six index cases
+  and AST-03 v20 source/PDF verification pass. Frozen CRLF script bytes are
+  preserved; whitespace checking recognizes CR at EOL.
+- The legacy package checker fails on three already-tracked unchanged CAT
+  draft PDFs missing from its old manifest. Checker and artifacts match the
+  starting HEAD. Record this pre-existing drift; preserve the old bytes and
+  do not imply that it affects the current delivery's passing hash audit.
+- No push, pull/rebase, GUI, runtime/database, NAS or printer action. Application
+  tests are outside this source/documentation publication scope. Empty scratch
+  files remain local; remote attachments and generated delivery/cache paths
+  are excluded from the scoped commits. Other tasks' working content is retained.
+- Final handoff scope verification passes for17 staged files: manual/root
+  status sections and selected manual session context only. All582 sealed
+  delivery hashes and the delivery ZIP remain unchanged; no unrelated working
+  file changed. The exact six archived review rounds are ignored deliberately
+  to prevent accidental bulk staging; their bytes and archive remain intact.

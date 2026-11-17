@@ -96,6 +96,157 @@ Maintain this log to highlight differences between this fork and upstream Snipe-
   for the required manual Dutch status matrix, Afgevoerd, workflow steps,
   camera-permission guidance, and the unresolved 6400/3200 MHz data check.
 
+### 2026-11-17 - Manual Repository State Reconciled
+
+- Aligned manual entry points, specification headers, backlog and ownership
+  with the finished 25-pair/68-page delivery and owner-reported NAS copy.
+  The current register and lightweight JSON ledger identify exact delivered
+  versions/files/hashes without claiming a live NAS inventory or acceptance.
+- Preserved former project/registry indexes as explicit history. Shared saved
+  native masters own later human edits; future revisions compare them before
+  synchronizing PDF, specification/review and version metadata. Technical
+  production is complete; release/reader/fresh-device evidence remains open.
+- Documentation/metadata only. The sealed local delivery, NAS files, manual
+  content and unrelated application work remain unchanged. Root outputs stay
+  ignored; repository source publication is separate from the owner's NAS copy.
+  [Manual entry](manuals/operator-guides/README.md).
+
+### 2026-11-12 - Portable Shared Handleidingen Folder
+
+- Created the approved flat PDF/Affinity delivery with descriptive paired
+  filenames, offline Dutch task navigation and root AGENTS.md. The _Beheer
+  register/text/specifications/rules, original images, native image maps and
+  dated application context support unfamiliar models without chat history.
+- All170 native image placements are Embedded; four isolated single-file tests
+  retain full pixels, recrop/undo and23 exact export pages. All original print
+  PDFs remain byte-identical. Native test exports match67/68 pages exactly;
+  AC-01's bounded phone-image colour variation is explicitly recorded without
+  changing the generic strict comparison or inferring owner acceptance.
+- Manual artifact/tooling scope only: no application/runtime/DB/printer or
+  NUC change. The ignored root folder and ZIP are local deliverables, not
+  published fresh-clone resources. [Current handoff](manuals/operator-guides/HANDOFF.md).
+
+### 2026-11-12 - Reusable Guide Skill And Native Handoff
+
+- Built/installed snipeit-operator-guides from maintained authoring rules and
+  owner feedback, with case boundaries and a reusable exact IDML/PDF checker.
+  Tested baseline comparisons, actual failure/repair cases and new guide cases;
+  [test record](manuals/operator-guides/reviews/guide-skill-2026-11-12.md).
+- Completed25 native guide conversions/68 pages and practical image, style,
+  vector/master and representative catalogue edits. CAT-04 v8 adds missing
+  point-of-use controls, USR-04 v9 fixes a screenshot-state caption and CAT-06
+  retains its full URL at unchanged type size. Earlier artifacts are preserved.
+- Assembled native/PDF/image packages without copied font binaries; four
+  representative relocated packages reproduce23 pages and full image hashes.
+  All68 pages have recorded visual review. No application, database or printer
+  change; live-target, fresh-device, operator/A4 and exact acceptance gaps
+  remain. [Current handoff](manuals/operator-guides/HANDOFF.md).
+
+### 2026-11-05 - Owner-Run Affinity Conversion Script
+
+- Prepared an all25/68-page script for manual execution in Affinity3.3.3.5004,
+  with a copy/run page, explicit input identities, separate per-run outputs,
+  native reopen before PDF export and optional image-resource packages.
+- Passed24 offline input/flow/failure checks and reference checks against nine
+  installed SDK files. No computer control, native execution or final guide
+  delivery is inferred. See the [current guide handoff](manuals/operator-guides/HANDOFF.md).
+
+### 2026-11-04 - All25 Guide Source And Affinity Preparation
+
+- Prepared the owner's selected newer guide set as25 proposed versions across
+  68 A4 pages, with repaired account/component/catalogue navigation and control
+  evidence, a central change list and equal-width old/new comparisons. Genuine
+  original captures, live paragraph/style IDML, editable vectors and common
+  master objects are included. Historical acceptance/runtime selections stay.
+- Native `.af` and final PDF creation remain incomplete: both desktop runtimes
+  fail before initialization, and the owner will restart later. Application-note
+  validator/configuration alignment and a clipped native status-choice capture
+  also remain release checks. No application, database or printing change. See
+  [the execution handoff](manuals/operator-guides/reviews/final-set-preparation-2026-11-04.md).
+
+### 2026-11-04 - Operator Guide Pilot
+
+- AST-03 v19 is an unaccepted two-sided pilot restoring the named Dashboard
+  creation control alongside duplicate search while retaining registration,
+  optional notes, Save, printing, placement and verification. The comparison
+  includes accepted v15, rejected v18 and a central change list. Reused Dutch
+  captures still need a fresh live UI check; no application, fixture, printer
+  or accepted guide selection changed. See
+  [the exact review](manuals/operator-guides/reviews/AST-03-v19.md).
+
+### 2026-10-08 - Three Manual Test Revisions
+
+AC-01 v11, SC-01 v14 and AST-05 v8 are separate unaccepted test drafts under
+the repaired authoring method, four A4 pages in total. The
+[reasoning and change list](manuals/operator-guides/reviews/reauthoring-test-2026-10-08.md)
+links exact artifacts, retained baselines and a visual comparison. Dutch demo
+locale, owned synthetic clean release/save, untranslated app copy, mobile
+history width and unperformed reader/physical trials are recorded separately.
+No accepted selection, production behavior or concurrent printer work changed.
+
+### 2026-10-08 - Manual Role And Focus Corrections
+
+Owner feedback places the three earlier manual test drafts in requires-rework
+state. Keep existing access-group names exactly and review a crop without
+marks before adding focus for remaining search/confusion. Complete joint
+forms/checks do not need repeated outlines. AC-01 v12, SC-01 v15 and AST-05 v9
+are bounded unaccepted corrections preserving task text, source crops and
+printed image size. The [feedback and exact review](manuals/operator-guides/reviews/emphasis-feedback-2026-10-08.md)
+records each omission/retention and wider remaining gaps. No new capture,
+application/database change, accepted selection, commit or printer change.
+
+### 2026-10-20 - Five Operational Manual Revisions
+
+AST-02 v10, WF-01 v16, WF-02 v14, AST-04 v8 and HELP-01 v9 are separate
+unaccepted drafts following positive review of the corrected examples.
+Seven A4 sides preserve task-specific structure, exact group names and useful
+image scale while integrating current workflow order, result/evidence saves,
+Klaar return and required QA audit note. HELP is a two-sided problem lookup.
+The [reasoning and change list](manuals/operator-guides/reviews/operational-guides-2026-10-20.md)
+links exact PDFs and visual comparisons. Controlled demo UI actions, synthetic
+results and unperformed physical/reader trials are recorded separately.
+No application source, accepted selection, printer, camera or card change.
+
+### 2026-10-20 - Remaining Seventeen Operator Guides
+
+The remaining active subjects now have separate working drafts: AC-02, AST-03,
+CMP-01/02/04, USR-01 through USR-05 and CAT-00 through CAT-06. Together with
+the previous eight proposals, all 25 active guide subjects are covered;
+AST-01 stays retired. No new version is automatically accepted. The
+[central change list and reasoning](manuals/operator-guides/reviews/remaining-guides-2026-10-20.md)
+and [old/new comparison](../resources/manuals/operator-guides/review-rounds/2026-10-20-remaining-guides/review.html)
+make every change reviewable. Exact group names, Dutch account settings,
+task-dependent composition, useful screenshot scale and conditional warnings
+carry through the batch. The 17 PDFs contain 56 A4 sides versus 52 baseline
+sides; the four added sides preserve relevant explanations and alternatives.
+
+Owned demo account, asset, component, numeric-attribute and group UI trials
+provide genuine saved evidence. Existing shared catalogue records were not
+saved; destructive branches, physical work/printing and reader trials remain
+unperformed. The retained sources distinguish the mounted follow-up checkout
+from the root and record translation/native-control and role-grant drift.
+All pages were visually reviewed; artifact checks and separate frozen-HTML
+reproduction passed. Historical accepted/review packages remain unchanged.
+No application source, accepted/runtime selection, commit, deployment or other
+agent's printer/camera/card work was changed.
+
+### 2026-10-27 - Manual Navigation And Guidance Corrections
+
+AC-02 v7 and AST-03 v18 are new unaccepted drafts correcting the owner's
+navigation, lost-help and image-space feedback. The full batch has a
+[concrete follow-up audit](manuals/operator-guides/reviews/navigation-and-space-feedback-2026-10-27.md);
+only these two examples have been revised in this pass. The shared method now
+preserves useful hint/recovery jobs, teaches transitions and terms, and reflows
+content after removals. Registration notes follow the current root optional
+rule; an older mounted create validator is documented as source drift.
+
+[Compare the three corrected A4 sides](../resources/manuals/operator-guides/review-rounds/2026-10-27-navigation-and-space/review.html).
+Genuine Dutch captures, source hashes, one owned synthetic registration, final
+renders, QA and editable SVG interchange are retained. Native Affinity import
+and physical/reader trials remain untested. Accepted artifacts, application
+source, permissions, runtime selections, printer/camera/card work and commits
+are unchanged by this manual pass.
+
 ### 2026-10-06
 - Repaired the shared operator-guide authoring process after owner clarification:
   reader outcome, relevance and action/choice structure now precede evidence,

@@ -1,6 +1,20 @@
 # Inbit Device Refurbishment Platform
 
-## Operator guide authoring method
+## Operator manuals / Handleidingen - 2026-11-17
+
+All 25 manuals / 68 A4 pages have print PDFs and editable Affinity files.
+The owner confirms copying the flat Handleidingen set to the NAS; its path,
+integrity and subsequent edits are not independently verified here. Use the
+[manual project index](docs/manuals/operator-guides/README.md),
+[exact delivered register](docs/manuals/operator-guides/registry.md) and
+[handoff](docs/manuals/operator-guides/HANDOFF.md) for current state and limits.
+Native preparation and packaging are complete. Application alignment, actual
+operator/A4/fresh-device trials and exact-version acceptance remain separate.
+Compare the shared files before revising them; saved native masters may contain
+newer human edits. The local Handleidingen folder and ZIP are ignored outputs,
+not fresh-clone artifacts.
+
+## Operator manual authoring method
 
 Guide creation and revisions use the
 [shared authoring method](docs/manuals/operator-guides/authoring-method.md):
@@ -14,9 +28,9 @@ See the [method review](docs/manuals/operator-guides/reviews/authoring-method-re
 for the reasoning change and its application across the current guide subjects.
 Existing PDF acceptance decisions and frozen artifacts remain separate.
 
-## Operator manuals revised - 2026-09-15
+## Historical manual revision - 2026-09-15
 
-The revised working drafts are USR-05 v2 (3 pages), CAT-05 v2 (8 pages), and
+The September15 working drafts were USR-05 v2 (3 pages), CAT-05 v2 (8 pages), and
 CAT-06 v2 (3 pages). See the [revision review](docs/manuals/operator-guides/reviews/USR-05-CAT-05-CAT-06-v2-2026-09-15.md) for changes,
 exact artifacts, checks and remaining operator trials. The three v1 PDFs and
 all accepted artifacts are retained unchanged; v2 is not acceptance.
@@ -340,9 +354,9 @@ audits rather than relying on this snapshot.
 - [Agent handbook](AGENTS.md)
 - [Security policy](SECURITY.md)
 
-Operator guides under `docs/manuals/operator-guides/` are versioned separately.
-The repository contains an immutable internally accepted review package plus
-explicitly unaccepted working drafts; neither is third-party-approved yet.
+Operator manuals under `docs/manuals/operator-guides/` are versioned separately.
+The current register identifies the delivered native/PDF baseline. Historical
+accepted artifacts remain immutable; newer versions need their own decisions.
 
 ## Contributing
 
