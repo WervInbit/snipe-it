@@ -227,8 +227,26 @@
   blobs under the committed `-text` policy restored the expected checksums; no
   tracked content changed.
 - Final combined verification: `npm test` passes the registry and package
-  verifier, and `npm audit --audit-level=high` reports zero vulnerabilities.
+  verifier, and the guide package's `npm audit --audit-level=high` reports zero
+  vulnerabilities.
   The previously completed PHP evidence remains 2,290 tests / 11,316
   assertions with four expected environment skips and zero failures.
 - Worktree and index are clean. No push, immutable build, production deploy,
   database write, NAS change, printer/CUPS operation, or NUC access occurred.
+
+## Application Root Dependency Audit
+
+- A final audit at the repository root intentionally checked the application
+  lock separately from `scripts/manuals`. It reports 34 total advisories: 3
+  critical, 11 high, 15 moderate, and 5 low. With development dependencies
+  omitted, the lock still reports 10: 1 critical, 2 high, and 7 moderate.
+- The production-classified set includes a critical DOMPurify path through the
+  optional jsPDF dependency and high findings in `probe-image-size` and
+  `source-map-js`; npm indicates non-major fixes are available. Bootstrap 3 and
+  AdminLTE 2 findings require semver-major replacements, while this fork also
+  carries a targeted Bootstrap 3 security patch script.
+- The audit classifies lockfile dependencies; it does not prove every package
+  is reachable in the compiled browser assets. Treat the result as a release
+  blocker pending reachability/bundle review, dependency updates, asset rebuild,
+  Node/browser/export regression checks, and a repeated audit. No `npm audit
+  fix`, forced major update, package file, or compiled asset change was made.

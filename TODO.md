@@ -17,6 +17,22 @@
   production release and take a fresh verified backup. No production action is
   authorized by the implementation checkpoint.
 
+## Release Dependency Gate - 2026-11-17
+
+- [ ] Triage and remediate the current application-root npm audit before an
+  immutable production build. `npm audit --omit=dev --audit-level=high`
+  currently reports 10 lockfile advisories: 1 critical, 2 high, and 7 moderate.
+  The full root lock reports 34 advisories, including development tooling.
+- [ ] Trace which reported packages are present in the shipped browser assets.
+  Prioritize the critical DOMPurify path through jsPDF and the high
+  `probe-image-size`/`source-map-js` paths; npm reports non-major fixes for
+  these. Re-run `npm ci`, Node tests, the production asset build, relevant
+  export/browser smoke checks, and both production/full audits after updates.
+- [ ] Handle the Bootstrap 3/AdminLTE 2 moderate findings as a deliberate UI
+  migration or documented patched-baseline decision. Do not use
+  `npm audit fix --force`: npm proposes semver-major Bootstrap/AdminLTE changes
+  that require focused compatibility work.
+
 ## Phone Preparation - 2026-09-29
 
 ## Manual Work Checkpoint - 2026-11-17

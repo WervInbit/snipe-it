@@ -7156,10 +7156,17 @@ there are multiple duplicate functions that still need to be removed, sku will b
   25 registered guides, 1,549 checked relative links, 251 explicitly declared
   unavailable historical/local links, 119 evidence files, 9 accepted PDFs,
   29 unaccepted draft PDFs, 2 locked baselines, and 79 active scripts.
-  `npm audit --audit-level=high` reports zero vulnerabilities.
+  The guide package's `npm audit --audit-level=high` reports zero vulnerabilities.
 - This pre-existing Windows checkout still held the two locked baseline SVGs
   with CRLF worktree bytes when the new `-text` rule arrived. Both files were
   refreshed from their unchanged Git blobs with LF bytes; their manifest
   SHA-256 values now verify and no content diff remains.
 - The branch and index are clean. Nothing was pushed or deployed, and no
   application runtime, database, NAS, printer, CUPS node, or NUC was changed.
+- A separate application-root audit is not clean. The full root lock reports
+  34 advisories (3 critical, 11 high, 15 moderate, 5 low); an `--omit=dev`
+  audit reports 10 (1 critical, 2 high, 7 moderate). This is lockfile evidence,
+  not yet a reachability finding for the compiled production assets. Record it
+  as a release gate: trace the shipped jsPDF/DOMPurify and build-tool paths,
+  apply non-breaking updates first, rebuild/test, and keep the Bootstrap 3 /
+  AdminLTE 2 major migration separate. No automatic audit fix was applied.
